@@ -58,8 +58,11 @@ jobs:
             # Only push docker image when on master branch on the Accedian project
             if [ "${CIRCLE_BRANCH}" == "master" ] && [ "${CIRCLE_PROJECT_USERNAME}" == "Accedian" ]; then
                echo "Now Tagging"
-               export DOCKER_VER=$(git semver minor)
-               git push origin --tags
+               git config --global user.email "${CIRCLE_USERNAME}@accedian.com"
+               git config --global user.name "CircleCI"
+               git semver minor
+               export DOCKER_VER=$(git semver get)
+               git push origin master ${DOCKER_VER}
                make circleci-push
             fi
 

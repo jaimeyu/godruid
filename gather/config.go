@@ -1,4 +1,4 @@
-package fedex
+package gather
 
 import (
 	"io/ioutil"

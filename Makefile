@@ -1,7 +1,7 @@
 DOCKER_REPO_NAME:= gcr.io/npav-172917/
 DOCKER_IMAGE_NAME := adh-gather
 GO_REPOSITORY_PATH := github.com/accedian/$(DOCKER_IMAGE_NAME)
-DOCKER_VER := $(if $(DOCKER_VER),$(DOCKER_VER),latest)
+DOCKER_VER := $(if $(DOCKER_VER),$(DOCKER_VER),latest)  
 BIN_NAME := bin/alpine-$(DOCKER_IMAGE_NAME)
 GO_SDK_IMAGE := gcr.io/npav-172917/docker-go-sdk
 GO_SDK_VERSION := 1.0.1-alpine

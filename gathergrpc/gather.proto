@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package gathergrpc;
+
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+
+// Service responsible for provisioning Administration
+// Users and their functionality, including creation of new 
+// Tenants
+service AdminProvisioningService {
+    
+    // Create a User with Administrative access. 
+    rpc CreateAdminUser(AdminUser) returns (AdminUser) {
+        option (google.api.http) = {
+            post: "/api/v1/admin"
+            body: "*"
+        };
+    }
+    
+    // Update a User with Administrative access. 
+    rpc UpdateAdminUser(AdminUser) returns (AdminUser) {
+        option (google.api.http) = {
+            put: "/api/v1/admin"
+            body: "*"
+        };
+    } 
+    
+    // Delete a User with Administrative access. 
+    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUser) {
+        option (google.api.http) = {
+            delete: "/api/v1/admin/{value}"
+        };
+    }
+    
+    // Retrieve and Administrative User by id. 
+    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUser) {
+        option (google.api.http) = {
+            get: "/api/v1/admin/{value}"
+        };
+    }
+    
+    // Retrieve all Administrative Users. 
+    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserList) {
+        option (google.api.http) = {
+            get: "/api/v1/admin/all"
+        };
+    }
+    
+    // Creates a Tenant and returns a TenantDescriptor which provides 
+    // metadata for the newly created Tenant.   
+    rpc CreateTenant(TenantDescriptor) returns (TenantDescriptor) {
+        option (google.api.http) = {
+            post: "/api/v1/tenant"
+            body: "*"
+        };
+    }
+    
+    // Updates a TenantDescriptor, which provides metadata 
+    // for the specified Tenant. 
+    rpc UpdateTenantDescriptor(TenantDescriptor) returns (TenantDescriptor) {
+        option (google.api.http) = {
+            put: "/api/v1/tenant/meta"
+            body: "*"
+        };
+    } 
+    
+    // Deletes a Tenant and returns a TenantDescriptor which provides
+    // metadata for the now deleted Tenant. 
+    rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptor) {
+        option (google.api.http) = {
+            delete: "/api/v1/tenant"
+        };
+    }
+
+    // Retrieves the metadata of a single Tenant by id.
+    rpc GetTenantDescriptor(google.protobuf.StringValue) returns (TenantDescriptor) {
+        option (google.api.http) = {
+            get: "/api/v1/tenant/meta/{value}"
+        };
+    }
+}
+
+// Enumeration of User state. 
+enum UserState {
+    UNKNOWN = 0;
+    INVITED = 1;
+    ACTIVE = 2;
+    SUSPENDED = 3;
+    PENDING_DELETE = 4;
+}
+
+// Provides the metadata of a Tenant. This information is used to 
+// idetify/describe a full Tenant entity.
+message TenantDescriptor {
+    string _id = 1;
+    string name = 2;
+    string urlSubdomain = 3;
+    UserState state = 4;
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6; 
+}
+
+// User data for an Adminstrative User.
+message AdminUser {
+    string _id = 1;
+    string username = 2;
+    string password = 3;
+    bool sendOnboardingEmail = 4;
+    string onboardingToken = 5;
+    bool userVerified = 6;
+    UserState state = 7;
+    int64 createdTimestamp = 8;
+    int64 lastModifiedTimestamp = 9;
+}
+
+// Wrapper message to provide a response in the form of
+// a container of multiple AdminUser objects.
+message AdminUserList {
+    repeated AdminUser list = 1;
+}
+

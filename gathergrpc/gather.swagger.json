@@ -1,0 +1,319 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "gather.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/admin": {
+      "post": {
+        "summary": "Create a User with Administrative access.",
+        "operationId": "CreateAdminUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update a User with Administrative access.",
+        "operationId": "UpdateAdminUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/admin/all": {
+      "get": {
+        "summary": "Retrieve all Administrative Users.",
+        "operationId": "GetAllAdminUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUserList"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/admin/{value}": {
+      "get": {
+        "summary": "Retrieve and Administrative User by id.",
+        "operationId": "GetAdminUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a User with Administrative access.",
+        "operationId": "DeleteAdminUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcAdminUser"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenant": {
+      "delete": {
+        "summary": "Deletes a Tenant and returns a TenantDescriptor which provides\nmetadata for the now deleted Tenant.",
+        "operationId": "DeleteTenant",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "post": {
+        "summary": "Creates a Tenant and returns a TenantDescriptor which provides \nmetadata for the newly created Tenant.",
+        "operationId": "CreateTenant",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenant/meta": {
+      "put": {
+        "summary": "Updates a TenantDescriptor, which provides metadata \nfor the specified Tenant.",
+        "operationId": "UpdateTenantDescriptor",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenant/meta/{value}": {
+      "get": {
+        "summary": "Retrieves the metadata of a single Tenant by id.",
+        "operationId": "GetTenantDescriptor",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "gathergrpcAdminUser": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "sendOnboardingEmail": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "onboardingToken": {
+          "type": "string"
+        },
+        "userVerified": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "state": {
+          "$ref": "#/definitions/gathergrpcUserState"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "User data for an Adminstrative User."
+    },
+    "gathergrpcAdminUserList": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcAdminUser"
+          }
+        }
+      },
+      "description": "Wrapper message to provide a response in the form of\na container of multiple AdminUser objects."
+    },
+    "gathergrpcTenantDescriptor": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "urlSubdomain": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/definitions/gathergrpcUserState"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
+    },
+    "gathergrpcUserState": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "INVITED",
+        "ACTIVE",
+        "SUSPENDED",
+        "PENDING_DELETE"
+      ],
+      "default": "UNKNOWN",
+      "description": "Enumeration of User state."
+    }
+  }
+}

@@ -8,3 +8,5 @@ serverConfig:
   GRPC:
     bindIP: http://localhost
     bindPort: 10000
+  StartupArgs:
+    adminDB: 1

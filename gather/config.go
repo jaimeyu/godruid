@@ -9,6 +9,15 @@ import (
 	"github.com/accedian/adh-gather/logger"
 )
 
+// DBImpl - type which describes a Database Implementation technology.
+type DBImpl int
+
+// This set of constants acts as an enumeration for Database Implementation types.
+const (
+	MEM DBImpl = iota
+	COUCH
+)
+
 // Config represents the global adh-gather configuration parameters, as loaded from the config file
 type Config struct {
 	ServerConfig struct {
@@ -23,6 +32,9 @@ type Config struct {
 		GRPC struct {
 			BindIP   string
 			BindPort int
+		}
+		StartupArgs struct {
+			AdminDB DBImpl
 		}
 	}
 }

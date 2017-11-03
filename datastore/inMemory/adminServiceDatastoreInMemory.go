@@ -1,6 +1,7 @@
 package inMemory
 
 import (
+	"github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
@@ -8,6 +9,14 @@ import (
 // database operations for the Admin Service when using local memory
 // as the storage option. Useful for tests.
 type AdminServiceDatastoreInMemory struct {
+}
+
+// CreateDAO - returns an in-memory implementation of the Admin Service
+// datastore.
+func CreateDAO() datastore.AdminServiceDatastore {
+	res := new(AdminServiceDatastoreInMemory)
+
+	return res
 }
 
 // CreateAdminUser - InMemory implementation of CreateAdminUser

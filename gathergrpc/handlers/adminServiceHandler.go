@@ -2,8 +2,13 @@ package handlers
 
 import (
 	"context"
+	"errors"
 
+	"github.com/accedian/adh-gather/gather"
+
+	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
+	"github.com/accedian/adh-gather/datastore/inMemory"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -25,8 +30,12 @@ type AdminServiceHandler struct {
 func CreateHandler() *AdminServiceHandler {
 	result := new(AdminServiceHandler)
 
-	// TODO: Make this a runtime decision...hardcoded now for testing.
-	result.adminDB = couchDB.CreateDAO()
+	// Seteup the DB implementation based on configuration
+	db, err := getDatastore()
+	if err != nil {
+		logger.Log.Fatalf("Unable to instantiate AdminServiceHandler: %v", err)
+	}
+	result.adminDB = db
 
 	return result
 }
@@ -107,4 +116,23 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, nil
+}
+
+func getDatastore() (datastore.AdminServiceDatastore, error) {
+	cfg, err := gather.GetActiveConfig()
+	if err != nil {
+		logger.Log.Errorf("Falied to instantiate AdminServiceHandler: %v", err)
+		return nil, err
+	}
+
+	dbType := cfg.ServerConfig.StartupArgs.AdminDB
+	if dbType == gather.COUCH {
+		logger.Log.Debug("AdminService DB is using CouchDB Implementation")
+		return couchDB.CreateDAO(), nil
+	} else if dbType == gather.MEM {
+		logger.Log.Debug("AdminService DB is using InMemory Implementation")
+		return inMemory.CreateDAO(), nil
+	}
+
+	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")
 }

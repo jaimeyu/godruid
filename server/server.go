@@ -16,9 +16,11 @@ import (
 )
 
 var (
-	port     = flag.Int("port", 10000, "The server port")
-	server   = flag.String("server", "", "Server interface to bind to")
-	restPort = flag.Int("restPort", 10001, "The port used for REST operations")
+	port       = flag.Int("port", 10000, "The server port")
+	server     = flag.String("server", "", "Server interface to bind to")
+	restPort   = flag.Int("restPort", 10001, "The port used for REST operations")
+	provDB     = flag.String("provDB", "http://localhost", "The server to connect to for provisioning details.")
+	provDBPort = flag.Int("provDBPort", 5984, "The port used for operations with Provisioning Database")
 )
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -28,7 +30,7 @@ type GatherServer struct {
 
 func newServer() *GatherServer {
 	s := new(GatherServer)
-	s.gsh = new(handlers.GRPCServiceHandler)
+	s.gsh = handlers.CreateCoordinator(fmt.Sprintf("%s:%d", *provDB, *provDBPort))
 
 	// TODO: Load in config and stuff here.
 
@@ -44,6 +46,8 @@ func gRPCHandlerStart() {
 
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterAdminProvisioningServiceServer(grpcServer, newServer().gsh)
+
+	log.Printf("gRPC service intiated on port: %d", *port)
 	grpcServer.Serve(lis)
 }
 
@@ -58,6 +62,8 @@ func restHandlerStart() {
 	if err != nil {
 		log.Fatalf("failed to start REST service: %v", err)
 	}
+
+	log.Printf("REST service intiated on port: %d", *restPort)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", *restPort), mux)
 

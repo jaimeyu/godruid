@@ -16,6 +16,15 @@ type GRPCServiceHandler struct {
 	ash *AdminServiceHandler
 }
 
+// CreateCoordinator - used to create a gRPC service handler wrapper
+// that coordinates the logic to satisfy all gRPC service
+// interfaces.
+func CreateCoordinator(provDBURL string) *GRPCServiceHandler {
+	result := new(GRPCServiceHandler)
+	result.ash = CreateHandler(provDBURL)
+	return result
+}
+
 // CreateAdminUser - Create an Administrative User.
 func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
 	return gsh.ash.CreateAdminUser(ctx, user)

@@ -10,6 +10,7 @@ import (
 
 	"github.com/leesper/couchdb-golang"
 
+	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
@@ -21,7 +22,8 @@ const dbName string = "adh-admin"
 // Admin service. Anytime the Admin service changes, the logic to handle the
 // API will be modified here.
 type AdminServiceHandler struct {
-	provDB string
+	provDB  string
+	adminDB *db.AdminServiceDatastore
 }
 
 // CreateHandler - used to generate a handler for the Admin Service.
@@ -154,29 +156,6 @@ func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantI
 	// Stub to implement
 	return nil, nil
 }
-
-// Helper methods
-
-// func generateAdminUser(username string,
-// 	password string,
-// 	onboardingToken string,
-// 	sendEmail bool,
-// 	verified bool,
-// 	state pb.UserState,
-// 	created int64,
-// 	lastMod int64) *pb.AdminUser {
-
-// 	return &pb.AdminUser{
-// 		XId:                   generateAdminUserId(username),
-// 		Username:              username,
-// 		Password:              password,
-// 		SendOnboardingEmail:   sendEmail,
-// 		OnboardingToken:       onboardingToken,
-// 		UserVerified:          verified,
-// 		State:                 state,
-// 		CreatedTimestamp:      created,
-// 		LastModifiedTimestamp: lastMod}
-// }
 
 func getDbName(provDbUrl string) string {
 	return provDbUrl + "/" + dbName

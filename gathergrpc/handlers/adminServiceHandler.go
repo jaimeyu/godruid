@@ -2,16 +2,12 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/url"
-	"time"
 
-	"github.com/leesper/couchdb-golang"
+	"github.com/accedian/adh-gather/datastore/couchDB"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
@@ -22,61 +18,33 @@ const dbName string = "adh-admin"
 // Admin service. Anytime the Admin service changes, the logic to handle the
 // API will be modified here.
 type AdminServiceHandler struct {
-	provDB  string
-	adminDB *db.AdminServiceDatastore
+	adminDB db.AdminServiceDatastore
 }
 
 // CreateHandler - used to generate a handler for the Admin Service.
-func CreateHandler(provDBURL string) *AdminServiceHandler {
+func CreateHandler() *AdminServiceHandler {
 	result := new(AdminServiceHandler)
-	result.provDB = provDBURL
+
+	// TODO: Make this a runtime decision...hardcoded now for testing.
+	result.adminDB = couchDB.CreateDAO()
+
 	return result
 }
 
 // CreateAdminUser - Create an Administrative User.
 func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	// Connect to PROV DB
-	dbName := getDbName(ash.provDB)
-	db, err := couchdb.NewDatabase(dbName)
+	// Perform any validation here:
+
+	// Issue request to DAO Layer to Create the Admin User
+	result, err := ash.adminDB.CreateAdminUser(user)
 	if err != nil {
-		log.Printf("Unable to connect to Prov DB %s: %v\n", ash.provDB, err)
+		logger.Log.Errorf("Unable to store Admin User: %v\n", err)
 		return nil, err
 	}
 
-	log.Printf("Using DB %s to Create useer %v \n", dbName, user)
-
-	// Give the user a known id and timestamps:
-	user.XId = user.Username
-	user.CreatedTimestamp = time.Now().Unix()
-	user.LastModifiedTimestamp = user.GetCreatedTimestamp()
-
-	// Marshal the Admin and read the bytes as string.
-	userToBytes, err := json.Marshal(user)
-	if err != nil {
-		log.Printf("Unable to convert user to format to persist: %v\n", err)
-		return nil, err
-	}
-	var storeFormat map[string]interface{}
-	err = json.Unmarshal(userToBytes, &storeFormat)
-	if err != nil {
-		log.Printf("Unable to convert user to format to persist: %v\n", err)
-		return nil, err
-	}
-
-	log.Printf("Attempting to store user: %v", storeFormat)
-
-	// Store the user in PROV DB
-	options := new(url.Values)
-	id, rev, err := db.Save(storeFormat, *options)
-	if err != nil {
-		log.Printf("Unable to store admin user: %v\n", err)
-		return nil, err
-	}
-	log.Printf("Successfully stored user %s with rev %s", id, rev)
-
-	// Return the provisioned user.
-	log.Printf("Stored user: %v\n", user)
-	return user, nil
+	// Succesfully Created the User, return the result.
+	logger.Log.Infof("Created Admin User: %v\n", result)
+	return result, nil
 }
 
 // UpdateAdminUser - Update an Administrative User.
@@ -93,35 +61,19 @@ func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.
 
 // GetAdminUser - Retrieve an Administrative User by the ID.
 func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	// Connect to PROV DB
-	dbName := getDbName(ash.provDB)
-	db, err := couchdb.NewDatabase(dbName)
+	// Perform and validation here:
+	logger.Log.Infof("Retrieving Admin User: %s", userID.Value)
+
+	// Issue request to DAO Layer to Get the requested Admin User
+	result, err := ash.adminDB.GetAdminUser(userID.Value)
 	if err != nil {
-		log.Printf("Unable to connect to Prov DB %s: %v\n", ash.provDB, err)
+		logger.Log.Errorf("Unable to retrieve Admin User: %v\n", err)
 		return nil, err
 	}
 
-	log.Printf("Using db %s to GET Admin User %s\n", dbName, userID.Value)
-
-	// Get the user from PROV DB
-	options := new(url.Values)
-	fetchedUser, err := db.Get(userID.Value, *options)
-	if err != nil {
-		log.Printf("Error retrieving user %s: %v\n", userID.Value, err)
-		return nil, err
-	}
-
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
-	fetchedUserInBytes, err := json.Marshal(fetchedUser)
-	if err != nil {
-		fmt.Printf("Error converting retrieved user to proper type: %v\n", err)
-	}
-
-	res := pb.AdminUser{}
-	json.Unmarshal(fetchedUserInBytes, &res)
-	log.Printf("Retrieved user: %v\n", res)
-	return &res, nil
+	// Succesfully found the User, return the result.
+	logger.Log.Infof("Retrieved Admin User: %v\n", result)
+	return result, nil
 }
 
 // GetAllAdminUsers -  Retrieve all Administrative Users.
@@ -155,8 +107,4 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, nil
-}
-
-func getDbName(provDbUrl string) string {
-	return provDbUrl + "/" + dbName
 }

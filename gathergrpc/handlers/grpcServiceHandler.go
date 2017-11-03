@@ -19,9 +19,10 @@ type GRPCServiceHandler struct {
 // CreateCoordinator - used to create a gRPC service handler wrapper
 // that coordinates the logic to satisfy all gRPC service
 // interfaces.
-func CreateCoordinator(provDBURL string) *GRPCServiceHandler {
+func CreateCoordinator() *GRPCServiceHandler {
 	result := new(GRPCServiceHandler)
-	result.ash = CreateHandler(provDBURL)
+
+	result.ash = CreateHandler()
 	return result
 }
 

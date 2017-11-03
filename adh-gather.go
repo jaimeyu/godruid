@@ -34,11 +34,7 @@ type GatherServer struct {
 
 func newServer() *GatherServer {
 	s := new(GatherServer)
-
-	cfg := getActiveConfigOrExit()
-	dbBindIP := cfg.ServerConfig.Datastore.BindIP
-	dbBindPort := cfg.ServerConfig.Datastore.BindPort
-	s.gsh = handlers.CreateCoordinator(fmt.Sprintf("%s:%d", dbBindIP, dbBindPort))
+	s.gsh = handlers.CreateCoordinator()
 
 	return s
 }
@@ -54,7 +50,7 @@ func gRPCHandlerStart() {
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterAdminProvisioningServiceServer(grpcServer, newServer().gsh)
 
-	log.Printf("gRPC service intiated on port: %d", grpcBindPort)
+	logger.Log.Infof("gRPC service intiated on port: %d", grpcBindPort)
 	grpcServer.Serve(lis)
 }
 
@@ -74,7 +70,7 @@ func restHandlerStart() {
 		log.Fatalf("failed to start REST service: %v", err)
 	}
 
-	log.Printf("REST service intiated on port: %d", restBindPort)
+	logger.Log.Infof("REST service intiated on port: %d", restBindPort)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), mux)
 
@@ -100,10 +96,11 @@ func main() {
 
 	logger.Log.Infof("Starting adh-gather broker with config '%s'", configFilePath)
 
+	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath)
-
 	fmt.Printf("Your config is %+v \n", cfg)
 
+	// Start the REST and gRPC Services
 	go restHandlerStart()
 	gRPCHandlerStart()
 }

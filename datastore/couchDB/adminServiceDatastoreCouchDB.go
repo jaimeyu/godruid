@@ -42,34 +42,34 @@ func CreateDAO() *AdminServiceDatastoreCouchDB {
 
 // CreateAdminUser - CouchDB implementation of CreateAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	db, err := couchdb.NewDatabase(couchDB.dbName)
+	db, err := couchDB.getDatabase()
 	if err != nil {
-		logger.Log.Errorf("Unable to connect to Prov DB %s: %v\n", couchDB.server, err)
 		return nil, err
 	}
 
-	logger.Log.Infof("Using DB %s to Create user %v \n", couchDB.dbName, user)
+	logger.Log.Infof("Using DB %s to Create Admin User %v \n", couchDB.dbName, user)
 
 	// Give the user a known id and timestamps:
-	user.XId = user.Username
+	user.Id = user.Username
 	user.CreatedTimestamp = time.Now().Unix()
 	user.LastModifiedTimestamp = user.GetCreatedTimestamp()
 
 	// Marshal the Admin and read the bytes as string.
 	storeFormat, err := convertAdminUserToGenericObject(user)
 
-	logger.Log.Debugf("Attempting to store user: %v", storeFormat)
+	logger.Log.Debugf("Attempting to create Admin User: %v", storeFormat)
 
 	// Store the user in PROV DB
 	options := new(url.Values)
 	id, rev, err := db.Save(storeFormat, *options)
 	if err != nil {
-		logger.Log.Errorf("Unable to store admin user: %v\n", err)
+		logger.Log.Errorf("Unable to create Admin User: %v\n", err)
 		return nil, err
 	}
 
-	// Leaving this here as a reminder that I need to add revision to the data model.
-	logger.Log.Debugf("Successfully stored user %s with rev %s", id, rev)
+	// Add the evision number to the response
+	user.Rev = rev
+	logger.Log.Debugf("Successfully created Admin User %s with rev %s", id, rev)
 
 	// Return the provisioned user.
 	logger.Log.Infof("Created Admin User: %v\n", user)
@@ -78,28 +78,75 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser)
 
 // UpdateAdminUser - CouchDB implementation of UpdateAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	// Stub to implement
-	return nil, nil
+	db, err := couchDB.getDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Using DB %s to update Admin User %v \n", couchDB.dbName, user)
+
+	// Update timestamp:
+	user.LastModifiedTimestamp = time.Now().Unix()
+
+	// Marshal the Admin and read the bytes as string.
+	storeFormat, err := convertAdminUserToGenericObject(user)
+
+	// Add the _rev field required for CouchDB conflict resolution
+	logger.Log.Debugf("Attempting to update Admin User: %v", storeFormat)
+
+	// Store the user in PROV DB
+	options := new(url.Values)
+	id, rev, err := db.Save(storeFormat, *options)
+	if err != nil {
+		logger.Log.Errorf("Unable to update Admin User: %v\n", err)
+		return nil, err
+	}
+
+	// Add the evision number to the response
+	user.Rev = rev
+	logger.Log.Debugf("Successfully updated Admin User %s with rev %s", id, rev)
+
+	// Return the provisioned user.
+	logger.Log.Infof("Updated Admin User: %v\n", user)
+	return user, nil
 }
 
 // DeleteAdminUser - CouchDB implementation of DeleteAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
-	// Stub to implement
-	return nil, nil
+	// Obtain the value of the existing record for a return value.
+	existingUser, err := couchDB.GetAdminUser(userID)
+	if err != nil {
+		logger.Log.Errorf("Unable to delete Admin User: %v\n", err)
+		return nil, err
+	}
+
+	// Perform the delete operation
+	db, err := couchDB.getDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Using db %s to delete Admin User %s\n", couchDB.dbName, userID)
+
+	err = db.Delete(userID)
+	if err != nil {
+		logger.Log.Errorf("Error deleting Admin User %s: %v\n", userID, err)
+		return nil, err
+	}
+
+	return existingUser, nil
 }
 
 // GetAdminUser - CouchDB implementation of GetAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUser, error) {
-	// Connect to PROV DB
-	db, err := couchdb.NewDatabase(couchDB.dbName)
+	db, err := couchDB.getDatabase()
 	if err != nil {
-		logger.Log.Errorf("Unable to connect to Prov DB %s: %v\n", couchDB.server, err)
 		return nil, err
 	}
 
-	logger.Log.Infof("Using db %s to GET Admin User %s\n", couchDB.dbName, userID)
+	logger.Log.Infof("Using db %s to retrieve Admin User %s\n", couchDB.dbName, userID)
 
-	// Get the Admion User from CouchDB
+	// Get the Admin User from CouchDB
 	options := new(url.Values)
 	fetchedUser, err := db.Get(userID, *options)
 	if err != nil {
@@ -162,6 +209,10 @@ func convertAdminUserToGenericObject(user *pb.AdminUser) (map[string]interface{}
 		return nil, err
 	}
 
+	// Add in the _id field and _rev fields that are necessary for CouchDB
+	insertField(genericFormat, "id")
+	insertField(genericFormat, "rev")
+
 	// Successfully converted the User
 	return genericFormat, nil
 }
@@ -195,4 +246,22 @@ func (couchDB *AdminServiceDatastoreCouchDB) getCouchDB() (*couchdb.Database, er
 	}
 
 	return db, nil
+}
+
+func (couchDB *AdminServiceDatastoreCouchDB) getDatabase() (*couchdb.Database, error) {
+	db, err := couchdb.NewDatabase(couchDB.dbName)
+	if err != nil {
+		logger.Log.Errorf("Unable to connect to CouchDB %s: %v\n", couchDB.server, err)
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// Adds the '_rev' field required for conflict resolution on CouchDB data.
+func insertField(genericData map[string]interface{}, fieldName string) {
+	if genericData[fieldName] != nil {
+		logger.Log.Debugf("Adding '%s' field to data: %v", fieldName, genericData)
+		genericData["_"+fieldName] = genericData[fieldName]
+	}
 }

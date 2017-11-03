@@ -58,14 +58,34 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 
 // UpdateAdminUser - Update an Administrative User.
 func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	// Stub to implement
-	return nil, nil
+	// Perform any validation here:
+
+	// Issue request to DAO Layer to Create the Admin User
+	result, err := ash.adminDB.UpdateAdminUser(user)
+	if err != nil {
+		logger.Log.Errorf("Unable to update Admin User: %v\n", err)
+		return nil, err
+	}
+
+	// Succesfully Updated the User, return the result.
+	logger.Log.Infof("Updated Admin User: %v\n", result)
+	return result, nil
 }
 
 // DeleteAdminUser - Delete an Administrative User.
 func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	// Stub to implement
-	return nil, nil
+	// Perform any validation here:
+
+	// Issue request to DAO Layer to Create the Admin User
+	result, err := ash.adminDB.DeleteAdminUser(userID.Value)
+	if err != nil {
+		logger.Log.Errorf("Unable to delete Admin User: %v\n", err)
+		return nil, err
+	}
+
+	// Succesfully Deleted the User, return the result.
+	logger.Log.Infof("Deleted Admin User: %v\n", result)
+	return result, nil
 }
 
 // GetAdminUser - Retrieve an Administrative User by the ID.

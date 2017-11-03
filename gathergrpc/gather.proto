@@ -95,25 +95,27 @@ enum UserState {
 // Provides the metadata of a Tenant. This information is used to 
 // idetify/describe a full Tenant entity.
 message TenantDescriptor {
-    string _id = 1;
-    string name = 2;
-    string urlSubdomain = 3;
-    UserState state = 4;
-    int64 createdTimestamp = 5;
-    int64 lastModifiedTimestamp = 6; 
+    string id = 1;
+    string rev = 2;
+    string name = 3;
+    string urlSubdomain = 4;
+    UserState state = 5;
+    int64 createdTimestamp = 6;
+    int64 lastModifiedTimestamp = 7; 
 }
 
 // User data for an Adminstrative User.
 message AdminUser {
-    string _id = 1;
-    string username = 2;
-    string password = 3;
-    bool sendOnboardingEmail = 4;
-    string onboardingToken = 5;
-    bool userVerified = 6;
-    UserState state = 7;
-    int64 createdTimestamp = 8;
-    int64 lastModifiedTimestamp = 9;
+    string id = 1;
+    string rev = 2;
+    string username = 3;
+    string password = 4;
+    bool sendOnboardingEmail = 5;
+    string onboardingToken = 6;
+    bool userVerified = 7;
+    UserState state = 8;
+    int64 createdTimestamp = 9;
+    int64 lastModifiedTimestamp = 10;
 }
 
 // Wrapper message to provide a response in the form of

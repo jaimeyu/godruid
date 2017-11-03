@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "gather.proto",
+    "title": "gathergrpc/gather.proto",
     "version": "version not set"
   },
   "schemes": [
@@ -231,7 +231,10 @@
     "gathergrpcAdminUser": {
       "type": "object",
       "properties": {
-        "_id": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
           "type": "string"
         },
         "username": {
@@ -280,7 +283,10 @@
     "gathergrpcTenantDescriptor": {
       "type": "object",
       "properties": {
-        "_id": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
           "type": "string"
         },
         "name": {

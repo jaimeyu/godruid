@@ -67,7 +67,7 @@
         ]
       }
     },
-    "/api/v1/admin/all": {
+    "/api/v1/admin-user-list": {
       "get": {
         "summary": "Retrieve all Administrative Users.",
         "operationId": "GetAllAdminUsers",
@@ -237,6 +237,9 @@
         "rev": {
           "type": "string"
         },
+        "datatype": {
+          "type": "string"
+        },
         "username": {
           "type": "string"
         },
@@ -287,6 +290,9 @@
           "type": "string"
         },
         "rev": {
+          "type": "string"
+        },
+        "datatype": {
           "type": "string"
         },
         "name": {

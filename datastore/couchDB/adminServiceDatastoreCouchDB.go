@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/gather"
@@ -12,6 +13,9 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	couchdb "github.com/leesper/couchdb-golang"
 )
+
+const adminUserType string = "adminUser"
+const tenantDescriptorType string = "tenantDescriptor"
 
 // AdminServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Admin Service when using CouchDB
@@ -49,10 +53,11 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser)
 
 	logger.Log.Infof("Using DB %s to Create Admin User %v \n", couchDB.dbName, user)
 
-	// Give the user a known id and timestamps:
+	// Give the user a known id, type, and timestamps:
 	user.Id = user.Username
 	user.CreatedTimestamp = time.Now().Unix()
 	user.LastModifiedTimestamp = user.GetCreatedTimestamp()
+	user.Datatype = adminUserType
 
 	// Marshal the Admin and read the bytes as string.
 	storeFormat, err := convertAdminUserToGenericObject(user)
@@ -85,8 +90,9 @@ func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser)
 
 	logger.Log.Infof("Using DB %s to update Admin User %v \n", couchDB.dbName, user)
 
-	// Update timestamp:
+	// Update timestamp and make sure the type is properly set:
 	user.LastModifiedTimestamp = time.Now().Unix()
+	user.Datatype = adminUserType
 
 	// Marshal the Admin and read the bytes as string.
 	storeFormat, err := convertAdminUserToGenericObject(user)
@@ -166,8 +172,29 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.Ad
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
 func (couchDB *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, error) {
-	// Stub to implement
-	return nil, nil
+	db, err := couchDB.getDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Using db %s to retrieve all Admin Users\n", couchDB.dbName)
+
+	// Get the Admin User from CouchDB
+	selector := fmt.Sprintf(`datatype == "%s"`, adminUserType)
+	fetchedUserList, err := db.Query(nil, selector, nil, nil, nil, nil)
+	if err != nil {
+		logger.Log.Errorf("Error retrieving Admin User List: %v\n", err)
+		return nil, err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	res, err := convertGenericObjectListToAdminUserList(fetchedUserList)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // CreateTenant - CouchDB implementation of CreateTenant
@@ -220,6 +247,9 @@ func convertAdminUserToGenericObject(user *pb.AdminUser) (map[string]interface{}
 // Takes the map[string]interface{} generic data returned by CouchDB and
 // converts it to an AdminUser.
 func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.AdminUser, error) {
+	// Add in the _id field and _rev fields that are necessary for CouchDB
+	insertField(genericUser, "_id")
+	insertField(genericUser, "_rev")
 	genericUserInBytes, err := json.Marshal(genericUser)
 	if err != nil {
 		fmt.Printf("Error converting generic user data to Admin User type: %v\n", err)
@@ -236,6 +266,22 @@ func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.Ad
 	logger.Log.Debugf("Converted generic data to AdminUser: %v\n", res)
 
 	return &res, nil
+}
+
+func convertGenericObjectListToAdminUserList(genericUserList []map[string]interface{}) (*pb.AdminUserList, error) {
+	res := new(pb.AdminUserList)
+	for _, genericUserObject := range genericUserList {
+		user, err := convertGenericObjectToAdminUser(genericUserObject)
+		if err != nil {
+			logger.Log.Warningf("Error converting generic object to AdminUser: %v", err)
+			continue
+		}
+		res.List = append(res.List, user)
+	}
+
+	logger.Log.Debugf("Converted generic data to AdminUserList: %v\n", res)
+
+	return res, nil
 }
 
 func (couchDB *AdminServiceDatastoreCouchDB) getCouchDB() (*couchdb.Database, error) {
@@ -262,6 +308,12 @@ func (couchDB *AdminServiceDatastoreCouchDB) getDatabase() (*couchdb.Database, e
 func insertField(genericData map[string]interface{}, fieldName string) {
 	if genericData[fieldName] != nil {
 		logger.Log.Debugf("Adding '%s' field to data: %v", fieldName, genericData)
-		genericData["_"+fieldName] = genericData[fieldName]
+
+		if strings.HasPrefix(fieldName, "_") {
+			genericData[fieldName[1:]] = genericData[fieldName]
+		} else {
+			genericData["_"+fieldName] = genericData[fieldName]
+		}
+
 	}
 }

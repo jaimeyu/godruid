@@ -107,8 +107,19 @@ func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.Str
 
 // GetAllAdminUsers -  Retrieve all Administrative Users.
 func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
-	// Stub to implement
-	return nil, nil
+	// Perform and validation here:
+	logger.Log.Info("Retrieving all Admin Users")
+
+	// Issue request to DAO Layer to Get the requested Admin User List
+	result, err := ash.adminDB.GetAllAdminUsers()
+	if err != nil {
+		logger.Log.Errorf("Unable to retrieve Admin Users: %v\n", err)
+		return nil, err
+	}
+
+	// Succesfully found the Users, return the result list.
+	logger.Log.Infof("Retrieved %d Admin Users\n", len(result.GetList()))
+	return result, nil
 }
 
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,

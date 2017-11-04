@@ -500,7 +500,7 @@ var (
 
 	pattern_AdminProvisioningService_GetAdminUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "admin", "value"}, ""))
 
-	pattern_AdminProvisioningService_GetAllAdminUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "admin", "all"}, ""))
+	pattern_AdminProvisioningService_GetAllAdminUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "admin-user-list"}, ""))
 
 	pattern_AdminProvisioningService_CreateTenant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "tenant"}, ""))
 

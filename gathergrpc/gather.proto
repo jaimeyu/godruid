@@ -45,7 +45,7 @@ service AdminProvisioningService {
     // Retrieve all Administrative Users. 
     rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserList) {
         option (google.api.http) = {
-            get: "/api/v1/admin/all"
+            get: "/api/v1/admin-user-list"
         };
     }
     
@@ -97,25 +97,27 @@ enum UserState {
 message TenantDescriptor {
     string id = 1;
     string rev = 2;
-    string name = 3;
-    string urlSubdomain = 4;
-    UserState state = 5;
-    int64 createdTimestamp = 6;
-    int64 lastModifiedTimestamp = 7; 
+    string datatype = 3;
+    string name = 4;
+    string urlSubdomain = 5;
+    UserState state = 6;
+    int64 createdTimestamp = 7;
+    int64 lastModifiedTimestamp = 8; 
 }
 
 // User data for an Adminstrative User.
 message AdminUser {
     string id = 1;
     string rev = 2;
-    string username = 3;
-    string password = 4;
-    bool sendOnboardingEmail = 5;
-    string onboardingToken = 6;
-    bool userVerified = 7;
-    UserState state = 8;
-    int64 createdTimestamp = 9;
-    int64 lastModifiedTimestamp = 10;
+    string datatype = 3;
+    string username = 4;
+    string password = 5;
+    bool sendOnboardingEmail = 6;
+    string onboardingToken = 7;
+    bool userVerified = 8;
+    UserState state = 9;
+    int64 createdTimestamp = 10;
+    int64 lastModifiedTimestamp = 11;
 }
 
 // Wrapper message to provide a response in the form of

@@ -71,7 +71,7 @@ service AdminProvisioningService {
     // metadata for the now deleted Tenant. 
     rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptor) {
         option (google.api.http) = {
-            delete: "/api/v1/tenant"
+            delete: "/api/v1/tenant/{value}"
         };
     }
 

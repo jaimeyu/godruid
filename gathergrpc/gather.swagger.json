@@ -133,21 +133,6 @@
       }
     },
     "/api/v1/tenant": {
-      "delete": {
-        "summary": "Deletes a Tenant and returns a TenantDescriptor which provides\nmetadata for the now deleted Tenant.",
-        "operationId": "DeleteTenant",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
-            }
-          }
-        },
-        "tags": [
-          "AdminProvisioningService"
-        ]
-      },
       "post": {
         "summary": "Creates a Tenant and returns a TenantDescriptor which provides \nmetadata for the newly created Tenant.",
         "operationId": "CreateTenant",
@@ -205,6 +190,31 @@
       "get": {
         "summary": "Retrieves the metadata of a single Tenant by id.",
         "operationId": "GetTenantDescriptor",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenant/{value}": {
+      "delete": {
+        "summary": "Deletes a Tenant and returns a TenantDescriptor which provides\nmetadata for the now deleted Tenant.",
+        "operationId": "DeleteTenant",
         "responses": {
           "200": {
             "description": "",

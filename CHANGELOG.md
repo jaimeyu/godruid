@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.8.0 
+**Release Date:** Thu Nov  2 14:14:09 UTC 2017     
+## Previous Releases 
 ### 0.7.0 
 **Release Date:** Tue Oct 31 21:04:09 UTC 2017     
-## Previous Releases 
 * Fix the build
 
 ### 0.5.0 

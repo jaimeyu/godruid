@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	couchdb "github.com/leesper/couchdb-golang"
 )
 
 const adminUserType string = "adminUser"
@@ -46,7 +44,7 @@ func CreateDAO() *AdminServiceDatastoreCouchDB {
 
 // CreateAdminUser - CouchDB implementation of CreateAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	db, err := couchDB.getDatabase()
+	db, err := couchDB.GetDatabase()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +58,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser)
 	user.Datatype = adminUserType
 
 	// Marshal the Admin and read the bytes as string.
-	storeFormat, err := convertAdminUserToGenericObject(user)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
 
 	logger.Log.Debugf("Attempting to create Admin User: %v", storeFormat)
 
@@ -83,7 +81,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser)
 
 // UpdateAdminUser - CouchDB implementation of UpdateAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	db, err := couchDB.getDatabase()
+	db, err := couchDB.GetDatabase()
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +93,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser)
 	user.Datatype = adminUserType
 
 	// Marshal the Admin and read the bytes as string.
-	storeFormat, err := convertAdminUserToGenericObject(user)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
 
 	// Add the _rev field required for CouchDB conflict resolution
 	logger.Log.Debugf("Attempting to update Admin User: %v", storeFormat)
@@ -127,7 +125,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb
 	}
 
 	// Perform the delete operation
-	db, err := couchDB.getDatabase()
+	db, err := couchDB.GetDatabase()
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +143,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb
 
 // GetAdminUser - CouchDB implementation of GetAdminUser
 func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUser, error) {
-	db, err := couchDB.getDatabase()
+	db, err := couchDB.GetDatabase()
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +170,7 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.Ad
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
 func (couchDB *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, error) {
-	db, err := couchDB.getDatabase()
+	db, err := couchDB.GetDatabase()
 	if err != nil {
 		return nil, err
 	}
@@ -221,45 +219,18 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string
 	return nil, nil
 }
 
-// Turns an AdminUser object into a map[string]interface{} so that it
-// can be stored in CouchDB.
-func convertAdminUserToGenericObject(user *pb.AdminUser) (map[string]interface{}, error) {
-	userToBytes, err := json.Marshal(user)
-	if err != nil {
-		logger.Log.Errorf("Unable to convert user to format to persist: %v\n", err)
-		return nil, err
-	}
-	var genericFormat map[string]interface{}
-	err = json.Unmarshal(userToBytes, &genericFormat)
-	if err != nil {
-		logger.Log.Errorf("Unable to convert user to format to persist: %v\n", err)
-		return nil, err
-	}
-
-	// Add in the _id field and _rev fields that are necessary for CouchDB
-	insertField(genericFormat, "id")
-	insertField(genericFormat, "rev")
-
-	// Successfully converted the User
-	return genericFormat, nil
-}
-
 // Takes the map[string]interface{} generic data returned by CouchDB and
 // converts it to an AdminUser.
 func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.AdminUser, error) {
-	// Add in the _id field and _rev fields that are necessary for CouchDB
-	insertField(genericUser, "_id")
-	insertField(genericUser, "_rev")
-	genericUserInBytes, err := json.Marshal(genericUser)
+	genericUserInBytes, err := ConvertGenericObjectToBytesWithCouchDbFields(genericUser)
 	if err != nil {
-		fmt.Printf("Error converting generic user data to Admin User type: %v\n", err)
 		return nil, err
 	}
 
 	res := pb.AdminUser{}
 	err = json.Unmarshal(genericUserInBytes, &res)
 	if err != nil {
-		fmt.Printf("Error converting generic user data to Admin User type: %v\n", err)
+		logger.Log.Errorf("Error converting generic user data to Admin User type: %v\n", err)
 		return nil, err
 	}
 
@@ -268,12 +239,13 @@ func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.Ad
 	return &res, nil
 }
 
+// Takes a set of generic data that contains a list of AdminUsers and converts it to
+// and ADH AdminUserList object
 func convertGenericObjectListToAdminUserList(genericUserList []map[string]interface{}) (*pb.AdminUserList, error) {
 	res := new(pb.AdminUserList)
 	for _, genericUserObject := range genericUserList {
 		user, err := convertGenericObjectToAdminUser(genericUserObject)
 		if err != nil {
-			logger.Log.Warningf("Error converting generic object to AdminUser: %v", err)
 			continue
 		}
 		res.List = append(res.List, user)
@@ -282,38 +254,4 @@ func convertGenericObjectListToAdminUserList(genericUserList []map[string]interf
 	logger.Log.Debugf("Converted generic data to AdminUserList: %v\n", res)
 
 	return res, nil
-}
-
-func (couchDB *AdminServiceDatastoreCouchDB) getCouchDB() (*couchdb.Database, error) {
-	db, err := couchdb.NewDatabase(couchDB.dbName)
-	if err != nil {
-		logger.Log.Errorf("Unable to connect to CouchDB %s: %v\n", couchDB.server, err)
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func (couchDB *AdminServiceDatastoreCouchDB) getDatabase() (*couchdb.Database, error) {
-	db, err := couchdb.NewDatabase(couchDB.dbName)
-	if err != nil {
-		logger.Log.Errorf("Unable to connect to CouchDB %s: %v\n", couchDB.server, err)
-		return nil, err
-	}
-
-	return db, nil
-}
-
-// Adds the '_rev' field required for conflict resolution on CouchDB data.
-func insertField(genericData map[string]interface{}, fieldName string) {
-	if genericData[fieldName] != nil {
-		logger.Log.Debugf("Adding '%s' field to data: %v", fieldName, genericData)
-
-		if strings.HasPrefix(fieldName, "_") {
-			genericData[fieldName[1:]] = genericData[fieldName]
-		} else {
-			genericData["_"+fieldName] = genericData[fieldName]
-		}
-
-	}
 }

@@ -142,3 +142,22 @@ func GetAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 
 	return fetchedData, nil
 }
+
+// ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
+// that object with the generic data.
+func ConvertGenericCouchDataToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+	genericDataInBytes, err := ConvertGenericObjectToBytesWithCouchDbFields(genericData)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(genericDataInBytes, &dataContainer)
+	if err != nil {
+		logger.Log.Errorf("Error converting generic data to %s type: %v\n", dataTypeStr, err)
+		return err
+	}
+
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
+
+	return nil
+}

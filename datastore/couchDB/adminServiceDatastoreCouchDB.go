@@ -1,7 +1,6 @@
 package couchDB
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -141,12 +140,13 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.Ad
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectToAdminUser(fetchedUser)
+	res := pb.AdminUser{}
+	err = ConvertGenericCouchDataToObject(fetchedUser, &res, datastore.AdminUserStr)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &res, nil
 }
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
@@ -270,30 +270,11 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectToTenantDescriptor(fetchedTenant)
+	res := pb.TenantDescriptor{}
+	err = ConvertGenericCouchDataToObject(fetchedTenant, &res, datastore.TenantDescriptorStr)
 	if err != nil {
 		return nil, err
 	}
-
-	return res, nil
-}
-
-// Takes the map[string]interface{} generic data returned by CouchDB and
-// converts it to an AdminUser.
-func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.AdminUser, error) {
-	genericUserInBytes, err := ConvertGenericObjectToBytesWithCouchDbFields(genericUser)
-	if err != nil {
-		return nil, err
-	}
-
-	res := pb.AdminUser{}
-	err = json.Unmarshal(genericUserInBytes, &res)
-	if err != nil {
-		logger.Log.Errorf("Error converting generic user data to %s type: %v\n", datastore.AdminUserStr, err)
-		return nil, err
-	}
-
-	logger.Log.Debugf("Converted generic data to %s: %v\n", datastore.AdminUserStr, res)
 
 	return &res, nil
 }
@@ -303,34 +284,15 @@ func convertGenericObjectToAdminUser(genericUser map[string]interface{}) (*pb.Ad
 func convertGenericObjectListToAdminUserList(genericUserList []map[string]interface{}) (*pb.AdminUserList, error) {
 	res := new(pb.AdminUserList)
 	for _, genericUserObject := range genericUserList {
-		user, err := convertGenericObjectToAdminUser(genericUserObject)
+		user := pb.AdminUser{}
+		err := ConvertGenericCouchDataToObject(genericUserObject, &user, datastore.AdminUserStr)
 		if err != nil {
 			continue
 		}
-		res.List = append(res.List, user)
+		res.List = append(res.List, &user)
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", datastore.AdminUserStr, res)
 
 	return res, nil
-}
-
-// Takes the map[string]interface{} generic data returned by CouchDB and
-// converts it to an TenantDescriptor.
-func convertGenericObjectToTenantDescriptor(genericData map[string]interface{}) (*pb.TenantDescriptor, error) {
-	genericDataInBytes, err := ConvertGenericObjectToBytesWithCouchDbFields(genericData)
-	if err != nil {
-		return nil, err
-	}
-
-	res := pb.TenantDescriptor{}
-	err = json.Unmarshal(genericDataInBytes, &res)
-	if err != nil {
-		logger.Log.Errorf("Error converting generic data to %s type: %v\n", datastore.TenantDescriptorStr, err)
-		return nil, err
-	}
-
-	logger.Log.Debugf("Converted generic data to %s: %v\n", datastore.TenantDescriptorStr, res)
-
-	return &res, nil
 }

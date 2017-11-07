@@ -1,8 +1,11 @@
 package couchDB
 
 import (
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/leesper/couchdb-golang"
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
@@ -18,13 +21,14 @@ const tenantDescriptorType string = "tenantDescriptor"
 // database operations for the Admin Service when using CouchDB
 // as the storage option.
 type AdminServiceDatastoreCouchDB struct {
-	server string
-	dbName string
+	couchHost string
+	dbName    string
+	server    *couchdb.Server
 }
 
-// CreateDAO - instantiates a CouchDB implementation of the
+// CreateAdminServiceDAO - instantiates a CouchDB implementation of the
 // AdminServiceDatastore.
-func CreateDAO() *AdminServiceDatastoreCouchDB {
+func CreateAdminServiceDAO() *AdminServiceDatastoreCouchDB {
 	result := new(AdminServiceDatastoreCouchDB)
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
@@ -34,16 +38,21 @@ func CreateDAO() *AdminServiceDatastoreCouchDB {
 	provDBURL := fmt.Sprintf("%s:%d",
 		cfg.ServerConfig.Datastore.BindIP,
 		cfg.ServerConfig.Datastore.BindPort)
-	logger.Log.Debug("CouchDB URL is: ", provDBURL)
-	result.server = provDBURL
-	result.dbName = result.server + "/adh-admin"
+	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
+	result.couchHost = provDBURL
+	result.dbName = result.couchHost + "/adh-admin"
+	server, err := couchdb.NewServer(result.couchHost)
+	if err != nil {
+		logger.Log.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %v", err)
+	}
 
+	result.server = server
 	return result
 }
 
 // CreateAdminUser - CouchDB implementation of CreateAdminUser
-func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +84,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser)
 }
 
 // UpdateAdminUser - CouchDB implementation of UpdateAdminUser
-func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +96,9 @@ func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser)
 
 	// Marshal the Admin and read the bytes as string.
 	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
+	if err != nil {
+		return nil, err
+	}
 
 	// Store the user in CouchDB
 	id, rev, err := StoreDataInCouchDB(storeFormat, datastore.AdminUserStr, db)
@@ -104,16 +116,16 @@ func (couchDB *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser)
 }
 
 // DeleteAdminUser - CouchDB implementation of DeleteAdminUser
-func (couchDB *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
+func (asd *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
 	// Obtain the value of the existing record for a return value.
-	existingUser, err := couchDB.GetAdminUser(userID)
+	existingUser, err := asd.GetAdminUser(userID)
 	if err != nil {
 		logger.Log.Errorf("Unable to delete %s: %v\n", datastore.AdminUserStr, err)
 		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB
-	db, err := couchDB.GetDatabase()
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +138,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb
 }
 
 // GetAdminUser - CouchDB implementation of GetAdminUser
-func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUser, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUser, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -150,8 +162,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.Ad
 }
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
-func (couchDB *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +184,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserLi
 }
 
 // CreateTenant - CouchDB implementation of CreateTenant
-func (couchDB *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -190,9 +202,16 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.T
 		return nil, err
 	}
 
-	// Store the user in CouchDB
+	// Store the tenant metadata in CouchDB
 	_, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantDescriptorStr, db)
 	if err != nil {
+		return nil, err
+	}
+
+	// Create a CouchDB database to isolate the tenant data
+	_, err = asd.createDatabase(tenantDescriptor.GetId())
+	if err != nil {
+		logger.Log.Errorf("Unable to create database for Tenant %s: %v", tenantDescriptor.GetId(), err)
 		return nil, err
 	}
 
@@ -205,8 +224,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.T
 }
 
 // UpdateTenantDescriptor - CouchDB implementation of UpdateTenantDescriptor
-func (couchDB *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -234,16 +253,16 @@ func (couchDB *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescri
 }
 
 // DeleteTenant - CouchDB implementation of DeleteTenant
-func (couchDB *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
+func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
 	// Obtain the value of the existing record for a return value.
-	existingTenant, err := couchDB.GetTenantDescriptor(tenantID)
+	existingTenant, err := asd.GetTenantDescriptor(tenantID)
 	if err != nil {
 		logger.Log.Errorf("Unable to delete %s: %v\n", tenantDescriptorType, err)
 		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB
-	db, err := couchDB.GetDatabase()
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -256,8 +275,8 @@ func (couchDB *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.
 }
 
 // GetTenantDescriptor - CouchDB implementation of GetTenantDescriptor
-func (couchDB *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
-	db, err := couchDB.GetDatabase()
+func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
+	db, err := GetDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -277,6 +296,32 @@ func (couchDB *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string
 	}
 
 	return &res, nil
+}
+
+// createDatabase - creates a database in CouchDB identified by the provided name.
+func (asd *AdminServiceDatastoreCouchDB) createDatabase(dbName string) (*couchdb.Database, error) {
+	if len(dbName) == 0 {
+		return nil, errors.New("Unable to create database if no identifier is provided")
+	}
+	if asd.server.Contains(dbName) {
+		return nil, errors.New("Unable to create database '" + dbName + "': database already exists")
+	}
+
+	return asd.server.Create(dbName)
+}
+
+// deleteDatabase - deletes a database in CouchDB identified by the provided name.
+func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
+	if len(dbName) == 0 {
+		logger.Log.Debug("No database identifier provided, nothing to delete")
+		return nil
+	}
+	if !asd.server.Contains(dbName) {
+		logger.Log.Debugf("Unable to delete database '" + dbName + "': database does not exist")
+		return nil
+	}
+
+	return asd.server.Delete(dbName)
 }
 
 // Takes a set of generic data that contains a list of AdminUsers and converts it to

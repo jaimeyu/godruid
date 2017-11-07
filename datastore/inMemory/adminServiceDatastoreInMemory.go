@@ -11,9 +11,9 @@ import (
 type AdminServiceDatastoreInMemory struct {
 }
 
-// CreateDAO - returns an in-memory implementation of the Admin Service
+// CreateAdminServiceDAO - returns an in-memory implementation of the Admin Service
 // datastore.
-func CreateDAO() datastore.AdminServiceDatastore {
+func CreateAdminServiceDAO() datastore.AdminServiceDatastore {
 	res := new(AdminServiceDatastoreInMemory)
 
 	return res

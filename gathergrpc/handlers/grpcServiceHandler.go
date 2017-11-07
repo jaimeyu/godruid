@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
@@ -14,6 +15,7 @@ import (
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
 	ash *AdminServiceHandler
+	tsh *TenantServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -22,7 +24,9 @@ type GRPCServiceHandler struct {
 func CreateCoordinator() *GRPCServiceHandler {
 	result := new(GRPCServiceHandler)
 
-	result.ash = CreateHandler()
+	result.ash = CreateAdminServiceHandler()
+	result.tsh = CreateTenantServiceHandler()
+
 	return result
 }
 
@@ -55,7 +59,20 @@ func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *em
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
 func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	return gsh.ash.CreateTenant(ctx, tenantMeta)
+	// Create the Tenant metadata record and reserve space to store isolated Tenant data
+	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a default Ingestion Profile for the Tenant.
+	ingPrfReq := pb.TenantIngestionProfileRequest{TenantId: result.GetId(), IngestionProfile: createDefaultTenantIngPrf()}
+	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
+	if err != nil {
+		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetId())
+	}
+
+	return result, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
@@ -72,4 +89,82 @@ func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.St
 //GetTenantDescriptor - retrieves Tenant metadata for the provided tenantID.
 func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
 	return gsh.ash.GetTenantDescriptor(ctx, tenantID)
+}
+
+// CreateTenantUser - creates a user scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+	return gsh.tsh.CreateTenantUser(ctx, tenantUserReq)
+}
+
+// UpdateTenantUser - updates a user scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+	return gsh.tsh.UpdateTenantUser(ctx, tenantUserReq)
+}
+
+// DeleteTenantUser - deletes a user scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+	return gsh.tsh.DeleteTenantUser(ctx, tenantUserIdReq)
+}
+
+// GetTenantUser - retrieves a user scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+	return gsh.tsh.GetTenantUser(ctx, tenantUserIdReq)
+}
+
+// GetAllTenantUsers - retrieves all users scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserListResponse, error) {
+	return gsh.tsh.GetAllTenantUsers(ctx, tenantID)
+}
+
+// CreateTenantDomain - creates a Domain scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+	return gsh.tsh.CreateTenantDomain(ctx, tenantDomainRequest)
+}
+
+// UpdateTenantDomain - updates a Domain scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+	return gsh.tsh.UpdateTenantDomain(ctx, tenantDomainRequest)
+}
+
+// DeleteTenantDomain - deletes a Domain scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+	return gsh.tsh.DeleteTenantDomain(ctx, tenantDomainIDRequest)
+}
+
+// GetTenantDomain - retrieves a Domain scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+	return gsh.tsh.GetTenantDomain(ctx, tenantDomainIDRequest)
+}
+
+// GetAllTenantDomains - retrieves all Domains scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainListResponse, error) {
+	return gsh.tsh.GetAllTenantDomains(ctx, tenantID)
+}
+
+// CreateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+	return gsh.tsh.CreateTenantIngestionProfile(ctx, tenantIngPrfReq)
+}
+
+// UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+	return gsh.tsh.UpdateTenantIngestionProfile(ctx, tenantIngPrfReq)
+}
+
+// GetTenantIngestionProfile - retrieves the Ingestion Profile for a singler Tenant.
+func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+	return gsh.tsh.GetTenantIngestionProfile(ctx, tenantID)
+}
+
+// DeleteTenantIngestionProfile - retrieves the Ingestion Profile for a singler Tenant.
+func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
+}
+
+func createDefaultTenantIngPrf() *pb.TenantIngestionProfile {
+	ingPrf := pb.TenantIngestionProfile{}
+	ingPrf.ScpUsername = "default"
+	ingPrf.ScpPassword = "password"
+
+	return &ingPrf
 }

@@ -26,12 +26,12 @@ type AdminServiceHandler struct {
 	adminDB db.AdminServiceDatastore
 }
 
-// CreateHandler - used to generate a handler for the Admin Service.
-func CreateHandler() *AdminServiceHandler {
+// CreateAdminServiceHandler - used to generate a handler for the Admin Service.
+func CreateAdminServiceHandler() *AdminServiceHandler {
 	result := new(AdminServiceHandler)
 
 	// Seteup the DB implementation based on configuration
-	db, err := getDatastore()
+	db, err := getAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceHandler: %v", err)
 	}
@@ -43,6 +43,7 @@ func CreateHandler() *AdminServiceHandler {
 // CreateAdminUser - Create an Administrative User.
 func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
 	// Perform any validation here:
+	logger.Log.Infof("Creating %s: %s", datastore.AdminUserStr, user)
 
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.CreateAdminUser(user)
@@ -59,6 +60,7 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 // UpdateAdminUser - Update an Administrative User.
 func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
 	// Perform any validation here:
+	logger.Log.Infof("Updating %s: %s", datastore.AdminUserStr, user)
 
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.UpdateAdminUser(user)
@@ -200,7 +202,7 @@ func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantI
 	return result, nil
 }
 
-func getDatastore() (datastore.AdminServiceDatastore, error) {
+func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
 		logger.Log.Errorf("Falied to instantiate AdminServiceHandler: %v", err)
@@ -210,10 +212,10 @@ func getDatastore() (datastore.AdminServiceDatastore, error) {
 	dbType := cfg.ServerConfig.StartupArgs.AdminDB
 	if dbType == gather.COUCH {
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")
-		return couchDB.CreateDAO(), nil
+		return couchDB.CreateAdminServiceDAO(), nil
 	} else if dbType == gather.MEM {
 		logger.Log.Debug("AdminService DB is using InMemory Implementation")
-		return inMemory.CreateDAO(), nil
+		return inMemory.CreateAdminServiceDAO(), nil
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")

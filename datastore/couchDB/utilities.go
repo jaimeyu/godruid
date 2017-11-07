@@ -10,18 +10,6 @@ import (
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
-// GetDatabase - returns the object used to issue commands to a CouchDB database
-// instance.
-func (couchDB *AdminServiceDatastoreCouchDB) GetDatabase() (*couchdb.Database, error) {
-	db, err := couchdb.NewDatabase(couchDB.dbName)
-	if err != nil {
-		logger.Log.Errorf("Unable to connect to CouchDB %s: %v\n", couchDB.server, err)
-		return nil, err
-	}
-
-	return db, nil
-}
-
 // InsertField - Helper metho to add fields to data models during conversion from ADH data
 // model to CouchDB data model and vice-versa. Useful for metadata fields
 // like '_id' and '_rev' that are key fields for operations in CouchDB.
@@ -160,4 +148,23 @@ func ConvertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
 
 	return nil
+}
+
+// GetDatabase - returns the object used to issue commands to a CouchDB database
+// instance.
+func GetDatabase(dbConnectionName string) (*couchdb.Database, error) {
+	db, err := couchdb.NewDatabase(dbConnectionName)
+	if err != nil {
+		logger.Log.Errorf("Unable to connect to CouchDB %s: %v\n", dbConnectionName, err)
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// CreateDBPathStr - Helper method to handle logic specific to CouchDB for creating the
+// URL to a database. Works by taking a server name (i.e. http://localhost:5894) and
+// appending the path to the db.
+func CreateDBPathStr(dbServerStr string, dbPathStr string) string {
+	return strings.Join([]string{dbServerStr, "/", dbPathStr}, "")
 }

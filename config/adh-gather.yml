@@ -10,3 +10,4 @@ serverConfig:
     bindPort: 10000
   StartupArgs:
     adminDB: 1
+    tenantDB: 1

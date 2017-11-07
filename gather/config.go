@@ -34,7 +34,8 @@ type Config struct {
 			BindPort int
 		}
 		StartupArgs struct {
-			AdminDB DBImpl
+			AdminDB  DBImpl
+			TenantDB DBImpl
 		}
 	}
 }

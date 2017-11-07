@@ -132,7 +132,7 @@
         ]
       }
     },
-    "/api/v1/tenant": {
+    "/api/v1/tenants": {
       "post": {
         "summary": "Creates a Tenant and returns a TenantDescriptor which provides \nmetadata for the newly created Tenant.",
         "operationId": "CreateTenant",
@@ -157,9 +157,7 @@
         "tags": [
           "AdminProvisioningService"
         ]
-      }
-    },
-    "/api/v1/tenant/meta": {
+      },
       "put": {
         "summary": "Updates a TenantDescriptor, which provides metadata \nfor the specified Tenant.",
         "operationId": "UpdateTenantDescriptor",
@@ -186,7 +184,379 @@
         ]
       }
     },
-    "/api/v1/tenant/meta/{value}": {
+    "/api/v1/tenants/{tenantId}/domains": {
+      "post": {
+        "summary": "Create a Domain scoped to a Single Tenant.",
+        "operationId": "CreateTenantDomain",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomain"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update a Domain scoped to a single Tenant.",
+        "operationId": "UpdateTenantDomain",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomain"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/domains/{domainId}": {
+      "get": {
+        "summary": "Retrieve a Domain scoped to a single Tenant.",
+        "operationId": "GetTenantDomain",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a Domain scoped to a single Tenant.",
+        "operationId": "DeleteTenantDomain",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/ingestion-profiles": {
+      "post": {
+        "summary": "Create a Ingestion Profile scoped to a Single Tenant.",
+        "operationId": "CreateTenantIngestionProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Updates an Ingestion Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "UpdateTenantIngestionProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}": {
+      "get": {
+        "summary": "Retrieves an Ingestion Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "GetTenantIngestionProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ingestionProfileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an Ingestion Profile scoped to a single Tenant.",
+        "operationId": "DeleteTenantIngestionProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ingestionProfileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/users": {
+      "post": {
+        "summary": "Create a User scoped to a Single Tenant.",
+        "operationId": "CreateTenantUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUser"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update a User scoped to a single Tenant.",
+        "operationId": "UpdateTenantUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUser"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/users/{userId}": {
+      "get": {
+        "summary": "Retrieve a User scoped to a single Tenant.",
+        "operationId": "GetTenantUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a User scoped to a single Tenant.",
+        "operationId": "DeleteTenantUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{value}": {
       "get": {
         "summary": "Retrieves the metadata of a single Tenant by id.",
         "operationId": "GetTenantDescriptor",
@@ -209,9 +579,7 @@
         "tags": [
           "AdminProvisioningService"
         ]
-      }
-    },
-    "/api/v1/tenant/{value}": {
+      },
       "delete": {
         "summary": "Deletes a Tenant and returns a TenantDescriptor which provides\nmetadata for the now deleted Tenant.",
         "operationId": "DeleteTenant",
@@ -233,6 +601,56 @@
         ],
         "tags": [
           "AdminProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{value}/domain-list": {
+      "get": {
+        "summary": "Retrieve all Domains scoped to a single Tenant.",
+        "operationId": "GetAllTenantDomains",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDomainListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{value}/user-list": {
+      "get": {
+        "summary": "Retrieve all Users scoped to a single Tenant.",
+        "operationId": "GetAllTenantUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantUserListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
         ]
       }
     }
@@ -324,6 +742,194 @@
         }
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
+    },
+    "gathergrpcTenantDomain": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "TenantDomain - model for a Domain for a single Tenant."
+    },
+    "gathergrpcTenantDomainList": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantDomain"
+          }
+        }
+      },
+      "description": "TenantDomainList - a container for a list of TenantDomain objects."
+    },
+    "gathergrpcTenantDomainListResponse": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "list": {
+          "$ref": "#/definitions/gathergrpcTenantDomainList"
+        }
+      },
+      "description": "TenantDomainListResponse - a wrapper for a list of TenantDomain objects that \nare returned as a response to a request.."
+    },
+    "gathergrpcTenantDomainResponse": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "domain": {
+          "$ref": "#/definitions/gathergrpcTenantDomain"
+        }
+      },
+      "title": "TenantDomainResponse - wrapper for responses that involve a Tenant Domain"
+    },
+    "gathergrpcTenantIngestionProfile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "scpUsername": {
+          "type": "string"
+        },
+        "scpPassword": {
+          "type": "string"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "TenantIngestionProfile - model for the singleton object that \ngoverns what data is displayed for a Tenant."
+    },
+    "gathergrpcTenantIngestionProfileResponse": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "ingestionProfile": {
+          "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
+        }
+      },
+      "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
+    },
+    "gathergrpcTenantUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "sendOnboardingEmail": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "onboardingToken": {
+          "type": "string"
+        },
+        "userVerified": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "state": {
+          "$ref": "#/definitions/gathergrpcUserState"
+        },
+        "domains": {
+          "$ref": "#/definitions/gathergrpcTenantDomainList"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "TenantUser - model for a User that is scoped to a single Tenant."
+    },
+    "gathergrpcTenantUserList": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantUser"
+          }
+        }
+      },
+      "description": "TenantUserList - a container for a list of TenantUser objects."
+    },
+    "gathergrpcTenantUserListResponse": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "list": {
+          "$ref": "#/definitions/gathergrpcTenantUserList"
+        }
+      },
+      "description": "TenantUserListResponse - a wrapper to handle requests that return a\nlist of TenantUser objects."
+    },
+    "gathergrpcTenantUserResponse": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/gathergrpcTenantUser"
+        }
+      },
+      "description": "TenantUserResponse - wrapper for responses to requests that involve a User that\nis scoped to a single Tenant."
     },
     "gathergrpcUserState": {
       "type": "string",

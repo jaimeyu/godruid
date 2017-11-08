@@ -81,11 +81,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUserReque
 		return nil, err
 	}
 
-	// err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.AdminUserStr)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	// Return the provisioned user.
 	logger.Log.Infof("Created %s: %v\n", datastore.AdminUserStr, res)
 	return &res, nil

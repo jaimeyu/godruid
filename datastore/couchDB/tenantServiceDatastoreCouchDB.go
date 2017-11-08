@@ -86,7 +86,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb
 	// Update timestamp and make sure the type is properly set:
 	user := tenantUserRequest.GetUser()
 	user.LastModifiedTimestamp = time.Now().Unix()
-	user.Datatype = adminUserType
+	user.Datatype = tenantUserType
 
 	// Marshal the user and read the bytes as string.
 	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
@@ -159,7 +159,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.
 }
 
 // GetAllTenantUsers - CouchDB implementation of GetAllTenantUsers
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*pb.TenantUserList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]*pb.TenantUser, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantID)
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -300,7 +300,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest 
 }
 
 // GetAllTenantDomains - CouchDB implementation of GetAllTenantDomains
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (*pb.TenantDomainList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) ([]*pb.TenantDomain, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantID)
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -442,15 +442,15 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 
 // Takes a set of generic data that contains a list of TenantUsers and converts it to
 // and ADH TenantUserList object
-func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserList, error) {
-	res := new(pb.TenantUserList)
+func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) ([]*pb.TenantUser, error) {
+	res := make([]*pb.TenantUser, 0)
 	for _, genericUserObject := range genericUserList {
 		user := pb.TenantUser{}
 		err := ConvertGenericCouchDataToObject(genericUserObject, &user, datastore.TenantUserStr)
 		if err != nil {
 			continue
 		}
-		res.List = append(res.List, &user)
+		res = append(res, &user)
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", datastore.TenantUserStr, res)
@@ -460,15 +460,15 @@ func convertGenericObjectListToTenantUserList(genericUserList []map[string]inter
 
 // Takes a set of generic data that contains a list of TenantDomains and converts it to
 // and ADH TenantDomainList object
-func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]interface{}) (*pb.TenantDomainList, error) {
-	res := new(pb.TenantDomainList)
+func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]interface{}) ([]*pb.TenantDomain, error) {
+	res := make([]*pb.TenantDomain, 0)
 	for _, genericDomainObject := range genericDomainList {
 		domain := pb.TenantDomain{}
 		err := ConvertGenericCouchDataToObject(genericDomainObject, &domain, datastore.TenantDomainStr)
 		if err != nil {
 			continue
 		}
-		res.List = append(res.List, &domain)
+		res = append(res, &domain)
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", datastore.TenantDomainStr, res)

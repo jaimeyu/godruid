@@ -254,9 +254,12 @@ message TenantDomain {
     int64 lastModifiedTimestamp = 7;
 }
 
-// TenantDomainList - a container for a list of TenantDomain objects.
-message TenantDomainList {
-    repeated TenantDomain list = 1;
+// Shortened version of a TenantDomain with just the important details.
+// Used to save space when including Domains inside of a TenantUser object. 
+message TenantDomainDetails {
+    string id = 1;
+    string name = 2;
+    string color = 3;
 }
 
 // Not dealing with the site tour right now as the concept is not fully 
@@ -299,7 +302,7 @@ message TenantUser {
     string onboardingToken = 7;
     bool userVerified = 8;
     UserState state = 9;
-    TenantDomainList domains = 10;
+    repeated TenantDomainDetails domains = 10;
     // TenantSiteTour siteTour = 11;  --- Come back to this concept when it is fleshed out. ---
 
     int64 createdTimestamp = 12;
@@ -334,16 +337,11 @@ message TenantDomainIdRequest {
     string domainId = 2;
 }
 
-// TenantUserList - a container for a list of TenantUser objects.
-message TenantUserList {
-    repeated TenantUser list = 1;
-}
-
 // TenantUserListResponse - a wrapper to handle requests that return a
 // list of TenantUser objects.
 message TenantUserListResponse {
     string tenantId = 1;
-    TenantUserList list = 2;
+    repeated TenantUser list = 2;
 }
 
 // TenantDomainRequest - wrapper for requests that involve a Tenant Domain
@@ -362,7 +360,7 @@ message TenantDomainResponse {
 // are returned as a response to a request..
 message TenantDomainListResponse {
     string tenantId = 1;
-    TenantDomainList list = 2;
+    repeated TenantDomain list = 2;
 }
 
 // TenantIngestionProfileRequest - wrapper for requests that involve the

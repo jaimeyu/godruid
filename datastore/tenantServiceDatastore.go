@@ -20,13 +20,13 @@ type TenantServiceDatastore interface {
 	UpdateTenantUser(*pb.TenantUserRequest) (*pb.TenantUser, error)
 	DeleteTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
 	GetTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetAllTenantUsers(string) (*pb.TenantUserList, error)
+	GetAllTenantUsers(string) ([]*pb.TenantUser, error)
 
 	CreateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomain, error)
 	UpdateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomain, error)
 	DeleteTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
 	GetTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
-	GetAllTenantDomains(string) (*pb.TenantDomainList, error)
+	GetAllTenantDomains(string) ([]*pb.TenantDomain, error)
 
 	CreateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error)
 	UpdateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error)

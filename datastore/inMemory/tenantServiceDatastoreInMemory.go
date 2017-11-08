@@ -46,7 +46,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantUser(tenantUserIDRequest *pb
 }
 
 // GetAllTenantUsers - InMemory implementation of GetAllTenantUsers
-func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) (*pb.TenantUserList, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) ([]*pb.TenantUser, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetAllTenantUsers not implemented")
 }
@@ -76,7 +76,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantDomain(tenantDomainIDRequest
 }
 
 // GetAllTenantDomains - InMemory implementation of GetAllTenantDomains
-func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDomains(tenantID string) (*pb.TenantDomainList, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDomains(tenantID string) ([]*pb.TenantDomain, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetAllTenantDomains not implemented")
 }

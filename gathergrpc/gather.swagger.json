@@ -772,17 +772,20 @@
       },
       "description": "TenantDomain - model for a Domain for a single Tenant."
     },
-    "gathergrpcTenantDomainList": {
+    "gathergrpcTenantDomainDetails": {
       "type": "object",
       "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantDomain"
-          }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
         }
       },
-      "description": "TenantDomainList - a container for a list of TenantDomain objects."
+      "description": "Shortened version of a TenantDomain with just the important details.\nUsed to save space when including Domains inside of a TenantUser object."
     },
     "gathergrpcTenantDomainListResponse": {
       "type": "object",
@@ -791,7 +794,10 @@
           "type": "string"
         },
         "list": {
-          "$ref": "#/definitions/gathergrpcTenantDomainList"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantDomain"
+          }
         }
       },
       "description": "TenantDomainListResponse - a wrapper for a list of TenantDomain objects that \nare returned as a response to a request.."
@@ -882,7 +888,10 @@
           "$ref": "#/definitions/gathergrpcUserState"
         },
         "domains": {
-          "$ref": "#/definitions/gathergrpcTenantDomainList"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantDomainDetails"
+          }
         },
         "createdTimestamp": {
           "type": "string",
@@ -895,18 +904,6 @@
       },
       "description": "TenantUser - model for a User that is scoped to a single Tenant."
     },
-    "gathergrpcTenantUserList": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantUser"
-          }
-        }
-      },
-      "description": "TenantUserList - a container for a list of TenantUser objects."
-    },
     "gathergrpcTenantUserListResponse": {
       "type": "object",
       "properties": {
@@ -914,7 +911,10 @@
           "type": "string"
         },
         "list": {
-          "$ref": "#/definitions/gathergrpcTenantUserList"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantUser"
+          }
         }
       },
       "description": "TenantUserListResponse - a wrapper to handle requests that return a\nlist of TenantUser objects."

@@ -41,7 +41,7 @@ func CreateAdminServiceHandler() *AdminServiceHandler {
 }
 
 // CreateAdminUser - Create an Administrative User.
-func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
+func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	// Perform any validation here:
 	logger.Log.Infof("Creating %s: %s", datastore.AdminUserStr, user)
 
@@ -58,7 +58,7 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 }
 
 // UpdateAdminUser - Update an Administrative User.
-func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
+func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	// Perform any validation here:
 	logger.Log.Infof("Updating %s: %s", datastore.AdminUserStr, user)
 
@@ -75,7 +75,7 @@ func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.Ad
 }
 
 // DeleteAdminUser - Delete an Administrative User.
-func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
+func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
 	// Perform any validation here:
 
 	// Issue request to DAO Layer to Create the Admin User
@@ -91,7 +91,7 @@ func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.
 }
 
 // GetAdminUser - Retrieve an Administrative User by the ID.
-func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
+func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Retrieving %s: %s", datastore.AdminUserStr, userID.Value)
 
@@ -108,7 +108,7 @@ func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.Str
 }
 
 // GetAllAdminUsers -  Retrieve all Administrative Users.
-func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
+func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserListResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Retrieving all %ss", datastore.AdminUserStr)
 
@@ -127,7 +127,7 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
-func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Creating %s: %v", datastore.TenantStr, tenantMeta)
 
@@ -138,16 +138,13 @@ func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb
 		return nil, err
 	}
 
-	// TODO: Issue request to TenantService Datastore to create necessary Tenant
-	// data objects
-
-	// Succesfully Createds the Tenant, return the metadata result.
+	// Succesfully Created the Tenant, return the metadata result.
 	logger.Log.Infof("Created %s: %v\n", datastore.TenantStr, result)
 	return result, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
-func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Updating %s: %v", datastore.TenantDescriptorStr, tenantMeta)
 
@@ -165,7 +162,7 @@ func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tena
 
 // DeleteTenant - Delete a Tenant by the provided ID. This operation will remove the Tenant
 // datastore as well as the TenantDescriptor metadata.
-func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
+func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Attempting to delete %s: %s", datastore.TenantStr, tenantID.Value)
 
@@ -176,9 +173,6 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 		return nil, err
 	}
 
-	// TODO: Add calls here to Tenant Service to delete any related
-	// tenant data.
-
 	// Succesfully removed the Tenant, return the metadata that identified
 	// the now deleted tenant.
 	logger.Log.Infof("Successfully deleted %s. Previous %s: %v\n", datastore.TenantStr, datastore.TenantDescriptorStr, result)
@@ -186,7 +180,7 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 }
 
 //GetTenantDescriptor - retrieves Tenant metadata for the provided tenantID.
-func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
+func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
 	// Perform and validation here:
 	logger.Log.Infof("Retrieving %s: %s", datastore.TenantDescriptorStr, tenantID.Value)
 

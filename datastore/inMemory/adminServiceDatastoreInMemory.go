@@ -20,55 +20,55 @@ func CreateAdminServiceDAO() datastore.AdminServiceDatastore {
 }
 
 // CreateAdminUser - InMemory implementation of CreateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // UpdateAdminUser - InMemory implementation of UpdateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // DeleteAdminUser - InMemory implementation of DeleteAdminUser
-func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.AdminUserResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // GetAdminUser - InMemory implementation of GetAdminUser
-func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.AdminUserResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // GetAllAdminUsers - InMemory implementation of GetAllAdminUsers
-func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() (*pb.AdminUserList, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() (*pb.AdminUserListResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // CreateTenant - InMemory implementation of CreateTenant
-func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // UpdateTenantDescriptor - InMemory implementation of UpdateTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // DeleteTenant - InMemory implementation of DeleteTenant
-func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.TenantDescriptorResponse, error) {
 	// Stub to implement
 	return nil, nil
 }
 
 // GetTenantDescriptor - InMemory implementation of GetTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptorResponse, error) {
 	// Stub to implement
 	return nil, nil
 }

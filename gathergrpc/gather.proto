@@ -13,7 +13,7 @@ import "google/protobuf/empty.proto";
 service AdminProvisioningService {
     
     // Create a User with Administrative access. 
-    rpc CreateAdminUser(AdminUser) returns (AdminUser) {
+    rpc CreateAdminUser(AdminUserRequest) returns (AdminUserResponse) {
         option (google.api.http) = {
             post: "/api/v1/admin"
             body: "*"
@@ -21,7 +21,7 @@ service AdminProvisioningService {
     }
     
     // Update a User with Administrative access. 
-    rpc UpdateAdminUser(AdminUser) returns (AdminUser) {
+    rpc UpdateAdminUser(AdminUserRequest) returns (AdminUserResponse) {
         option (google.api.http) = {
             put: "/api/v1/admin"
             body: "*"
@@ -29,21 +29,21 @@ service AdminProvisioningService {
     } 
     
     // Delete a User with Administrative access. 
-    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUser) {
+    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUserResponse) {
         option (google.api.http) = {
             delete: "/api/v1/admin/{value}"
         };
     }
     
     // Retrieve and Administrative User by id. 
-    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUser) {
+    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUserResponse) {
         option (google.api.http) = {
             get: "/api/v1/admin/{value}"
         };
     }
     
     // Retrieve all Administrative Users. 
-    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserList) {
+    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserListResponse) {
         option (google.api.http) = {
             get: "/api/v1/admin-user-list"
         };
@@ -51,7 +51,7 @@ service AdminProvisioningService {
     
     // Creates a Tenant and returns a TenantDescriptor which provides 
     // metadata for the newly created Tenant.   
-    rpc CreateTenant(TenantDescriptor) returns (TenantDescriptor) {
+    rpc CreateTenant(TenantDescriptorRequest) returns (TenantDescriptorResponse) {
         option (google.api.http) = {
             post: "/api/v1/tenants"
             body: "*"
@@ -60,7 +60,7 @@ service AdminProvisioningService {
     
     // Updates a TenantDescriptor, which provides metadata 
     // for the specified Tenant. 
-    rpc UpdateTenantDescriptor(TenantDescriptor) returns (TenantDescriptor) {
+    rpc UpdateTenantDescriptor(TenantDescriptorRequest) returns (TenantDescriptorResponse) {
         option (google.api.http) = {
             put: "/api/v1/tenants"
             body: "*"
@@ -69,14 +69,14 @@ service AdminProvisioningService {
     
     // Deletes a Tenant and returns a TenantDescriptor which provides
     // metadata for the now deleted Tenant. 
-    rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptor) {
+    rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptorResponse) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{value}"
         };
     }
 
     // Retrieves the metadata of a single Tenant by id.
-    rpc GetTenantDescriptor(google.protobuf.StringValue) returns (TenantDescriptor) {
+    rpc GetTenantDescriptor(google.protobuf.StringValue) returns (TenantDescriptorResponse) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}"
         };
@@ -95,8 +95,6 @@ enum UserState {
 // Provides the metadata of a Tenant. This information is used to 
 // idetify/describe a full Tenant entity.
 message TenantDescriptor {
-    string id = 1;
-    string rev = 2;
     string datatype = 3;
 
     string name = 4;
@@ -107,10 +105,24 @@ message TenantDescriptor {
     int64 lastModifiedTimestamp = 8; 
 }
 
+// TenantDescriptorRequest - wrapper for passing TenantDescriptor
+// data as a request to the service.
+message TenantDescriptorRequest {
+    string _id = 1;
+    string _rev = 2;
+    TenantDescriptor data = 3;
+}
+
+// TenantDescriptorResponse - wrapper for passing TenantDescriptor
+// data as a response from the service.
+message TenantDescriptorResponse {
+    string _id = 1;
+    string _rev = 2;
+    TenantDescriptor data = 3;
+}
+
 // User data for an Adminstrative User.
 message AdminUser {
-    string id = 1;
-    string rev = 2;
     string datatype = 3;
 
     string username = 4;
@@ -124,10 +136,26 @@ message AdminUser {
     int64 lastModifiedTimestamp = 11;
 }
 
+// AdminUserRequest - wrapper for passing AdminUser
+// data as a request to the service.
+message AdminUserRequest {
+    string _id = 1;
+    string _rev = 2;
+    AdminUser data = 3;
+}
+
+// AdminUserResponse - wrapper for passing AdminUser
+// data as a response from the service.
+message AdminUserResponse {
+    string _id = 1;
+    string _rev = 2;
+    AdminUser data = 3;
+}
+
 // Wrapper message to provide a response in the form of
 // a container of multiple AdminUser objects.
-message AdminUserList {
-    repeated AdminUser list = 1;
+message AdminUserListResponse {
+    repeated AdminUserResponse list = 1;
 }
 
 // Service responsible for provisioning Tenant scope data including

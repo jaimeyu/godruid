@@ -31,34 +31,34 @@ func CreateCoordinator() *GRPCServiceHandler {
 }
 
 // CreateAdminUser - Create an Administrative User.
-func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
+func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	return gsh.ash.CreateAdminUser(ctx, user)
 }
 
 // UpdateAdminUser - Update an Administrative User.
-func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
+func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
 	return gsh.ash.UpdateAdminUser(ctx, user)
 }
 
 // DeleteAdminUser - Delete an Administrative User.
-func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
+func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
 	return gsh.ash.DeleteAdminUser(ctx, userID)
 }
 
 // GetAdminUser - Retrieve an Administrative User by the ID.
-func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
+func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
 	return gsh.ash.GetAdminUser(ctx, userID)
 }
 
 // GetAllAdminUsers -  Retrieve all Administrative Users.
-func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
+func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserListResponse, error) {
 	return gsh.ash.GetAllAdminUsers(ctx, noValue)
 }
 
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
-func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	// Create the Tenant metadata record and reserve space to store isolated Tenant data
 	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
 	if err != nil {
@@ -66,28 +66,31 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create a default Ingestion Profile for the Tenant.
-	ingPrfReq := pb.TenantIngestionProfileRequest{TenantId: result.GetId(), IngestionProfile: createDefaultTenantIngPrf()}
+	ingPrfReq := pb.TenantIngestionProfileRequest{TenantId: result.GetXId(), IngestionProfile: createDefaultTenantIngPrf()}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetId())
+		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetXId())
 	}
 
 	return result, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
 	return gsh.ash.UpdateTenantDescriptor(ctx, tenantMeta)
 }
 
 // DeleteTenant - Delete a Tenant by the provided ID. This operation will remove the Tenant
 // datastore as well as the TenantDescriptor metadata.
-func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
+func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
+	// TODO: Add calls here to Tenant Service to delete any related
+	// tenant data.
+
 	return gsh.ash.DeleteTenant(ctx, tenantID)
 }
 
 //GetTenantDescriptor - retrieves Tenant metadata for the provided tenantID.
-func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
+func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
 	return gsh.ash.GetTenantDescriptor(ctx, tenantID)
 }
 

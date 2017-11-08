@@ -23,7 +23,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserResponse"
             }
           }
         },
@@ -33,7 +33,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserRequest"
             }
           }
         ],
@@ -48,7 +48,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserResponse"
             }
           }
         },
@@ -58,7 +58,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserRequest"
             }
           }
         ],
@@ -75,7 +75,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserList"
+              "$ref": "#/definitions/gathergrpcAdminUserListResponse"
             }
           }
         },
@@ -92,7 +92,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserResponse"
             }
           }
         },
@@ -115,7 +115,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUser"
+              "$ref": "#/definitions/gathergrpcAdminUserResponse"
             }
           }
         },
@@ -140,7 +140,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
             }
           }
         },
@@ -150,7 +150,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorRequest"
             }
           }
         ],
@@ -165,7 +165,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
             }
           }
         },
@@ -175,7 +175,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorRequest"
             }
           }
         ],
@@ -564,7 +564,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
             }
           }
         },
@@ -587,7 +587,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptor"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
             }
           }
         },
@@ -659,12 +659,6 @@
     "gathergrpcAdminUser": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "rev": {
-          "type": "string"
-        },
         "datatype": {
           "type": "string"
         },
@@ -699,27 +693,51 @@
       },
       "description": "User data for an Adminstrative User."
     },
-    "gathergrpcAdminUserList": {
+    "gathergrpcAdminUserListResponse": {
       "type": "object",
       "properties": {
         "list": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcAdminUser"
+            "$ref": "#/definitions/gathergrpcAdminUserResponse"
           }
         }
       },
       "description": "Wrapper message to provide a response in the form of\na container of multiple AdminUser objects."
     },
+    "gathergrpcAdminUserRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcAdminUser"
+        }
+      },
+      "description": "AdminUserRequest - wrapper for passing AdminUser\ndata as a request to the service."
+    },
+    "gathergrpcAdminUserResponse": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcAdminUser"
+        }
+      },
+      "description": "AdminUserResponse - wrapper for passing AdminUser\ndata as a response from the service."
+    },
     "gathergrpcTenantDescriptor": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "rev": {
-          "type": "string"
-        },
         "datatype": {
           "type": "string"
         },
@@ -742,6 +760,36 @@
         }
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
+    },
+    "gathergrpcTenantDescriptorRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantDescriptor"
+        }
+      },
+      "description": "TenantDescriptorRequest - wrapper for passing TenantDescriptor\ndata as a request to the service."
+    },
+    "gathergrpcTenantDescriptorResponse": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantDescriptor"
+        }
+      },
+      "description": "TenantDescriptorResponse - wrapper for passing TenantDescriptor\ndata as a response from the service."
     },
     "gathergrpcTenantDomain": {
       "type": "object",

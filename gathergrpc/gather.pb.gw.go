@@ -31,7 +31,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
 func request_AdminProvisioningService_CreateAdminUser_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdminUser
+	var protoReq AdminUserRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -44,7 +44,7 @@ func request_AdminProvisioningService_CreateAdminUser_0(ctx context.Context, mar
 }
 
 func request_AdminProvisioningService_UpdateAdminUser_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdminUser
+	var protoReq AdminUserRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -120,7 +120,7 @@ func request_AdminProvisioningService_GetAllAdminUsers_0(ctx context.Context, ma
 }
 
 func request_AdminProvisioningService_CreateTenant_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDescriptor
+	var protoReq TenantDescriptorRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -133,7 +133,7 @@ func request_AdminProvisioningService_CreateTenant_0(ctx context.Context, marsha
 }
 
 func request_AdminProvisioningService_UpdateTenantDescriptor_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDescriptor
+	var protoReq TenantDescriptorRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {

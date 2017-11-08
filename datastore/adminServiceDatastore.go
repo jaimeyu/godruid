@@ -16,14 +16,14 @@ const TenantStr string = "Tenant"
 // AdminServiceDatastore - interface which provides the functionality
 // of the AdminService Datastore.
 type AdminServiceDatastore interface {
-	CreateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
-	UpdateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
-	DeleteAdminUser(string) (*pb.AdminUser, error)
-	GetAdminUser(string) (*pb.AdminUser, error)
-	GetAllAdminUsers() (*pb.AdminUserList, error)
+	CreateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
+	UpdateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
+	DeleteAdminUser(string) (*pb.AdminUserResponse, error)
+	GetAdminUser(string) (*pb.AdminUserResponse, error)
+	GetAllAdminUsers() (*pb.AdminUserListResponse, error)
 
-	CreateTenant(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
-	UpdateTenantDescriptor(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
-	DeleteTenant(string) (*pb.TenantDescriptor, error)
-	GetTenantDescriptor(string) (*pb.TenantDescriptor, error)
+	CreateTenant(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
+	UpdateTenantDescriptor(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
+	DeleteTenant(string) (*pb.TenantDescriptorResponse, error)
+	GetTenantDescriptor(string) (*pb.TenantDescriptorResponse, error)
 }

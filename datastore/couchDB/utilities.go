@@ -13,18 +13,18 @@ import (
 // InsertField - Helper metho to add fields to data models during conversion from ADH data
 // model to CouchDB data model and vice-versa. Useful for metadata fields
 // like '_id' and '_rev' that are key fields for operations in CouchDB.
-func InsertField(genericData map[string]interface{}, fieldName string) {
-	if genericData[fieldName] != nil {
-		logger.Log.Debugf("Adding '%s' field to data: %v", fieldName, genericData)
+// func InsertField(genericData map[string]interface{}, fieldName string) {
+// 	if genericData[fieldName] != nil {
+// 		logger.Log.Debugf("Adding '%s' field to data: %v", fieldName, genericData)
 
-		if strings.HasPrefix(fieldName, "_") {
-			genericData[fieldName[1:]] = genericData[fieldName]
-		} else {
-			genericData["_"+fieldName] = genericData[fieldName]
-		}
+// 		if strings.HasPrefix(fieldName, "_") {
+// 			genericData[fieldName[1:]] = genericData[fieldName]
+// 		} else {
+// 			genericData["_"+fieldName] = genericData[fieldName]
+// 		}
 
-	}
-}
+// 	}
+// }
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
 // that can be stored. Changes the provided object into a map[string]interface{} generic
@@ -44,8 +44,8 @@ func ConvertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{
 	}
 
 	// Add in the _id field and _rev fields that are necessary for CouchDB
-	InsertField(genericFormat, "id")
-	InsertField(genericFormat, "rev")
+	// InsertField(genericFormat, "id")
+	// InsertField(genericFormat, "rev")
 
 	// Successfully converted the User
 	return genericFormat, nil
@@ -57,8 +57,8 @@ func ConvertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{
 // ADH data model object.
 func ConvertGenericObjectToBytesWithCouchDbFields(genericObject map[string]interface{}) ([]byte, error) {
 	// Add in the _id field and _rev fields that are necessary for CouchDB
-	InsertField(genericObject, "_id")
-	InsertField(genericObject, "_rev")
+	// InsertField(genericObject, "_id")
+	// InsertField(genericObject, "_rev")
 	genericUserInBytes, err := json.Marshal(genericObject)
 	if err != nil {
 		logger.Log.Errorf("Error converting generic data to bytes: %v\n", err)
@@ -131,6 +131,22 @@ func GetAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 	return fetchedData, nil
 }
 
+// GetAllOfTypeByIDPrefix - retrieves a list of data whose ids start with
+// the specified prefix from the couchDB instance.
+func GetAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
+	logger.Log.Infof("Attempting to retrieve all %ss\n", dataTypeStrForLogging)
+
+	// Get the Admin User from CouchDB
+	selector := fmt.Sprintf(`regex(_id, "^%s")`, dataType)
+	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
+	if err != nil {
+		logger.Log.Errorf("Error retrieving all %ss: %v\n", dataTypeStrForLogging, err)
+		return nil, err
+	}
+
+	return fetchedData, nil
+}
+
 // ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
 // that object with the generic data.
 func ConvertGenericCouchDataToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
@@ -167,4 +183,18 @@ func GetDatabase(dbConnectionName string) (*couchdb.Database, error) {
 // appending the path to the db.
 func CreateDBPathStr(dbServerStr string, dbPathStr string) string {
 	return strings.Join([]string{dbServerStr, "/", dbPathStr}, "")
+}
+
+// PopulateDataResponse - useful when storing data in couchDB and there is a
+// generated id or revision provided that now needs to be included in the response.
+func PopulateDataResponse(id string, rev string, returnedData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+	// returnedData["_id"] = id
+	// returnedData["_rev"] = rev
+
+	err := ConvertGenericCouchDataToObject(returnedData, &dataContainer, dataTypeStr)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

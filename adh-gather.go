@@ -48,7 +48,9 @@ func gRPCHandlerStart() {
 	var opts []grpc.ServerOption
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterAdminProvisioningServiceServer(grpcServer, newServer().gsh)
+	grpcServiceHandler := newServer().gsh
+	pb.RegisterAdminProvisioningServiceServer(grpcServer, grpcServiceHandler)
+	pb.RegisterTenantProvisioningServiceServer(grpcServer, grpcServiceHandler)
 
 	logger.Log.Infof("gRPC service intiated on port: %d", grpcBindPort)
 	grpcServer.Serve(lis)
@@ -66,6 +68,10 @@ func restHandlerStart() {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("localhost:%d", grpcBindPort), opts)
+	if err != nil {
+		log.Fatalf("failed to start REST service: %v", err)
+	}
+	err = pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("localhost:%d", grpcBindPort), opts)
 	if err != nil {
 		log.Fatalf("failed to start REST service: %v", err)
 	}

@@ -41,76 +41,80 @@ func CreateTenantServiceDAO() *TenantServiceDatastoreCouchDB {
 }
 
 // CreateTenantUser - CouchDB implementation of CreateTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUser, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantUserRequest.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantUserRequest.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
-	// Give the user a known id, type, and timestamps:
-	user := tenantUserRequest.GetUser()
-	user.Id = user.GetUsername()
-	user.CreatedTimestamp = time.Now().Unix()
-	user.LastModifiedTimestamp = user.GetCreatedTimestamp()
-	user.Datatype = tenantUserType
+	// Give the user a known type, and timestamps:
+	tenantUserRequest.Data.Datatype = tenantUserType
+	tenantUserRequest.Data.CreatedTimestamp = time.Now().Unix()
+	tenantUserRequest.Data.LastModifiedTimestamp = tenantUserRequest.GetData().GetCreatedTimestamp()
 
 	// Marshal the user and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantUserRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the user in CouchDB
-	_, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantUserStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantUserStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the revision number to the response
-	user.Rev = rev
+	// Populate the response
+	res := pb.TenantUserResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Created %s: %v\n", datastore.TenantUserStr, user)
-	return user, nil
+	logger.Log.Infof("Created %s: %v\n", datastore.TenantUserStr, res)
+	return &res, nil
 }
 
 // UpdateTenantUser - CouchDB implementation of UpdateTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUser, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantUserRequest.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantUserRequest.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update timestamp and make sure the type is properly set:
-	user := tenantUserRequest.GetUser()
-	user.LastModifiedTimestamp = time.Now().Unix()
-	user.Datatype = tenantUserType
+	tenantUserRequest.Data.Datatype = tenantUserType
+	tenantUserRequest.Data.LastModifiedTimestamp = time.Now().Unix()
 
 	// Marshal the user and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantUserRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the user in CouchDB
-	id, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantUserStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantUserStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the evision number to the response
-	user.Rev = rev
-	logger.Log.Debugf("Successfully updated %s %s with rev %s", datastore.TenantUserStr, id, rev)
+	// Populate the response
+	res := pb.TenantUserResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Updated %s: %v\n", datastore.TenantUserStr, user)
-	return user, nil
+	logger.Log.Infof("Updated %s: %v\n", datastore.TenantUserStr, res)
+	return &res, nil
 }
 
 // DeleteTenantUser - CouchDB implementation of DeleteTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
 
 	// Obtain the value of the existing record for a return value.
 	existingUser, err := tsd.GetTenantUser(tenantUserIDRequest)
@@ -134,7 +138,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *
 }
 
 // GetTenantUser - CouchDB implementation of GetTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantUserIDRequest.GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -149,7 +153,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res := pb.TenantUser{}
+	res := pb.TenantUserResponse{}
 	err = ConvertGenericCouchDataToObject(fetchedUser, &res, datastore.TenantUserStr)
 	if err != nil {
 		return nil, err
@@ -159,7 +163,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.
 }
 
 // GetAllTenantUsers - CouchDB implementation of GetAllTenantUsers
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]*pb.TenantUser, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*pb.TenantUserListResponse, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantID)
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -182,76 +186,80 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]
 }
 
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomain, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantDomainRequest.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantDomainRequest.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
-	// Give the domain a known id, type, and timestamps:
-	domain := tenantDomainRequest.GetDomain()
-	domain.Id = domain.GetName()
-	domain.CreatedTimestamp = time.Now().Unix()
-	domain.LastModifiedTimestamp = domain.GetCreatedTimestamp()
-	domain.Datatype = tenantDomainType
+	// Give the domain a known type, and timestamps:
+	tenantDomainRequest.Data.Datatype = tenantDomainType
+	tenantDomainRequest.Data.CreatedTimestamp = time.Now().Unix()
+	tenantDomainRequest.Data.LastModifiedTimestamp = tenantDomainRequest.GetData().GetCreatedTimestamp()
 
 	// Marshal the domain and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(domain)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantDomainRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the domain in CouchDB
-	_, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantDomainStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantDomainStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the revision number to the response
-	domain.Rev = rev
+	// Populate the response
+	res := pb.TenantDomainResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Created %s: %v\n", datastore.TenantDomainStr, domain)
-	return domain, nil
+	logger.Log.Infof("Created %s: %v\n", datastore.TenantDomainStr, res)
+	return &res, nil
 }
 
 // UpdateTenantDomain - CouchDB implementation of UpdateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomain, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantDomainRequest.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantDomainRequest.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update timestamp and make sure the type is properly set:
-	domain := tenantDomainRequest.GetDomain()
-	domain.LastModifiedTimestamp = time.Now().Unix()
-	domain.Datatype = tenantDomainType
+	tenantDomainRequest.Data.Datatype = tenantDomainType
+	tenantDomainRequest.Data.LastModifiedTimestamp = time.Now().Unix()
 
 	// Marshal the domain and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(domain)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantDomainRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the domain in CouchDB
-	id, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantDomainStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantDomainStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the revision number to the response
-	domain.Rev = rev
-	logger.Log.Debugf("Successfully updated %s %s with rev %s", datastore.TenantDomainStr, id, rev)
+	// Populate the response
+	res := pb.TenantDomainResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Updated %s: %v\n", datastore.TenantDomainStr, domain)
-	return domain, nil
+	logger.Log.Infof("Updated %s: %v\n", datastore.TenantDomainStr, res)
+	return &res, nil
 }
 
 // DeleteTenantDomain - CouchDB implementation of DeleteTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
 
 	// Obtain the value of the existing record for a return value.
 	existingDomain, err := tsd.GetTenantDomain(tenantDomainIDRequest)
@@ -275,7 +283,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDReque
 }
 
 // GetTenantDomain - CouchDB implementation of GetTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantDomainIDRequest.GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -290,7 +298,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest 
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res := pb.TenantDomain{}
+	res := pb.TenantDomainResponse{}
 	err = ConvertGenericCouchDataToObject(fetchedDomain, &res, datastore.TenantDomainStr)
 	if err != nil {
 		return nil, err
@@ -300,7 +308,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest 
 }
 
 // GetAllTenantDomains - CouchDB implementation of GetAllTenantDomains
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) ([]*pb.TenantDomain, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (*pb.TenantDomainListResponse, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantID)
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -323,76 +331,80 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (
 }
 
 // CreateTenantIngestionProfile - CouchDB implementation of CreateTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantIngPrfReq.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
-	// Give the ingestion profile a known id, type, and timestamps:
-	ingPrf := tenantIngPrfReq.GetIngestionProfile()
-	ingPrf.Id = tenantIngPrfType
-	ingPrf.CreatedTimestamp = time.Now().Unix()
-	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
-	ingPrf.Datatype = tenantIngPrfType
+	// Give the ingestion profile a known type, and timestamps:
+	tenantIngPrfReq.Data.Datatype = tenantIngPrfType
+	tenantIngPrfReq.Data.CreatedTimestamp = time.Now().Unix()
+	tenantIngPrfReq.Data.LastModifiedTimestamp = tenantIngPrfReq.GetData().GetCreatedTimestamp()
 
 	// Marshal the ingestion profile and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(ingPrf)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantIngPrfReq)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the ingestion profile in CouchDB
-	_, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantIngestionProfileStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantIngestionProfileStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the revision number to the response
-	ingPrf.Rev = rev
+	// Populate the response
+	res := pb.TenantIngestionProfileResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Created %s: %v\n", datastore.TenantIngestionProfileStr, ingPrf)
-	return ingPrf, nil
+	logger.Log.Infof("Created %s: %v\n", datastore.TenantIngestionProfileStr, res)
+	return &res, nil
 }
 
 // UpdateTenantIngestionProfile - CouchDB implementation of UpdateTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error) {
-	tenantDBName := CreateDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+	tenantDBName := CreateDBPathStr(tsd.server, tenantIngPrfReq.GetData().GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update timestamp and make sure the type is properly set:
-	ingPrf := tenantIngPrfReq.GetIngestionProfile()
-	ingPrf.LastModifiedTimestamp = time.Now().Unix()
-	ingPrf.Datatype = tenantIngPrfType
+	tenantIngPrfReq.Data.Datatype = tenantIngPrfType
+	tenantIngPrfReq.Data.LastModifiedTimestamp = time.Now().Unix()
 
 	// Marshal the ingestion profile and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(ingPrf)
+	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantIngPrfReq)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the ingestion profile in CouchDB
-	id, rev, err := StoreDataInCouchDB(storeFormat, datastore.TenantIngestionProfileStr, db)
+	_, _, err = StoreDataInCouchDB(storeFormat, datastore.TenantIngestionProfileStr, db)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the revision number to the response
-	ingPrf.Rev = rev
-	logger.Log.Debugf("Successfully updated %s %s with rev %s", datastore.TenantIngestionProfileStr, id, rev)
+	// Populate the response
+	res := pb.TenantIngestionProfileResponse{}
+	err = ConvertGenericCouchDataToObject(storeFormat, &res, datastore.TenantUserStr)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Updated %s: %v\n", datastore.TenantIngestionProfileStr, ingPrf)
-	return ingPrf, nil
+	logger.Log.Infof("Updated %s: %v\n", datastore.TenantIngestionProfileStr, res)
+	return &res, nil
 }
 
 // GetTenantIngestionProfile - CouchDB implementation of GetTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
 	tenantDBName := CreateDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
 	db, err := GetDatabase(tenantDBName)
 	if err != nil {
@@ -407,7 +419,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrf
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res := pb.TenantIngestionProfile{}
+	res := pb.TenantIngestionProfileResponse{}
 	err = ConvertGenericCouchDataToObject(fetchedIngPrf, &res, datastore.TenantIngestionProfileStr)
 	if err != nil {
 		return nil, err
@@ -417,7 +429,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrf
 }
 
 // DeleteTenantIngestionProfile - CouchDB implementation of DeleteTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
 
 	// Obtain the value of the existing record for a return value.
 	existingIngPrf, err := tsd.GetTenantIngestionProfile(tenantIngPrfReq)
@@ -442,36 +454,36 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 
 // Takes a set of generic data that contains a list of TenantUsers and converts it to
 // and ADH TenantUserList object
-func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) ([]*pb.TenantUser, error) {
-	res := make([]*pb.TenantUser, 0)
+func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserListResponse, error) {
+	res := pb.TenantUserListResponse{}
 	for _, genericUserObject := range genericUserList {
 		user := pb.TenantUser{}
 		err := ConvertGenericCouchDataToObject(genericUserObject, &user, datastore.TenantUserStr)
 		if err != nil {
 			continue
 		}
-		res = append(res, &user)
+		res.List = append(res.GetList(), &user)
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", datastore.TenantUserStr, res)
 
-	return res, nil
+	return &res, nil
 }
 
 // Takes a set of generic data that contains a list of TenantDomains and converts it to
 // and ADH TenantDomainList object
-func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]interface{}) ([]*pb.TenantDomain, error) {
-	res := make([]*pb.TenantDomain, 0)
+func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]interface{}) (*pb.TenantDomainListResponse, error) {
+	res := pb.TenantDomainListResponse{}
 	for _, genericDomainObject := range genericDomainList {
 		domain := pb.TenantDomain{}
 		err := ConvertGenericCouchDataToObject(genericDomainObject, &domain, datastore.TenantDomainStr)
 		if err != nil {
 			continue
 		}
-		res = append(res, &domain)
+		res.List = append(res.GetList(), &domain)
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", datastore.TenantDomainStr, res)
 
-	return res, nil
+	return &res, nil
 }

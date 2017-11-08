@@ -165,16 +165,16 @@ service TenantProvisioningService {
     // Create a User scoped to a Single Tenant. 
     rpc CreateTenantUser(TenantUserRequest) returns (TenantUserResponse) {
         option (google.api.http) = {
-            post: "/api/v1/tenants/{tenantId}/users"
-            body: "user"
+            post: "/api/v1/tenants/{data.tenantId}/users"
+            body: "*"
         };
     }
     
     // Update a User scoped to a single Tenant. 
     rpc UpdateTenantUser(TenantUserRequest) returns (TenantUserResponse) {
         option (google.api.http) = {
-            put: "/api/v1/tenants/{tenantId}/users"
-            body: "user"
+            put: "/api/v1/tenants/{data.tenantId}/users"
+            body: "*"
         };
     } 
     
@@ -202,16 +202,16 @@ service TenantProvisioningService {
     // Create a Domain scoped to a Single Tenant. 
     rpc CreateTenantDomain(TenantDomainRequest) returns (TenantDomainResponse) {
         option (google.api.http) = {
-            post: "/api/v1/tenants/{tenantId}/domains"
-            body: "domain"
+            post: "/api/v1/tenants/{data.tenantId}/domains"
+            body: "*"
         };
     }
     
     // Update a Domain scoped to a single Tenant. 
     rpc UpdateTenantDomain(TenantDomainRequest) returns (TenantDomainResponse) {
         option (google.api.http) = {
-            put: "/api/v1/tenants/{tenantId}/domains"
-            body: "domain"
+            put: "/api/v1/tenants/{data.tenantId}/domains"
+            body: "*"
         };
     } 
     
@@ -239,8 +239,8 @@ service TenantProvisioningService {
     // Create a Ingestion Profile scoped to a Single Tenant. 
     rpc CreateTenantIngestionProfile(TenantIngestionProfileRequest) returns (TenantIngestionProfileResponse) {
         option (google.api.http) = {
-            post: "/api/v1/tenants/{tenantId}/ingestion-profiles"
-            body: "ingestionProfile"
+            post: "/api/v1/tenants/{data.tenantId}/ingestion-profiles"
+            body: "*"
         };
     }
     
@@ -248,8 +248,8 @@ service TenantProvisioningService {
     // collected for the Tenant. 
     rpc UpdateTenantIngestionProfile(TenantIngestionProfileRequest) returns (TenantIngestionProfileResponse) {
         option (google.api.http) = {
-            put: "/api/v1/tenants/{tenantId}/ingestion-profiles"
-            body: "ingestionProfile"
+            put: "/api/v1/tenants/{data.tenantId}/ingestion-profiles"
+            body: "*"
         };
     } 
 
@@ -271,24 +271,43 @@ service TenantProvisioningService {
 
 // TenantDomain - model for a Domain for a single Tenant.
 message TenantDomain {
-    string id = 1;
-    string rev = 2;
-    string datatype = 3;
+    string tenantId = 1;
+    string datatype = 2;
 
-    string name = 4;
-    string color = 5;
+    string name = 3;
+    string color = 4;
 
-    int64 createdTimestamp = 6;
-    int64 lastModifiedTimestamp = 7;
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6;
 }
 
-// Shortened version of a TenantDomain with just the important details.
-// Used to save space when including Domains inside of a TenantUser object. 
-message TenantDomainDetails {
-    string id = 1;
-    string name = 2;
-    string color = 3;
+// TenantDomainRequest - wrapper for requests that involve a Tenant Domain
+message TenantDomainRequest {
+    string _id = 1;
+    string _rev = 2;
+    TenantDomain data = 3;
 }
+
+// TenantDomainResponse - wrapper for responses that involve a Tenant Domain
+message TenantDomainResponse {
+    string _id = 1;
+    string _rev = 2;
+    TenantDomain data = 3;
+}
+
+// TenantDomainListResponse - a wrapper for a list of TenantDomain objects that 
+// are returned as a response to a request..
+message TenantDomainListResponse {
+    repeated TenantDomain list = 1;
+}
+
+// TenantDomainIdRequest - wrapper for requests that involve a Tenant Domain, 
+// but only require the domainID to complete the request.
+message TenantDomainIdRequest {
+    string tenantId = 1;
+    string domainId = 2;
+}
+
 
 // Not dealing with the site tour right now as the concept is not fully 
 // thought out. Leaving this snippet in though as we will need to address
@@ -307,48 +326,75 @@ message TenantDomainDetails {
 // TenantIngestionProfile - model for the singleton object that 
 // governs what data is displayed for a Tenant.
 message TenantIngestionProfile {
-    string id = 1;
-    string rev = 2;
-    string datatype = 3;
+    string tenantId = 1;
+    string datatype = 2;
 
-    string scpUsername = 4;
-    string scpPassword = 5;
+    string scpUsername = 3;
+    string scpPassword = 4;
 
-    int64 createdTimestamp = 6;
-    int64 lastModifiedTimestamp = 7;
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6;
+}
+
+// TenantIngestionProfileRequest - wrapper for requests that involve the
+// Tenant Ingestion Profile
+message TenantIngestionProfileRequest {
+    string _id = 1;
+    string _rev = 2;
+    TenantIngestionProfile data = 3;
+}
+
+// TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile
+// in a response.
+message TenantIngestionProfileResponse {
+    string _id = 1;
+    string _rev = 2;
+    TenantIngestionProfile data = 3;
+}
+
+message TenantIngestionProfileIdRequest {
+    string tenantId = 1;
+    string ingestionProfileId = 2;
 }
 
 // TenantUser - model for a User that is scoped to a single Tenant.
 message TenantUser {
-    string id = 1;
-    string rev = 2;
-    string datatype = 3;
+    string tenantId = 1;
+    string datatype = 2;
 
-    string username = 4;
-    string password = 5;
-    bool sendOnboardingEmail = 6;
-    string onboardingToken = 7;
-    bool userVerified = 8;
-    UserState state = 9;
-    repeated TenantDomainDetails domains = 10;
+    string username = 3;
+    string password = 4;
+    bool sendOnboardingEmail = 5;
+    string onboardingToken = 6;
+    bool userVerified = 7;
+    UserState state = 8;
+    repeated string domains = 9;
     // TenantSiteTour siteTour = 11;  --- Come back to this concept when it is fleshed out. ---
 
-    int64 createdTimestamp = 12;
-    int64 lastModifiedTimestamp = 13;
+    int64 createdTimestamp = 10;
+    int64 lastModifiedTimestamp = 11;
 }
 
 // TenantUserRequest - wrapper for requests that involve a User that
 // is scoped to a single Tenant.
 message TenantUserRequest {
-    string tenantId = 1;
-    TenantUser user = 2;
+    string _id = 1;
+    string _rev = 2;
+    TenantUser data = 3;
 }
 
 // TenantUserResponse - wrapper for responses to requests that involve a User that
 // is scoped to a single Tenant.
 message TenantUserResponse {
-    string tenantId = 1;
-    TenantUser user = 2;
+    string _id = 1;
+    string _rev = 2;
+    TenantUser data = 3;
+}
+
+// TenantUserListResponse - a wrapper to handle requests that return a
+// list of TenantUser objects.
+message TenantUserListResponse {
+    repeated TenantUser list = 1;
 }
 
 // TenantUserIdRequest - wrapper for requests that involve a Tenant User, 
@@ -358,56 +404,3 @@ message TenantUserIdRequest {
     string userId = 2;
 }
 
-// TenantDomainIdRequest - wrapper for requests that involve a Tenant Domaiun, 
-// but only require the domain to complete the request.
-message TenantDomainIdRequest {
-    string tenantId = 1;
-    string domainId = 2;
-}
-
-// TenantUserListResponse - a wrapper to handle requests that return a
-// list of TenantUser objects.
-message TenantUserListResponse {
-    string tenantId = 1;
-    repeated TenantUser list = 2;
-}
-
-// TenantDomainRequest - wrapper for requests that involve a Tenant Domain
-message TenantDomainRequest {
-    string tenantId = 1;
-    TenantDomain domain = 2;
-}
-
-// TenantDomainResponse - wrapper for responses that involve a Tenant Domain
-message TenantDomainResponse {
-    string tenantId = 1;
-    TenantDomain domain = 2;
-}
-
-// TenantDomainListResponse - a wrapper for a list of TenantDomain objects that 
-// are returned as a response to a request..
-message TenantDomainListResponse {
-    string tenantId = 1;
-    repeated TenantDomain list = 2;
-}
-
-// TenantIngestionProfileRequest - wrapper for requests that involve the
-// Tenant Ingestion Profile
-message TenantIngestionProfileRequest {
-    string tenantId = 1;
-    TenantIngestionProfile ingestionProfile = 2;
-}
-
-// TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile
-// in a response.
-message TenantIngestionProfileResponse {
-    string tenantId = 1;
-    TenantIngestionProfile ingestionProfile = 2;
-}
-
-// TenantIngestionProfileIdRequest - wrapper for requests that involve the
-// Tenant Ingestion Profile but only need the id
-message TenantIngestionProfileIdRequest {
-    string tenantId = 1;
-    string ingestionProfileId = 2;
-}

@@ -66,7 +66,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create a default Ingestion Profile for the Tenant.
-	ingPrfReq := pb.TenantIngestionProfileRequest{TenantId: result.GetXId(), IngestionProfile: createDefaultTenantIngPrf()}
+	ingPrfReq := pb.TenantIngestionProfileRequest{XId: "ingestionProfile", Data: createDefaultTenantIngPrf(result.GetXId())}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
 		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetXId())
@@ -164,10 +164,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context,
 	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 }
 
-func createDefaultTenantIngPrf() *pb.TenantIngestionProfile {
+func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 	ingPrf := pb.TenantIngestionProfile{}
 	ingPrf.ScpUsername = "default"
 	ingPrf.ScpPassword = "password"
+	ingPrf.TenantId = tenantId
 
 	return &ingPrf
 }

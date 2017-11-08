@@ -60,7 +60,7 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 		return nil, err
 	}
 
-	logger.Log.Infof("Creating %s: %s", db.TenantUserStr, tenantUserReq.GetUser())
+	logger.Log.Infof("Creating %s: %s", db.TenantUserStr, tenantUserReq)
 
 	// Issue request to DAO Layer to Create the Tenant User
 	result, err := tsh.tenantDB.CreateTenantUser(tenantUserReq)
@@ -71,7 +71,7 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 
 	// Succesfully Created the User, return the result.
 	logger.Log.Infof("Created %s: %v\n", db.TenantUserStr, result)
-	return &pb.TenantUserResponse{TenantId: tenantUserReq.GetTenantId(), User: result}, nil
+	return result, nil
 }
 
 // UpdateTenantUser - updates a user scoped to a single Tenant.
@@ -81,7 +81,7 @@ func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUse
 		return nil, err
 	}
 
-	logger.Log.Infof("Updating %s: %s", db.TenantUserStr, tenantUserReq.GetUser())
+	logger.Log.Infof("Updating %s: %s", db.TenantUserStr, tenantUserReq)
 
 	// Issue request to DAO Layer to Update the Tenant User
 	result, err := tsh.tenantDB.UpdateTenantUser(tenantUserReq)
@@ -92,7 +92,7 @@ func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUse
 
 	// Succesfully Updated the User, return the result.
 	logger.Log.Infof("Updated %s: %v\n", db.TenantUserStr, result)
-	return &pb.TenantUserResponse{TenantId: tenantUserReq.GetTenantId(), User: result}, nil
+	return result, nil
 }
 
 // DeleteTenantUser - deletes a user scoped to a single Tenant.
@@ -113,7 +113,7 @@ func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUse
 
 	// Succesfully Deleted the User, return the result.
 	logger.Log.Infof("Deleted %s: %v\n", db.TenantUserStr, result)
-	return &pb.TenantUserResponse{TenantId: tenantUserIDReq.GetTenantId(), User: result}, nil
+	return result, nil
 }
 
 // GetTenantUser - retrieves a user scoped to a single Tenant.
@@ -134,7 +134,7 @@ func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserID
 
 	// Succesfully fetched the User, return the result.
 	logger.Log.Infof("Retrieved %s: %v\n", db.TenantUserStr, result)
-	return &pb.TenantUserResponse{TenantId: tenantUserIDReq.GetTenantId(), User: result}, nil
+	return result, nil
 }
 
 // GetAllTenantUsers - retrieves all users scoped to a single Tenant.
@@ -151,8 +151,8 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 	}
 
 	// Succesfully fetched the Users, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantUserStr, len(result))
-	return &pb.TenantUserListResponse{TenantId: tenantID.Value, List: result}, nil
+	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantUserStr, len(result.GetList()))
+	return result, nil
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
@@ -162,7 +162,7 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 		return nil, err
 	}
 
-	logger.Log.Infof("Creating %s: %s", db.TenantDomainStr, tenantDomainRequest.GetDomain())
+	logger.Log.Infof("Creating %s: %s", db.TenantDomainStr, tenantDomainRequest)
 
 	// Issue request to DAO Layer to Create the Tenant Domain
 	result, err := tsh.tenantDB.CreateTenantDomain(tenantDomainRequest)
@@ -173,7 +173,7 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 
 	// Succesfully Created the Domain, return the result.
 	logger.Log.Infof("Created %s: %v\n", db.TenantDomainStr, result)
-	return &pb.TenantDomainResponse{TenantId: tenantDomainRequest.GetTenantId(), Domain: result}, nil
+	return result, nil
 }
 
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
@@ -183,7 +183,7 @@ func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantD
 		return nil, err
 	}
 
-	logger.Log.Infof("Updating %s: %s", db.TenantDomainStr, tenantDomainRequest.GetDomain())
+	logger.Log.Infof("Updating %s: %s", db.TenantDomainStr, tenantDomainRequest)
 
 	// Issue request to DAO Layer to Update the Tenant Domain
 	result, err := tsh.tenantDB.UpdateTenantDomain(tenantDomainRequest)
@@ -194,7 +194,7 @@ func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantD
 
 	// Succesfully Updated the Domain, return the result.
 	logger.Log.Infof("Updated %s: %v\n", db.TenantDomainStr, result)
-	return &pb.TenantDomainResponse{TenantId: tenantDomainRequest.GetTenantId(), Domain: result}, nil
+	return result, nil
 }
 
 // DeleteTenantDomain - deletes a Domain scoped to a single Tenant.
@@ -215,7 +215,7 @@ func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantD
 
 	// Succesfully Deleted the Domain, return the result.
 	logger.Log.Infof("Deleted %s: %v\n", db.TenantDomainStr, result)
-	return &pb.TenantDomainResponse{TenantId: tenantDomainIDRequest.GetTenantId(), Domain: result}, nil
+	return result, nil
 }
 
 // GetTenantDomain - retrieves a Domain scoped to a single Tenant.
@@ -236,7 +236,7 @@ func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDoma
 
 	// Succesfully fetched the Domain, return the result.
 	logger.Log.Infof("Retrieved %s: %v\n", db.TenantDomainStr, result)
-	return &pb.TenantDomainResponse{TenantId: tenantDomainIDRequest.GetTenantId(), Domain: result}, nil
+	return result, nil
 }
 
 // GetAllTenantDomains - retrieves all Domains scoped to a single Tenant.
@@ -253,8 +253,8 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 	}
 
 	// Succesfully fetched the Domains, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantDomainStr, len(result))
-	return &pb.TenantDomainListResponse{TenantId: tenantID.Value, List: result}, nil
+	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantDomainStr, len(result.GetList()))
+	return result, nil
 }
 
 // CreateTenantIngestionProfile - creates an Ingestion Profile scoped to a specific Tenant.
@@ -264,7 +264,7 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 		return nil, err
 	}
 
-	logger.Log.Infof("Creating %s: %s", db.TenantIngestionProfileStr, tenantIngPrfReq.GetIngestionProfile())
+	logger.Log.Infof("Creating %s: %s", db.TenantIngestionProfileStr, tenantIngPrfReq)
 
 	// Issue request to DAO Layer to Create the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.CreateTenantIngestionProfile(tenantIngPrfReq)
@@ -275,7 +275,7 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 
 	// Succesfully Created the Ingestion Profile, return the result.
 	logger.Log.Infof("Created %s: %v\n", db.TenantIngestionProfileStr, result)
-	return &pb.TenantIngestionProfileResponse{TenantId: tenantIngPrfReq.GetTenantId(), IngestionProfile: result}, nil
+	return result, nil
 }
 
 // UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
@@ -285,7 +285,7 @@ func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Contex
 		return nil, err
 	}
 
-	logger.Log.Infof("Updating %s: %s", db.TenantIngestionProfileStr, tenantIngPrfReq.GetIngestionProfile())
+	logger.Log.Infof("Updating %s: %s", db.TenantIngestionProfileStr, tenantIngPrfReq)
 
 	// Issue request to DAO Layer to Update the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(tenantIngPrfReq)
@@ -296,7 +296,7 @@ func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Contex
 
 	// Succesfully Updated the Ingestion Profile, return the result.
 	logger.Log.Infof("Updated %s: %v\n", db.TenantIngestionProfileStr, result)
-	return &pb.TenantIngestionProfileResponse{TenantId: tenantIngPrfReq.GetTenantId(), IngestionProfile: result}, nil
+	return result, nil
 }
 
 // GetTenantIngestionProfile - retrieves the Ingestion Profile for a single Tenant.
@@ -317,7 +317,7 @@ func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, 
 
 	// Succesfully fetched the Ingestion Profile, return the result.
 	logger.Log.Infof("Retrieved %s: %v\n", db.TenantIngestionProfileStr, result)
-	return &pb.TenantIngestionProfileResponse{TenantId: tenantIngPrfIDReq.GetTenantId(), IngestionProfile: result}, nil
+	return result, nil
 }
 
 // DeleteTenantIngestionProfile - deletes the Ingestion Profile for a single Tenant.
@@ -338,16 +338,20 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 
 	// Succesfully deleted the Ingestion Profile, return the result.
 	logger.Log.Infof("Deleted %s: %v\n", db.TenantIngestionProfileStr, result)
-	return &pb.TenantIngestionProfileResponse{TenantId: tenantIngPrfIDReq.GetTenantId(), IngestionProfile: result}, nil
+	return result, nil
 }
 
 func validateTenantUserRequest(request *pb.TenantUserRequest) error {
-	if request == nil || request.GetUser() == nil {
+	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantUserRequest: no Tenant User data provided")
 	}
 
-	if len(request.GetTenantId()) == 0 {
-		return errors.New("Invalid TenantUserRequest: no Tenant Id provided")
+	if len(request.GetData().GetTenantId()) == 0 {
+		return errors.New("Invalid TenantUserRequest: no Tenant ID provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid TenantUserRequest: no Tenant User ID provided")
 	}
 
 	return nil
@@ -366,12 +370,16 @@ func validateTenantUserIDRequest(request *pb.TenantUserIdRequest) error {
 }
 
 func validateTenantDomainRequest(request *pb.TenantDomainRequest) error {
-	if request == nil || request.GetDomain() == nil {
+	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantDomainRequest: no Tenant Domain data provided")
 	}
 
-	if len(request.GetTenantId()) == 0 {
+	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantDomainRequest: no Tenant Id provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid TenantUserRequest: no Tenant Domain ID provided")
 	}
 
 	return nil
@@ -390,12 +398,16 @@ func validateTenantDomainIDRequest(request *pb.TenantDomainIdRequest) error {
 }
 
 func validateTenantIngPrfRequest(request *pb.TenantIngestionProfileRequest) error {
-	if request == nil || request.GetIngestionProfile() == nil {
+	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Ingestion Profile data provided")
 	}
 
-	if len(request.GetTenantId()) == 0 {
+	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Id provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid TenantIngestionProfileRequest: no Ingestion Profile ID provided")
 	}
 
 	return nil

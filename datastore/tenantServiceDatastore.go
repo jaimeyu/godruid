@@ -16,20 +16,20 @@ const TenantIngestionProfileStr string = "Tenant Ingestion Profile"
 // TenantServiceDatastore - interface which provides the functionality
 // of the TenantService Datastore.
 type TenantServiceDatastore interface {
-	CreateTenantUser(*pb.TenantUserRequest) (*pb.TenantUser, error)
-	UpdateTenantUser(*pb.TenantUserRequest) (*pb.TenantUser, error)
-	DeleteTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetAllTenantUsers(string) ([]*pb.TenantUser, error)
+	CreateTenantUser(*pb.TenantUserRequest) (*pb.TenantUserResponse, error)
+	UpdateTenantUser(*pb.TenantUserRequest) (*pb.TenantUserResponse, error)
+	DeleteTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUserResponse, error)
+	GetTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUserResponse, error)
+	GetAllTenantUsers(string) (*pb.TenantUserListResponse, error)
 
-	CreateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomain, error)
-	UpdateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomain, error)
-	DeleteTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
-	GetTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
-	GetAllTenantDomains(string) ([]*pb.TenantDomain, error)
+	CreateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomainResponse, error)
+	UpdateTenantDomain(*pb.TenantDomainRequest) (*pb.TenantDomainResponse, error)
+	DeleteTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error)
+	GetTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error)
+	GetAllTenantDomains(string) (*pb.TenantDomainListResponse, error)
 
-	CreateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error)
-	UpdateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfile, error)
-	GetTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
-	DeleteTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
+	CreateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error)
+	UpdateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error)
+	GetTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error)
+	DeleteTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error)
 }

@@ -203,7 +203,7 @@ func request_TenantProvisioningService_CreateTenantUser_0(ctx context.Context, m
 	var protoReq TenantUserRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.User); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -214,15 +214,15 @@ func request_TenantProvisioningService_CreateTenantUser_0(ctx context.Context, m
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.CreateTenantUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -234,7 +234,7 @@ func request_TenantProvisioningService_UpdateTenantUser_0(ctx context.Context, m
 	var protoReq TenantUserRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.User); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -245,15 +245,15 @@ func request_TenantProvisioningService_UpdateTenantUser_0(ctx context.Context, m
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.UpdateTenantUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -368,7 +368,7 @@ func request_TenantProvisioningService_CreateTenantDomain_0(ctx context.Context,
 	var protoReq TenantDomainRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Domain); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -379,15 +379,15 @@ func request_TenantProvisioningService_CreateTenantDomain_0(ctx context.Context,
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.CreateTenantDomain(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -399,7 +399,7 @@ func request_TenantProvisioningService_UpdateTenantDomain_0(ctx context.Context,
 	var protoReq TenantDomainRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Domain); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -410,15 +410,15 @@ func request_TenantProvisioningService_UpdateTenantDomain_0(ctx context.Context,
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.UpdateTenantDomain(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -533,7 +533,7 @@ func request_TenantProvisioningService_CreateTenantIngestionProfile_0(ctx contex
 	var protoReq TenantIngestionProfileRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.IngestionProfile); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -544,15 +544,15 @@ func request_TenantProvisioningService_CreateTenantIngestionProfile_0(ctx contex
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.CreateTenantIngestionProfile(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -564,7 +564,7 @@ func request_TenantProvisioningService_UpdateTenantIngestionProfile_0(ctx contex
 	var protoReq TenantIngestionProfileRequest
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.IngestionProfile); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -575,15 +575,15 @@ func request_TenantProvisioningService_UpdateTenantIngestionProfile_0(ctx contex
 		_   = err
 	)
 
-	val, ok = pathParams["tenantId"]
+	val, ok = pathParams["data.tenantId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "tenantId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data.tenantId")
 	}
 
-	protoReq.TenantId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "data.tenantId", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "tenantId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data.tenantId", err)
 	}
 
 	msg, err := client.UpdateTenantIngestionProfile(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -1457,9 +1457,9 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 }
 
 var (
-	pattern_TenantProvisioningService_CreateTenantUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "users"}, ""))
+	pattern_TenantProvisioningService_CreateTenantUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "users"}, ""))
 
-	pattern_TenantProvisioningService_UpdateTenantUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "users"}, ""))
+	pattern_TenantProvisioningService_UpdateTenantUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "users"}, ""))
 
 	pattern_TenantProvisioningService_DeleteTenantUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "tenants", "tenantId", "users", "userId"}, ""))
 
@@ -1467,9 +1467,9 @@ var (
 
 	pattern_TenantProvisioningService_GetAllTenantUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "value", "user-list"}, ""))
 
-	pattern_TenantProvisioningService_CreateTenantDomain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "domains"}, ""))
+	pattern_TenantProvisioningService_CreateTenantDomain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "domains"}, ""))
 
-	pattern_TenantProvisioningService_UpdateTenantDomain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "domains"}, ""))
+	pattern_TenantProvisioningService_UpdateTenantDomain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "domains"}, ""))
 
 	pattern_TenantProvisioningService_DeleteTenantDomain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "tenants", "tenantId", "domains", "domainId"}, ""))
 
@@ -1477,9 +1477,9 @@ var (
 
 	pattern_TenantProvisioningService_GetAllTenantDomains_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "value", "domain-list"}, ""))
 
-	pattern_TenantProvisioningService_CreateTenantIngestionProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "ingestion-profiles"}, ""))
+	pattern_TenantProvisioningService_CreateTenantIngestionProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "ingestion-profiles"}, ""))
 
-	pattern_TenantProvisioningService_UpdateTenantIngestionProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "tenantId", "ingestion-profiles"}, ""))
+	pattern_TenantProvisioningService_UpdateTenantIngestionProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tenants", "data.tenantId", "ingestion-profiles"}, ""))
 
 	pattern_TenantProvisioningService_GetTenantIngestionProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"api", "v1", "tenants", "tenantId", "ingestion-profiles", "ingestionProfileId"}, ""))
 

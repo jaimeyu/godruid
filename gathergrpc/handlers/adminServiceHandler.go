@@ -42,7 +42,10 @@ func CreateAdminServiceHandler() *AdminServiceHandler {
 
 // CreateAdminUser - Create an Administrative User.
 func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	// Perform any validation here:
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateAdminUserRequest(user); err != nil {
+		return nil, err
+	}
 	logger.Log.Infof("Creating %s: %s", datastore.AdminUserStr, user)
 
 	// Issue request to DAO Layer to Create the Admin User
@@ -59,7 +62,10 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 
 // UpdateAdminUser - Update an Administrative User.
 func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	// Perform any validation here:
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateAdminUserRequest(user); err != nil {
+		return nil, err
+	}
 	logger.Log.Infof("Updating %s: %s", datastore.AdminUserStr, user)
 
 	// Issue request to DAO Layer to Create the Admin User
@@ -128,7 +134,10 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
 func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	// Perform and validation here:
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantDescriptorRequest(tenantMeta); err != nil {
+		return nil, err
+	}
 	logger.Log.Infof("Creating %s: %v", datastore.TenantStr, tenantMeta)
 
 	// Issue request to AdminService DAO to create the metadata record:
@@ -145,7 +154,10 @@ func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
 func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	// Perform and validation here:
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantDescriptorRequest(tenantMeta); err != nil {
+		return nil, err
+	}
 	logger.Log.Infof("Updating %s: %v", datastore.TenantDescriptorStr, tenantMeta)
 
 	// Issue request to AdminService DAO to update the metadata record:
@@ -213,4 +225,28 @@ func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")
+}
+
+func validateAdminUserRequest(request *pb.AdminUserRequest) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid AdminUserRequest: no Admin User data provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid AdminUserRequest: no Admin User ID provided")
+	}
+
+	return nil
+}
+
+func validateTenantDescriptorRequest(request *pb.TenantDescriptorRequest) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid TenantDescriptorRequest: no Tenant Descriptor data provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid TenantDescriptorRequest: no Tenant ID provided")
+	}
+
+	return nil
 }

@@ -126,7 +126,7 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 	}
 
 	// Succesfully found the Users, return the result list.
-	logger.Log.Infof("Retrieved %d %ss\n", len(result.GetList()), datastore.AdminUserStr)
+	logger.Log.Infof("Retrieved %d %ss\n", len(result.GetData()), datastore.AdminUserStr)
 	return result, nil
 }
 
@@ -205,6 +205,23 @@ func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantI
 
 	// Succesfully found the Tenant Metadata, return the result.
 	logger.Log.Infof("Retrieved %s: %v\n", datastore.TenantDescriptorStr, result)
+	return result, nil
+}
+
+// GetAllTenantDescriptors -  Retrieve all Tenant Descriptors.
+func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noValue *emp.Empty) (*pb.TenantDescriptorListResponse, error) {
+	// Perform and validation here:
+	logger.Log.Infof("Retrieving all %ss", datastore.TenantStr)
+
+	// Issue request to DAO Layer to Get the requested Tenant Descriptor List
+	result, err := ash.adminDB.GetAllTenantDescriptors()
+	if err != nil {
+		logger.Log.Errorf("Unable to retrieve %ss: %v\n", datastore.TenantStr, err)
+		return nil, err
+	}
+
+	// Succesfully found the Tenant Descriptors, return the result list.
+	logger.Log.Infof("Retrieved %d %ss\n", len(result.GetData()), datastore.TenantStr)
 	return result, nil
 }
 

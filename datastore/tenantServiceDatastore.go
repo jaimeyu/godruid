@@ -13,6 +13,15 @@ const TenantDomainStr string = "Tenant Domain"
 // TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 const TenantIngestionProfileStr string = "Tenant Ingestion Profile"
 
+// TenantUserType - datatype string used to identify a Tenant User in the datastore record
+const TenantUserType string = "user"
+
+// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
+const TenantDomainType string = "domain"
+
+// TenantIngPrfType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
+const TenantIngPrfType string = "ingestionProfile"
+
 // TenantServiceDatastore - interface which provides the functionality
 // of the TenantService Datastore.
 type TenantServiceDatastore interface {

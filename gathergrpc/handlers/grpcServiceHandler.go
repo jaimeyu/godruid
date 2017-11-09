@@ -94,6 +94,11 @@ func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID
 	return gsh.ash.GetTenantDescriptor(ctx, tenantID)
 }
 
+// GetAllTenantDescriptors -  Retrieve all Tenant Descriptors.
+func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noValue *emp.Empty) (*pb.TenantDescriptorListResponse, error) {
+	return gsh.ash.GetAllTenantDescriptors(ctx, noValue)
+}
+
 // CreateTenantUser - creates a user scoped to a single Tenant.
 func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
 	return gsh.tsh.CreateTenantUser(ctx, tenantUserReq)

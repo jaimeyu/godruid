@@ -97,7 +97,7 @@ func GetAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 	logger.Log.Infof("Attempting to retrieve all %ss\n", dataTypeStrForLogging)
 
 	// Get the Admin User from CouchDB
-	selector := fmt.Sprintf(`datatype == "%s"`, dataType)
+	selector := fmt.Sprintf(`data.datatype == "%s"`, dataType)
 	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
 	if err != nil {
 		logger.Log.Errorf("Error retrieving all %ss: %v\n", dataTypeStrForLogging, err)

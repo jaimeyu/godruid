@@ -132,6 +132,23 @@
         ]
       }
     },
+    "/api/v1/tenant-list": {
+      "get": {
+        "summary": "Retrieve all Users scoped to a single Tenant.",
+        "operationId": "GetAllTenantDescriptors",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantDescriptorListResponse"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants": {
       "post": {
         "summary": "Creates a Tenant and returns a TenantDescriptor which provides \nmetadata for the newly created Tenant.",
@@ -696,7 +713,7 @@
     "gathergrpcAdminUserListResponse": {
       "type": "object",
       "properties": {
-        "list": {
+        "data": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/gathergrpcAdminUserResponse"
@@ -761,6 +778,18 @@
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
     },
+    "gathergrpcTenantDescriptorListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+          }
+        }
+      },
+      "description": "Wrapper message to provide a response in the form of\na container of multiple TenantDescriptor objects."
+    },
     "gathergrpcTenantDescriptorRequest": {
       "type": "object",
       "properties": {
@@ -820,10 +849,10 @@
     "gathergrpcTenantDomainListResponse": {
       "type": "object",
       "properties": {
-        "list": {
+        "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcTenantDomain"
+            "$ref": "#/definitions/gathergrpcTenantDomainResponse"
           }
         }
       },
@@ -964,10 +993,10 @@
     "gathergrpcTenantUserListResponse": {
       "type": "object",
       "properties": {
-        "list": {
+        "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcTenantUser"
+            "$ref": "#/definitions/gathergrpcTenantUserResponse"
           }
         }
       },

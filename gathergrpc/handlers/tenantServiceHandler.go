@@ -151,7 +151,7 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 	}
 
 	// Succesfully fetched the Users, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantUserStr, len(result.GetList()))
+	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantUserStr, len(result.GetData()))
 	return result, nil
 }
 
@@ -253,7 +253,7 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 	}
 
 	// Succesfully fetched the Domains, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantDomainStr, len(result.GetList()))
+	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantDomainStr, len(result.GetData()))
 	return result, nil
 }
 

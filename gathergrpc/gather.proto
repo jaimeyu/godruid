@@ -81,6 +81,13 @@ service AdminProvisioningService {
             get: "/api/v1/tenants/{value}"
         };
     }
+
+    // Retrieve all Users scoped to a single Tenant. 
+    rpc GetAllTenantDescriptors(google.protobuf.Empty) returns (TenantDescriptorListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenant-list"
+        };
+    }
 }
 
 // Enumeration of User state. 
@@ -121,6 +128,12 @@ message TenantDescriptorResponse {
     TenantDescriptor data = 3;
 }
 
+// Wrapper message to provide a response in the form of
+// a container of multiple TenantDescriptor objects.
+message TenantDescriptorListResponse {
+    repeated TenantDescriptorResponse data = 1;
+}
+
 // User data for an Adminstrative User.
 message AdminUser {
     string datatype = 3;
@@ -155,7 +168,7 @@ message AdminUserResponse {
 // Wrapper message to provide a response in the form of
 // a container of multiple AdminUser objects.
 message AdminUserListResponse {
-    repeated AdminUserResponse list = 1;
+    repeated AdminUserResponse data = 1;
 }
 
 // Service responsible for provisioning Tenant scope data including
@@ -298,7 +311,7 @@ message TenantDomainResponse {
 // TenantDomainListResponse - a wrapper for a list of TenantDomain objects that 
 // are returned as a response to a request..
 message TenantDomainListResponse {
-    repeated TenantDomain list = 1;
+    repeated TenantDomainResponse data = 1;
 }
 
 // TenantDomainIdRequest - wrapper for requests that involve a Tenant Domain, 
@@ -394,7 +407,7 @@ message TenantUserResponse {
 // TenantUserListResponse - a wrapper to handle requests that return a
 // list of TenantUser objects.
 message TenantUserListResponse {
-    repeated TenantUser list = 1;
+    repeated TenantUserResponse data = 1;
 }
 
 // TenantUserIdRequest - wrapper for requests that involve a Tenant User, 

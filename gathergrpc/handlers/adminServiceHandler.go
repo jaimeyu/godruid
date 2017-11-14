@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/accedian/adh-gather/gather"
 
@@ -33,7 +34,7 @@ func CreateAdminServiceHandler() *AdminServiceHandler {
 	// Seteup the DB implementation based on configuration
 	db, err := getAdminServiceDatastore()
 	if err != nil {
-		logger.Log.Fatalf("Unable to instantiate AdminServiceHandler: %v", err)
+		logger.Log.Fatalf("Unable to instantiate AdminServiceHandler: %s", err.Error())
 	}
 	result.adminDB = db
 
@@ -51,12 +52,11 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.CreateAdminUser(user)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", datastore.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", datastore.AdminUserStr, err.Error())
 	}
 
 	// Succesfully Created the User, return the result.
-	logger.Log.Infof("Created %s: %v\n", datastore.AdminUserStr, result)
+	logger.Log.Infof("Created %s: %s\n", datastore.AdminUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -71,12 +71,11 @@ func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.Ad
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.UpdateAdminUser(user)
 	if err != nil {
-		logger.Log.Errorf("Unable to update %s: %v\n", datastore.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to update %s: %s", datastore.AdminUserStr, err.Error())
 	}
 
 	// Succesfully Updated the User, return the result.
-	logger.Log.Infof("Updated %s: %v\n", datastore.AdminUserStr, result)
+	logger.Log.Infof("Updated %s: %s\n", datastore.AdminUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -87,12 +86,11 @@ func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.DeleteAdminUser(userID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", datastore.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.AdminUserStr, err.Error())
 	}
 
 	// Succesfully Deleted the User, return the result.
-	logger.Log.Infof("Deleted %s: %v\n", datastore.AdminUserStr, result)
+	logger.Log.Infof("Deleted %s: %s\n", datastore.AdminUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -104,12 +102,11 @@ func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.Str
 	// Issue request to DAO Layer to Get the requested Admin User
 	result, err := ash.adminDB.GetAdminUser(userID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %s: %v\n", datastore.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())
 	}
 
 	// Succesfully found the User, return the result.
-	logger.Log.Infof("Retrieved %s: %v\n", datastore.AdminUserStr, result)
+	logger.Log.Infof("Retrieved %s: %s\n", datastore.AdminUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -121,8 +118,7 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 	// Issue request to DAO Layer to Get the requested Admin User List
 	result, err := ash.adminDB.GetAllAdminUsers()
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %ss: %v\n", datastore.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", datastore.AdminUserStr, err.Error())
 	}
 
 	// Succesfully found the Users, return the result list.
@@ -138,17 +134,16 @@ func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb
 	if err := validateTenantDescriptorRequest(tenantMeta); err != nil {
 		return nil, err
 	}
-	logger.Log.Infof("Creating %s: %v", datastore.TenantStr, tenantMeta)
+	logger.Log.Infof("Creating %s: %s", datastore.TenantStr, tenantMeta.GetXId())
 
 	// Issue request to AdminService DAO to create the metadata record:
 	result, err := ash.adminDB.CreateTenant(tenantMeta)
 	if err != nil {
-		logger.Log.Errorf("Unable to create %s: %v\n", datastore.TenantStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to create %s: %s", datastore.TenantStr, err.Error())
 	}
 
 	// Succesfully Created the Tenant, return the metadata result.
-	logger.Log.Infof("Created %s: %v\n", datastore.TenantStr, result)
+	logger.Log.Infof("Created %s: %s\n", datastore.TenantStr, result.GetXId())
 	return result, nil
 }
 
@@ -158,17 +153,16 @@ func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tena
 	if err := validateTenantDescriptorRequest(tenantMeta); err != nil {
 		return nil, err
 	}
-	logger.Log.Infof("Updating %s: %v", datastore.TenantDescriptorStr, tenantMeta)
+	logger.Log.Infof("Updating %s: %s", datastore.TenantDescriptorStr, tenantMeta.GetXId())
 
 	// Issue request to AdminService DAO to update the metadata record:
 	result, err := ash.adminDB.UpdateTenantDescriptor(tenantMeta)
 	if err != nil {
-		logger.Log.Errorf("Unable to update %s: %v\n", datastore.TenantDescriptorStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to update %s: %s", datastore.TenantDescriptorStr, err.Error())
 	}
 
 	// Succesfully Createds the Tenant, return the metadata result.
-	logger.Log.Infof("Updated %s: %v\n", datastore.TenantDescriptorStr, result)
+	logger.Log.Infof("Updated %s: %s\n", datastore.TenantDescriptorStr, result.GetXId())
 	return result, nil
 }
 
@@ -181,13 +175,12 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 	// Issue request to DAO Layer to Delete the requested Tenant
 	result, err := ash.adminDB.DeleteTenant(tenantID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", datastore.TenantStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.TenantStr, err.Error())
 	}
 
 	// Succesfully removed the Tenant, return the metadata that identified
 	// the now deleted tenant.
-	logger.Log.Infof("Successfully deleted %s. Previous %s: %v\n", datastore.TenantStr, datastore.TenantDescriptorStr, result)
+	logger.Log.Infof("Successfully deleted %s. Previous %s: %s\n", datastore.TenantStr, datastore.TenantDescriptorStr, result.GetXId())
 	return result, nil
 }
 
@@ -199,12 +192,11 @@ func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantI
 	// Issue request to DAO Layer to Get the requested Tenant Metadata
 	result, err := ash.adminDB.GetTenantDescriptor(tenantID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %s: %v\n", datastore.TenantDescriptorStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.TenantDescriptorStr, err.Error())
 	}
 
 	// Succesfully found the Tenant Metadata, return the result.
-	logger.Log.Infof("Retrieved %s: %v\n", datastore.TenantDescriptorStr, result)
+	logger.Log.Infof("Retrieved %s: %s\n", datastore.TenantDescriptorStr, result.GetXId())
 	return result, nil
 }
 
@@ -216,8 +208,7 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 	// Issue request to DAO Layer to Get the requested Tenant Descriptor List
 	result, err := ash.adminDB.GetAllTenantDescriptors()
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %ss: %v\n", datastore.TenantStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", datastore.TenantStr, err.Error())
 	}
 
 	// Succesfully found the Tenant Descriptors, return the result list.
@@ -228,17 +219,17 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		logger.Log.Errorf("Falied to instantiate AdminServiceHandler: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("Falied to instantiate AdminServiceHandler: %s", err.Error())
 	}
 
 	dbType := cfg.ServerConfig.StartupArgs.AdminDB
-	if dbType == gather.COUCH {
+	switch dbType {
+	case gather.COUCH:
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")
-		return couchDB.CreateAdminServiceDAO(), nil
-	} else if dbType == gather.MEM {
+		return couchDB.CreateAdminServiceDAO()
+	case gather.MEM:
 		logger.Log.Debug("AdminService DB is using InMemory Implementation")
-		return inMemory.CreateAdminServiceDAO(), nil
+		return inMemory.CreateAdminServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")

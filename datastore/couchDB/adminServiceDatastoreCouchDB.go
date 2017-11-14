@@ -25,11 +25,11 @@ type AdminServiceDatastoreCouchDB struct {
 
 // CreateAdminServiceDAO - instantiates a CouchDB implementation of the
 // AdminServiceDatastore.
-func CreateAdminServiceDAO() *AdminServiceDatastoreCouchDB {
+func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	result := new(AdminServiceDatastoreCouchDB)
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		logger.Log.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %v", err)
+		return nil, fmt.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
 	}
 
 	provDBURL := fmt.Sprintf("%s:%d",
@@ -40,81 +40,79 @@ func CreateAdminServiceDAO() *AdminServiceDatastoreCouchDB {
 	result.dbName = result.couchHost + "/adh-admin"
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {
-		logger.Log.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %v", err)
+		return nil, fmt.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
 	}
 
 	result.server = server
-	return result
+	return result, nil
 }
 
 // CreateAdminUser - CouchDB implementation of CreateAdminUser
 func (asd *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Give the user a known type and timestamps:
-	user.Data.Datatype = ds.AdminUserType
+	user.Data.Datatype = string(ds.AdminUserType)
 	user.Data.CreatedTimestamp = time.Now().Unix()
 	user.Data.LastModifiedTimestamp = user.GetData().GetCreatedTimestamp()
 
 	// Marshal the Admin and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
+	storeFormat, err := convertDataToCouchDbSupportedModel(user)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the user in CouchDB
-	_, _, err = StoreDataInCouchDB(storeFormat, ds.AdminUserStr, db)
+	_, _, err = storeDataInCouchDB(storeFormat, ds.AdminUserStr, db)
 	if err != nil {
 		return nil, err
 	}
 
 	// Populate the response
 	res := pb.AdminUserResponse{}
-	err = ConvertGenericCouchDataToObject(storeFormat, &res, ds.AdminUserStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Created %s: %v\n", ds.AdminUserStr, res)
+	logger.Log.Debugf("Created %s: %v\n", ds.AdminUserStr, res)
 	return &res, nil
 }
 
 // UpdateAdminUser - CouchDB implementation of UpdateAdminUser
 func (asd *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update timestamp and make sure the type is properly set:
-	user.Data.Datatype = ds.AdminUserType
+	user.Data.Datatype = string(ds.AdminUserType)
 	user.Data.LastModifiedTimestamp = time.Now().Unix()
 
 	// Marshal the Admin and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(user)
+	storeFormat, err := convertDataToCouchDbSupportedModel(user)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the user in CouchDB
-	_, _, err = StoreDataInCouchDB(storeFormat, ds.AdminUserStr, db)
+	_, _, err = storeDataInCouchDB(storeFormat, ds.AdminUserStr, db)
 	if err != nil {
 		return nil, err
 	}
 
 	// Populate the response
 	res := pb.AdminUserResponse{}
-	err = ConvertGenericCouchDataToObject(storeFormat, &res, ds.AdminUserStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Updated %s: %v\n", ds.AdminUserStr, res)
+	logger.Log.Debugf("Updated %s: %v\n", ds.AdminUserStr, res)
 	return &res, nil
 }
 
@@ -123,32 +121,32 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.Adm
 	// Obtain the value of the existing record for a return value.
 	existingUser, err := asd.GetAdminUser(userID)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", ds.AdminUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", ds.AdminUserStr, err.Error())
 	}
 
 	// Perform the delete operation on CouchDB
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = DeleteByDocID(userID, ds.AdminUserStr, db); err != nil {
+	if err = deleteByDocID(userID, ds.AdminUserStr, db); err != nil {
 		return nil, err
 	}
 
+	logger.Log.Debugf("Deleted %s: %v\n", ds.AdminUserStr, existingUser)
 	return existingUser, nil
 }
 
 // GetAdminUser - CouchDB implementation of GetAdminUser
 func (asd *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUserResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve the user data from CouchDB
-	fetchedUser, err := GetByDocID(userID, ds.AdminUserStr, db)
+	fetchedUser, err := getByDocID(userID, ds.AdminUserStr, db)
 	if err != nil {
 		return nil, err
 	}
@@ -156,22 +154,22 @@ func (asd *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminU
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	res := pb.AdminUserResponse{}
-	err = ConvertGenericCouchDataToObject(fetchedUser, &res, ds.AdminUserStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(fetchedUser, &res, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
 
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.AdminUserStr, res)
 	return &res, nil
 }
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
 func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserListResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
-	fetchedUserList, err := GetAllOfTypeByIDPrefix(ds.AdminUserType, ds.AdminUserStr, db)
+	fetchedUserList, err := getAllOfTypeByIDPrefix(string(ds.AdminUserType), ds.AdminUserStr, db)
 	if err != nil {
 		return nil, err
 	}
@@ -183,29 +181,30 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserListRe
 		return nil, err
 	}
 
+	logger.Log.Debugf("Retrieved %d %ss\n", len(res.GetData()), ds.AdminUserStr)
 	return res, nil
 }
 
 // CreateTenant - CouchDB implementation of CreateTenant
 func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Give the tenantDescriptor a known type, and timestamps:
-	tenantDescriptor.Data.Datatype = ds.TenantDescriptorType
+	tenantDescriptor.Data.Datatype = string(ds.TenantDescriptorType)
 	tenantDescriptor.Data.CreatedTimestamp = time.Now().Unix()
 	tenantDescriptor.Data.LastModifiedTimestamp = tenantDescriptor.GetData().GetCreatedTimestamp()
 
 	// Marshal the tenantDescriptor and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantDescriptor)
+	storeFormat, err := convertDataToCouchDbSupportedModel(tenantDescriptor)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the tenant metadata in CouchDB
-	_, _, err = StoreDataInCouchDB(storeFormat, ds.TenantDescriptorStr, db)
+	_, _, err = storeDataInCouchDB(storeFormat, ds.TenantDescriptorStr, db)
 	if err != nil {
 		return nil, err
 	}
@@ -213,51 +212,51 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 	// Create a CouchDB database to isolate the tenant data
 	_, err = asd.createDatabase(tenantDescriptor.GetXId())
 	if err != nil {
-		logger.Log.Errorf("Unable to create database for Tenant %s: %v", tenantDescriptor.GetXId(), err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to create database for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
 	}
 
 	// Populate the response
 	res := pb.TenantDescriptorResponse{}
-	err = ConvertGenericCouchDataToObject(storeFormat, &res, ds.TenantDescriptorStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Created %s: %v\n", ds.TenantDescriptorStr, res)
+	logger.Log.Debugf("Created %s: %v\n", ds.TenantDescriptorStr, res)
 	return &res, nil
 }
 
 // UpdateTenantDescriptor - CouchDB implementation of UpdateTenantDescriptor
 func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update timestamp and make sure the type is properly set:
-	tenantDescriptor.Data.Datatype = ds.TenantDescriptorType
+	tenantDescriptor.Data.Datatype = string(ds.TenantDescriptorType)
 	tenantDescriptor.Data.LastModifiedTimestamp = time.Now().Unix()
 
 	// Marshal the tenantDescriptor and read the bytes as string.
-	storeFormat, err := ConvertDataToCouchDbSupportedModel(tenantDescriptor)
+	storeFormat, err := convertDataToCouchDbSupportedModel(tenantDescriptor)
+	if err != nil {
+		return nil, err
+	}
 
 	// Store the user in CouchDB
-	_, _, err = StoreDataInCouchDB(storeFormat, ds.TenantDescriptorStr, db)
+	_, _, err = storeDataInCouchDB(storeFormat, ds.TenantDescriptorStr, db)
 	if err != nil {
 		return nil, err
 	}
 
 	// Populate the response
 	res := pb.TenantDescriptorResponse{}
-	err = ConvertGenericCouchDataToObject(storeFormat, &res, ds.TenantDescriptorStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
 
 	// Return the provisioned user.
-	logger.Log.Infof("Updated %s: %v\n", ds.TenantDescriptorStr, res)
+	logger.Log.Debugf("Updated %s: %s\n", ds.TenantDescriptorStr, res)
 	return &res, nil
 }
 
@@ -266,32 +265,32 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 	// Obtain the value of the existing record for a return value.
 	existingTenant, err := asd.GetTenantDescriptor(tenantID)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", ds.TenantDescriptorType, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", ds.TenantDescriptorType, err.Error())
 	}
 
 	// Perform the delete operation on CouchDB
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = DeleteByDocID(tenantID, ds.TenantDescriptorStr, db); err != nil {
+	if err = deleteByDocID(tenantID, ds.TenantDescriptorStr, db); err != nil {
 		return nil, err
 	}
 
+	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantDescriptorStr, existingTenant)
 	return existingTenant, nil
 }
 
 // GetTenantDescriptor - CouchDB implementation of GetTenantDescriptor
 func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptorResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve the tenant data from CouchDB
-	fetchedTenant, err := GetByDocID(tenantID, ds.TenantDescriptorStr, db)
+	fetchedTenant, err := getByDocID(tenantID, ds.TenantDescriptorStr, db)
 	if err != nil {
 		return nil, err
 	}
@@ -299,22 +298,22 @@ func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	res := pb.TenantDescriptorResponse{}
-	err = ConvertGenericCouchDataToObject(fetchedTenant, &res, ds.TenantDescriptorStr)
-	if err != nil {
+	if err = convertGenericCouchDataToObject(fetchedTenant, &res, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
 
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantDescriptorStr, res)
 	return &res, nil
 }
 
 // GetAllTenantDescriptors - CouchDB implementation of GetAllTenantDescriptors
 func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDescriptorListResponse, error) {
-	db, err := GetDatabase(asd.dbName)
+	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
 	}
 
-	fetchedTenantList, err := GetAllOfTypeByIDPrefix(ds.TenantDescriptorType, ds.TenantStr, db)
+	fetchedTenantList, err := getAllOfTypeByIDPrefix(string(ds.TenantDescriptorType), ds.TenantStr, db)
 	if err != nil {
 		return nil, err
 	}
@@ -326,6 +325,7 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDe
 		return nil, err
 	}
 
+	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantDescriptorStr)
 	return res, nil
 
 }
@@ -339,6 +339,7 @@ func (asd *AdminServiceDatastoreCouchDB) createDatabase(dbName string) (*couchdb
 		return nil, errors.New("Unable to create database '" + dbName + "': database already exists")
 	}
 
+	logger.Log.Debugf("Created DB %s\n", dbName)
 	return asd.server.Create(dbName)
 }
 
@@ -353,6 +354,7 @@ func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 		return nil
 	}
 
+	logger.Log.Debugf("Deleted DB %s\n", dbName)
 	return asd.server.Delete(dbName)
 }
 
@@ -362,8 +364,7 @@ func convertGenericObjectListToAdminUserList(genericUserList []map[string]interf
 	res := new(pb.AdminUserListResponse)
 	for _, genericUserObject := range genericUserList {
 		user := pb.AdminUserResponse{}
-		err := ConvertGenericCouchDataToObject(genericUserObject, &user, ds.AdminUserStr)
-		if err != nil {
+		if err := convertGenericCouchDataToObject(genericUserObject, &user, ds.AdminUserStr); err != nil {
 			continue
 		}
 		res.Data = append(res.GetData(), &user)
@@ -378,8 +379,7 @@ func convertGenericObjectListToTenantDescriptorList(genericTenantList []map[stri
 	res := new(pb.TenantDescriptorListResponse)
 	for _, genericTenantObject := range genericTenantList {
 		tenant := pb.TenantDescriptorResponse{}
-		err := ConvertGenericCouchDataToObject(genericTenantObject, &tenant, ds.TenantDescriptorStr)
-		if err != nil {
+		if err := convertGenericCouchDataToObject(genericTenantObject, &tenant, ds.TenantDescriptorStr); err != nil {
 			continue
 		}
 		res.Data = append(res.GetData(), &tenant)

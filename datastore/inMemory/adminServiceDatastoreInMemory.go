@@ -15,10 +15,10 @@ type AdminServiceDatastoreInMemory struct {
 
 // CreateAdminServiceDAO - returns an in-memory implementation of the Admin Service
 // datastore.
-func CreateAdminServiceDAO() datastore.AdminServiceDatastore {
+func CreateAdminServiceDAO() (datastore.AdminServiceDatastore, error) {
 	res := new(AdminServiceDatastoreInMemory)
 
-	return res
+	return res, nil
 }
 
 // CreateAdminUser - InMemory implementation of CreateAdminUser

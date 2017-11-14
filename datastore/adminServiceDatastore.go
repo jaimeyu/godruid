@@ -4,20 +4,27 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
-// AdminUserStr - common name of the AdminUser data type for use in logs.
-const AdminUserStr string = "Admin User"
+// AdminDataType - data type descriptors for objects stored in the admin datastore
+type AdminDataType string
 
-// TenantDescriptorStr - common name of the TenantDescriptor data type for use in logs.
-const TenantDescriptorStr string = "Tenant Descriptor"
+const (
+	// AdminUserType - datatype string used to identify an Admin User in the datastore record
+	AdminUserType AdminDataType = "adminUser"
 
-// TenantStr - common name of the TenantDescriptor data type for use in logs.
-const TenantStr string = "Tenant"
+	// TenantDescriptorType - datatype string used to identify an Tenant Descriptor in the datastore record
+	TenantDescriptorType AdminDataType = "tenant"
+)
 
-// AdminUserType - datatype string used to identify an Admin User in the datastore record
-const AdminUserType string = "adminUser"
+const (
+	// AdminUserStr - common name of the AdminUser data type for use in logs.
+	AdminUserStr = "Admin User"
 
-// TenantDescriptorType - datatype string used to identify an Tenant Descriptor in the datastore record
-const TenantDescriptorType string = "tenant"
+	// TenantDescriptorStr - common name of the TenantDescriptor data type for use in logs.
+	TenantDescriptorStr = "Tenant Descriptor"
+
+	// TenantStr - common name of the TenantDescriptor data type for use in logs.
+	TenantStr = "Tenant"
+)
 
 // AdminServiceDatastore - interface which provides the functionality
 // of the AdminService Datastore.

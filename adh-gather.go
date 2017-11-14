@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 
@@ -43,7 +42,7 @@ func gRPCHandlerStart() {
 	grpcBindPort := getActiveConfigOrExit().ServerConfig.GRPC.BindPort
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", grpcBindPort))
 	if err != nil {
-		log.Fatalf("failed to start gRPC Service: %v", err)
+		logger.Log.Fatalf("failed to start gRPC Service: %s", err.Error())
 	}
 	var opts []grpc.ServerOption
 
@@ -69,11 +68,11 @@ func restHandlerStart() {
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("localhost:%d", grpcBindPort), opts)
 	if err != nil {
-		log.Fatalf("failed to start REST service: %v", err)
+		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 	err = pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("localhost:%d", grpcBindPort), opts)
 	if err != nil {
-		log.Fatalf("failed to start REST service: %v", err)
+		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 
 	logger.Log.Infof("REST service intiated on port: %d", restBindPort)
@@ -85,7 +84,7 @@ func restHandlerStart() {
 func getActiveConfigOrExit() *gather.Config {
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		log.Fatalf("failed to start Gather Service: %v", err)
+		logger.Log.Fatalf("failed to start Gather Service: %s", err.Error())
 	}
 
 	return cfg

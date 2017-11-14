@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
@@ -27,7 +28,7 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 	// Seteup the DB implementation based on configuration
 	db, err := getTenantServiceDatastore()
 	if err != nil {
-		logger.Log.Fatalf("Unable to instantiate TenantServiceHandler: %v", err)
+		logger.Log.Fatalf("Unable to instantiate TenantServiceHandler: %s", err.Error())
 	}
 	result.tenantDB = db
 
@@ -37,17 +38,17 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		logger.Log.Errorf("Falied to instantiate TenantServiceHandler: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("Falied to instantiate TenantServiceHandler: %s", err.Error())
 	}
 
 	dbType := cfg.ServerConfig.StartupArgs.TenantDB
-	if dbType == gather.COUCH {
+	switch dbType {
+	case gather.COUCH:
 		logger.Log.Debug("TenantService DB is using CouchDB Implementation")
-		return couchDB.CreateTenantServiceDAO(), nil
-	} else if dbType == gather.MEM {
+		return couchDB.CreateTenantServiceDAO()
+	case gather.MEM:
 		logger.Log.Debug("TenantService DB is using InMemory Implementation")
-		return inMemory.CreateTenantServiceDAO(), nil
+		return inMemory.CreateTenantServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")
@@ -65,12 +66,11 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 	// Issue request to DAO Layer to Create the Tenant User
 	result, err := tsh.tenantDB.CreateTenantUser(tenantUserReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantUserStr, err.Error())
 	}
 
 	// Succesfully Created the User, return the result.
-	logger.Log.Infof("Created %s: %v\n", db.TenantUserStr, result)
+	logger.Log.Infof("Created %s: %s\n", db.TenantUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -86,12 +86,11 @@ func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUse
 	// Issue request to DAO Layer to Update the Tenant User
 	result, err := tsh.tenantDB.UpdateTenantUser(tenantUserReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantUserStr, err.Error())
 	}
 
 	// Succesfully Updated the User, return the result.
-	logger.Log.Infof("Updated %s: %v\n", db.TenantUserStr, result)
+	logger.Log.Infof("Updated %s: %s\n", db.TenantUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -107,12 +106,11 @@ func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUse
 	// Issue request to DAO Layer to Delete the Tenant User
 	result, err := tsh.tenantDB.DeleteTenantUser(tenantUserIDReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", db.TenantUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantUserStr, err.Error())
 	}
 
 	// Succesfully Deleted the User, return the result.
-	logger.Log.Infof("Deleted %s: %v\n", db.TenantUserStr, result)
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -128,12 +126,11 @@ func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserID
 	// Issue request to DAO Layer to fetch the Tenant User
 	result, err := tsh.tenantDB.GetTenantUser(tenantUserIDReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %s: %v\n", db.TenantUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantUserStr, err.Error())
 	}
 
 	// Succesfully fetched the User, return the result.
-	logger.Log.Infof("Retrieved %s: %v\n", db.TenantUserStr, result)
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantUserStr, result.GetXId())
 	return result, nil
 }
 
@@ -146,12 +143,11 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 	// Issue request to DAO Layer to fetch the Tenant Users
 	result, err := tsh.tenantDB.GetAllTenantUsers(tenantID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %ss: %v\n", db.TenantUserStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", db.TenantUserStr, err.Error())
 	}
 
 	// Succesfully fetched the Users, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantUserStr, len(result.GetData()))
+	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantUserStr)
 	return result, nil
 }
 
@@ -167,12 +163,11 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 	// Issue request to DAO Layer to Create the Tenant Domain
 	result, err := tsh.tenantDB.CreateTenantDomain(tenantDomainRequest)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantDomainStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantDomainStr, err.Error())
 	}
 
 	// Succesfully Created the Domain, return the result.
-	logger.Log.Infof("Created %s: %v\n", db.TenantDomainStr, result)
+	logger.Log.Infof("Created %s: %s\n", db.TenantDomainStr, result.GetXId())
 	return result, nil
 }
 
@@ -188,12 +183,11 @@ func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantD
 	// Issue request to DAO Layer to Update the Tenant Domain
 	result, err := tsh.tenantDB.UpdateTenantDomain(tenantDomainRequest)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantDomainStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantDomainStr, err.Error())
 	}
 
 	// Succesfully Updated the Domain, return the result.
-	logger.Log.Infof("Updated %s: %v\n", db.TenantDomainStr, result)
+	logger.Log.Infof("Updated %s: %s\n", db.TenantDomainStr, result.GetXId())
 	return result, nil
 }
 
@@ -209,12 +203,11 @@ func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantD
 	// Issue request to DAO Layer to Delete the Tenant Domain
 	result, err := tsh.tenantDB.DeleteTenantDomain(tenantDomainIDRequest)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", db.TenantDomainStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantDomainStr, err.Error())
 	}
 
 	// Succesfully Deleted the Domain, return the result.
-	logger.Log.Infof("Deleted %s: %v\n", db.TenantDomainStr, result)
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantDomainStr, result.GetXId())
 	return result, nil
 }
 
@@ -230,12 +223,11 @@ func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDoma
 	// Issue request to DAO Layer to fetch the Tenant Domain
 	result, err := tsh.tenantDB.GetTenantDomain(tenantDomainIDRequest)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %s: %v\n", db.TenantDomainStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantDomainStr, err.Error())
 	}
 
 	// Succesfully fetched the Domain, return the result.
-	logger.Log.Infof("Retrieved %s: %v\n", db.TenantDomainStr, result)
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantDomainStr, result.GetXId())
 	return result, nil
 }
 
@@ -248,12 +240,11 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 	// Issue request to DAO Layer to fetch the Tenant Domains
 	result, err := tsh.tenantDB.GetAllTenantDomains(tenantID.Value)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %ss: %v\n", db.TenantDomainStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", db.TenantDomainStr, err.Error())
 	}
 
 	// Succesfully fetched the Domains, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", db.TenantDomainStr, len(result.GetData()))
+	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantDomainStr)
 	return result, nil
 }
 
@@ -269,12 +260,11 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 	// Issue request to DAO Layer to Create the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.CreateTenantIngestionProfile(tenantIngPrfReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantIngestionProfileStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantIngestionProfileStr, err.Error())
 	}
 
 	// Succesfully Created the Ingestion Profile, return the result.
-	logger.Log.Infof("Created %s: %v\n", db.TenantIngestionProfileStr, result)
+	logger.Log.Infof("Created %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
 	return result, nil
 }
 
@@ -290,12 +280,11 @@ func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Contex
 	// Issue request to DAO Layer to Update the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(tenantIngPrfReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to store %s: %v\n", db.TenantIngestionProfileStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantIngestionProfileStr, err.Error())
 	}
 
 	// Succesfully Updated the Ingestion Profile, return the result.
-	logger.Log.Infof("Updated %s: %v\n", db.TenantIngestionProfileStr, result)
+	logger.Log.Infof("Updated %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
 	return result, nil
 }
 
@@ -311,12 +300,11 @@ func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, 
 	// Issue request to DAO Layer to fetch the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.GetTenantIngestionProfile(tenantIngPrfIDReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to retrieve %s: %v\n", db.TenantIngestionProfileStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantIngestionProfileStr, err.Error())
 	}
 
 	// Succesfully fetched the Ingestion Profile, return the result.
-	logger.Log.Infof("Retrieved %s: %v\n", db.TenantIngestionProfileStr, result)
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
 	return result, nil
 }
 
@@ -332,12 +320,11 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 	// Issue request to DAO Layer to delete the Tenant Ingestion Profile
 	result, err := tsh.tenantDB.DeleteTenantIngestionProfile(tenantIngPrfIDReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to delete %s: %v\n", db.TenantIngestionProfileStr, err)
-		return nil, err
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantIngestionProfileStr, err.Error())
 	}
 
 	// Succesfully deleted the Ingestion Profile, return the result.
-	logger.Log.Infof("Deleted %s: %v\n", db.TenantIngestionProfileStr, result)
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
 	return result, nil
 }
 

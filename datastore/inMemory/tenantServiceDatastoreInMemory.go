@@ -15,10 +15,10 @@ type TenantServiceDatastoreInMemory struct {
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
 // datastore.
-func CreateTenantServiceDAO() datastore.TenantServiceDatastore {
+func CreateTenantServiceDAO() (datastore.TenantServiceDatastore, error) {
 	res := new(TenantServiceDatastoreInMemory)
 
-	return res
+	return res, nil
 }
 
 // CreateTenantUser - InMemory implementation of CreateTenantUser

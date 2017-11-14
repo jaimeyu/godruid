@@ -4,23 +4,30 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
-// TenantUserStr - common name of the TenantUser data type for use in logs.
-const TenantUserStr string = "Tenant User"
+// TenantDataType - enumeration of the types of data stored in the Tenant Datastore
+type TenantDataType string
 
-// TenantDomainStr - common name of the Tenant Domain data type for use in logs.
-const TenantDomainStr string = "Tenant Domain"
+const (
+	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
+	TenantUserType TenantDataType = "user"
 
-// TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
-const TenantIngestionProfileStr string = "Tenant Ingestion Profile"
+	// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
+	TenantDomainType TenantDataType = "domain"
 
-// TenantUserType - datatype string used to identify a Tenant User in the datastore record
-const TenantUserType string = "user"
+	// TenantIngestionProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
+	TenantIngestionProfileType TenantDataType = "ingestionProfile"
+)
 
-// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
-const TenantDomainType string = "domain"
+const (
+	// TenantUserStr - common name of the TenantUser data type for use in logs.
+	TenantUserStr = "Tenant User"
 
-// TenantIngPrfType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
-const TenantIngPrfType string = "ingestionProfile"
+	// TenantDomainStr - common name of the Tenant Domain data type for use in logs.
+	TenantDomainStr = "Tenant Domain"
+
+	// TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
+	TenantIngestionProfileStr = "Tenant Ingestion Profile"
+)
 
 // TenantServiceDatastore - interface which provides the functionality
 // of the TenantService Datastore.

@@ -29,7 +29,8 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	result := new(AdminServiceDatastoreCouchDB)
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
+		logger.Log.Debugf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
+		return nil, err
 	}
 
 	provDBURL := fmt.Sprintf("%s:%d",
@@ -40,7 +41,8 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	result.dbName = result.couchHost + "/adh-admin"
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
+		logger.Log.Debugf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
+		return nil, err
 	}
 
 	result.server = server
@@ -121,7 +123,8 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.Adm
 	// Obtain the value of the existing record for a return value.
 	existingUser, err := asd.GetAdminUser(userID)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", ds.AdminUserStr, err.Error())
+		logger.Log.Debugf("Unable to delete %s: %s", ds.AdminUserStr, err.Error())
+		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB
@@ -212,7 +215,8 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 	// Create a CouchDB database to isolate the tenant data
 	_, err = asd.createDatabase(tenantDescriptor.GetXId())
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create database for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
+		logger.Log.Debugf("Unable to create database for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
+		return nil, err
 	}
 
 	// Populate the response
@@ -265,7 +269,8 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 	// Obtain the value of the existing record for a return value.
 	existingTenant, err := asd.GetTenantDescriptor(tenantID)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", ds.TenantDescriptorType, err.Error())
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantDescriptorType, err.Error())
+		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB

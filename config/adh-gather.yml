@@ -11,3 +11,4 @@ serverConfig:
   StartupArgs:
     adminDB: 1
     tenantDB: 1
+    pouchPluginDB: 1

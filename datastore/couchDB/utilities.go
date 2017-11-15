@@ -16,12 +16,14 @@ import (
 func convertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{}, error) {
 	dataToBytes, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to convert data to CouchDB format to persist: %s", err.Error())
+		logger.Log.Debugf("Unable to convert data to CouchDB format to persist: %s", err.Error())
+		return nil, err
 	}
 	var genericFormat map[string]interface{}
 	err = json.Unmarshal(dataToBytes, &genericFormat)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to convert data to CouchDB format to persist: %s", err.Error())
+		logger.Log.Debugf("Unable to convert data to CouchDB format to persist: %s", err.Error())
+		return nil, err
 	}
 
 	// Successfully converted the User
@@ -35,7 +37,8 @@ func convertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{
 func convertGenericObjectToBytesWithCouchDbFields(genericObject map[string]interface{}) ([]byte, error) {
 	genericUserInBytes, err := json.Marshal(genericObject)
 	if err != nil {
-		return nil, fmt.Errorf("Error converting generic data to bytes: %s", err.Error())
+		logger.Log.Debugf("Error converting generic data to bytes: %s", err.Error())
+		return nil, err
 	}
 
 	return genericUserInBytes, nil
@@ -53,7 +56,8 @@ func storeDataInCouchDB(dataToStore map[string]interface{}, dataTypeStrForLoggin
 	options := new(url.Values)
 	id, rev, err := db.Save(dataToStore, *options)
 	if err != nil {
-		return "", "", fmt.Errorf("Unable to store %s: %s", dataTypeStrForLogging, err.Error())
+		logger.Log.Debugf("Unable to store %s: %s", dataTypeStrForLogging, err.Error())
+		return "", "", err
 	}
 
 	logger.Log.Debugf("Successfully stored %s: id: %s, rev: %s", dataTypeStrForLogging, id, rev)
@@ -66,7 +70,8 @@ func deleteByDocID(docID string, dataTypeStrForLogging string, db *couchdb.Datab
 
 	err := db.Delete(docID)
 	if err != nil {
-		return fmt.Errorf("Error deleting %s %s: %s", dataTypeStrForLogging, docID, err.Error())
+		logger.Log.Debugf("Error deleting %s %s: %s", dataTypeStrForLogging, docID, err.Error())
+		return err
 	}
 
 	return nil
@@ -80,7 +85,8 @@ func getByDocID(docID string, dataTypeStrForLogging string, db *couchdb.Database
 	options := new(url.Values)
 	fetchedData, err := db.Get(docID, *options)
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())
+		logger.Log.Debugf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())
+		return nil, err
 	}
 
 	return fetchedData, nil
@@ -94,7 +100,8 @@ func getAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 	selector := fmt.Sprintf(`data.datatype == "%s"`, dataType)
 	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		return nil, err
 	}
 
 	return fetchedData, nil
@@ -109,7 +116,8 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 	selector := fmt.Sprintf(`regex(_id, "^%s")`, dataType)
 	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		return nil, err
 	}
 
 	return fetchedData, nil
@@ -125,7 +133,8 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 
 	err = json.Unmarshal(genericDataInBytes, &dataContainer)
 	if err != nil {
-		return fmt.Errorf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		return err
 	}
 
 	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
@@ -138,7 +147,8 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 func getDatabase(dbConnectionName string) (*couchdb.Database, error) {
 	db, err := couchdb.NewDatabase(dbConnectionName)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to connect to CouchDB %s: %s", dbConnectionName, err.Error())
+		logger.Log.Debugf("Unable to connect to CouchDB %s: %s", dbConnectionName, err.Error())
+		return nil, err
 	}
 
 	return db, nil
@@ -149,4 +159,15 @@ func getDatabase(dbConnectionName string) (*couchdb.Database, error) {
 // appending the path to the db.
 func createDBPathStr(dbServerStr string, dbPathStr string) string {
 	return strings.Join([]string{dbServerStr, "/", dbPathStr}, "")
+}
+
+func accessDBChangesFeed(db *couchdb.Database, queryParams *url.Values) (map[string]interface{}, error) {
+	// Get access to the Changes feed for the DB
+	fetchedData, err := db.Changes(*queryParams)
+	if err != nil {
+		logger.Log.Debugf("Error accessing Changes feed: %s", err.Error())
+		return nil, err
+	}
+
+	return fetchedData, nil
 }

@@ -46,4 +46,5 @@ You can modify the following values in  the `config/adh-gath.yml` file:
   	4. StartupArgs
     	1. adminDB: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
 		2. tenantDB: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
+		3. pouchPluginDB: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
 

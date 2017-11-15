@@ -715,7 +715,7 @@ func RegisterAdminProvisioningServiceHandler(ctx context.Context, mux *runtime.S
 func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client AdminProvisioningServiceClient) error {
 
 	mux.Handle("POST", pattern_AdminProvisioningService_CreateAdminUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -744,7 +744,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("PUT", pattern_AdminProvisioningService_UpdateAdminUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -773,7 +773,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("DELETE", pattern_AdminProvisioningService_DeleteAdminUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -802,7 +802,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("GET", pattern_AdminProvisioningService_GetAdminUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -831,7 +831,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("GET", pattern_AdminProvisioningService_GetAllAdminUsers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -860,7 +860,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("POST", pattern_AdminProvisioningService_CreateTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -889,7 +889,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("PUT", pattern_AdminProvisioningService_UpdateTenantDescriptor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -918,7 +918,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("DELETE", pattern_AdminProvisioningService_DeleteTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -947,7 +947,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("GET", pattern_AdminProvisioningService_GetTenantDescriptor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -976,7 +976,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 	})
 
 	mux.Handle("GET", pattern_AdminProvisioningService_GetAllTenantDescriptors_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1090,7 +1090,7 @@ func RegisterTenantProvisioningServiceHandler(ctx context.Context, mux *runtime.
 func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client TenantProvisioningServiceClient) error {
 
 	mux.Handle("POST", pattern_TenantProvisioningService_CreateTenantUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1119,7 +1119,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("PUT", pattern_TenantProvisioningService_UpdateTenantUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1148,7 +1148,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("DELETE", pattern_TenantProvisioningService_DeleteTenantUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1177,7 +1177,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("GET", pattern_TenantProvisioningService_GetTenantUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1206,7 +1206,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("GET", pattern_TenantProvisioningService_GetAllTenantUsers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1235,7 +1235,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("POST", pattern_TenantProvisioningService_CreateTenantDomain_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1264,7 +1264,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("PUT", pattern_TenantProvisioningService_UpdateTenantDomain_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1293,7 +1293,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("DELETE", pattern_TenantProvisioningService_DeleteTenantDomain_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1322,7 +1322,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("GET", pattern_TenantProvisioningService_GetTenantDomain_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1351,7 +1351,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("GET", pattern_TenantProvisioningService_GetAllTenantDomains_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1380,7 +1380,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("POST", pattern_TenantProvisioningService_CreateTenantIngestionProfile_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1409,7 +1409,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("PUT", pattern_TenantProvisioningService_UpdateTenantIngestionProfile_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1438,7 +1438,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("GET", pattern_TenantProvisioningService_GetTenantIngestionProfile_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {
@@ -1467,7 +1467,7 @@ func RegisterTenantProvisioningServiceHandlerClient(ctx context.Context, mux *ru
 	})
 
 	mux.Handle("DELETE", pattern_TenantProvisioningService_DeleteTenantIngestionProfile_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
 			go func(done <-chan struct{}, closed <-chan bool) {

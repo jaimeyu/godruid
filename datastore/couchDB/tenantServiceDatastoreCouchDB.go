@@ -24,7 +24,8 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	result := new(TenantServiceDatastoreCouchDB)
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate TenantServiceDatastoreCouchDB: %s", err.Error())
+		logger.Log.Debugf("Falied to instantiate TenantServiceDatastoreCouchDB: %s", err.Error())
+		return nil, err
 	}
 
 	provDBURL := fmt.Sprintf("%s:%d",
@@ -113,7 +114,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *
 	// Obtain the value of the existing record for a return value.
 	existingUser, err := tsd.GetTenantUser(tenantUserIDRequest)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", ds.TenantUserStr, err.Error())
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantUserStr, err.Error())
+		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB
@@ -257,7 +259,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDReque
 	// Obtain the value of the existing record for a return value.
 	existingDomain, err := tsd.GetTenantDomain(tenantDomainIDRequest)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", ds.TenantDomainStr, err.Error())
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantDomainStr, err.Error())
+		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB
@@ -426,7 +429,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 	// Obtain the value of the existing record for a return value.
 	existingIngPrf, err := tsd.GetTenantIngestionProfile(tenantIngPrfReq)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", ds.TenantIngestionProfileStr, err.Error())
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantIngestionProfileStr, err.Error())
+		return nil, err
 	}
 
 	// Perform the delete operation on CouchDB

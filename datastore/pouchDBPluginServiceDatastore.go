@@ -21,7 +21,7 @@ const (
 type PouchDBPluginServiceDatastore interface {
 	// GetChanges(*pb.DBChangesRequest) (*pb.DBChangesResponse, error)
 	GetChanges(dbname string, queryParams *url.Values) (map[string]interface{}, error)
-	// CheckAvailablility() (*pb.DBAvailableResponse, error)
+	CheckAvailability() (map[string]interface{}, error)
 	// StoreDBSyncCheckpoint(dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error)
 	// GetDBSyncCheckpoint(dbCheckpointID *pb.DBSyncCheckpointId, appendPrefix bool) (*pb.DBSyncCheckpoint, error)
 }

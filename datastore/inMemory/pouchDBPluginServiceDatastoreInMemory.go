@@ -27,11 +27,11 @@ func (pdb *PouchDBPluginServiceDatastoreInMemory) GetChanges(dbname string, quer
 	return nil, errors.New("GetChanges() not implemented for InMemory DB")
 }
 
-// // CheckAvailablility - InMemory implementation of CheckAvailablility
-// func (pdb *PouchDBPluginServiceDatastoreInMemory) CheckAvailablility() (*pb.DBAvailableResponse, error) {
-// 	// Stub to implement
-// 	return nil, errors.New("CheckAvailablility() not implemented for InMemory DB")
-// }
+// CheckAvailability - InMemory implementation of CheckAvailability
+func (pdb *PouchDBPluginServiceDatastoreInMemory) CheckAvailability() (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("CheckAvailablility() not implemented for InMemory DB")
+}
 
 // // StoreDBSyncCheckpoint - InMemory implementation of StoreDBSyncCheckpoint
 // func (pdb *PouchDBPluginServiceDatastoreInMemory) StoreDBSyncCheckpoint(dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {

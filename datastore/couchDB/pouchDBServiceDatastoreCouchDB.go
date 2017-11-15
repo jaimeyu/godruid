@@ -65,25 +65,18 @@ func (psd *PouchDBServiceDatastoreCouchDB) GetChanges(dbname string, queryParams
 	return fetchedData, nil
 }
 
-// // CheckAvailablility - CouchDB implementation of CheckAvailablility
-// func (psd *PouchDBServiceDatastoreCouchDB) CheckAvailablility() (*pb.DBAvailableResponse, error) {
+// CheckAvailability - CouchDB implementation of CheckAvailability
+func (psd *PouchDBServiceDatastoreCouchDB) CheckAvailability() (map[string]interface{}, error) {
 
-// 	// Retrieve the DB Changes Feed data from CouchDB
-// 	fetchedData, err := psd.checkIfAvailable()
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Retrieve the DB Changes Feed data from CouchDB
+	fetchedData, err := psd.checkIfAvailable()
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Marshal the response from the datastore to bytes so that it
-// 	// can be Marshalled back to the proper type.
-// 	res := pb.DBAvailableResponse{}
-// 	if err = convertGenericCouchDataToObject(fetchedData, &res, "heartbeat"); err != nil {
-// 		return nil, err
-// 	}
-
-// 	logger.Log.Debugf("CheckAvailibility complete: %v\n", res)
-// 	return &res, nil
-// }
+	logger.Log.Debugf("CheckAvailibility complete: %v\n", fetchedData)
+	return fetchedData, nil
+}
 
 // // StoreDBSyncCheckpoint - CouchDB implementation of StoreDBSyncCheckpoint
 // func (psd *PouchDBServiceDatastoreCouchDB) StoreDBSyncCheckpoint(dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {

@@ -68,6 +68,18 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 	return result
 }
 
+// RegisterAPIHandlers - will bind any REST API routes defined in this service
+// to the passed in request multiplexor.
+func (psh *PouchDBPluginServiceHandler) RegisterAPIHandlers(router *mux.Router) {
+	for _, route := range psh.routes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(route.HandlerFunc)
+	}
+}
+
 func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error) {
 	cfg, err := gather.GetActiveConfig()
 	if err != nil {
@@ -98,7 +110,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 
 	logger.Log.Infof("Looking for changes from DB %s", dbName)
 
-	//Issue request to DAO Layer to faccess the Changes Feed
+	//Issue request to DAO Layer to access the Changes Feed
 	queryParams := r.URL.Query()
 	result, err := psh.pouchPluginDB.GetChanges(dbName, &queryParams)
 	if err != nil {
@@ -110,15 +122,35 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	logger.Log.Infof("Successfully accessed %s changes from DB %s\n", db.ChangeFeedStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	fmt.Fprintf(w, string(response))
 }
 
+// CheckAvailability - used to check if the CouchDB server is available.
 func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "CheckAvailability hit!")
+	// Validate the request to ensure this operation is valid:
+
+	logger.Log.Info("Checking for CouchDB availability")
+
+	//Issue request to DAO Layer to access check availability
+	result, err := psh.pouchPluginDB.CheckAvailability()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error checking CouchDB availability: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// Succesfully accessed the couch server, return the result
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	logger.Log.Info("CouchDB server is available.\n")
+
+	fmt.Fprintf(w, string(response))
 }
 
 func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
@@ -127,18 +159,6 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 
 func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "GetDBSyncCheckpoint hit!")
-}
-
-// RegisterAPIHandlers - will bind any REST API routes defined in this service
-// to the passed in request multiplexor.
-func (psh *PouchDBPluginServiceHandler) RegisterAPIHandlers(router *mux.Router) {
-	for _, route := range psh.routes {
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(route.HandlerFunc)
-	}
 }
 
 // // GetChanges - used to subscribe to the changes feed from CouchDB.

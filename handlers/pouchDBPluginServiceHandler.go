@@ -72,6 +72,13 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 			Pattern:     "/{dbname}/_local/{docid}",
 			HandlerFunc: result.GetDBSyncCheckpoint,
 		},
+
+		server.Route{
+			Name:        "GetDBRevisionDiff",
+			Method:      "POST",
+			Pattern:     "/{dbname}/_revs_diff",
+			HandlerFunc: result.GetDBRevisionDiff,
+		},
 	}
 
 	return result
@@ -197,7 +204,7 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 	fmt.Fprintf(w, string(response))
 }
 
-// GetDbSyncCheckpoint - retrieves a stored DB Checkpoint for use in pouch - couch synchronization.
+// GetDBSyncCheckpoint - retrieves a stored DB Checkpoint for use in pouch - couch synchronization.
 // See https://pouchdb.com/guides/local-documents.html for more details on the concept
 // of CouchDB local documents.
 func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
@@ -225,6 +232,41 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+// GetDBRevisionDiff - provides ability to query the DB, with a list of revision tags map to
+// a documentID, and have the DB respond with a list of which revisions it does not have.
+// See http://docs.couchdb.org/en/2.1.1/api/database/misc.html#db-revs-diff for Couch documentation
+// on the API.
+func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, dbNameInURL)
+
+	logger.Log.Infof("Attempting to retrieve %s from DB %s", db.DBRevDiffStr, dbName)
+
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	//Issue request to DAO Layer to fetch the Revision Diff
+	result, err := psh.pouchPluginDB.GetDBRevisionDiff(dbName, requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully retrieved the DB Revision Diff, return the result.
+	logger.Log.Infof("Successfully retrieved %s from DB %s\n", db.DBRevDiffStr, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBRevDiffStr, err.Error()), http.StatusInternalServerError)
 		return
 	}
 

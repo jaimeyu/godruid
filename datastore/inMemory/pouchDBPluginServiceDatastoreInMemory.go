@@ -44,3 +44,9 @@ func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBSyncCheckpoint(dbName str
 	// Stub to implement
 	return nil, errors.New("GetDBSyncCheckpoint() not implemented for InMemory DB")
 }
+
+// GetDBRevisionDiff - InMemory implementation of GetDBRevisionDiff
+func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBRevisionDiff(dbname string, request map[string]interface{}) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("GetDBRevisionDiff() not implemented for InMemory DB")
+}

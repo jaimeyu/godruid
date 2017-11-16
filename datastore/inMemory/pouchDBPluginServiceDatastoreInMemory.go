@@ -33,14 +33,14 @@ func (pdb *PouchDBPluginServiceDatastoreInMemory) CheckAvailability() (map[strin
 	return nil, errors.New("CheckAvailablility() not implemented for InMemory DB")
 }
 
-// // StoreDBSyncCheckpoint - InMemory implementation of StoreDBSyncCheckpoint
-// func (pdb *PouchDBPluginServiceDatastoreInMemory) StoreDBSyncCheckpoint(dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {
-// 	// Stub to implement
-// 	return nil, errors.New("StoreDBSyncCheckpoint() not implemented for InMemory DB")
-// }
+// StoreDBSyncCheckpoint - InMemory implementation of StoreDBSyncCheckpoint
+func (pdb *PouchDBPluginServiceDatastoreInMemory) StoreDBSyncCheckpoint(dbname string, queryParams *url.Values, request map[string]interface{}) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("StoreDBSyncCheckpoint() not implemented for InMemory DB")
+}
 
-// // GetDBSyncCheckpoint - InMemory implementation of GetDBSyncCheckpoint
-// func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBSyncCheckpoint(dbCheckpointID *pb.DBSyncCheckpointId, appendPrefix bool) (*pb.DBSyncCheckpoint, error) {
-// 	// Stub to implement
-// 	return nil, errors.New("GetDBSyncCheckpoint() not implemented for InMemory DB")
-// }
+// GetDBSyncCheckpoint - InMemory implementation of GetDBSyncCheckpoint
+func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBSyncCheckpoint(dbName string, documentID string) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("GetDBSyncCheckpoint() not implemented for InMemory DB")
+}

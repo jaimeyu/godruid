@@ -16,6 +16,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Used as enum for retrieving parts of the PouchDB plugin URL
+type pouchPluginURLPart int32
+
+const (
+	dbNameInURL     pouchPluginURLPart = 1
+	dbMethodInURL   pouchPluginURLPart = 2
+	documentIDInURL pouchPluginURLPart = 3
+)
+
 // PouchDBPluginServiceHandler - handler of logic related to calls for the
 // pass through PouchDB Plugin Service.
 type PouchDBPluginServiceHandler struct {
@@ -103,10 +112,9 @@ func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error
 // See http://docs.couchdb.org/en/2.1.1/api/database/changes.html for details
 // on the API format.
 func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *http.Request) {
-	// Validate the request to ensure this operation is valid:
+	// TODO: Validate the request to ensure this operation is valid:
 
-	urlParts := strings.Split(r.URL.Path, "/")
-	dbName := urlParts[1]
+	dbName := getDBFieldFromRequest(r, dbNameInURL)
 
 	logger.Log.Infof("Looking for changes from DB %s", dbName)
 
@@ -118,7 +126,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Succesfully fetched the Changes Feed, return the result.
+	// Succesfully fetched the Changes Feed, return the result. See
 	logger.Log.Infof("Successfully accessed %s changes from DB %s\n", db.ChangeFeedStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
@@ -130,8 +138,10 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 }
 
 // CheckAvailability - used to check if the CouchDB server is available.
+// See http://docs.couchdb.org/en/2.1.1/api/server/common.html for the
+// CouchDB documentation on this API.
 func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter, r *http.Request) {
-	// Validate the request to ensure this operation is valid:
+	// TODO: Validate the request to ensure this operation is valid:
 
 	logger.Log.Info("Checking for CouchDB availability")
 
@@ -153,47 +163,90 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 	fmt.Fprintf(w, string(response))
 }
 
+// StoreDBSyncCheckpoint - persists a checkpoint used during synchronization between pouch and
+// couch DB. See https://pouchdb.com/guides/local-documents.html for more details on the concept
+// of CouchDB local documents.
 func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "StoreDBSyncCheckpoint hit!")
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	logger.Log.Infof("Attempting to store %s to DB %s", db.DBSyncCheckpointStr, dbName)
+
+	//Issue request to DAO Layer to store the DB Checkpoint
+	queryParams := r.URL.Query()
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	result, err := psh.pouchPluginDB.StoreDBSyncCheckpoint(dbName, &queryParams, requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to store %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// Succesfully stored the DB Checkpoint, return the result.
+	logger.Log.Infof("Successfully stored %s to DB %s\n", db.DBSyncCheckpointStr, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
 }
 
+// GetDbSyncCheckpoint - retrieves a stored DB Checkpoint for use in pouch - couch synchronization.
+// See https://pouchdb.com/guides/local-documents.html for more details on the concept
+// of CouchDB local documents.
 func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "GetDBSyncCheckpoint hit!")
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	dbMethod := getDBFieldFromRequest(r, dbMethodInURL)
+	docID := getDBFieldFromRequest(r, documentIDInURL)
+
+	// Need to build up the full "_local/docID" format as URL parsing
+	// separates this.
+	documentID := dbMethod + "/" + docID
+
+	logger.Log.Infof("Attempting to retrieve %s %s from DB %s", db.DBSyncCheckpointStr, documentID, dbName)
+
+	//Issue request to DAO Layer to fetch the DB Checkpoint
+	result, err := psh.pouchPluginDB.GetDBSyncCheckpoint(dbName, documentID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// Succesfully retrieved the DB Checkpoint, return the result.
+	logger.Log.Infof("Successfully retrieved %s %s from DB %s\n", db.DBSyncCheckpointStr, documentID, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
 }
 
-// // GetChanges - used to subscribe to the changes feed from CouchDB.
-// func (psh *PouchDBPluginServiceHandler) GetChanges(ctx context.Context, dbChangesRequest *pb.DBChangesRequest) (*pb.DBChangesResponse, error) {
-// 	// Validate the request to ensure this operation is valid:
+func getDBFieldFromRequest(r *http.Request, field pouchPluginURLPart) string {
+	urlParts := strings.Split(r.URL.Path, "/")
+	return urlParts[field]
+}
 
-// 	logger.Log.Infof("Looking for changes from DB %s", dbChangesRequest.GetDbName())
+func getRequestBodyAsGenericObject(r *http.Request) (map[string]interface{}, error) {
+	decoder := json.NewDecoder(r.Body)
+	var result map[string]interface{}
+	err := decoder.Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Body.Close()
 
-// 	// Issue request to DAO Layer to faccess the Changes Feed
-// 	result, err := psh.pouchPluginDB.GetChanges(dbChangesRequest)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error())
-// 	}
-
-// 	// Succesfully fetched the Changes Feed, return the result.
-// 	logger.Log.Infof("Retrieved %d changes from %s\n", len(result.GetResults()), db.ChangeFeedStr)
-// 	return result, nil
-// }
-
-// // CheckAvailablility - ping the CouchDB server for availability.
-// func (psh *PouchDBPluginServiceHandler) CheckAvailablility(ctx context.Context, noValue *emp.Empty) (*pb.DBAvailableResponse, error) {
-// 	// Validate the request to ensure this operation is valid:
-
-// 	logger.Log.Info("Checking availability of the CouchDB Server")
-
-// 	// Issue request to DAO Layer to check DB Availability
-// 	result, err := psh.pouchPluginDB.CheckAvailablility()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Unable to retrieve Couch DB availability: %s", err.Error())
-// 	}
-
-// 	// DB is available, send the response
-// 	logger.Log.Info("CouchDB server is available\n")
-// 	return result, nil
-// }
+	return result, nil
+}
 
 // // StoreDBSyncCheckpoint - stores data used to keep track of sync position between pouch and couch DBs.
 // func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(ctx context.Context, dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {

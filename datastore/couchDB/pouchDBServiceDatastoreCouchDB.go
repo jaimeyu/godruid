@@ -49,8 +49,7 @@ func CreatePouchDBServiceDAO() (*PouchDBServiceDatastoreCouchDB, error) {
 func (psd *PouchDBServiceDatastoreCouchDB) GetChanges(dbname string, queryParams *url.Values) (map[string]interface{}, error) {
 	logger.Log.Debugf("Attempting to access %s for DB %s with options: %v", ds.ChangeFeedStr, dbname, queryParams)
 
-	couchDBName := createDBPathStr(psd.couchHost, dbname)
-	db, err := getDatabase(couchDBName)
+	db, err := getDatabase(createDBPathStr(psd.couchHost, dbname))
 	if err != nil {
 		return nil, err
 	}
@@ -78,85 +77,54 @@ func (psd *PouchDBServiceDatastoreCouchDB) CheckAvailability() (map[string]inter
 	return fetchedData, nil
 }
 
-// // StoreDBSyncCheckpoint - CouchDB implementation of StoreDBSyncCheckpoint
-// func (psd *PouchDBServiceDatastoreCouchDB) StoreDBSyncCheckpoint(dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {
-// 	// Validate the request to ensure this operation is valid:
+// StoreDBSyncCheckpoint - CouchDB implementation of StoreDBSyncCheckpoint
+func (psd *PouchDBServiceDatastoreCouchDB) StoreDBSyncCheckpoint(dbname string, queryParams *url.Values, request map[string]interface{}) (map[string]interface{}, error) {
+	// Validate the request to ensure this operation is valid:
 
-// 	logger.Log.Debugf("Storing %s: %v", ds.DBSyncCheckpointStr, dbCheckpoint)
+	logger.Log.Debugf("Storing %s: %v - using options: %v", ds.DBSyncCheckpointStr, request, queryParams)
 
-// 	db, err := getDatabase(psd.couchHost + "/" + dbCheckpoint.GetDbName())
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	db, err := getDatabase(createDBPathStr(psd.couchHost, dbname))
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Update the ID as it has the '_local' portion stripped by the
-// 	// URL matching logic.
-// 	dbCheckpoint.XId = ds.DBSyncCheckpointPrefixStr + dbCheckpoint.GetXId()
+	// Store the sync checkpoint in CouchDB
+	id, rev, err := storeDataInCouchDBWithQueryParams(request, ds.DBSyncCheckpointStr, db, queryParams)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Marshal the data and read the bytes as string.
-// 	storeFormat, err := convertDataToCouchDbSupportedModel(dbCheckpoint)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	result := make(map[string]interface{})
+	result["id"] = id
+	result["ok"] = true
+	result["rev"] = rev
 
-// 	// Store the sync checkpoint in CouchDB
-// 	_, _, err = storeDataInCouchDB(storeFormat, ds.DBSyncCheckpointStr, db)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// DB Sync Checkpoint stored, send the response
+	logger.Log.Debugf("%s %v stored.\n", ds.DBSyncCheckpointStr, result)
+	return result, nil
+}
 
-// 	// Populate the response
-// 	res, err := psd.GetDBSyncCheckpoint(&pb.DBSyncCheckpointId{DbName: dbCheckpoint.GetDbName(), XId: dbCheckpoint.GetXId()}, false)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+// GetDBSyncCheckpoint - CoiuchDB implementation of GetDBSyncCheckpoint
+func (psd *PouchDBServiceDatastoreCouchDB) GetDBSyncCheckpoint(dbname string, documentID string) (map[string]interface{}, error) {
+	// Validate the request to ensure this operation is valid:
 
-// 	result := pb.DBSyncCheckpointPutResponse{}
-// 	result.Id = res.GetXId()
-// 	result.Ok = true
-// 	result.Rev = res.GetXRev()
+	logger.Log.Debugf("Retrieving %s: %s", ds.DBSyncCheckpointStr, documentID)
 
-// 	// DB Sync Checkpoint stored, send the response
-// 	logger.Log.Debugf("%s %v stored.\n", ds.DBSyncCheckpointStr, result)
-// 	return &result, nil
-// }
+	db, err := getDatabase(createDBPathStr(psd.couchHost, dbname))
+	if err != nil {
+		return nil, err
+	}
 
-// // GetDBSyncCheckpoint - CoiuchDB implementation of GetDBSyncCheckpoint
-// func (psd *PouchDBServiceDatastoreCouchDB) GetDBSyncCheckpoint(dbCheckpointID *pb.DBSyncCheckpointId, appendPrefix bool) (*pb.DBSyncCheckpoint, error) {
-// 	// Validate the request to ensure this operation is valid:
+	// Retrieve the checkpoint data from CouchDB
+	fetchedData, err := getByDocID(documentID, ds.DBSyncCheckpointStr, db)
+	if err != nil {
+		return nil, err
+	}
 
-// 	logger.Log.Debugf("Retrieving %s: %v", ds.DBSyncCheckpointStr, dbCheckpointID)
-
-// 	db, err := getDatabase(psd.couchHost + "/" + dbCheckpointID.GetDbName())
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Update the id to include tha parsed out '_local'
-// 	var searchID string
-// 	if appendPrefix {
-// 		searchID = ds.DBSyncCheckpointPrefixStr + dbCheckpointID.GetXId()
-// 	} else {
-// 		searchID = dbCheckpointID.GetXId()
-// 	}
-
-// 	// Retrieve the checkpoint data from CouchDB
-// 	fetchedData, err := getByDocID(searchID, ds.DBSyncCheckpointStr, db)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Marshal the response from the datastore to bytes so that it
-// 	// can be Marshalled back to the proper type.
-// 	res := pb.DBSyncCheckpoint{}
-// 	if err = convertGenericCouchDataToObject(fetchedData, &res, ds.DBSyncCheckpointStr); err != nil {
-// 		return nil, err
-// 	}
-
-// 	// DB Sync Checkpoint retrieved, send the response
-// 	logger.Log.Debugf("%s %v retrieved.\n", ds.DBSyncCheckpointStr, dbCheckpointID)
-// 	return &res, nil
-// }
+	// DB Sync Checkpoint retrieved, send the response
+	logger.Log.Debugf("%s %v retrieved.\n", ds.DBSyncCheckpointStr, fetchedData)
+	return fetchedData, nil
+}
 
 // ************************ Extensions of CouchDB-GoLang functionality ************************ //
 

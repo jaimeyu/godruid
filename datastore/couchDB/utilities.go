@@ -50,11 +50,23 @@ func convertGenericObjectToBytesWithCouchDbFields(genericObject map[string]inter
 // dataTypeStrForLogging(human readable string of the type of data being stored),
 // db (the CouchDB connector used to store the data.)
 func storeDataInCouchDB(dataToStore map[string]interface{}, dataTypeStrForLogging string, db *couchdb.Database) (string, string, error) {
+	return storeDataInCouchDBWithQueryParams(dataToStore, dataTypeStrForLogging, db, nil)
+}
+
+// StoreDataInCouchDB - takes data that is already in a format ready to store in CouchDB
+// and attempts to store it. Parameters are:
+// dataToStore(the CouchDB ready data to be stored),
+// dataTypeStrForLogging(human readable string of the type of data being stored),
+// db (the CouchDB connector used to store the data.)
+// queryParams (the query parameters passed to the call to store the data)
+func storeDataInCouchDBWithQueryParams(dataToStore map[string]interface{}, dataTypeStrForLogging string, db *couchdb.Database, queryParams *url.Values) (string, string, error) {
 	logger.Log.Debugf("Attempting to store %s: %v", dataTypeStrForLogging, dataToStore)
 
 	// Store the user in PROV DB
-	options := new(url.Values)
-	id, rev, err := db.Save(dataToStore, *options)
+	if queryParams == nil {
+		queryParams = new(url.Values)
+	}
+	id, rev, err := db.Save(dataToStore, *queryParams)
 	if err != nil {
 		logger.Log.Debugf("Unable to store %s: %s", dataTypeStrForLogging, err.Error())
 		return "", "", err

@@ -145,6 +145,28 @@ func (psd *PouchDBServiceDatastoreCouchDB) GetDBRevisionDiff(dbname string, requ
 	return fetchedData, nil
 }
 
+// BulkDBUpdate - CouchDB implementation of BulkDBUpdate
+func (psd *PouchDBServiceDatastoreCouchDB) BulkDBUpdate(dbname string, request map[string]interface{}) ([]map[string]interface{}, error) {
+	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBBulkUpdateStr, request, dbname)
+
+	// Create a resource that can make the bulk update call to Couch
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to perform %s: %s", ds.DBBulkUpdateStr, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the checkpoint data from CouchDB
+	fetchedData, err := performBulkUpdate(request, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// DB Sync Checkpoint retrieved, send the response
+	logger.Log.Debugf("Completed %s on DB %s: %v\n", ds.DBBulkUpdateStr, dbname, fetchedData)
+	return fetchedData, nil
+}
+
 // ************************ Extensions of CouchDB-GoLang functionality ************************ //
 
 // checkIfAvailable - contacts the CouchDB server to ascertain availability
@@ -171,6 +193,21 @@ func fetchRevDiff(body map[string]interface{}, resource *couchdb.Resource) (map[
 	}
 
 	return parseData(data)
+}
+
+func performBulkUpdate(body map[string]interface{}, resource *couchdb.Resource) ([]map[string]interface{}, error) {
+	_, data, err := resource.PostJSON("_bulk_docs", nil, body, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonArr []map[string]interface{}
+	err = json.Unmarshal(data, &jsonArr)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonArr, nil
 }
 
 func parseData(data []byte) (map[string]interface{}, error) {

@@ -9,10 +9,13 @@ const (
 	ChangeFeedStr = "Changes Feed"
 
 	// DBSyncCheckpointStr - common name to refer to a DB Checkpoint. For use in logs.
-	DBSyncCheckpointStr = "DB Sync Checkpoint"
+	DBSyncCheckpointStr = "Sync Checkpoint"
 
 	// DBRevDiffStr - common name to refer to a DB Revision Diff. For use in logs.
-	DBRevDiffStr = "DB Revision Diff"
+	DBRevDiffStr = "Revision Diff"
+
+	// DBBulkUpdateStr - common name to refer to a DB Bulk Update. For use in logs.
+	DBBulkUpdateStr = "Bulk Update"
 
 	// DBSyncCheckpointPrefixStr - prefix required for storing objects as "local documents" per database.
 	// Used during pouch - couch db syncronization
@@ -28,4 +31,5 @@ type PouchDBPluginServiceDatastore interface {
 	StoreDBSyncCheckpoint(dbname string, queryParams *url.Values, request map[string]interface{}) (map[string]interface{}, error)
 	GetDBSyncCheckpoint(dbName string, documentID string) (map[string]interface{}, error)
 	GetDBRevisionDiff(dbname string, request map[string]interface{}) (map[string]interface{}, error)
+	BulkDBUpdate(dbname string, request map[string]interface{}) ([]map[string]interface{}, error)
 }

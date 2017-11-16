@@ -50,3 +50,9 @@ func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBRevisionDiff(dbname strin
 	// Stub to implement
 	return nil, errors.New("GetDBRevisionDiff() not implemented for InMemory DB")
 }
+
+// BulkDBUpdate - InMemory implementation of BulkDBUpdate
+func (pdb *PouchDBPluginServiceDatastoreInMemory) BulkDBUpdate(dbname string, request map[string]interface{}) ([]map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("BulkDBUpdate() not implemented for InMemory DB")
+}

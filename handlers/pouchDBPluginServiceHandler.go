@@ -79,6 +79,13 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 			Pattern:     "/{dbname}/_revs_diff",
 			HandlerFunc: result.GetDBRevisionDiff,
 		},
+
+		server.Route{
+			Name:        "BulkDBUpdate",
+			Method:      "POST",
+			Pattern:     "/{dbname}/_bulk_docs",
+			HandlerFunc: result.BulkDBUpdate,
+		},
 	}
 
 	return result
@@ -267,6 +274,40 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBRevDiffStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+// BulkDBUpdate - allows multiple DB changes in one operation. See
+// http://docs.couchdb.org/en/2.1.1/api/database/bulk-api.html#db-bulk-docs for
+// CouchDB documentation of the API.
+func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, dbNameInURL)
+
+	logger.Log.Infof("Attempting to perform %s on DB %s", db.DBBulkUpdateStr, dbName)
+
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	//Issue request to DAO Layer to perform the bulk update
+	result, err := psh.pouchPluginDB.BulkDBUpdate(dbName, requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully performed the bulk update, return the result.
+	logger.Log.Infof("Successfully completed %s from DB %s\n", db.DBBulkUpdateStr, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkUpdateStr, err.Error()), http.StatusInternalServerError)
 		return
 	}
 

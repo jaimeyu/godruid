@@ -1,13 +1,13 @@
 serverConfig:
   Datastore:
     bindIP: http://localhost
-    bindPort: 8888
+    bindPort: 5984
   REST:
     bindIP: http://localhost
     bindPort: 10001
   GRPC:
     bindIP: http://localhost
-    bindPort: 10000
+    bindPort: 10002
   StartupArgs:
     adminDB: 1
     tenantDB: 1

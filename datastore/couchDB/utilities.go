@@ -91,11 +91,17 @@ func deleteByDocID(docID string, dataTypeStrForLogging string, db *couchdb.Datab
 
 // GetByDocID - retrieves a document (by documentID) from the specified CouchDB instamnce.
 func getByDocID(docID string, dataTypeStrForLogging string, db *couchdb.Database) (map[string]interface{}, error) {
+	return getByDocIDWithQueryParams(docID, dataTypeStrForLogging, db, nil)
+}
+
+func getByDocIDWithQueryParams(docID string, dataTypeStrForLogging string, db *couchdb.Database, queryParams *url.Values) (map[string]interface{}, error) {
 	logger.Log.Debugf("Attempting to retrieve %s %s\n", dataTypeStrForLogging, docID)
 
-	// Get the Admin User from CouchDB
-	options := new(url.Values)
-	fetchedData, err := db.Get(docID, *options)
+	// Get the Document from CouchDB
+	if queryParams == nil {
+		queryParams = new(url.Values)
+	}
+	fetchedData, err := db.Get(docID, *queryParams)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())
 		return nil, err
@@ -169,8 +175,8 @@ func getDatabase(dbConnectionName string) (*couchdb.Database, error) {
 // CreateDBPathStr - Helper method to handle logic specific to CouchDB for creating the
 // URL to a database. Works by taking a server name (i.e. http://localhost:5894) and
 // appending the path to the db.
-func createDBPathStr(dbServerStr string, dbPathStr string) string {
-	return strings.Join([]string{dbServerStr, "/", dbPathStr}, "")
+func createDBPathStr(pathParts ...string) string {
+	return strings.Join(pathParts, "/")
 }
 
 func accessDBChangesFeed(db *couchdb.Database, queryParams *url.Values) (map[string]interface{}, error) {

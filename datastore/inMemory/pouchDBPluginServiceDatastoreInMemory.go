@@ -2,6 +2,7 @@ package inMemory
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -55,4 +56,34 @@ func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDBRevisionDiff(dbname strin
 func (pdb *PouchDBPluginServiceDatastoreInMemory) BulkDBUpdate(dbname string, request map[string]interface{}) ([]map[string]interface{}, error) {
 	// Stub to implement
 	return nil, errors.New("BulkDBUpdate() not implemented for InMemory DB")
+}
+
+// BulkDBGet - InMemory implementation of BulkDBGet
+func (pdb *PouchDBPluginServiceDatastoreInMemory) BulkDBGet(dbname string, queryParams *url.Values, request map[string]interface{}) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("BulkDBGet() not implemented for InMemory DB")
+}
+
+// CheckDBAvailability - InMemory inmplementation of CheckDBAvailability
+func (pdb *PouchDBPluginServiceDatastoreInMemory) CheckDBAvailability(dbName string) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("CheckDBAvailability() not implemented for InMemory DB")
+}
+
+// GetAllDBDocs - InMemory inmplementation of GetAllDBDocs
+func (pdb *PouchDBPluginServiceDatastoreInMemory) GetAllDBDocs(dbname string, request map[string]interface{}) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("GetAllDBDocs() not implemented for InMemory DB")
+}
+
+// CreateDB - InMemory inmplementation of CreateDB
+func (pdb *PouchDBPluginServiceDatastoreInMemory) CreateDB(dbname string) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("CreateDB() not implemented for InMemory DB")
+}
+
+// GetDoc - InMemory inmplementation of GetDoc
+func (pdb *PouchDBPluginServiceDatastoreInMemory) GetDoc(dbname string, docID string, queryParams *url.Values, headers *http.Header) (map[string]interface{}, error) {
+	// Stub to implement
+	return nil, errors.New("GetDoc() not implemented for InMemory DB")
 }

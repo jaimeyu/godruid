@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 
 	ds "github.com/accedian/adh-gather/datastore"
@@ -62,7 +63,7 @@ func (psd *PouchDBServiceDatastoreCouchDB) CheckAvailability() (map[string]inter
 
 	resource, err := couchdb.NewResource(psd.couchHost, nil)
 	if err != nil {
-		logger.Log.Debugf("Falied to retrieve %s: %s", ds.DBRevDiffStr, err.Error())
+		logger.Log.Debugf("Falied to check availability of Couch Server %s: %s", ds.DBRevDiffStr, err.Error())
 		return nil, err
 	}
 
@@ -167,6 +168,111 @@ func (psd *PouchDBServiceDatastoreCouchDB) BulkDBUpdate(dbname string, request m
 	return fetchedData, nil
 }
 
+// CheckDBAvailability - CouchDB inmplementation of CheckDBAvailability
+func (psd *PouchDBServiceDatastoreCouchDB) CheckDBAvailability(dbName string) (map[string]interface{}, error) {
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbName), nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to check availability of DB %s: %s", dbName, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the DB status data from CouchDB
+	fetchedData, err := checkIfAvailable(resource)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("CheckAvailibility complete: %v\n", fetchedData)
+	return fetchedData, nil
+}
+
+// GetAllDBDocs - CouchDB inmplementation of GetAllDBDocs
+func (psd *PouchDBServiceDatastoreCouchDB) GetAllDBDocs(dbname string, request map[string]interface{}) (map[string]interface{}, error) {
+	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBAllDocsStr, request, dbname)
+
+	// Create a resource that can make the fetch all docs call to Couch
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to fetch %s: %s", ds.DBAllDocsStr, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the all doc metadata from CouchDB
+	fetchedData, err := fetchAllDocs(request, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// All Docs data retrieved, send the response
+	logger.Log.Debugf("Completed fetch of %s on DB %s: %v\n", ds.DBAllDocsStr, dbname, fetchedData)
+	return fetchedData, nil
+}
+
+// CreateDB - Couch inmplementation of CreateDB
+func (psd *PouchDBServiceDatastoreCouchDB) CreateDB(dbname string) (map[string]interface{}, error) {
+	resource, err := couchdb.NewResource(psd.couchHost, nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to create DB %s: %s", dbname, err.Error())
+		return nil, err
+	}
+
+	// Issue request to create the DB
+	fetchedData, err := createDB(dbname, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("DB %s created: %v\n", dbname, fetchedData)
+	return fetchedData, nil
+}
+
+// GetDoc - CouchDB inmplementation of GetDoc
+func (psd *PouchDBServiceDatastoreCouchDB) GetDoc(dbname string, docID string, queryParams *url.Values, headers *http.Header) (map[string]interface{}, error) {
+	logger.Log.Debugf("Attempting to fetch %s %s for DB %s with options: %v", ds.DBDocStr, docID, dbname, queryParams)
+
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), *headers)
+	if err != nil {
+		logger.Log.Debugf("Falied to create DB %s: %s", dbname, err.Error())
+		return nil, err
+	}
+
+	// db, err := getDatabase(createDBPathStr(psd.couchHost, dbname))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// Retrieve the DB Changes Feed data from CouchDB
+	fetchedData, err := getDoc(docID, resource, queryParams, headers)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Fetched %s %s for DB %s returned: %v\n", ds.DBDocStr, docID, dbname, fetchedData)
+	return fetchedData, nil
+}
+
+// BulkDBGet - Couch implementation of BulkDBGet
+func (psd *PouchDBServiceDatastoreCouchDB) BulkDBGet(dbname string, queryParams *url.Values, request map[string]interface{}) (map[string]interface{}, error) {
+	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBBulkGetStr, request, dbname)
+
+	// Create a resource that can make the bulk fetch call to Couch
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to perform %s: %s", ds.DBBulkGetStr, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the bulk data from CouchDB
+	fetchedData, err := performBulkGet(queryParams, request, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// DB Sync Checkpoint retrieved, send the response
+	logger.Log.Debugf("Completed %s on DB %s: %v\n", ds.DBBulkGetStr, dbname, fetchedData)
+	return fetchedData, nil
+}
+
 // ************************ Extensions of CouchDB-GoLang functionality ************************ //
 
 // checkIfAvailable - contacts the CouchDB server to ascertain availability
@@ -185,6 +291,47 @@ func checkIfAvailable(resource *couchdb.Resource) (map[string]interface{}, error
 	return jsonMap, nil
 }
 
+func getDoc(docID string, resource *couchdb.Resource, queryParams *url.Values, headers *http.Header) (map[string]interface{}, error) {
+
+	_, data, err := resource.GetJSON(docID, *headers, *queryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	isArrayResponse := queryParams != nil && queryParams.Get("open_revs") != ""
+	if isArrayResponse {
+		// Parse result as array and then add to object to return.
+		var jsonMap []map[string]interface{}
+		err = json.Unmarshal(data, &jsonMap)
+		if err != nil {
+			return nil, err
+		}
+
+		result := make(map[string]interface{})
+		result["data"] = jsonMap
+		return result, nil
+	}
+
+	// Not an array response, just parse as object and then return
+	// the result wrapped in the result object
+	result := make(map[string]interface{})
+	val, err := parseData(data)
+	if err != nil {
+		return nil, err
+	}
+	result["data"] = val
+	return result, nil
+}
+
+func createDB(dbname string, resource *couchdb.Resource) (map[string]interface{}, error) {
+	_, data, err := resource.PutJSON(dbname, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseData(data)
+}
+
 // fetchRevDiff - retrieves the revision diff for the provided map to revision list request.
 func fetchRevDiff(body map[string]interface{}, resource *couchdb.Resource) (map[string]interface{}, error) {
 	_, data, err := resource.PostJSON("_revs_diff", nil, body, nil)
@@ -201,13 +348,25 @@ func performBulkUpdate(body map[string]interface{}, resource *couchdb.Resource) 
 		return nil, err
 	}
 
-	var jsonArr []map[string]interface{}
-	err = json.Unmarshal(data, &jsonArr)
+	return parseDataArray(data)
+}
+
+func performBulkGet(queryParams *url.Values, body map[string]interface{}, resource *couchdb.Resource) (map[string]interface{}, error) {
+	_, data, err := resource.PostJSON("_bulk_get", nil, body, *queryParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return jsonArr, nil
+	return parseData(data)
+}
+
+func fetchAllDocs(body map[string]interface{}, resource *couchdb.Resource) (map[string]interface{}, error) {
+	_, data, err := resource.PostJSON("_all_docs", nil, body, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseData(data)
 }
 
 func parseData(data []byte) (map[string]interface{}, error) {
@@ -220,6 +379,16 @@ func parseData(data []byte) (map[string]interface{}, error) {
 		reason := result["reason"].(string)
 		return result, errors.New(reason)
 	}
+	return result, nil
+}
+
+func parseDataArray(data []byte) ([]map[string]interface{}, error) {
+	result := []map[string]interface{}{}
+	err := json.Unmarshal(data, &result)
+	if err != nil {
+		return result, err
+	}
+
 	return result, nil
 }
 

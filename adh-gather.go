@@ -9,8 +9,9 @@ import (
 	"strings"
 
 	"github.com/accedian/adh-gather/gather"
-	"github.com/accedian/adh-gather/handlers"
+	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
+	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
@@ -30,8 +31,8 @@ func init() {
 
 // GatherServer - Server which will implement the gRPC Services.
 type GatherServer struct {
-	gsh     *handlers.GRPCServiceHandler
-	pouchSH *handlers.PouchDBPluginServiceHandler
+	gsh     *adhh.GRPCServiceHandler
+	pouchSH *adhh.PouchDBPluginServiceHandler
 
 	mux   *mux.Router
 	gwmux *runtime.ServeMux
@@ -39,8 +40,8 @@ type GatherServer struct {
 
 func newServer() *GatherServer {
 	s := new(GatherServer)
-	s.gsh = handlers.CreateCoordinator()
-	s.pouchSH = handlers.CreatePouchDBPluginServiceHandler()
+	s.gsh = adhh.CreateCoordinator()
+	s.pouchSH = adhh.CreatePouchDBPluginServiceHandler()
 
 	return s
 }
@@ -76,11 +77,6 @@ func restHandlerStart(gatherServer *GatherServer) {
 	gatherServer.gwmux = runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
-	// // Setup the overall handler:
-	// mux := gatherServer.pouchSH.Router
-
-	// Register handlers for the Non-gRPC REST GW calls.
-
 	// Register the Admin Service
 	if err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("localhost:%d", grpcBindPort), opts); err != nil {
 		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
@@ -103,7 +99,10 @@ func restHandlerStart(gatherServer *GatherServer) {
 	// mux.Handle("/api/v1/", gwmux)
 
 	logger.Log.Infof("REST service intiated on port: %d", restBindPort)
-	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), gatherServer)
+	originsOption := gh.AllowedOrigins([]string{"http://localhost:4200"})
+	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
+	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
+	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), gh.CORS(originsOption, methodsOption, headersOption, gh.AllowCredentials())(gatherServer))
 
 }
 

@@ -16,13 +16,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Used as enum for retrieving parts of the PouchDB plugin URL
-type pouchPluginURLPart int32
+type httpErrorString string
 
 const (
-	dbNameInURL     pouchPluginURLPart = 1
-	dbMethodInURL   pouchPluginURLPart = 2
-	documentIDInURL pouchPluginURLPart = 3
+	notFound httpErrorString = "status 404 - not found"
 )
 
 // PouchDBPluginServiceHandler - handler of logic related to calls for the
@@ -86,6 +83,41 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 			Pattern:     "/{dbname}/_bulk_docs",
 			HandlerFunc: result.BulkDBUpdate,
 		},
+
+		server.Route{
+			Name:        "CheckDBAvailability",
+			Method:      "GET",
+			Pattern:     "/{dbname}/",
+			HandlerFunc: result.CheckDBAvailability,
+		},
+
+		server.Route{
+			Name:        "CreateDB",
+			Method:      "PUT",
+			Pattern:     "/{dbname}/",
+			HandlerFunc: result.CreateDB,
+		},
+
+		server.Route{
+			Name:        "GetAllDBDocs",
+			Method:      "POST",
+			Pattern:     "/{dbname}/_all_docs",
+			HandlerFunc: result.GetAllDBDocs,
+		},
+
+		server.Route{
+			Name:        "GetDBDoc",
+			Method:      "GET",
+			Pattern:     "/{dbname}/{docid}",
+			HandlerFunc: result.GetDBDoc,
+		},
+
+		server.Route{
+			Name:        "BulkDBGet",
+			Method:      "POST",
+			Pattern:     "/{dbname}/_bulk_get",
+			HandlerFunc: result.BulkDBGet,
+		},
 	}
 
 	return result
@@ -128,7 +160,7 @@ func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error
 func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	dbName := getDBFieldFromRequest(r, 1)
 
 	logger.Log.Infof("Looking for changes from DB %s", dbName)
 
@@ -183,7 +215,7 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	dbName := getDBFieldFromRequest(r, 1)
 	logger.Log.Infof("Attempting to store %s to DB %s", db.DBSyncCheckpointStr, dbName)
 
 	//Issue request to DAO Layer to store the DB Checkpoint
@@ -217,9 +249,9 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, dbNameInURL)
-	dbMethod := getDBFieldFromRequest(r, dbMethodInURL)
-	docID := getDBFieldFromRequest(r, documentIDInURL)
+	dbName := getDBFieldFromRequest(r, 1)
+	dbMethod := getDBFieldFromRequest(r, 2)
+	docID := getDBFieldFromRequest(r, 3)
 
 	// Need to build up the full "_local/docID" format as URL parsing
 	// separates this.
@@ -230,6 +262,10 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	//Issue request to DAO Layer to fetch the DB Checkpoint
 	result, err := psh.pouchPluginDB.GetDBSyncCheckpoint(dbName, documentID)
 	if err != nil {
+		if checkError(err, notFound) {
+			http.Error(w, fmt.Sprintf("%s %s does not exist", db.DBSyncCheckpointStr, documentID), http.StatusNotFound)
+			return
+		}
 		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
 		return
 	}
@@ -252,7 +288,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	dbName := getDBFieldFromRequest(r, 1)
 
 	logger.Log.Infof("Attempting to retrieve %s from DB %s", db.DBRevDiffStr, dbName)
 
@@ -286,7 +322,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, dbNameInURL)
+	dbName := getDBFieldFromRequest(r, 1)
 
 	logger.Log.Infof("Attempting to perform %s on DB %s", db.DBBulkUpdateStr, dbName)
 
@@ -314,9 +350,161 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 	fmt.Fprintf(w, string(response))
 }
 
-func getDBFieldFromRequest(r *http.Request, field pouchPluginURLPart) string {
+// CheckDBAvailability - heartbeat for the given database.
+func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 1)
+	logger.Log.Infof("Checking for availability of DB %s", dbName)
+
+	//Issue request to DAO Layer to access check availability
+	result, err := psh.pouchPluginDB.CheckDBAvailability(dbName)
+	if err != nil {
+		if checkError(err, notFound) {
+			http.Error(w, fmt.Sprintf("DB %s does not exist", dbName), http.StatusNotFound)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Error checking availability of DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// Succesfully accessed the couch server, return the result
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	logger.Log.Infof("DB %s is available.\n", dbName)
+
+	fmt.Fprintf(w, string(response))
+}
+
+// GetAllDBDocs - provides metadata on all docs in a DB. See
+// http://docs.couchdb.org/en/2.1.1/api/database/bulk-api.html for
+// Couch documentation of this API.
+func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 1)
+
+	logger.Log.Infof("Attempting to fetch %s from DB %s", db.DBAllDocsStr, dbName)
+
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s request content: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	//Issue request to DAO Layer to perform the bulk fetch
+	result, err := psh.pouchPluginDB.GetAllDBDocs(dbName, requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to fetch %s: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully performed the bulk fetch, return the result.
+	logger.Log.Infof("Successfully retrieved %s from DB %s\n", db.DBAllDocsStr, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBAllDocsStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+// CreateDB - provides the ability for pouch to create a couchDB.
+func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 1)
+
+	logger.Log.Infof("Attempting to create DB %s", db.DBAllDocsStr, dbName)
+
+	//Issue request to DAO Layer to perform the DB creation
+	result, err := psh.pouchPluginDB.CreateDB(dbName)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to create DB %s: %s", dbName, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully performed the DB creation, return the result.
+	logger.Log.Infof("Successfully created DB %s\n", dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating DB creation response: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+// GetDBDoc - returns a document plus optional metadate about the document from CouchDB.
+// See http://docs.couchdb.org/en/2.1.1/api/document/common.html for documentation of the API
+func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 1)
+	docID := getDBFieldFromRequest(r, 2)
+
+	logger.Log.Infof("Fetching %s %s from DB %s", db.DBDocStr, docID, dbName)
+
+	//Issue request to DAO Layer to access the Document
+	queryParams := r.URL.Query()
+	result, err := psh.pouchPluginDB.GetDoc(dbName, docID, &queryParams, &r.Header)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to retrieve %s %s: %s", db.DBDocStr, docID, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully fetched the Document, return the result. See
+	logger.Log.Infof("Successfully accessed %s %s from DB %s\n", db.DBDocStr, docID, dbName)
+	response, err := json.Marshal(result["data"]) // Only need the data portion of this wrapper object
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBDocStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+// BulkDBGet - allows fetching multiple DB Documenta in one operation.
+// There is no CouchDB documentation of the API.
+func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 1)
+
+	logger.Log.Infof("Attempting to perform %s on DB %s", db.DBBulkGetStr, dbName)
+
+	queryParams := r.URL.Query()
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	//Issue request to DAO Layer to perform the bulk update
+	result, err := psh.pouchPluginDB.BulkDBGet(dbName, &queryParams, requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	// Succesfully performed the bulk get, return the result.
+	logger.Log.Infof("Successfully completed %s from DB %s\n", db.DBBulkGetStr, dbName)
+	response, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkGetStr, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, string(response))
+}
+
+func getDBFieldFromRequest(r *http.Request, urlPart int32) string {
 	urlParts := strings.Split(r.URL.Path, "/")
-	return urlParts[field]
+	return urlParts[urlPart]
 }
 
 func getRequestBodyAsGenericObject(r *http.Request) (map[string]interface{}, error) {
@@ -331,36 +519,10 @@ func getRequestBodyAsGenericObject(r *http.Request) (map[string]interface{}, err
 	return result, nil
 }
 
-// // StoreDBSyncCheckpoint - stores data used to keep track of sync position between pouch and couch DBs.
-// func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(ctx context.Context, dbCheckpoint *pb.DBSyncCheckpoint) (*pb.DBSyncCheckpointPutResponse, error) {
-// 	// Validate the request to ensure this operation is valid:
+func checkError(err error, errorType httpErrorString) bool {
+	if strings.Contains(err.Error(), string(errorType)) {
+		return true
+	}
 
-// 	logger.Log.Infof("Storing %s: %s", db.DBSyncCheckpointStr, dbCheckpoint.GetXId())
-
-// 	// Issue request to DAO Layer to check DB Availability
-// 	result, err := psh.pouchPluginDB.StoreDBSyncCheckpoint(dbCheckpoint)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Unable to store %s: %s", db.DBSyncCheckpointStr, err.Error())
-// 	}
-
-// 	// DB Sync Checkpoint stored, send the response
-// 	logger.Log.Infof("%s %s stored.\n", db.DBSyncCheckpointStr, dbCheckpoint.GetXId())
-// 	return result, nil
-// }
-
-// // GetDBSyncCheckpoint - retrieves a previously stored DB sync checkpoint between pouch and couch DB.
-// func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(ctx context.Context, dbCheckpointID *pb.DBSyncCheckpointId) (*pb.DBSyncCheckpoint, error) {
-// 	// Validate the request to ensure this operation is valid:
-
-// 	logger.Log.Infof("Retrieving %s: %s", db.DBSyncCheckpointStr, dbCheckpointID.GetXId())
-
-// 	// Issue request to DAO Layer to check DB Availability
-// 	result, err := psh.pouchPluginDB.GetDBSyncCheckpoint(dbCheckpointID, true)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error())
-// 	}
-
-// 	// DB Sync Checkpoint retrieved, send the response
-// 	logger.Log.Infof("%s %s retrieved.\n", db.DBSyncCheckpointStr, dbCheckpointID.GetXId())
-// 	return result, nil
-// }
+	return false
+}

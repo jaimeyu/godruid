@@ -40,6 +40,7 @@ type Config struct {
 			}
 			TenantDB      DBImpl
 			PouchPluginDB DBImpl
+			Debug         bool
 		}
 	}
 }

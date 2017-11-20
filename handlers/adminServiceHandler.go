@@ -18,8 +18,6 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
 
-const dbName string = "adh-admin"
-
 // AdminServiceHandler - implementation of the interface for the gRPC
 // Admin service. Anytime the Admin service changes, the logic to handle the
 // API will be modified here.

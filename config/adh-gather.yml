@@ -14,3 +14,4 @@ serverConfig:
       impl: 1
     tenantDB: 1
     pouchPluginDB: 1
+    debug: false

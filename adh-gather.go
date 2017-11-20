@@ -21,12 +21,10 @@ import (
 
 var (
 	configFilePath string
-	debug          bool
 )
 
 func init() {
 	flag.StringVar(&configFilePath, "config", "config/adh-gather.yml", "Specify a configuration file to use")
-	flag.BoolVar(&debug, "debug", false, "Enable debug mode (and logs)")
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -129,17 +127,18 @@ func getActiveConfigOrExit() *gather.Config {
 func main() {
 	flag.Parse()
 
+	// Load Configuration
+	cfg := gather.LoadConfig(configFilePath)
+
+	debug := cfg.ServerConfig.StartupArgs.Debug
 	if debug {
 		logger.SetDebugLevel(true)
 	} else {
 		logger.SetDebugLevel(false)
 	}
 
+	logger.Log.Infof("Your config is %+v \n", cfg)
 	logger.Log.Infof("Starting adh-gather broker with config '%s'", configFilePath)
-
-	// Load Configuration
-	cfg := gather.LoadConfig(configFilePath)
-	fmt.Printf("Your config is %+v \n", cfg)
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()

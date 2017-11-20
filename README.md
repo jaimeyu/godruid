@@ -44,7 +44,9 @@ You can modify the following values in  the `config/adh-gath.yml` file:
 		1. bindIP: the host of the ADH-Gather gRPC Service.
     	2. bindPort: the port for the ADH-Gather gRPC Service.
   	4. StartupArgs
-    	1. adminDB: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
+    	1. adminDB: 
+			- name: the name of the admin database used for adh-gather
+			- impl: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
 		2. tenantDB: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
 		3. pouchPluginDB: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
 

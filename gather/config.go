@@ -34,7 +34,10 @@ type Config struct {
 			BindPort int
 		}
 		StartupArgs struct {
-			AdminDB       DBImpl
+			AdminDB struct {
+				Name string
+				Impl DBImpl
+			}
 			TenantDB      DBImpl
 			PouchPluginDB DBImpl
 		}

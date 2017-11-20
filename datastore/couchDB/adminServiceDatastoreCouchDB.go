@@ -33,17 +33,22 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 		return nil, err
 	}
 
+	// Couch Server Configuration
 	provDBURL := fmt.Sprintf("%s:%d",
 		cfg.ServerConfig.Datastore.BindIP,
 		cfg.ServerConfig.Datastore.BindPort)
 	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
 	result.couchHost = provDBURL
-	result.dbName = result.couchHost + "/adh-admin"
+
+	// Couch DB name configuration
+	dbName := cfg.ServerConfig.StartupArgs.AdminDB.Name
+	result.dbName = result.couchHost + "/" + dbName
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {
 		logger.Log.Debugf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
 		return nil, err
 	}
+	logger.Log.Debugf("Admin Database is: %s", result.dbName)
 
 	result.server = server
 	return result, nil

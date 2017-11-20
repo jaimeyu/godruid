@@ -222,7 +222,7 @@ func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 		return nil, fmt.Errorf("Falied to instantiate AdminServiceHandler: %s", err.Error())
 	}
 
-	dbType := cfg.ServerConfig.StartupArgs.AdminDB
+	dbType := cfg.ServerConfig.StartupArgs.AdminDB.Impl
 	switch dbType {
 	case gather.COUCH:
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")

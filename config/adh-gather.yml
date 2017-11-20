@@ -9,6 +9,8 @@ serverConfig:
     bindIP: http://localhost
     bindPort: 10002
   StartupArgs:
-    adminDB: 1
+    adminDB: 
+      name: adh-admin
+      impl: 1
     tenantDB: 1
     pouchPluginDB: 1

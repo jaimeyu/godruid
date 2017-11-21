@@ -9,7 +9,10 @@ protoc -I/usr/local/include -I. \
   -I$GOPATH/src \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --go_out=plugins=grpc:. \
-  gathergrpc/gather.proto
+  gathergrpc/commonModels.proto \
+  gathergrpc/adminModels.proto  \
+  gathergrpc/tenantModels.proto \
+  gathergrpc/gather.proto       \
 
 # Generate the REST handler for the gRPC service
 protoc -I/usr/local/include -I. \

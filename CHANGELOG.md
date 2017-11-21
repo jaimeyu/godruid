@@ -1,4 +1,7 @@
 ## Current Release 
+### 0.10.0
+**Release Date:** Tue Nov 21 11:37:09 UTC 2017 
+* Adding Viper config as well as Docker support.
 ### 0.9.0
 **Release Date:** Tue Nov 14 11:33:09 UTC 2017 
 * Changes based on PR feedback for initial ADH-Gather shell. Changes include initial protobuf definition, gRPC service implementation, REST reverse proxy generation, initial CouchDB impl, and separation of service and DAO layers.

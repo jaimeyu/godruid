@@ -49,7 +49,7 @@ func newServer() *GatherServer {
 }
 
 func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
-	gRPCAddress := fmt.Sprintf("%s:%d", cfg.GetString("server.grpc.ip"), cfg.GetInt("server.grpc.port"))
+	gRPCAddress := fmt.Sprintf("%s:%d", cfg.GetString(gather.CK_server_grpc_ip.String()), cfg.GetInt(gather.CK_server_grpc_port.String()))
 
 	lis, err := net.Listen("tcp", gRPCAddress)
 	if err != nil {
@@ -66,8 +66,8 @@ func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 }
 
 func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
-	restBindPort := cfg.GetInt("server.rest.port")
-	grpcBindPort := cfg.GetInt("server.grpc.port")
+	restBindPort := cfg.GetInt(gather.CK_server_rest_port.String())
+	grpcBindPort := cfg.GetInt(gather.CK_server_grpc_port.String())
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -133,7 +133,7 @@ func main() {
 		logger.Log.Debugf("Config changed: %s", e.Name)
 	})
 
-	debug := cfg.GetBool("args.debug")
+	debug := cfg.GetBool(gather.CK_args_debug.String())
 	if debug {
 		logger.SetDebugLevel(true)
 	} else {

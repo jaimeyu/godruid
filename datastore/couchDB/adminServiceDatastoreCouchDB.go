@@ -33,13 +33,13 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 
 	// Couch Server Configuration
 	provDBURL := fmt.Sprintf("%s:%d",
-		result.cfg.GetString("server.datastore.ip"),
-		result.cfg.GetInt("server.datastore.port"))
+		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
+		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
 	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
 	result.couchHost = provDBURL
 
 	// Couch DB name configuration
-	dbName := result.cfg.GetString("args.admindb.name")
+	dbName := result.cfg.GetString(gather.CK_args_admindb_name.String())
 	result.dbName = result.couchHost + "/" + dbName
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {

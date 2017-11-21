@@ -79,15 +79,15 @@ func LoadConfig(cfgPath string, v *viper.Viper) config.Provider {
 
 // LoadDefaults - loads default values for the configuration
 func LoadDefaults(v *viper.Viper) {
-	v.SetDefault("server.datastore.ip", "http://localhost")
-	v.SetDefault("server.datastore.port", 5984)
-	v.SetDefault("server.rest.ip", "0.0.0.0")
-	v.SetDefault("server.rest.port", 10001)
-	v.SetDefault("server.grpc.ip", "0.0.0.0")
-	v.SetDefault("server.grpc.port", 10002)
-	v.SetDefault("args.admindb.name", "adh-admin")
-	v.SetDefault("args.admindb.impl", 1)
-	v.SetDefault("args.tenantdb.impl", 1)
-	v.SetDefault("args.pouchplugindb.impl", 1)
-	v.SetDefault("args.debug", false)
+	v.SetDefault(CK_server_datastore_ip.String(), "http://localhost")
+	v.SetDefault(CK_server_datastore_port.String(), 5984)
+	v.SetDefault(CK_server_rest_ip.String(), "0.0.0.0")
+	v.SetDefault(CK_server_rest_port.String(), 10001)
+	v.SetDefault(CK_server_grpc_ip.String(), "0.0.0.0")
+	v.SetDefault(CK_server_grpc_port.String(), 10002)
+	v.SetDefault(CK_args_admindb_name.String(), "adh-admin")
+	v.SetDefault(CK_args_admindb_impl.String(), 1)
+	v.SetDefault(CK_args_tenantdb_impl.String(), 1)
+	v.SetDefault(CK_args_pouchplugindb_impl.String(), 1)
+	v.SetDefault(CK_args_debug.String(), false)
 }

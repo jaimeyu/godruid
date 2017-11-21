@@ -29,8 +29,8 @@ func CreatePouchDBServiceDAO() (*PouchDBServiceDatastoreCouchDB, error) {
 	result.cfg = gather.GetConfig()
 
 	provDBURL := fmt.Sprintf("%s:%d",
-		result.cfg.GetString("server.datastore.ip"),
-		result.cfg.GetInt("server.datastore.port"))
+		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
+		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
 	logger.Log.Debug("Pouch Plugin Service CouchDB URL is: ", provDBURL)
 	result.couchHost = provDBURL
 

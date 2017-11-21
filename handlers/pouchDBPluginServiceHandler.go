@@ -137,7 +137,7 @@ func (psh *PouchDBPluginServiceHandler) RegisterAPIHandlers(router *mux.Router) 
 
 func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error) {
 	cfg := gather.GetConfig()
-	dbType := gather.DBImpl(cfg.GetInt("args.pouchplugindb.impl"))
+	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_pouchplugindb_impl.String()))
 	switch dbType {
 	case gather.COUCH:
 		logger.Log.Debug("PouchDBPluginService DB is using CouchDB Implementation")

@@ -1,0 +1,73 @@
+version: "3.3"
+
+services:
+  interlock:
+    image:  gcr.io/npav-172917/interlock:latest
+    #image: ehazlett/interlock:1.4.1
+    command: -D run  -c /etc/interlock/config.toml
+    tty: true
+    ports:
+        - 8080
+    environment:
+        INTERLOCK_CONFIG: |
+            ListenAddr = ":8080"
+            #PollInterval = "5s"
+            DockerURL = "unix:///var/run/docker.sock"
+            #DockerURL = "tcp://debian-leader.c.npav-172917.internal:2376"
+            #TLSCACert = "/etc/docker/ssl/docker-ca.pem"
+            #TLSCert = "/etc/docker/ssl/docker-cert.pem"
+            #TLSKey = "/etc/docker/ssl/docker-key.pem"
+            [[Extensions]]
+            Name = "nginx"
+            ConfigPath = "/etc/nginx/nginx.conf"
+            PidPath = "/var/run/nginx.pid"
+            TemplatePath = ""
+            MaxConn = 1024
+            Port = 80
+    volumes:
+        - /etc/docker:/etc/docker:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+        - "deployment.name=${DEPLOYMENT_NAME}"
+        - "deployment.taskname=interlock"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  nginx:
+    image: nginx:latest
+    entrypoint: nginx
+    command: -g "daemon off;" -c /etc/nginx/nginx.conf
+    ports:
+        - 80:80
+    labels:
+        - "interlock.ext.name=nginx"
+        - "deployment.name=${DEPLOYMENT_NAME}"
+        - "deployment.taskname=nginx"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  couchdb:
+    image: apache/couchdb:2.1.1
+    ports:
+      - "5984:5984" # default couch port
+    volumes:
+      - couchdata:/usr/local/var/lib/couchdb
+    
+  adh-gather:
+    image:  gcr.io/npav-172917/adh-gather:latest
+    ports:
+      - "10001:10001"  # rest 
+      - "10002:10002"  # grpc
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    entrypoint:
+      - /docker-entrypoint.sh
+  
+volumes:
+  couchdata: 

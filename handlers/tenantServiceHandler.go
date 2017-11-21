@@ -36,12 +36,8 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 }
 
 func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate TenantServiceHandler: %s", err.Error())
-	}
-
-	dbType := cfg.ServerConfig.StartupArgs.TenantDB
+	cfg := gather.GetConfig()
+	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_tenantdb_impl.String()))
 	switch dbType {
 	case gather.COUCH:
 		logger.Log.Debug("TenantService DB is using CouchDB Implementation")

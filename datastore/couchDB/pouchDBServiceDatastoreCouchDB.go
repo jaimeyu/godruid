@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
@@ -18,22 +19,19 @@ import (
 // as the storage option.
 type PouchDBServiceDatastoreCouchDB struct {
 	couchHost string
+	cfg       config.Provider
 }
 
 // CreatePouchDBServiceDAO - instantiates a CouchDB implementation of the
 // PouchDBPluginServiceDatastore.
 func CreatePouchDBServiceDAO() (*PouchDBServiceDatastoreCouchDB, error) {
 	result := new(PouchDBServiceDatastoreCouchDB)
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		logger.Log.Debugf("Falied to instantiate PouchDBServiceDatastoreCouchDB: %s", err.Error())
-		return nil, err
-	}
+	result.cfg = gather.GetConfig()
 
 	provDBURL := fmt.Sprintf("%s:%d",
-		cfg.ServerConfig.Datastore.BindIP,
-		cfg.ServerConfig.Datastore.BindPort)
-	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
+		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
+		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
+	logger.Log.Debug("Pouch Plugin Service CouchDB URL is: ", provDBURL)
 	result.couchHost = provDBURL
 
 	return result, nil

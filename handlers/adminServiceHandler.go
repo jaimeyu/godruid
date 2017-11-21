@@ -18,8 +18,6 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
 
-const dbName string = "adh-admin"
-
 // AdminServiceHandler - implementation of the interface for the gRPC
 // Admin service. Anytime the Admin service changes, the logic to handle the
 // API will be modified here.
@@ -217,12 +215,8 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 }
 
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate AdminServiceHandler: %s", err.Error())
-	}
-
-	dbType := cfg.ServerConfig.StartupArgs.AdminDB
+	cfg := gather.GetConfig()
+	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))
 	switch dbType {
 	case gather.COUCH:
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")

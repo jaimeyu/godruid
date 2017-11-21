@@ -1,12 +1,11 @@
 package gather
 
 import (
-	"errors"
-	"io/ioutil"
+	"strings"
 
-	"github.com/ghodss/yaml"
-
+	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/spf13/viper"
 )
 
 // DBImpl - type which describes a Database Implementation technology.
@@ -20,55 +19,75 @@ const (
 
 // Config represents the global adh-gather configuration parameters, as loaded from the config file
 type Config struct {
-	ServerConfig struct {
-		REST struct {
-			BindIP   string
-			BindPort int
+	server struct {
+		rest struct {
+			ip   string
+			port int
 		}
-		Datastore struct {
-			BindIP   string
-			BindPort int
+		datastore struct {
+			ip   string
+			port int
 		}
-		GRPC struct {
-			BindIP   string
-			BindPort int
+		grpc struct {
+			ip   string
+			port int
 		}
-		StartupArgs struct {
-			AdminDB       DBImpl
-			TenantDB      DBImpl
-			PouchPluginDB DBImpl
+	}
+	args struct {
+		admindb struct {
+			name string
+			impl DBImpl
 		}
+		tenantdb struct {
+			impl DBImpl
+		}
+		pouchplugindb struct {
+			impl DBImpl
+		}
+		debug bool
 	}
 }
 
 // Stores the active configuration for the running instance.
-var activeConfig *Config
+var cfg config.Provider
 
-func LoadConfig(cfgPath string) *Config {
-
-	bData, err := ioutil.ReadFile(cfgPath)
-	if err != nil {
-		logger.Log.Panicf("Failed to open configuaration file '%s': %s", cfgPath, err.Error())
-
-	}
-
-	var cfg Config
-
-	if err := yaml.Unmarshal(bData, &cfg); err != nil {
-		logger.Log.Panicf("Failed to parse configuration file '%s': %s", cfgPath, err.Error())
-	}
-
-	activeConfig = &cfg
-
-	return activeConfig
+// GetConfig - returns the current configuration.
+func GetConfig() config.Provider {
+	return cfg
 }
 
-// GetActiveConfig - returns the active configuration for the running process,
-// or an error if the configuration has not been loaded.
-func GetActiveConfig() (*Config, error) {
-	if activeConfig == nil {
-		return nil, errors.New("Please run LoadConfig before trying to access Config Parameters")
+// LoadConfig - implements configuration based on the provided file
+func LoadConfig(cfgPath string, v *viper.Viper) config.Provider {
+	replacer := strings.NewReplacer(".", "_")
+	v.SetEnvKeyReplacer(replacer)
+
+	v.AutomaticEnv()
+
+	v.SetConfigFile(cfgPath)
+	v.SetConfigType("yaml")
+	err := v.ReadInConfig()
+	if err != nil {
+		logger.Log.Panicf("Failed to parse configuration file '%s': %s",
+			cfgPath, err.Error())
 	}
 
-	return activeConfig, nil
+	LoadDefaults(v)
+
+	cfg = v
+	return cfg
+}
+
+// LoadDefaults - loads default values for the configuration
+func LoadDefaults(v *viper.Viper) {
+	v.SetDefault(CK_server_datastore_ip.String(), "http://localhost")
+	v.SetDefault(CK_server_datastore_port.String(), 5984)
+	v.SetDefault(CK_server_rest_ip.String(), "0.0.0.0")
+	v.SetDefault(CK_server_rest_port.String(), 10001)
+	v.SetDefault(CK_server_grpc_ip.String(), "0.0.0.0")
+	v.SetDefault(CK_server_grpc_port.String(), 10002)
+	v.SetDefault(CK_args_admindb_name.String(), "adh-admin")
+	v.SetDefault(CK_args_admindb_impl.String(), 1)
+	v.SetDefault(CK_args_tenantdb_impl.String(), 1)
+	v.SetDefault(CK_args_pouchplugindb_impl.String(), 1)
+	v.SetDefault(CK_args_debug.String(), false)
 }

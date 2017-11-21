@@ -1,4 +1,9 @@
 ## Current Release 
+
+### 0.10.0
+**Release Date:** Tue Nov 21 11:37:09 UTC 2017 
+* Adding Viper config as well as Docker support.
+
 ### 0.9.0 
 **Release Date:** Fri Nov 17 22:17:53 UTC 2017     
 ## Previous Releases 

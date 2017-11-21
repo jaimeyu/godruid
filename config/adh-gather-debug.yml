@@ -1,0 +1,19 @@
+server:
+  datastore:
+    ip: http://localhost
+    port: 5984
+  rest:
+    ip: 0.0.0.0
+    port: 10001
+  grpc:
+    ip: 0.0.0.0
+    port: 10002
+args:
+  admindb: 
+    name: aod-ui
+    impl: 1
+  tenantdb: 
+    impl: 1
+  pouchplugindb:
+    impl: 1
+  debug: true

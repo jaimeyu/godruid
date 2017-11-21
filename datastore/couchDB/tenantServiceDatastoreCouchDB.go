@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
@@ -16,21 +17,18 @@ import (
 // as the storage option.
 type TenantServiceDatastoreCouchDB struct {
 	server string
+	cfg    config.Provider
 }
 
 // CreateTenantServiceDAO - instantiates a CouchDB implementation of the
 // TenantServiceDatastore.
 func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	result := new(TenantServiceDatastoreCouchDB)
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		logger.Log.Debugf("Falied to instantiate TenantServiceDatastoreCouchDB: %s", err.Error())
-		return nil, err
-	}
+	result.cfg = gather.GetConfig()
 
 	provDBURL := fmt.Sprintf("%s:%d",
-		cfg.ServerConfig.Datastore.BindIP,
-		cfg.ServerConfig.Datastore.BindPort)
+		result.cfg.GetString("server.datastore.ip"),
+		result.cfg.GetInt("server.datastore.port"))
 	logger.Log.Debug("Tenant Service CouchDB URL is: ", provDBURL)
 	result.server = provDBURL
 

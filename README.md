@@ -34,19 +34,19 @@ You can generate the necessary gRPC Service, REST Reverse Proxy, and REST Swagge
 
 You can modify the following values in  the `config/adh-gath.yml` file:
 
-	1. Datastore
-    	1. bindIP: the host of the CouchDB datastore. (Use full http:// format) 
-    	2. bindPort: the port used to communicate with CouchDB.
-  	2. REST
-    	1. bindIP: the host of the ADH-Gather REST API.
-    	2. bindPort: the port for the ADH-Gather REST API.
-  	3. GRPC
-		1. bindIP: the host of the ADH-Gather gRPC Service.
-    	2. bindPort: the port for the ADH-Gather gRPC Service.
-  	4. StartupArgs
-    	1. adminDB: 
+	1. datastore
+    	1. ip: the host of the CouchDB datastore. (Use full http:// format) 
+    	2. port: the port used to communicate with CouchDB.
+  	2. rest
+    	1. ip: the host of the ADH-Gather REST API.
+    	2. port: the port for the ADH-Gather REST API.
+  	3. grpc
+		1. ip: the host of the ADH-Gather gRPC Service.
+    	2. port: the port for the ADH-Gather gRPC Service.
+  	4. args
+    	1. admindb: 
 			- name: the name of the admin database used for adh-gather
 			- impl: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
-		2. tenantDB: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
-		3. pouchPluginDB: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
+		2. tenantdb: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
+		3. pouchplugindb: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
 

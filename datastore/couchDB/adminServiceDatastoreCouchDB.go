@@ -7,6 +7,7 @@ import (
 
 	"github.com/leesper/couchdb-golang"
 
+	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
@@ -21,27 +22,24 @@ type AdminServiceDatastoreCouchDB struct {
 	couchHost string
 	dbName    string
 	server    *couchdb.Server
+	cfg       config.Provider
 }
 
 // CreateAdminServiceDAO - instantiates a CouchDB implementation of the
 // AdminServiceDatastore.
 func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	result := new(AdminServiceDatastoreCouchDB)
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		logger.Log.Debugf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
-		return nil, err
-	}
+	result.cfg = gather.GetConfig()
 
 	// Couch Server Configuration
 	provDBURL := fmt.Sprintf("%s:%d",
-		cfg.ServerConfig.Datastore.BindIP,
-		cfg.ServerConfig.Datastore.BindPort)
+		result.cfg.GetString("server.datastore.ip"),
+		result.cfg.GetInt("server.datastore.port"))
 	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
 	result.couchHost = provDBURL
 
 	// Couch DB name configuration
-	dbName := cfg.ServerConfig.StartupArgs.AdminDB.Name
+	dbName := result.cfg.GetString("args.admindb.name")
 	result.dbName = result.couchHost + "/" + dbName
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {

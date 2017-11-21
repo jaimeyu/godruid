@@ -10,10 +10,10 @@ server:
     port: 10002
 args:
   admindb: 
-    name: adh-admin
+    name: aod-ui
     impl: 1
   tenantdb: 
     impl: 1
   pouchplugindb:
     impl: 1
-  debug: false
+  debug: true

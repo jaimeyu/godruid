@@ -2,18 +2,22 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"net"
 	"net/http"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+
+	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -24,7 +28,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configFilePath, "config", "config/adh-gather.yml", "Specify a configuration file to use")
+	pflag.StringVar(&configFilePath, "config", "config/adh-gather.yml", "Specify a configuration file to use")
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -44,9 +48,10 @@ func newServer() *GatherServer {
 	return s
 }
 
-func gRPCHandlerStart(gatherServer *GatherServer) {
-	grpcBindPort := getActiveConfigOrExit().ServerConfig.GRPC.BindPort
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", grpcBindPort))
+func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
+	gRPCAddress := fmt.Sprintf("%s:%d", cfg.GetString("server.grpc.ip"), cfg.GetInt("server.grpc.port"))
+
+	lis, err := net.Listen("tcp", gRPCAddress)
 	if err != nil {
 		logger.Log.Fatalf("failed to start gRPC Service: %s", err.Error())
 	}
@@ -55,16 +60,14 @@ func gRPCHandlerStart(gatherServer *GatherServer) {
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterAdminProvisioningServiceServer(grpcServer, gatherServer.gsh)
 	pb.RegisterTenantProvisioningServiceServer(grpcServer, gatherServer.gsh)
-	// pb.RegisterPouchDBPluginServiceServer(grpcServer, gatherServer.pouchSH)
 
-	logger.Log.Infof("gRPC service intiated on port: %d", grpcBindPort)
+	logger.Log.Infof("gRPC service intiated on: %s", gRPCAddress)
 	grpcServer.Serve(lis)
 }
 
-func restHandlerStart(gatherServer *GatherServer) {
-	cfg := getActiveConfigOrExit()
-	restBindPort := cfg.ServerConfig.REST.BindPort
-	grpcBindPort := cfg.ServerConfig.GRPC.BindPort
+func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
+	restBindPort := cfg.GetInt("server.rest.port")
+	grpcBindPort := cfg.GetInt("server.grpc.port")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -115,33 +118,32 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getActiveConfigOrExit() *gather.Config {
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		logger.Log.Fatalf("failed to start Gather Service: %s", err.Error())
-	}
-
-	return cfg
-}
-
 func main() {
-	flag.Parse()
+	pflag.Parse()
+	v := viper.New()
+
+	v.BindPFlags(pflag.CommandLine)
+
+	configFilePath := v.GetString("config")
 
 	// Load Configuration
-	cfg := gather.LoadConfig(configFilePath)
+	cfg := gather.LoadConfig(configFilePath, v)
+	v.WatchConfig()
+	v.OnConfigChange(func(e fsnotify.Event) {
+		logger.Log.Debugf("Config changed: %s", e.Name)
+	})
 
-	debug := cfg.ServerConfig.StartupArgs.Debug
+	debug := cfg.GetBool("args.debug")
 	if debug {
 		logger.SetDebugLevel(true)
 	} else {
 		logger.SetDebugLevel(false)
 	}
 
-	logger.Log.Infof("Your config is %+v \n", cfg)
 	logger.Log.Infof("Starting adh-gather broker with config '%s'", configFilePath)
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()
-	go restHandlerStart(gatherServer)
-	gRPCHandlerStart(gatherServer)
+	go restHandlerStart(gatherServer, cfg)
+	gRPCHandlerStart(gatherServer, cfg)
 }

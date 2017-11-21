@@ -215,12 +215,8 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 }
 
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
-	cfg, err := gather.GetActiveConfig()
-	if err != nil {
-		return nil, fmt.Errorf("Falied to instantiate AdminServiceHandler: %s", err.Error())
-	}
-
-	dbType := cfg.ServerConfig.StartupArgs.AdminDB.Impl
+	cfg := gather.GetConfig()
+	dbType := gather.DBImpl(cfg.GetInt("args.admindb.impl"))
 	switch dbType {
 	case gather.COUCH:
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")

@@ -92,10 +92,12 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	// Add in handling for non protobuf generated API endpoints:
 	gatherServer.pouchSH.RegisterAPIHandlers(gatherServer.mux)
 
-	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
-	originsOption := gh.AllowedOrigins([]string{"http://localhost:4200"})
+	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
+	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)
+	originsOption := gh.AllowedOrigins(allowedOrigins)
 	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
 	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
+	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
 	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), gh.CORS(originsOption, methodsOption, headersOption, gh.AllowCredentials())(gatherServer))
 
 }

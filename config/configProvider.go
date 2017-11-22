@@ -3,6 +3,7 @@ package config
 // Provider - taken from https://github.com/gohugoio/hugo/blob/master/config/configProvider.go
 type Provider interface {
 	GetString(key string) string
+	GetStringSlice(key string) []string
 	GetInt(key string) int
 	GetBool(key string) bool
 	GetStringMap(key string) map[string]interface{}

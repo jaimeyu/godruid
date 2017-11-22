@@ -8,6 +8,9 @@ server:
   grpc:
     ip: 0.0.0.0
     port: 10002
+  cors:
+    allowedorigins: 
+      - http://localhost:4200
 args:
   admindb: 
     name: aod-ui

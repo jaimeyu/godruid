@@ -32,6 +32,9 @@ type Config struct {
 			ip   string
 			port int
 		}
+		cors struct {
+			allowedorigins []string
+		}
 	}
 	args struct {
 		admindb struct {

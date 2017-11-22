@@ -921,16 +921,25 @@
     "gathergrpcMonitoredObject": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "tenantId": {
           "type": "string"
         },
         "datatype": {
           "type": "string"
         },
-        "deviceType": {
+        "actuatorType": {
           "$ref": "#/definitions/MonitoredObjectDeviceType"
         },
-        "deviceName": {
+        "actuatorName": {
+          "type": "string"
+        },
+        "reflectorType": {
+          "$ref": "#/definitions/MonitoredObjectDeviceType"
+        },
+        "reflectorName": {
           "type": "string"
         },
         "objectName": {

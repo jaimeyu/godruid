@@ -445,7 +445,7 @@ func generateID(obj interface{}) (string, error) {
 	switch v := obj.(type) {
 	case *pb.MonitoredObject:
 		cast := obj.(*pb.MonitoredObject)
-		return fmt.Sprintf("managedObject_%s_%s", cast.GetDeviceName(), cast.GetObjectName()), nil
+		return fmt.Sprintf("%s_%s", db.TenantMonitoredObjectType, cast.GetId()), nil
 	default:
 		return "", fmt.Errorf("Unable to generate ID for unknown object type: %v", v)
 	}

@@ -139,25 +139,16 @@ func validateMonitoredObjectRequest(request *pb.MonitoredObjectRequest, isUpdate
 		return errors.New("Invalid MonitoredObjectRequest: no Tenant Monitored Object data provided")
 	}
 
-	err := validateMonitoredObject(request.GetData())
-	if err != nil {
-		return err
-	}
-
 	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid MonitoredObjectRequest: no Tenant Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid MonitoredObjectRequest: must provide a createdTimestamp and revision for an update")
+	if len(request.GetData().GetId()) == 0 {
+		return errors.New("Invalid MonitoredObjectRequest: no Monitored Object Id provided")
 	}
 
-	return nil
-}
-
-func validateMonitoredObject(object *pb.MonitoredObject) error {
-	if len(object.GetDeviceName()) == 0 || len(object.GetObjectName()) == 0 {
-		return errors.New("Must provide both a Device Name and an Object Name")
+	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
+		return errors.New("Invalid MonitoredObjectRequest: must provide a createdTimestamp and revision for an update")
 	}
 
 	return nil

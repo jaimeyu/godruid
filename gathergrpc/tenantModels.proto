@@ -152,17 +152,21 @@ message MonitoredObject {
         ACCEDIAN_VNID = 2;
     }
 
-    string tenantId = 1;
-    string datatype = 2;
+    string id = 1;
+    string tenantId = 2;
+    string datatype = 3;
 
-    DeviceType deviceType = 3;
-    string deviceName = 4;
+    DeviceType actuatorType = 4;
+    string actuatorName = 5;
+
+    DeviceType reflectorType = 6;
+    string reflectorName = 7;
     
-    string objectName = 5;
-    MonitoredObjectType objectType = 6;  
+    string objectName = 8;
+    MonitoredObjectType objectType = 9;  
 
-    int64 createdTimestamp = 7;
-    int64 lastModifiedTimestamp = 8;
+    int64 createdTimestamp = 10;
+    int64 lastModifiedTimestamp = 11;
 }
 
 

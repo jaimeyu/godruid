@@ -33,6 +33,11 @@ It has these top-level messages:
 	TenantUserResponse
 	TenantUserListResponse
 	TenantUserIdRequest
+	MonitoredObject
+	MonitoredObjectRequest
+	MonitoredObjectResponse
+	MonitoredObjectListResponse
+	MonitoredObjectIdRequest
 */
 package gathergrpc
 

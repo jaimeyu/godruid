@@ -324,6 +324,101 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 	return result, nil
 }
 
+// CreateMonitoredObject - creates a Monitored Object scoped to a specific tenant
+func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateMonitoredObjectRequest(monitoredObjectReq); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Creating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
+
+	// Issue request to DAO Layer to Create the Tenant Monitored Object
+	result, err := tsh.tenantDB.CreateMonitoredObject(monitoredObjectReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully Created the Monitored, return the result.
+	logger.Log.Infof("Created %s: %s\n", db.TenantMonitoredObjectStr, result.GetXId())
+	return result, nil
+}
+
+// UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
+func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateMonitoredObjectRequest(monitoredObjectReq); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Updating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
+
+	// Issue request to DAO Layer to Update the Tenant Monitored Object
+	result, err := tsh.tenantDB.UpdateMonitoredObject(monitoredObjectReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully Updated the Monitored Object, return the result.
+	logger.Log.Infof("Updated %s: %s\n", db.TenantMonitoredObjectStr, result.GetXId())
+	return result, nil
+}
+
+// GetMonitoredObject - retrieves the MonitoredObject for a singler Tenant.
+func (tsh *TenantServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
+		return nil, err
+	}
+
+	// Issue request to DAO Layer to fetch the Tenant Monitored Object
+	result, err := tsh.tenantDB.GetMonitoredObject(monitoredObjectIDReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully fetched the Monitored Object, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantMonitoredObjectStr, result.GetXId())
+	return result, nil
+}
+
+// DeleteMonitoredObject - deletes the MonitoredObject for a singler Tenant.
+func (tsh *TenantServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	// Validate the request to ensure the operation is valid:
+	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Deleting %s for Tenant %s", db.TenantMonitoredObjectStr, monitoredObjectIDReq.GetTenantId())
+
+	// Issue request to DAO Layer to delete the Tenant Monitored Object
+	result, err := tsh.tenantDB.DeleteMonitoredObject(monitoredObjectIDReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully deleted the MonitoredObject, return the result.
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantMonitoredObjectStr, result.GetXId())
+	return result, nil
+}
+
+// GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
+func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectListResponse, error) {
+	// Validate the request to ensure this operation is valid:
+
+	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantMonitoredObjectStr, tenantID.Value)
+
+	// Issue request to DAO Layer to fetch the Tenant Monitored Objects
+	result, err := tsh.tenantDB.GetAllMonitoredObjects(tenantID.Value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully fetched the Monitored Objects, return the result.
+	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantMonitoredObjectStr)
+	return result, nil
+}
+
 func validateTenantUserRequest(request *pb.TenantUserRequest) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantUserRequest: no Tenant User data provided")
@@ -403,6 +498,43 @@ func validateTenantIngPrfIDRequest(request *pb.TenantIngestionProfileIdRequest) 
 
 	if len(request.GetTenantId()) == 0 {
 		return errors.New("Invalid TenantIngestionProfileIdRequest: no Tenant Id provided")
+	}
+
+	return nil
+}
+
+func validateMonitoredObjectRequest(request *pb.MonitoredObjectRequest) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid MonitoredObjectRequest: no Tenant Monitored Object data provided")
+	}
+
+	err := validateMonitoredObject(request.GetData())
+	if err != nil {
+		return err
+	}
+
+	if len(request.GetData().GetTenantId()) == 0 {
+		return errors.New("Invalid MonitoredObjectRequest: no Tenant Id provided")
+	}
+
+	return nil
+}
+
+func validateMonitoredObject(object *pb.MonitoredObject) error {
+	if len(object.GetDeviceName()) == 0 || len(object.GetObjectName()) == 0 {
+		return errors.New("Must provide both a Device Name and an Object Name")
+	}
+
+	return nil
+}
+
+func validateMonitoredObjectIDRequest(request *pb.MonitoredObjectIdRequest) error {
+	if request == nil || len(request.GetMonitoredObjectId()) == 0 {
+		return errors.New("Invalid MonitoredObjectIdRequest: no Monitored Object ID data provided")
+	}
+
+	if len(request.GetTenantId()) == 0 {
+		return errors.New("Invalid MonitoredObjectIdRequest: no Tenant Id provided")
 	}
 
 	return nil

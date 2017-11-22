@@ -202,5 +202,42 @@ service TenantProvisioningService {
             delete: "/api/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}"
         };
     }
+
+    // Create a MonitoredObject scoped to a Single Tenant. 
+    rpc CreateMonitoredObject(MonitoredObjectRequest) returns (MonitoredObjectResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/tenants/{data.tenantId}/monitored-objects"
+            body: "*"
+        };
+    }
+    
+    // Update a MonitoredObject scoped to a single Tenant. 
+    rpc UpdateMonitoredObject(MonitoredObjectRequest) returns (MonitoredObjectResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/tenants/{data.tenantId}/monitored-objects"
+            body: "*"
+        };
+    } 
+    
+    // Delete a MonitoredObject scoped to a single Tenant. 
+    rpc DeleteMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObjectResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}"
+        };
+    }
+    
+    // Retrieve a MonitoredObject scoped to a single Tenant. 
+    rpc GetMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObjectResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}"
+        };
+    }
+    
+    // Retrieve all MonitoredObject scoped to a single Tenant. 
+    rpc GetAllMonitoredObjects(google.protobuf.StringValue) returns (MonitoredObjectListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{value}/monitored-object-list"
+        };
+    }
 }
 

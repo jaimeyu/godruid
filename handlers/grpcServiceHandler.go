@@ -169,6 +169,31 @@ func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context,
 	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 }
 
+// CreateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	return gsh.tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
+}
+
+// UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	return gsh.tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
+}
+
+// GetMonitoredObject - retrieves the MonitoredObject for a singler Tenant.
+func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	return gsh.tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
+}
+
+// DeleteMonitoredObject - deletes the MonitoredObject for a singler Tenant.
+func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	return gsh.tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
+}
+
+// GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
+func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectListResponse, error) {
+	return gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
+}
+
 func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 	ingPrf := pb.TenantIngestionProfile{}
 	ingPrf.ScpUsername = "default"

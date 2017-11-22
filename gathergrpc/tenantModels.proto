@@ -138,3 +138,56 @@ message TenantUserIdRequest {
     string tenantId = 1;
     string userId = 2;
 }
+
+// MonitoredObject - describes a unique device/object which is reporting 
+// data from the network.
+message MonitoredObject {
+    enum MonitoredObjectType {
+        UNKNOWN = 0;
+        TWAMP = 1;
+    }
+    enum DeviceType {
+        NOT_KNOWN = 0;
+        ACCEDIAN_NID = 1;
+        ACCEDIAN_VNID = 2;
+    }
+
+    string tenantId = 1;
+    string datatype = 2;
+
+    DeviceType deviceType = 3;
+    string deviceName = 4;
+    
+    string objectName = 5;
+    MonitoredObjectType objectType = 6;  
+
+    int64 createdTimestamp = 7;
+    int64 lastModifiedTimestamp = 8;
+}
+
+// MonitoredObjectRequest - Wrapper for requests involving a MonitoredObject that are 
+// scoped to a single Tenant.
+message MonitoredObjectRequest {
+    string _id = 1;
+    string _rev = 2;
+    MonitoredObject data = 3;
+}
+
+// MonitoredObjectRequest - Wrapper for responses involving a MonitoredObject that are 
+// scoped to a single Tenant.
+message MonitoredObjectResponse {
+    string _id = 1;
+    string _rev = 2;
+    MonitoredObject data = 3;
+}
+
+// MonitoredObjectListResponse - Wrapper for requests which return a list of MonitoredObjects 
+// scoped to a single Tenant.
+message MonitoredObjectListResponse {
+    repeated MonitoredObjectResponse data = 3;
+}
+
+message MonitoredObjectIdRequest {
+    string tenantId = 1;
+    string monitoredObjectId = 2;
+}

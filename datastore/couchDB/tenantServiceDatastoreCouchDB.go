@@ -352,7 +352,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 
 	// Populate the response
 	res := pb.TenantIngestionProfileResponse{}
-	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantUserStr); err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
 
@@ -387,7 +387,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIng
 
 	// Populate the response
 	res := pb.TenantIngestionProfileResponse{}
-	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantUserStr); err != nil {
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
 
@@ -446,6 +446,150 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 	return existingIngPrf, nil
 }
 
+// CreateMonitoredObject - CouchDB implementation of CreateMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, monitoredObjectReq.GetData().GetTenantId())
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Give the Monitored Object a known type, and timestamps:
+	monitoredObjectReq.Data.Datatype = string(ds.TenantMonitoredObjectType)
+	monitoredObjectReq.Data.CreatedTimestamp = time.Now().Unix()
+	monitoredObjectReq.Data.LastModifiedTimestamp = monitoredObjectReq.GetData().GetCreatedTimestamp()
+
+	// Marshal the object and read the bytes as string.
+	storeFormat, err := convertDataToCouchDbSupportedModel(monitoredObjectReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(storeFormat, ds.TenantMonitoredObjectStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.MonitoredObjectResponse{}
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantMonitoredObjectStr); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.TenantMonitoredObjectStr, res)
+	return &res, nil
+}
+
+// UpdateMonitoredObject - CouchDB implementation of UpdateMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, monitoredObjectReq.GetData().GetTenantId())
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update timestamp and make sure the type is properly set:
+	monitoredObjectReq.Data.Datatype = string(ds.TenantMonitoredObjectStr)
+	monitoredObjectReq.Data.LastModifiedTimestamp = time.Now().Unix()
+
+	// Marshal the object and read the bytes as string.
+	storeFormat, err := convertDataToCouchDbSupportedModel(monitoredObjectReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(storeFormat, ds.TenantIngestionProfileStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.MonitoredObjectResponse{}
+	if err = convertGenericCouchDataToObject(storeFormat, &res, ds.TenantMonitoredObjectStr); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned user.
+	logger.Log.Debugf("Updated %s: %s\n", ds.TenantMonitoredObjectStr, res)
+	return &res, nil
+}
+
+// GetMonitoredObject - CouchDB implementation of GetMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve the object data from CouchDB
+	fetchedIngPrf, err := getByDocID(monitoredObjectIDReq.GetMonitoredObjectId(), ds.TenantMonitoredObjectStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	res := pb.MonitoredObjectResponse{}
+	if err = convertGenericCouchDataToObject(fetchedIngPrf, &res, ds.TenantMonitoredObjectStr); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantMonitoredObjectStr, res)
+	return &res, nil
+}
+
+// DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	// Obtain the value of the existing record for a return value.
+	existingObject, err := tsd.GetMonitoredObject(monitoredObjectIDReq)
+	if err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantMonitoredObjectStr, err.Error())
+		return nil, err
+	}
+
+	// Perform the delete operation on CouchDB
+	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = deleteByDocID(monitoredObjectIDReq.GetMonitoredObjectId(), ds.TenantMonitoredObjectStr, db); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantMonitoredObjectStr, existingObject)
+	return existingObject, nil
+}
+
+// GetAllMonitoredObjects - CouchDB implementation of GetAllMonitoredObjects
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedObjectList, err := getAllOfTypeByIDPrefix(string(ds.TenantMonitoredObjectType), ds.TenantMonitoredObjectStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	res, err := convertGenericObjectListToMonitoredObjectList(fetchedObjectList)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantMonitoredObjectStr)
+	return res, nil
+}
+
 // Takes a set of generic data that contains a list of TenantUsers and converts it to
 // and ADH TenantUserList object
 func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserListResponse, error) {
@@ -476,6 +620,21 @@ func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]i
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantDomainStr, res)
+
+	return &res, nil
+}
+
+func convertGenericObjectListToMonitoredObjectList(genericObjectList []map[string]interface{}) (*pb.MonitoredObjectListResponse, error) {
+	res := pb.MonitoredObjectListResponse{}
+	for _, genericDomainObject := range genericObjectList {
+		object := pb.MonitoredObjectResponse{}
+		if err := convertGenericCouchDataToObject(genericDomainObject, &object, ds.TenantMonitoredObjectStr); err != nil {
+			continue
+		}
+		res.Data = append(res.GetData(), &object)
+	}
+
+	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantMonitoredObjectStr, res)
 
 	return &res, nil
 }

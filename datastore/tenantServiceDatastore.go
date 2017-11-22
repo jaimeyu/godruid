@@ -16,6 +16,9 @@ const (
 
 	// TenantIngestionProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantIngestionProfileType TenantDataType = "ingestionProfile"
+
+	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
+	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 )
 
 const (
@@ -27,6 +30,9 @@ const (
 
 	// TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantIngestionProfileStr = "Tenant Ingestion Profile"
+
+	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
+	TenantMonitoredObjectStr = "Tenant Monitored Object"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
@@ -48,4 +54,10 @@ type TenantServiceDatastore interface {
 	UpdateTenantIngestionProfile(*pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error)
 	GetTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error)
 	DeleteTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error)
+
+	CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error)
+	UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error)
+	GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error)
+	DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error)
+	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error)
 }

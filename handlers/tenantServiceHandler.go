@@ -53,7 +53,7 @@ func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 // CreateTenantUser - creates a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantUserRequest(tenantUserReq); err != nil {
+	if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
 		return nil, err
 	}
 
@@ -73,7 +73,7 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 // UpdateTenantUser - updates a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantUserRequest(tenantUserReq); err != nil {
+	if err := validateTenantUserRequest(tenantUserReq, true); err != nil {
 		return nil, err
 	}
 
@@ -150,7 +150,7 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantDomainRequest(tenantDomainRequest); err != nil {
+	if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
 		return nil, err
 	}
 
@@ -170,7 +170,7 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantDomainRequest(tenantDomainRequest); err != nil {
+	if err := validateTenantDomainRequest(tenantDomainRequest, true); err != nil {
 		return nil, err
 	}
 
@@ -247,7 +247,7 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 // CreateTenantIngestionProfile - creates an Ingestion Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantIngPrfRequest(tenantIngPrfReq); err != nil {
+	if err := validateTenantIngPrfRequest(tenantIngPrfReq, false); err != nil {
 		return nil, err
 	}
 
@@ -267,7 +267,7 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 // UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantIngPrfRequest(tenantIngPrfReq); err != nil {
+	if err := validateTenantIngPrfRequest(tenantIngPrfReq, true); err != nil {
 		return nil, err
 	}
 
@@ -327,11 +327,21 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 // CreateMonitoredObject - creates a Monitored Object scoped to a specific tenant
 func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateMonitoredObjectRequest(monitoredObjectReq); err != nil {
+	if err := validateMonitoredObjectRequest(monitoredObjectReq, false); err != nil {
 		return nil, err
 	}
 
 	logger.Log.Infof("Creating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
+
+	// If no id is provided for the Manged Object, generate one
+	objectID := monitoredObjectReq.GetXId()
+	if len(objectID) == 0 {
+		objectID, err := generateID(monitoredObjectReq.GetData())
+		if err != nil {
+			return nil, err
+		}
+		monitoredObjectReq.XId = objectID
+	}
 
 	// Issue request to DAO Layer to Create the Tenant Monitored Object
 	result, err := tsh.tenantDB.CreateMonitoredObject(monitoredObjectReq)
@@ -347,11 +357,21 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 // UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateMonitoredObjectRequest(monitoredObjectReq); err != nil {
+	if err := validateMonitoredObjectRequest(monitoredObjectReq, true); err != nil {
 		return nil, err
 	}
 
 	logger.Log.Infof("Updating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
+
+	// If no id is provided for the Manged Object, generate one
+	objectID := monitoredObjectReq.GetXId()
+	if len(objectID) == 0 {
+		objectID, err := generateID(monitoredObjectReq.GetData())
+		if err != nil {
+			return nil, err
+		}
+		monitoredObjectReq.XId = objectID
+	}
 
 	// Issue request to DAO Layer to Update the Tenant Monitored Object
 	result, err := tsh.tenantDB.UpdateMonitoredObject(monitoredObjectReq)
@@ -419,123 +439,14 @@ func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, ten
 	return result, nil
 }
 
-func validateTenantUserRequest(request *pb.TenantUserRequest) error {
-	if request == nil || request.GetData() == nil {
-		return errors.New("Invalid TenantUserRequest: no Tenant User data provided")
+// generateID generates an ID for an object based on the type of the
+// provided object.
+func generateID(obj interface{}) (string, error) {
+	switch v := obj.(type) {
+	case *pb.MonitoredObject:
+		cast := obj.(*pb.MonitoredObject)
+		return fmt.Sprintf("managedObject_%s_%s", cast.GetDeviceName(), cast.GetObjectName()), nil
+	default:
+		return "", fmt.Errorf("Unable to generate ID for unknown object type: %v", v)
 	}
-
-	if len(request.GetData().GetTenantId()) == 0 {
-		return errors.New("Invalid TenantUserRequest: no Tenant ID provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantUserRequest: no Tenant User ID provided")
-	}
-
-	return nil
-}
-
-func validateTenantUserIDRequest(request *pb.TenantUserIdRequest) error {
-	if request == nil || len(request.GetUserId()) == 0 {
-		return errors.New("Invalid TenantUserIdRequest: no Tenant User ID data provided")
-	}
-
-	if len(request.GetTenantId()) == 0 {
-		return errors.New("Invalid TenantUserIdRequest: no Tenant Id provided")
-	}
-
-	return nil
-}
-
-func validateTenantDomainRequest(request *pb.TenantDomainRequest) error {
-	if request == nil || request.GetData() == nil {
-		return errors.New("Invalid TenantDomainRequest: no Tenant Domain data provided")
-	}
-
-	if len(request.GetData().GetTenantId()) == 0 {
-		return errors.New("Invalid TenantDomainRequest: no Tenant Id provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantUserRequest: no Tenant Domain ID provided")
-	}
-
-	return nil
-}
-
-func validateTenantDomainIDRequest(request *pb.TenantDomainIdRequest) error {
-	if request == nil || len(request.GetDomainId()) == 0 {
-		return errors.New("Invalid TenantDomainIdRequest: no Tenant Domain ID data provided")
-	}
-
-	if len(request.GetTenantId()) == 0 {
-		return errors.New("Invalid TenantDomainIdRequest: no Tenant Id provided")
-	}
-
-	return nil
-}
-
-func validateTenantIngPrfRequest(request *pb.TenantIngestionProfileRequest) error {
-	if request == nil || request.GetData() == nil {
-		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Ingestion Profile data provided")
-	}
-
-	if len(request.GetData().GetTenantId()) == 0 {
-		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Id provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantIngestionProfileRequest: no Ingestion Profile ID provided")
-	}
-
-	return nil
-}
-
-func validateTenantIngPrfIDRequest(request *pb.TenantIngestionProfileIdRequest) error {
-	if request == nil || len(request.GetIngestionProfileId()) == 0 {
-		return errors.New("Invalid TenantIngestionProfileIdRequest: no Ingestion Profile ID data provided")
-	}
-
-	if len(request.GetTenantId()) == 0 {
-		return errors.New("Invalid TenantIngestionProfileIdRequest: no Tenant Id provided")
-	}
-
-	return nil
-}
-
-func validateMonitoredObjectRequest(request *pb.MonitoredObjectRequest) error {
-	if request == nil || request.GetData() == nil {
-		return errors.New("Invalid MonitoredObjectRequest: no Tenant Monitored Object data provided")
-	}
-
-	err := validateMonitoredObject(request.GetData())
-	if err != nil {
-		return err
-	}
-
-	if len(request.GetData().GetTenantId()) == 0 {
-		return errors.New("Invalid MonitoredObjectRequest: no Tenant Id provided")
-	}
-
-	return nil
-}
-
-func validateMonitoredObject(object *pb.MonitoredObject) error {
-	if len(object.GetDeviceName()) == 0 || len(object.GetObjectName()) == 0 {
-		return errors.New("Must provide both a Device Name and an Object Name")
-	}
-
-	return nil
-}
-
-func validateMonitoredObjectIDRequest(request *pb.MonitoredObjectIdRequest) error {
-	if request == nil || len(request.GetMonitoredObjectId()) == 0 {
-		return errors.New("Invalid MonitoredObjectIdRequest: no Monitored Object ID data provided")
-	}
-
-	if len(request.GetTenantId()) == 0 {
-		return errors.New("Invalid MonitoredObjectIdRequest: no Tenant Id provided")
-	}
-
-	return nil
 }

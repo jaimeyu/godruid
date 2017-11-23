@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
@@ -66,7 +65,9 @@ func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 }
 
 func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
+	restBindIP := cfg.GetString(gather.CK_server_rest_ip.String())
 	restBindPort := cfg.GetInt(gather.CK_server_rest_port.String())
+	grpcBindIP := cfg.GetString(gather.CK_server_grpc_ip.String())
 	grpcBindPort := cfg.GetInt(gather.CK_server_grpc_port.String())
 
 	ctx := context.Background()
@@ -79,30 +80,24 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
 	// Register the Admin Service
-	if err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("localhost:%d", grpcBindPort), opts); err != nil {
+	if err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
 		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 
 	// Register the Tenant Service
-	if err := pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("localhost:%d", grpcBindPort), opts); err != nil {
+	if err := pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
 		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 
 	// Add in handling for non protobuf generated API endpoints:
 	gatherServer.pouchSH.RegisterAPIHandlers(gatherServer.mux)
 
-	// // Register the PouchDBPlugin Service
-	// if err := pb.RegisterPouchDBPluginServiceHandlerFromEndpoint(ctx, gwmux, fmt.Sprintf("localhost:%d", grpcBindPort), opts); err != nil {
-	// 	logger.Log.Fatalf("failed to start REST service: %s", err.Error())
-	// }
-
-	// Handle all the generated gRPC REST GW calls from the same overall mux
-	// mux.Handle("/api/v1/", gwmux)
-
-	logger.Log.Infof("REST service intiated on port: %d", restBindPort)
-	originsOption := gh.AllowedOrigins([]string{"http://localhost:4200"})
+	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
+	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)
+	originsOption := gh.AllowedOrigins(allowedOrigins)
 	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
 	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
+	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
 	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), gh.CORS(originsOption, methodsOption, headersOption, gh.AllowCredentials())(gatherServer))
 
 }
@@ -128,10 +123,6 @@ func main() {
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)
-	v.WatchConfig()
-	v.OnConfigChange(func(e fsnotify.Event) {
-		logger.Log.Debugf("Config changed: %s", e.Name)
-	})
 
 	debug := cfg.GetBool(gather.CK_args_debug.String())
 	if debug {

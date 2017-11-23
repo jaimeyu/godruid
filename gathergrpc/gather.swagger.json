@@ -329,6 +329,70 @@
         ]
       }
     },
+    "/api/v1/tenants/{data.tenantId}/monitored-objects": {
+      "post": {
+        "summary": "Create a MonitoredObject scoped to a Single Tenant.",
+        "operationId": "CreateMonitoredObject",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update a MonitoredObject scoped to a single Tenant.",
+        "operationId": "UpdateMonitoredObject",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{data.tenantId}/users": {
       "post": {
         "summary": "Create a User scoped to a Single Tenant.",
@@ -513,6 +577,66 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}": {
+      "get": {
+        "summary": "Retrieve a MonitoredObject scoped to a single Tenant.",
+        "operationId": "GetMonitoredObject",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "monitoredObjectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a MonitoredObject scoped to a single Tenant.",
+        "operationId": "DeleteMonitoredObject",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "monitoredObjectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{tenantId}/users/{userId}": {
       "get": {
         "summary": "Retrieve a User scoped to a single Tenant.",
@@ -646,6 +770,31 @@
         ]
       }
     },
+    "/api/v1/tenants/{value}/monitored-object-list": {
+      "get": {
+        "summary": "Retrieve all MonitoredObject scoped to a single Tenant.",
+        "operationId": "GetAllMonitoredObjects",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{value}/user-list": {
       "get": {
         "summary": "Retrieve all Users scoped to a single Tenant.",
@@ -673,6 +822,23 @@
     }
   },
   "definitions": {
+    "MonitoredObjectDeviceType": {
+      "type": "string",
+      "enum": [
+        "NOT_KNOWN",
+        "ACCEDIAN_NID",
+        "ACCEDIAN_VNID"
+      ],
+      "default": "NOT_KNOWN"
+    },
+    "MonitoredObjectMonitoredObjectType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "TWAMP"
+      ],
+      "default": "UNKNOWN"
+    },
     "gathergrpcAdminUser": {
       "type": "object",
       "properties": {
@@ -751,6 +917,89 @@
         }
       },
       "description": "AdminUserResponse - wrapper for passing AdminUser\ndata as a response from the service."
+    },
+    "gathergrpcMonitoredObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "actuatorType": {
+          "$ref": "#/definitions/MonitoredObjectDeviceType"
+        },
+        "actuatorName": {
+          "type": "string"
+        },
+        "reflectorType": {
+          "$ref": "#/definitions/MonitoredObjectDeviceType"
+        },
+        "reflectorName": {
+          "type": "string"
+        },
+        "objectName": {
+          "type": "string"
+        },
+        "objectType": {
+          "$ref": "#/definitions/MonitoredObjectMonitoredObjectType"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "MonitoredObject - describes a unique device/object which is reporting \ndata from the network."
+    },
+    "gathergrpcMonitoredObjectListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+          }
+        }
+      },
+      "description": "MonitoredObjectListResponse - Wrapper for requests which return a list of MonitoredObjects \nscoped to a single Tenant."
+    },
+    "gathergrpcMonitoredObjectRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcMonitoredObject"
+        }
+      },
+      "description": "MonitoredObjectRequest - Wrapper for requests involving a MonitoredObject that are \nscoped to a single Tenant."
+    },
+    "gathergrpcMonitoredObjectResponse": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcMonitoredObject"
+        }
+      },
+      "description": "MonitoredObjectRequest - Wrapper for responses involving a MonitoredObject that are \nscoped to a single Tenant."
     },
     "gathergrpcTenantDescriptor": {
       "type": "object",

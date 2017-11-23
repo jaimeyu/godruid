@@ -143,11 +143,11 @@ message TenantUserIdRequest {
 // data from the network.
 message MonitoredObject {
     enum MonitoredObjectType {
-        UNKNOWN = 0;
+        MO_UNKNOWN = 0;
         TWAMP = 1;
     }
     enum DeviceType {
-        NOT_KNOWN = 0;
+        DT_UNKNOWN = 0;
         ACCEDIAN_NID = 1;
         ACCEDIAN_VNID = 2;
     }

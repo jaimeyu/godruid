@@ -53,7 +53,7 @@ func (m *TenantDescriptor) GetState() UserState {
 	if m != nil {
 		return m.State
 	}
-	return UserState_UNKNOWN
+	return UserState_USER_UNKNOWN
 }
 
 func (m *TenantDescriptor) GetCreatedTimestamp() int64 {
@@ -220,7 +220,7 @@ func (m *AdminUser) GetState() UserState {
 	if m != nil {
 		return m.State
 	}
-	return UserState_UNKNOWN
+	return UserState_USER_UNKNOWN
 }
 
 func (m *AdminUser) GetCreatedTimestamp() int64 {

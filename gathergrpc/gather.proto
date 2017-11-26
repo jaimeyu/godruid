@@ -7,6 +7,7 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "gathergrpc/adminModels.proto";
 import "gathergrpc/tenantModels.proto";
+import "gathergrpc/metricModels.proto";
 
 
 // Service responsible for provisioning Administration
@@ -239,5 +240,17 @@ service TenantProvisioningService {
             get: "/api/v1/tenants/{value}/monitored-object-list"
         };
     }
+}
+
+// Service responsible for retrieving aggregate metrics from druid 
+service MetricsService {
+    
+    // Retrieve and Administrative User by id. 
+    rpc GetThresholdCrossing(ThresholdCrossingRequest) returns (ThresholdCrossingResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/threshold-crossing"
+        };
+    }
+  
 }
 

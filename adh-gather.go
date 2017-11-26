@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
+	"github.com/accedian/adh-gather/datastore/druid"
 	"github.com/accedian/adh-gather/gather"
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
@@ -134,7 +135,11 @@ func main() {
 	logger.Log.Infof("Starting adh-gather broker with config '%s'", configFilePath)
 
 	// Start the REST and gRPC Services
-	gatherServer := newServer()
-	go restHandlerStart(gatherServer, cfg)
-	gRPCHandlerStart(gatherServer, cfg)
+	// gatherServer := newServer()
+	// go restHandlerStart(gatherServer, cfg)
+	// gRPCHandlerStart(gatherServer, cfg)
+
+	dc := druid.NewDruidDatasctoreClient()
+	dc.GetThresholdCrossing("")
+	// dc.GetStats("", "")
 }

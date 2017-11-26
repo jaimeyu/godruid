@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package gathergrpc;
+
+message ThresholdCrossingResponse {
+  string timestamp = 1;
+  map<string, float> result = 2;
+}
+
+message ThresholdCrossingRequest {
+  string thresholdProfileName = 1;
+  string interval = 2;
+  string tenant = 3;
+  string domain = 4;
+}

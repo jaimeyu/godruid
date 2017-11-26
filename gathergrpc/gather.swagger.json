@@ -819,6 +819,49 @@
           "TenantProvisioningService"
         ]
       }
+    },
+    "/api/v1/threshold-crossing": {
+      "get": {
+        "summary": "Retrieve and Administrative User by id.",
+        "operationId": "GetThresholdCrossing",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcThresholdCrossingResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "thresholdProfileName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1280,6 +1323,21 @@
         }
       },
       "description": "TenantUserResponse - wrapper for responses to requests that involve a User that\nis scoped to a single Tenant."
+    },
+    "gathergrpcThresholdCrossingResponse": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      }
     },
     "gathergrpcUserState": {
       "type": "string",

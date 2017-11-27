@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package gathergrpc;
+
+// Enumeration of User state. 
+enum UserState {
+    USER_UNKNOWN = 0;
+    INVITED = 1;
+    ACTIVE = 2;
+    SUSPENDED = 3;
+    PENDING_DELETE = 4;
+}

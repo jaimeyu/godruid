@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/accedian/adh-gather/logger"
 	couchdb "github.com/leesper/couchdb-golang"
@@ -188,4 +189,112 @@ func accessDBChangesFeed(db *couchdb.Database, queryParams *url.Values) (map[str
 	}
 
 	return fetchedData, nil
+}
+
+// storeData - encapsulates logic required for basic data storage for objects that follow the basic data format.
+func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	// Convert to generic object
+	storeFormat, err := convertDataToCouchDbSupportedModel(data)
+	if err != nil {
+		return err
+	}
+
+	// Give the data a known type, and timestamps:
+	objectData := storeFormat["data"].(map[string]interface{})
+	objectData["datatype"] = dataType
+	objectData["createdTimestamp"] = time.Now().Unix()
+	objectData["lastModifiedTimestamp"] = objectData["createdTimestamp"]
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(storeFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Populate the response
+	if err = convertGenericCouchDataToObject(storeFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", dataTypeLogStr, dataContainer)
+	return nil
+}
+
+// updateData - encapsulates logic required for basic data updates for objects that follow the basic data format.
+func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	// Convert to generic object
+	storeFormat, err := convertDataToCouchDbSupportedModel(data)
+	if err != nil {
+		return err
+	}
+
+	// Give the data a known type, and timestamps:
+	objectData := storeFormat["data"].(map[string]interface{})
+	objectData["datatype"] = dataType
+	objectData["lastModifiedTimestamp"] = time.Now().Unix()
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(storeFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Populate the response
+	if err = convertGenericCouchDataToObject(storeFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, dataContainer)
+	return nil
+}
+
+// getData - encapsulates logic required for basic data retrieval for objects that follow the basic data format.
+func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	// Retrieve the object data from CouchDB
+	fetchedObject, err := getByDocID(dataID, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	if err = convertGenericCouchDataToObject(fetchedObject, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, dataContainer)
+	return nil
+}
+
+// deleteData - encapsulates logic required for basic data deletion for objects that follow the basic data format.
+func deleteData(dbName string, dataID string, dataTypeLogStr string) error {
+	// Perform the delete operation on CouchDB
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	if err = deleteByDocID(dataID, dataTypeLogStr, db); err != nil {
+		return err
+	}
+
+	logger.Log.Debugf("Deleted %s: %s\n", dataTypeLogStr)
+	return nil
 }

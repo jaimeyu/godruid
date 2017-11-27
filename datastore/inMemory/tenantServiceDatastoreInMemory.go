@@ -104,3 +104,33 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantIngestionProfile(tenantIn
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: DeleteTenantIngestionProfile not implemented")
 }
+
+// CreateMonitoredObject - InMemory implementation of CreateMonitoredObject
+func (tsd *TenantServiceDatastoreInMemory) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: CreateMonitoredObject not implemented")
+}
+
+// UpdateMonitoredObject - InMemory implementation of UpdateMonitoredObject
+func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: UpdateMonitoredObject not implemented")
+}
+
+// GetMonitoredObject - InMemory implementation of GetMonitoredObject
+func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetMonitoredObject not implemented")
+}
+
+// DeleteMonitoredObject - InMemory implementation of DeleteMonitoredObject
+func (tsd *TenantServiceDatastoreInMemory) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: DeleteMonitoredObject not implemented")
+}
+
+// GetAllMonitoredObjects - InMemory implementation of GetAllMonitoredObjects
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetAllMonitoredObjects not implemented")
+}

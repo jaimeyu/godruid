@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package gathergrpc;
+
+import "gathergrpc/commonModels.proto";
+
+
+// Provides the metadata of a Tenant. This information is used to 
+// idetify/describe a full Tenant entity.
+message TenantDescriptor {
+    string datatype = 3;
+
+    string name = 4;
+    string urlSubdomain = 5;
+    UserState state = 6;
+
+    int64 createdTimestamp = 7;
+    int64 lastModifiedTimestamp = 8; 
+}
+
+// TenantDescriptorRequest - wrapper for passing TenantDescriptor
+// data as a request to the service.
+message TenantDescriptorRequest {
+    string _id = 1;
+    string _rev = 2;
+    TenantDescriptor data = 3;
+}
+
+// TenantDescriptorResponse - wrapper for passing TenantDescriptor
+// data as a response from the service.
+message TenantDescriptorResponse {
+    string _id = 1;
+    string _rev = 2;
+    TenantDescriptor data = 3;
+}
+
+// Wrapper message to provide a response in the form of
+// a container of multiple TenantDescriptor objects.
+message TenantDescriptorListResponse {
+    repeated TenantDescriptorResponse data = 1;
+}
+
+// User data for an Adminstrative User.
+message AdminUser {
+    string datatype = 3;
+
+    string username = 4;
+    string password = 5;
+    bool sendOnboardingEmail = 6;
+    string onboardingToken = 7;
+    bool userVerified = 8;
+    UserState state = 9;
+
+    int64 createdTimestamp = 10;
+    int64 lastModifiedTimestamp = 11;
+}
+
+// AdminUserRequest - wrapper for passing AdminUser
+// data as a request to the service.
+message AdminUserRequest {
+    string _id = 1;
+    string _rev = 2;
+    AdminUser data = 3;
+}
+
+// AdminUserResponse - wrapper for passing AdminUser
+// data as a response from the service.
+message AdminUserResponse {
+    string _id = 1;
+    string _rev = 2;
+    AdminUser data = 3;
+}
+
+// Wrapper message to provide a response in the form of
+// a container of multiple AdminUser objects.
+message AdminUserListResponse {
+    repeated AdminUserResponse data = 1;
+}

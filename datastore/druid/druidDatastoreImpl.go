@@ -6,6 +6,8 @@ import (
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/godruid"
+
+	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
 type DruidDatastoreClient struct {
@@ -14,18 +16,18 @@ type DruidDatastoreClient struct {
 	dClient godruid.Client
 }
 
-func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) (string, error) {
+func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error) {
 	client := dc.dClient
 
 	err := client.Query(query)
 
-	fmt.Println(string(query.GetRawJSON()))
+	//	fmt.Println(string(query.GetRawJSON()))
 
 	if err != nil {
 		fmt.Println("ERROR----", err)
 	}
 
-	return "nil", nil
+	return query.GetRawJSON(), nil
 }
 
 func NewDruidDatasctoreClient() *DruidDatastoreClient {
@@ -43,16 +45,23 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	}
 }
 
-func (dc *DruidDatastoreClient) GetStats(metric string, threshold string) (string, error) {
+func (dc *DruidDatastoreClient) GetStats(metric string) (string, error) {
 
-	query := StatsQuery("NPAVKPI", "delayP95", "", "2017-11-02/2100-01-01")
+	query := StatsQuery("NPAVKPI2", "delayP95", "", "2017-11-02/2100-01-01")
 	dc.executeQuery(query)
 	return "nil", nil
 }
 
-func (dc *DruidDatastoreClient) GetThresholdCrossing(metric string) (string, error) {
-	query := ThresholdCrossingQuery("NPAVKPI", "delayP95", "", "2017-11-02/2100-01-01")
-	dc.executeQuery(query)
+func (dc *DruidDatastoreClient) GetThresholdCrossing(metric string, threshold string) (*pb.ThresholdCrossingResponse, error) {
 
-	return "nil", nil
+	fmt.Println("ASDLKJASKLJD")
+	query := ThresholdCrossingQuery("NPAVKPI2", "delayP95", "", "2017-11-02/2100-01-01")
+	response, _ := dc.executeQuery(query)
+
+	rr := &pb.ThresholdCrossingResponse{
+		Timestamp: "test",
+		Result:    response,
+	}
+
+	return rr, nil
 }

@@ -1331,11 +1331,8 @@
           "type": "string"
         },
         "result": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "number",
-            "format": "float"
-          }
+          "type": "string",
+          "format": "byte"
         }
       }
     },

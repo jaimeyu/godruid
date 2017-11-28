@@ -8,6 +8,7 @@ It is generated from these files:
 	gathergrpc/commonModels.proto
 	gathergrpc/adminModels.proto
 	gathergrpc/tenantModels.proto
+	gathergrpc/metricModels.proto
 	gathergrpc/gather.proto
 
 It has these top-level messages:
@@ -38,6 +39,8 @@ It has these top-level messages:
 	MonitoredObjectResponse
 	MonitoredObjectListResponse
 	MonitoredObjectIdRequest
+	ThresholdCrossingResponse
+	ThresholdCrossingRequest
 */
 package gathergrpc
 

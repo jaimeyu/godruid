@@ -4,7 +4,7 @@ package gathergrpc;
 
 message ThresholdCrossingResponse {
   string timestamp = 1;
-  map<string, float> result = 2;
+  bytes result = 2;
 }
 
 message ThresholdCrossingRequest {

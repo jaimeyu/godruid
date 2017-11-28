@@ -12,7 +12,9 @@ protoc -I/usr/local/include -I. \
   gathergrpc/commonModels.proto \
   gathergrpc/adminModels.proto  \
   gathergrpc/tenantModels.proto \
+  gathergrpc/metricModels.proto \
   gathergrpc/gather.proto 
+  
         
 
 # Generate the REST handler for the gRPC service

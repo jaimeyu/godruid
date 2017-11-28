@@ -16,6 +16,7 @@ import (
 type GRPCServiceHandler struct {
 	ash *AdminServiceHandler
 	tsh *TenantServiceHandler
+	msh *MetricServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -26,6 +27,7 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	result.ash = CreateAdminServiceHandler()
 	result.tsh = CreateTenantServiceHandler()
+	result.msh = CreateMetricServiceHandler()
 
 	return result
 }
@@ -206,5 +208,5 @@ func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain
 func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.ThresholdCrossingResponse, error) {
-	return gsh.ash.GetAdminUser(ctx, userID)
+	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq)
 }

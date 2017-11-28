@@ -4,7 +4,7 @@ package gathergrpc;
 
 // Enumeration of User state. 
 enum UserState {
-    UNKNOWN = 0;
+    USER_UNKNOWN = 0;
     INVITED = 1;
     ACTIVE = 2;
     SUSPENDED = 3;

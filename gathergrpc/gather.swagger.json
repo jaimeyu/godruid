@@ -868,19 +868,19 @@
     "MonitoredObjectDeviceType": {
       "type": "string",
       "enum": [
-        "NOT_KNOWN",
+        "DT_UNKNOWN",
         "ACCEDIAN_NID",
         "ACCEDIAN_VNID"
       ],
-      "default": "NOT_KNOWN"
+      "default": "DT_UNKNOWN"
     },
     "MonitoredObjectMonitoredObjectType": {
       "type": "string",
       "enum": [
-        "UNKNOWN",
+        "MO_UNKNOWN",
         "TWAMP"
       ],
-      "default": "UNKNOWN"
+      "default": "MO_UNKNOWN"
     },
     "gathergrpcAdminUser": {
       "type": "object",
@@ -1339,13 +1339,13 @@
     "gathergrpcUserState": {
       "type": "string",
       "enum": [
-        "UNKNOWN",
+        "USER_UNKNOWN",
         "INVITED",
         "ACTIVE",
         "SUSPENDED",
         "PENDING_DELETE"
       ],
-      "default": "UNKNOWN",
+      "default": "USER_UNKNOWN",
       "description": "Enumeration of User state."
     }
   }

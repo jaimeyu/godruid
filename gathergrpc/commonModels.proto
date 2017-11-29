@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package gathergrpc;
 
 // Enumeration of User state. 
@@ -9,4 +11,62 @@ enum UserState {
     ACTIVE = 2;
     SUSPENDED = 3;
     PENDING_DELETE = 4;
+}
+
+// JSON API Envelope
+// The following messages follow the JSON API spec as defined here:
+// http://jsonapi.org/format/
+
+message JSONAPIObject {
+  google.protobuf.Any data = 1;
+  repeated Error errors = 2;
+  map<string, string> metadata = 3;  
+  map<string, string> jsonapi = 4;
+  Links links = 5;
+  repeated Resource included = 6;
+}
+
+message Error {
+  string id = 1;
+  Links links = 2;
+  string status = 3;
+  string code = 4;
+  string title = 5;
+  string detail = 6;
+  map<string, string> metadata = 7;
+  map<string, string> source = 8;
+}
+
+// Links technically allow any valid json string as a key,
+// we obviously can't do this, so we have to stick to the following.
+message Links {
+  message Related {
+    string href = 1;
+    map<string, string> metadata = 2;  
+  }
+
+  Related related = 1;
+  string self = 2;
+  string first = 3;
+  string next = 4;
+  string prev = 5;
+  string last = 6;
+  string about = 7;
+  string article = 8;  
+}
+
+message Resource {
+  string id = 1;
+  string type = 2;
+  map<string,string> attributes = 3;
+  Links links = 4;
+  map<string, string> metadata = 5;
+  Relationships relationships = 6;
+}
+
+message Relationships {
+  Links links = 1;
+  google.protobuf.Any data = 2;
+  map<string, string> metadata = 3;    
+  
 }

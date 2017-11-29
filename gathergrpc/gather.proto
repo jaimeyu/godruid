@@ -8,6 +8,7 @@ import "google/protobuf/empty.proto";
 import "gathergrpc/adminModels.proto";
 import "gathergrpc/tenantModels.proto";
 import "gathergrpc/metricModels.proto";
+import "gathergrpc/commonModels.proto";
 
 
 // Service responsible for provisioning Administration
@@ -246,7 +247,7 @@ service TenantProvisioningService {
 service MetricsService {
     
     // Retrieve and Administrative User by id. 
-    rpc GetThresholdCrossing(ThresholdCrossingRequest) returns (ThresholdCrossingResponse) {
+    rpc GetThresholdCrossing(ThresholdCrossingRequest) returns (JSONAPIObject) {
         option (google.api.http) = {
             get: "/api/v1/threshold-crossing"
         };

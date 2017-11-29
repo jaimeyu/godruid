@@ -207,6 +207,6 @@ func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain
-func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.ThresholdCrossingResponse, error) {
+func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
 	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq)
 }

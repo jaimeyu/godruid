@@ -25,7 +25,7 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 }
 
 // GetThresholdCrossing
-func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.ThresholdCrossingResponse, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
 
 	// Issue request to DAO Layer to Get the requested Admin User
 

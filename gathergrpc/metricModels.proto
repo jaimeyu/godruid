@@ -2,9 +2,26 @@ syntax = "proto3";
 
 package gathergrpc;
 
-message ThresholdCrossingResponse {
+message ThresholdCrossingResult {
+  float total = 1;
+  float minorPercent = 2;
+  float minorRatio = 3;
+  float minorThreshold = 4;
+  float majorThreshold = 5;
+  float criticalRatio = 6;
+  float criticalThreshold = 7;
+  float criticalPercent = 8;
+  float majorPercent = 9;
+  float majorRatio = 10;
+}
+
+message ThresholdCrossing {
   string timestamp = 1;
-  bytes result = 2;
+  ThresholdCrossingResult result = 2;
+}
+
+message ThresholdCrossingResponse {
+   repeated ThresholdCrossing data = 1;
 }
 
 message ThresholdCrossingRequest {

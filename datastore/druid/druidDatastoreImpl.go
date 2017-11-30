@@ -128,8 +128,6 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	response, err := dc.executeQuery(query)
 
-	fmt.Println("RES_---.", string(response))
-
 	if err != nil {
 		return nil, err
 	}

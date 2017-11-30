@@ -51,8 +51,10 @@ func filterHelper(metric string, e *pb.Event) *godruid.Filter {
 func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
 
 	aggregations := make([]godruid.Aggregation, len(events)+1)
-
+	postAggregations := make([]godruid.PostAggregation, len(events)*2)
 	for i, e := range events {
+
+		name := e.Severity + "Threshold"
 
 		aggregations[i+1] = godruid.AggFiltered(
 			godruid.FilterAnd(
@@ -60,51 +62,31 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: e.Severity + "Threshold",
+				Name: name,
 			},
 		)
+
+		postAggregations[i] = godruid.PostAggArithmetic(e.Severity+"Ratio", "/", []godruid.PostAggregation{
+			godruid.PostAggFieldAccessor(name),
+			godruid.PostAggFieldAccessor("total"),
+		})
+
+		postAggregations[i+len(events)] = godruid.PostAggArithmetic(e.Severity+"Percent", "*", []godruid.PostAggregation{
+			godruid.PostAggFieldAccessor(e.Severity + "Ratio"),
+			godruid.PostAggConstant("", "100"),
+		})
 
 	}
 
 	aggregations[0] = godruid.AggCount("total")
 
 	return &godruid.QueryTimeseries{
-		QueryType:    "timeseries",
-		DataSource:   dataSource,
-		Granularity:  godruid.GranHour,
-		Context:      map[string]interface{}{"timeout": 60000},
-		Aggregations: aggregations,
-		PostAggregations: []godruid.PostAggregation{
-			godruid.PostAggArithmetic("minorRatio", "/", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("minorThreshold"),
-				godruid.PostAggFieldAccessor("total"),
-			}),
-
-			godruid.PostAggArithmetic("majorRatio", "/", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("majorThreshold"),
-				godruid.PostAggFieldAccessor("total"),
-			}),
-
-			godruid.PostAggArithmetic("criticalRatio", "/", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("criticalThreshold"),
-				godruid.PostAggFieldAccessor("total"),
-			}),
-
-			godruid.PostAggArithmetic("minorPercent", "*", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("minorRatio"),
-				godruid.PostAggConstant("", "100"),
-			}),
-
-			godruid.PostAggArithmetic("majorPercent", "*", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("majorRatio"),
-				godruid.PostAggConstant("", "100"),
-			}),
-
-			godruid.PostAggArithmetic("criticalPercent", "*", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("criticalRatio"),
-				godruid.PostAggConstant("", "100"),
-			}),
-		},
-		Intervals: []string{interval},
+		QueryType:        "timeseries",
+		DataSource:       dataSource,
+		Granularity:      godruid.GranHour,
+		Context:          map[string]interface{}{"timeout": 60000},
+		Aggregations:     aggregations,
+		PostAggregations: postAggregations,
+		Intervals:        []string{interval},
 	}
 }

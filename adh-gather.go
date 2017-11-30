@@ -159,7 +159,4 @@ func main() {
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)
 
-	// dc := druid.NewDruidDatasctoreClient()
-	// dc.GetThresholdCrossing("")
-	// dc.GetStats("", "")
 }

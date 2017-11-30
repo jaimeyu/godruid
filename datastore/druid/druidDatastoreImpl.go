@@ -79,22 +79,24 @@ func lookupThresholdProfile() *pb.ThresholdProfile {
 							Direction: "az",
 							Events: []*pb.Event{
 								&pb.Event{
-									Bound:    "upper",
-									Unit:     "percent",
-									Severity: "minor",
-									Value:    500,
+									UpperBound:  30000,
+									UpperStrict: true,
+									Unit:        "percent",
+									Severity:    "minor",
 								},
 								&pb.Event{
-									Bound:    "upper",
-									Unit:     "percent",
-									Severity: "major",
-									Value:    1000,
+									UpperBound:  75000,
+									LowerBound:  30000,
+									UpperStrict: true,
+									LowerStrict: false,
+									Unit:        "percent",
+									Severity:    "major",
 								},
 								&pb.Event{
-									Bound:    "upper",
-									Unit:     "percent",
-									Severity: "critical",
-									Value:    1500,
+									LowerBound:  75000,
+									LowerStrict: false,
+									Unit:        "percent",
+									Severity:    "critical",
 								},
 							},
 						},
@@ -125,6 +127,8 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	query := ThresholdCrossingQuery(table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, events)
 
 	response, err := dc.executeQuery(query)
+
+	fmt.Println("RES_---.", string(response))
 
 	if err != nil {
 		return nil, err

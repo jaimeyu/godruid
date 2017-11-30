@@ -31,44 +31,49 @@ func StatsQuery(dataSource string, metric string, threshold string, interval str
 	}
 }
 
+func filterHelper(metric string, e *pb.Event) *godruid.Filter {
+
+	if e.UpperBound != 0 && e.LowerBound != 0 {
+		return godruid.FilterLowerUpperBound(metric, "numeric", e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
+
+	}
+
+	if e.UpperBound != 0 {
+		return godruid.FilterUpperBound(metric, "numeric", e.UpperBound, e.UpperStrict)
+	}
+
+	if e.LowerBound != 0 {
+		return godruid.FilterLowerBound(metric, "numeric", e.LowerBound, e.LowerStrict)
+	}
+	return nil
+}
+
 func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
 
-	return &godruid.QueryTimeseries{
-		QueryType:   "timeseries",
-		DataSource:  dataSource,
-		Granularity: godruid.GranHour,
-		Context:     map[string]interface{}{"timeout": 60000},
+	aggregations := make([]godruid.Aggregation, len(events)+1)
 
-		Aggregations: []godruid.Aggregation{
-			godruid.AggCount("total"),
-			godruid.AggFiltered(
-				godruid.FilterAnd(
-					godruid.FilterUpperBound(metric, "numeric", "30000", true),
-				),
-				&godruid.Aggregation{
-					Type: "count",
-					Name: "minorThreshold",
-				},
+	for i, e := range events {
+
+		aggregations[i+1] = godruid.AggFiltered(
+			godruid.FilterAnd(
+				filterHelper(metric, e),
 			),
-			godruid.AggFiltered(
-				godruid.FilterAnd(
-					godruid.FilterLowerUpperBound(metric, "numeric", "30000", false, "75000", true),
-				),
-				&godruid.Aggregation{
-					Type: "count",
-					Name: "majorThreshold",
-				},
-			),
-			godruid.AggFiltered(
-				godruid.FilterAnd(
-					godruid.FilterLowerBound(metric, "numeric", "75000", false),
-				),
-				&godruid.Aggregation{
-					Type: "count",
-					Name: "criticalThreshold",
-				},
-			),
-		},
+			&godruid.Aggregation{
+				Type: "count",
+				Name: e.Severity + "Threshold",
+			},
+		)
+
+	}
+
+	aggregations[0] = godruid.AggCount("total")
+
+	return &godruid.QueryTimeseries{
+		QueryType:    "timeseries",
+		DataSource:   dataSource,
+		Granularity:  godruid.GranHour,
+		Context:      map[string]interface{}{"timeout": 60000},
+		Aggregations: aggregations,
 		PostAggregations: []godruid.PostAggregation{
 			godruid.PostAggArithmetic("minorRatio", "/", []godruid.PostAggregation{
 				godruid.PostAggFieldAccessor("minorThreshold"),

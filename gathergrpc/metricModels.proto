@@ -4,7 +4,7 @@ package gathergrpc;
 
 message Event {
   string unit = 1;
-  string severity = 2;
+  string type = 2;
   float upperBound = 3;
   float lowerBound = 4;
   bool upperStrict = 5;

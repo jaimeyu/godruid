@@ -54,7 +54,7 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 	postAggregations := make([]godruid.PostAggregation, len(events)*2)
 	for i, e := range events {
 
-		name := e.Severity + "Threshold"
+		name := e.Type + "Threshold"
 
 		aggregations[i+1] = godruid.AggFiltered(
 			godruid.FilterAnd(
@@ -66,13 +66,13 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 			},
 		)
 
-		postAggregations[i] = godruid.PostAggArithmetic(e.Severity+"Ratio", "/", []godruid.PostAggregation{
+		postAggregations[i] = godruid.PostAggArithmetic(e.Type+"Ratio", "/", []godruid.PostAggregation{
 			godruid.PostAggFieldAccessor(name),
 			godruid.PostAggFieldAccessor("total"),
 		})
 
-		postAggregations[i+len(events)] = godruid.PostAggArithmetic(e.Severity+"Percent", "*", []godruid.PostAggregation{
-			godruid.PostAggFieldAccessor(e.Severity + "Ratio"),
+		postAggregations[i+len(events)] = godruid.PostAggArithmetic(e.Type+"Percent", "*", []godruid.PostAggregation{
+			godruid.PostAggFieldAccessor(e.Type + "Ratio"),
 			godruid.PostAggConstant("", "100"),
 		})
 

@@ -1,6 +1,9 @@
 package druid
 
-import "github.com/accedian/godruid"
+import (
+	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/godruid"
+)
 
 func StatsQuery(dataSource string, metric string, threshold string, interval string) *godruid.QueryTimeseries {
 	return &godruid.QueryTimeseries{
@@ -28,7 +31,8 @@ func StatsQuery(dataSource string, metric string, threshold string, interval str
 	}
 }
 
-func ThresholdCrossingQuery(dataSource string, metric string, threshold string, interval string) *godruid.QueryTimeseries {
+func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
+
 	return &godruid.QueryTimeseries{
 		QueryType:   "timeseries",
 		DataSource:  dataSource,

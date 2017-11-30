@@ -20,3 +20,7 @@ args:
   pouchplugindb:
     impl: 1
   debug: true
+
+druid:
+  server: "https://broker.proto.npav.accedian.net"
+  table: "NPAVKPI2"

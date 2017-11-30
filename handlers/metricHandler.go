@@ -27,11 +27,7 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 // GetThresholdCrossing
 func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
 
-	// Issue request to DAO Layer to Get the requested Admin User
-
-	fmt.Println(ctx)
-
-	result, err := msh.druidDB.GetThresholdCrossing("", "")
+	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())

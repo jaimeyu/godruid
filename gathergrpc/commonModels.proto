@@ -18,12 +18,18 @@ enum UserState {
 // http://jsonapi.org/format/
 
 message JSONAPIObject {
-  google.protobuf.Any data = 1;
+  repeated Data data = 1;
   repeated Error errors = 2;
   map<string, string> metadata = 3;  
   map<string, string> jsonapi = 4;
   Links links = 5;
   repeated Resource included = 6;
+}
+
+message Data {
+  string id = 1;
+  string type = 2;
+  google.protobuf.Any attributes = 3;
 }
 
 message Error {

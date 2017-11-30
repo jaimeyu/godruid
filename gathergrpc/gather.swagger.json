@@ -856,6 +856,30 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "objectType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -975,6 +999,20 @@
       },
       "description": "AdminUserResponse - wrapper for passing AdminUser\ndata as a response from the service."
     },
+    "gathergrpcData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/definitions/protobufAny"
+        }
+      }
+    },
     "gathergrpcError": {
       "type": "object",
       "properties": {
@@ -1014,7 +1052,10 @@
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/protobufAny"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcData"
+          }
         },
         "errors": {
           "type": "array",

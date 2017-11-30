@@ -2,6 +2,31 @@ syntax = "proto3";
 
 package gathergrpc;
 
+message Event {
+  string bound = 1;
+  string unit = 2;
+  float value = 3;
+  string severity = 4;
+}
+
+message MetricData {
+  string direction = 1;
+  repeated Event events = 2;
+}
+
+message Metric {
+  string id = 1;
+  repeated MetricData data = 2;
+}
+
+message Threshold {
+  repeated Metric metrics = 1;
+}
+
+message ThresholdProfile {
+  Threshold twamp = 1;
+}
+
 message ThresholdCrossingResult {
   float total = 1;
   float minorPercent = 2;
@@ -29,4 +54,8 @@ message ThresholdCrossingRequest {
   string interval = 2;
   string tenant = 3;
   string domain = 4;
-}
+  string granularity = 5;
+  string objectType = 6;
+  string direction = 7;
+  string metric = 8;
+} 

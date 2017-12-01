@@ -202,6 +202,8 @@ func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 	ingPrf.ScpPassword = "password"
 	ingPrf.TenantId = tenantId
 
+	ingPrf.ThresholdProfile = []*pb.ThresholdProfile{}
+
 	return &ingPrf
 }
 

@@ -51,7 +51,7 @@ func filterHelper(metric string, e *pb.Event) *godruid.Filter {
 func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
 
 	aggregations := make([]godruid.Aggregation, len(events)+1)
-	postAggregations := make([]godruid.PostAggregation, len(events)*2)
+
 	for i, e := range events {
 
 		name := e.Type + "Threshold"
@@ -65,28 +65,16 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 				Name: name,
 			},
 		)
-
-		postAggregations[i] = godruid.PostAggArithmetic(e.Type+"Ratio", "/", []godruid.PostAggregation{
-			godruid.PostAggFieldAccessor(name),
-			godruid.PostAggFieldAccessor("total"),
-		})
-
-		postAggregations[i+len(events)] = godruid.PostAggArithmetic(e.Type+"Percent", "*", []godruid.PostAggregation{
-			godruid.PostAggFieldAccessor(e.Type + "Ratio"),
-			godruid.PostAggConstant("", "100"),
-		})
-
 	}
 
 	aggregations[0] = godruid.AggCount("total")
 
 	return &godruid.QueryTimeseries{
-		QueryType:        "timeseries",
-		DataSource:       dataSource,
-		Granularity:      godruid.GranHour,
-		Context:          map[string]interface{}{"timeout": 60000},
-		Aggregations:     aggregations,
-		PostAggregations: postAggregations,
-		Intervals:        []string{interval},
+		QueryType:    "timeseries",
+		DataSource:   dataSource,
+		Granularity:  godruid.GranHour,
+		Context:      map[string]interface{}{"timeout": 60000},
+		Aggregations: aggregations,
+		Intervals:    []string{interval},
 	}
 }

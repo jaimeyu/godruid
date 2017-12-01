@@ -85,7 +85,7 @@ func lookupThresholdProfile() *pb.ThresholdProfile {
 									Type:        "minor",
 								},
 								&pb.Event{
-									UpperBound:  75000,
+									UpperBound:  50000,
 									LowerBound:  30000,
 									UpperStrict: true,
 									LowerStrict: false,
@@ -93,7 +93,7 @@ func lookupThresholdProfile() *pb.ThresholdProfile {
 									Type:        "major",
 								},
 								&pb.Event{
-									LowerBound:  75000,
+									LowerBound:  50000,
 									LowerStrict: false,
 									Unit:        "percent",
 									Type:        "critical",

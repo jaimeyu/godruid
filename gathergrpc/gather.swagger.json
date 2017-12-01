@@ -1048,6 +1048,33 @@
         }
       }
     },
+    "gathergrpcEvent": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "upperBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "lowerBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "upperStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "lowerStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
     "gathergrpcJSONAPIObject": {
       "type": "object",
       "properties": {
@@ -1115,6 +1142,34 @@
         }
       },
       "description": "Links technically allow any valid json string as a key,\nwe obviously can't do this, so we have to stick to the following."
+    },
+    "gathergrpcMetric": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcMetricData"
+          }
+        }
+      }
+    },
+    "gathergrpcMetricData": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcEvent"
+          }
+        }
+      }
     },
     "gathergrpcMonitoredObject": {
       "type": "object",
@@ -1403,6 +1458,12 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "thresholdProfile": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcThresholdProfile"
+          }
         }
       },
       "description": "TenantIngestionProfile - model for the singleton object that \ngoverns what data is displayed for a Tenant."
@@ -1524,6 +1585,25 @@
         }
       },
       "description": "TenantUserResponse - wrapper for responses to requests that involve a User that\nis scoped to a single Tenant."
+    },
+    "gathergrpcThreshold": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcMetric"
+          }
+        }
+      }
+    },
+    "gathergrpcThresholdProfile": {
+      "type": "object",
+      "properties": {
+        "twamp": {
+          "$ref": "#/definitions/gathergrpcThreshold"
+        }
+      }
     },
     "gathergrpcUserState": {
       "type": "string",

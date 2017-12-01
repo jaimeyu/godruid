@@ -76,3 +76,32 @@ message Relationships {
   map<string, string> metadata = 3;    
   
 }
+
+// Threshold Profile
+
+message Event {
+  string unit = 1;
+  string type = 2;
+  float upperBound = 3;
+  float lowerBound = 4;
+  bool upperStrict = 5;
+  bool lowerStrict = 6;
+}
+
+message MetricData {
+  string direction = 1;
+  repeated Event events = 2;
+}
+
+message Metric {
+  string id = 1;
+  repeated MetricData data = 2;
+}
+
+message Threshold {
+  repeated Metric metrics = 1;
+}
+
+message ThresholdProfile {
+  Threshold twamp = 1;
+}

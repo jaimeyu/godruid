@@ -69,6 +69,8 @@ message TenantIngestionProfile {
 
     int64 createdTimestamp = 5;
     int64 lastModifiedTimestamp = 6;
+
+    repeated ThresholdProfile thresholdProfile = 7;
 }
 
 // TenantIngestionProfileRequest - wrapper for requests that involve the

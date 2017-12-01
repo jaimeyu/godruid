@@ -5,6 +5,9 @@ import (
 	"github.com/accedian/godruid"
 )
 
+// StatsQuery - query that returns min/max/sum/mean/median for a given metric
+// peyo TODO: this isn't parameterized yet, also not sure we're actually going to
+// be using this query.
 func StatsQuery(dataSource string, metric string, threshold string, interval string) *godruid.QueryTimeseries {
 	return &godruid.QueryTimeseries{
 		QueryType:   "timeseries",
@@ -48,6 +51,8 @@ func filterHelper(metric string, e *pb.Event) *godruid.Filter {
 	return nil
 }
 
+// ThresholdCrossingQuery - Query that returns a count of events that crossed a given
+// threshold, for a given metric.
 func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
 
 	aggregations := make([]godruid.Aggregation, len(events)+1)

@@ -14,6 +14,8 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
+// DruidDatastoreClient - struct responsible for handling
+// database operations for druid
 type DruidDatastoreClient struct {
 	server     string
 	cfg        config.Provider
@@ -44,6 +46,9 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 	return query.GetRawJSON(), nil
 }
 
+// NewDruidDatasctoreClient - Constructor for DruidDatastoreClient object
+// initializes the godruid client, and retrieves auth token
+// peyo TODO: the auth functionality here needs to be changed, this is only valid for dev
 func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
 	server := cfg.GetString(gather.CK_druid_server.String())
@@ -60,6 +65,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	}
 }
 
+// peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetStats(metric string) (string, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 	query := StatsQuery(table, metric, "", "2017-11-02/2100-01-01")
@@ -67,6 +73,8 @@ func (dc *DruidDatastoreClient) GetStats(metric string) (string, error) {
 	return "nil", nil
 }
 
+// peyo TODO : this should query couchDB and get the actual threshold profile
+// will do this once we have threshold profiles in couch
 func lookupThresholdProfile() *pb.ThresholdProfile {
 
 	return &pb.ThresholdProfile{
@@ -107,6 +115,9 @@ func lookupThresholdProfile() *pb.ThresholdProfile {
 	}
 }
 
+// GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
+// result in a JSON API wrapper.
+// peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 

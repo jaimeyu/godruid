@@ -77,9 +77,13 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 	aggregations[0] = godruid.AggCount("total")
 
 	return &godruid.QueryTimeseries{
-		QueryType:    "timeseries",
-		DataSource:   dataSource,
-		Granularity:  godruid.GranHour,
+		QueryType:  "timeseries",
+		DataSource: dataSource,
+		Granularity: godruid.GranPeriod{
+			Type:     "period",
+			Period:   granularity,
+			TimeZone: "UTC",
+		},
 		Context:      map[string]interface{}{"timeout": 60000},
 		Aggregations: aggregations,
 		Intervals:    []string{interval},

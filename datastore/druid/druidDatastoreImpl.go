@@ -73,48 +73,6 @@ func (dc *DruidDatastoreClient) GetStats(metric string) (string, error) {
 	return "nil", nil
 }
 
-// peyo TODO : this should query couchDB and get the actual threshold profile
-// will do this once we have threshold profiles in couch
-func lookupThresholdProfile() *pb.ThresholdProfile {
-
-	return &pb.ThresholdProfile{
-		Twamp: &pb.Threshold{
-			Metrics: []*pb.Metric{
-				&pb.Metric{
-					Id: "delayP95",
-					Data: []*pb.MetricData{
-						&pb.MetricData{
-							Direction: "az",
-							Events: []*pb.Event{
-								&pb.Event{
-									UpperBound:  30000,
-									UpperStrict: true,
-									Unit:        "percent",
-									Type:        "minor",
-								},
-								&pb.Event{
-									UpperBound:  50000,
-									LowerBound:  30000,
-									UpperStrict: true,
-									LowerStrict: false,
-									Unit:        "percent",
-									Type:        "major",
-								},
-								&pb.Event{
-									LowerBound:  50000,
-									LowerStrict: false,
-									Unit:        "percent",
-									Type:        "critical",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere

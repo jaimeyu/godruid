@@ -25,9 +25,9 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 }
 
 // GetThresholdCrossing
-func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, ingestionProfile *pb.TenantIngestionProfileResponse) (*pb.JSONAPIObject, error) {
 
-	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq)
+	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, ingestionProfile)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())

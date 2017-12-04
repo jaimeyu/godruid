@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -210,5 +211,14 @@ func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain
 func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
-	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq)
+	ingestionProfile, err := gsh.GetTenantIngestionProfile(ctx, &pb.TenantIngestionProfileIdRequest{
+		TenantId:           thresholdCrossingReq.Tenant,
+		IngestionProfileId: "ip123",
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to find ingestion profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
+	}
+
+	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, ingestionProfile)
 }

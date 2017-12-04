@@ -822,7 +822,7 @@
     },
     "/api/v1/threshold-crossing": {
       "get": {
-        "summary": "Retrieve and Administrative User by id.",
+        "summary": "Retrieve threshold crossing for given metric.",
         "operationId": "GetThresholdCrossing",
         "responses": {
           "200": {

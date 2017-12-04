@@ -1118,7 +1118,7 @@ var _TenantProvisioningService_serviceDesc = grpc.ServiceDesc{
 // Client API for MetricsService service
 
 type MetricsServiceClient interface {
-	// Retrieve and Administrative User by id.
+	// Retrieve threshold crossing for given metric.
 	GetThresholdCrossing(ctx context.Context, in *ThresholdCrossingRequest, opts ...grpc.CallOption) (*JSONAPIObject, error)
 }
 
@@ -1142,7 +1142,7 @@ func (c *metricsServiceClient) GetThresholdCrossing(ctx context.Context, in *Thr
 // Server API for MetricsService service
 
 type MetricsServiceServer interface {
-	// Retrieve and Administrative User by id.
+	// Retrieve threshold crossing for given metric.
 	GetThresholdCrossing(context.Context, *ThresholdCrossingRequest) (*JSONAPIObject, error)
 }
 

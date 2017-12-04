@@ -119,18 +119,19 @@ func lookupThresholdProfile() *pb.ThresholdProfile {
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	thresholdProfile := lookupThresholdProfile()
-	threshold, err := getThreshold(thresholdProfile, "twamp")
+	threshold, err := getThreshold(thresholdProfile, request.ObjectType)
 	if err != nil {
 		return nil, err
 	}
-	metric, err := getMetric(threshold, request.Metric, "twamp")
+	metric, err := getMetric(threshold, request.Metric, request.ObjectType)
 	if err != nil {
 		return nil, err
 	}
-	events, err := getEvents(metric, request.Direction, "twamp")
+	events, err := getEvents(metric, request.Direction, request.ObjectType)
 	if err != nil {
 		return nil, err
 	}

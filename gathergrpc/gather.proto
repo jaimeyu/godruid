@@ -246,7 +246,7 @@ service TenantProvisioningService {
 // Service responsible for retrieving aggregate metrics from druid 
 service MetricsService {
     
-    // Retrieve and Administrative User by id. 
+    // Retrieve threshold crossing for given metric.
     rpc GetThresholdCrossing(ThresholdCrossingRequest) returns (JSONAPIObject) {
         option (google.api.http) = {
             get: "/api/v1/threshold-crossing"

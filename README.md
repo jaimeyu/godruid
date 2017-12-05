@@ -19,7 +19,7 @@ Execute the following makefile targets to build this docker image
 	1. `make docker`: builds the docker image
 	2. `make push` : builds the docker image and push it to the gcr repository
 
-You can set the following ENV variable before calling make:
+You can set the following ENV variable before calling make: 
 
 	1. `DOCKER_TAG`: The image tag to use (for instance: export `TAG=1.0.2; make docker` would build `gcr.io/npav-172917/adh-gather:1.0.2`)
 	2. `DOCKER_IMAGE_NAME: Changes the name of the image (defaults to adh-gather)

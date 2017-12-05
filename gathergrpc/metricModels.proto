@@ -33,7 +33,6 @@ message ThresholdCrossingRequest {
   string direction = 6;
   string metric = 7;
   string thresholdProfileId = 8;
-  
 }
 
 message HistogramRequest {

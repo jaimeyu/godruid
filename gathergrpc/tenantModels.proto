@@ -110,6 +110,18 @@ message TenantThreshold {
   string objectType = 2;
 }
 
+// TenantMetric
+message TenantMetric {
+  string id = 1;
+  repeated TenantMetricData data = 2;
+}
+
+// TenantMetricData
+message TenantMetricData {
+  string direction = 1;
+  repeated TenantEvent events = 2;
+}
+
 // TenantEvent 
 message TenantEvent {
   string unit = 1;
@@ -118,17 +130,6 @@ message TenantEvent {
   float lowerBound = 4;
   bool upperStrict = 5;
   bool lowerStrict = 6;
-}
-// TenantMetricData
-message TenantMetricData {
-  string direction = 1;
-  repeated TenantEvent events = 2;
-}
-
-// TenantMetric
-message TenantMetric {
-  string id = 1;
-  repeated TenantMetricData data = 2;
 }
 
 // TenantThresholdProfileRequest - wrapper for requests that involve the

@@ -33,4 +33,33 @@ message ThresholdCrossingRequest {
   string objectType = 6;
   string direction = 7;
   string metric = 8;
-} 
+}
+
+message HistogramRequest {
+  string interval = 1; //ISO-8601 Intervals
+  string tenant = 2;
+  string domain = 3;
+  string granularity = 4; //ISO-8601 period combination
+  string direction = 5;
+  string metric = 6;
+  int32 numBuckets = 7;
+  int32 resolution = 8;
+}
+
+message HistogramBuckets {
+  repeated float breaks = 1;
+  repeated float counts = 2;
+}
+
+message HistogramResult {
+  HistogramBuckets thresholdBuckets = 1;
+}
+
+message Histogram {
+  string timestamp = 1;
+  HistogramResult result = 2;
+}
+
+message HistogramResponse {
+   repeated Histogram data = 1;
+}

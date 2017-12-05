@@ -54,6 +54,11 @@ It has these top-level messages:
 	ThresholdCrossing
 	ThresholdCrossingResponse
 	ThresholdCrossingRequest
+	HistogramRequest
+	HistogramBuckets
+	HistogramResult
+	Histogram
+	HistogramResponse
 */
 package gathergrpc
 

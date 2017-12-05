@@ -132,6 +132,75 @@
         ]
       }
     },
+    "/api/v1/histogram": {
+      "get": {
+        "summary": "Retrieve a histogram of measurements for given time range and metric",
+        "operationId": "GetHistogram",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcJSONAPIObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "numBuckets",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
     "/api/v1/tenant-list": {
       "get": {
         "summary": "Retrieve all Users scoped to a single Tenant.",

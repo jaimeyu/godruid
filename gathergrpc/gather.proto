@@ -252,6 +252,13 @@ service MetricsService {
             get: "/api/v1/threshold-crossing"
         };
     }
+
+    // Retrieve a histogram of measurements for given time range and metric
+    rpc GetHistogram(HistogramRequest) returns (JSONAPIObject) {
+        option (google.api.http) = {
+            get: "/api/v1/histogram"
+        };
+    }
   
 }
 

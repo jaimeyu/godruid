@@ -82,7 +82,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 				if contains(metrics, m.GetId()) || len(metrics) == 0 {
 					for _, d := range m.GetData() {
 						for _, e := range d.GetEvents() {
-							name := t.ObjectType + "-" + m.Id + "-" + e.GetType()
+							name := t.ObjectType + "." + m.Id + "." + e.GetType()
 							aggregation := godruid.AggFiltered(
 								godruid.FilterAnd(
 									FilterHelper(metric, e),

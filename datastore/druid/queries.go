@@ -5,7 +5,7 @@ import (
 	"github.com/accedian/godruid"
 )
 
-// HistogramQuery -
+// HistogramQuery - Count of metrics per bucket for given interval.
 func HistogramQuery(dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
 	return &godruid.QueryTimeseries{
@@ -18,7 +18,7 @@ func HistogramQuery(dataSource string, metric string, granularity string, interv
 		},
 		Context: map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
-			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets),
+			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity"),
 		},
 		Intervals: []string{interval},
 	}

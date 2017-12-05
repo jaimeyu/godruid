@@ -32,6 +32,7 @@ message ThresholdCrossingRequest {
   string objectType = 5;
   string direction = 6;
   string metric = 7;
+  string thresholdProfileId = 8;
   
 }
 

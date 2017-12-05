@@ -26,7 +26,7 @@ func HistogramQuery(dataSource string, metric string, granularity string, interv
 
 // FilterHelper - helper function to select correct druid filter based on
 // a given event and metric
-func FilterHelper(metric string, e *pb.Event) *godruid.Filter {
+func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
 
 	if e.UpperBound != 0 && e.LowerBound != 0 {
 		return godruid.FilterLowerUpperBound(metric, "numeric", e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
@@ -45,7 +45,7 @@ func FilterHelper(metric string, e *pb.Event) *godruid.Filter {
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a given
 // threshold, for a given metric.
-func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.Event) *godruid.QueryTimeseries {
+func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.TenantEvent) *godruid.QueryTimeseries {
 
 	aggregations := make([]godruid.Aggregation, len(events)+1)
 

@@ -106,13 +106,11 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
-func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, ingestionProfile *pb.TenantIngestionProfileResponse) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	thresholdProfile := ingestionProfile.Data.GetThresholdProfile()[0]
-
-	threshold, err := getThreshold(thresholdProfile, request.ObjectType)
+	threshold, err := getThreshold(thresholdProfile.Data, request.ObjectType)
 	if err != nil {
 		return nil, err
 	}

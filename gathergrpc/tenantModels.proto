@@ -69,8 +69,6 @@ message TenantIngestionProfile {
 
     int64 createdTimestamp = 5;
     int64 lastModifiedTimestamp = 6;
-
-    repeated ThresholdProfile thresholdProfile = 7;
 }
 
 // TenantIngestionProfileRequest - wrapper for requests that involve the
@@ -92,6 +90,66 @@ message TenantIngestionProfileResponse {
 message TenantIngestionProfileIdRequest {
     string tenantId = 1;
     string ingestionProfileId = 2;
+}
+
+//Threshold Profile
+
+// TenantThresholdProfile
+message TenantThresholdProfile {
+  string tenantId = 1;
+  string datatype = 2;
+  repeated TenantThreshold thresholds = 3;
+
+  int64 createdTimestamp = 4;
+  int64 lastModifiedTimestamp = 5;
+}
+
+// TenantThreshold
+message TenantThreshold {
+  repeated TenantMetric metrics = 1;
+  string objectType = 2;
+}
+
+// TenantEvent 
+message TenantEvent {
+  string unit = 1;
+  string type = 2;
+  float upperBound = 3;
+  float lowerBound = 4;
+  bool upperStrict = 5;
+  bool lowerStrict = 6;
+}
+// TenantMetricData
+message TenantMetricData {
+  string direction = 1;
+  repeated TenantEvent events = 2;
+}
+
+// TenantMetric
+message TenantMetric {
+  string id = 1;
+  repeated TenantMetricData data = 2;
+}
+
+// TenantThresholdProfileRequest - wrapper for requests that involve the
+// Tenant Threshold Profile
+message TenantThresholdProfileRequest {
+    string _id = 1;
+    string _rev = 2;
+    TenantThresholdProfile data = 3;
+}
+
+// TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile
+// in a response.
+message TenantThresholdProfileResponse {
+    string _id = 1;
+    string _rev = 2;
+    TenantThresholdProfile data = 3;
+}
+
+message TenantThresholdProfileIdRequest {
+    string tenantId = 1;
+    string thresholdProfileId = 2;
 }
 
 // TenantUser - model for a User that is scoped to a single Tenant.

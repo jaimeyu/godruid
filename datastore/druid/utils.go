@@ -8,18 +8,19 @@ import (
 	"github.com/accedian/godruid"
 )
 
-func getThreshold(thresholdProfile *pb.ThresholdProfile, objectType string) (*pb.Threshold, error) {
+func getThreshold(thresholdProfile *pb.TenantThresholdProfile, objectType string) (*pb.TenantThreshold, error) {
 
-	switch objectType {
-	case "twamp":
-		return thresholdProfile.Twamp, nil
-	default:
-		return nil, fmt.Errorf("No threshold profile available for object type: %s", objectType)
+	for _, tp := range thresholdProfile.Thresholds {
+		if tp.ObjectType == objectType {
+			return tp, nil
+		}
 	}
+
+	return nil, fmt.Errorf("No threshold profile available for object type: %s", objectType)
 
 }
 
-func getMetric(threshold *pb.Threshold, metricName string, objectType string) (*pb.Metric, error) {
+func getMetric(threshold *pb.TenantThreshold, metricName string, objectType string) (*pb.TenantMetric, error) {
 
 	for _, m := range threshold.Metrics {
 		if m.Id == metricName {
@@ -30,7 +31,7 @@ func getMetric(threshold *pb.Threshold, metricName string, objectType string) (*
 	return nil, fmt.Errorf("No threshold information available for object type: %s, and metric: %s", objectType, metricName)
 }
 
-func getEvents(metric *pb.Metric, direction string, objectType string) ([]*pb.Event, error) {
+func getEvents(metric *pb.TenantMetric, direction string, objectType string) ([]*pb.TenantEvent, error) {
 	for _, md := range metric.Data {
 		if md.Direction == direction {
 			return md.Events, nil

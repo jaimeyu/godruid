@@ -462,6 +462,70 @@
         ]
       }
     },
+    "/api/v1/tenants/{data.tenantId}/threshold-profiles": {
+      "post": {
+        "summary": "Create a Threshold Profile scoped to a Single Tenant.",
+        "operationId": "CreateTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Updates an Threshold Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "UpdateTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{data.tenantId}/users": {
       "post": {
         "summary": "Create a User scoped to a Single Tenant.",
@@ -696,6 +760,66 @@
           },
           {
             "name": "monitoredObjectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}": {
+      "get": {
+        "summary": "Retrieves an Threshold Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "GetTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an Threshold Profile scoped to a single Tenant.",
+        "operationId": "DeleteTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -943,6 +1067,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1111,33 +1241,6 @@
         }
       }
     },
-    "gathergrpcEvent": {
-      "type": "object",
-      "properties": {
-        "unit": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "upperBound": {
-          "type": "number",
-          "format": "float"
-        },
-        "lowerBound": {
-          "type": "number",
-          "format": "float"
-        },
-        "upperStrict": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "lowerStrict": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      }
-    },
     "gathergrpcJSONAPIObject": {
       "type": "object",
       "properties": {
@@ -1205,34 +1308,6 @@
         }
       },
       "description": "Links technically allow any valid json string as a key,\nwe obviously can't do this, so we have to stick to the following."
-    },
-    "gathergrpcMetric": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcMetricData"
-          }
-        }
-      }
-    },
-    "gathergrpcMetricData": {
-      "type": "object",
-      "properties": {
-        "direction": {
-          "type": "string"
-        },
-        "events": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcEvent"
-          }
-        }
-      }
     },
     "gathergrpcMonitoredObject": {
       "type": "object",
@@ -1499,6 +1574,34 @@
       },
       "title": "TenantDomainResponse - wrapper for responses that involve a Tenant Domain"
     },
+    "gathergrpcTenantEvent": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "upperBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "lowerBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "upperStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "lowerStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "TenantEvent"
+    },
     "gathergrpcTenantIngestionProfile": {
       "type": "object",
       "properties": {
@@ -1521,12 +1624,6 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
-        },
-        "thresholdProfile": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcThresholdProfile"
-          }
         }
       },
       "description": "TenantIngestionProfile - model for the singleton object that \ngoverns what data is displayed for a Tenant."
@@ -1557,6 +1654,107 @@
         },
         "data": {
           "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
+        }
+      },
+      "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
+    },
+    "gathergrpcTenantMetric": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantMetricData"
+          }
+        }
+      },
+      "title": "TenantMetric"
+    },
+    "gathergrpcTenantMetricData": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantEvent"
+          }
+        }
+      },
+      "title": "TenantMetricData"
+    },
+    "gathergrpcTenantThreshold": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantMetric"
+          }
+        },
+        "objectType": {
+          "type": "string"
+        }
+      },
+      "title": "TenantThreshold"
+    },
+    "gathergrpcTenantThresholdProfile": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantThreshold"
+          }
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "TenantThresholdProfile"
+    },
+    "gathergrpcTenantThresholdProfileRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
+        }
+      },
+      "title": "TenantThresholdProfileRequest - wrapper for requests that involve the\nTenant Threshold Profile"
+    },
+    "gathergrpcTenantThresholdProfileResponse": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
         }
       },
       "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
@@ -1648,25 +1846,6 @@
         }
       },
       "description": "TenantUserResponse - wrapper for responses to requests that involve a User that\nis scoped to a single Tenant."
-    },
-    "gathergrpcThreshold": {
-      "type": "object",
-      "properties": {
-        "metrics": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcMetric"
-          }
-        }
-      }
-    },
-    "gathergrpcThresholdProfile": {
-      "type": "object",
-      "properties": {
-        "twamp": {
-          "$ref": "#/definitions/gathergrpcThreshold"
-        }
-      }
     },
     "gathergrpcUserState": {
       "type": "string",

@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.12.0 
+**Release Date:** Tue Dec  5 16:02:18 UTC 2017     
+## Previous Releases 
 * Adding TLS support.
 
-## Previous Releases 
 ### 0.11.0 
 **Release Date:** Mon Nov 27 22:11:07 UTC 2017 
 

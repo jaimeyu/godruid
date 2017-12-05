@@ -8,7 +8,9 @@ import (
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
-func HistogramQuery(dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
+func HistogramQuery(tenant string, dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
+
+	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
 
 	return &godruid.QueryTimeseries{
 		QueryType:  "timeseries",
@@ -20,7 +22,13 @@ func HistogramQuery(dataSource string, metric string, granularity string, interv
 		},
 		Context: map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
-			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity"),
+
+			godruid.AggFiltered(
+				godruid.FilterAnd(
+					godruid.FilterSelector("tenantId", tenant),
+				),
+				&aggHist,
+			),
 		},
 		Intervals: []string{interval},
 	}
@@ -56,7 +64,7 @@ func contains(slice []string, s string) bool {
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) *godruid.QueryTimeseries {
+func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) *godruid.QueryTimeseries {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -78,6 +86,8 @@ func ThresholdCrossingQuery(dataSource string, metric string, granularity string
 							aggregation := godruid.AggFiltered(
 								godruid.FilterAnd(
 									FilterHelper(metric, e),
+									godruid.FilterSelector("sessionType", t.ObjectType),
+									godruid.FilterSelector("tenantId", tenant),
 								),
 								&godruid.Aggregation{
 									Type: "count",

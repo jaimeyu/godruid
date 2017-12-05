@@ -147,6 +147,7 @@
         "parameters": [
           {
             "name": "interval",
+            "description": "ISO-8601 Intervals.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -165,6 +166,7 @@
           },
           {
             "name": "granularity",
+            "description": "ISO-8601 period combination.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -1028,6 +1030,7 @@
         "parameters": [
           {
             "name": "interval",
+            "description": "ISO-8601 Intervals.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -1046,6 +1049,7 @@
           },
           {
             "name": "granularity",
+            "description": "ISO-8601 period combination.",
             "in": "query",
             "required": false,
             "type": "string"

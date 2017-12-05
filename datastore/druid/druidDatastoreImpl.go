@@ -112,20 +112,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	threshold, err := getThreshold(thresholdProfile.Data, request.ObjectType)
-	if err != nil {
-		return nil, err
-	}
-	metric, err := getMetric(threshold, request.Metric, request.ObjectType)
-	if err != nil {
-		return nil, err
-	}
-	events, err := getEvents(metric, request.Direction, request.ObjectType)
-	if err != nil {
-		return nil, err
-	}
-
-	query := ThresholdCrossingQuery(table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, events)
+	query := ThresholdCrossingQuery(table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
 
 	response, err := dc.executeQuery(query)
 

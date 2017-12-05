@@ -1,6 +1,8 @@
 package druid
 
 import (
+	"fmt"
+
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/godruid"
 )
@@ -43,28 +45,35 @@ func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
 	return nil
 }
 
-// ThresholdCrossingQuery - Query that returns a count of events that crossed a given
-// threshold, for a given metric.
-func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, events []*pb.TenantEvent) *godruid.QueryTimeseries {
+// ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// defined by the supplied threshold profile..
+func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) *godruid.QueryTimeseries {
 
-	aggregations := make([]godruid.Aggregation, len(events)+1)
+	var aggregations []godruid.Aggregation
 
-	for i, e := range events {
+	aggregations = append(aggregations, godruid.AggCount("total"))
 
-		name := e.Type + "Threshold"
-
-		aggregations[i+1] = godruid.AggFiltered(
-			godruid.FilterAnd(
-				FilterHelper(metric, e),
-			),
-			&godruid.Aggregation{
-				Type: "count",
-				Name: name,
-			},
-		)
+	for i, t := range thresholdProfile.GetThresholds() {
+		fmt.Println(i, " ", t.ObjectType)
+		for j, m := range t.GetMetrics() {
+			fmt.Println(i, " ", j, " ", t.ObjectType, "-", m.Id)
+			for _, d := range m.GetData() {
+				for _, e := range d.GetEvents() {
+					name := t.ObjectType + "-" + m.Id + "-" + e.GetType()
+					aggregation := godruid.AggFiltered(
+						godruid.FilterAnd(
+							FilterHelper(metric, e),
+						),
+						&godruid.Aggregation{
+							Type: "count",
+							Name: name,
+						},
+					)
+					aggregations = append(aggregations, aggregation)
+				}
+			}
+		}
 	}
-
-	aggregations[0] = godruid.AggCount("total")
 
 	return &godruid.QueryTimeseries{
 		QueryType:  "timeseries",

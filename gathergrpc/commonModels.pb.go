@@ -37,9 +37,9 @@ It has these top-level messages:
 	TenantIngestionProfileIdRequest
 	TenantThresholdProfile
 	TenantThreshold
-	TenantEvent
-	TenantMetricData
 	TenantMetric
+	TenantMetricData
+	TenantEvent
 	TenantThresholdProfileRequest
 	TenantThresholdProfileResponse
 	TenantThresholdProfileIdRequest
@@ -53,7 +53,6 @@ It has these top-level messages:
 	MonitoredObjectResponse
 	MonitoredObjectListResponse
 	MonitoredObjectIdRequest
-	ThresholdCrossingResult
 	ThresholdCrossing
 	ThresholdCrossingResponse
 	ThresholdCrossingRequest

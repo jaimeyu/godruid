@@ -2,22 +2,9 @@ syntax = "proto3";
 
 package gathergrpc;
 
-message ThresholdCrossingResult {
-  float total = 1;
-  float minorPercent = 2;
-  float minorRatio = 3;
-  float minorThreshold = 4;
-  float majorThreshold = 5;
-  float criticalRatio = 6;
-  float criticalThreshold = 7;
-  float criticalPercent = 8;
-  float majorPercent = 9;
-  float majorRatio = 10;
-}
-
 message ThresholdCrossing {
   string timestamp = 1;
-  ThresholdCrossingResult result = 2;
+  map<string,float> result = 2;
 }
 
 message ThresholdCrossingResponse {
@@ -25,10 +12,12 @@ message ThresholdCrossingResponse {
 }
 
 message ThresholdCrossingRequest {
-  string interval = 1; //ISO-8601 Intervals
+  //ISO-8601 Intervals
+  string interval = 1;
   string tenant = 2;
   string domain = 3;
-  string granularity = 4; //ISO-8601 period combination
+  //ISO-8601 period combination
+  string granularity = 4;
   string objectType = 5;
   string direction = 6;
   string metric = 7;
@@ -36,10 +25,12 @@ message ThresholdCrossingRequest {
 }
 
 message HistogramRequest {
-  string interval = 1; //ISO-8601 Intervals
+  //ISO-8601 Intervals
+  string interval = 1;
   string tenant = 2;
   string domain = 3;
-  string granularity = 4; //ISO-8601 period combination
+  //ISO-8601 period combination
+  string granularity = 4;
   string direction = 5;
   string metric = 6;
   int32 granularityBuckets = 7;

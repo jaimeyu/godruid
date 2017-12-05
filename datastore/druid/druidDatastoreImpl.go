@@ -124,6 +124,8 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	json.Unmarshal(response, &thresholdCrossing)
 
+	reformatThresholdCrossingResponse(thresholdCrossing)
+
 	resp := &pb.ThresholdCrossingResponse{
 		Data: thresholdCrossing,
 	}

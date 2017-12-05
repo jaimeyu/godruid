@@ -12,6 +12,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+
+	"github.com/satori/go.uuid"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -94,7 +96,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{
-				Id:         "some-uuid",
+				Id:         uuid.NewV4().String(),
 				Type:       "event-distribution",
 				Attributes: data,
 			},
@@ -149,7 +151,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{
-				Id:         "some-uuid",
+				Id:         uuid.NewV4().String(),
 				Type:       "threshold-crossing-report",
 				Attributes: data,
 			},

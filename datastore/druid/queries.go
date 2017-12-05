@@ -1,7 +1,7 @@
 package druid
 
 import (
-	"fmt"
+	"strings"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/godruid"
@@ -45,34 +45,52 @@ func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
 	return nil
 }
 
+func contains(slice []string, s string) bool {
+	for _, v := range slice {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
 func ThresholdCrossingQuery(dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) *godruid.QueryTimeseries {
 
 	var aggregations []godruid.Aggregation
+	metrics := strings.Split(metric, ",")
+	objectTypes := strings.Split(objectType, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	for i, t := range thresholdProfile.GetThresholds() {
-		fmt.Println(i, " ", t.ObjectType)
-		for j, m := range t.GetMetrics() {
-			fmt.Println(i, " ", j, " ", t.ObjectType, "-", m.Id)
-			for _, d := range m.GetData() {
-				for _, e := range d.GetEvents() {
-					name := t.ObjectType + "-" + m.Id + "-" + e.GetType()
-					aggregation := godruid.AggFiltered(
-						godruid.FilterAnd(
-							FilterHelper(metric, e),
-						),
-						&godruid.Aggregation{
-							Type: "count",
-							Name: name,
-						},
-					)
-					aggregations = append(aggregations, aggregation)
+	for _, t := range thresholdProfile.GetThresholds() {
+		// if no objectTypes have been provided, use all of them, otherwise
+		// only include the provided ones
+		if contains(objectTypes, t.GetObjectType()) || len(objectTypes) == 0 {
+			for _, m := range t.GetMetrics() {
+				// if no metrics have been provided, use all of them, otherwise
+				// only include the provided ones
+				if contains(metrics, m.GetId()) || len(metrics) == 0 {
+					for _, d := range m.GetData() {
+						for _, e := range d.GetEvents() {
+							name := t.ObjectType + "-" + m.Id + "-" + e.GetType()
+							aggregation := godruid.AggFiltered(
+								godruid.FilterAnd(
+									FilterHelper(metric, e),
+								),
+								&godruid.Aggregation{
+									Type: "count",
+									Name: name,
+								},
+							)
+							aggregations = append(aggregations, aggregation)
+						}
+					}
 				}
 			}
 		}
+
 	}
 
 	return &godruid.QueryTimeseries{

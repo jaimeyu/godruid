@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/accedian/adh-gather/datastore"
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/druid"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -30,7 +29,19 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thres
 	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, ingestionProfile)
 
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())
+		return nil, fmt.Errorf("Unable to retrieve Threshold Crossing. %s:", err.Error())
+	}
+
+	return result, nil
+}
+
+// GetThresholdCrossing
+func (msh *MetricServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
+
+	result, err := msh.druidDB.GetHistogram(histogramReq)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Histogram. %s:", err.Error())
 	}
 
 	return result, nil

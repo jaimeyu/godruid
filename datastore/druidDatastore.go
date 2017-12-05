@@ -11,5 +11,5 @@ type DruidDatastore interface {
 	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, ingestionProfile *pb.TenantIngestionProfileResponse) (*pb.JSONAPIObject, error)
 
 	// Returns the min,max,avg,median for a given metric
-	GetStats(metric string) (string, error)
+	GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error)
 }

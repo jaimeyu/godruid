@@ -5,30 +5,20 @@ import (
 	"github.com/accedian/godruid"
 )
 
-// StatsQuery - query that returns min/max/sum/mean/median for a given metric
-// peyo TODO: this isn't parameterized yet, also not sure we're actually going to
-// be using this query.
-func StatsQuery(dataSource string, metric string, threshold string, interval string) *godruid.QueryTimeseries {
-	return &godruid.QueryTimeseries{
-		QueryType:   "timeseries",
-		DataSource:  dataSource,
-		Granularity: godruid.GranHour,
-		Aggregations: []godruid.Aggregation{
-			godruid.AggLongMin(metric+"Min", metric),
-			godruid.AggLongSum(metric+"Sum", metric),
-			godruid.AggLongMax(metric+"Max", metric),
-			godruid.AggCount("rowCount"),
-		},
-		PostAggregations: []godruid.PostAggregation{
-			godruid.PostAggArithmetic("medianPoint", "/", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("rowCount"),
-				godruid.PostAggConstant("", "2"),
-			}),
+// HistogramQuery -
+func HistogramQuery(dataSource string, metric string, granularity string, interval string, resolution int32, numBuckets int32) *godruid.QueryTimeseries {
 
-			godruid.PostAggArithmetic("delayP95Mean", "/", []godruid.PostAggregation{
-				godruid.PostAggFieldAccessor("delayP95Sum"),
-				godruid.PostAggFieldAccessor("rowCount"),
-			}),
+	return &godruid.QueryTimeseries{
+		QueryType:  "timeseries",
+		DataSource: dataSource,
+		Granularity: godruid.GranPeriod{
+			Type:     "period",
+			Period:   granularity,
+			TimeZone: "UTC",
+		},
+		Context: map[string]interface{}{"timeout": 60000},
+		Aggregations: []godruid.Aggregation{
+			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, numBuckets),
 		},
 		Intervals: []string{interval},
 	}

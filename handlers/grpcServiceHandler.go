@@ -222,3 +222,9 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 
 	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, ingestionProfile)
 }
+
+// GetHistogram -
+func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
+
+	return gsh.msh.GetHistogram(ctx, histogramReq)
+}

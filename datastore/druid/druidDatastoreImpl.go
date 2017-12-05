@@ -66,11 +66,41 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 }
 
 // peyo TODO: implement this query
-func (dc *DruidDatastoreClient) GetStats(metric string) (string, error) {
+func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query := StatsQuery(table, metric, "", "2017-11-02/2100-01-01")
-	dc.executeQuery(query)
-	return "nil", nil
+	query := HistogramQuery(table, request.Metric, request.Granularity, request.Interval, request.Resolution, request.NumBuckets)
+
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	histogram := []*pb.Histogram{}
+
+	json.Unmarshal(response, &histogram)
+
+	resp := &pb.HistogramResponse{
+		Data: histogram,
+	}
+
+	data, err := ptypes.MarshalAny(resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// peyo TODO: need to figure out where to get this ID and Type from.
+	rr := &pb.JSONAPIObject{
+		Data: []*pb.Data{
+			&pb.Data{
+				Id:         "some-uuid",
+				Type:       "report",
+				Attributes: data,
+			},
+		},
+	}
+	return rr, nil
 }
 
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
@@ -103,12 +133,12 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-	tt := []*pb.ThresholdCrossing{}
+	thresholdCrossing := []*pb.ThresholdCrossing{}
 
-	json.Unmarshal(response, &tt)
+	json.Unmarshal(response, &thresholdCrossing)
 
 	resp := &pb.ThresholdCrossingResponse{
-		Data: tt,
+		Data: thresholdCrossing,
 	}
 
 	data, err := ptypes.MarshalAny(resp)

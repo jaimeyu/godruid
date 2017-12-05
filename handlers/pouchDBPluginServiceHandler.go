@@ -45,77 +45,77 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 		server.Route{
 			Name:        "CheckAvailability",
 			Method:      "GET",
-			Pattern:     "/",
+			Pattern:     "/pouchdb/",
 			HandlerFunc: result.CheckAvailability,
 		},
 
 		server.Route{
 			Name:        "GetChanges",
 			Method:      "GET",
-			Pattern:     "/{dbname}/_changes",
+			Pattern:     "/pouchdb/{dbname}/_changes",
 			HandlerFunc: result.GetChanges,
 		},
 
 		server.Route{
 			Name:        "StoreDBSyncCheckpoint",
 			Method:      "PUT",
-			Pattern:     "/{dbname}/_local/{docid}",
+			Pattern:     "/pouchdb/{dbname}/_local/{docid}",
 			HandlerFunc: result.StoreDBSyncCheckpoint,
 		},
 
 		server.Route{
 			Name:        "GetDBSyncCheckpoint",
 			Method:      "GET",
-			Pattern:     "/{dbname}/_local/{docid}",
+			Pattern:     "/pouchdb/{dbname}/_local/{docid}",
 			HandlerFunc: result.GetDBSyncCheckpoint,
 		},
 
 		server.Route{
 			Name:        "GetDBRevisionDiff",
 			Method:      "POST",
-			Pattern:     "/{dbname}/_revs_diff",
+			Pattern:     "/pouchdb/{dbname}/_revs_diff",
 			HandlerFunc: result.GetDBRevisionDiff,
 		},
 
 		server.Route{
 			Name:        "BulkDBUpdate",
 			Method:      "POST",
-			Pattern:     "/{dbname}/_bulk_docs",
+			Pattern:     "/pouchdb/{dbname}/_bulk_docs",
 			HandlerFunc: result.BulkDBUpdate,
 		},
 
 		server.Route{
 			Name:        "CheckDBAvailability",
 			Method:      "GET",
-			Pattern:     "/{dbname}/",
+			Pattern:     "/pouchdb/{dbname}/",
 			HandlerFunc: result.CheckDBAvailability,
 		},
 
 		server.Route{
 			Name:        "CreateDB",
 			Method:      "PUT",
-			Pattern:     "/{dbname}/",
+			Pattern:     "/pouchdb/{dbname}/",
 			HandlerFunc: result.CreateDB,
 		},
 
 		server.Route{
 			Name:        "GetAllDBDocs",
 			Method:      "POST",
-			Pattern:     "/{dbname}/_all_docs",
+			Pattern:     "/pouchdb/{dbname}/_all_docs",
 			HandlerFunc: result.GetAllDBDocs,
 		},
 
 		server.Route{
 			Name:        "GetDBDoc",
 			Method:      "GET",
-			Pattern:     "/{dbname}/{docid}",
+			Pattern:     "/pouchdb/{dbname}/{docid}",
 			HandlerFunc: result.GetDBDoc,
 		},
 
 		server.Route{
 			Name:        "BulkDBGet",
 			Method:      "POST",
-			Pattern:     "/{dbname}/_bulk_get",
+			Pattern:     "/pouchdb/{dbname}/_bulk_get",
 			HandlerFunc: result.BulkDBGet,
 		},
 	}
@@ -156,7 +156,7 @@ func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error
 func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Looking for changes from DB %s", dbName)
 
@@ -211,7 +211,7 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 	logger.Log.Infof("Attempting to store %s to DB %s", db.DBSyncCheckpointStr, dbName)
 
 	//Issue request to DAO Layer to store the DB Checkpoint
@@ -245,9 +245,9 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
-	dbMethod := getDBFieldFromRequest(r, 2)
-	docID := getDBFieldFromRequest(r, 3)
+	dbName := getDBFieldFromRequest(r, 2)
+	dbMethod := getDBFieldFromRequest(r, 3)
+	docID := getDBFieldFromRequest(r, 4)
 
 	// Need to build up the full "_local/docID" format as URL parsing
 	// separates this.
@@ -284,7 +284,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Attempting to retrieve %s from DB %s", db.DBRevDiffStr, dbName)
 
@@ -318,7 +318,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Attempting to perform %s on DB %s", db.DBBulkUpdateStr, dbName)
 
@@ -350,11 +350,11 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 	logger.Log.Infof("Checking for availability of DB %s", dbName)
 
 	//Issue request to DAO Layer to access check availability
-	result, err := psh.pouchPluginDB.CheckDBAvailability(dbName)
+	result, err := psh.IsDBAvailable(dbName)
 	if err != nil {
 		if checkError(err, notFound) {
 			http.Error(w, fmt.Sprintf("DB %s does not exist", dbName), http.StatusNotFound)
@@ -381,7 +381,7 @@ func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWrite
 func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Attempting to fetch %s from DB %s", db.DBAllDocsStr, dbName)
 
@@ -413,12 +413,12 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Attempting to create DB %s", db.DBAllDocsStr, dbName)
 
 	//Issue request to DAO Layer to perform the DB creation
-	result, err := psh.pouchPluginDB.CreateDB(dbName)
+	result, err := psh.AddDB(dbName)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to create DB %s: %s", dbName, err.Error()), http.StatusBadRequest)
 		return
@@ -440,8 +440,8 @@ func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.
 func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
-	docID := getDBFieldFromRequest(r, 2)
+	dbName := getDBFieldFromRequest(r, 2)
+	docID := getDBFieldFromRequest(r, 3)
 
 	logger.Log.Infof("Fetching %s %s from DB %s", db.DBDocStr, docID, dbName)
 
@@ -469,7 +469,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.
 func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validate the request to ensure this operation is valid:
 
-	dbName := getDBFieldFromRequest(r, 1)
+	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Attempting to perform %s on DB %s", db.DBBulkGetStr, dbName)
 
@@ -521,4 +521,14 @@ func checkError(err error, errorType httpErrorString) bool {
 	}
 
 	return false
+}
+
+// IsDBAvailable - checks if a DB is available.
+func (psh *PouchDBPluginServiceHandler) IsDBAvailable(dbName string) (map[string]interface{}, error) {
+	return psh.pouchPluginDB.CheckDBAvailability(dbName)
+}
+
+// AddDB - creates a DB instance.
+func (psh *PouchDBPluginServiceHandler) AddDB(dbName string) (map[string]interface{}, error) {
+	return psh.pouchPluginDB.CreateDB(dbName)
 }

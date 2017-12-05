@@ -182,7 +182,7 @@
             "type": "string"
           },
           {
-            "name": "numBuckets",
+            "name": "granularityBuckets",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -902,12 +902,6 @@
           }
         },
         "parameters": [
-          {
-            "name": "thresholdProfileName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
           {
             "name": "interval",
             "in": "query",

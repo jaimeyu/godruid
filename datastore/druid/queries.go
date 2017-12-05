@@ -18,7 +18,7 @@ func HistogramQuery(dataSource string, metric string, granularity string, interv
 		},
 		Context: map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
-			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, numBuckets),
+			godruid.AggHistoFold("thresholdBuckets", metric+"P95His to", resolution, numBuckets),
 		},
 		Intervals: []string{interval},
 	}

@@ -68,7 +68,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query := HistogramQuery(table, request.Metric, request.Granularity, request.Interval, request.Resolution, request.NumBuckets)
+	query := HistogramQuery(table, request.Metric, request.Granularity, request.Interval, request.Resolution, request.GranularityBuckets)
 
 	response, err := dc.executeQuery(query)
 
@@ -95,7 +95,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 		Data: []*pb.Data{
 			&pb.Data{
 				Id:         "some-uuid",
-				Type:       "report",
+				Type:       "event-distribution",
 				Attributes: data,
 			},
 		},
@@ -152,7 +152,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		Data: []*pb.Data{
 			&pb.Data{
 				Id:         "some-uuid",
-				Type:       "report",
+				Type:       "threshold-crossing-report",
 				Attributes: data,
 			},
 		},

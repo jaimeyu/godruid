@@ -25,14 +25,14 @@ message ThresholdCrossingResponse {
 }
 
 message ThresholdCrossingRequest {
-  string thresholdProfileName = 1;
-  string interval = 2; //ISO-8601 Intervals
-  string tenant = 3;
-  string domain = 4;
-  string granularity = 5; //ISO-8601 period combination
-  string objectType = 6;
-  string direction = 7;
-  string metric = 8;
+  string interval = 1; //ISO-8601 Intervals
+  string tenant = 2;
+  string domain = 3;
+  string granularity = 4; //ISO-8601 period combination
+  string objectType = 5;
+  string direction = 6;
+  string metric = 7;
+  
 }
 
 message HistogramRequest {
@@ -42,7 +42,7 @@ message HistogramRequest {
   string granularity = 4; //ISO-8601 period combination
   string direction = 5;
   string metric = 6;
-  int32 numBuckets = 7;
+  int32 granularityBuckets = 7;
   int32 resolution = 8;
 }
 

@@ -1,9 +1,11 @@
 package druid
 
 import (
+	"encoding/json"
 	"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/godruid"
 )
 
 func getThreshold(thresholdProfile *pb.ThresholdProfile, objectType string) (*pb.Threshold, error) {
@@ -35,4 +37,21 @@ func getEvents(metric *pb.Metric, direction string, objectType string) ([]*pb.Ev
 		}
 	}
 	return nil, fmt.Errorf("No events information available for object type: %s, metric: %s, and direction: %s", objectType, metric.Id, direction)
+}
+
+func queryToString(query godruid.Query, debug bool) string {
+	var reqJson []byte
+	var err error
+
+	if debug {
+		reqJson, err = json.MarshalIndent(query, "", "  ")
+	} else {
+		reqJson, err = json.Marshal(query)
+	}
+
+	if err != nil {
+		return ""
+	}
+
+	return string(reqJson)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // HistogramQuery -
-func HistogramQuery(dataSource string, metric string, granularity string, interval string, resolution int32, numBuckets int32) *godruid.QueryTimeseries {
+func HistogramQuery(dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
 	return &godruid.QueryTimeseries{
 		QueryType:  "timeseries",
@@ -18,7 +18,7 @@ func HistogramQuery(dataSource string, metric string, granularity string, interv
 		},
 		Context: map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
-			godruid.AggHistoFold("thresholdBuckets", metric+"P95His to", resolution, numBuckets),
+			godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets),
 		},
 		Intervals: []string{interval},
 	}

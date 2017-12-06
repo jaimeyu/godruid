@@ -39,7 +39,6 @@ func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
 
 	if e.UpperBound != 0 && e.LowerBound != 0 {
 		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
-
 	}
 
 	if e.UpperBound != 0 {
@@ -90,7 +89,6 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 				}
 			}
 		}
-
 	}
 
 	return &godruid.QueryTimeseries{

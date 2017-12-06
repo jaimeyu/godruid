@@ -18,6 +18,11 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+const (
+	ThresholdCrossingReport = "threshold-crossing-report"
+	EventDistribution       = "event-distribution"
+)
+
 // DruidDatastoreClient - struct responsible for handling
 // database operations for druid
 type DruidDatastoreClient struct {
@@ -99,7 +104,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 		Data: []*pb.Data{
 			&pb.Data{
 				Id:         uuid.NewV4().String(),
-				Type:       "event-distribution",
+				Type:       EventDistribution,
 				Attributes: data,
 			},
 		},
@@ -151,7 +156,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		Data: []*pb.Data{
 			&pb.Data{
 				Id:         uuid.NewV4().String(),
-				Type:       "threshold-crossing-report",
+				Type:       ThresholdCrossingReport,
 				Attributes: data,
 			},
 		},

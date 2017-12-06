@@ -7,20 +7,20 @@ import (
 	"github.com/accedian/godruid"
 )
 
+const (
+	TimeZoneUTC = "UTC"
+)
+
 // HistogramQuery - Count of metrics per bucket for given interval.
 func HistogramQuery(tenant string, dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
 	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
 
 	return &godruid.QueryTimeseries{
-		QueryType:  "timeseries",
-		DataSource: dataSource,
-		Granularity: godruid.GranPeriod{
-			Type:     "period",
-			Period:   granularity,
-			TimeZone: "UTC",
-		},
-		Context: map[string]interface{}{"timeout": 60000},
+		QueryType:   "timeseries",
+		DataSource:  dataSource,
+		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:     map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
 
 			godruid.AggFiltered(
@@ -104,13 +104,9 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	}
 
 	return &godruid.QueryTimeseries{
-		QueryType:  "timeseries",
-		DataSource: dataSource,
-		Granularity: godruid.GranPeriod{
-			Type:     "period",
-			Period:   granularity,
-			TimeZone: "UTC",
-		},
+		QueryType:    "timeseries",
+		DataSource:   dataSource,
+		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": 60000},
 		Aggregations: aggregations,
 		Intervals:    []string{interval},

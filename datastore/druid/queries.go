@@ -17,7 +17,6 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
 
 	return &godruid.QueryTimeseries{
-		QueryType:   "timeseries",
 		DataSource:  dataSource,
 		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:     map[string]interface{}{"timeout": 60000},
@@ -39,27 +38,18 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
 
 	if e.UpperBound != 0 && e.LowerBound != 0 {
-		return godruid.FilterLowerUpperBound(metric, "numeric", e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
+		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
 
 	}
 
 	if e.UpperBound != 0 {
-		return godruid.FilterUpperBound(metric, "numeric", e.UpperBound, e.UpperStrict)
+		return godruid.FilterUpperBound(metric, godruid.NUMERIC, e.UpperBound, e.UpperStrict)
 	}
 
 	if e.LowerBound != 0 {
-		return godruid.FilterLowerBound(metric, "numeric", e.LowerBound, e.LowerStrict)
+		return godruid.FilterLowerBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict)
 	}
 	return nil
-}
-
-func contains(slice []string, s string) bool {
-	for _, v := range slice {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
@@ -104,7 +94,6 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	}
 
 	return &godruid.QueryTimeseries{
-		QueryType:    "timeseries",
 		DataSource:   dataSource,
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": 60000},

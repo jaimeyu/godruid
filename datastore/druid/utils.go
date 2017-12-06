@@ -9,6 +9,7 @@ import (
 	"github.com/accedian/godruid"
 )
 
+// Format a ThresholdCrossing object into something the UI can consume
 func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing) ([]byte, error) {
 	res := gabs.New()
 	_, err := res.Array("data")
@@ -28,6 +29,7 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return res.Bytes(), nil
 }
 
+// Convert a query object to string, mainly for debugging purposes
 func queryToString(query godruid.Query, debug bool) string {
 	var reqJson []byte
 	var err error
@@ -43,4 +45,14 @@ func queryToString(query godruid.Query, debug bool) string {
 	}
 
 	return string(reqJson)
+}
+
+// Check to see if a value is in a slice
+func contains(slice []string, s string) bool {
+	for _, v := range slice {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

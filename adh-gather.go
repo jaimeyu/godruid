@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
@@ -25,10 +26,16 @@ import (
 
 var (
 	configFilePath string
+	enableTLS      bool
+	tlsKeyFile     string
+	tlsCertFile    string
 )
 
 func init() {
 	pflag.StringVar(&configFilePath, "config", "config/adh-gather.yml", "Specify a configuration file to use")
+	pflag.StringVar(&tlsKeyFile, "tlskey", "/run/secrets/tls_key", "Specify a TLS Key file")
+	pflag.StringVar(&tlsCertFile, "tlscert", "/run/secrets/tls_crt", "Specify a TLS Cert file")
+	pflag.BoolVar(&enableTLS, "tls", true, "Specify if TLS should be enabled")
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -116,7 +123,23 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
 	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
 	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
-	http.ListenAndServe(fmt.Sprintf(":%d", restBindPort), gh.CORS(originsOption, methodsOption, headersOption, gh.AllowCredentials())(gatherServer))
+
+	// Enable TLS based on config
+	handler := gh.CORS(originsOption, methodsOption, headersOption, gh.AllowCredentials())(gatherServer)
+	addr := fmt.Sprintf("%s:%d", restBindIP, restBindPort)
+	if enableTLS {
+		if _, err := os.Stat(tlsCertFile); os.IsNotExist(err) {
+			// No TLS cert file
+			logger.Log.Fatalf("Failed to start Gather: TLS cert %s does not exist", tlsCertFile)
+		}
+		if _, err := os.Stat(tlsKeyFile); os.IsNotExist(err) {
+			// No TLS cert file
+			logger.Log.Fatalf("Failed to start Gather: TLS key %s does not exist", tlsKeyFile)
+		}
+		http.ListenAndServeTLS(addr, tlsCertFile, tlsKeyFile, handler)
+	} else {
+		http.ListenAndServe(addr, handler)
+	}
 
 }
 
@@ -140,7 +163,10 @@ func main() {
 
 	v.BindPFlags(pflag.CommandLine)
 
-	configFilePath := v.GetString("config")
+	configFilePath = v.GetString("config")
+	enableTLS = v.GetBool("tls")
+	tlsCertFile = v.GetString("tlscert")
+	tlsKeyFile = v.GetString("tlskey")
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)
@@ -156,6 +182,20 @@ func main() {
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()
+
+	// Make sure the admin DB exists:
+	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
+	_, err := gatherServer.pouchSH.IsDBAvailable(adminDB)
+	if err != nil {
+		logger.Log.Infof("Database %s does not exist. %s DB will now be created.", adminDB, adminDB)
+
+		// Try to create the DB:
+		_, err = gatherServer.pouchSH.AddDB(adminDB)
+		if err != nil {
+			logger.Log.Fatalf("Unable to create DB %s: %s", adminDB, err.Error())
+		}
+	}
+	logger.Log.Infof("Using %s as Administrative Database", adminDB)
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)
 

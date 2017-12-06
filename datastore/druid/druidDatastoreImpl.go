@@ -38,11 +38,11 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 		if strings.Contains(err.Error(), "401") {
 			logger.Log.Info("Auth token expired, refreshing token")
 			dc.AuthToken = GetAuthCode(dc.cfg)
-			dc.numRetries++
-			if dc.numRetries > 3 {
-				return nil, fmt.Errorf("Unable to refresh valid auth token. Please contact administrator")
+			err := client.Query(query, dc.AuthToken)
+			if err != nil {
+				return nil, err
 			}
-			return dc.executeQuery(query)
+			return query.GetRawJSON(), nil
 		}
 		return nil, err
 	}

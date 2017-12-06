@@ -9,28 +9,23 @@ import (
 	"github.com/accedian/godruid"
 )
 
-func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing) {
+func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing) ([]byte, error) {
 	res := gabs.New()
-	res.ArrayOfSize(len(thresholdCrossing), "data")
-	dataElements, err := res.S("data").Children()
-	// TODO NEED TO FIX THIS
+	_, err := res.Array("data")
+
 	if err != nil {
-		fmt.Println("ERR-->", err)
+		return nil, fmt.Errorf("Error formatting Threshold Crossing JSON. Err: %s", err)
 	}
-	for i, tc := range thresholdCrossing {
-		_, err := dataElements[i].SetP(tc.GetTimestamp(), "timestamp")
-
-		if err != nil {
-			fmt.Println("ERR-->", err)
-		}
-
+	for _, tc := range thresholdCrossing {
+		obj := gabs.New()
+		obj.SetP(tc.GetTimestamp(), "timestamp")
 		for k, v := range tc.Result {
-			dataElements[i].SetP(v, "result."+k)
+			obj.SetP(v, "result."+k)
 		}
-		res.ArrayAppend(dataElements[i].Data(), "data")
+		res.ArrayAppend(obj.Data(), "data")
 	}
 
-	fmt.Println("RES---->", res)
+	return res.Bytes(), nil
 }
 
 func queryToString(query godruid.Query, debug bool) string {

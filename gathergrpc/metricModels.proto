@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/struct.proto";
+
 package gathergrpc;
 
 message ThresholdCrossing {
@@ -7,8 +9,13 @@ message ThresholdCrossing {
   map<string,float> result = 2;
 }
 
+message FormattedThresholdCrossing {
+  string timestamp = 1;
+  google.protobuf.Struct result = 2;
+}
+
 message ThresholdCrossingResponse {
-   repeated ThresholdCrossing data = 1;
+   repeated FormattedThresholdCrossing data = 1;
 }
 
 message ThresholdCrossingRequest {

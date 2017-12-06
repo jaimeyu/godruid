@@ -1,6 +1,7 @@
 package druid
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/godruid"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -124,10 +126,18 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	json.Unmarshal(response, &thresholdCrossing)
 
-	reformatThresholdCrossingResponse(thresholdCrossing)
+	formattedJSON, err := reformatThresholdCrossingResponse(thresholdCrossing)
 
-	resp := &pb.ThresholdCrossingResponse{
-		Data: thresholdCrossing,
+	if err != nil {
+		return nil, err
+	}
+
+	resp := new(pb.ThresholdCrossingResponse)
+
+	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into ThresholdCrossingResponse. Err: %s", err)
 	}
 
 	data, err := ptypes.MarshalAny(resp)

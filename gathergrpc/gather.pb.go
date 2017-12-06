@@ -7,8 +7,8 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import _ "google.golang.org/genproto/googleapis/api/annotations"
-import google_protobuf2 "github.com/golang/protobuf/ptypes/wrappers"
-import google_protobuf3 "github.com/golang/protobuf/ptypes/empty"
+import google_protobuf3 "github.com/golang/protobuf/ptypes/wrappers"
+import google_protobuf4 "github.com/golang/protobuf/ptypes/empty"
 
 import (
 	context "golang.org/x/net/context"
@@ -36,11 +36,11 @@ type AdminProvisioningServiceClient interface {
 	// Update a User with Administrative access.
 	UpdateAdminUser(ctx context.Context, in *AdminUserRequest, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Delete a User with Administrative access.
-	DeleteAdminUser(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
+	DeleteAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Retrieve and Administrative User by id.
-	GetAdminUser(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
+	GetAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Retrieve all Administrative Users.
-	GetAllAdminUsers(ctx context.Context, in *google_protobuf3.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error)
+	GetAllAdminUsers(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error)
 	// Creates a Tenant and returns a TenantDescriptor which provides
 	// metadata for the newly created Tenant.
 	CreateTenant(ctx context.Context, in *TenantDescriptorRequest, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
@@ -49,11 +49,11 @@ type AdminProvisioningServiceClient interface {
 	UpdateTenantDescriptor(ctx context.Context, in *TenantDescriptorRequest, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Deletes a Tenant and returns a TenantDescriptor which provides
 	// metadata for the now deleted Tenant.
-	DeleteTenant(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
+	DeleteTenant(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Retrieves the metadata of a single Tenant by id.
-	GetTenantDescriptor(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
+	GetTenantDescriptor(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantDescriptors(ctx context.Context, in *google_protobuf3.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error)
+	GetAllTenantDescriptors(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error)
 }
 
 type adminProvisioningServiceClient struct {
@@ -82,7 +82,7 @@ func (c *adminProvisioningServiceClient) UpdateAdminUser(ctx context.Context, in
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
+func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
 	out := new(AdminUserResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/DeleteAdminUser", in, out, c.cc, opts...)
 	if err != nil {
@@ -91,7 +91,7 @@ func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
+func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
 	out := new(AdminUserResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAdminUser", in, out, c.cc, opts...)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *g
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAllAdminUsers(ctx context.Context, in *google_protobuf3.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error) {
+func (c *adminProvisioningServiceClient) GetAllAdminUsers(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error) {
 	out := new(AdminUserListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAllAdminUsers", in, out, c.cc, opts...)
 	if err != nil {
@@ -127,7 +127,7 @@ func (c *adminProvisioningServiceClient) UpdateTenantDescriptor(ctx context.Cont
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
+func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
 	out := new(TenantDescriptorResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/DeleteTenant", in, out, c.cc, opts...)
 	if err != nil {
@@ -136,7 +136,7 @@ func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *g
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
+func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
 	out := new(TenantDescriptorResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetTenantDescriptor", in, out, c.cc, opts...)
 	if err != nil {
@@ -145,7 +145,7 @@ func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAllTenantDescriptors(ctx context.Context, in *google_protobuf3.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error) {
+func (c *adminProvisioningServiceClient) GetAllTenantDescriptors(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error) {
 	out := new(TenantDescriptorListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAllTenantDescriptors", in, out, c.cc, opts...)
 	if err != nil {
@@ -162,11 +162,11 @@ type AdminProvisioningServiceServer interface {
 	// Update a User with Administrative access.
 	UpdateAdminUser(context.Context, *AdminUserRequest) (*AdminUserResponse, error)
 	// Delete a User with Administrative access.
-	DeleteAdminUser(context.Context, *google_protobuf2.StringValue) (*AdminUserResponse, error)
+	DeleteAdminUser(context.Context, *google_protobuf3.StringValue) (*AdminUserResponse, error)
 	// Retrieve and Administrative User by id.
-	GetAdminUser(context.Context, *google_protobuf2.StringValue) (*AdminUserResponse, error)
+	GetAdminUser(context.Context, *google_protobuf3.StringValue) (*AdminUserResponse, error)
 	// Retrieve all Administrative Users.
-	GetAllAdminUsers(context.Context, *google_protobuf3.Empty) (*AdminUserListResponse, error)
+	GetAllAdminUsers(context.Context, *google_protobuf4.Empty) (*AdminUserListResponse, error)
 	// Creates a Tenant and returns a TenantDescriptor which provides
 	// metadata for the newly created Tenant.
 	CreateTenant(context.Context, *TenantDescriptorRequest) (*TenantDescriptorResponse, error)
@@ -175,11 +175,11 @@ type AdminProvisioningServiceServer interface {
 	UpdateTenantDescriptor(context.Context, *TenantDescriptorRequest) (*TenantDescriptorResponse, error)
 	// Deletes a Tenant and returns a TenantDescriptor which provides
 	// metadata for the now deleted Tenant.
-	DeleteTenant(context.Context, *google_protobuf2.StringValue) (*TenantDescriptorResponse, error)
+	DeleteTenant(context.Context, *google_protobuf3.StringValue) (*TenantDescriptorResponse, error)
 	// Retrieves the metadata of a single Tenant by id.
-	GetTenantDescriptor(context.Context, *google_protobuf2.StringValue) (*TenantDescriptorResponse, error)
+	GetTenantDescriptor(context.Context, *google_protobuf3.StringValue) (*TenantDescriptorResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantDescriptors(context.Context, *google_protobuf3.Empty) (*TenantDescriptorListResponse, error)
+	GetAllTenantDescriptors(context.Context, *google_protobuf4.Empty) (*TenantDescriptorListResponse, error)
 }
 
 func RegisterAdminProvisioningServiceServer(s *grpc.Server, srv AdminProvisioningServiceServer) {
@@ -223,7 +223,7 @@ func _AdminProvisioningService_UpdateAdminUser_Handler(srv interface{}, ctx cont
 }
 
 func _AdminProvisioningService_DeleteAdminUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -235,13 +235,13 @@ func _AdminProvisioningService_DeleteAdminUser_Handler(srv interface{}, ctx cont
 		FullMethod: "/gathergrpc.AdminProvisioningService/DeleteAdminUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).DeleteAdminUser(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(AdminProvisioningServiceServer).DeleteAdminUser(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAdminUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -253,13 +253,13 @@ func _AdminProvisioningService_GetAdminUser_Handler(srv interface{}, ctx context
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAdminUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAdminUser(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(AdminProvisioningServiceServer).GetAdminUser(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAllAdminUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf3.Empty)
+	in := new(google_protobuf4.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func _AdminProvisioningService_GetAllAdminUsers_Handler(srv interface{}, ctx con
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAllAdminUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAllAdminUsers(ctx, req.(*google_protobuf3.Empty))
+		return srv.(AdminProvisioningServiceServer).GetAllAdminUsers(ctx, req.(*google_protobuf4.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -313,7 +313,7 @@ func _AdminProvisioningService_UpdateTenantDescriptor_Handler(srv interface{}, c
 }
 
 func _AdminProvisioningService_DeleteTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -325,13 +325,13 @@ func _AdminProvisioningService_DeleteTenant_Handler(srv interface{}, ctx context
 		FullMethod: "/gathergrpc.AdminProvisioningService/DeleteTenant",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).DeleteTenant(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(AdminProvisioningServiceServer).DeleteTenant(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetTenantDescriptor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -343,13 +343,13 @@ func _AdminProvisioningService_GetTenantDescriptor_Handler(srv interface{}, ctx 
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetTenantDescriptor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetTenantDescriptor(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(AdminProvisioningServiceServer).GetTenantDescriptor(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAllTenantDescriptors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf3.Empty)
+	in := new(google_protobuf4.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -361,7 +361,7 @@ func _AdminProvisioningService_GetAllTenantDescriptors_Handler(srv interface{}, 
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAllTenantDescriptors",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAllTenantDescriptors(ctx, req.(*google_protobuf3.Empty))
+		return srv.(AdminProvisioningServiceServer).GetAllTenantDescriptors(ctx, req.(*google_protobuf4.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -427,7 +427,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a User scoped to a single Tenant.
 	GetTenantUser(ctx context.Context, in *TenantUserIdRequest, opts ...grpc.CallOption) (*TenantUserResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantUsers(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error)
+	GetAllTenantUsers(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error)
 	// Create a Domain scoped to a Single Tenant.
 	CreateTenantDomain(ctx context.Context, in *TenantDomainRequest, opts ...grpc.CallOption) (*TenantDomainResponse, error)
 	// Update a Domain scoped to a single Tenant.
@@ -437,7 +437,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a Domain scoped to a single Tenant.
 	GetTenantDomain(ctx context.Context, in *TenantDomainIdRequest, opts ...grpc.CallOption) (*TenantDomainResponse, error)
 	// Retrieve all Domains scoped to a single Tenant.
-	GetAllTenantDomains(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error)
+	GetAllTenantDomains(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error)
 	// Create a Ingestion Profile scoped to a Single Tenant.
 	CreateTenantIngestionProfile(ctx context.Context, in *TenantIngestionProfileRequest, opts ...grpc.CallOption) (*TenantIngestionProfileResponse, error)
 	// Updates an Ingestion Profile, which provides details on the data
@@ -467,7 +467,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a MonitoredObject scoped to a single Tenant.
 	GetMonitoredObject(ctx context.Context, in *MonitoredObjectIdRequest, opts ...grpc.CallOption) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
-	GetAllMonitoredObjects(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error)
+	GetAllMonitoredObjects(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error)
 }
 
 type tenantProvisioningServiceClient struct {
@@ -514,7 +514,7 @@ func (c *tenantProvisioningServiceClient) GetTenantUser(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllTenantUsers(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllTenantUsers(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error) {
 	out := new(TenantUserListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllTenantUsers", in, out, c.cc, opts...)
 	if err != nil {
@@ -559,7 +559,7 @@ func (c *tenantProvisioningServiceClient) GetTenantDomain(ctx context.Context, i
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllTenantDomains(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllTenantDomains(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error) {
 	out := new(TenantDomainListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllTenantDomains", in, out, c.cc, opts...)
 	if err != nil {
@@ -676,7 +676,7 @@ func (c *tenantProvisioningServiceClient) GetMonitoredObject(ctx context.Context
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllMonitoredObjects(ctx context.Context, in *google_protobuf2.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllMonitoredObjects(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error) {
 	out := new(MonitoredObjectListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllMonitoredObjects", in, out, c.cc, opts...)
 	if err != nil {
@@ -697,7 +697,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a User scoped to a single Tenant.
 	GetTenantUser(context.Context, *TenantUserIdRequest) (*TenantUserResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantUsers(context.Context, *google_protobuf2.StringValue) (*TenantUserListResponse, error)
+	GetAllTenantUsers(context.Context, *google_protobuf3.StringValue) (*TenantUserListResponse, error)
 	// Create a Domain scoped to a Single Tenant.
 	CreateTenantDomain(context.Context, *TenantDomainRequest) (*TenantDomainResponse, error)
 	// Update a Domain scoped to a single Tenant.
@@ -707,7 +707,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a Domain scoped to a single Tenant.
 	GetTenantDomain(context.Context, *TenantDomainIdRequest) (*TenantDomainResponse, error)
 	// Retrieve all Domains scoped to a single Tenant.
-	GetAllTenantDomains(context.Context, *google_protobuf2.StringValue) (*TenantDomainListResponse, error)
+	GetAllTenantDomains(context.Context, *google_protobuf3.StringValue) (*TenantDomainListResponse, error)
 	// Create a Ingestion Profile scoped to a Single Tenant.
 	CreateTenantIngestionProfile(context.Context, *TenantIngestionProfileRequest) (*TenantIngestionProfileResponse, error)
 	// Updates an Ingestion Profile, which provides details on the data
@@ -737,7 +737,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a MonitoredObject scoped to a single Tenant.
 	GetMonitoredObject(context.Context, *MonitoredObjectIdRequest) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
-	GetAllMonitoredObjects(context.Context, *google_protobuf2.StringValue) (*MonitoredObjectListResponse, error)
+	GetAllMonitoredObjects(context.Context, *google_protobuf3.StringValue) (*MonitoredObjectListResponse, error)
 }
 
 func RegisterTenantProvisioningServiceServer(s *grpc.Server, srv TenantProvisioningServiceServer) {
@@ -817,7 +817,7 @@ func _TenantProvisioningService_GetTenantUser_Handler(srv interface{}, ctx conte
 }
 
 func _TenantProvisioningService_GetAllTenantUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -829,7 +829,7 @@ func _TenantProvisioningService_GetAllTenantUsers_Handler(srv interface{}, ctx c
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllTenantUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllTenantUsers(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllTenantUsers(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -907,7 +907,7 @@ func _TenantProvisioningService_GetTenantDomain_Handler(srv interface{}, ctx con
 }
 
 func _TenantProvisioningService_GetAllTenantDomains_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -919,7 +919,7 @@ func _TenantProvisioningService_GetAllTenantDomains_Handler(srv interface{}, ctx
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllTenantDomains",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllTenantDomains(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllTenantDomains(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1141,7 +1141,7 @@ func _TenantProvisioningService_GetMonitoredObject_Handler(srv interface{}, ctx 
 }
 
 func _TenantProvisioningService_GetAllMonitoredObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1153,7 +1153,7 @@ func _TenantProvisioningService_GetAllMonitoredObjects_Handler(srv interface{}, 
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllMonitoredObjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllMonitoredObjects(ctx, req.(*google_protobuf2.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllMonitoredObjects(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }

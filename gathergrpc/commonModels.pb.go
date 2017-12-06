@@ -54,6 +54,7 @@ It has these top-level messages:
 	MonitoredObjectListResponse
 	MonitoredObjectIdRequest
 	ThresholdCrossing
+	FormattedThresholdCrossing
 	ThresholdCrossingResponse
 	ThresholdCrossingRequest
 	HistogramRequest

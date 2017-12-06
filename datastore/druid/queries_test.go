@@ -41,40 +41,44 @@ func TestFilterHelper(t *testing.T) {
 }
 
 func TestThresholdCrossingQuery(t *testing.T) {
-	druid.ThresholdCrossingQuery("druidTableName", metric1, "1h", "1900-11-02/2100-01-01", "twamp", "az", tp.Twamp.Metrics[0].Data[0].Events)
+	q := druid.ThresholdCrossingQuery("master", "druidTableName", "delayP95", "PT1H", "1900-11-02/2100-01-01", "TWAMP", "az", tp)
 
+	assert.Equal(t, *q, *testThresholdCrossing1)
 }
 
 var metric1 = "delayP95"
 
-var tp = &pb.ThresholdProfile{
-	Twamp: &pb.Threshold{
-		Metrics: []*pb.Metric{
-			&pb.Metric{
-				Id: "delayP95",
-				Data: []*pb.MetricData{
-					&pb.MetricData{
-						Direction: "az",
-						Events: []*pb.Event{
-							&pb.Event{
-								UpperBound:  30000,
-								UpperStrict: true,
-								Unit:        "percent",
-								Type:        "minor",
-							},
-							&pb.Event{
-								UpperBound:  50000,
-								LowerBound:  30000,
-								UpperStrict: true,
-								LowerStrict: false,
-								Unit:        "percent",
-								Type:        "major",
-							},
-							&pb.Event{
-								LowerBound:  50000,
-								LowerStrict: false,
-								Unit:        "percent",
-								Type:        "critical",
+var tp = &pb.TenantThresholdProfile{
+	Thresholds: []*pb.TenantThreshold{
+		&pb.TenantThreshold{
+			ObjectType: "TWAMP",
+			Metrics: []*pb.TenantMetric{
+				&pb.TenantMetric{
+					Id: "delayP95",
+					Data: []*pb.TenantMetricData{
+						&pb.TenantMetricData{
+							Direction: "az",
+							Events: []*pb.TenantEvent{
+								&pb.TenantEvent{
+									UpperBound:  30000,
+									UpperStrict: true,
+									Unit:        "percent",
+									Type:        "minor",
+								},
+								&pb.TenantEvent{
+									UpperBound:  50000,
+									LowerBound:  30000,
+									UpperStrict: true,
+									LowerStrict: false,
+									Unit:        "percent",
+									Type:        "major",
+								},
+								&pb.TenantEvent{
+									LowerBound:  50000,
+									LowerStrict: false,
+									Unit:        "percent",
+									Type:        "critical",
+								},
 							},
 						},
 					},
@@ -84,17 +88,17 @@ var tp = &pb.ThresholdProfile{
 	},
 }
 
-var lowerEvent = &pb.Event{
+var lowerEvent = &pb.TenantEvent{
 	LowerBound:  10000,
 	LowerStrict: true,
 }
 
-var upperEvent = &pb.Event{
+var upperEvent = &pb.TenantEvent{
 	UpperBound:  10000,
 	UpperStrict: true,
 }
 
-var bothEvent = &pb.Event{
+var bothEvent = &pb.TenantEvent{
 	LowerBound:  10000,
 	LowerStrict: true,
 	UpperBound:  10000,
@@ -102,37 +106,47 @@ var bothEvent = &pb.Event{
 }
 
 var testThresholdCrossing1 = &godruid.QueryTimeseries{
-	QueryType:   "timeseries",
-	DataSource:  "druidTableName",
-	Granularity: godruid.GranHour,
-	Context:     map[string]interface{}{"timeout": 60000},
+	QueryType:  "timeseries",
+	DataSource: "druidTableName",
+	Granularity: godruid.GranPeriod{
+		Type:     "period",
+		Period:   "PT1H",
+		TimeZone: "UTC",
+	},
+	Context: map[string]interface{}{"timeout": 60000},
 	Aggregations: []godruid.Aggregation{
 		godruid.AggCount("total"),
 		godruid.AggFiltered(
 			godruid.FilterAnd(
-				godruid.FilterLowerBound(metric1, "numeric", 75000, false),
-			),
-			&godruid.Aggregation{
-				Type: "count",
-				Name: "minorThreshold",
-			},
-		),
-		godruid.AggFiltered(
-			godruid.FilterAnd(
 				godruid.FilterUpperBound(metric1, "numeric", 30000, true),
+				godruid.FilterSelector("sessionType", "TWAMP"),
+				godruid.FilterSelector("tenantId", "master"),
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: "majorThreshold",
+				Name: "TWAMP.delayP95.minor",
 			},
 		),
 		godruid.AggFiltered(
 			godruid.FilterAnd(
-				godruid.FilterLowerUpperBound(metric1, "numeric", 30000, false, 75000, true),
+				godruid.FilterLowerUpperBound(metric1, "numeric", 30000, false, 50000, true),
+				godruid.FilterSelector("sessionType", "TWAMP"),
+				godruid.FilterSelector("tenantId", "master"),
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: "criticalThreshold",
+				Name: "TWAMP.delayP95.major",
+			},
+		),
+		godruid.AggFiltered(
+			godruid.FilterAnd(
+				godruid.FilterLowerBound(metric1, "numeric", 50000, false),
+				godruid.FilterSelector("sessionType", "TWAMP"),
+				godruid.FilterSelector("tenantId", "master"),
+			),
+			&godruid.Aggregation{
+				Type: "count",
+				Name: "TWAMP.delayP95.critical",
 			},
 		),
 	},

@@ -132,6 +132,77 @@
         ]
       }
     },
+    "/api/v1/histogram": {
+      "get": {
+        "summary": "Retrieve a histogram of measurements for given time range and metric",
+        "operationId": "GetHistogram",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcJSONAPIObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "interval",
+            "description": "ISO-8601 Intervals.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "granularity",
+            "description": "ISO-8601 period combination.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "granularityBuckets",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
     "/api/v1/tenant-list": {
       "get": {
         "summary": "Retrieve all Users scoped to a single Tenant.",
@@ -393,6 +464,70 @@
         ]
       }
     },
+    "/api/v1/tenants/{data.tenantId}/threshold-profiles": {
+      "post": {
+        "summary": "Create a Threshold Profile scoped to a Single Tenant.",
+        "operationId": "CreateTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Updates an Threshold Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "UpdateTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{data.tenantId}/users": {
       "post": {
         "summary": "Create a User scoped to a Single Tenant.",
@@ -637,6 +772,66 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}": {
+      "get": {
+        "summary": "Retrieves an Threshold Profile, which provides details on the data \ncollected for the Tenant.",
+        "operationId": "GetTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an Threshold Profile scoped to a single Tenant.",
+        "operationId": "DeleteTenantThresholdProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{tenantId}/users/{userId}": {
       "get": {
         "summary": "Retrieve a User scoped to a single Tenant.",
@@ -819,9 +1014,92 @@
           "TenantProvisioningService"
         ]
       }
+    },
+    "/api/v1/threshold-crossing": {
+      "get": {
+        "summary": "Retrieve threshold crossing for given metric.",
+        "operationId": "GetThresholdCrossing",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcJSONAPIObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "interval",
+            "description": "ISO-8601 Intervals.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "granularity",
+            "description": "ISO-8601 period combination.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "objectType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
     }
   },
   "definitions": {
+    "LinksRelated": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "MonitoredObjectDeviceType": {
       "type": "string",
       "enum": [
@@ -918,6 +1196,123 @@
       },
       "description": "AdminUserResponse - wrapper for passing AdminUser\ndata as a response from the service."
     },
+    "gathergrpcData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/definitions/protobufAny"
+        }
+      }
+    },
+    "gathergrpcError": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "links": {
+          "$ref": "#/definitions/gathergrpcLinks"
+        },
+        "status": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gathergrpcJSONAPIObject": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcData"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcError"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "jsonapi": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "$ref": "#/definitions/gathergrpcLinks"
+        },
+        "included": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcResource"
+          }
+        }
+      }
+    },
+    "gathergrpcLinks": {
+      "type": "object",
+      "properties": {
+        "related": {
+          "$ref": "#/definitions/LinksRelated"
+        },
+        "self": {
+          "type": "string"
+        },
+        "first": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
+        },
+        "prev": {
+          "type": "string"
+        },
+        "last": {
+          "type": "string"
+        },
+        "about": {
+          "type": "string"
+        },
+        "article": {
+          "type": "string"
+        }
+      },
+      "description": "Links technically allow any valid json string as a key,\nwe obviously can't do this, so we have to stick to the following."
+    },
     "gathergrpcMonitoredObject": {
       "type": "object",
       "properties": {
@@ -1000,6 +1395,52 @@
         }
       },
       "description": "MonitoredObjectRequest - Wrapper for responses involving a MonitoredObject that are \nscoped to a single Tenant."
+    },
+    "gathergrpcRelationships": {
+      "type": "object",
+      "properties": {
+        "links": {
+          "$ref": "#/definitions/gathergrpcLinks"
+        },
+        "data": {
+          "$ref": "#/definitions/protobufAny"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gathergrpcResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "$ref": "#/definitions/gathergrpcLinks"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "relationships": {
+          "$ref": "#/definitions/gathergrpcRelationships"
+        }
+      }
     },
     "gathergrpcTenantDescriptor": {
       "type": "object",
@@ -1137,6 +1578,34 @@
       },
       "title": "TenantDomainResponse - wrapper for responses that involve a Tenant Domain"
     },
+    "gathergrpcTenantEvent": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "upperBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "lowerBound": {
+          "type": "number",
+          "format": "float"
+        },
+        "upperStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "lowerStrict": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "TenantEvent"
+    },
     "gathergrpcTenantIngestionProfile": {
       "type": "object",
       "properties": {
@@ -1189,6 +1658,107 @@
         },
         "data": {
           "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
+        }
+      },
+      "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
+    },
+    "gathergrpcTenantMetric": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantMetricData"
+          }
+        }
+      },
+      "title": "TenantMetric"
+    },
+    "gathergrpcTenantMetricData": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantEvent"
+          }
+        }
+      },
+      "title": "TenantMetricData"
+    },
+    "gathergrpcTenantThreshold": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantMetric"
+          }
+        },
+        "objectType": {
+          "type": "string"
+        }
+      },
+      "title": "TenantThreshold"
+    },
+    "gathergrpcTenantThresholdProfile": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantThreshold"
+          }
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "TenantThresholdProfile"
+    },
+    "gathergrpcTenantThresholdProfileRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
+        }
+      },
+      "title": "TenantThresholdProfileRequest - wrapper for requests that involve the\nTenant Threshold Profile"
+    },
+    "gathergrpcTenantThresholdProfileResponse": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
         }
       },
       "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
@@ -1292,6 +1862,21 @@
       ],
       "default": "USER_UNKNOWN",
       "description": "Enumeration of User state."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string",
+          "description": "A URL/resource name whose content describes the type of the\nserialized protocol buffer message.\n\nFor URLs which use the scheme `http`, `https`, or no scheme, the\nfollowing restrictions and interpretations apply:\n\n* If no scheme is provided, `https` is assumed.\n* The last segment of the URL's path must represent the fully\n  qualified name of the type (as in `path/google.protobuf.Duration`).\n  The name should be in a canonical form (e.g., leading \".\" is\n  not accepted).\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        },
+        "value": {
+          "type": "string",
+          "format": "byte",
+          "description": "Must be a valid serialized protocol buffer of the above specified type."
+        }
+      },
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
     }
   }
 }

@@ -105,6 +105,30 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantIngestionProfile(tenantIn
 	return nil, errors.New("Unsupported operation: DeleteTenantIngestionProfile not implemented")
 }
 
+// CreateTenantThresholdProfile - InMemory implementation of CreateTenantThresholdProfile
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: CreateTenantThresholdProfile not implemented")
+}
+
+// UpdateTenantThresholdProfile - InMemory implementation of UpdateTenantThresholdProfile
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: UpdateTenantThresholdProfile not implemented")
+}
+
+// GetTenantThresholdProfile - InMemory implementation of GetTenantThresholdProfile
+func (tsd *TenantServiceDatastoreInMemory) GetTenantThresholdProfile(tenantIngPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetTenantThresholdProfile not implemented")
+}
+
+// DeleteTenantThresholdProfile - InMemory implementation of DeleteTenantThresholdProfile
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantThresholdProfile(tenantIngPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: DeleteTenantThresholdProfile not implemented")
+}
+
 // CreateMonitoredObject - InMemory implementation of CreateMonitoredObject
 func (tsd *TenantServiceDatastoreInMemory) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	// Stub to implement

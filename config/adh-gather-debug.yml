@@ -13,10 +13,15 @@ server:
       - http://localhost:4200
 args:
   admindb: 
-    name: aod-ui
+    name: adh-admin
     impl: 1
   tenantdb: 
     impl: 1
   pouchplugindb:
     impl: 1
   debug: true
+
+druid:
+  server: "https://broker.proto.npav.accedian.net"
+  table: "NPAVKPI2"
+  auth: "https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1%2FDfvhAZKYRY2MM90DbK66VfIvbsx7Phh1fLnVSxqRbYc&grant_type=refresh_token&audience=627634877761-fuiuhml29ce7985ua5rcjm2s3adk797v.apps.googleusercontent.com"

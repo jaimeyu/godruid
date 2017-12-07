@@ -290,6 +290,75 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 	return existingObject, nil
 }
 
+// CreateTenantThresholdProfile - CouchDB implementation of CreateTenantThresholdProfile
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	logger.Log.Debugf("Creating %s: %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetData().GetTenantId())
+	dataType := string(ds.TenantThresholdProfileType)
+	dataContainer := pb.TenantThresholdProfileResponse{}
+	if err := storeData(tenantDBName, tenantThreshPrfReq, dataType, ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// UpdateTenantThresholdProfile - CouchDB implementation of UpdateTenantThresholdProfile
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetData().GetTenantId())
+	dataType := string(ds.TenantThresholdProfileType)
+	dataContainer := pb.TenantThresholdProfileResponse{}
+	if err := updateData(tenantDBName, tenantThreshPrfReq, dataType, ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// GetTenantThresholdProfile - CouchDB implementation of GetTenantThresholdProfile
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
+	dataContainer := pb.TenantThresholdProfileResponse{}
+	if err := getData(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// DeleteTenantThresholdProfile - CouchDB implementation of DeleteTenantThresholdProfile
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	// Obtain the value of the existing record for a return value.
+	existingObject, err := tsd.GetTenantThresholdProfile(tenantThreshPrfReq)
+	if err != nil {
+		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantThresholdProfileStr, err.Error())
+		return nil, err
+	}
+
+	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
+	if err := deleteData(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), ds.TenantThresholdProfileStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantThresholdProfileStr, err.Error())
+		return nil, err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantThresholdProfileStr, existingObject)
+	return existingObject, nil
+}
+
 // CreateMonitoredObject - CouchDB implementation of CreateMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	logger.Log.Debugf("Creating %s: %v\n", ds.TenantMonitoredObjectStr, monitoredObjectReq)

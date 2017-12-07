@@ -93,4 +93,6 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_tenantdb_impl.String(), 1)
 	v.SetDefault(CK_args_pouchplugindb_impl.String(), 1)
 	v.SetDefault(CK_args_debug.String(), false)
+	v.SetDefault(CK_druid_server.String(), "https://broker.proto.npav.accedian.net")
+	v.SetDefault(CK_druid_table.String(), "NPAVKPI2")
 }

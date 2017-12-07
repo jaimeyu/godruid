@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
@@ -42,8 +43,9 @@ type GatherServer struct {
 	gsh     *adhh.GRPCServiceHandler
 	pouchSH *adhh.PouchDBPluginServiceHandler
 
-	mux   *mux.Router
-	gwmux *runtime.ServeMux
+	mux        *mux.Router
+	gwmux      *runtime.ServeMux
+	jsonAPIMux *runtime.ServeMux
 }
 
 func newServer() *GatherServer {
@@ -66,6 +68,7 @@ func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterAdminProvisioningServiceServer(grpcServer, gatherServer.gsh)
 	pb.RegisterTenantProvisioningServiceServer(grpcServer, gatherServer.gsh)
+	pb.RegisterMetricsServiceServer(grpcServer, gatherServer.gsh)
 
 	logger.Log.Infof("gRPC service intiated on: %s", gRPCAddress)
 	grpcServer.Serve(lis)
@@ -84,6 +87,16 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	gatherServer.mux = mux.NewRouter().StrictSlash(true)
 
 	gatherServer.gwmux = runtime.NewServeMux()
+
+	gatherServer.jsonAPIMux = runtime.NewServeMux(
+		runtime.WithForwardResponseOption(
+			func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
+				w.Header().Set("Content-Type", "application/vnd.api+json")
+				return nil
+			},
+		),
+	)
+
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
 	// Register the Admin Service
@@ -93,6 +106,11 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 
 	// Register the Tenant Service
 	if err := pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
+		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
+	}
+
+	// Register the Metrics Service
+	if err := pb.RegisterMetricsServiceHandlerFromEndpoint(ctx, gatherServer.jsonAPIMux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
 		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 
@@ -129,7 +147,10 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 // gRPC REST GW handler prefix, then use that handler, use the default handler
 // otherwise.
 func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.Index(r.URL.Path, "/api/v1/") == 0 {
+
+	if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
+		gs.jsonAPIMux.ServeHTTP(w, r)
+	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
 		gs.gwmux.ServeHTTP(w, r)
 	} else {
 		gs.mux.ServeHTTP(w, r)
@@ -177,4 +198,5 @@ func main() {
 	logger.Log.Infof("Using %s as Administrative Database", adminDB)
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)
+
 }

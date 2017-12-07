@@ -58,6 +58,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
 	objectTypes := strings.Split(objectType, ",")
+	directions := strings.Split(direction, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
@@ -70,21 +71,23 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 				// only include the provided ones
 				if contains(metrics, m.GetId()) || len(metrics) == 0 {
 					for _, d := range m.GetData() {
-						for _, e := range d.GetEvents() {
-							name := t.ObjectType + "." + m.Id + "." + e.GetType()
-							aggregation := godruid.AggFiltered(
-								godruid.FilterAnd(
-									FilterHelper(metric, e),
-									godruid.FilterSelector("sessionType", t.ObjectType),
-									godruid.FilterSelector("tenantId", tenant),
-									godruid.FilterSelector("direction", direction),
-								),
-								&godruid.Aggregation{
-									Type: "count",
-									Name: name,
-								},
-							)
-							aggregations = append(aggregations, aggregation)
+						if contains(directions, d.GetDirection()) || len(directions) == 0 {
+							for _, e := range d.GetEvents() {
+								name := t.GetObjectType() + "." + m.Id + "." + e.GetType() + "." + d.GetDirection()
+								aggregation := godruid.AggFiltered(
+									godruid.FilterAnd(
+										FilterHelper(metric, e),
+										godruid.FilterSelector("sessionType", t.GetObjectType()),
+										godruid.FilterSelector("tenantId", tenant),
+										godruid.FilterSelector("direction", d.GetDirection()),
+									),
+									&godruid.Aggregation{
+										Type: "count",
+										Name: name,
+									},
+								)
+								aggregations = append(aggregations, aggregation)
+							}
 						}
 					}
 				}

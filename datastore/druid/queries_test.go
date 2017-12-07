@@ -120,7 +120,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: "TWAMP.delayP95.minor",
+				Name: "TWAMP.delayP95.minor.0",
 			},
 		),
 		godruid.AggFiltered(
@@ -132,7 +132,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: "TWAMP.delayP95.major",
+				Name: "TWAMP.delayP95.major.0",
 			},
 		),
 		godruid.AggFiltered(
@@ -144,7 +144,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 			),
 			&godruid.Aggregation{
 				Type: "count",
-				Name: "TWAMP.delayP95.critical",
+				Name: "TWAMP.delayP95.critical.0",
 			},
 		),
 	},

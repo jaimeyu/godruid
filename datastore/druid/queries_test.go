@@ -41,7 +41,7 @@ func TestFilterHelper(t *testing.T) {
 }
 
 func TestThresholdCrossingQuery(t *testing.T) {
-	q := druid.ThresholdCrossingQuery("master", "druidTableName", "delayP95", "PT1H", "1900-11-02/2100-01-01", "TWAMP", "az", tp)
+	q := druid.ThresholdCrossingQuery("master", "druidTableName", "delayP95", "PT1H", "1900-11-02/2100-01-01", "TWAMP", "0", tp)
 
 	assert.Equal(t, *q, *testThresholdCrossing1)
 }
@@ -57,7 +57,7 @@ var tp = &pb.TenantThresholdProfile{
 					Id: "delayP95",
 					Data: []*pb.TenantMetricData{
 						&pb.TenantMetricData{
-							Direction: "az",
+							Direction: "0",
 							Events: []*pb.TenantEvent{
 								&pb.TenantEvent{
 									UpperBound:  30000,
@@ -106,14 +106,9 @@ var bothEvent = &pb.TenantEvent{
 }
 
 var testThresholdCrossing1 = &godruid.QueryTimeseries{
-	QueryType:  "timeseries",
-	DataSource: "druidTableName",
-	Granularity: godruid.GranPeriod{
-		Type:     "period",
-		Period:   "PT1H",
-		TimeZone: "UTC",
-	},
-	Context: map[string]interface{}{"timeout": 60000},
+	DataSource:  "druidTableName",
+	Granularity: godruid.GranPeriod("PT1H", druid.TimeZoneUTC, ""),
+	Context:     map[string]interface{}{"timeout": 60000},
 	Aggregations: []godruid.Aggregation{
 		godruid.AggCount("total"),
 		godruid.AggFiltered(
@@ -121,6 +116,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 				godruid.FilterUpperBound(metric1, "numeric", 30000, true),
 				godruid.FilterSelector("sessionType", "TWAMP"),
 				godruid.FilterSelector("tenantId", "master"),
+				godruid.FilterSelector("direction", "0"),
 			),
 			&godruid.Aggregation{
 				Type: "count",
@@ -132,6 +128,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 				godruid.FilterLowerUpperBound(metric1, "numeric", 30000, false, 50000, true),
 				godruid.FilterSelector("sessionType", "TWAMP"),
 				godruid.FilterSelector("tenantId", "master"),
+				godruid.FilterSelector("direction", "0"),
 			),
 			&godruid.Aggregation{
 				Type: "count",
@@ -143,6 +140,7 @@ var testThresholdCrossing1 = &godruid.QueryTimeseries{
 				godruid.FilterLowerBound(metric1, "numeric", 50000, false),
 				godruid.FilterSelector("sessionType", "TWAMP"),
 				godruid.FilterSelector("tenantId", "master"),
+				godruid.FilterSelector("direction", "0"),
 			),
 			&godruid.Aggregation{
 				Type: "count",

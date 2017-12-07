@@ -12,7 +12,7 @@ const (
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
-func HistogramQuery(tenant string, dataSource string, metric string, granularity string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
+func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
 	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
 
@@ -21,10 +21,10 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:     map[string]interface{}{"timeout": 60000},
 		Aggregations: []godruid.Aggregation{
-
 			godruid.AggFiltered(
 				godruid.FilterAnd(
 					godruid.FilterSelector("tenantId", tenant),
+					godruid.FilterSelector("direction", direction),
 				),
 				&aggHist,
 			),

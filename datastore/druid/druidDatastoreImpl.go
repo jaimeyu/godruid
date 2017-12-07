@@ -77,7 +77,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.Resolution, request.GranularityBuckets)
+	query := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
 
 	response, err := dc.executeQuery(query)
 

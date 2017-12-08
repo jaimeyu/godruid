@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -16,6 +17,7 @@ import (
 type GRPCServiceHandler struct {
 	ash *AdminServiceHandler
 	tsh *TenantServiceHandler
+	msh *MetricServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -26,6 +28,7 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	result.ash = CreateAdminServiceHandler()
 	result.tsh = CreateTenantServiceHandler()
+	result.msh = CreateMetricServiceHandler()
 
 	return result
 }
@@ -169,6 +172,26 @@ func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context,
 	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 }
 
+// CreateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	return gsh.tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
+}
+
+// UpdateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
+func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	return gsh.tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
+}
+
+// GetTenantThresholdProfile - retrieves the Threshold Profile for a singler Tenant.
+func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	return gsh.tsh.GetTenantThresholdProfile(ctx, tenantID)
+}
+
+// DeleteTenantThresholdProfile - retrieves the Threshold Profile for a singler Tenant.
+func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	return gsh.tsh.DeleteTenantThresholdProfile(ctx, tenantID)
+}
+
 // CreateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
 func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	return gsh.tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
@@ -201,4 +224,25 @@ func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
 	ingPrf.TenantId = tenantId
 
 	return &ingPrf
+}
+
+// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
+// interval, tenant, domain
+func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
+		TenantId:           thresholdCrossingReq.Tenant,
+		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to find ingestion profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
+	}
+
+	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
+}
+
+// GetHistogram -
+func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
+
+	return gsh.msh.GetHistogram(ctx, histogramReq)
 }

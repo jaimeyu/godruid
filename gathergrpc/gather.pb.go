@@ -7,8 +7,8 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import _ "google.golang.org/genproto/googleapis/api/annotations"
-import google_protobuf1 "github.com/golang/protobuf/ptypes/wrappers"
-import google_protobuf2 "github.com/golang/protobuf/ptypes/empty"
+import google_protobuf3 "github.com/golang/protobuf/ptypes/wrappers"
+import google_protobuf4 "github.com/golang/protobuf/ptypes/empty"
 
 import (
 	context "golang.org/x/net/context"
@@ -36,11 +36,11 @@ type AdminProvisioningServiceClient interface {
 	// Update a User with Administrative access.
 	UpdateAdminUser(ctx context.Context, in *AdminUserRequest, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Delete a User with Administrative access.
-	DeleteAdminUser(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
+	DeleteAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Retrieve and Administrative User by id.
-	GetAdminUser(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
+	GetAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error)
 	// Retrieve all Administrative Users.
-	GetAllAdminUsers(ctx context.Context, in *google_protobuf2.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error)
+	GetAllAdminUsers(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error)
 	// Creates a Tenant and returns a TenantDescriptor which provides
 	// metadata for the newly created Tenant.
 	CreateTenant(ctx context.Context, in *TenantDescriptorRequest, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
@@ -49,11 +49,11 @@ type AdminProvisioningServiceClient interface {
 	UpdateTenantDescriptor(ctx context.Context, in *TenantDescriptorRequest, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Deletes a Tenant and returns a TenantDescriptor which provides
 	// metadata for the now deleted Tenant.
-	DeleteTenant(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
+	DeleteTenant(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Retrieves the metadata of a single Tenant by id.
-	GetTenantDescriptor(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
+	GetTenantDescriptor(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantDescriptors(ctx context.Context, in *google_protobuf2.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error)
+	GetAllTenantDescriptors(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error)
 }
 
 type adminProvisioningServiceClient struct {
@@ -82,7 +82,7 @@ func (c *adminProvisioningServiceClient) UpdateAdminUser(ctx context.Context, in
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
+func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
 	out := new(AdminUserResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/DeleteAdminUser", in, out, c.cc, opts...)
 	if err != nil {
@@ -91,7 +91,7 @@ func (c *adminProvisioningServiceClient) DeleteAdminUser(ctx context.Context, in
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
+func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*AdminUserResponse, error) {
 	out := new(AdminUserResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAdminUser", in, out, c.cc, opts...)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *adminProvisioningServiceClient) GetAdminUser(ctx context.Context, in *g
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAllAdminUsers(ctx context.Context, in *google_protobuf2.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error) {
+func (c *adminProvisioningServiceClient) GetAllAdminUsers(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*AdminUserListResponse, error) {
 	out := new(AdminUserListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAllAdminUsers", in, out, c.cc, opts...)
 	if err != nil {
@@ -127,7 +127,7 @@ func (c *adminProvisioningServiceClient) UpdateTenantDescriptor(ctx context.Cont
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
+func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
 	out := new(TenantDescriptorResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/DeleteTenant", in, out, c.cc, opts...)
 	if err != nil {
@@ -136,7 +136,7 @@ func (c *adminProvisioningServiceClient) DeleteTenant(ctx context.Context, in *g
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
+func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDescriptorResponse, error) {
 	out := new(TenantDescriptorResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetTenantDescriptor", in, out, c.cc, opts...)
 	if err != nil {
@@ -145,7 +145,7 @@ func (c *adminProvisioningServiceClient) GetTenantDescriptor(ctx context.Context
 	return out, nil
 }
 
-func (c *adminProvisioningServiceClient) GetAllTenantDescriptors(ctx context.Context, in *google_protobuf2.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error) {
+func (c *adminProvisioningServiceClient) GetAllTenantDescriptors(ctx context.Context, in *google_protobuf4.Empty, opts ...grpc.CallOption) (*TenantDescriptorListResponse, error) {
 	out := new(TenantDescriptorListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.AdminProvisioningService/GetAllTenantDescriptors", in, out, c.cc, opts...)
 	if err != nil {
@@ -162,11 +162,11 @@ type AdminProvisioningServiceServer interface {
 	// Update a User with Administrative access.
 	UpdateAdminUser(context.Context, *AdminUserRequest) (*AdminUserResponse, error)
 	// Delete a User with Administrative access.
-	DeleteAdminUser(context.Context, *google_protobuf1.StringValue) (*AdminUserResponse, error)
+	DeleteAdminUser(context.Context, *google_protobuf3.StringValue) (*AdminUserResponse, error)
 	// Retrieve and Administrative User by id.
-	GetAdminUser(context.Context, *google_protobuf1.StringValue) (*AdminUserResponse, error)
+	GetAdminUser(context.Context, *google_protobuf3.StringValue) (*AdminUserResponse, error)
 	// Retrieve all Administrative Users.
-	GetAllAdminUsers(context.Context, *google_protobuf2.Empty) (*AdminUserListResponse, error)
+	GetAllAdminUsers(context.Context, *google_protobuf4.Empty) (*AdminUserListResponse, error)
 	// Creates a Tenant and returns a TenantDescriptor which provides
 	// metadata for the newly created Tenant.
 	CreateTenant(context.Context, *TenantDescriptorRequest) (*TenantDescriptorResponse, error)
@@ -175,11 +175,11 @@ type AdminProvisioningServiceServer interface {
 	UpdateTenantDescriptor(context.Context, *TenantDescriptorRequest) (*TenantDescriptorResponse, error)
 	// Deletes a Tenant and returns a TenantDescriptor which provides
 	// metadata for the now deleted Tenant.
-	DeleteTenant(context.Context, *google_protobuf1.StringValue) (*TenantDescriptorResponse, error)
+	DeleteTenant(context.Context, *google_protobuf3.StringValue) (*TenantDescriptorResponse, error)
 	// Retrieves the metadata of a single Tenant by id.
-	GetTenantDescriptor(context.Context, *google_protobuf1.StringValue) (*TenantDescriptorResponse, error)
+	GetTenantDescriptor(context.Context, *google_protobuf3.StringValue) (*TenantDescriptorResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantDescriptors(context.Context, *google_protobuf2.Empty) (*TenantDescriptorListResponse, error)
+	GetAllTenantDescriptors(context.Context, *google_protobuf4.Empty) (*TenantDescriptorListResponse, error)
 }
 
 func RegisterAdminProvisioningServiceServer(s *grpc.Server, srv AdminProvisioningServiceServer) {
@@ -223,7 +223,7 @@ func _AdminProvisioningService_UpdateAdminUser_Handler(srv interface{}, ctx cont
 }
 
 func _AdminProvisioningService_DeleteAdminUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -235,13 +235,13 @@ func _AdminProvisioningService_DeleteAdminUser_Handler(srv interface{}, ctx cont
 		FullMethod: "/gathergrpc.AdminProvisioningService/DeleteAdminUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).DeleteAdminUser(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(AdminProvisioningServiceServer).DeleteAdminUser(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAdminUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -253,13 +253,13 @@ func _AdminProvisioningService_GetAdminUser_Handler(srv interface{}, ctx context
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAdminUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAdminUser(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(AdminProvisioningServiceServer).GetAdminUser(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAllAdminUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.Empty)
+	in := new(google_protobuf4.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func _AdminProvisioningService_GetAllAdminUsers_Handler(srv interface{}, ctx con
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAllAdminUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAllAdminUsers(ctx, req.(*google_protobuf2.Empty))
+		return srv.(AdminProvisioningServiceServer).GetAllAdminUsers(ctx, req.(*google_protobuf4.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -313,7 +313,7 @@ func _AdminProvisioningService_UpdateTenantDescriptor_Handler(srv interface{}, c
 }
 
 func _AdminProvisioningService_DeleteTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -325,13 +325,13 @@ func _AdminProvisioningService_DeleteTenant_Handler(srv interface{}, ctx context
 		FullMethod: "/gathergrpc.AdminProvisioningService/DeleteTenant",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).DeleteTenant(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(AdminProvisioningServiceServer).DeleteTenant(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetTenantDescriptor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -343,13 +343,13 @@ func _AdminProvisioningService_GetTenantDescriptor_Handler(srv interface{}, ctx 
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetTenantDescriptor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetTenantDescriptor(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(AdminProvisioningServiceServer).GetTenantDescriptor(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminProvisioningService_GetAllTenantDescriptors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf2.Empty)
+	in := new(google_protobuf4.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -361,7 +361,7 @@ func _AdminProvisioningService_GetAllTenantDescriptors_Handler(srv interface{}, 
 		FullMethod: "/gathergrpc.AdminProvisioningService/GetAllTenantDescriptors",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminProvisioningServiceServer).GetAllTenantDescriptors(ctx, req.(*google_protobuf2.Empty))
+		return srv.(AdminProvisioningServiceServer).GetAllTenantDescriptors(ctx, req.(*google_protobuf4.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -427,7 +427,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a User scoped to a single Tenant.
 	GetTenantUser(ctx context.Context, in *TenantUserIdRequest, opts ...grpc.CallOption) (*TenantUserResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantUsers(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error)
+	GetAllTenantUsers(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error)
 	// Create a Domain scoped to a Single Tenant.
 	CreateTenantDomain(ctx context.Context, in *TenantDomainRequest, opts ...grpc.CallOption) (*TenantDomainResponse, error)
 	// Update a Domain scoped to a single Tenant.
@@ -437,7 +437,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a Domain scoped to a single Tenant.
 	GetTenantDomain(ctx context.Context, in *TenantDomainIdRequest, opts ...grpc.CallOption) (*TenantDomainResponse, error)
 	// Retrieve all Domains scoped to a single Tenant.
-	GetAllTenantDomains(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error)
+	GetAllTenantDomains(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error)
 	// Create a Ingestion Profile scoped to a Single Tenant.
 	CreateTenantIngestionProfile(ctx context.Context, in *TenantIngestionProfileRequest, opts ...grpc.CallOption) (*TenantIngestionProfileResponse, error)
 	// Updates an Ingestion Profile, which provides details on the data
@@ -448,6 +448,16 @@ type TenantProvisioningServiceClient interface {
 	GetTenantIngestionProfile(ctx context.Context, in *TenantIngestionProfileIdRequest, opts ...grpc.CallOption) (*TenantIngestionProfileResponse, error)
 	// Delete an Ingestion Profile scoped to a single Tenant.
 	DeleteTenantIngestionProfile(ctx context.Context, in *TenantIngestionProfileIdRequest, opts ...grpc.CallOption) (*TenantIngestionProfileResponse, error)
+	// Create a Threshold Profile scoped to a Single Tenant.
+	CreateTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error)
+	// Updates an Threshold Profile, which provides details on the data
+	// collected for the Tenant.
+	UpdateTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error)
+	// Retrieves an Threshold Profile, which provides details on the data
+	// collected for the Tenant.
+	GetTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileIdRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error)
+	// Delete an Threshold Profile scoped to a single Tenant.
+	DeleteTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileIdRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error)
 	// Create a MonitoredObject scoped to a Single Tenant.
 	CreateMonitoredObject(ctx context.Context, in *MonitoredObjectRequest, opts ...grpc.CallOption) (*MonitoredObjectResponse, error)
 	// Update a MonitoredObject scoped to a single Tenant.
@@ -457,7 +467,7 @@ type TenantProvisioningServiceClient interface {
 	// Retrieve a MonitoredObject scoped to a single Tenant.
 	GetMonitoredObject(ctx context.Context, in *MonitoredObjectIdRequest, opts ...grpc.CallOption) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
-	GetAllMonitoredObjects(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error)
+	GetAllMonitoredObjects(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error)
 }
 
 type tenantProvisioningServiceClient struct {
@@ -504,7 +514,7 @@ func (c *tenantProvisioningServiceClient) GetTenantUser(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllTenantUsers(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllTenantUsers(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantUserListResponse, error) {
 	out := new(TenantUserListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllTenantUsers", in, out, c.cc, opts...)
 	if err != nil {
@@ -549,7 +559,7 @@ func (c *tenantProvisioningServiceClient) GetTenantDomain(ctx context.Context, i
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllTenantDomains(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllTenantDomains(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*TenantDomainListResponse, error) {
 	out := new(TenantDomainListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllTenantDomains", in, out, c.cc, opts...)
 	if err != nil {
@@ -594,6 +604,42 @@ func (c *tenantProvisioningServiceClient) DeleteTenantIngestionProfile(ctx conte
 	return out, nil
 }
 
+func (c *tenantProvisioningServiceClient) CreateTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error) {
+	out := new(TenantThresholdProfileResponse)
+	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/CreateTenantThresholdProfile", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantProvisioningServiceClient) UpdateTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error) {
+	out := new(TenantThresholdProfileResponse)
+	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/UpdateTenantThresholdProfile", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantProvisioningServiceClient) GetTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileIdRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error) {
+	out := new(TenantThresholdProfileResponse)
+	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetTenantThresholdProfile", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantProvisioningServiceClient) DeleteTenantThresholdProfile(ctx context.Context, in *TenantThresholdProfileIdRequest, opts ...grpc.CallOption) (*TenantThresholdProfileResponse, error) {
+	out := new(TenantThresholdProfileResponse)
+	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/DeleteTenantThresholdProfile", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tenantProvisioningServiceClient) CreateMonitoredObject(ctx context.Context, in *MonitoredObjectRequest, opts ...grpc.CallOption) (*MonitoredObjectResponse, error) {
 	out := new(MonitoredObjectResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/CreateMonitoredObject", in, out, c.cc, opts...)
@@ -630,7 +676,7 @@ func (c *tenantProvisioningServiceClient) GetMonitoredObject(ctx context.Context
 	return out, nil
 }
 
-func (c *tenantProvisioningServiceClient) GetAllMonitoredObjects(ctx context.Context, in *google_protobuf1.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error) {
+func (c *tenantProvisioningServiceClient) GetAllMonitoredObjects(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error) {
 	out := new(MonitoredObjectListResponse)
 	err := grpc.Invoke(ctx, "/gathergrpc.TenantProvisioningService/GetAllMonitoredObjects", in, out, c.cc, opts...)
 	if err != nil {
@@ -651,7 +697,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a User scoped to a single Tenant.
 	GetTenantUser(context.Context, *TenantUserIdRequest) (*TenantUserResponse, error)
 	// Retrieve all Users scoped to a single Tenant.
-	GetAllTenantUsers(context.Context, *google_protobuf1.StringValue) (*TenantUserListResponse, error)
+	GetAllTenantUsers(context.Context, *google_protobuf3.StringValue) (*TenantUserListResponse, error)
 	// Create a Domain scoped to a Single Tenant.
 	CreateTenantDomain(context.Context, *TenantDomainRequest) (*TenantDomainResponse, error)
 	// Update a Domain scoped to a single Tenant.
@@ -661,7 +707,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a Domain scoped to a single Tenant.
 	GetTenantDomain(context.Context, *TenantDomainIdRequest) (*TenantDomainResponse, error)
 	// Retrieve all Domains scoped to a single Tenant.
-	GetAllTenantDomains(context.Context, *google_protobuf1.StringValue) (*TenantDomainListResponse, error)
+	GetAllTenantDomains(context.Context, *google_protobuf3.StringValue) (*TenantDomainListResponse, error)
 	// Create a Ingestion Profile scoped to a Single Tenant.
 	CreateTenantIngestionProfile(context.Context, *TenantIngestionProfileRequest) (*TenantIngestionProfileResponse, error)
 	// Updates an Ingestion Profile, which provides details on the data
@@ -672,6 +718,16 @@ type TenantProvisioningServiceServer interface {
 	GetTenantIngestionProfile(context.Context, *TenantIngestionProfileIdRequest) (*TenantIngestionProfileResponse, error)
 	// Delete an Ingestion Profile scoped to a single Tenant.
 	DeleteTenantIngestionProfile(context.Context, *TenantIngestionProfileIdRequest) (*TenantIngestionProfileResponse, error)
+	// Create a Threshold Profile scoped to a Single Tenant.
+	CreateTenantThresholdProfile(context.Context, *TenantThresholdProfileRequest) (*TenantThresholdProfileResponse, error)
+	// Updates an Threshold Profile, which provides details on the data
+	// collected for the Tenant.
+	UpdateTenantThresholdProfile(context.Context, *TenantThresholdProfileRequest) (*TenantThresholdProfileResponse, error)
+	// Retrieves an Threshold Profile, which provides details on the data
+	// collected for the Tenant.
+	GetTenantThresholdProfile(context.Context, *TenantThresholdProfileIdRequest) (*TenantThresholdProfileResponse, error)
+	// Delete an Threshold Profile scoped to a single Tenant.
+	DeleteTenantThresholdProfile(context.Context, *TenantThresholdProfileIdRequest) (*TenantThresholdProfileResponse, error)
 	// Create a MonitoredObject scoped to a Single Tenant.
 	CreateMonitoredObject(context.Context, *MonitoredObjectRequest) (*MonitoredObjectResponse, error)
 	// Update a MonitoredObject scoped to a single Tenant.
@@ -681,7 +737,7 @@ type TenantProvisioningServiceServer interface {
 	// Retrieve a MonitoredObject scoped to a single Tenant.
 	GetMonitoredObject(context.Context, *MonitoredObjectIdRequest) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
-	GetAllMonitoredObjects(context.Context, *google_protobuf1.StringValue) (*MonitoredObjectListResponse, error)
+	GetAllMonitoredObjects(context.Context, *google_protobuf3.StringValue) (*MonitoredObjectListResponse, error)
 }
 
 func RegisterTenantProvisioningServiceServer(s *grpc.Server, srv TenantProvisioningServiceServer) {
@@ -761,7 +817,7 @@ func _TenantProvisioningService_GetTenantUser_Handler(srv interface{}, ctx conte
 }
 
 func _TenantProvisioningService_GetAllTenantUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -773,7 +829,7 @@ func _TenantProvisioningService_GetAllTenantUsers_Handler(srv interface{}, ctx c
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllTenantUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllTenantUsers(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllTenantUsers(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -851,7 +907,7 @@ func _TenantProvisioningService_GetTenantDomain_Handler(srv interface{}, ctx con
 }
 
 func _TenantProvisioningService_GetAllTenantDomains_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -863,7 +919,7 @@ func _TenantProvisioningService_GetAllTenantDomains_Handler(srv interface{}, ctx
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllTenantDomains",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllTenantDomains(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllTenantDomains(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -936,6 +992,78 @@ func _TenantProvisioningService_DeleteTenantIngestionProfile_Handler(srv interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TenantProvisioningServiceServer).DeleteTenantIngestionProfile(ctx, req.(*TenantIngestionProfileIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantProvisioningService_CreateTenantThresholdProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantThresholdProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantProvisioningServiceServer).CreateTenantThresholdProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.TenantProvisioningService/CreateTenantThresholdProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantProvisioningServiceServer).CreateTenantThresholdProfile(ctx, req.(*TenantThresholdProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantProvisioningService_UpdateTenantThresholdProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantThresholdProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantProvisioningServiceServer).UpdateTenantThresholdProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.TenantProvisioningService/UpdateTenantThresholdProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantProvisioningServiceServer).UpdateTenantThresholdProfile(ctx, req.(*TenantThresholdProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantProvisioningService_GetTenantThresholdProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantThresholdProfileIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantProvisioningServiceServer).GetTenantThresholdProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.TenantProvisioningService/GetTenantThresholdProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantProvisioningServiceServer).GetTenantThresholdProfile(ctx, req.(*TenantThresholdProfileIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantProvisioningService_DeleteTenantThresholdProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantThresholdProfileIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantProvisioningServiceServer).DeleteTenantThresholdProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.TenantProvisioningService/DeleteTenantThresholdProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantProvisioningServiceServer).DeleteTenantThresholdProfile(ctx, req.(*TenantThresholdProfileIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1013,7 +1141,7 @@ func _TenantProvisioningService_GetMonitoredObject_Handler(srv interface{}, ctx 
 }
 
 func _TenantProvisioningService_GetAllMonitoredObjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.StringValue)
+	in := new(google_protobuf3.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1025,7 +1153,7 @@ func _TenantProvisioningService_GetAllMonitoredObjects_Handler(srv interface{}, 
 		FullMethod: "/gathergrpc.TenantProvisioningService/GetAllMonitoredObjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantProvisioningServiceServer).GetAllMonitoredObjects(ctx, req.(*google_protobuf1.StringValue))
+		return srv.(TenantProvisioningServiceServer).GetAllMonitoredObjects(ctx, req.(*google_protobuf3.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1091,6 +1219,22 @@ var _TenantProvisioningService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _TenantProvisioningService_DeleteTenantIngestionProfile_Handler,
 		},
 		{
+			MethodName: "CreateTenantThresholdProfile",
+			Handler:    _TenantProvisioningService_CreateTenantThresholdProfile_Handler,
+		},
+		{
+			MethodName: "UpdateTenantThresholdProfile",
+			Handler:    _TenantProvisioningService_UpdateTenantThresholdProfile_Handler,
+		},
+		{
+			MethodName: "GetTenantThresholdProfile",
+			Handler:    _TenantProvisioningService_GetTenantThresholdProfile_Handler,
+		},
+		{
+			MethodName: "DeleteTenantThresholdProfile",
+			Handler:    _TenantProvisioningService_DeleteTenantThresholdProfile_Handler,
+		},
+		{
 			MethodName: "CreateMonitoredObject",
 			Handler:    _TenantProvisioningService_CreateMonitoredObject_Handler,
 		},
@@ -1115,67 +1259,178 @@ var _TenantProvisioningService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "gathergrpc/gather.proto",
 }
 
-func init() { proto.RegisterFile("gathergrpc/gather.proto", fileDescriptor3) }
+// Client API for MetricsService service
 
-var fileDescriptor3 = []byte{
-	// 929 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x96, 0x4d, 0x6f, 0xe3, 0x44,
-	0x18, 0xc7, 0x65, 0x0e, 0x48, 0x8c, 0x5a, 0xa5, 0x4c, 0x49, 0xd3, 0xba, 0x49, 0x4b, 0x9d, 0x56,
-	0xa5, 0x2e, 0x89, 0x69, 0x10, 0x20, 0x21, 0x90, 0xa0, 0x04, 0x95, 0x22, 0x2a, 0x2a, 0x4a, 0xb9,
-	0xbb, 0xf1, 0x34, 0x9d, 0xca, 0xf1, 0x18, 0x7b, 0x12, 0x5e, 0xa2, 0x08, 0x04, 0x52, 0x2f, 0x08,
-	0x09, 0x09, 0x89, 0x13, 0xda, 0xfb, 0x4a, 0xab, 0x3d, 0xed, 0x07, 0x58, 0x69, 0x3f, 0xc2, 0x7e,
-	0x85, 0xfd, 0x20, 0x2b, 0x3f, 0x63, 0xc7, 0x6f, 0xb1, 0x93, 0x74, 0xdd, 0xde, 0x1a, 0x3f, 0x33,
-	0xf3, 0xff, 0x79, 0xe6, 0xe7, 0x67, 0x8a, 0x2a, 0x5d, 0x9d, 0x5f, 0x11, 0xa7, 0xeb, 0xd8, 0x1d,
-	0x4d, 0xfc, 0xd9, 0xb4, 0x1d, 0xc6, 0x19, 0x46, 0x61, 0x41, 0xae, 0x76, 0x19, 0xeb, 0x9a, 0x44,
-	0xd3, 0x6d, 0xaa, 0xe9, 0x96, 0xc5, 0xb8, 0xce, 0x29, 0xb3, 0x5c, 0x31, 0x52, 0xde, 0xf0, 0xab,
-	0xf0, 0xeb, 0xa2, 0x7f, 0xa9, 0xfd, 0xe4, 0xe8, 0xb6, 0x4d, 0x9c, 0xa0, 0xbe, 0x9e, 0xac, 0x93,
-	0x9e, 0xcd, 0x7f, 0xf1, 0x8b, 0xd5, 0x48, 0xbe, 0x6e, 0xf4, 0xa8, 0x75, 0xc2, 0x0c, 0x62, 0x06,
-	0x53, 0x6b, 0x91, 0x2a, 0x27, 0x96, 0x6e, 0xf1, 0x68, 0xb9, 0xf5, 0xff, 0x1b, 0x68, 0xf5, 0x73,
-	0x6f, 0xd2, 0xa9, 0xc3, 0x06, 0xd4, 0xa5, 0xcc, 0xa2, 0x56, 0xf7, 0x8c, 0x38, 0x03, 0xda, 0x21,
-	0xf8, 0x0a, 0x95, 0xbe, 0x70, 0x88, 0xce, 0x09, 0x8c, 0x38, 0x77, 0x89, 0x83, 0xab, 0xcd, 0x70,
-	0xbd, 0xe6, 0xf8, 0xf1, 0x77, 0xe4, 0xc7, 0x3e, 0x71, 0xb9, 0x5c, 0xcb, 0xa8, 0xba, 0x36, 0xb3,
-	0x5c, 0xa2, 0xac, 0xfe, 0xf1, 0xfc, 0xc5, 0xbf, 0xaf, 0x61, 0x65, 0x11, 0xb6, 0x61, 0x70, 0x20,
-	0x70, 0x3f, 0x96, 0x54, 0x2f, 0xe9, 0xdc, 0x36, 0x0a, 0x4f, 0x92, 0xd3, 0x49, 0x3d, 0x54, 0x6a,
-	0x13, 0x93, 0x24, 0x92, 0x60, 0x7b, 0x9b, 0xc1, 0xf6, 0x36, 0xcf, 0xb8, 0x43, 0xad, 0xee, 0x0f,
-	0xba, 0xd9, 0x27, 0xd3, 0x92, 0x6a, 0x90, 0x54, 0x51, 0xcb, 0xb1, 0x24, 0x6d, 0x38, 0xf0, 0x26,
-	0x8f, 0xf0, 0x35, 0x5a, 0x38, 0x22, 0xbc, 0xd8, 0x2c, 0x9c, 0x91, 0x65, 0xa1, 0x25, 0x2f, 0xcb,
-	0x34, 0xc7, 0x33, 0x5d, 0xbc, 0x92, 0xca, 0xfb, 0xd2, 0x53, 0x47, 0xde, 0x9a, 0x98, 0xf4, 0x0d,
-	0x75, 0xf9, 0x38, 0x6d, 0x13, 0xd2, 0xd6, 0x70, 0x25, 0x96, 0xd6, 0xe8, 0xbb, 0xc4, 0x69, 0x98,
-	0xd4, 0xe5, 0xb8, 0x8f, 0x16, 0x84, 0x1e, 0xdf, 0x83, 0x57, 0xb8, 0x1e, 0x5d, 0x53, 0x3c, 0x6b,
-	0x13, 0xb7, 0xe3, 0x50, 0x9b, 0xb3, 0xf1, 0xc1, 0x6d, 0xe7, 0x0f, 0xf2, 0xb3, 0x65, 0xc8, 0x7e,
-	0x4b, 0x29, 0x05, 0xd9, 0x42, 0x5d, 0xd7, 0x3b, 0xc1, 0xdf, 0xd0, 0x8a, 0x70, 0x25, 0x39, 0xfb,
-	0x0e, 0x00, 0xe4, 0x49, 0x00, 0x2e, 0x5a, 0x10, 0x0a, 0xf9, 0xef, 0x9d, 0x7f, 0xa6, 0xb3, 0xe5,
-	0xf9, 0x9b, 0xad, 0x56, 0x12, 0x79, 0xe3, 0xc3, 0xfd, 0x15, 0x2d, 0x1f, 0x11, 0x9e, 0x7a, 0xe5,
-	0x02, 0xb3, 0x71, 0x66, 0xf6, 0xcf, 0xa8, 0x22, 0xc4, 0x4a, 0x2e, 0x91, 0xed, 0xd7, 0x3b, 0x79,
-	0xc9, 0x31, 0xcd, 0xd6, 0x21, 0xbd, 0x8c, 0x97, 0xe3, 0xe9, 0xa0, 0x58, 0xeb, 0x71, 0x05, 0xad,
-	0x89, 0xd9, 0x93, 0xfa, 0xd3, 0x9f, 0x12, 0x5a, 0x8a, 0x1a, 0x08, 0x5f, 0x58, 0x2d, 0x9d, 0x1c,
-	0x6d, 0x1c, 0x1b, 0x59, 0x65, 0x1f, 0xe7, 0x3d, 0xc0, 0x51, 0x95, 0x9d, 0xd4, 0x66, 0x18, 0x3a,
-	0xd7, 0x9b, 0xe2, 0xd7, 0xb1, 0x31, 0xd2, 0xbc, 0xef, 0x00, 0x74, 0xf0, 0x28, 0xa2, 0x42, 0x16,
-	0x48, 0x21, 0xcf, 0x4e, 0x71, 0x23, 0xa1, 0xa5, 0xa8, 0x95, 0x40, 0xb1, 0x39, 0x39, 0xe6, 0xd8,
-	0x98, 0x95, 0xe3, 0x00, 0x38, 0xf6, 0xd5, 0xbd, 0x14, 0x47, 0x02, 0x41, 0x1b, 0xf6, 0x61, 0xe1,
-	0x91, 0xb7, 0x1d, 0x8b, 0x63, 0x53, 0x0b, 0xa5, 0xc0, 0x73, 0x50, 0xfc, 0x2e, 0xa1, 0x37, 0xa3,
-	0xce, 0x8a, 0x6e, 0x98, 0xff, 0xb5, 0x28, 0x93, 0x31, 0x62, 0xb6, 0xee, 0x01, 0x4a, 0x1d, 0x6f,
-	0x65, 0x7c, 0x2b, 0x5a, 0xd8, 0x1e, 0xff, 0x92, 0x10, 0x8e, 0xda, 0xd9, 0x66, 0x3d, 0x9d, 0x5a,
-	0x93, 0x76, 0x43, 0x54, 0x82, 0xdd, 0x78, 0x3b, 0x7b, 0x80, 0x0f, 0xd1, 0x02, 0x88, 0x77, 0x95,
-	0xdd, 0x69, 0x76, 0x18, 0x30, 0x0f, 0xfc, 0xf0, 0x68, 0x62, 0x6d, 0xb3, 0x68, 0x1a, 0x79, 0x1e,
-	0x9a, 0x7f, 0x24, 0x84, 0xa3, 0xb6, 0xfa, 0x34, 0x5b, 0x59, 0x61, 0xa1, 0x2b, 0xd3, 0x79, 0x3e,
-	0x00, 0x1e, 0x4d, 0x6d, 0xe4, 0xd8, 0xe2, 0xa3, 0x68, 0x43, 0xc3, 0x5f, 0x7e, 0x84, 0xff, 0x96,
-	0x50, 0x29, 0xec, 0xb0, 0xc5, 0xf3, 0xe0, 0x39, 0x79, 0x6e, 0x24, 0xe8, 0xf8, 0x61, 0xd7, 0x15,
-	0x43, 0x6e, 0xd1, 0xf1, 0x61, 0x62, 0xcc, 0xe2, 0x7d, 0x40, 0xda, 0xc1, 0xf5, 0x2c, 0x8b, 0x05,
-	0x86, 0xf0, 0xf8, 0x89, 0x84, 0xaa, 0x51, 0x8f, 0x8f, 0xad, 0x2e, 0x71, 0xbd, 0xff, 0x5e, 0x4f,
-	0x1d, 0x76, 0x49, 0x4d, 0x82, 0xf7, 0xd2, 0x99, 0xc9, 0x31, 0xc1, 0x6e, 0xa9, 0xb3, 0x0c, 0xf5,
-	0x21, 0x3f, 0x05, 0xc8, 0x8f, 0x94, 0xd6, 0x34, 0xaf, 0x68, 0xb0, 0x42, 0xc3, 0x16, 0x4b, 0x80,
-	0x62, 0x1e, 0x76, 0x54, 0xf8, 0x7b, 0xc6, 0x96, 0x6f, 0x89, 0xfd, 0x54, 0x42, 0x6b, 0x63, 0x0d,
-	0x53, 0xcc, 0xfb, 0xd3, 0x41, 0x42, 0x35, 0xe7, 0xa1, 0xfe, 0x1a, 0xa8, 0xdb, 0xf8, 0x30, 0x47,
-	0xd2, 0x34, 0xb0, 0x36, 0xa4, 0xa9, 0xf4, 0x11, 0x7e, 0x26, 0xa1, 0x6a, 0xf4, 0xe3, 0xbe, 0xf7,
-	0xb7, 0x50, 0x8b, 0x78, 0x8b, 0x07, 0x12, 0x2a, 0x0b, 0xed, 0x4f, 0x98, 0x45, 0x39, 0x73, 0x88,
-	0xf1, 0xed, 0xc5, 0x35, 0xe9, 0x70, 0x1c, 0xbb, 0x27, 0x12, 0xc5, 0x80, 0xba, 0x9e, 0x3b, 0xc6,
-	0xc7, 0xfd, 0x04, 0x70, 0x3f, 0x54, 0x0e, 0xa6, 0xa9, 0xd2, 0x0b, 0x16, 0x68, 0x30, 0x58, 0x01,
-	0x4c, 0xf1, 0x00, 0x85, 0xe0, 0x77, 0x0d, 0x28, 0xdf, 0x0e, 0xf0, 0x91, 0x84, 0xca, 0xc2, 0x83,
-	0x24, 0xe0, 0x76, 0x4e, 0x78, 0x78, 0xf2, 0x33, 0x21, 0x7e, 0x05, 0x88, 0x87, 0xea, 0x67, 0x39,
-	0x47, 0x9e, 0xa2, 0xd3, 0x86, 0xbd, 0x64, 0xe8, 0x08, 0x3f, 0x94, 0x10, 0x3e, 0x22, 0xfc, 0xee,
-	0x59, 0xf1, 0xab, 0xb3, 0xfe, 0x27, 0xa1, 0x15, 0x71, 0x39, 0x24, 0xb2, 0xa6, 0xdd, 0x0f, 0xbb,
-	0x39, 0x9c, 0xb1, 0x2b, 0x22, 0xfb, 0xd6, 0xf2, 0xaf, 0x88, 0x24, 0x28, 0x5c, 0x16, 0x17, 0xaf,
-	0x43, 0xea, 0xfb, 0x2f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x0a, 0xd4, 0xdb, 0x83, 0x15, 0x11, 0x00,
-	0x00,
+type MetricsServiceClient interface {
+	// Retrieve threshold crossing for given metric.
+	GetThresholdCrossing(ctx context.Context, in *ThresholdCrossingRequest, opts ...grpc.CallOption) (*JSONAPIObject, error)
+	// Retrieve a histogram of measurements for given time range and metric
+	GetHistogram(ctx context.Context, in *HistogramRequest, opts ...grpc.CallOption) (*JSONAPIObject, error)
+}
+
+type metricsServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewMetricsServiceClient(cc *grpc.ClientConn) MetricsServiceClient {
+	return &metricsServiceClient{cc}
+}
+
+func (c *metricsServiceClient) GetThresholdCrossing(ctx context.Context, in *ThresholdCrossingRequest, opts ...grpc.CallOption) (*JSONAPIObject, error) {
+	out := new(JSONAPIObject)
+	err := grpc.Invoke(ctx, "/gathergrpc.MetricsService/GetThresholdCrossing", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metricsServiceClient) GetHistogram(ctx context.Context, in *HistogramRequest, opts ...grpc.CallOption) (*JSONAPIObject, error) {
+	out := new(JSONAPIObject)
+	err := grpc.Invoke(ctx, "/gathergrpc.MetricsService/GetHistogram", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for MetricsService service
+
+type MetricsServiceServer interface {
+	// Retrieve threshold crossing for given metric.
+	GetThresholdCrossing(context.Context, *ThresholdCrossingRequest) (*JSONAPIObject, error)
+	// Retrieve a histogram of measurements for given time range and metric
+	GetHistogram(context.Context, *HistogramRequest) (*JSONAPIObject, error)
+}
+
+func RegisterMetricsServiceServer(s *grpc.Server, srv MetricsServiceServer) {
+	s.RegisterService(&_MetricsService_serviceDesc, srv)
+}
+
+func _MetricsService_GetThresholdCrossing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ThresholdCrossingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetricsServiceServer).GetThresholdCrossing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.MetricsService/GetThresholdCrossing",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetricsServiceServer).GetThresholdCrossing(ctx, req.(*ThresholdCrossingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetricsService_GetHistogram_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistogramRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetricsServiceServer).GetHistogram(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gathergrpc.MetricsService/GetHistogram",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetricsServiceServer).GetHistogram(ctx, req.(*HistogramRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _MetricsService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "gathergrpc.MetricsService",
+	HandlerType: (*MetricsServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetThresholdCrossing",
+			Handler:    _MetricsService_GetThresholdCrossing_Handler,
+		},
+		{
+			MethodName: "GetHistogram",
+			Handler:    _MetricsService_GetHistogram_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "gathergrpc/gather.proto",
+}
+
+func init() { proto.RegisterFile("gathergrpc/gather.proto", fileDescriptor4) }
+
+var fileDescriptor4 = []byte{
+	// 1090 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x98, 0xcf, 0x6e, 0x1b, 0x45,
+	0x1c, 0xc7, 0xb5, 0x1c, 0x90, 0x18, 0xa5, 0x24, 0x9d, 0x34, 0x71, 0xbd, 0xb5, 0x5b, 0xb2, 0x69,
+	0x55, 0xb2, 0xc1, 0x5e, 0x12, 0x04, 0x48, 0x08, 0x24, 0xda, 0x06, 0xa5, 0xa9, 0x08, 0x8d, 0x48,
+	0xcb, 0x7d, 0xe3, 0x9d, 0xda, 0x53, 0xed, 0xee, 0x2c, 0x33, 0xe3, 0xf0, 0xc7, 0xb2, 0x40, 0x20,
+	0xe5, 0x82, 0x90, 0x90, 0x90, 0x38, 0x21, 0x6e, 0x1c, 0x90, 0x38, 0xf2, 0x00, 0x48, 0x3c, 0x02,
+	0xaf, 0xc0, 0x0b, 0xf0, 0x06, 0x68, 0x7f, 0xb3, 0xbb, 0xde, 0x3f, 0xde, 0xb5, 0x1d, 0x36, 0xb9,
+	0x25, 0xfe, 0xcd, 0xcc, 0xf7, 0x33, 0x33, 0x9f, 0x19, 0x8d, 0x8d, 0x1a, 0x7d, 0x5b, 0x0e, 0x08,
+	0xef, 0xf3, 0xa0, 0x67, 0xa9, 0x3f, 0xbb, 0x01, 0x67, 0x92, 0x61, 0x34, 0x29, 0xe8, 0xad, 0x3e,
+	0x63, 0x7d, 0x97, 0x58, 0x76, 0x40, 0x2d, 0xdb, 0xf7, 0x99, 0xb4, 0x25, 0x65, 0xbe, 0x50, 0x2d,
+	0xf5, 0x9b, 0x51, 0x15, 0xfe, 0x3b, 0x19, 0x3e, 0xb3, 0x3e, 0xe3, 0x76, 0x10, 0x10, 0x1e, 0xd7,
+	0x6f, 0xe4, 0xeb, 0xc4, 0x0b, 0xe4, 0x17, 0x51, 0xb1, 0x95, 0xca, 0xb7, 0x1d, 0x8f, 0xfa, 0x87,
+	0xcc, 0x21, 0x6e, 0xdc, 0xb5, 0x9d, 0xaa, 0x4a, 0xe2, 0xdb, 0xbe, 0x2c, 0x2d, 0x7b, 0x44, 0x72,
+	0xda, 0x2b, 0x2d, 0xf7, 0x98, 0xe7, 0xb1, 0xcc, 0xe0, 0xbb, 0x3f, 0xbf, 0x84, 0xae, 0xdf, 0x0b,
+	0x23, 0x8f, 0x38, 0x3b, 0xa5, 0x82, 0x32, 0x9f, 0xfa, 0xfd, 0x63, 0xc2, 0x4f, 0x69, 0x8f, 0xe0,
+	0x01, 0x5a, 0x7e, 0xc0, 0x89, 0x2d, 0x09, 0xb4, 0x78, 0x2a, 0x08, 0xc7, 0xad, 0xee, 0x64, 0xbc,
+	0x6e, 0xf2, 0xf1, 0xc7, 0xe4, 0xd3, 0x21, 0x11, 0x52, 0x6f, 0x97, 0x54, 0x45, 0xc0, 0x7c, 0x41,
+	0x8c, 0xeb, 0xdf, 0xfc, 0xfd, 0xcf, 0x8f, 0x2f, 0x60, 0xe3, 0x0a, 0x2c, 0xe2, 0xe9, 0x8e, 0x9a,
+	0xec, 0x3b, 0x9a, 0x19, 0x26, 0x3d, 0x0d, 0x9c, 0xda, 0x93, 0xf4, 0x62, 0x92, 0x87, 0x96, 0xf7,
+	0x88, 0x4b, 0x72, 0x49, 0xb0, 0x39, 0xdd, 0x78, 0x73, 0xba, 0xc7, 0x92, 0x53, 0xbf, 0xff, 0x89,
+	0xed, 0x0e, 0xc9, 0xac, 0xa4, 0x36, 0x24, 0x35, 0xcc, 0xb5, 0x4c, 0x92, 0x35, 0x3a, 0x0d, 0x3b,
+	0x8f, 0xf1, 0x73, 0xb4, 0xb4, 0x4f, 0x64, 0xbd, 0x59, 0xb8, 0x24, 0xcb, 0x47, 0x2b, 0x61, 0x96,
+	0xeb, 0x26, 0x3d, 0x05, 0x5e, 0x2f, 0xe4, 0x7d, 0x10, 0x8a, 0xa7, 0x6f, 0x4c, 0x4d, 0xfa, 0x90,
+	0x0a, 0x99, 0xa4, 0xdd, 0x82, 0xb4, 0x26, 0x6e, 0x64, 0xd2, 0x3a, 0x43, 0x41, 0x78, 0xc7, 0xa5,
+	0x42, 0xe2, 0x21, 0x5a, 0x52, 0x7a, 0x3c, 0x01, 0x2b, 0xf1, 0x66, 0x7a, 0x4c, 0xf5, 0xd9, 0x1e,
+	0x11, 0x3d, 0x4e, 0x03, 0xc9, 0x92, 0x8d, 0xbb, 0x5d, 0xdd, 0x28, 0xca, 0xd6, 0x21, 0xfb, 0x9a,
+	0xb1, 0x1c, 0x67, 0x2b, 0xf1, 0x45, 0xb8, 0x83, 0x5f, 0xa1, 0x75, 0xe5, 0x4a, 0xbe, 0xf7, 0x05,
+	0x00, 0xe8, 0xd3, 0x00, 0x04, 0x5a, 0x52, 0x0a, 0x45, 0xf3, 0xae, 0xde, 0xd3, 0xf9, 0xf2, 0xa2,
+	0xc5, 0x36, 0x1b, 0xb9, 0xbc, 0x64, 0x73, 0xbf, 0x44, 0xab, 0xfb, 0x44, 0x16, 0xa6, 0x5c, 0x63,
+	0x36, 0x2e, 0xcd, 0xfe, 0x1c, 0x35, 0x94, 0x58, 0xf9, 0x21, 0xca, 0xfd, 0x7a, 0xb5, 0x2a, 0x39,
+	0xa3, 0xd9, 0x0d, 0x48, 0x5f, 0xc3, 0xab, 0xd9, 0x74, 0x50, 0x6c, 0xf7, 0xd7, 0x36, 0x6a, 0xaa,
+	0xde, 0xd3, 0xee, 0xa7, 0x6f, 0x35, 0xb4, 0x92, 0x36, 0x10, 0x4e, 0x58, 0xbb, 0x98, 0x9c, 0xbe,
+	0x38, 0x6e, 0x96, 0x95, 0x23, 0x9c, 0xd7, 0x01, 0xc7, 0x34, 0xee, 0x14, 0x16, 0xc3, 0xb1, 0xa5,
+	0xdd, 0x55, 0xff, 0x1d, 0x38, 0x63, 0x2b, 0x3c, 0x07, 0xa0, 0x43, 0x48, 0x91, 0x16, 0xb2, 0x46,
+	0x0a, 0x7d, 0x7e, 0x8a, 0x33, 0x0d, 0xad, 0xa4, 0xad, 0x04, 0x8a, 0x5b, 0xd3, 0x63, 0x0e, 0x9c,
+	0x79, 0x39, 0x76, 0x80, 0x63, 0xdb, 0xdc, 0x2a, 0x70, 0xe4, 0x10, 0xac, 0xd1, 0x10, 0x06, 0x1e,
+	0x87, 0xcb, 0x71, 0x25, 0x31, 0xb5, 0x56, 0x0a, 0xbc, 0x00, 0xc5, 0xd7, 0x1a, 0xba, 0x9a, 0x76,
+	0x56, 0xdd, 0x86, 0xd5, 0xa7, 0xc5, 0x98, 0x8e, 0x91, 0xb1, 0x75, 0x0b, 0x50, 0x36, 0xf1, 0x46,
+	0xc9, 0x59, 0xb1, 0x26, 0xd7, 0xe3, 0x77, 0x1a, 0xc2, 0x69, 0x3b, 0xf7, 0x98, 0x67, 0x53, 0x7f,
+	0xda, 0x6a, 0xa8, 0x4a, 0xbc, 0x1a, 0xaf, 0x94, 0x37, 0x88, 0x20, 0x76, 0x01, 0xe2, 0x35, 0xe3,
+	0xee, 0x2c, 0x3b, 0x1c, 0xe8, 0x07, 0x7e, 0x84, 0x34, 0x99, 0x6b, 0xb3, 0x6e, 0x1a, 0x7d, 0x11,
+	0x9a, 0x1f, 0x34, 0x84, 0xd3, 0xb6, 0x46, 0x34, 0x1b, 0x65, 0x61, 0x13, 0x57, 0x66, 0xf3, 0xbc,
+	0x09, 0x3c, 0x96, 0xd9, 0xa9, 0xb0, 0x25, 0x42, 0xb1, 0x46, 0x4e, 0x34, 0xfc, 0x18, 0x7f, 0xaf,
+	0xa1, 0xe5, 0xc9, 0x0d, 0x5b, 0x3f, 0x0f, 0x5e, 0x90, 0xe7, 0x4c, 0x83, 0x1b, 0x7f, 0x72, 0xeb,
+	0xaa, 0x26, 0xe7, 0xb8, 0xf1, 0xa1, 0x63, 0xc6, 0xe2, 0x6d, 0x40, 0xba, 0x83, 0x37, 0xcb, 0x2c,
+	0x56, 0x18, 0xca, 0xe3, 0x3f, 0x34, 0xd4, 0x4a, 0x7b, 0x7c, 0xe0, 0xf7, 0x89, 0x08, 0xdf, 0xbe,
+	0x47, 0x9c, 0x3d, 0xa3, 0x2e, 0xc1, 0x5b, 0xc5, 0xcc, 0x7c, 0x9b, 0x78, 0xb5, 0xcc, 0x79, 0x9a,
+	0x46, 0x90, 0xef, 0x01, 0xe4, 0xdb, 0xc6, 0xee, 0x2c, 0xaf, 0x68, 0x3c, 0x42, 0x27, 0x50, 0x43,
+	0x80, 0x62, 0x21, 0x76, 0x5a, 0xf8, 0x4b, 0xc6, 0xd6, 0xcf, 0x89, 0xfd, 0xa7, 0x86, 0x9a, 0x89,
+	0x86, 0x05, 0xe6, 0xed, 0xd9, 0x20, 0x13, 0x35, 0x17, 0xa1, 0x7e, 0x04, 0xd4, 0x7b, 0xf8, 0x7e,
+	0x85, 0xa4, 0x45, 0x60, 0x6b, 0x44, 0x0b, 0xe9, 0x63, 0xfc, 0x97, 0x86, 0x5a, 0xe9, 0xc3, 0x7d,
+	0xe9, 0xb3, 0x30, 0xeb, 0x98, 0x45, 0x5e, 0xfb, 0x27, 0x03, 0x4e, 0xc4, 0x80, 0xb9, 0x4e, 0x85,
+	0x3f, 0xf9, 0x36, 0x15, 0x73, 0x28, 0x36, 0x5d, 0x54, 0x7b, 0x19, 0x8f, 0x50, 0xa9, 0xfd, 0x25,
+	0x63, 0xeb, 0xe7, 0xc4, 0xce, 0x68, 0x5f, 0x60, 0xde, 0x9e, 0x0d, 0x52, 0x29, 0x4c, 0x29, 0xf5,
+	0x3c, 0xda, 0x17, 0x81, 0xad, 0x91, 0x2c, 0xa4, 0x17, 0xb5, 0xbf, 0xf4, 0x59, 0x98, 0x75, 0xcc,
+	0xe2, 0x17, 0x0d, 0xad, 0x29, 0xed, 0x0f, 0x99, 0x4f, 0x25, 0xe3, 0xc4, 0x79, 0x7c, 0xf2, 0x9c,
+	0xf4, 0x24, 0xce, 0x3c, 0x8f, 0x72, 0xc5, 0x98, 0x7a, 0xb3, 0xb2, 0x4d, 0x84, 0xfb, 0x2e, 0xe0,
+	0xbe, 0x65, 0xec, 0xcc, 0x52, 0xc5, 0x8b, 0x07, 0xe8, 0x30, 0x18, 0x01, 0x4c, 0x09, 0x01, 0x95,
+	0xe0, 0x17, 0x0d, 0xa8, 0x9f, 0x0f, 0xf0, 0x77, 0x0d, 0xad, 0x29, 0x0f, 0xf2, 0x80, 0xb7, 0x2b,
+	0xc2, 0x27, 0x3b, 0x3f, 0x17, 0xe2, 0x43, 0x40, 0xbc, 0x6f, 0xbe, 0x5f, 0xb1, 0xe5, 0x05, 0x3a,
+	0x6b, 0xe4, 0xe5, 0x43, 0xc7, 0xf8, 0x37, 0x0d, 0xe1, 0x7d, 0x22, 0x2f, 0x9e, 0x15, 0xff, 0x7f,
+	0xd6, 0x9f, 0x34, 0xb4, 0xae, 0xde, 0x44, 0xb9, 0xac, 0x59, 0xcf, 0xa2, 0xbb, 0x15, 0x9c, 0x99,
+	0x97, 0x51, 0xf9, 0x63, 0x2d, 0x7a, 0x19, 0xe5, 0x41, 0xd5, 0xf7, 0xd4, 0x7f, 0x35, 0xf4, 0xf2,
+	0x21, 0xfc, 0xf8, 0x26, 0xe2, 0x2f, 0xa7, 0x23, 0x74, 0x2d, 0xbc, 0xd0, 0xe2, 0x23, 0xf6, 0x80,
+	0x33, 0x21, 0xa8, 0xdf, 0xcf, 0x2e, 0x6c, 0xa1, 0x1c, 0x2f, 0x6c, 0x33, 0xdd, 0xea, 0xd1, 0xf1,
+	0xe3, 0x8f, 0xee, 0x1d, 0x1d, 0x28, 0x5c, 0xc3, 0x00, 0xc4, 0x16, 0xd6, 0x13, 0xc4, 0xe4, 0x68,
+	0xf7, 0xe2, 0x90, 0x13, 0xf8, 0xd9, 0xe9, 0x21, 0x15, 0x92, 0xf5, 0xb9, 0xed, 0x65, 0x7f, 0x4c,
+	0x4b, 0x3e, 0x9e, 0x23, 0xac, 0x09, 0x61, 0xab, 0xf8, 0x6a, 0x1c, 0x36, 0x88, 0x3b, 0x9f, 0xbc,
+	0x08, 0x2b, 0xfd, 0xc6, 0x7f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x9e, 0xf7, 0xf0, 0x43, 0x3e, 0x15,
+	0x00, 0x00,
 }

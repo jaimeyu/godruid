@@ -23,7 +23,7 @@ func TestLoadingConfig(t *testing.T) {
 	assert.Equal(t, cfg.GetString(gather.CK_server_rest_ip.String()), "0.0.0.0")
 	assert.Equal(t, cfg.GetString(gather.CK_server_datastore_ip.String()), "http://localhost")
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)
-	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "aod-ui")
+	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "adh-admin")
 }
 
 func TestLoadingDefaults(t *testing.T) {

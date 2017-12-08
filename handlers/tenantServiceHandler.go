@@ -324,6 +324,86 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 	return result, nil
 }
 
+// CreateTenantThresholdProfile - creates an Threshold Profile scoped to a specific Tenant.
+func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, false); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Creating %s: %s", db.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	// Issue request to DAO Layer to Create the Tenant Threshold Profile
+	result, err := tsh.tenantDB.CreateTenantThresholdProfile(tenantThreshPrfReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantThresholdProfileStr, err.Error())
+	}
+
+	// Succesfully Created the Threshold Profile, return the result.
+	logger.Log.Infof("Created %s: %s\n", db.TenantThresholdProfileStr, result.GetXId())
+	return result, nil
+}
+
+// UpdateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
+func (tsh *TenantServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, true); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Updating %s: %s", db.TenantThresholdProfileStr, tenantThreshPrfReq)
+
+	// Issue request to DAO Layer to Update the Tenant Threshold Profile
+	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(tenantThreshPrfReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantThresholdProfileStr, err.Error())
+	}
+
+	// Succesfully Updated the Threshold Profile, return the result.
+	logger.Log.Infof("Updated %s: %s\n", db.TenantThresholdProfileStr, result.GetXId())
+	return result, nil
+}
+
+// GetTenantThresholdProfile - retrieves the Threshold Profile for a single Tenant.
+func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Validate the request to ensure the operation is valid:
+	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Retrieving %s for Tenant %s", db.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
+
+	// Issue request to DAO Layer to fetch the Tenant Threshold Profile
+	result, err := tsh.tenantDB.GetTenantThresholdProfile(tenantThreshPrfIDReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantThresholdProfileStr, err.Error())
+	}
+
+	// Succesfully fetched the Threshold Profile, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantThresholdProfileStr, result.GetXId())
+	return result, nil
+}
+
+// DeleteTenantThresholdProfile - deletes the Threshold Profile for a single Tenant.
+func (tsh *TenantServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+	// Validate the request to ensure the operation is valid:
+	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Deleting %s for Tenant %s", db.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
+
+	// Issue request to DAO Layer to delete the Tenant Threshold Profile
+	result, err := tsh.tenantDB.DeleteTenantThresholdProfile(tenantThreshPrfIDReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantThresholdProfileStr, err.Error())
+	}
+
+	// Succesfully deleted the Threshold Profile, return the result.
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantThresholdProfileStr, result.GetXId())
+	return result, nil
+}
+
 // CreateMonitoredObject - creates a Monitored Object scoped to a specific tenant
 func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
 	// Validate the request to ensure no invalid data is stored:

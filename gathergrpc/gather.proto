@@ -7,6 +7,8 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "gathergrpc/adminModels.proto";
 import "gathergrpc/tenantModels.proto";
+import "gathergrpc/metricModels.proto";
+import "gathergrpc/commonModels.proto";
 
 
 // Service responsible for provisioning Administration
@@ -203,6 +205,40 @@ service TenantProvisioningService {
         };
     }
 
+
+  // Create a Threshold Profile scoped to a Single Tenant. 
+    rpc CreateTenantThresholdProfile(TenantThresholdProfileRequest) returns (TenantThresholdProfileResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/tenants/{data.tenantId}/threshold-profiles"
+            body: "*"
+        };
+    }
+    
+    // Updates an Threshold Profile, which provides details on the data 
+    // collected for the Tenant. 
+    rpc UpdateTenantThresholdProfile(TenantThresholdProfileRequest) returns (TenantThresholdProfileResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/tenants/{data.tenantId}/threshold-profiles"
+            body: "*"
+        };
+    } 
+
+    // Retrieves an Threshold Profile, which provides details on the data 
+    // collected for the Tenant. 
+    rpc GetTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfileResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}"
+        };
+    }
+
+    // Delete an Threshold Profile scoped to a single Tenant. 
+    rpc DeleteTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfileResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}"
+        };
+    }
+
+  
     // Create a MonitoredObject scoped to a Single Tenant. 
     rpc CreateMonitoredObject(MonitoredObjectRequest) returns (MonitoredObjectResponse) {
         option (google.api.http) = {
@@ -239,5 +275,24 @@ service TenantProvisioningService {
             get: "/api/v1/tenants/{value}/monitored-object-list"
         };
     }
+}
+
+// Service responsible for retrieving aggregate metrics from druid 
+service MetricsService {
+    
+    // Retrieve threshold crossing for given metric.
+    rpc GetThresholdCrossing(ThresholdCrossingRequest) returns (JSONAPIObject) {
+        option (google.api.http) = {
+            get: "/api/v1/threshold-crossing"
+        };
+    }
+
+    // Retrieve a histogram of measurements for given time range and metric
+    rpc GetHistogram(HistogramRequest) returns (JSONAPIObject) {
+        option (google.api.http) = {
+            get: "/api/v1/histogram"
+        };
+    }
+  
 }
 

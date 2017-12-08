@@ -134,6 +134,38 @@ func validateTenantIngPrfIDRequest(request *pb.TenantIngestionProfileIdRequest) 
 	return nil
 }
 
+func validateTenantThreshPrfRequest(request *pb.TenantThresholdProfileRequest, isUpdate bool) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid TenantThresholdProfileRequest: no Tenant Threshold Profile data provided")
+	}
+
+	if len(request.GetData().GetTenantId()) == 0 {
+		return errors.New("Invalid TenantThresholdProfileRequest: no Tenant Id provided")
+	}
+
+	if len(request.GetXId()) == 0 {
+		return errors.New("Invalid TenantThresholdProfileRequest: no Ingestion Profile ID provided")
+	}
+
+	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
+		return errors.New("Invalid TenantThresholdProfileRequest: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
+func validateTenantThreshPrfIDRequest(request *pb.TenantThresholdProfileIdRequest) error {
+	if request == nil || len(request.GetThresholdProfileId()) == 0 {
+		return errors.New("Invalid TenantThresholdProfileIdRequest: no Threshold Profile ID data provided")
+	}
+
+	if len(request.GetTenantId()) == 0 {
+		return errors.New("Invalid TenantThresholdProfileIdRequest: no Tenant Id provided")
+	}
+
+	return nil
+}
+
 func validateMonitoredObjectRequest(request *pb.MonitoredObjectRequest, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid MonitoredObjectRequest: no Tenant Monitored Object data provided")

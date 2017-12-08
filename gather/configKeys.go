@@ -17,6 +17,8 @@ const (
 	CK_args_tenantdb_impl         ConfigKey = "args.tenantdb.impl"
 	CK_args_pouchplugindb_impl    ConfigKey = "args.pouchplugindb.impl"
 	CK_args_debug                 ConfigKey = "args.debug"
+	CK_druid_server               ConfigKey = "druid.server"
+	CK_druid_table                ConfigKey = "druid.table"
 )
 
 func (key ConfigKey) String() string {

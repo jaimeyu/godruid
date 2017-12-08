@@ -53,4 +53,7 @@ func TestWithEnvironmentVariables(t *testing.T) {
 
 	os.Setenv("ARGS_ADMINDB_NAME", "testname")
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "testname")
+
+	os.Setenv("SERVER_CORS_ALLOWEDORIGINS", "http://stuff.com http://other.com")
+	assert.Equal(t, cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String()), []string{"http://stuff.com", "http://other.com"})
 }

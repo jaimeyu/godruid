@@ -23,19 +23,22 @@ func GetAuthCode(cfg config.Provider) string {
 	// implement oauth
 	url := cfg.GetString("druid.auth")
 
-	req, _ := http.NewRequest("POST", url, nil)
+	if url != "" {
+		req, _ := http.NewRequest("POST", url, nil)
 
-	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("postman-token", "1d5ed9ef-2e83-a103-c4e1-f68ec0e56134")
+		req.Header.Add("cache-control", "no-cache")
+		req.Header.Add("postman-token", "1d5ed9ef-2e83-a103-c4e1-f68ec0e56134")
 
-	res, _ := http.DefaultClient.Do(req)
+		res, _ := http.DefaultClient.Do(req)
 
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
 
-	var auth Auth
+		var auth Auth
 
-	json.Unmarshal(body, &auth)
+		json.Unmarshal(body, &auth)
 
-	return auth.IDToken
+		return auth.IDToken
+	}
+	return ""
 }

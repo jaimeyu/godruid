@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/satori/go.uuid"
+
+	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	emp "github.com/golang/protobuf/ptypes/empty"
@@ -69,10 +72,28 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create a default Ingestion Profile for the Tenant.
-	ingPrfReq := pb.TenantIngestionProfileRequest{XId: "ingestionProfile", Data: createDefaultTenantIngPrf(result.GetXId())}
+	ingPrfReq := pb.TenantIngestionProfileRequest{XId: string(db.TenantIngestionProfileType), Data: createDefaultTenantIngPrf(result.GetXId())}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
 		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetXId())
+	}
+
+	// Create a default Threshold Profile for the Tenant
+	threshPrfReq := pb.TenantThresholdProfileRequest{XId: string(db.TenantThresholdProfileType) + "_" + uuid.NewV4().String(), Data: createDefaultTenantThresholdPrf(result.GetXId())}
+	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
+	if err != nil {
+		logger.Log.Errorf("Unable to create Threshold Profile for Tenant %s. The Tenant does exist though, so may need to create the Threshold Profile manually", result.GetXId())
+	} else {
+		// Update the tenant metadata with the new default threshold profile ID.
+		tenantUpdateRequest := pb.TenantDescriptorRequest{XId: result.GetXId(), XRev: result.GetXRev(), Data: result.GetData()}
+		tenantUpdateRequest.GetData().DefaultThresholdProfile = threshProfileResponse.GetXId()
+		resultWithThreshProfile, err := gsh.ash.UpdateTenantDescriptor(ctx, &tenantUpdateRequest)
+		if err != nil {
+			logger.Log.Errorf("Unable to assign Threshold Profile %s to Tenant %s. May need to assign the Threshold Profile manually", threshProfileResponse.GetXId(), result.GetXId())
+			return result, nil
+		}
+
+		return resultWithThreshProfile, nil
 	}
 
 	return result, nil
@@ -215,15 +236,6 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 // GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
 func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectListResponse, error) {
 	return gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
-}
-
-func createDefaultTenantIngPrf(tenantId string) *pb.TenantIngestionProfile {
-	ingPrf := pb.TenantIngestionProfile{}
-	ingPrf.ScpUsername = "default"
-	ingPrf.ScpPassword = "password"
-	ingPrf.TenantId = tenantId
-
-	return &ingPrf
 }
 
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,

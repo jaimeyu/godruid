@@ -187,7 +187,13 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 		return nil, err
 	}
 
-	if err := deleteData(asd.dbName, tenantID, ds.TenantStr); err != nil {
+	// Truy to delete the DB for the tenant
+	if err := asd.deleteDatabase(tenantID); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())
+		return nil, err
+	}
+
+	if err = deleteData(asd.dbName, tenantID, ds.TenantStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())
 		return nil, err
 	}

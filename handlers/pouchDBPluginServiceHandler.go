@@ -127,6 +127,7 @@ func CreatePouchDBPluginServiceHandler() *PouchDBPluginServiceHandler {
 // to the passed in request multiplexor.
 func (psh *PouchDBPluginServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 	for _, route := range psh.routes {
+		logger.Log.Debugf("Registering endpoint: %v", route)
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
@@ -496,11 +497,6 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	}
 
 	fmt.Fprintf(w, string(response))
-}
-
-func getDBFieldFromRequest(r *http.Request, urlPart int32) string {
-	urlParts := strings.Split(r.URL.Path, "/")
-	return urlParts[urlPart]
 }
 
 func getRequestBodyAsGenericObject(r *http.Request) (map[string]interface{}, error) {

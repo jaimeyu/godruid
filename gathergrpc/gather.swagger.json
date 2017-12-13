@@ -1350,6 +1350,12 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "domainSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "description": "MonitoredObject - describes a unique device/object which is reporting \ndata from the network."
@@ -1464,6 +1470,9 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "defaultThresholdProfile": {
+          "type": "string"
         }
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
@@ -1532,6 +1541,12 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "thresholdProfileSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "description": "TenantDomain - model for a Domain for a single Tenant."

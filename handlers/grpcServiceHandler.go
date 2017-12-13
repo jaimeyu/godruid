@@ -247,7 +247,7 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Unable to find ingestion profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
+		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
 	}
 
 	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)

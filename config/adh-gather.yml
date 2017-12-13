@@ -22,5 +22,6 @@ args:
   debug: true
 
 druid:
-  server: "https://broker.proto.npav.accedian.net"
+  server: http://aod_broker
+  port: 8082
   table: "NPAVKPI2"

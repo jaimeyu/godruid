@@ -14,7 +14,8 @@ const (
 // HistogramQuery - Count of metrics per bucket for given interval.
 func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
-	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
+	//peyo TODO need to figure out a better way than just appending Histo
+	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"Histo", resolution, granularityBuckets, "0", "Infinity")
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,

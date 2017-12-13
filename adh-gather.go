@@ -42,6 +42,7 @@ func init() {
 type GatherServer struct {
 	gsh     *adhh.GRPCServiceHandler
 	pouchSH *adhh.PouchDBPluginServiceHandler
+	testSH  *adhh.TestDataServiceHandler
 
 	mux        *mux.Router
 	gwmux      *runtime.ServeMux
@@ -52,6 +53,7 @@ func newServer() *GatherServer {
 	s := new(GatherServer)
 	s.gsh = adhh.CreateCoordinator()
 	s.pouchSH = adhh.CreatePouchDBPluginServiceHandler()
+	s.testSH = adhh.CreateTestDataServiceHandler()
 
 	return s
 }
@@ -116,6 +118,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 
 	// Add in handling for non protobuf generated API endpoints:
 	gatherServer.pouchSH.RegisterAPIHandlers(gatherServer.mux)
+	gatherServer.testSH.RegisterAPIHandlers(gatherServer.mux)
 
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)

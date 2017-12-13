@@ -1,4 +1,6 @@
 ## Current Release 
+### Added
+* Test data service as well as the linkage between Domain/ThresholdProfile/MonitoredObject in the data model.
 ### 0.15.0 
 **Release Date:** Tue Dec 12 18:07:01 UTC 2017     
 ## Previous Releases 

@@ -1,9 +1,11 @@
 ## Current Release 
+### 0.19.0 
+**Release Date:** Thu Dec 14 21:45:35 UTC 2017     
+## Previous Releases 
 ### Added
 * Adding object count by domain API
 ### 0.18.0 
 **Release Date:** Thu Dec 14 15:51:11 UTC 2017     
-## Previous Releases 
 ### Added
 * Changing how IDs are constructed for data stored in Couch.
 ### 0.17.0 

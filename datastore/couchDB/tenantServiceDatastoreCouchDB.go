@@ -11,6 +11,10 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
+const (
+	monitoredObjectsByDomainIndex = "_design/monitoredObjectCount/_view/byDomain"
+)
+
 // TenantServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Tenant Service when using CouchDB
 // as the storage option.
@@ -450,6 +454,70 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 
 	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantMonitoredObjectStr)
 	return res, nil
+}
+
+// GetMonitoredObjectToDomainMap - CouchDB implementation of GetMonitoredObjectToDomainMap
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, moByDomReq.GetTenantId())
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get response data either by subset, or for all domains
+	domainSet := moByDomReq.GetDomainSet()
+	var fetchResponse map[string]interface{}
+	if domainSet == nil || len(domainSet) == 0 {
+		// Retrieve values for all domains
+		fetchResponse, err = getByDocID(monitoredObjectsByDomainIndex, ds.MonitoredObjectToDomainMapStr, db)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Retrieve just the subset of values.
+		requestBody := map[string]interface{}{}
+		requestBody["keys"] = moByDomReq.GetDomainSet()
+
+		fetchResponse, err = fetchDesignDocumentResults(requestBody, tenantDBName, monitoredObjectsByDomainIndex)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	if fetchResponse["rows"] == nil {
+		return &pb.MonitoredObjectCountByDomainResponse{}, nil
+	}
+
+	// Response will vary depending on if it is aggregated or not
+	response := pb.MonitoredObjectCountByDomainResponse{}
+	rows := fetchResponse["rows"].([]interface{})
+	if moByDomReq.GetByCount() {
+		// Aggregate the data into a mapping of Domain ID to count.
+		domainMap := map[string]int64{}
+		for _, row := range rows {
+			obj := row.(map[string]interface{})
+			key := obj["key"].(string)
+			domainMap[key] = domainMap[key] + 1
+		}
+		response.DomainToMonitoredObjectCountMap = domainMap
+	} else {
+		// Return the results as a map of Domain name to values.
+		domainMap := map[string]*pb.MonitoredObjectList{}
+		for _, row := range rows {
+			obj := row.(map[string]interface{})
+			key := obj["key"].(string)
+			val := obj["value"].(string)
+			if domainMap[key] == nil {
+				domainMap[key] = &pb.MonitoredObjectList{}
+			}
+			domainMap[key].MonitoredObjectSet = append(domainMap[key].GetMonitoredObjectSet(), val)
+		}
+		response.DomainToMonitoredObjectSetMap = domainMap
+	}
+
+	logger.Log.Debugf("Returning %s: %vs\n", ds.MonitoredObjectToDomainMapStr, response)
+	return &response, nil
 }
 
 // Takes a set of generic data that contains a list of TenantUsers and converts it to

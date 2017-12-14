@@ -261,3 +261,22 @@ message MonitoredObjectIdRequest {
     string tenantId = 1;
     string monitoredObjectId = 2;
 }
+
+// Provides options to configure how the GetMonitoredObjectToDomainMap API will return its results.
+// byCount: true will return a count of Monitored Objects, false will return a set of MonitoredObject IDs.
+// domainSet: set of Domain IDs to filter the request by.
+message MonitoredObjectCountByDomainRequest {
+    string tenantId = 1;
+    bool byCount = 2;
+    repeated string domainSet = 3;
+}
+
+message MonitoredObjectCountByDomainResponse {
+    map<string, int64> domainToMonitoredObjectCountMap = 1;
+    map<string, MonitoredObjectList> domainToMonitoredObjectSetMap = 2;
+}
+
+message MonitoredObjectList {
+    repeated string  monitoredObjectSet = 1;
+}
+

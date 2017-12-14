@@ -53,6 +53,9 @@ It has these top-level messages:
 	MonitoredObjectResponse
 	MonitoredObjectListResponse
 	MonitoredObjectIdRequest
+	MonitoredObjectCountByDomainRequest
+	MonitoredObjectCountByDomainResponse
+	MonitoredObjectList
 	ThresholdCrossing
 	FormattedThresholdCrossing
 	ThresholdCrossingResponse

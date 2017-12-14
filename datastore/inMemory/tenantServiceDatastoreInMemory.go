@@ -158,3 +158,9 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetAllMonitoredObjects not implemented")
 }
+
+// GetMonitoredObjectToDomainMap - InMemory implementation of GetMonitoredObjectToDomainMap
+func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetMonitoredObjectToDomainMap not implemented")
+}

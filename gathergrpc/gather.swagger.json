@@ -712,6 +712,38 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenantId}/monitored-object-domain-map": {
+      "post": {
+        "operationId": "GetMonitoredObjectToDomainMap",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectCountByDomainResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcMonitoredObjectCountByDomainRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}": {
       "get": {
         "summary": "Retrieve a MonitoredObject scoped to a single Tenant.",
@@ -1359,6 +1391,54 @@
         }
       },
       "description": "MonitoredObject - describes a unique device/object which is reporting \ndata from the network."
+    },
+    "gathergrpcMonitoredObjectCountByDomainRequest": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "byCount": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "domainSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Provides options to configure how the GetMonitoredObjectToDomainMap API will return its results.\nbyCount: true will return a count of Monitored Objects, false will return a set of MonitoredObject IDs.\ndomainSet: set of Domain IDs to filter the request by."
+    },
+    "gathergrpcMonitoredObjectCountByDomainResponse": {
+      "type": "object",
+      "properties": {
+        "domainToMonitoredObjectCountMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "domainToMonitoredObjectSetMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/gathergrpcMonitoredObjectList"
+          }
+        }
+      }
+    },
+    "gathergrpcMonitoredObjectList": {
+      "type": "object",
+      "properties": {
+        "monitoredObjectSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "gathergrpcMonitoredObjectListResponse": {
       "type": "object",

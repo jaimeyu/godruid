@@ -512,3 +512,22 @@ func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, ten
 	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantMonitoredObjectStr)
 	return result, nil
 }
+
+// GetMonitoredObjectToDomainMap - retrieves a mapping of MonitoredObjects to each Domain. Will retrieve the mapping either as a count, or as a set of all
+// MonitoredObjects that use each Domain.
+func (tsh *TenantServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context, moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+	// Validate the request:
+	if err := validateMonitoredObjectToDomainMapRequest(moByDomReq); err != nil {
+		return nil, err
+	}
+
+	// Issue request to DAO Layer to fetch the Tenant Monitored Object Map
+	result, err := tsh.tenantDB.GetMonitoredObjectToDomainMap(moByDomReq)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.MonitoredObjectToDomainMapStr, err.Error())
+	}
+
+	// Succesfully fetched the Monitored Object Map, return the result.
+	logger.Log.Infof("Successfully retrieved %s: %s\n", db.MonitoredObjectToDomainMapStr)
+	return result, nil
+}

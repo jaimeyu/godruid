@@ -240,6 +240,12 @@ func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenan
 	return gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
 }
 
+// GetMonitoredObjectToDomainMap - retrieves a mapping of MonitoredObjects to each Domain. Will retrieve the mapping either as a count, or as a set of all
+// MonitoredObjects that use each Domain.
+func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context, moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+	return gsh.tsh.GetMonitoredObjectToDomainMap(ctx, moByDomReq)
+}
+
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain
 func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {

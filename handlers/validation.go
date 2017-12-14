@@ -197,3 +197,15 @@ func validateMonitoredObjectIDRequest(request *pb.MonitoredObjectIdRequest) erro
 
 	return nil
 }
+
+func validateMonitoredObjectToDomainMapRequest(request *pb.MonitoredObjectCountByDomainRequest) error {
+	if request == nil {
+		return errors.New("Invalid MonitoredObjectCountByDomainRequest: no request data provided")
+	}
+
+	if len(request.GetTenantId()) == 0 {
+		return errors.New("Invalid MonitoredObjectCountByDomainRequest: no Tenant Id provided")
+	}
+
+	return nil
+}

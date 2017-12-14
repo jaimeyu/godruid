@@ -156,6 +156,12 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 		return nil, err
 	}
 
+	// Add in the views/indicies necessary for the db:
+	if err = asd.addTenantViewsToDB(tenantDescriptor.GetXId()); err != nil {
+		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
+		return nil, err
+	}
+
 	// Return the provisioned object.
 	logger.Log.Debugf("Created %s: %v\n", ds.TenantStr, dataContainer)
 	return &dataContainer, nil
@@ -254,6 +260,47 @@ func (asd *AdminServiceDatastoreCouchDB) createDatabase(dbName string) (*couchdb
 	return asd.server.Create(dbName)
 }
 
+func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error {
+	if len(dbName) == 0 {
+		return errors.New("Unable to add views to a database if no database name is provided")
+	}
+	if !asd.server.Contains(dbName) {
+		return errors.New("Unable to add views to database '" + dbName + "': database does not exist")
+	}
+
+	// resource, err := couchdb.NewResource(createDBPathStr(asd.couchHost, dbName), nil)
+	// if err != nil {
+	// 	logger.Log.Debugf("Unable to add views to database: %s", err.Error())
+	// 	return err
+	// }
+
+	// tenantViews := generateTenantViews()
+	// for _, viewPayload := range tenantViews {
+	// 	_, err := addDesignDocument(viewPayload, resource)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	logger.Log.Debugf("Adding Tenant Views to DB %s", dbName)
+
+	db, err := getDatabase(createDBPathStr(asd.couchHost, dbName))
+	if err != nil {
+		return err
+	}
+
+	// Store the sync checkpoint in CouchDB
+	for _, viewPayload := range generateTenantViews() {
+		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", db, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	logger.Log.Debugf("Added views to DB %s\n", dbName)
+	return nil
+}
+
 // deleteDatabase - deletes a database in CouchDB identified by the provided name.
 func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 	if len(dbName) == 0 {
@@ -299,4 +346,21 @@ func convertGenericObjectListToTenantDescriptorList(genericTenantList []map[stri
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantDescriptorStr, res)
 
 	return res, nil
+}
+
+// Produces all of the views/indicies necessary for the Tenant DB
+func generateTenantViews() []map[string]interface{} {
+	result := make([]map[string]interface{}, 0)
+
+	monitoredObjectCountByDomain := map[string]interface{}{}
+	monitoredObjectCountByDomain["_id"] = "_design/monitoredObjectCount"
+	monitoredObjectCountByDomain["language"] = "javascript"
+	byDomain := map[string]interface{}{}
+	byDomain["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject' && doc.data.domainSet) {\n      for (var i in doc.data.domainSet) {\n        emit(doc.data.domainSet[i], doc._id);\n      }\n    }\n}"
+	views := map[string]interface{}{}
+	views["byDomain"] = byDomain
+	monitoredObjectCountByDomain["views"] = views
+
+	logger.Log.Debug("Adding view for monitoredObjectCountByDomain")
+	return append(result, monitoredObjectCountByDomain)
 }

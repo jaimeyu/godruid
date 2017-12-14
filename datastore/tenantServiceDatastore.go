@@ -20,7 +20,7 @@ const (
 	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
-	// TenantIngestionProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
+	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 )
 
@@ -37,8 +37,11 @@ const (
 	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
 	TenantMonitoredObjectStr = "Tenant Monitored Object"
 
-	// TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
+	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantThresholdProfileStr = "Tenant Threshold Profile"
+
+	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Doamin Map for use in logs.
+	MonitoredObjectToDomainMapStr = "Monitored Object to Doamin Map"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
@@ -71,4 +74,5 @@ type TenantServiceDatastore interface {
 	GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error)
 	DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error)
 	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error)
+	GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error)
 }

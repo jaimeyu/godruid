@@ -275,6 +275,15 @@ service TenantProvisioningService {
             get: "/api/v1/tenants/{value}/monitored-object-list"
         };
     }
+
+    // Retrieve a mapping of Domain to Montiored Objects as either a count or a set of the 
+    // ids of the monitored objects. 
+    rpc GetMonitoredObjectToDomainMap(MonitoredObjectCountByDomainRequest) returns (MonitoredObjectCountByDomainResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/tenants/{tenantId}/monitored-object-domain-map"
+            body: "*"
+        };
+    }
 }
 
 // Service responsible for retrieving aggregate metrics from druid 

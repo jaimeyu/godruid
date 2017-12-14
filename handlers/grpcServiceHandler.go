@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/satori/go.uuid"
-
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -72,14 +70,18 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create a default Ingestion Profile for the Tenant.
-	ingPrfReq := pb.TenantIngestionProfileRequest{XId: string(db.TenantIngestionProfileType), Data: createDefaultTenantIngPrf(result.GetXId())}
+	ingPrfData := createDefaultTenantIngPrf(result.GetXId())
+	ingPrfID := db.GenerateID(ingPrfData, string(db.TenantIngestionProfileType))
+	ingPrfReq := pb.TenantIngestionProfileRequest{XId: ingPrfID, Data: ingPrfData}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
 		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetXId())
 	}
 
 	// Create a default Threshold Profile for the Tenant
-	threshPrfReq := pb.TenantThresholdProfileRequest{XId: string(db.TenantThresholdProfileType) + "_" + uuid.NewV4().String(), Data: createDefaultTenantThresholdPrf(result.GetXId())}
+	threshPrfData := createDefaultTenantThresholdPrf(result.GetXId())
+	threshPrfID := db.GenerateID(threshPrfData, string(db.TenantThresholdProfileType))
+	threshPrfReq := pb.TenantThresholdProfileRequest{XId: threshPrfID, Data: threshPrfData}
 	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
 	if err != nil {
 		logger.Log.Errorf("Unable to create Threshold Profile for Tenant %s. The Tenant does exist though, so may need to create the Threshold Profile manually", result.GetXId())

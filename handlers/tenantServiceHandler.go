@@ -416,10 +416,7 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 	// If no id is provided for the Manged Object, generate one
 	objectID := monitoredObjectReq.GetXId()
 	if len(objectID) == 0 {
-		objectID, err := generateID(monitoredObjectReq.GetData())
-		if err != nil {
-			return nil, err
-		}
+		objectID := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
 		monitoredObjectReq.XId = objectID
 	}
 
@@ -446,10 +443,7 @@ func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, moni
 	// If no id is provided for the Manged Object, generate one
 	objectID := monitoredObjectReq.GetXId()
 	if len(objectID) == 0 {
-		objectID, err := generateID(monitoredObjectReq.GetData())
-		if err != nil {
-			return nil, err
-		}
+		objectID := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
 		monitoredObjectReq.XId = objectID
 	}
 
@@ -517,16 +511,4 @@ func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, ten
 	// Succesfully fetched the Monitored Objects, return the result.
 	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantMonitoredObjectStr)
 	return result, nil
-}
-
-// generateID generates an ID for an object based on the type of the
-// provided object.
-func generateID(obj interface{}) (string, error) {
-	switch v := obj.(type) {
-	case *pb.MonitoredObject:
-		cast := obj.(*pb.MonitoredObject)
-		return fmt.Sprintf("%s_%s", db.TenantMonitoredObjectType, cast.GetId()), nil
-	default:
-		return "", fmt.Errorf("Unable to generate ID for unknown object type: %v", v)
-	}
 }

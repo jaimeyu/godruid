@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/satori/go.uuid"
-
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -247,7 +245,6 @@ func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
 	result := pb.TenantDescriptorRequest{}
 
 	tenantStr := string(db.TenantDescriptorType)
-	result.XId = tenantStr + "_" + uuid.NewV4().String()
 	result.Data = &pb.TenantDescriptor{}
 	result.Data.Name = name
 	result.Data.UrlSubdomain = name + ".npav.accedian.net"
@@ -257,6 +254,8 @@ func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
+	result.XId = db.GenerateID(result.Data, tenantStr)
+
 	return &result
 }
 
@@ -264,7 +263,7 @@ func generateTenantUser(name string, tenantID string) *pb.TenantUserRequest {
 	result := pb.TenantUserRequest{}
 
 	tenantUserStr := string(db.TenantUserType)
-	result.XId = tenantUserStr + "_" + uuid.NewV4().String()
+
 	result.Data = &pb.TenantUser{}
 	result.Data.Datatype = tenantUserStr
 	result.Data.Username = "admin@" + name + ".com"
@@ -277,6 +276,8 @@ func generateTenantUser(name string, tenantID string) *pb.TenantUserRequest {
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
+	result.XId = db.GenerateID(result.Data, tenantUserStr)
+
 	return &result
 }
 
@@ -284,7 +285,6 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result := pb.TenantDomainRequest{}
 
 	tenantDomainStr := string(db.TenantDomainType)
-	result.XId = tenantDomainStr + "_" + uuid.NewV4().String()
 	result.Data = &pb.TenantDomain{}
 	result.Data.Datatype = tenantDomainStr
 	result.Data.Name = name
@@ -294,6 +294,8 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
+	result.XId = db.GenerateID(result.Data, tenantDomainStr)
+
 	return &result
 }
 
@@ -301,7 +303,6 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 	result := pb.MonitoredObjectRequest{}
 
 	tenantMonObjStr := string(db.TenantMonitoredObjectType)
-	result.XId = tenantMonObjStr + "_" + id
 	result.Data = &pb.MonitoredObject{}
 	result.Data.Datatype = tenantMonObjStr
 	result.Data.Id = id
@@ -339,6 +340,8 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet[:indextToStopAt]...)
 		}
 	}
+
+	result.XId = db.GenerateID(result.Data, tenantMonObjStr)
 
 	return &result
 }

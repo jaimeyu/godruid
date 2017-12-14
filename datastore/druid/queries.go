@@ -14,7 +14,8 @@ const (
 // HistogramQuery - Count of metrics per bucket for given interval.
 func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32) *godruid.QueryTimeseries {
 
-	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"P95Histo", resolution, granularityBuckets, "0", "Infinity")
+	//peyo TODO need to figure out a better way than just appending Histo
+	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"Histo", resolution, granularityBuckets, "0", "Infinity")
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
@@ -65,18 +66,18 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	for _, t := range thresholdProfile.GetThresholds() {
 		// if no objectTypes have been provided, use all of them, otherwise
 		// only include the provided ones
-		if contains(objectTypes, t.GetObjectType()) || len(objectTypes) == 0 {
+		if contains(objectTypes, t.GetObjectType()) || objectType == "" {
 			for _, m := range t.GetMetrics() {
 				// if no metrics have been provided, use all of them, otherwise
 				// only include the provided ones
-				if contains(metrics, m.GetId()) || len(metrics) == 0 {
+				if contains(metrics, m.GetId()) || metric == "" {
 					for _, d := range m.GetData() {
-						if contains(directions, d.GetDirection()) || len(directions) == 0 {
+						if contains(directions, d.GetDirection()) || direction == "" {
 							for _, e := range d.GetEvents() {
-								name := t.GetObjectType() + "." + m.Id + "." + e.GetType() + "." + d.GetDirection()
+								name := t.GetObjectType() + "." + m.GetId() + "." + e.GetType() + "." + d.GetDirection()
 								aggregation := godruid.AggFiltered(
 									godruid.FilterAnd(
-										FilterHelper(metric, e),
+										FilterHelper(m.GetId(), e),
 										godruid.FilterSelector("sessionType", t.GetObjectType()),
 										godruid.FilterSelector("tenantId", tenant),
 										godruid.FilterSelector("direction", d.GetDirection()),

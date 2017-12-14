@@ -17,3 +17,4 @@ adh-gather
 # Debug file generated during testing
 server/debug
 debug
+.vscode/launch.json

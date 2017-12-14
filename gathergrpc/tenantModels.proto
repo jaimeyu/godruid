@@ -14,6 +14,8 @@ message TenantDomain {
 
     int64 createdTimestamp = 5;
     int64 lastModifiedTimestamp = 6;
+
+    repeated string thresholdProfileSet = 7;
 }
 
 // TenantDomainRequest - wrapper for requests that involve a Tenant Domain
@@ -228,6 +230,8 @@ message MonitoredObject {
 
     int64 createdTimestamp = 10;
     int64 lastModifiedTimestamp = 11;
+
+    repeated string domainSet = 12;
 }
 
 

@@ -1,4 +1,6 @@
 ## Current Release 
+### Added
+* Changing how IDs are constructed for data stored in Couch.
 ### 0.16.0 
 **Release Date:** Wed Dec 13 23:36:20 UTC 2017     
 ## Previous Releases 

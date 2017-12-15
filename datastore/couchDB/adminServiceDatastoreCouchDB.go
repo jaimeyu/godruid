@@ -268,20 +268,6 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 		return errors.New("Unable to add views to database '" + dbName + "': database does not exist")
 	}
 
-	// resource, err := couchdb.NewResource(createDBPathStr(asd.couchHost, dbName), nil)
-	// if err != nil {
-	// 	logger.Log.Debugf("Unable to add views to database: %s", err.Error())
-	// 	return err
-	// }
-
-	// tenantViews := generateTenantViews()
-	// for _, viewPayload := range tenantViews {
-	// 	_, err := addDesignDocument(viewPayload, resource)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
 	logger.Log.Debugf("Adding Tenant Views to DB %s", dbName)
 
 	db, err := getDatabase(createDBPathStr(asd.couchHost, dbName))
@@ -314,6 +300,80 @@ func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 
 	logger.Log.Debugf("Deleted DB %s\n", dbName)
 	return asd.server.Delete(dbName)
+}
+
+// CreateIngestionDictionary - CouchDB implementation of CreateIngestionDictionary
+func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	logger.Log.Debugf("Creating %s: %v\n", ds.IngestionDictionaryStr, ingDictionary)
+
+	dataType := string(ds.IngestionDictionaryType)
+	dataContainer := pb.IngestionDictionary{}
+	if err := storeData(asd.dbName, ingDictionary, dataType, ds.IngestionDictionaryStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.IngestionDictionaryStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// UpdateIngestionDictionary - CouchDB implementation of UpdateIngestionDictionary
+func (asd *AdminServiceDatastoreCouchDB) UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.IngestionDictionaryStr, ingDictionary)
+
+	dataType := string(ds.IngestionDictionaryType)
+	dataContainer := pb.IngestionDictionary{}
+	if err := updateData(asd.dbName, ingDictionary, dataType, ds.IngestionDictionaryStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", ds.IngestionDictionaryStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// DeleteIngestionDictionary - CouchDB implementation of DeleteIngestionDictionary
+func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
+	logger.Log.Debugf("Deleting %s\n", ds.IngestionDictionaryStr)
+
+	// Obtain the value of the existing record for a return value.
+	existingDictionary, err := asd.GetIngestionDictionary()
+	if err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.IngestionDictionaryStr, err.Error())
+		return nil, err
+	}
+
+	if err = deleteData(asd.dbName, existingDictionary.GetXId(), ds.IngestionDictionaryStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.IngestionDictionaryStr, err.Error())
+		return nil, err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", ds.IngestionDictionaryStr, existingDictionary)
+	return existingDictionary, nil
+	
+}
+
+// GetIngestionDictionary - CouchDB implementation of GetIngestionDictionary
+func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.IngestionDictionary, error) {
+	db, err := getDatabase(asd.dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedData, err := getAllOfTypeByIDPrefix(string(ds.IngestionDictionaryType), ds.IngestionDictionaryStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.IngestionDictionary{}
+	if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.IngestionDictionaryStr); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Found %s %s\n", ds.IngestionDictionaryStr, res)
+	return &res, nil
 }
 
 // Takes a set of generic data that contains a list of AdminUsers and converts it to

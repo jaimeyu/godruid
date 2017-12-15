@@ -78,3 +78,39 @@ message AdminUserResponse {
 message AdminUserListResponse {
     repeated AdminUserResponse data = 1;
 }
+
+// Stores the available values of the metrics that may be ingested by ADH.
+message IngestionDictionaryData {
+
+    message UIData {
+        string group = 1;
+        string position = 2;
+    }
+    message MonitoredObjectType {
+        string key = 1;
+        string rawMetricId = 2;
+        string unit = 3;
+        repeated string directions = 4;
+    }
+    message MetricDefinition {
+        repeated MonitoredObjectType monitoredObjectTypes = 1;
+        UIData ui = 2;
+    }
+    message MetricMap {
+        map<string, MetricDefinition> metricMap = 1;
+    }
+
+    string datatype = 1;
+
+    map<string, MetricMap> vendorMap = 2;
+
+    int64 createdTimestamp = 10;
+    int64 lastModifiedTimestamp = 11;
+}
+
+// Wrapper fos the object that stores the available values of the metrics that may be ingested by ADH.
+message IngestionDictionary {
+    string _id = 1;
+    string _rev = 2;
+    IngestionDictionaryData data = 3;
+}

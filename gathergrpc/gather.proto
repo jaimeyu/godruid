@@ -92,6 +92,36 @@ service AdminProvisioningService {
             get: "/api/v1/tenant-list"
         };
     }
+
+    // Create an IngestionDictionary used for the entire deployment.
+    rpc CreateIngestionDictionary(IngestionDictionary) returns (IngestionDictionary) {
+        option (google.api.http) = {
+            post: "/api/v1/ingestion-dictionaries"
+            body: "*"
+        };
+    }
+    
+    // Update an IngestionDictionary used for the entire deployment.
+    rpc UpdateIngestionDictionary(IngestionDictionary) returns (IngestionDictionary) {
+        option (google.api.http) = {
+            put: "/api/v1/ingestion-dictionaries"
+            body: "*"
+        };
+    } 
+    
+    // Delete an IngestionDictionary used for the entire deployment.
+    rpc DeleteIngestionDictionary(google.protobuf.Empty) returns (IngestionDictionary) {
+        option (google.api.http) = {
+            delete: "/api/v1/ingestion-dictionaries"
+        };
+    }
+    
+    // Retrieve an IngestionDictionary used for the entire deployment.
+    rpc GetIngestionDictionary(google.protobuf.Empty) returns (IngestionDictionary) {
+        option (google.api.http) = {
+            get: "/api/v1/ingestion-dictionaries"
+        };
+    }
 }
 
 

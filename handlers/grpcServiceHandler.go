@@ -125,6 +125,26 @@ func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noVa
 	return gsh.ash.GetAllTenantDescriptors(ctx, noValue)
 }
 
+// CreateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
+func (gsh *GRPCServiceHandler) CreateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	return gsh.ash.CreateIngestionDictionary(ctx, ingDictionary)
+}
+
+// UpdateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
+func (gsh *GRPCServiceHandler) UpdateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	return gsh.ash.UpdateIngestionDictionary(ctx, ingDictionary)
+}
+
+// DeleteIngestionDictionary - Delete an IngestionDictionary used for the entire deployment.
+func (gsh *GRPCServiceHandler) DeleteIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
+	return gsh.ash.DeleteIngestionDictionary(ctx, noValue)
+}
+
+// GetIngestionDictionary - Retrieve an IngestionDictionary used for the entire deployment.
+func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
+	return gsh.ash.GetIngestionDictionary(ctx, noValue)
+}
+
 // CreateTenantUser - creates a user scoped to a single Tenant.
 func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
 	return gsh.tsh.CreateTenantUser(ctx, tenantUserReq)

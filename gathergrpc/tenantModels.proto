@@ -63,14 +63,21 @@ message TenantDomainIdRequest {
 // TenantIngestionProfile - model for the singleton object that 
 // governs what data is displayed for a Tenant.
 message TenantIngestionProfile {
+    
+    message MetricMap {
+        map<string, bool> metricMap = 1;
+    }
+    message MonitoredObjectMap {
+        map<string, MetricMap> monitoredObjectMap = 1;
+    }
+
     string tenantId = 1;
     string datatype = 2;
 
-    string scpUsername = 3;
-    string scpPassword = 4;
+    map<string, MonitoredObjectMap> vendorMap = 3;
 
-    int64 createdTimestamp = 5;
-    int64 lastModifiedTimestamp = 6;
+    int64 createdTimestamp = 4;
+    int64 lastModifiedTimestamp = 5;
 }
 
 // TenantIngestionProfileRequest - wrapper for requests that involve the
@@ -279,4 +286,3 @@ message MonitoredObjectCountByDomainResponse {
 message MonitoredObjectList {
     repeated string  monitoredObjectSet = 1;
 }
-

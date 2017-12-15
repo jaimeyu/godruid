@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.20.0 
+**Release Date:** Fri Dec 15 21:58:47 UTC 2017     
+## Previous Releases 
 ### 0.19.0 
 **Release Date:** Thu Dec 14 21:45:35 UTC 2017     
-## Previous Releases 
 ### Added
 * Adding object count by domain API
 ### 0.18.0 

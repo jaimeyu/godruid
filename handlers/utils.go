@@ -9,16 +9,42 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
+var (
+	defaultIngestionProfileMetricNames = []string{
+		"delayMax", "delayP95", "delayPHi", "delayVarP95", "delayVarPHi",
+		"jitterMax", "jitterP95", "jitterPHi", "packetsLost", "packetsLostPct",
+		"lostBurstMax", "packetsReceived"}
+)
+
 func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfile {
 	ingPrf := pb.TenantIngestionProfile{}
-	ingPrf.ScpUsername = "default"
-	ingPrf.ScpPassword = "password"
 	ingPrf.TenantId = tenantID
 	ingPrf.Datatype = string(db.TenantIngestionProfileType)
 	ingPrf.CreatedTimestamp = time.Now().Unix()
 	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
 
+	// Default Values for the metrics:
+	moMap := pb.TenantIngestionProfile_MonitoredObjectMap{}
+	metricMap := pb.TenantIngestionProfile_MetricMap{}
+	metricMap.MetricMap = createMetricMap(defaultIngestionProfileMetricNames...)
+	moMap.MonitoredObjectMap = make(map[string]*pb.TenantIngestionProfile_MetricMap)
+	moMap.MonitoredObjectMap["pe"] = &metricMap
+	moMap.MonitoredObjectMap["sl"] = &metricMap
+	moMap.MonitoredObjectMap["sf"] = &metricMap
+	vendorMap := make(map[string]*pb.TenantIngestionProfile_MonitoredObjectMap)
+	vendorMap["accedian"] = &moMap
+	ingPrf.VendorMap = vendorMap
+
 	return &ingPrf
+}
+
+func createMetricMap(metricNames ...string) map[string]bool {
+	result := make(map[string]bool)
+	for _, s := range metricNames {
+		result[s] = true
+	}
+
+	return result
 }
 
 func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile {

@@ -209,3 +209,15 @@ func validateMonitoredObjectToDomainMapRequest(request *pb.MonitoredObjectCountB
 
 	return nil
 }
+
+func validateIngestionDictionary(request *pb.IngestionDictionary, isUpdate bool) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid IngestionDictionary: no IngestionDictionary data provided")
+	}
+
+	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
+		return errors.New("Invalid IngestionDictionary: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}

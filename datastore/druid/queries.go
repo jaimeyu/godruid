@@ -78,7 +78,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 								aggregation := godruid.AggFiltered(
 									godruid.FilterAnd(
 										FilterHelper(m.GetId(), e),
-										godruid.FilterSelector("sessionType", t.GetObjectType()),
+										godruid.FilterSelector("obejctType", t.GetObjectType()),
 										godruid.FilterSelector("tenantId", tenant),
 										godruid.FilterSelector("direction", d.GetDirection()),
 									),

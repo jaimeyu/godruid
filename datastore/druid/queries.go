@@ -36,20 +36,22 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 
 // FilterHelper - helper function to select correct druid filter based on
 // a given event and metric
-func FilterHelper(metric string, e *pb.TenantEvent) *godruid.Filter {
+func FilterHelper(metric string, e *pb.TenantThresholdProfile_EventAttrMap) *godruid.Filter {
 
-	if e.UpperBound != 0 && e.LowerBound != 0 {
-		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
-	}
+	// if e.UpperBound != 0 && e.LowerBound != 0 {
+	// 	return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict, e.UpperBound, e.UpperStrict)
+	// }
 
-	if e.UpperBound != 0 {
-		return godruid.FilterUpperBound(metric, godruid.NUMERIC, e.UpperBound, e.UpperStrict)
-	}
+	// if e.UpperBound != 0 {
+	// 	return godruid.FilterUpperBound(metric, godruid.NUMERIC, e.UpperBound, e.UpperStrict)
+	// }
 
-	if e.LowerBound != 0 {
-		return godruid.FilterLowerBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict)
-	}
-	return nil
+	// if e.LowerBound != 0 {
+	// 	return godruid.FilterLowerBound(metric, godruid.NUMERIC, e.LowerBound, e.LowerStrict)
+	// }
+
+	return godruid.FilterLowerBound(metric, godruid.NUMERIC, 1000, true)
+	// return nil
 }
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
@@ -63,24 +65,25 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	for _, t := range thresholdProfile.GetThresholds() {
+	// peyo TODO don't hardcode vendor
+	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian"].GetMonitoredObjectTypeMap() {
 		// if no objectTypes have been provided, use all of them, otherwise
 		// only include the provided ones
-		if contains(objectTypes, t.GetObjectType()) || objectType == "" {
-			for _, m := range t.GetMetrics() {
+		if contains(objectTypes, tk) || objectType == "" {
+			for mk, m := range t.GetMetricMap() {
 				// if no metrics have been provided, use all of them, otherwise
 				// only include the provided ones
-				if contains(metrics, m.GetId()) || metric == "" {
-					for _, d := range m.GetData() {
-						if contains(directions, d.GetDirection()) || direction == "" {
-							for _, e := range d.GetEvents() {
-								name := t.GetObjectType() + "." + m.GetId() + "." + e.GetType() + "." + d.GetDirection()
+				if contains(metrics, mk) || metric == "" {
+					for dk, d := range m.GetDirectionMap() {
+						if contains(directions, dk) || direction == "" {
+							for ek, e := range d.GetEventMap() {
+								name := tk + "." + mk + "." + ek + "." + dk
 								aggregation := godruid.AggFiltered(
 									godruid.FilterAnd(
-										FilterHelper(m.GetId(), e),
-										godruid.FilterSelector("obejctType", t.GetObjectType()),
+										FilterHelper(mk, e),
+										godruid.FilterSelector("obejctType", tk),
 										godruid.FilterSelector("tenantId", tenant),
-										godruid.FilterSelector("direction", d.GetDirection()),
+										godruid.FilterSelector("direction", dk),
 									),
 									&godruid.Aggregation{
 										Type: "count",
@@ -88,6 +91,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 									},
 								)
 								aggregations = append(aggregations, aggregation)
+
 							}
 						}
 					}

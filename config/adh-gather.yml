@@ -22,6 +22,8 @@ args:
   debug: true
 
 druid:
-  server: http://aod_broker
-  port: 8082
-  table: "NPAVKPI2"
+  server: "https://broker.skoa.npav.accedian.net"
+  table: "npav-ts-metrics"
+  auth: "https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1%2FCmG4jLIxA7pmNBUrxBPW1QFlTAM2mhHfqV_Bw2S-sbs&grant_type=refresh_token&audience=627634877761-gsci6s8gheq6rktbf17h2bfg47o9paol.apps.googleusercontent.com"
+    
+    

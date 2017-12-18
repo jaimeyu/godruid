@@ -102,7 +102,7 @@ message IngestionDictionaryData {
 
     string datatype = 1;
 
-    map<string, MetricMap> vendorMap = 2;
+    map<string, MetricMap> metrics = 2;
 
     int64 createdTimestamp = 10;
     int64 lastModifiedTimestamp = 11;

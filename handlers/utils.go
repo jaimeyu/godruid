@@ -31,9 +31,9 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfile {
 	moMap.MonitoredObjectMap["pe"] = &metricMap
 	moMap.MonitoredObjectMap["sl"] = &metricMap
 	moMap.MonitoredObjectMap["sf"] = &metricMap
-	vendorMap := make(map[string]*pb.TenantIngestionProfile_MonitoredObjectMap)
-	vendorMap["accedian"] = &moMap
-	ingPrf.VendorMap = vendorMap
+	metrics := make(map[string]*pb.TenantIngestionProfile_MonitoredObjectMap)
+	metrics["accedian"] = &moMap
+	ingPrf.Metrics = metrics
 
 	return &ingPrf
 }

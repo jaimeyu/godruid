@@ -1409,7 +1409,7 @@
         "datatype": {
           "type": "string"
         },
-        "vendorMap": {
+        "metrics": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/gathergrpcIngestionDictionaryDataMetricMap"
@@ -1898,7 +1898,7 @@
         "datatype": {
           "type": "string"
         },
-        "vendorMap": {
+        "metrics": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/TenantIngestionProfileMonitoredObjectMap"

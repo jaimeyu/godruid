@@ -468,6 +468,8 @@ type TenantProvisioningServiceClient interface {
 	GetMonitoredObject(ctx context.Context, in *MonitoredObjectIdRequest, opts ...grpc.CallOption) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
 	GetAllMonitoredObjects(ctx context.Context, in *google_protobuf3.StringValue, opts ...grpc.CallOption) (*MonitoredObjectListResponse, error)
+	// Retrieve a mapping of Domain to Montiored Objects as either a count or a set of the
+	// ids of the monitored objects.
 	GetMonitoredObjectToDomainMap(ctx context.Context, in *MonitoredObjectCountByDomainRequest, opts ...grpc.CallOption) (*MonitoredObjectCountByDomainResponse, error)
 }
 
@@ -748,6 +750,8 @@ type TenantProvisioningServiceServer interface {
 	GetMonitoredObject(context.Context, *MonitoredObjectIdRequest) (*MonitoredObjectResponse, error)
 	// Retrieve all MonitoredObject scoped to a single Tenant.
 	GetAllMonitoredObjects(context.Context, *google_protobuf3.StringValue) (*MonitoredObjectListResponse, error)
+	// Retrieve a mapping of Domain to Montiored Objects as either a count or a set of the
+	// ids of the monitored objects.
 	GetMonitoredObjectToDomainMap(context.Context, *MonitoredObjectCountByDomainRequest) (*MonitoredObjectCountByDomainResponse, error)
 }
 

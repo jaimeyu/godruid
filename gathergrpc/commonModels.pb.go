@@ -36,10 +36,6 @@ It has these top-level messages:
 	TenantIngestionProfileResponse
 	TenantIngestionProfileIdRequest
 	TenantThresholdProfile
-	TenantThreshold
-	TenantMetric
-	TenantMetricData
-	TenantEvent
 	TenantThresholdProfileRequest
 	TenantThresholdProfileResponse
 	TenantThresholdProfileIdRequest

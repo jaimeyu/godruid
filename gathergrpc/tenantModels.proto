@@ -96,42 +96,38 @@ message TenantIngestionProfileIdRequest {
 
 //Threshold Profile
 
-// TenantThresholdProfile
 message TenantThresholdProfile {
+
+  message EventAttrMap {
+    map<string, string> eventAttrMap = 1;
+  }
+
+  message EventMap {
+    map<string, EventAttrMap> eventMap = 1;
+  }
+
+  message DirectionMap {
+    map<string, EventMap> directionMap = 1;
+  }
+
+  message MetricMap {
+    map<string, DirectionMap> metricMap = 1;
+  }
+
+  message MonitoredObjectTypeMap {
+    map<string, MetricMap> monitoredObjectTypeMap = 1; 
+  }
+
+  message VendorMap {
+    map<string, MonitoredObjectTypeMap> vendorMap = 1; 
+  }
+
   string tenantId = 1;
   string datatype = 2;
-  repeated TenantThreshold thresholds = 3;
-
+  VendorMap thresholds = 3;
   int64 createdTimestamp = 4;
   int64 lastModifiedTimestamp = 5;
-}
 
-// TenantThreshold
-message TenantThreshold {
-  repeated TenantMetric metrics = 1;
-  string objectType = 2;
-}
-
-// TenantMetric
-message TenantMetric {
-  string id = 1;
-  repeated TenantMetricData data = 2;
-}
-
-// TenantMetricData
-message TenantMetricData {
-  string direction = 1;
-  repeated TenantEvent events = 2;
-}
-
-// TenantEvent 
-message TenantEvent {
-  string unit = 1;
-  string type = 2;
-  float upperBound = 3;
-  float lowerBound = 4;
-  bool upperStrict = 5;
-  bool lowerStrict = 6;
 }
 
 // TenantThresholdProfileRequest - wrapper for requests that involve the
@@ -154,7 +150,10 @@ message TenantThresholdProfileIdRequest {
     string tenantId = 1;
     string thresholdProfileId = 2;
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TenantUser - model for a User that is scoped to a single Tenant.
 message TenantUser {
     string tenantId = 1;

@@ -1,6 +1,7 @@
 package druid_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/accedian/adh-gather/datastore/druid"
@@ -60,7 +61,11 @@ func TestThresholdCrossingQuery(t *testing.T) {
 		logger.Log.Error("ThresholdCrossing query error: ", err)
 	}
 
-	assert.Equal(t, *testThresholdCrossing1, *q)
+	qJson, _ := json.Marshal(q)
+	expectedJson, _ := json.Marshal(testThresholdCrossing1)
+
+	// check to see if the number of bytes is equal since filters can be out of order
+	assert.Equal(t, len(expectedJson), len(qJson))
 }
 
 var metric1 = "delayP95"

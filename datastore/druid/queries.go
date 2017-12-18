@@ -108,8 +108,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 								aggregation := godruid.AggFiltered(
 									godruid.FilterAnd(
 										filter,
-										// peyo TODO temporary
-										// godruid.FilterSelector("objectType", tk),
+										godruid.FilterSelector("objectType", tk),
 										godruid.FilterSelector("tenantId", tenant),
 										godruid.FilterSelector("direction", dk),
 									),

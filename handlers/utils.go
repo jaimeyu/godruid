@@ -52,7 +52,7 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 
 	thrPrf.TenantId = tenantID
 	thrPrf.Datatype = string(db.TenantThresholdProfileType)
-	thrPrf.Thresholds = []*pb.TenantThreshold{}
+	thrPrf.Thresholds = &pb.TenantThresholdProfile_VendorMap{}
 	// TODO: Add in the hardcoded defaults here.
 	thrPrf.CreatedTimestamp = time.Now().Unix()
 	thrPrf.LastModifiedTimestamp = thrPrf.GetCreatedTimestamp()

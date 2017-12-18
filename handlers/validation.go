@@ -144,7 +144,7 @@ func validateTenantThreshPrfRequest(request *pb.TenantThresholdProfileRequest, i
 	}
 
 	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantThresholdProfileRequest: no Ingestion Profile ID provided")
+		return errors.New("Invalid TenantThresholdProfileRequest: no Threshold Profile ID provided")
 	}
 
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {

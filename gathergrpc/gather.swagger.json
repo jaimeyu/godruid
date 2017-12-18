@@ -1260,6 +1260,61 @@
         }
       }
     },
+    "TenantThresholdProfileDirectionMap": {
+      "type": "object",
+      "properties": {
+        "directionMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileEventMap"
+          }
+        }
+      }
+    },
+    "TenantThresholdProfileEventAttrMap": {
+      "type": "object",
+      "properties": {
+        "eventAttrMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TenantThresholdProfileEventMap": {
+      "type": "object",
+      "properties": {
+        "eventMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileEventAttrMap"
+          }
+        }
+      }
+    },
+    "TenantThresholdProfileMonitoredObjectTypeMap": {
+      "type": "object",
+      "properties": {
+        "monitoredObjectTypeMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/gathergrpcTenantThresholdProfileMetricMap"
+          }
+        }
+      }
+    },
+    "TenantThresholdProfileVendorMap": {
+      "type": "object",
+      "properties": {
+        "vendorMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileMonitoredObjectTypeMap"
+          }
+        }
+      }
+    },
     "gathergrpcAdminUser": {
       "type": "object",
       "properties": {
@@ -1861,34 +1916,6 @@
       },
       "title": "TenantDomainResponse - wrapper for responses that involve a Tenant Domain"
     },
-    "gathergrpcTenantEvent": {
-      "type": "object",
-      "properties": {
-        "unit": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "upperBound": {
-          "type": "number",
-          "format": "float"
-        },
-        "lowerBound": {
-          "type": "number",
-          "format": "float"
-        },
-        "upperStrict": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "lowerStrict": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "title": "TenantEvent"
-    },
     "gathergrpcTenantIngestionProfile": {
       "type": "object",
       "properties": {
@@ -1957,51 +1984,6 @@
       },
       "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
     },
-    "gathergrpcTenantMetric": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantMetricData"
-          }
-        }
-      },
-      "title": "TenantMetric"
-    },
-    "gathergrpcTenantMetricData": {
-      "type": "object",
-      "properties": {
-        "direction": {
-          "type": "string"
-        },
-        "events": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantEvent"
-          }
-        }
-      },
-      "title": "TenantMetricData"
-    },
-    "gathergrpcTenantThreshold": {
-      "type": "object",
-      "properties": {
-        "metrics": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantMetric"
-          }
-        },
-        "objectType": {
-          "type": "string"
-        }
-      },
-      "title": "TenantThreshold"
-    },
     "gathergrpcTenantThresholdProfile": {
       "type": "object",
       "properties": {
@@ -2012,10 +1994,7 @@
           "type": "string"
         },
         "thresholds": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantThreshold"
-          }
+          "$ref": "#/definitions/TenantThresholdProfileVendorMap"
         },
         "createdTimestamp": {
           "type": "string",
@@ -2025,8 +2004,18 @@
           "type": "string",
           "format": "int64"
         }
-      },
-      "title": "TenantThresholdProfile"
+      }
+    },
+    "gathergrpcTenantThresholdProfileMetricMap": {
+      "type": "object",
+      "properties": {
+        "metricMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileDirectionMap"
+          }
+        }
+      }
     },
     "gathergrpcTenantThresholdProfileRequest": {
       "type": "object",
@@ -2102,7 +2091,7 @@
           "format": "int64"
         }
       },
-      "description": "TenantUser - model for a User that is scoped to a single Tenant."
+      "description": "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\nTenantUser - model for a User that is scoped to a single Tenant."
     },
     "gathergrpcTenantUserListResponse": {
       "type": "object",

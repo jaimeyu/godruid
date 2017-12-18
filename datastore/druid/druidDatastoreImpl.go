@@ -78,7 +78,11 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
+	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
+
+	if err != nil {
+		return nil, err
+	}
 
 	response, err := dc.executeQuery(query)
 
@@ -120,7 +124,11 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+
+	if err != nil {
+		return nil, err
+	}
 
 	response, err := dc.executeQuery(query)
 

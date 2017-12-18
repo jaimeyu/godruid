@@ -214,6 +214,73 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 	return result, nil
 }
 
+// CreateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
+func (ash *AdminServiceHandler) CreateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateIngestionDictionary(ingDictionary, false); err != nil {
+		return nil, err
+	}
+	logger.Log.Infof("Creating %s: %s", datastore.IngestionDictionaryStr, ingDictionary.GetXId())
+
+	// Issue request to AdminService DAO to create the record:
+	result, err := ash.adminDB.CreateIngestionDictionary(ingDictionary)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create %s: %s", datastore.IngestionDictionaryStr, err.Error())
+	}
+
+	// Succesfully Created the record
+	logger.Log.Infof("Created %s: %s\n", datastore.IngestionDictionaryStr, result.GetXId())
+	return result, nil
+}
+
+// UpdateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
+func (ash *AdminServiceHandler) UpdateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	if err := validateIngestionDictionary(ingDictionary, true); err != nil {
+		return nil, err
+	}
+	logger.Log.Infof("Updating %s: %s", datastore.IngestionDictionaryStr, ingDictionary.GetXId())
+
+	// Issue request to AdminService DAO to update the record
+	result, err := ash.adminDB.UpdateIngestionDictionary(ingDictionary)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to update %s: %s", datastore.IngestionDictionaryStr, err.Error())
+	}
+
+	// Succesfully updated the record
+	logger.Log.Infof("Updated %s: %s\n", datastore.IngestionDictionaryStr, result.GetXId())
+	return result, nil
+}
+
+// DeleteIngestionDictionary - Delete an IngestionDictionary used for the entire deployment.
+func (ash *AdminServiceHandler) DeleteIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
+	logger.Log.Infof("Attempting to delete %s", datastore.IngestionDictionaryStr)
+
+	// Issue request to DAO Layer to Delete the record
+	result, err := ash.adminDB.DeleteIngestionDictionary()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.IngestionDictionaryStr, err.Error())
+	}
+
+	// Succesfully removed the record, return the previous record
+	logger.Log.Infof("Successfully deleted %s. Previous %s: %s\n", datastore.IngestionDictionaryStr, datastore.IngestionDictionaryStr, result.GetXId())
+	return result, nil
+}
+
+// GetIngestionDictionary - Retrieve an IngestionDictionary used for the entire deployment.
+func (ash *AdminServiceHandler) GetIngestionDictionary(ctx context.Context, noValuie *emp.Empty) (*pb.IngestionDictionary, error) {
+	logger.Log.Infof("Retrieving %s", datastore.IngestionDictionaryStr)
+
+	// Issue request to DAO Layer to Get the requested record
+	result, err := ash.adminDB.GetIngestionDictionary()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.IngestionDictionaryStr, err.Error())
+	}
+
+	// Succesfully found the record, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", datastore.IngestionDictionaryStr, result.GetXId())
+	return result, nil
+}
+
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))

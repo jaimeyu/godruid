@@ -80,3 +80,27 @@ func (memDB *AdminServiceDatastoreInMemory) GetAllTenantDescriptors() (*pb.Tenan
 	// Stub to implement
 	return nil, errors.New("GetAllTenantDescriptors() not implemented for InMemory DB")
 }
+
+// CreateIngestionDictionary - InMemory implementation of CreateIngestionDictionary
+func (memDB *AdminServiceDatastoreInMemory) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	// Stub to implement
+	return nil, errors.New("CreateIngestionDictionary() not implemented for InMemory DB")
+}
+
+// UpdateIngestionDictionary - InMemory implementation of UpdateIngestionDictionary
+func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	// Stub to implement
+	return nil, errors.New("UpdateIngestionDictionary() not implemented for InMemory DB")
+}
+
+// DeleteIngestionDictionary - InMemory implementation of DeleteIngestionDictionary
+func (memDB *AdminServiceDatastoreInMemory) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
+	// Stub to implement
+	return nil, errors.New("DeleteIngestionDictionary() not implemented for InMemory DB")
+}
+
+// GetIngestionDictionary - InMemory implementation of GetIngestionDictionary
+func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.IngestionDictionary, error) {
+	// Stub to implement
+	return nil, errors.New("GetIngestionDictionary() not implemented for InMemory DB")
+}

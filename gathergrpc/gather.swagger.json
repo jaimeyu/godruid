@@ -203,6 +203,88 @@
         ]
       }
     },
+    "/api/v1/ingestion-dictionaries": {
+      "get": {
+        "summary": "Retrieve an IngestionDictionary used for the entire deployment.",
+        "operationId": "GetIngestionDictionary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an IngestionDictionary used for the entire deployment.",
+        "operationId": "DeleteIngestionDictionary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "post": {
+        "summary": "Create an IngestionDictionary used for the entire deployment.",
+        "operationId": "CreateIngestionDictionary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update an IngestionDictionary used for the entire deployment.",
+        "operationId": "UpdateIngestionDictionary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcIngestionDictionary"
+            }
+          }
+        ],
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenant-list": {
       "get": {
         "summary": "Retrieve all Users scoped to a single Tenant.",
@@ -1119,6 +1201,31 @@
     }
   },
   "definitions": {
+    "IngestionDictionaryDataMetricDefinition": {
+      "type": "object",
+      "properties": {
+        "monitoredObjectTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcIngestionDictionaryDataMonitoredObjectType"
+          }
+        },
+        "ui": {
+          "$ref": "#/definitions/IngestionDictionaryDataUIData"
+        }
+      }
+    },
+    "IngestionDictionaryDataUIData": {
+      "type": "object",
+      "properties": {
+        "group": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        }
+      }
+    },
     "LinksRelated": {
       "type": "object",
       "properties": {
@@ -1142,13 +1249,16 @@
       ],
       "default": "DT_UNKNOWN"
     },
-    "MonitoredObjectMonitoredObjectType": {
-      "type": "string",
-      "enum": [
-        "MO_UNKNOWN",
-        "TWAMP"
-      ],
-      "default": "MO_UNKNOWN"
+    "TenantIngestionProfileMonitoredObjectMap": {
+      "type": "object",
+      "properties": {
+        "monitoredObjectMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/gathergrpcTenantIngestionProfileMetricMap"
+          }
+        }
+      }
     },
     "TenantThresholdProfileDirectionMap": {
       "type": "object",
@@ -1183,24 +1293,13 @@
         }
       }
     },
-    "TenantThresholdProfileMetricMap": {
-      "type": "object",
-      "properties": {
-        "metricMap": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileDirectionMap"
-          }
-        }
-      }
-    },
     "TenantThresholdProfileMonitoredObjectTypeMap": {
       "type": "object",
       "properties": {
         "monitoredObjectTypeMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileMetricMap"
+            "$ref": "#/definitions/gathergrpcTenantThresholdProfileMetricMap"
           }
         }
       }
@@ -1344,6 +1443,75 @@
         }
       }
     },
+    "gathergrpcIngestionDictionary": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcIngestionDictionaryData"
+        }
+      },
+      "description": "Wrapper fos the object that stores the available values of the metrics that may be ingested by ADH."
+    },
+    "gathergrpcIngestionDictionaryData": {
+      "type": "object",
+      "properties": {
+        "datatype": {
+          "type": "string"
+        },
+        "vendorMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/gathergrpcIngestionDictionaryDataMetricMap"
+          }
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "Stores the available values of the metrics that may be ingested by ADH."
+    },
+    "gathergrpcIngestionDictionaryDataMetricMap": {
+      "type": "object",
+      "properties": {
+        "metricMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/IngestionDictionaryDataMetricDefinition"
+          }
+        }
+      }
+    },
+    "gathergrpcIngestionDictionaryDataMonitoredObjectType": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "rawMetricId": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "directions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "gathergrpcJSONAPIObject": {
       "type": "object",
       "properties": {
@@ -1440,7 +1608,7 @@
           "type": "string"
         },
         "objectType": {
-          "$ref": "#/definitions/MonitoredObjectMonitoredObjectType"
+          "$ref": "#/definitions/gathergrpcMonitoredObjectMonitoredObjectType"
         },
         "createdTimestamp": {
           "type": "string",
@@ -1518,6 +1686,14 @@
         }
       },
       "description": "MonitoredObjectListResponse - Wrapper for requests which return a list of MonitoredObjects \nscoped to a single Tenant."
+    },
+    "gathergrpcMonitoredObjectMonitoredObjectType": {
+      "type": "string",
+      "enum": [
+        "MO_UNKNOWN",
+        "TWAMP"
+      ],
+      "default": "MO_UNKNOWN"
     },
     "gathergrpcMonitoredObjectRequest": {
       "type": "object",
@@ -1749,11 +1925,11 @@
         "datatype": {
           "type": "string"
         },
-        "scpUsername": {
-          "type": "string"
-        },
-        "scpPassword": {
-          "type": "string"
+        "vendorMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantIngestionProfileMonitoredObjectMap"
+          }
         },
         "createdTimestamp": {
           "type": "string",
@@ -1765,6 +1941,18 @@
         }
       },
       "description": "TenantIngestionProfile - model for the singleton object that \ngoverns what data is displayed for a Tenant."
+    },
+    "gathergrpcTenantIngestionProfileMetricMap": {
+      "type": "object",
+      "properties": {
+        "metricMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean",
+            "format": "boolean"
+          }
+        }
+      }
     },
     "gathergrpcTenantIngestionProfileRequest": {
       "type": "object",
@@ -1815,6 +2003,17 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "gathergrpcTenantThresholdProfileMetricMap": {
+      "type": "object",
+      "properties": {
+        "metricMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileDirectionMap"
+          }
         }
       }
     },

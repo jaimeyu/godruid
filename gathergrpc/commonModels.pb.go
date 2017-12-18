@@ -26,6 +26,8 @@ It has these top-level messages:
 	AdminUserRequest
 	AdminUserResponse
 	AdminUserListResponse
+	IngestionDictionaryData
+	IngestionDictionary
 	TenantDomain
 	TenantDomainRequest
 	TenantDomainResponse

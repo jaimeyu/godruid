@@ -61,3 +61,7 @@ message Histogram {
 message HistogramResponse {
    repeated Histogram data = 1;
 }
+
+message ThresholdCrossingByMonitoredObjectResponse {
+    google.protobuf.Struct result = 1;  
+}

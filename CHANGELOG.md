@@ -1,9 +1,11 @@
 ## Current Release 
 ### 0.23.0 
+**Release Date:** Tue Dec 19 20:56:00 UTC 2017     
+## Previous Releases 
+### 0.23.0 
 * Refactor naming in ingestion profile and getting rid of relational pouch id prefixes in domains and monitored objects.
 ### 0.22.0 
 **Release Date:** Mon Dec 18 20:23:21 UTC 2017     
-## Previous Releases 
 ### 0.21.0 
 **Release Date:** Mon Dec 18 16:03:03 UTC 2017     
 ### 0.20.0 

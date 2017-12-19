@@ -281,6 +281,21 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
 }
 
+// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
+// interval, tenant, domain, and groups by monitoredObjectID
+func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
+		TenantId:           thresholdCrossingReq.Tenant,
+		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
+	}
+
+	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
+}
+
 // GetHistogram -
 func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 

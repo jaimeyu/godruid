@@ -29,6 +29,29 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return res.Bytes(), nil
 }
 
+func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) ([]byte, error) {
+	res := gabs.New()
+	for _, tc := range thresholdCrossing {
+		monObj := tc.Event["monitoredObjectId"].(string)
+		if !res.ExistsP("result." + monObj) {
+			_, err := res.ArrayP("result." + monObj)
+			if err != nil {
+				return nil, fmt.Errorf("Error formatting Threshold Crossing By Monitored Object JSON. Err: %s", err)
+			}
+		}
+
+		obj := gabs.New()
+		obj.SetP(tc.Timestamp, "timestamp")
+		for k, v := range tc.Event {
+			obj.SetP(v, k)
+		}
+		res.ArrayAppendP(obj.Data(), "result."+monObj)
+
+	}
+
+	return res.Bytes(), nil
+}
+
 // Convert a query object to string, mainly for debugging purposes
 func queryToString(query godruid.Query, debug bool) string {
 	var reqJson []byte

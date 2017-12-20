@@ -1,4 +1,6 @@
 ## Current Release 
+### 0.26.0
+* Fixes for SLA Domain Report 
 ### 0.25.0 
 **Release Date:** Wed Dec 20 15:44:38 UTC 2017     
 ## Previous Releases 

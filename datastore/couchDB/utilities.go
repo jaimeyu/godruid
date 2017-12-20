@@ -132,7 +132,7 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 	logger.Log.Debugf("Attempting to retrieve all %ss\n", dataTypeStrForLogging)
 
 	// Get the Admin User from CouchDB
-	selector := fmt.Sprintf(`regex(_id, "^%s")`, dataType)
+	selector := fmt.Sprintf(`regex(_id, "^%s_")`, dataType)
 	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())

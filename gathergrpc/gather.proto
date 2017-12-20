@@ -326,6 +326,12 @@ service MetricsService {
         };
     }
 
+  rpc GetThresholdCrossingByMonitoredObject(ThresholdCrossingRequest) returns (JSONAPIObject) {
+        option (google.api.http) = {
+            get: "/api/v1/threshold-crossing-by-monitored-object"
+        };
+    }
+
     // Retrieve a histogram of measurements for given time range and metric
     rpc GetHistogram(HistogramRequest) returns (JSONAPIObject) {
         option (google.api.http) = {

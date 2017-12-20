@@ -1,9 +1,11 @@
 ## Current Release 
+### 0.27.0 
+**Release Date:** Wed Dec 20 20:17:17 UTC 2017     
+## Previous Releases 
 #### adh-gather:0.27.0
 * feat - adding the Tenant Meta data model to tenant DB.
 ### 0.26.0 
 **Release Date:** Wed Dec 20 16:02:07 UTC 2017     
-## Previous Releases 
 ### 0.26.0
 * Fixes for SLA Domain Report 
 ### 0.25.0 

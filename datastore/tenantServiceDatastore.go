@@ -22,6 +22,9 @@ const (
 
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
+
+	// TenantMetaType - datatype string used to identify a Tenant Meta in the datastore record
+	TenantMetaType TenantDataType = "meta"
 )
 
 const (
@@ -42,6 +45,9 @@ const (
 
 	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Doamin Map for use in logs.
 	MonitoredObjectToDomainMapStr = "Monitored Object to Doamin Map"
+
+	// TenantMetaStr - common name for the Meta for use in logs.
+	TenantMetaStr = "Tenant Meta"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
@@ -75,4 +81,9 @@ type TenantServiceDatastore interface {
 	DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error)
 	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error)
 	GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error)
+
+	CreateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error)
+	UpdateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error)
+	DeleteTenantMeta(tenantID string) (*pb.TenantMeta, error)
+	GetTenantMeta(tenantID string) (*pb.TenantMeta, error)
 }

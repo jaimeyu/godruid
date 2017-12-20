@@ -164,3 +164,27 @@ func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDom
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetMonitoredObjectToDomainMap not implemented")
 }
+
+// CreateTenantMeta - InMemory implementation of CreateTenantMeta
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: CreateTenantMeta not implemented")
+}
+
+// UpdateTenantMeta - InMemory implementation of UpdateTenantMeta
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: UpdateTenantMeta not implemented")
+}
+
+// DeleteTenantMeta - InMemory implementation of DeleteTenantMeta
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: DeleteTenantMeta not implemented")
+}
+
+// GetTenantMeta - InMemory implementation of GetTenantMeta
+func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetTenantMeta not implemented")
+}

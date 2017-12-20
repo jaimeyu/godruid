@@ -520,6 +520,85 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
+// CreateTenantMeta - CouchDB implementation of CreateTenantMeta
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	logger.Log.Debugf("Creating %s: %v\n", ds.TenantMetaStr, meta)
+
+	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
+	dataType := string(ds.TenantMetaType)
+	dataContainer := pb.TenantMeta{}
+	if err := storeData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.TenantMetaStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// UpdateTenantMeta - CouchDB implementation of UpdateTenantMeta
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.TenantMetaStr, meta)
+
+	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
+	dataType := string(ds.TenantMetaType)
+	dataContainer := pb.TenantMeta{}
+	if err := updateData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", ds.TenantMetaStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// DeleteTenantMeta - CouchDB implementation of DeleteTenantMeta
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantMetaStr, tenantID)
+
+	// Obtain the value of the existing record for a return value.
+	existingObject, err := tsd.GetTenantMeta(tenantID)
+	if err != nil {
+		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantMetaStr, err.Error())
+		return nil, err
+	}
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	if err := deleteData(tenantDBName, existingObject.GetXId(), ds.TenantMetaStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantMetaStr, err.Error())
+		return nil, err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantMetaStr, existingObject)
+	return existingObject, nil
+}
+
+// GetTenantMeta - CouchDB implementation of GetTenantMeta
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedData, err := getAllOfTypeByIDPrefix(string(ds.TenantMetaType), ds.TenantMetaStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.TenantMeta{}
+	if len(fetchedData) != 0 {
+		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.TenantMetaStr); err != nil {
+			return nil, err
+		}
+	}
+
+	logger.Log.Debugf("Found %s %v\n", ds.TenantMetaStr, res)
+	return &res, nil
+}
+
 // Takes a set of generic data that contains a list of TenantUsers and converts it to
 // and ADH TenantUserList object
 func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserListResponse, error) {

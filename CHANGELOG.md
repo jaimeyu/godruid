@@ -1,4 +1,6 @@
 ## Current Release 
+#### adh-gather:0.27.0
+* feat - adding the Tenant Meta data model to tenant DB.
 ### 0.26.0 
 **Release Date:** Wed Dec 20 16:02:07 UTC 2017     
 ## Previous Releases 

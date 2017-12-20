@@ -47,6 +47,9 @@ type Config struct {
 		pouchplugindb struct {
 			impl DBImpl
 		}
+		testdatadb struct {
+			impl DBImpl
+		}
 		debug bool
 	}
 }
@@ -92,6 +95,7 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_admindb_impl.String(), 1)
 	v.SetDefault(CK_args_tenantdb_impl.String(), 1)
 	v.SetDefault(CK_args_pouchplugindb_impl.String(), 1)
+	v.SetDefault(CK_args_testdatadb_impl.String(), 1)
 	v.SetDefault(CK_args_debug.String(), false)
 	v.SetDefault(CK_druid_server.String(), "aod_broker")
 	v.SetDefault(CK_druid_server.String(), 8082)

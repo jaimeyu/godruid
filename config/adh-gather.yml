@@ -19,6 +19,8 @@ args:
     impl: 1
   pouchplugindb:
     impl: 1
+  testdatadb:
+    impl: 1
   debug: true
 
 druid:

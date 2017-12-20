@@ -49,6 +49,7 @@ You can modify the following values in  the `config/adh-gath.yml` file:
 			- impl: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
 		2. tenantdb: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
 		3. pouchplugindb: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
+		4. testdatadb: type of datastore to use for TestData Service. (0=InMemory, 1=CouchDB)
 
 The following command line arguments are also available when executing the adh-gather program:
 	

@@ -2,22 +2,30 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/satori/go.uuid"
+
 	db "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/couchDB"
+	"github.com/accedian/adh-gather/datastore/inMemory"
+	"github.com/accedian/adh-gather/gather"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/server"
+	wr "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/gorilla/mux"
 )
 
 const (
 	unableToReadRequestStr     = "Unable to read Test Data content"
 	missingTenantNameStr       = "Missing tenantName field"
+	missingTenantIDStr         = "Missing tenantID field"
 	missingDomainSetStr        = "Missing domainSet field"
 	missingMonObjID            = "Missing Monitored Object id field"
 	missingMonObjActuatorName  = "Missing Monitored Object actuatorName field"
@@ -27,6 +35,13 @@ const (
 	moActuatorNameStr          = "actuatorName"
 	moReflectorNameStr         = "reflectorName"
 	moObjectNameStr            = "objectName"
+	domainSLAReportName        = "Weekly Domain SLA Report"
+
+	millisecondsPerWeek                         = 1000 * 60 * 60 * 24 * 7
+	totalMonitoredObjectCountForDomainSLAReport = 25
+	domainSlaReportBucketCount                  = 150
+	domainSlaReportBucketDurationInMilliseconds = millisecondsPerWeek / domainSlaReportBucketCount
+	domainSlaReportBucketDurationInMinutes      = domainSlaReportBucketDurationInMilliseconds / (1000 * 60)
 )
 
 // TestDataServiceHandler - handler for all APIs related to test data provisioning.
@@ -36,6 +51,7 @@ type TestDataServiceHandler struct {
 	// tenantDB db.TenantServiceDatastore
 	pouchDB db.PouchDBPluginServiceDatastore
 	grpcSH  *GRPCServiceHandler
+	testDB  db.TestDataServiceDatastore
 }
 
 // CreateTestDataServiceHandler - generates a TestDataServiceHandler to handle all test
@@ -64,6 +80,20 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Pattern:     "/test-data/{dbname}",
 			HandlerFunc: result.PurgeDB,
 		},
+
+		server.Route{
+			Name:        "GenerateHistoricalDomainSLAReports",
+			Method:      "POST",
+			Pattern:     "/test-data/domain-sla-reports",
+			HandlerFunc: result.GenerateHistoricalDomainSLAReports,
+		},
+
+		server.Route{
+			Name:        "GetAllDocsByType",
+			Method:      "GET",
+			Pattern:     "/test-data/{dbname}/{datatype}",
+			HandlerFunc: result.GetAllDocsByType,
+		},
 	}
 
 	// Wire up the datastore impls
@@ -85,9 +115,30 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 	}
 	result.pouchDB = pouchdb
 
+	testdb, err := getTestDataServiceDatastore()
+	if err != nil {
+		logger.Log.Fatalf("Unable to instantiate TestDataServiceHandler: %s", err.Error())
+	}
+	result.testDB = testdb
+
 	result.grpcSH = CreateCoordinator()
 
 	return result
+}
+
+func getTestDataServiceDatastore() (db.TestDataServiceDatastore, error) {
+	cfg := gather.GetConfig()
+	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_testdatadb_impl.String()))
+	switch dbType {
+	case gather.COUCH:
+		logger.Log.Debug("TestDataService DB is using CouchDB Implementation")
+		return couchDB.CreateTestDataServiceDAO()
+	case gather.MEM:
+		logger.Log.Debug("TestDataService DB is using InMemory Implementation")
+		return inMemory.CreateTestDataServiceDAO()
+	}
+
+	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")
 }
 
 // RegisterAPIHandlers - connects the endpoints of the multiplexor to the functions that will
@@ -185,7 +236,40 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 
 	dbName := getDBFieldFromRequest(r, 2)
 
-	// Get a list of documents from the DB:
+	datatypeFilter := r.URL.Query().Get("datatype")
+
+	if len(datatypeFilter) != 0 {
+		// doing the delete by datatype filter, not all docs.
+		allDocsByType, err := tsh.testDB.GetAllDocsByDatatype(dbName, datatypeFilter)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Unable to purge DB %s of documents of type %s: %s", dbName, datatypeFilter, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		if len(allDocsByType) != 0 {
+			docsToDelete := make([]map[string]interface{}, 0)
+			for _, doc := range allDocsByType {
+				docID := doc["_id"].(string)
+				docRev := doc["_rev"].(string)
+				docsToDelete = append(docsToDelete, map[string]interface{}{"_id": docID, "_rev": docRev, "_deleted": true})
+			}
+
+			deleteBody := map[string]interface{}{"docs": docsToDelete}
+			logger.Log.Debugf("Attempting to delete the following from DB %s: %v", dbName, docsToDelete)
+
+			_, err = tsh.pouchDB.BulkDBUpdate(dbName, deleteBody)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
+				return
+			}
+		}
+
+		// Purge complete, send back success details:
+		fmt.Fprintf(w, fmt.Sprintf("Successfully purged all %s records from DB %s", datatypeFilter, dbName))
+		return
+	}
+
+	// Get a list of all documents from the DB:
 	docs, err := tsh.pouchDB.GetAllDBDocs(dbName, map[string]interface{}{})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
@@ -217,6 +301,160 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 	fmt.Fprintf(w, "Successfully purged all records from DB "+dbName)
 }
 
+// GenerateHistoricalDomainSLAReports - generates weekly SLA reports for a Tenant based on the Domains provisioned for that Tenant.
+func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.ResponseWriter, r *http.Request) {
+
+	// Get the contents of the request:
+	requestBody, err := getRequestBodyAsGenericObject(r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", "Test Data", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	err = validateGenerateDomainSLAReportRequest(requestBody)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Create a Tenant metadata using the provided name:
+	tenantID := requestBody["tenantId"].(string)
+	numReportsPerDomainObj := requestBody["numReportsPerDomain"]
+	numReportsPerDomain := float64(5)
+	if numReportsPerDomainObj != nil {
+		numReportsPerDomain = numReportsPerDomainObj.(float64)
+	}
+
+	// Get the list of Domain Objects provisioned for this tenant:
+	domainSetForTenant, err := tsh.grpcSH.GetAllTenantDomains(nil, &wr.StringValue{Value: tenantID})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to generate %s content for Tenant %s: No Domain data provisioned", db.DomainSlaReportStr, tenantID), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate teh data for each domain for the number of reports and insert them as a bulk update:
+	rand.Seed(time.Now().UTC().UnixNano())
+	docsToInsert := make([]map[string]interface{}, 0)
+	endReportTS := time.Now().Truncate(24*time.Hour).UnixNano() / 1000000 // Truncate a current timestamp to the beginning of this day.
+	startReportTS := endReportTS - millisecondsPerWeek
+	for i := float64(0); i < numReportsPerDomain; i++ {
+		for _, domain := range domainSetForTenant.GetData() {
+			// Add a new Report to the list of documents to insert
+			docsToInsert = append(docsToInsert, generateSLADomainReport(domain.GetData().GetName(), startReportTS, endReportTS))
+		}
+
+		// Update the timestamps for the previous week
+		endReportTS = startReportTS
+		startReportTS = startReportTS - millisecondsPerWeek
+	}
+
+	insertBody := map[string]interface{}{"docs": docsToInsert}
+	logger.Log.Debugf("Attempting to insert %s %ss for Tenant %s", len(docsToInsert), db.DomainSlaReportStr, tenantID)
+
+	_, err = tsh.pouchDB.BulkDBUpdate(tenantID, insertBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to insert %ss for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, fmt.Sprintf("Successfully generated all %ss for tenant %s", db.DomainSlaReportStr, tenantID))
+}
+
+// GetAllDocsByType - retrieves all docs by type.
+func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *http.Request) {
+	// TODO: Validate the request to ensure this operation is valid:
+
+	dbName := getDBFieldFromRequest(r, 2)
+	docType := getDBFieldFromRequest(r, 3)
+
+	if len(dbName) == 0 || len(docType) == 0 {
+		http.Error(w, fmt.Sprintf("Unable to retrieve documents without a DB name and Document type"), http.StatusInternalServerError)
+		return
+	}
+
+	allDocsByType, err := tsh.testDB.GetAllDocsByDatatype(dbName, docType)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to retrieve documents of type %s from DB %s: %s", docType, dbName, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// All operations successful, just return the Tenant Descriptor as success:
+	response, err := json.Marshal(allDocsByType)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, string(response))
+}
+
+func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS int64) map[string]interface{} {
+	result := map[string]interface{}{}
+
+	typeName := string(db.DomainSlaReportType)
+	result["_id"] = typeName + db.PouchDBIdBridgeStr + uuid.NewV4().String()
+
+	resultContent := map[string]interface{}{}
+	resultContent["datatype"] = typeName
+	resultContent["reportName"] = domainSLAReportName
+	resultContent["domain"] = domainName
+	resultContent["objectCount"] = 25
+
+	reportRange := map[string]interface{}{}
+	reportRange["start"] = reportStartTS
+	reportRange["end"] = reportEndTS
+	resultContent["range"] = reportRange
+
+	// Set compliance rate somewhere between 94% and 96%
+	slaComplianceRate := 940 + rand.Intn(960-940)
+
+	values := make([]map[string]interface{}, 0)
+	for i := 0; i < domainSlaReportBucketCount; i++ {
+		// Make a value for each timestamp in the range of the report
+		values = append(values, generateSlaRangeValue(reportStartTS, slaComplianceRate))
+
+		// Increment the bucket timestamp
+		reportStartTS = reportStartTS + domainSlaReportBucketDurationInMilliseconds
+	}
+
+	resultContent["buckets"] = values
+	result["data"] = resultContent
+
+	return result
+}
+
+func generateSlaRangeValue(timestamp int64, complianceRate int) map[string]interface{} {
+	result := map[string]interface{}{}
+
+	result["timestamp"] = timestamp
+
+	metrics := map[string]interface{}{}
+	metrics["jitterP95"] = generateValueInRangeIfPassesTest(1, 80, complianceRate)
+	metrics["delayP95"] = generateValueInRangeIfPassesTest(1, 80, complianceRate)
+	metrics["packetsLostPct"] = generateValueInRangeIfPassesTest(1, 80, complianceRate)
+	result["metrics"] = metrics
+
+	return result
+}
+
+func generateValueInRangeIfPassesTest(minValue int, maxValue int, testRate int) int {
+	roll := rand.Intn(1000)
+	if roll <= testRate {
+		// failed the test, just return 0
+		return 0
+	}
+
+	// Weight the result so that it skews towards 0
+	roll = rand.Intn(100)
+	if roll < 80 {
+		maxValue = 20
+	} else if roll < 90 {
+		maxValue = 60
+	}
+
+	// Generate a number for return in the range of desired values.
+	return minValue + rand.Intn(maxValue-minValue)
+}
+
 func validatePopulateTestDataRequest(requestBody map[string]interface{}) error {
 	if requestBody["tenantName"] == nil || len(requestBody["tenantName"].(string)) == 0 {
 		return fmt.Errorf("%s: %s", unableToReadRequestStr, missingTenantNameStr)
@@ -224,6 +462,14 @@ func validatePopulateTestDataRequest(requestBody map[string]interface{}) error {
 
 	if requestBody["domainSet"] == nil {
 		return fmt.Errorf("%s: %s", unableToReadRequestStr, missingDomainSetStr)
+	}
+
+	return nil
+}
+
+func validateGenerateDomainSLAReportRequest(requestBody map[string]interface{}) error {
+	if requestBody["tenantId"] == nil || len(requestBody["tenantId"].(string)) == 0 {
+		return fmt.Errorf("%s: %s", unableToReadRequestStr, missingTenantIDStr)
 	}
 
 	return nil

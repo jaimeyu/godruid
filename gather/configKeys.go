@@ -16,6 +16,7 @@ const (
 	CK_args_admindb_impl          ConfigKey = "args.admindb.impl"
 	CK_args_tenantdb_impl         ConfigKey = "args.tenantdb.impl"
 	CK_args_pouchplugindb_impl    ConfigKey = "args.pouchplugindb.impl"
+	CK_args_testdatadb_impl       ConfigKey = "args.testdatadb.impl"
 	CK_args_debug                 ConfigKey = "args.debug"
 	CK_druid_server               ConfigKey = "druid.server"
 	CK_druid_port                 ConfigKey = "druid.port"

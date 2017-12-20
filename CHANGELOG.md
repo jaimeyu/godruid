@@ -1,4 +1,6 @@
 ## Current Release 
+* Adding Domain SLA Report test data generation.
+
 ### 0.24.0 
 **Release Date:** Wed Dec 20 14:03:14 UTC 2017     
 ## Previous Releases 

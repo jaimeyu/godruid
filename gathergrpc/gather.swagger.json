@@ -1320,7 +1320,7 @@
     "TenantIngestionProfileMonitoredObjectMap": {
       "type": "object",
       "properties": {
-        "monitoredObjectMap": {
+        "monitoredObjectTypeMap": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/gathergrpcTenantIngestionProfileMetricMap"
@@ -1368,17 +1368,6 @@
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/gathergrpcTenantThresholdProfileMetricMap"
-          }
-        }
-      }
-    },
-    "TenantThresholdProfileVendorMap": {
-      "type": "object",
-      "properties": {
-        "vendorMap": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileMonitoredObjectTypeMap"
           }
         }
       }
@@ -1994,10 +1983,7 @@
           "type": "string"
         },
         "metrics": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/TenantIngestionProfileMonitoredObjectMap"
-          }
+          "$ref": "#/definitions/gathergrpcTenantIngestionProfileVendorMap"
         },
         "createdTimestamp": {
           "type": "string",
@@ -2052,6 +2038,17 @@
       },
       "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
     },
+    "gathergrpcTenantIngestionProfileVendorMap": {
+      "type": "object",
+      "properties": {
+        "vendorMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantIngestionProfileMonitoredObjectMap"
+          }
+        }
+      }
+    },
     "gathergrpcTenantThresholdProfile": {
       "type": "object",
       "properties": {
@@ -2062,7 +2059,7 @@
           "type": "string"
         },
         "thresholds": {
-          "$ref": "#/definitions/TenantThresholdProfileVendorMap"
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfileVendorMap"
         },
         "createdTimestamp": {
           "type": "string",
@@ -2114,6 +2111,17 @@
         }
       },
       "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
+    },
+    "gathergrpcTenantThresholdProfileVendorMap": {
+      "type": "object",
+      "properties": {
+        "vendorMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileMonitoredObjectTypeMap"
+          }
+        }
+      }
     },
     "gathergrpcTenantUser": {
       "type": "object",

@@ -27,13 +27,15 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfile {
 	moMap := pb.TenantIngestionProfile_MonitoredObjectMap{}
 	metricMap := pb.TenantIngestionProfile_MetricMap{}
 	metricMap.MetricMap = createMetricMap(defaultIngestionProfileMetricNames...)
-	moMap.MonitoredObjectMap = make(map[string]*pb.TenantIngestionProfile_MetricMap)
-	moMap.MonitoredObjectMap["pe"] = &metricMap
-	moMap.MonitoredObjectMap["sl"] = &metricMap
-	moMap.MonitoredObjectMap["sf"] = &metricMap
+	moMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfile_MetricMap)
+	moMap.MonitoredObjectTypeMap["pe"] = &metricMap
+	moMap.MonitoredObjectTypeMap["sl"] = &metricMap
+	moMap.MonitoredObjectTypeMap["sf"] = &metricMap
 	metrics := make(map[string]*pb.TenantIngestionProfile_MonitoredObjectMap)
 	metrics["accedian"] = &moMap
-	ingPrf.Metrics = metrics
+	vendorMap := &pb.TenantIngestionProfile_VendorMap{}
+	vendorMap.VendorMap = metrics
+	ingPrf.Metrics = vendorMap
 
 	return &ingPrf
 }
@@ -52,12 +54,118 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 
 	thrPrf.TenantId = tenantID
 	thrPrf.Datatype = string(db.TenantThresholdProfileType)
-	thrPrf.Thresholds = &pb.TenantThresholdProfile_VendorMap{}
-	// TODO: Add in the hardcoded defaults here.
+
+	thrPrf.Thresholds = createDefaultThreshold()
+
 	thrPrf.CreatedTimestamp = time.Now().Unix()
 	thrPrf.LastModifiedTimestamp = thrPrf.GetCreatedTimestamp()
 
 	return &thrPrf
+}
+
+func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
+	return &pb.TenantThresholdProfile_VendorMap{
+		VendorMap: map[string]*pb.TenantThresholdProfile_MonitoredObjectTypeMap{
+			"accedian": &pb.TenantThresholdProfile_MonitoredObjectTypeMap{
+				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfile_MetricMap{
+					"pe": &pb.TenantThresholdProfile_MetricMap{
+						MetricMap: map[string]*pb.TenantThresholdProfile_DirectionMap{
+							"delayP95": &pb.TenantThresholdProfile_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
+									"0": &pb.TenantThresholdProfile_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
+											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"upperLimit": "50000",
+													"unit":       "ms",
+												},
+											},
+											"major": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "200000",
+													"lowerStrict": "true",
+													"upperLimit":  "300000",
+													"upperStrict": "false",
+													"unit":        "ms",
+												},
+											},
+											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "300000",
+													"lowerStrict": "true",
+													"unit":        "ms",
+												},
+											},
+										},
+									},
+								},
+							},
+							"jitterP95": &pb.TenantThresholdProfile_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
+									"0": &pb.TenantThresholdProfile_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
+											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"upperLimit": "1000",
+													"unit":       "ms",
+												},
+											},
+											"major": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "3500",
+													"lowerStrict": "true",
+													"upperLimit":  "5000",
+													"upperStrict": "false",
+													"unit":        "ms",
+												},
+											},
+											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "5000",
+													"lowerStrict": "true",
+													"unit":        "ms",
+												},
+											},
+										},
+									},
+								},
+							},
+							"packetsLostPct": &pb.TenantThresholdProfile_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
+									"0": &pb.TenantThresholdProfile_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
+											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"upperLimit": "0.5",
+													"unit":       "%",
+												},
+											},
+											"major": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "0.5",
+													"lowerStrict": "true",
+													"upperLimit":  "1.0",
+													"upperStrict": "false",
+													"unit":        "%",
+												},
+											},
+											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "1.0",
+													"lowerStrict": "true",
+													"unit":        "%",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }
 
 func getDBFieldFromRequest(r *http.Request, urlPart int32) string {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -142,7 +143,11 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 			return
 		}
-		createdDomainIDSet = append(createdDomainIDSet, domain.GetXId())
+
+		// For the IDs used as references inside other objects, need to strip off the 'domain_2_'
+		// as this is just relational pouch adaption:
+		domainIDParts := strings.Split(domain.GetXId(), "_")
+		createdDomainIDSet = append(createdDomainIDSet, domainIDParts[len(domainIDParts)-1])
 	}
 
 	// If there are Monitored Objects, add them as well and map them to Domains
@@ -247,7 +252,7 @@ func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
 	tenantStr := string(db.TenantDescriptorType)
 	result.Data = &pb.TenantDescriptor{}
 	result.Data.Name = name
-	result.Data.UrlSubdomain = name + ".npav.accedian.net"
+	result.Data.UrlSubdomain = strings.ToLower(name) + ".npav.accedian.net"
 	result.Data.State = 2
 	result.Data.Datatype = tenantStr
 	result.Data.DefaultThresholdProfile = ""
@@ -266,7 +271,7 @@ func generateTenantUser(name string, tenantID string) *pb.TenantUserRequest {
 
 	result.Data = &pb.TenantUser{}
 	result.Data.Datatype = tenantUserStr
-	result.Data.Username = "admin@" + name + ".com"
+	result.Data.Username = "admin@" + strings.ToLower(name) + ".com"
 	result.Data.TenantId = tenantID
 	result.Data.UserVerified = true
 	result.Data.State = 2
@@ -290,7 +295,11 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result.Data.Name = name
 	result.Data.TenantId = tenantID
 	result.Data.Color = "#0000FF"
-	result.Data.ThresholdProfileSet = append(result.Data.GetThresholdProfileSet(), defaultThreshPrf)
+
+	// Only use the hash portion of the id for the reference since the thresholdProfile_2_ is all
+	// relational pouch tagging.
+	thrPrfIDParts := strings.Split(defaultThreshPrf, "_")
+	result.Data.ThresholdProfileSet = append(result.Data.GetThresholdProfileSet(), thrPrfIDParts[len(thrPrfIDParts)-1])
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 

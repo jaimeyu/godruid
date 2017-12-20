@@ -185,11 +185,18 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 		return
 	}
 
+	// Fetch the tenant Meta so that teh default threshold profile id is available:
+	tenantMeta, err := tsh.grpcSH.GetTenantMeta(nil, &wr.StringValue{Value: tenantDescriptor.GetXId()})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
 	// Add in the Domain Objects.
 	tenantDomains := requestBody["domainSet"].([]interface{})
 	createdDomainIDSet := []string{}
 	for _, domainName := range tenantDomains {
-		domain, err := tsh.grpcSH.CreateTenantDomain(nil, generateTenantDomain(domainName.(string), tenantDescriptor.GetXId(), tenantDescriptor.GetData().GetDefaultThresholdProfile()))
+		domain, err := tsh.grpcSH.CreateTenantDomain(nil, generateTenantDomain(domainName.(string), tenantDescriptor.GetXId(), tenantMeta.GetData().GetDefaultThresholdProfile()))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 			return
@@ -349,7 +356,7 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	}
 
 	insertBody := map[string]interface{}{"docs": docsToInsert}
-	logger.Log.Debugf("Attempting to insert %s %ss for Tenant %s", len(docsToInsert), db.DomainSlaReportStr, tenantID)
+	// logger.Log.Debugf("Attempting to insert %d %ss for Tenant %s", len(docsToInsert), db.DomainSlaReportStr, tenantID)
 
 	_, err = tsh.pouchDB.BulkDBUpdate(tenantID, insertBody)
 	if err != nil {
@@ -398,6 +405,7 @@ func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS
 	resultContent["reportName"] = domainSLAReportName
 	resultContent["domain"] = domainName
 	resultContent["objectCount"] = 25
+	resultContent["thresholdName"] = "Default"
 
 	reportRange := map[string]interface{}{}
 	reportRange["start"] = reportStartTS
@@ -501,7 +509,6 @@ func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
 	result.Data.UrlSubdomain = strings.ToLower(name) + ".npav.accedian.net"
 	result.Data.State = 2
 	result.Data.Datatype = tenantStr
-	result.Data.DefaultThresholdProfile = ""
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 

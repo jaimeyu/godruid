@@ -314,6 +314,36 @@ service TenantProvisioningService {
             body: "*"
         };
     }
+
+    // Create TenantMeta scoped to a Single Tenant. 
+    rpc CreateTenantMeta(TenantMeta) returns (TenantMeta) {
+        option (google.api.http) = {
+            post: "/api/v1/tenants/{data.tenantId}/meta"
+            body: "*"
+        };
+    }
+    
+    // Update TenantMeta scoped to a single Tenant. 
+    rpc UpdateTenantMeta(TenantMeta) returns (TenantMeta) {
+        option (google.api.http) = {
+            put: "/api/v1/tenants/{data.tenantId}/meta"
+            body: "*"
+        };
+    } 
+    
+    // Delete TenantMeta scoped to a single Tenant. 
+    rpc DeleteTenantMeta(google.protobuf.StringValue) returns (TenantMeta) {
+        option (google.api.http) = {
+            delete: "/api/v1/tenants/{value}/meta"
+        };
+    }
+    
+    // Retrieve a User scoped to a single Tenant
+    rpc GetTenantMeta(google.protobuf.StringValue) returns (TenantMeta) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{value}/meta"
+        };
+    }
 }
 
 // Service responsible for retrieving aggregate metrics from druid 

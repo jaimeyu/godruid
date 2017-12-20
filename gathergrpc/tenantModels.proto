@@ -134,9 +134,10 @@ message TenantThresholdProfile {
 
   string tenantId = 1;
   string datatype = 2;
-  VendorMap thresholds = 3;
-  int64 createdTimestamp = 4;
-  int64 lastModifiedTimestamp = 5;
+  string name = 3;
+  VendorMap thresholds = 4;
+  int64 createdTimestamp = 5;
+  int64 lastModifiedTimestamp = 6;
 
 }
 
@@ -287,4 +288,26 @@ message MonitoredObjectCountByDomainResponse {
 
 message MonitoredObjectList {
     repeated string  monitoredObjectSet = 1;
+}
+
+message TenantMetaData {
+    string tenantId = 1;
+    string datatype = 2;
+
+    string tenantName = 3;
+    string defaultThresholdProfile = 4;
+
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6;
+}
+
+message TenantMeta {
+    string _id = 1;
+    string _rev = 2;
+    TenantMetaData data = 3;
+}
+
+message TenantMetaIdRequest {
+    string tenantId = 1;
+    string metaId = 2;
 }

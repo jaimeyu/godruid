@@ -351,7 +351,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.Ingest
 	// Return the deleted object.
 	logger.Log.Debugf("Deleted %s: %v\n", ds.IngestionDictionaryStr, existingDictionary)
 	return existingDictionary, nil
-	
+
 }
 
 // GetIngestionDictionary - CouchDB implementation of GetIngestionDictionary
@@ -368,11 +368,13 @@ func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.Ingestion
 
 	// Populate the response
 	res := pb.IngestionDictionary{}
-	if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.IngestionDictionaryStr); err != nil {
-		return nil, err
+	if len(fetchedData) != 0 {
+		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.IngestionDictionaryStr); err != nil {
+			return nil, err
+		}
 	}
 
-	logger.Log.Debugf("Found %s %s\n", ds.IngestionDictionaryStr, res)
+	logger.Log.Debugf("Found %s %v\n", ds.IngestionDictionaryStr, res)
 	return &res, nil
 }
 

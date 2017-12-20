@@ -531,3 +531,73 @@ func (tsh *TenantServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Conte
 	logger.Log.Infof("Successfully retrieved %s: %s\n", db.MonitoredObjectToDomainMapStr)
 	return result, nil
 }
+
+// CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.
+func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantMetaRequest(meta, false); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Creating %s for Tenant %s", db.TenantMetaStr, meta.GetData().GetTenantId())
+
+	// Issue request to DAO Layer to Create the record
+	result, err := tsh.tenantDB.CreateTenantMeta(meta)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantMetaStr, err.Error())
+	}
+
+	// Succesfully Created the record, return the result.
+	logger.Log.Infof("Created %s: %s\n", db.TenantMetaStr, result.GetXId())
+	return result, nil
+}
+
+// UpdateTenantMeta - Update TenantMeta scoped to a single Tenant.
+func (tsh *TenantServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantMetaRequest(meta, true); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Infof("Updating %s: %s", db.TenantMetaStr, meta)
+
+	// Issue request to DAO Layer to Update the record
+	result, err := tsh.tenantDB.UpdateTenantMeta(meta)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to store %s: %s", db.TenantMetaStr, err.Error())
+	}
+
+	// Succesfully Updated the record, return the result.
+	logger.Log.Infof("Updated %s: %s\n", db.TenantMetaStr, result.GetXId())
+	return result, nil
+}
+
+// DeleteTenantMeta - Delete TenantMeta scoped to a single Tenant.
+func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+
+	logger.Log.Infof("Deleting %s for Tenant %s", db.TenantMetaStr, tenantID.GetValue())
+
+	// Issue request to DAO Layer to delete the record
+	result, err := tsh.tenantDB.DeleteTenantMeta(tenantID.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("Unable to delete %s: %s", db.TenantMetaStr, err.Error())
+	}
+
+	// Succesfully deleted the record, return the result.
+	logger.Log.Infof("Deleted %s: %s\n", db.TenantMetaStr, result.GetXId())
+	return result, nil
+}
+
+// GetTenantMeta - Retrieve a User scoped to a single Tenant.
+func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+
+	// Issue request to DAO Layer to fetch the record
+	result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantMetaStr, err.Error())
+	}
+
+	// Succesfully fetched the record, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantMetaStr, result.GetXId())
+	return result, nil
+}

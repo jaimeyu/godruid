@@ -54,6 +54,7 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 
 	thrPrf.TenantId = tenantID
 	thrPrf.Datatype = string(db.TenantThresholdProfileType)
+	thrPrf.Name = "Default"
 
 	thrPrf.Thresholds = createDefaultThreshold()
 
@@ -61,6 +62,20 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 	thrPrf.LastModifiedTimestamp = thrPrf.GetCreatedTimestamp()
 
 	return &thrPrf
+}
+
+func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, tenantName string) *pb.TenantMetaData {
+	result := pb.TenantMetaData{}
+
+	result.TenantId = tenantID
+	result.Datatype = string(db.TenantMetaType)
+	result.DefaultThresholdProfile = defaultThresholdProfile
+	result.TenantName = tenantName
+
+	result.CreatedTimestamp = time.Now().Unix()
+	result.LastModifiedTimestamp = result.GetCreatedTimestamp()
+
+	return &result
 }
 
 func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {

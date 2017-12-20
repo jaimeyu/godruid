@@ -221,3 +221,19 @@ func validateIngestionDictionary(request *pb.IngestionDictionary, isUpdate bool)
 
 	return nil
 }
+
+func validateTenantMetaRequest(request *pb.TenantMeta, isUpdate bool) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid TenantMeta: no Tenant Meta data provided")
+	}
+
+	if len(request.GetData().GetTenantId()) == 0 {
+		return errors.New("Invalid TenantMeta: no Tenant Id provided")
+	}
+
+	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
+		return errors.New("Invalid TenantMeta: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}

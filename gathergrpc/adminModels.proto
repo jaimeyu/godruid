@@ -16,8 +16,6 @@ message TenantDescriptor {
 
     int64 createdTimestamp = 7;
     int64 lastModifiedTimestamp = 8; 
-
-    string defaultThresholdProfile = 9;
 }
 
 // TenantDescriptorRequest - wrapper for passing TenantDescriptor

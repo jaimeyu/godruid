@@ -482,6 +482,70 @@
         ]
       }
     },
+    "/api/v1/tenants/{data.tenantId}/meta": {
+      "post": {
+        "summary": "Create TenantMeta scoped to a Single Tenant.",
+        "operationId": "CreateTenantMeta",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "put": {
+        "summary": "Update TenantMeta scoped to a single Tenant.",
+        "operationId": "UpdateTenantMeta",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data.tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{data.tenantId}/monitored-objects": {
       "post": {
         "summary": "Create a MonitoredObject scoped to a Single Tenant.",
@@ -1064,6 +1128,54 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/gathergrpcTenantDomainListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{value}/meta": {
+      "get": {
+        "summary": "Retrieve a User scoped to a single Tenant",
+        "operationId": "GetTenantMeta",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete TenantMeta scoped to a single Tenant.",
+        "operationId": "DeleteTenantMeta",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMeta"
             }
           }
         },
@@ -1850,9 +1962,6 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
-        },
-        "defaultThresholdProfile": {
-          "type": "string"
         }
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
@@ -2049,6 +2158,45 @@
         }
       }
     },
+    "gathergrpcTenantMeta": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantMetaData"
+        }
+      }
+    },
+    "gathergrpcTenantMetaData": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "tenantName": {
+          "type": "string"
+        },
+        "defaultThresholdProfile": {
+          "type": "string"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "gathergrpcTenantThresholdProfile": {
       "type": "object",
       "properties": {
@@ -2056,6 +2204,9 @@
           "type": "string"
         },
         "datatype": {
+          "type": "string"
+        },
+        "name": {
           "type": "string"
         },
         "thresholds": {

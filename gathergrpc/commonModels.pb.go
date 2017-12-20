@@ -63,6 +63,7 @@ It has these top-level messages:
 	HistogramResult
 	Histogram
 	HistogramResponse
+	ThresholdCrossingByMonitoredObjectResponse
 */
 package gathergrpc
 

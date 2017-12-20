@@ -134,3 +134,61 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 		Intervals:    []string{interval},
 	}, nil
 }
+
+// ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// defined by the supplied threshold profile. Groups results my monitored object ID.
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) (*godruid.QueryGroupBy, error) {
+
+	var aggregations []godruid.Aggregation
+	metrics := strings.Split(metric, ",")
+	directions := strings.Split(direction, ",")
+
+	aggregations = append(aggregations, godruid.AggCount("total"))
+
+	// peyo TODO don't hardcode vendor
+	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian"].GetMonitoredObjectTypeMap() {
+		for mk, m := range t.GetMetricMap() {
+			// if no metrics have been provided, use all of them, otherwise
+			// only include the provided ones
+			if contains(metrics, mk) || metric == "" {
+				for dk, d := range m.GetDirectionMap() {
+					if contains(directions, dk) || direction == "" {
+						for ek, e := range d.GetEventMap() {
+							name := mk + "." + ek + "." + dk
+							filter, err := FilterHelper(mk, e)
+							if err != nil {
+								return nil, err
+							}
+							aggregation := godruid.AggFiltered(
+								godruid.FilterAnd(
+									filter,
+									godruid.FilterSelector("tenantId", tenant),
+									godruid.FilterSelector("direction", dk),
+								),
+								&godruid.Aggregation{
+									Type: "count",
+									Name: name,
+								},
+							)
+							aggregations = append(aggregations, aggregation)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return &godruid.QueryGroupBy{
+		DataSource:   dataSource,
+		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:      map[string]interface{}{"timeout": 60000},
+		Aggregations: aggregations,
+		Intervals:    []string{interval},
+		Dimensions: []godruid.DimSpec{
+			godruid.Dimension{
+				Dimension:  "monitoredObjectId",
+				OutputName: "monitoredObjectId",
+			},
+		},
+	}, nil
+}

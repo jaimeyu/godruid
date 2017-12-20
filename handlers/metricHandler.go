@@ -35,7 +35,19 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thres
 	return result, nil
 }
 
-// GetThresholdCrossing
+// GetThresholdCrossingByMonitoredObject
+func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
+
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Threshold Crossing. %s:", err.Error())
+	}
+
+	return result, nil
+}
+
+// GetThresholdHistogram
 func (msh *MetricServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 
 	result, err := msh.druidDB.GetHistogram(histogramReq)

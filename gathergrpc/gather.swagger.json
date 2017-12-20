@@ -1198,6 +1198,74 @@
           "MetricsService"
         ]
       }
+    },
+    "/api/v1/threshold-crossing-by-monitored-object": {
+      "get": {
+        "operationId": "GetThresholdCrossingByMonitoredObject",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcJSONAPIObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "interval",
+            "description": "ISO-8601 Intervals.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "granularity",
+            "description": "ISO-8601 period combination.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "objectType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "thresholdProfileId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
     }
   },
   "definitions": {

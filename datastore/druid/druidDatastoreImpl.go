@@ -33,6 +33,12 @@ type DruidDatastoreClient struct {
 	numRetries int
 }
 
+type ThresholdCrossingByMonitoredObjectResponse struct {
+	Version   string
+	Timestamp string
+	Event     map[string]interface{}
+}
+
 func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error) {
 
 	client := dc.dClient
@@ -147,6 +153,63 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	}
 
 	resp := new(pb.ThresholdCrossingResponse)
+
+	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into ThresholdCrossingResponse. Err: %s", err)
+	}
+
+	data, err := ptypes.MarshalAny(resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// peyo TODO: need to figure out where to get this ID and Type from.
+	rr := &pb.JSONAPIObject{
+		Data: []*pb.Data{
+			&pb.Data{
+				Id:         uuid.NewV4().String(),
+				Type:       ThresholdCrossingReport,
+				Attributes: data,
+			},
+		},
+	}
+
+	return rr, nil
+}
+
+// GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
+// result in a JSON API wrapper.
+// peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
+func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
+
+	table := dc.cfg.GetString(gather.CK_druid_table.String())
+
+	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	thresholdCrossing := make([]ThresholdCrossingByMonitoredObjectResponse, 0)
+
+	err = json.Unmarshal(response, &thresholdCrossing)
+
+	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp := new(pb.ThresholdCrossingByMonitoredObjectResponse)
 
 	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
 

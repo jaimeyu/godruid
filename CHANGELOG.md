@@ -1,11 +1,15 @@
 ## Current Release 
-### 0.25.0
 * Adding Domain SLA Report test data generation.
+
+### 0.24.0 
+**Release Date:** Wed Dec 20 14:03:14 UTC 2017     
+## Previous Releases 
+### 0.23.0 
+**Release Date:** Tue Dec 19 20:56:00 UTC 2017     
 ### 0.23.0 
 * Refactor naming in ingestion profile and getting rid of relational pouch id prefixes in domains and monitored objects.
 ### 0.22.0 
 **Release Date:** Mon Dec 18 20:23:21 UTC 2017     
-## Previous Releases 
 ### 0.21.0 
 **Release Date:** Mon Dec 18 16:03:03 UTC 2017     
 ### 0.20.0 

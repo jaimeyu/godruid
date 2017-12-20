@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/accedian/adh-gather/config"
-	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 )
@@ -43,5 +42,5 @@ func (testDB *TestDataServiceDatastoreCouchDB) GetAllDocsByDatatype(dbName strin
 		return nil, err
 	}
 
-	return getAllOfTypeByIDPrefix(string(ds.DomainSlaReportType), ds.DomainSlaReportStr, db)
+	return getAllOfTypeByIDPrefix(datatype, datatype, db)
 }

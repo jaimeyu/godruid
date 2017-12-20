@@ -68,13 +68,16 @@ message TenantIngestionProfile {
         map<string, bool> metricMap = 1;
     }
     message MonitoredObjectMap {
-        map<string, MetricMap> monitoredObjectMap = 1;
+        map<string, MetricMap> monitoredObjectTypeMap = 1;
+    }
+    message VendorMap {
+        map<string, MonitoredObjectMap> vendorMap = 1;
     }
 
     string tenantId = 1;
     string datatype = 2;
 
-    map<string, MonitoredObjectMap> metrics = 3;
+    VendorMap metrics = 3;
 
     int64 createdTimestamp = 4;
     int64 lastModifiedTimestamp = 5;

@@ -152,7 +152,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 											"minor": &pb.TenantThresholdProfile_EventAttrMap{
 												map[string]string{
 													"upperLimit": "0.5",
-													"unit":       "%",
+													"unit":       "pct",
 												},
 											},
 											"major": &pb.TenantThresholdProfile_EventAttrMap{
@@ -161,14 +161,14 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"lowerStrict": "true",
 													"upperLimit":  "1.0",
 													"upperStrict": "false",
-													"unit":        "%",
+													"unit":        "pct",
 												},
 											},
 											"critical": &pb.TenantThresholdProfile_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "1.0",
 													"lowerStrict": "true",
-													"unit":        "%",
+													"unit":        "pct",
 												},
 											},
 										},

@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.28.0 
 **Release Date:** Thu Dec 21 16:02:04 UTC 2017     
+* bug - change '%' to pct in default threshold profile
 ## Previous Releases 
 ### 0.27.0 
 **Release Date:** Wed Dec 20 20:17:17 UTC 2017     

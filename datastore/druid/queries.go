@@ -109,7 +109,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 									godruid.FilterAnd(
 										filter,
 										godruid.FilterSelector("objectType", tk),
-										godruid.FilterSelector("tenantId", tenant),
+										godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 										godruid.FilterSelector("direction", dk),
 									),
 									&godruid.Aggregation{
@@ -162,7 +162,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 							aggregation := godruid.AggFiltered(
 								godruid.FilterAnd(
 									filter,
-									godruid.FilterSelector("tenantId", tenant),
+									godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 									godruid.FilterSelector("direction", dk),
 								),
 								&godruid.Aggregation{

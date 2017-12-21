@@ -267,31 +267,40 @@ func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain
 func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+	tenantID := thresholdCrossingReq.Tenant
+
 	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           thresholdCrossingReq.Tenant,
+		TenantId:           tenantID,
 		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
 	})
+
+	tenantMeta, err := gsh.GetTenantMeta(ctx, &wr.StringValue{Value: tenantID})
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
 	}
 
-	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
+	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile, tenantMeta)
 }
 
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain, and groups by monitoredObjectID
 func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
+
+	tenantID := thresholdCrossingReq.Tenant
+
 	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           thresholdCrossingReq.Tenant,
+		TenantId:           tenantID,
 		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
 	})
+
+	tenantMeta, err := gsh.GetTenantMeta(ctx, &wr.StringValue{Value: tenantID})
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
 	}
 
-	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
+	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile, tenantMeta)
 }
 
 // GetHistogram -

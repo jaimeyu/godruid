@@ -588,17 +588,15 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 	} else if lengthOfDomainSet != 0 {
 		numDomainsToSelect := rand.Intn(lengthOfDomainSet) + 1
 		switch numDomainsToSelect {
-		case 0:
-			// Do nothing
 		case 1:
-			// Just take a randome one.
+			// Just take a random one.
 			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet[rand.Intn(lengthOfDomainSet)])
 		case lengthOfDomainSet:
 			// Take them all
 			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet...)
 		default:
 			// Take a subset.
-			indextToStopAt := rand.Intn(lengthOfDomainSet)
+			indextToStopAt := rand.Intn(lengthOfDomainSet) + 1
 			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet[:indextToStopAt]...)
 		}
 	}

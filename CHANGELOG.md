@@ -1,12 +1,13 @@
 ## Current Release 
+### 0.33.0 
+**Release Date:** Fri Dec 22 17:16:48 UTC 2017     
+## Previous Releases 
 ### 0.32.0 
 **Release Date:** Fri Dec 22 14:57:21 UTC 2017  
 * refactor - changing Meta type to TenantMetadata    
-## Previous Releases 
 ### 0.31.0 
 **Release Date:** Thu Dec 21 21:53:35 UTC 2017   
  
-## Previous Releases 
 **Release Date:** Thu Dec 21 21:53:35 UTC 2017     
 ### 0.30.0 
 **Release Date:** Thu Dec 21 20:52:00 UTC 2017

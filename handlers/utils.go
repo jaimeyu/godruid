@@ -64,8 +64,8 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 	return &thrPrf
 }
 
-func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, tenantName string) *pb.TenantMetaData {
-	result := pb.TenantMetaData{}
+func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, tenantName string) *pb.TenantMeta {
+	result := pb.TenantMeta{}
 
 	result.TenantId = tenantID
 	result.Datatype = string(db.TenantMetaType)

@@ -82,8 +82,8 @@ type TenantServiceDatastore interface {
 	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error)
 	GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error)
 
-	CreateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error)
-	UpdateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error)
-	DeleteTenantMeta(tenantID string) (*pb.TenantMeta, error)
-	GetTenantMeta(tenantID string) (*pb.TenantMeta, error)
+	CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
+	UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
+	DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error)
+	GetTenantMeta(tenantID string) (*pb.TenantMetadata, error)
 }

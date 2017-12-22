@@ -290,7 +290,7 @@ message MonitoredObjectList {
     repeated string  monitoredObjectSet = 1;
 }
 
-message TenantMetaData {
+message TenantMeta {
     string tenantId = 1;
     string datatype = 2;
 
@@ -301,10 +301,10 @@ message TenantMetaData {
     int64 lastModifiedTimestamp = 6;
 }
 
-message TenantMeta {
+message TenantMetadata {
     string _id = 1;
     string _rev = 2;
-    TenantMetaData data = 3;
+    TenantMeta data = 3;
 }
 
 message TenantMetaIdRequest {

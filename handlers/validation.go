@@ -222,7 +222,7 @@ func validateIngestionDictionary(request *pb.IngestionDictionary, isUpdate bool)
 	return nil
 }
 
-func validateTenantMetaRequest(request *pb.TenantMeta, isUpdate bool) error {
+func validateTenantMetaRequest(request *pb.TenantMetadata, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantMeta: no Tenant Meta data provided")
 	}

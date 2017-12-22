@@ -1055,7 +1055,7 @@ func request_TenantProvisioningService_GetMonitoredObjectToDomainMap_0(ctx conte
 }
 
 func request_TenantProvisioningService_CreateTenantMeta_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantMeta
+	var protoReq TenantMetadata
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -1086,7 +1086,7 @@ func request_TenantProvisioningService_CreateTenantMeta_0(ctx context.Context, m
 }
 
 func request_TenantProvisioningService_UpdateTenantMeta_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantMeta
+	var protoReq TenantMetadata
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {

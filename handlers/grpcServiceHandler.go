@@ -274,13 +274,11 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
 	})
 
-	tenantMeta, err := gsh.GetTenantMeta(ctx, &wr.StringValue{Value: tenantID})
-
 	if err != nil {
 		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
 	}
 
-	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile, tenantMeta)
+	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
 }
 
 // GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
@@ -294,13 +292,11 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context
 		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
 	})
 
-	tenantMeta, err := gsh.GetTenantMeta(ctx, &wr.StringValue{Value: tenantID})
-
 	if err != nil {
 		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
 	}
 
-	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile, tenantMeta)
+	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
 }
 
 // GetHistogram -

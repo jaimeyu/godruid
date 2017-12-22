@@ -324,3 +324,13 @@ func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *w
 func (gsh *GRPCServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 	return gsh.tsh.GetTenantMeta(ctx, tenantID)
 }
+
+// GetTenantIDByAlias - retrieve a Tenant ID by the common name of the Tenant
+func (gsh *GRPCServiceHandler) GetTenantIDByAlias(ctx context.Context, value *wr.StringValue) (*wr.StringValue, error) {
+	return gsh.ash.GetTenantIDByAlias(ctx, value)
+}
+
+// AddAdminViews - add views to admin db
+func (gsh *GRPCServiceHandler) AddAdminViews() error {
+	return gsh.ash.AddAdminViews()
+}

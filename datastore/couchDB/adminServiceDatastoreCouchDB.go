@@ -3,6 +3,7 @@ package couchDB
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/leesper/couchdb-golang"
 
@@ -14,14 +15,19 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
+const (
+	tenantIDByNameIndex = "_design/tenant/_view/byAlias"
+)
+
 // AdminServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Admin Service when using CouchDB
 // as the storage option.
 type AdminServiceDatastoreCouchDB struct {
-	couchHost string
-	dbName    string
-	server    *couchdb.Server
-	cfg       config.Provider
+	couchHost   string
+	dbName      string
+	dbNameAlone string
+	server      *couchdb.Server
+	cfg         config.Provider
 }
 
 // CreateAdminServiceDAO - instantiates a CouchDB implementation of the
@@ -38,8 +44,8 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	result.couchHost = provDBURL
 
 	// Couch DB name configuration
-	dbName := result.cfg.GetString(gather.CK_args_admindb_name.String())
-	result.dbName = result.couchHost + "/" + dbName
+	result.dbNameAlone = result.cfg.GetString(gather.CK_args_admindb_name.String())
+	result.dbName = result.couchHost + "/" + result.dbNameAlone
 	server, err := couchdb.NewServer(result.couchHost)
 	if err != nil {
 		logger.Log.Debugf("Falied to instantiate AdminServiceDatastoreCouchDB: %s", err.Error())
@@ -145,6 +151,9 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 
 	dataType := string(ds.TenantDescriptorType)
 	dataContainer := pb.TenantDescriptorResponse{}
+
+	// Add the alias to the descriptor:
+	tenantDescriptor.Data.Alias = strings.ToLower(tenantDescriptor.GetData().GetName())
 	if err := storeData(asd.dbName, tenantDescriptor, dataType, ds.TenantStr, &dataContainer); err != nil {
 		return nil, err
 	}
@@ -378,6 +387,51 @@ func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.Ingestion
 	return &res, nil
 }
 
+// GetTenantIDByAlias - InMemory impl of GetTenantIDByAlias
+func (asd *AdminServiceDatastoreCouchDB) GetTenantIDByAlias(name string) (string, error) {
+
+	// Retrieve just the subset of values.
+	requestBody := map[string]interface{}{}
+	requestBody["keys"] = []string{strings.ToLower(name)}
+
+	fetchResponse, err := fetchDesignDocumentResults(requestBody, asd.dbName, tenantIDByNameIndex)
+	if err != nil {
+		return "", err
+	}
+
+	rows := fetchResponse["rows"].([]interface{})
+	if rows == nil || len(rows) == 0 {
+		return "", nil
+	}
+	obj := rows[0].(map[string]interface{})
+
+	response := obj["value"].(string)
+	logger.Log.Debugf("Returning Tenant ID: %vs\n")
+	return response, nil
+}
+
+// AddAdminViews - Adds the admin views (indicies) to the Admin DB.
+func (asd *AdminServiceDatastoreCouchDB) AddAdminViews() error {
+
+	logger.Log.Debugf("Adding Admin Views to DB %s", asd.dbNameAlone)
+
+	db, err := getDatabase(asd.dbName)
+	if err != nil {
+		return err
+	}
+
+	// Store the sync checkpoint in CouchDB
+	for _, viewPayload := range generateAdminViews() {
+		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "AdminView", db, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	logger.Log.Debugf("Added views to DB %s\n", asd.dbNameAlone)
+	return nil
+}
+
 // Takes a set of generic data that contains a list of AdminUsers and converts it to
 // and ADH AdminUserList object
 func convertGenericObjectListToAdminUserList(genericUserList []map[string]interface{}) (*pb.AdminUserListResponse, error) {
@@ -425,4 +479,20 @@ func generateTenantViews() []map[string]interface{} {
 
 	logger.Log.Debug("Adding view for monitoredObjectCountByDomain")
 	return append(result, monitoredObjectCountByDomain)
+}
+
+func generateAdminViews() []map[string]interface{} {
+	result := make([]map[string]interface{}, 0)
+
+	tenantIDByName := map[string]interface{}{}
+	tenantIDByName["_id"] = "_design/tenant"
+	tenantIDByName["language"] = "javascript"
+	byName := map[string]interface{}{}
+	byName["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'tenant') {\n        emit(doc.data.alias, doc._id);\n    }\n}"
+	views := map[string]interface{}{}
+	views["byAlias"] = byName
+	tenantIDByName["views"] = views
+
+	logger.Log.Debug("Adding view for monitoredObjectCountByDomain")
+	return append(result, tenantIDByName)
 }

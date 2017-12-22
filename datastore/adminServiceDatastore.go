@@ -35,6 +35,8 @@ const (
 // AdminServiceDatastore - interface which provides the functionality
 // of the AdminService Datastore.
 type AdminServiceDatastore interface {
+	AddAdminViews() error
+
 	CreateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
 	UpdateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
 	DeleteAdminUser(string) (*pb.AdminUserResponse, error)
@@ -51,4 +53,6 @@ type AdminServiceDatastore interface {
 	UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error)
 	DeleteIngestionDictionary() (*pb.IngestionDictionary, error)
 	GetIngestionDictionary() (*pb.IngestionDictionary, error)
+
+	GetTenantIDByAlias(name string) (string, error)
 }

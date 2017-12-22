@@ -281,6 +281,30 @@ func (ash *AdminServiceHandler) GetIngestionDictionary(ctx context.Context, noVa
 	return result, nil
 }
 
+// GetTenantIDByAlias - retrieve a Tenant ID by the common name of the Tenant
+func (ash *AdminServiceHandler) GetTenantIDByAlias(ctx context.Context, name *wr.StringValue) (*wr.StringValue, error) {
+
+	logger.Log.Infof("Retrieving Tenant ID by name: %s", name)
+
+	// Issue request to DAO Layer to Get the requested Tenant ID
+	result, err := ash.adminDB.GetTenantIDByAlias(name.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve Tenant ID: %s", err.Error())
+	}
+
+	// Return Tenant ID
+	logger.Log.Infof("Retrieved Tenant ID: %s\n", result)
+	return &wr.StringValue{Value: result}, nil
+}
+
+// AddAdminViews - Add admin views to Admin DB.
+func (ash *AdminServiceHandler) AddAdminViews() error {
+	logger.Log.Info("Adding Views to Admin DB")
+
+	// Issue request to DAO Layer to Get the requested Tenant ID
+	return ash.adminDB.AddAdminViews()
+}
+
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))

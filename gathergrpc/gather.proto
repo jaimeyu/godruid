@@ -122,6 +122,13 @@ service AdminProvisioningService {
             get: "/api/v1/ingestion-dictionaries"
         };
     }
+
+    // Retrieve a TenantID based on the comman name of the tenant.
+    rpc GetTenantIDByAlias(google.protobuf.StringValue) returns (google.protobuf.StringValue) {
+        option (google.api.http) = {
+            get: "/api/v1/tenant-by-alias/{value}"
+        };
+    }
 }
 
 

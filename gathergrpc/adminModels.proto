@@ -8,14 +8,15 @@ import "gathergrpc/commonModels.proto";
 // Provides the metadata of a Tenant. This information is used to 
 // idetify/describe a full Tenant entity.
 message TenantDescriptor {
-    string datatype = 3;
+    string datatype = 1;
 
-    string name = 4;
-    string urlSubdomain = 5;
-    UserState state = 6;
+    string name = 2;
+    string alias = 3;
+    string urlSubdomain = 4;
+    UserState state = 5;
 
-    int64 createdTimestamp = 7;
-    int64 lastModifiedTimestamp = 8; 
+    int64 createdTimestamp = 6;
+    int64 lastModifiedTimestamp = 7; 
 }
 
 // TenantDescriptorRequest - wrapper for passing TenantDescriptor

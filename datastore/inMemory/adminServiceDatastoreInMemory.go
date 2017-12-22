@@ -104,3 +104,15 @@ func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.Ingest
 	// Stub to implement
 	return nil, errors.New("GetIngestionDictionary() not implemented for InMemory DB")
 }
+
+// GetTenantIDByAlias - InMemory impl of GetTenantIDByAlias
+func (memDB *AdminServiceDatastoreInMemory) GetTenantIDByAlias(name string) (string, error) {
+	// Stub to implement
+	return "", errors.New("GetTenantIDByName() not implemented for InMemory DB")
+}
+
+// AddAdminViews - Adds the admin views (indicies) to the Admin DB.
+func (memDB *AdminServiceDatastoreInMemory) AddAdminViews() error {
+	// Stub to implement
+	return errors.New("GetTenantIDByName() not implemented for InMemory DB")
+}

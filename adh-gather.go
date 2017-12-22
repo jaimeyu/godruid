@@ -197,6 +197,13 @@ func main() {
 		if err != nil {
 			logger.Log.Fatalf("Unable to create DB %s: %s", adminDB, err.Error())
 		}
+
+		// Also add the Views for Admin DB.
+		err = gatherServer.gsh.AddAdminViews()
+		if err != nil {
+			logger.Log.Fatalf("Unable to Add Views to DB %s: %s", adminDB, err.Error())
+		}
+
 	}
 	logger.Log.Infof("Using %s as Administrative Database", adminDB)
 	go restHandlerStart(gatherServer, cfg)

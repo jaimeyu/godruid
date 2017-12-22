@@ -24,7 +24,7 @@ const (
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 
 	// TenantMetaType - datatype string used to identify a Tenant Meta in the datastore record
-	TenantMetaType TenantDataType = "meta"
+	TenantMetaType TenantDataType = "tenantMetadata"
 )
 
 const (

@@ -26,4 +26,4 @@ args:
 druid:
   server: http://aod_broker
   port: 8082
-  table: "NPAVKPI2"
+  table: "npav-ts-metrics"

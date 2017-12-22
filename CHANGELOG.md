@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.32.0 
+**Release Date:** Fri Dec 22 14:57:21 UTC 2017     
+## Previous Releases 
 ### 0.31.0 
 **Release Date:** Thu Dec 21 21:53:35 UTC 2017     
-## Previous Releases 
 ### 0.30.0 
 **Release Date:** Thu Dec 21 20:52:00 UTC 2017
 * bug - make sure MO always have at least 1 domain for SKO    

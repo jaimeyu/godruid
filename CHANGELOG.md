@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.35.0 
+**Release Date:** Fri Dec 22 20:26:18 UTC 2017     
+## Previous Releases 
 ### 0.34.0 
 **Release Date:** Fri Dec 22 20:02:26 UTC 2017    
 * add getTenantByAlias API 
-## Previous Releases 
 ### 0.33.0 
 **Release Date:** Fri Dec 22 17:16:48 UTC 2017     
 ### 0.32.0 

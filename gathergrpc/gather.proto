@@ -316,7 +316,7 @@ service TenantProvisioningService {
     }
 
     // Create TenantMeta scoped to a Single Tenant. 
-    rpc CreateTenantMeta(TenantMeta) returns (TenantMeta) {
+    rpc CreateTenantMeta(TenantMetadata) returns (TenantMetadata) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/meta"
             body: "*"
@@ -324,7 +324,7 @@ service TenantProvisioningService {
     }
     
     // Update TenantMeta scoped to a single Tenant. 
-    rpc UpdateTenantMeta(TenantMeta) returns (TenantMeta) {
+    rpc UpdateTenantMeta(TenantMetadata) returns (TenantMetadata) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/meta"
             body: "*"
@@ -332,14 +332,14 @@ service TenantProvisioningService {
     } 
     
     // Delete TenantMeta scoped to a single Tenant. 
-    rpc DeleteTenantMeta(google.protobuf.StringValue) returns (TenantMeta) {
+    rpc DeleteTenantMeta(google.protobuf.StringValue) returns (TenantMetadata) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{value}/meta"
         };
     }
     
     // Retrieve a User scoped to a single Tenant
-    rpc GetTenantMeta(google.protobuf.StringValue) returns (TenantMeta) {
+    rpc GetTenantMeta(google.protobuf.StringValue) returns (TenantMetadata) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/meta"
         };

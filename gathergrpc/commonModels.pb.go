@@ -54,8 +54,8 @@ It has these top-level messages:
 	MonitoredObjectCountByDomainRequest
 	MonitoredObjectCountByDomainResponse
 	MonitoredObjectList
-	TenantMetaData
 	TenantMeta
+	TenantMetadata
 	TenantMetaIdRequest
 	ThresholdCrossing
 	FormattedThresholdCrossing

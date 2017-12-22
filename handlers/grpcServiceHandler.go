@@ -90,7 +90,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	// Create the tenant metadata
 	meta := createDefaultTenantMeta(result.GetXId(), threshProfileResponse.GetXId(), result.GetData().GetName())
 	metaID := db.GenerateID(meta, string(db.TenantMetaType))
-	metaReq := pb.TenantMeta{XId: metaID, Data: meta}
+	metaReq := pb.TenantMetadata{XId: metaID, Data: meta}
 	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
 	if err != nil {
 		logger.Log.Errorf("Unable to create Tenant Meta for Tenant %s. The Tenant does exist though, so may need to create the Tenant Meta manually", result.GetXId())
@@ -310,21 +310,21 @@ func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *p
 }
 
 // CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (gsh *GRPCServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	return gsh.tsh.CreateTenantMeta(ctx, meta)
 }
 
 // UpdateTenantMeta - Update TenantMeta scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	return gsh.tsh.UpdateTenantMeta(ctx, meta)
 }
 
 // DeleteTenantMeta - Delete TenantMeta scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 	return gsh.tsh.DeleteTenantMeta(ctx, tenantID)
 }
 
 // GetTenantMeta - Retrieve a User scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+func (gsh *GRPCServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 	return gsh.tsh.GetTenantMeta(ctx, tenantID)
 }

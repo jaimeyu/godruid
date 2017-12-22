@@ -490,7 +490,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         },
@@ -506,7 +506,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         ],
@@ -521,7 +521,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         },
@@ -537,7 +537,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         ],
@@ -1152,7 +1152,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         },
@@ -1175,7 +1175,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantMeta"
+              "$ref": "#/definitions/gathergrpcTenantMetadata"
             }
           }
         },
@@ -2161,20 +2161,6 @@
     "gathergrpcTenantMeta": {
       "type": "object",
       "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantMetaData"
-        }
-      }
-    },
-    "gathergrpcTenantMetaData": {
-      "type": "object",
-      "properties": {
         "tenantId": {
           "type": "string"
         },
@@ -2194,6 +2180,20 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "gathergrpcTenantMetadata": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantMeta"
         }
       }
     },

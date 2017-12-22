@@ -126,7 +126,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
-func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMeta) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMetadata) (*pb.JSONAPIObject, error) {
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
@@ -183,7 +183,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
-func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMeta) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMetadata) (*pb.JSONAPIObject, error) {
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 

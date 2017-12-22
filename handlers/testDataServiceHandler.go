@@ -567,6 +567,7 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 	tenantMonObjStr := string(db.TenantMonitoredObjectType)
 	result.Data = &pb.MonitoredObject{}
 	result.Data.Datatype = tenantMonObjStr
+
 	result.Data.Id = id
 	result.Data.TenantId = tenantID
 	result.Data.ActuatorName = actuatorName

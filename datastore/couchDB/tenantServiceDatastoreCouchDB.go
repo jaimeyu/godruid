@@ -521,12 +521,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	logger.Log.Debugf("Creating %s: %v\n", ds.TenantMetaStr, meta)
 
 	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
 	dataType := string(ds.TenantMetaType)
-	dataContainer := pb.TenantMeta{}
+	dataContainer := pb.TenantMetadata{}
 	if err := storeData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
 		return nil, err
 	}
@@ -537,12 +537,12 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMeta) 
 }
 
 // UpdateTenantMeta - CouchDB implementation of UpdateTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	logger.Log.Debugf("Updating %s: %v\n", ds.TenantMetaStr, meta)
 
 	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
 	dataType := string(ds.TenantMetaType)
-	dataContainer := pb.TenantMeta{}
+	dataContainer := pb.TenantMetadata{}
 	if err := updateData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
 		return nil, err
 	}
@@ -553,7 +553,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMeta) 
 }
 
 // DeleteTenantMeta - CouchDB implementation of DeleteTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
 	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantMetaStr, tenantID)
 
 	// Obtain the value of the existing record for a return value.
@@ -575,7 +575,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb
 }
 
 // GetTenantMeta - CouchDB implementation of GetTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.TenantMeta, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	db, err := getDatabase(tenantDBName)
 	if err != nil {
@@ -588,7 +588,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.Te
 	}
 
 	// Populate the response
-	res := pb.TenantMeta{}
+	res := pb.TenantMetadata{}
 	if len(fetchedData) != 0 {
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.TenantMetaStr); err != nil {
 			return nil, err

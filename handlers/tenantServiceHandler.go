@@ -533,7 +533,7 @@ func (tsh *TenantServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Conte
 }
 
 // CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.
-func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantMetaRequest(meta, false); err != nil {
 		return nil, err
@@ -553,7 +553,7 @@ func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.
 }
 
 // UpdateTenantMeta - Update TenantMeta scoped to a single Tenant.
-func (tsh *TenantServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMeta) (*pb.TenantMeta, error) {
+func (tsh *TenantServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantMetaRequest(meta, true); err != nil {
 		return nil, err
@@ -573,7 +573,7 @@ func (tsh *TenantServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.
 }
 
 // DeleteTenantMeta - Delete TenantMeta scoped to a single Tenant.
-func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
 	logger.Log.Infof("Deleting %s for Tenant %s", db.TenantMetaStr, tenantID.GetValue())
 
@@ -589,7 +589,7 @@ func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID 
 }
 
 // GetTenantMeta - Retrieve a User scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMeta, error) {
+func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
 	// Issue request to DAO Layer to fetch the record
 	result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())

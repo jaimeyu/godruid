@@ -24,9 +24,9 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 }
 
 // GetThresholdCrossing
-func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMetadata) (*pb.JSONAPIObject, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
 
-	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, thresholdProfile, tenantMeta)
+	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, thresholdProfile)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Threshold Crossing. %s:", err.Error())
@@ -36,9 +36,9 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thres
 }
 
 // GetThresholdCrossingByMonitoredObject
-func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse, tenantMeta *pb.TenantMetadata) (*pb.JSONAPIObject, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile, tenantMeta)
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Threshold Crossing. %s:", err.Error())

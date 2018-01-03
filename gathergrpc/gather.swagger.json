@@ -1974,9 +1974,6 @@
         "name": {
           "type": "string"
         },
-        "alias": {
-          "type": "string"
-        },
         "urlSubdomain": {
           "type": "string"
         },

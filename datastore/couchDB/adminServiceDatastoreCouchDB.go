@@ -152,8 +152,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 	dataType := string(ds.TenantDescriptorType)
 	dataContainer := pb.TenantDescriptorResponse{}
 
-	// Add the alias to the descriptor:
-	tenantDescriptor.Data.Alias = strings.ToLower(tenantDescriptor.GetData().GetName())
 	if err := storeData(asd.dbName, tenantDescriptor, dataType, ds.TenantStr, &dataContainer); err != nil {
 		return nil, err
 	}
@@ -488,7 +486,7 @@ func generateAdminViews() []map[string]interface{} {
 	tenantIDByName["_id"] = "_design/tenant"
 	tenantIDByName["language"] = "javascript"
 	byName := map[string]interface{}{}
-	byName["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'tenant') {\n        emit(doc.data.alias, doc._id);\n    }\n}"
+	byName["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'tenant') {\n        emit(doc.data.name.toLowerCase(), doc._id);\n    }\n}"
 	views := map[string]interface{}{}
 	views["byAlias"] = byName
 	tenantIDByName["views"] = views

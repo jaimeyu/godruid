@@ -11,12 +11,11 @@ message TenantDescriptor {
     string datatype = 1;
 
     string name = 2;
-    string alias = 3;
-    string urlSubdomain = 4;
-    UserState state = 5;
+    string urlSubdomain = 3;
+    UserState state = 4;
 
-    int64 createdTimestamp = 6;
-    int64 lastModifiedTimestamp = 7; 
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6; 
 }
 
 // TenantDescriptorRequest - wrapper for passing TenantDescriptor

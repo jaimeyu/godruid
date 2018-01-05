@@ -25,7 +25,7 @@ You can set the following ENV variable before calling make:
 	2. `DOCKER_IMAGE_NAME: Changes the name of the image (defaults to adh-gather)
 	3. `DOCKER_REPO_NAME: Changes the repository to push the image to (defaults to gcr.io/npav-172917/)
 
-You can generate the necessary gRPC Service, REST Reverse Proxy, and REST Swagger Definition by executing
+You can generate the necessary gRPC Service, REST Reverse Proxy, and REST Swagger Definition by executing.
 
 	1. ./generateFromProto.sh  
 

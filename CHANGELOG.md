@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.38.0 
-**Release Date:** Fri Jan  5 03:24:03 UTC 2018     
+**Release Date:** Fri Jan  5 03:24:03 UTC 2018   
+* change default thresh to more reasonable sko values.  
 ## Previous Releases 
 ### 0.37.0 
 **Release Date:** Wed Jan  3 13:55:21 UTC 2018 

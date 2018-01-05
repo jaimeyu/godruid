@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.39.0 
+**Release Date:** Fri Jan  5 20:06:32 UTC 2018     
+## Previous Releases 
 ### 0.38.0 
 **Release Date:** Fri Jan  5 03:24:03 UTC 2018   
 * change default thresh to more reasonable sko values.  
-## Previous Releases 
 ### 0.37.0 
 **Release Date:** Wed Jan  3 13:55:21 UTC 2018 
 * removing prefix from relational id in tenant metadata    

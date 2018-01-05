@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -88,7 +89,10 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create the tenant metadata
-	meta := createDefaultTenantMeta(result.GetXId(), threshProfileResponse.GetXId(), result.GetData().GetName())
+	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
+	// as this is just relational pouch adaption:
+	threshPrfIDParts := strings.Split(threshProfileResponse.GetXId(), "_")
+	meta := createDefaultTenantMeta(result.GetXId(), threshPrfIDParts[len(threshPrfIDParts)-1], result.GetData().GetName())
 	metaID := db.GenerateID(meta, string(db.TenantMetaType))
 	metaReq := pb.TenantMetadata{XId: metaID, Data: meta}
 	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)

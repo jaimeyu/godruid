@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.37.0 
-**Release Date:** Wed Jan  3 13:55:21 UTC 2018     
+**Release Date:** Wed Jan  3 13:55:21 UTC 2018 
+* removing prefix from relational id in tenant metadata    
 ## Previous Releases 
 ### 0.36.0 
 **Release Date:** Fri Dec 22 20:59:43 UTC 2017     

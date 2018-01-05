@@ -7,7 +7,6 @@ import (
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	"github.com/accedian/adh-gather/logger"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
@@ -72,20 +71,26 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 
 	// Create a default Ingestion Profile for the Tenant.
 	ingPrfData := createDefaultTenantIngPrf(result.GetXId())
-	ingPrfID := db.GenerateID(ingPrfData, string(db.TenantIngestionProfileType))
+	ingPrfID, err := db.GenerateID(ingPrfData, string(db.TenantIngestionProfileType))
+	if err != nil {
+		return nil, err
+	}
 	ingPrfReq := pb.TenantIngestionProfileRequest{XId: ingPrfID, Data: ingPrfData}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to create Ingestion Profile for Tenant %s. The Tenant does exist though, so may need to create the Ingestion Profile manually", result.GetXId())
+		return nil, err
 	}
 
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(result.GetXId())
-	threshPrfID := db.GenerateID(threshPrfData, string(db.TenantThresholdProfileType))
+	threshPrfID, err := db.GenerateID(threshPrfData, string(db.TenantThresholdProfileType))
+	if err != nil {
+		return nil, err
+	}
 	threshPrfReq := pb.TenantThresholdProfileRequest{XId: threshPrfID, Data: threshPrfData}
 	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to create Threshold Profile for Tenant %s. The Tenant does exist though, so may need to create the Threshold Profile manually", result.GetXId())
+		return nil, err
 	}
 
 	// Create the tenant metadata
@@ -93,11 +98,14 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	// as this is just relational pouch adaption:
 	threshPrfIDParts := strings.Split(threshProfileResponse.GetXId(), "_")
 	meta := createDefaultTenantMeta(result.GetXId(), threshPrfIDParts[len(threshPrfIDParts)-1], result.GetData().GetName())
-	metaID := db.GenerateID(meta, string(db.TenantMetaType))
+	metaID, err := db.GenerateID(meta, string(db.TenantMetaType))
+	if err != nil {
+		return nil, err
+	}
 	metaReq := pb.TenantMetadata{XId: metaID, Data: meta}
 	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
 	if err != nil {
-		logger.Log.Errorf("Unable to create Tenant Meta for Tenant %s. The Tenant does exist though, so may need to create the Tenant Meta manually", result.GetXId())
+		return nil, err
 	}
 
 	return result, nil

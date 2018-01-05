@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.38.0 
+**Release Date:** Fri Jan  5 03:24:03 UTC 2018     
+## Previous Releases 
 ### 0.37.0 
 **Release Date:** Wed Jan  3 13:55:21 UTC 2018 
 * removing prefix from relational id in tenant metadata    
-## Previous Releases 
 ### 0.36.0 
 **Release Date:** Fri Dec 22 20:59:43 UTC 2017     
 * remove alias from tenant model and update index to use lowercase name instead.

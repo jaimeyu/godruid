@@ -416,7 +416,10 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 	// If no id is provided for the Manged Object, generate one
 	objectID := monitoredObjectReq.GetXId()
 	if len(objectID) == 0 {
-		objectID := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
+		objectID, err := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
+		if err != nil {
+			return nil, err
+		}
 		monitoredObjectReq.XId = objectID
 	}
 
@@ -443,7 +446,10 @@ func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, moni
 	// If no id is provided for the Manged Object, generate one
 	objectID := monitoredObjectReq.GetXId()
 	if len(objectID) == 0 {
-		objectID := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
+		objectID, err := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
+		if err != nil {
+			return nil, err
+		}
 		monitoredObjectReq.XId = objectID
 	}
 

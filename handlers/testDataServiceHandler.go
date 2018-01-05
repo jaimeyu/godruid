@@ -172,14 +172,24 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 
 	// Create a Tenant metadata using the provided name:
 	tenantName := requestBody["tenantName"].(string)
-	tenantDescriptor, err := tsh.grpcSH.CreateTenant(nil, (generateTenantDescriptor(tenantName)))
+	desc, err := generateTenantDescriptor(tenantName)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	tenantDescriptor, err := tsh.grpcSH.CreateTenant(nil, desc)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	// Now the TenantDB exisits....add a default user.
-	_, err = tsh.grpcSH.CreateTenantUser(nil, generateTenantUser(tenantName, tenantDescriptor.GetXId()))
+	user, err := generateTenantUser(tenantName, tenantDescriptor.GetXId())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	_, err = tsh.grpcSH.CreateTenantUser(nil, user)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 		return
@@ -196,7 +206,12 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	tenantDomains := requestBody["domainSet"].([]interface{})
 	createdDomainIDSet := []string{}
 	for _, domainName := range tenantDomains {
-		domain, err := tsh.grpcSH.CreateTenantDomain(nil, generateTenantDomain(domainName.(string), tenantDescriptor.GetXId(), tenantMeta.GetData().GetDefaultThresholdProfile()))
+		dom, err := generateTenantDomain(domainName.(string), tenantDescriptor.GetXId(), tenantMeta.GetData().GetDefaultThresholdProfile())
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
+			return
+		}
+		domain, err := tsh.grpcSH.CreateTenantDomain(nil, dom)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 			return
@@ -219,7 +234,12 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 					logger.Log.Errorf("Not creating Monitored Object %v: %s", monObj, err.Error())
 				}
 
-				_, err := tsh.grpcSH.CreateMonitoredObject(nil, generateMonitoredObject(obj[moIDStr].(string), tenantDescriptor.GetXId(), obj[moActuatorNameStr].(string), obj[moReflectorNameStr].(string), obj[moObjectNameStr].(string), createdDomainIDSet))
+				mo, err := generateMonitoredObject(obj[moIDStr].(string), tenantDescriptor.GetXId(), obj[moActuatorNameStr].(string), obj[moReflectorNameStr].(string), obj[moObjectNameStr].(string), createdDomainIDSet)
+				if err != nil {
+					http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
+					return
+				}
+				_, err = tsh.grpcSH.CreateMonitoredObject(nil, mo)
 				if err != nil {
 					http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 					return
@@ -347,7 +367,12 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	for i := float64(0); i < numReportsPerDomain; i++ {
 		for _, domain := range domainSetForTenant.GetData() {
 			// Add a new Report to the list of documents to insert
-			docsToInsert = append(docsToInsert, generateSLADomainReport(domain.GetData().GetName(), startReportTS, endReportTS))
+			slaReport, err := generateSLADomainReport(domain.GetData().GetName(), startReportTS, endReportTS)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Unable to generate %s content for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
+				return
+			}
+			docsToInsert = append(docsToInsert, slaReport)
 		}
 
 		// Update the timestamps for the previous week
@@ -394,11 +419,15 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	fmt.Fprintf(w, string(response))
 }
 
-func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS int64) map[string]interface{} {
+func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS int64) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
 
 	typeName := string(db.DomainSlaReportType)
-	result["_id"] = typeName + db.PouchDBIdBridgeStr + uuid.NewV4().String()
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
+	result["_id"] = typeName + db.PouchDBIdBridgeStr + uuid.String()
 
 	resultContent := map[string]interface{}{}
 	resultContent["datatype"] = typeName
@@ -427,7 +456,7 @@ func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS
 	resultContent["buckets"] = values
 	result["data"] = resultContent
 
-	return result
+	return result, nil
 }
 
 func generateSlaRangeValue(timestamp int64, complianceRate int) map[string]interface{} {
@@ -500,7 +529,7 @@ func validateMonitoredObject(monObj map[string]interface{}) error {
 	return nil
 }
 
-func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
+func generateTenantDescriptor(name string) (*pb.TenantDescriptorRequest, error) {
 	result := pb.TenantDescriptorRequest{}
 
 	tenantStr := string(db.TenantDescriptorType)
@@ -512,12 +541,16 @@ func generateTenantDescriptor(name string) *pb.TenantDescriptorRequest {
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	result.XId = db.GenerateID(result.Data, tenantStr)
+	id, err := db.GenerateID(result.Data, tenantStr)
+	if err != nil {
+		return nil, err
+	}
+	result.XId = id
 
-	return &result
+	return &result, nil
 }
 
-func generateTenantUser(name string, tenantID string) *pb.TenantUserRequest {
+func generateTenantUser(name string, tenantID string) (*pb.TenantUserRequest, error) {
 	result := pb.TenantUserRequest{}
 
 	tenantUserStr := string(db.TenantUserType)
@@ -534,12 +567,16 @@ func generateTenantUser(name string, tenantID string) *pb.TenantUserRequest {
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	result.XId = db.GenerateID(result.Data, tenantUserStr)
+	id, err := db.GenerateID(result.Data, tenantUserStr)
+	if err != nil {
+		return nil, err
+	}
+	result.XId = id
 
-	return &result
+	return &result, nil
 }
 
-func generateTenantDomain(name string, tenantID string, defaultThreshPrf string) *pb.TenantDomainRequest {
+func generateTenantDomain(name string, tenantID string, defaultThreshPrf string) (*pb.TenantDomainRequest, error) {
 	result := pb.TenantDomainRequest{}
 
 	tenantDomainStr := string(db.TenantDomainType)
@@ -556,12 +593,16 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	result.XId = db.GenerateID(result.Data, tenantDomainStr)
+	id, err := db.GenerateID(result.Data, tenantDomainStr)
+	if err != nil {
+		return nil, err
+	}
+	result.XId = id
 
-	return &result
+	return &result, nil
 }
 
-func generateMonitoredObject(id string, tenantID string, actuatorName string, reflectorName string, objectName string, domainIDSet []string) *pb.MonitoredObjectRequest {
+func generateMonitoredObject(id string, tenantID string, actuatorName string, reflectorName string, objectName string, domainIDSet []string) (*pb.MonitoredObjectRequest, error) {
 	result := pb.MonitoredObjectRequest{}
 
 	tenantMonObjStr := string(db.TenantMonitoredObjectType)
@@ -602,7 +643,11 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 		}
 	}
 
-	result.XId = db.GenerateID(result.Data, tenantMonObjStr)
+	id, err := db.GenerateID(result.Data, tenantMonObjStr)
+	if err != nil {
+		return nil, err
+	}
+	result.XId = id
 
-	return &result
+	return &result, nil
 }

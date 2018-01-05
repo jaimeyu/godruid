@@ -18,14 +18,18 @@ const (
 
 // GenerateID - generates an ID for an object based on the type of the
 // provided object.
-func GenerateID(obj interface{}, dataType string) string {
+func GenerateID(obj interface{}, dataType string) (string, error) {
 	//
 	switch obj.(type) {
 	case *pb.MonitoredObject:
 		cast := obj.(*pb.MonitoredObject)
-		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, trimAndLowercase(cast.GetId()))
+		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, trimAndLowercase(cast.GetId())), nil
 	default:
-		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, uuid.NewV4().String())
+		uuid, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, uuid.String()), nil
 	}
 }
 

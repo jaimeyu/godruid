@@ -109,7 +109,6 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 									godruid.FilterAnd(
 										filter,
 										godruid.FilterSelector("objectType", tk),
-										godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 										godruid.FilterSelector("direction", dk),
 									),
 									&godruid.Aggregation{
@@ -129,7 +128,8 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:      map[string]interface{}{"timeout": 60000},
+		Context:      map[string]interface{}{"timeout": 60000, "skipEmptyBuckets": true},
+		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Aggregations: aggregations,
 		Intervals:    []string{interval},
 	}, nil

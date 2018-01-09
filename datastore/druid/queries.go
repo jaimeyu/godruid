@@ -162,7 +162,6 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 							aggregation := godruid.AggFiltered(
 								godruid.FilterAnd(
 									filter,
-									godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 									godruid.FilterSelector("direction", dk),
 								),
 								&godruid.Aggregation{
@@ -183,6 +182,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": 60000},
 		Aggregations: aggregations,
+		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Intervals:    []string{interval},
 		Dimensions: []godruid.DimSpec{
 			godruid.Dimension{

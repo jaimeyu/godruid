@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Download Dependencies
-          command: dep ensure
+          command: ~/go/src/github.com/golang/dep/cmd/dep ensure
 
       - run: 
           name: Running unit tests

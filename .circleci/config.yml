@@ -22,8 +22,8 @@ jobs:
       #     command: go get -u github.com/golang/dep/cmd/dep
 
       - run:
-        name: Download Dependencies
-        command: dep ensure
+          name: Download Dependencies
+          command: dep ensure
 
       - run: 
           name: Running unit tests

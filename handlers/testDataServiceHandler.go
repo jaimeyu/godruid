@@ -423,10 +423,7 @@ func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS
 	result := map[string]interface{}{}
 
 	typeName := string(db.DomainSlaReportType)
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return nil, err
-	}
+	uuid := uuid.NewV4()
 	result["_id"] = typeName + db.PouchDBIdBridgeStr + uuid.String()
 
 	resultContent := map[string]interface{}{}

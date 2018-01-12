@@ -41,6 +41,7 @@ It has these top-level messages:
 	TenantThresholdProfileRequest
 	TenantThresholdProfileResponse
 	TenantThresholdProfileIdRequest
+	TenantThresholdListResponse
 	TenantUser
 	TenantUserRequest
 	TenantUserResponse

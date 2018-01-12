@@ -599,6 +599,55 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.Te
 	return &res, nil
 }
 
+// GetActiveTenantIngestionProfile - CouchDB implementation of GetActiveTenantIngestionProfile
+func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfileResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedData, err := getAllOfTypeByIDPrefix(string(ds.TenantIngestionProfileType), ds.TenantIngestionProfileStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.TenantIngestionProfileResponse{}
+	if len(fetchedData) != 0 {
+		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.TenantIngestionProfileStr); err != nil {
+			return nil, err
+		}
+	}
+
+	logger.Log.Debugf("Found %s %v\n", ds.TenantIngestionProfileStr, res)
+	return &res, nil
+}
+
+// GetAllTenantThresholdProfile - CouchDB implementation of GetAllTenantThresholdProfile
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdListResponse, error) {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedObjectList, err := getAllOfTypeByIDPrefix(string(ds.TenantThresholdProfileType), ds.TenantThresholdProfileStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	res, err := convertGenericObjectListToThresholdProfileList(fetchedObjectList)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantMonitoredObjectStr)
+	return res, nil
+}
+
 // Takes a set of generic data that contains a list of TenantUsers and converts it to
 // and ADH TenantUserList object
 func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserListResponse, error) {
@@ -644,6 +693,21 @@ func convertGenericObjectListToMonitoredObjectList(genericObjectList []map[strin
 	}
 
 	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantMonitoredObjectStr, res)
+
+	return &res, nil
+}
+
+func convertGenericObjectListToThresholdProfileList(genericObjectList []map[string]interface{}) (*pb.TenantThresholdListResponse, error) {
+	res := pb.TenantThresholdListResponse{}
+	for _, genericDomainObject := range genericObjectList {
+		object := pb.TenantThresholdProfileResponse{}
+		if err := convertGenericCouchDataToObject(genericDomainObject, &object, ds.TenantThresholdProfileStr); err != nil {
+			continue
+		}
+		res.Data = append(res.GetData(), &object)
+	}
+
+	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantThresholdProfileStr, res)
 
 	return &res, nil
 }

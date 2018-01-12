@@ -220,6 +220,11 @@ func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, te
 	return gsh.tsh.GetTenantIngestionProfile(ctx, tenantID)
 }
 
+// GetActiveTenantIngestionProfile - retrieves the active Ingestion Profile for a single Tenant.
+func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfileResponse, error) {
+	return gsh.tsh.GetActiveTenantIngestionProfile(ctx, tenantID)
+}
+
 // DeleteTenantIngestionProfile - retrieves the Ingestion Profile for a singler Tenant.
 func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
 	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
@@ -243,6 +248,11 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 // DeleteTenantThresholdProfile - retrieves the Threshold Profile for a singler Tenant.
 func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
 	return gsh.tsh.DeleteTenantThresholdProfile(ctx, tenantID)
+}
+
+// GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
+func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdListResponse, error) {
+	return gsh.tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 }
 
 // CreateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.

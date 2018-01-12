@@ -188,3 +188,15 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*pb.T
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetTenantMeta not implemented")
 }
+
+// GetActiveTenantIngestionProfile - InMemory implementation of GetActiveTenantIngestionProfile
+func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfileResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetActiveTenantIngestionProfile not implemented")
+}
+
+// GetAllTenantThresholdProfile - InMemory implementation of GetAllTenantThresholdProfile
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdListResponse, error) {
+	// Stub to implement
+	return nil, errors.New("Unsupported operation: GetAllTenantThresholdProfile not implemented")
+}

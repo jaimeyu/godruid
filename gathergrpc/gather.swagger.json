@@ -1144,6 +1144,30 @@
         ]
       }
     },
+    "/api/v1/tenants/{value}/active-ingestion-profile": {
+      "get": {
+        "operationId": "GetActiveTenantIngestionProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{value}/domain-list": {
       "get": {
         "summary": "Retrieve all Domains scoped to a single Tenant.",
@@ -1226,6 +1250,31 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/gathergrpcMonitoredObjectListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
+    "/api/v1/tenants/{value}/threshold-profile-list": {
+      "get": {
+        "summary": "Retrieve all Thresholds scoped to a single Tenant.",
+        "operationId": "GetAllTenantThresholdProfiles",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantThresholdListResponse"
             }
           }
         },
@@ -2219,6 +2268,17 @@
         },
         "data": {
           "$ref": "#/definitions/gathergrpcTenantMeta"
+        }
+      }
+    },
+    "gathergrpcTenantThresholdListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+          }
         }
       }
     },

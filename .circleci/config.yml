@@ -21,9 +21,9 @@ jobs:
       #     name: Downloading the dependency management tool
       #     command: go get -u github.com/golang/dep/cmd/dep
 
-      # - run:
-      #   name: Download Dependencies
-      #   command: dep ensure
+      - run:
+        name: Download Dependencies
+        command: dep ensure
 
       - run: 
           name: Running unit tests

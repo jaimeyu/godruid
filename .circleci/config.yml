@@ -17,9 +17,9 @@ jobs:
     steps:
       - checkout 
     
-      # - run: 
-      #     name: Downloading the dependency management tool
-      #     command: go get -u github.com/golang/dep/cmd/dep
+      - run: 
+          name: Downloading the dependency management tool
+          command: go get -u github.com/golang/dep/cmd/dep
 
       - run:
           name: Download Dependencies

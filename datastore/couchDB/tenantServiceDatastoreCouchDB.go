@@ -123,8 +123,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*p
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToTenantUserList(fetchedUserList)
-	if err != nil {
+	res := &pb.TenantUserListResponse{}
+	res.Data = make([]*pb.TenantUserResponse, 0)
+	if err = convertGenericArrayToObject(fetchedUserList, &res.Data, ds.TenantUserStr); err != nil {
 		return nil, err
 	}
 
@@ -216,8 +217,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToTenantDomainList(fetchedDomainList)
-	if err != nil {
+	res := &pb.TenantDomainListResponse{}
+	res.Data = make([]*pb.TenantDomainResponse, 0)
+	if err = convertGenericArrayToObject(fetchedDomainList, &res.Data, ds.TenantDomainStr); err != nil {
 		return nil, err
 	}
 
@@ -447,8 +449,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToMonitoredObjectList(fetchedObjectList)
-	if err != nil {
+	res := &pb.MonitoredObjectListResponse{}
+	res.Data = make([]*pb.MonitoredObjectResponse, 0)
+	if err = convertGenericArrayToObject(fetchedObjectList, &res.Data, ds.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
 
@@ -639,75 +642,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToThresholdProfileList(fetchedObjectList)
-	if err != nil {
+	res := &pb.TenantThresholdListResponse{}
+	res.Data = make([]*pb.TenantThresholdProfileResponse, 0)
+	if err = convertGenericArrayToObject(fetchedObjectList, &res.Data, ds.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantMonitoredObjectStr)
+	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantThresholdProfileStr)
 	return res, nil
-}
-
-// Takes a set of generic data that contains a list of TenantUsers and converts it to
-// and ADH TenantUserList object
-func convertGenericObjectListToTenantUserList(genericUserList []map[string]interface{}) (*pb.TenantUserListResponse, error) {
-	res := pb.TenantUserListResponse{}
-	for _, genericUserObject := range genericUserList {
-		user := pb.TenantUserResponse{}
-		if err := convertGenericCouchDataToObject(genericUserObject, &user, ds.TenantUserStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &user)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantUserStr, res)
-
-	return &res, nil
-}
-
-// Takes a set of generic data that contains a list of TenantDomains and converts it to
-// and ADH TenantDomainList object
-func convertGenericObjectListToTenantDomainList(genericDomainList []map[string]interface{}) (*pb.TenantDomainListResponse, error) {
-	res := pb.TenantDomainListResponse{}
-	for _, genericDomainObject := range genericDomainList {
-		domain := pb.TenantDomainResponse{}
-		if err := convertGenericCouchDataToObject(genericDomainObject, &domain, ds.TenantDomainStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &domain)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantDomainStr, res)
-
-	return &res, nil
-}
-
-func convertGenericObjectListToMonitoredObjectList(genericObjectList []map[string]interface{}) (*pb.MonitoredObjectListResponse, error) {
-	res := pb.MonitoredObjectListResponse{}
-	for _, genericDomainObject := range genericObjectList {
-		object := pb.MonitoredObjectResponse{}
-		if err := convertGenericCouchDataToObject(genericDomainObject, &object, ds.TenantMonitoredObjectStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &object)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantMonitoredObjectStr, res)
-
-	return &res, nil
-}
-
-func convertGenericObjectListToThresholdProfileList(genericObjectList []map[string]interface{}) (*pb.TenantThresholdListResponse, error) {
-	res := pb.TenantThresholdListResponse{}
-	for _, genericDomainObject := range genericObjectList {
-		object := pb.TenantThresholdProfileResponse{}
-		if err := convertGenericCouchDataToObject(genericDomainObject, &object, ds.TenantThresholdProfileStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &object)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantThresholdProfileStr, res)
-
-	return &res, nil
 }

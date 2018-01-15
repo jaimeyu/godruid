@@ -45,6 +45,16 @@ func convertGenericObjectToBytesWithCouchDbFields(genericObject map[string]inter
 	return genericUserInBytes, nil
 }
 
+func convertGenericObjectToBytes(genericObject []map[string]interface{}) ([]byte, error) {
+	genericUserInBytes, err := json.Marshal(genericObject)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to bytes: %s", err.Error())
+		return nil, err
+	}
+
+	return genericUserInBytes, nil
+}
+
 // StoreDataInCouchDB - takes data that is already in a format ready to store in CouchDB
 // and attempts to store it. Parameters are:
 // dataToStore(the CouchDB ready data to be stored),
@@ -146,6 +156,23 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 // that object with the generic data.
 func convertGenericCouchDataToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
 	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(genericData)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(genericDataInBytes, &dataContainer)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		return err
+	}
+
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
+
+	return nil
+}
+
+func convertGenericArrayToObject(genericData []map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+	genericDataInBytes, err := convertGenericObjectToBytes(genericData)
 	if err != nil {
 		return err
 	}

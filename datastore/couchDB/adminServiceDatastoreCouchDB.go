@@ -136,8 +136,9 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserListRe
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToAdminUserList(fetchedUserList)
-	if err != nil {
+	res := &pb.AdminUserListResponse{}
+	res.Data = make([]*pb.AdminUserResponse, 0)
+	if err = convertGenericArrayToObject(fetchedUserList, &res.Data, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
 
@@ -200,7 +201,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 		return nil, err
 	}
 
-	// Truy to delete the DB for the tenant
+	// Try to delete the DB for the tenant
 	if err := asd.deleteDatabase(tenantID); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())
 		return nil, err
@@ -244,8 +245,9 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDe
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
-	res, err := convertGenericObjectListToTenantDescriptorList(fetchedTenantList)
-	if err != nil {
+	res := &pb.TenantDescriptorListResponse{}
+	res.Data = make([]*pb.TenantDescriptorResponse, 0)
+	if err = convertGenericArrayToObject(fetchedTenantList, &res.Data, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
 
@@ -428,38 +430,6 @@ func (asd *AdminServiceDatastoreCouchDB) AddAdminViews() error {
 
 	logger.Log.Debugf("Added views to DB %s\n", asd.dbNameAlone)
 	return nil
-}
-
-// Takes a set of generic data that contains a list of AdminUsers and converts it to
-// and ADH AdminUserList object
-func convertGenericObjectListToAdminUserList(genericUserList []map[string]interface{}) (*pb.AdminUserListResponse, error) {
-	res := new(pb.AdminUserListResponse)
-	for _, genericUserObject := range genericUserList {
-		user := pb.AdminUserResponse{}
-		if err := convertGenericCouchDataToObject(genericUserObject, &user, ds.AdminUserStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &user)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.AdminUserStr, res)
-
-	return res, nil
-}
-
-func convertGenericObjectListToTenantDescriptorList(genericTenantList []map[string]interface{}) (*pb.TenantDescriptorListResponse, error) {
-	res := new(pb.TenantDescriptorListResponse)
-	for _, genericTenantObject := range genericTenantList {
-		tenant := pb.TenantDescriptorResponse{}
-		if err := convertGenericCouchDataToObject(genericTenantObject, &tenant, ds.TenantDescriptorStr); err != nil {
-			continue
-		}
-		res.Data = append(res.GetData(), &tenant)
-	}
-
-	logger.Log.Debugf("Converted generic data to %s List: %v\n", ds.TenantDescriptorStr, res)
-
-	return res, nil
 }
 
 // Produces all of the views/indicies necessary for the Tenant DB

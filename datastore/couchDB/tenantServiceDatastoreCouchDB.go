@@ -40,422 +40,237 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 
 // CreateTenantUser - CouchDB implementation of CreateTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantUserStr, tenantUserRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantUserRequest.GetData().GetTenantId())
-	dataType := string(ds.TenantUserType)
-	dataContainer := pb.TenantUserResponse{}
-	if err := storeData(tenantDBName, tenantUserRequest, dataType, ds.TenantUserStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantUserResponse{}
+	if err := createDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(ds.TenantUserType), ds.TenantUserStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantUserStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateTenantUser - CouchDB implementation of UpdateTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantUserStr, tenantUserRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantUserRequest.GetData().GetTenantId())
-	dataType := string(ds.TenantUserType)
-	dataContainer := pb.TenantUserResponse{}
-	if err := updateData(tenantDBName, tenantUserRequest, dataType, ds.TenantUserStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantUserResponse{}
+	if err := updateDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(ds.TenantUserType), ds.TenantUserStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantUserStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // DeleteTenantUser - CouchDB implementation of DeleteTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
-
-	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantUserStr, tenantUserIDRequest)
-
-	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetTenantUser(tenantUserIDRequest)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantUserStr, err.Error())
-		return nil, err
-	}
-
 	tenantDBName := createDBPathStr(tsd.server, tenantUserIDRequest.GetTenantId())
-	if err := deleteData(tenantDBName, tenantUserIDRequest.GetUserId(), ds.TenantUserStr); err != nil {
-		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantUserStr, err.Error())
+	dataContainer := pb.TenantUserResponse{}
+	if err := deleteDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, ds.TenantUserStr); err != nil {
 		return nil, err
 	}
-
-	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantUserStr, existingObject)
-	return existingObject, nil
+	return &dataContainer, nil
 }
 
 // GetTenantUser - CouchDB implementation of GetTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
-	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantUserStr, tenantUserIDRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantUserIDRequest.GetTenantId())
 	dataContainer := pb.TenantUserResponse{}
-	if err := getData(tenantDBName, tenantUserIDRequest.GetUserId(), ds.TenantUserStr, &dataContainer); err != nil {
+	if err := getDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, ds.TenantUserStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantUserStr, dataContainer)
 	return &dataContainer, nil
 }
 
 // GetAllTenantUsers - CouchDB implementation of GetAllTenantUsers
 func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*pb.TenantUserListResponse, error) {
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
-		return nil, err
-	}
-
-	fetchedUserList, err := getAllOfType(string(ds.TenantUserType), ds.TenantUserStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
 	res := &pb.TenantUserListResponse{}
 	res.Data = make([]*pb.TenantUserResponse, 0)
-	if err = convertGenericArrayToObject(fetchedUserList, &res.Data, ds.TenantUserStr); err != nil {
+	if err := getAllOfTypeFromCouch(tenantDBName, string(ds.TenantUserType), ds.TenantUserStr, &res.Data); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Found %d %ss", len(res.GetData()), ds.TenantUserStr)
 	return res, nil
 }
 
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantDomainStr, tenantDomainRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantDomainRequest.GetData().GetTenantId())
-	dataType := string(ds.TenantDomainType)
-	dataContainer := pb.TenantDomainResponse{}
-	if err := storeData(tenantDBName, tenantDomainRequest, dataType, ds.TenantDomainStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantDomainResponse{}
+	if err := createDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(ds.TenantDomainType), ds.TenantDomainStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantDomainStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateTenantDomain - CouchDB implementation of UpdateTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantDomainStr, tenantDomainRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantDomainRequest.GetData().GetTenantId())
-	dataType := string(ds.TenantDomainType)
-	dataContainer := pb.TenantDomainResponse{}
-	if err := updateData(tenantDBName, tenantDomainRequest, dataType, ds.TenantDomainStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantDomainResponse{}
+	if err := updateDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(ds.TenantDomainType), ds.TenantDomainStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantDomainStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // DeleteTenantDomain - CouchDB implementation of DeleteTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
-	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantDomainStr, tenantDomainIDRequest)
-
-	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetTenantDomain(tenantDomainIDRequest)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantDomainStr, err.Error())
-		return nil, err
-	}
-
 	tenantDBName := createDBPathStr(tsd.server, tenantDomainIDRequest.GetTenantId())
-	if err := deleteData(tenantDBName, tenantDomainIDRequest.GetDomainId(), ds.TenantDomainStr); err != nil {
-		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantDomainStr, err.Error())
+	dataContainer := pb.TenantDomainResponse{}
+	if err := deleteDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, ds.TenantDomainStr); err != nil {
 		return nil, err
 	}
-
-	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantDomainStr, existingObject)
-	return existingObject, nil
+	return &dataContainer, nil
 }
 
 // GetTenantDomain - CouchDB implementation of GetTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
-	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantDomainStr, tenantDomainIDRequest)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantDomainIDRequest.GetTenantId())
 	dataContainer := pb.TenantDomainResponse{}
-	if err := getData(tenantDBName, tenantDomainIDRequest.GetDomainId(), ds.TenantDomainStr, &dataContainer); err != nil {
+	if err := getDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, ds.TenantDomainStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantDomainStr, dataContainer)
 	return &dataContainer, nil
 }
 
 // GetAllTenantDomains - CouchDB implementation of GetAllTenantDomains
 func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (*pb.TenantDomainListResponse, error) {
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
-		return nil, err
-	}
-
-	fetchedDomainList, err := getAllOfTypeByIDPrefix(string(ds.TenantDomainType), ds.TenantDomainStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
 	res := &pb.TenantDomainListResponse{}
 	res.Data = make([]*pb.TenantDomainResponse, 0)
-	if err = convertGenericArrayToObject(fetchedDomainList, &res.Data, ds.TenantDomainStr); err != nil {
+	if err := getAllOfTypeFromCouch(tenantDBName, string(ds.TenantDomainType), ds.TenantDomainStr, &res.Data); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantDomainStr)
 	return res, nil
 }
 
 // CreateTenantIngestionProfile - CouchDB implementation of CreateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantIngestionProfileStr, tenantIngPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetData().GetTenantId())
-	dataType := string(ds.TenantIngestionProfileType)
-	dataContainer := pb.TenantIngestionProfileResponse{}
-	if err := storeData(tenantDBName, tenantIngPrfReq, dataType, ds.TenantIngestionProfileStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantIngestionProfileResponse{}
+	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(ds.TenantIngestionProfileType), ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantIngestionProfileStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateTenantIngestionProfile - CouchDB implementation of UpdateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
-	logger.Log.Debugf("Updating %s: %v\n", ds.TenantIngestionProfileStr, tenantIngPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetData().GetTenantId())
-	dataType := string(ds.TenantIngestionProfileType)
-	dataContainer := pb.TenantIngestionProfileResponse{}
-	if err := updateData(tenantDBName, tenantIngPrfReq, dataType, ds.TenantIngestionProfileStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantIngestionProfileResponse{}
+	if err := updateDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(ds.TenantIngestionProfileType), ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.TenantIngestionProfileStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // GetTenantIngestionProfile - CouchDB implementation of GetTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
-	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantIngestionProfileStr, tenantIngPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
 	dataContainer := pb.TenantIngestionProfileResponse{}
-	if err := getData(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), ds.TenantIngestionProfileStr, &dataContainer); err != nil {
+	if err := getDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantIngestionProfileStr, dataContainer)
 	return &dataContainer, nil
 }
 
 // DeleteTenantIngestionProfile - CouchDB implementation of DeleteTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
-	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantIngestionProfileStr, tenantIngPrfReq)
-
-	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetTenantIngestionProfile(tenantIngPrfReq)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantIngestionProfileStr, err.Error())
-		return nil, err
-	}
-
 	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
-	if err := deleteData(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), ds.TenantIngestionProfileStr); err != nil {
-		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantIngestionProfileStr, err.Error())
+	dataContainer := pb.TenantIngestionProfileResponse{}
+	if err := deleteDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, ds.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantIngestionProfileStr, existingObject)
-	return existingObject, nil
+	return &dataContainer, nil
 }
 
 // CreateTenantThresholdProfile - CouchDB implementation of CreateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetData().GetTenantId())
-	dataType := string(ds.TenantThresholdProfileType)
-	dataContainer := pb.TenantThresholdProfileResponse{}
-	if err := storeData(tenantDBName, tenantThreshPrfReq, dataType, ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantThresholdProfileResponse{}
+	if err := createDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(ds.TenantThresholdProfileType), ds.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateTenantThresholdProfile - CouchDB implementation of UpdateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
-	logger.Log.Debugf("Updating %s: %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetData().GetTenantId())
-	dataType := string(ds.TenantThresholdProfileType)
-	dataContainer := pb.TenantThresholdProfileResponse{}
-	if err := updateData(tenantDBName, tenantThreshPrfReq, dataType, ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantThresholdProfileResponse{}
+	if err := updateDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(ds.TenantThresholdProfileType), ds.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // GetTenantThresholdProfile - CouchDB implementation of GetTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
-	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
-
 	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
 	dataContainer := pb.TenantThresholdProfileResponse{}
-	if err := getData(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), ds.TenantThresholdProfileStr, &dataContainer); err != nil {
+	if err := getDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, ds.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantThresholdProfileStr, dataContainer)
 	return &dataContainer, nil
 }
 
 // DeleteTenantThresholdProfile - CouchDB implementation of DeleteTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
-	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantThresholdProfileStr, tenantThreshPrfReq)
-
-	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetTenantThresholdProfile(tenantThreshPrfReq)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantThresholdProfileStr, err.Error())
-		return nil, err
-	}
-
 	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
-	if err := deleteData(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), ds.TenantThresholdProfileStr); err != nil {
-		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantThresholdProfileStr, err.Error())
+	dataContainer := pb.TenantThresholdProfileResponse{}
+	if err := deleteDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, ds.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-
-	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantThresholdProfileStr, existingObject)
-	return existingObject, nil
+	return &dataContainer, nil
 }
 
 // CreateMonitoredObject - CouchDB implementation of CreateMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantMonitoredObjectStr, monitoredObjectReq)
-
 	tenantDBName := createDBPathStr(tsd.server, monitoredObjectReq.GetData().GetTenantId())
-	dataType := string(ds.TenantMonitoredObjectType)
-	dataContainer := pb.MonitoredObjectResponse{}
-	if err := storeData(tenantDBName, monitoredObjectReq, dataType, ds.TenantMonitoredObjectStr, &dataContainer); err != nil {
+	dataContainer := &pb.MonitoredObjectResponse{}
+	if err := createDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(ds.TenantMonitoredObjectType), ds.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantMonitoredObjectStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateMonitoredObject - CouchDB implementation of UpdateMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
-	logger.Log.Debugf("Updating %s: %v\n", ds.TenantMonitoredObjectStr, monitoredObjectReq)
-
 	tenantDBName := createDBPathStr(tsd.server, monitoredObjectReq.GetData().GetTenantId())
-	dataType := string(ds.TenantMonitoredObjectType)
-	dataContainer := pb.MonitoredObjectResponse{}
-	if err := updateData(tenantDBName, monitoredObjectReq, dataType, ds.TenantMonitoredObjectStr, &dataContainer); err != nil {
+	dataContainer := &pb.MonitoredObjectResponse{}
+	if err := updateDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(ds.TenantMonitoredObjectType), ds.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.TenantMonitoredObjectStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // GetMonitoredObject - CouchDB implementation of GetMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
-	logger.Log.Debugf("Retrieving %s for %v\n", ds.TenantMonitoredObjectStr, monitoredObjectIDReq)
-
 	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
 	dataContainer := pb.MonitoredObjectResponse{}
-	if err := getData(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), ds.TenantMonitoredObjectStr, &dataContainer); err != nil {
+	if err := getDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, ds.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantMonitoredObjectStr, dataContainer)
 	return &dataContainer, nil
 }
 
 // DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
-	logger.Log.Debugf("Deleting %s for %v\n", ds.TenantMonitoredObjectStr, monitoredObjectIDReq)
-
-	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetMonitoredObject(monitoredObjectIDReq)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", ds.TenantMonitoredObjectStr, err.Error())
-		return nil, err
-	}
-
 	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
-	if err := deleteData(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), ds.TenantMonitoredObjectStr); err != nil {
-		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantMonitoredObjectStr, err.Error())
+	dataContainer := pb.MonitoredObjectResponse{}
+	if err := deleteDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, ds.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-
-	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantMonitoredObjectStr, existingObject)
-	return existingObject, nil
+	return &dataContainer, nil
 }
 
 // GetAllMonitoredObjects - CouchDB implementation of GetAllMonitoredObjects
 func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectListResponse, error) {
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
-		return nil, err
-	}
-
-	fetchedObjectList, err := getAllOfTypeByIDPrefix(string(ds.TenantMonitoredObjectType), ds.TenantMonitoredObjectStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
 	res := &pb.MonitoredObjectListResponse{}
 	res.Data = make([]*pb.MonitoredObjectResponse, 0)
-	if err = convertGenericArrayToObject(fetchedObjectList, &res.Data, ds.TenantMonitoredObjectStr); err != nil {
+	if err := getAllOfTypeFromCouch(tenantDBName, string(ds.TenantMonitoredObjectType), ds.TenantMonitoredObjectStr, &res.Data); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantMonitoredObjectStr)
 	return res, nil
 }
 
@@ -525,34 +340,22 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantMetaStr, meta)
-
 	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
-	dataType := string(ds.TenantMetaType)
-	dataContainer := pb.TenantMetadata{}
-	if err := storeData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantMetadata{}
+	if err := createDataInCouch(tenantDBName, meta, dataContainer, string(ds.TenantMetaType), ds.TenantMetaStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.TenantMetaStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // UpdateTenantMeta - CouchDB implementation of UpdateTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
-	logger.Log.Debugf("Updating %s: %v\n", ds.TenantMetaStr, meta)
-
 	tenantDBName := createDBPathStr(tsd.server, meta.GetData().GetTenantId())
-	dataType := string(ds.TenantMetaType)
-	dataContainer := pb.TenantMetadata{}
-	if err := updateData(tenantDBName, meta, dataType, ds.TenantMetaStr, &dataContainer); err != nil {
+	dataContainer := &pb.TenantMetadata{}
+	if err := updateDataInCouch(tenantDBName, meta, dataContainer, string(ds.TenantMetaType), ds.TenantMetaStr); err != nil {
 		return nil, err
 	}
-
-	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.TenantMetaStr, dataContainer)
-	return &dataContainer, nil
+	return dataContainer, nil
 }
 
 // DeleteTenantMeta - CouchDB implementation of DeleteTenantMeta
@@ -630,24 +433,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 // GetAllTenantThresholdProfile - CouchDB implementation of GetAllTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdListResponse, error) {
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
-		return nil, err
-	}
-
-	fetchedObjectList, err := getAllOfTypeByIDPrefix(string(ds.TenantThresholdProfileType), ds.TenantThresholdProfileStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
 	res := &pb.TenantThresholdListResponse{}
 	res.Data = make([]*pb.TenantThresholdProfileResponse, 0)
-	if err = convertGenericArrayToObject(fetchedObjectList, &res.Data, ds.TenantThresholdProfileStr); err != nil {
+	if err := getAllOfTypeFromCouch(tenantDBName, string(ds.TenantThresholdProfileType), ds.TenantThresholdProfileStr, &res.Data); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Found %d %ss\n", len(res.GetData()), ds.TenantThresholdProfileStr)
 	return res, nil
 }

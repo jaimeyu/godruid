@@ -235,6 +235,12 @@ service TenantProvisioningService {
         };
     }
 
+    rpc GetActiveTenantIngestionProfile(google.protobuf.StringValue) returns (TenantIngestionProfileResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{value}/active-ingestion-profile"
+        };
+    }
+
     // Delete an Ingestion Profile scoped to a single Tenant. 
     rpc DeleteTenantIngestionProfile(TenantIngestionProfileIdRequest) returns (TenantIngestionProfileResponse) {
         option (google.api.http) = {
@@ -265,6 +271,13 @@ service TenantProvisioningService {
     rpc GetTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfileResponse) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}"
+        };
+    }
+
+    // Retrieve all Thresholds scoped to a single Tenant. 
+    rpc GetAllTenantThresholdProfiles(google.protobuf.StringValue) returns (TenantThresholdListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/tenants/{value}/threshold-profile-list"
         };
     }
 

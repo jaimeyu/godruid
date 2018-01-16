@@ -607,3 +607,31 @@ func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr
 	logger.Log.Infof("Retrieved %s: %s\n", db.TenantMetaStr, result.GetXId())
 	return result, nil
 }
+
+// GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
+func (tsh *TenantServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdListResponse, error) {
+	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantThresholdProfileStr, tenantID.Value)
+
+	// Issue request to DAO Layer to fetch the records
+	result, err := tsh.tenantDB.GetAllTenantThresholdProfile(tenantID.Value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %ss: %s", db.TenantThresholdProfileStr, err.Error())
+	}
+
+	// Succesfully fetched the records, return the result.
+	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), db.TenantThresholdProfileStr)
+	return result, nil
+}
+
+// GetActiveTenantIngestionProfile - retrieves the active Ingestion Profile for a single Tenant.
+func (tsh *TenantServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfileResponse, error) {
+	// Issue request to DAO Layer to fetch the record
+	result, err := tsh.tenantDB.GetActiveTenantIngestionProfile(tenantID.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.TenantIngestionProfileStr, err.Error())
+	}
+
+	// Succesfully fetched the record, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
+	return result, nil
+}

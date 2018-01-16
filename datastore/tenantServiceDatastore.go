@@ -86,4 +86,7 @@ type TenantServiceDatastore interface {
 	UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
 	DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error)
 	GetTenantMeta(tenantID string) (*pb.TenantMetadata, error)
+
+	GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfileResponse, error)
+	GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdListResponse, error)
 }

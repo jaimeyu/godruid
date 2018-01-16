@@ -45,6 +45,16 @@ func convertGenericObjectToBytesWithCouchDbFields(genericObject map[string]inter
 	return genericUserInBytes, nil
 }
 
+func convertGenericObjectToBytes(genericObject []map[string]interface{}) ([]byte, error) {
+	genericUserInBytes, err := json.Marshal(genericObject)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to bytes: %s", err.Error())
+		return nil, err
+	}
+
+	return genericUserInBytes, nil
+}
+
 // StoreDataInCouchDB - takes data that is already in a format ready to store in CouchDB
 // and attempts to store it. Parameters are:
 // dataToStore(the CouchDB ready data to be stored),
@@ -146,6 +156,23 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 // that object with the generic data.
 func convertGenericCouchDataToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
 	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(genericData)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(genericDataInBytes, &dataContainer)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		return err
+	}
+
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
+
+	return nil
+}
+
+func convertGenericArrayToObject(genericData []map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+	genericDataInBytes, err := convertGenericObjectToBytes(genericData)
 	if err != nil {
 		return err
 	}
@@ -297,4 +324,75 @@ func deleteData(dbName string, dataID string, dataTypeLogStr string) error {
 
 	logger.Log.Debugf("Deleted %s: %s\n", dataTypeLogStr)
 	return nil
+}
+
+func createDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
+	logger.Log.Debugf("Creating %s: %v\n", loggingStr, dataToStore)
+
+	if err := storeData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", loggingStr, dataContainer)
+	return nil
+}
+
+func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
+	logger.Log.Debugf("Updating %s: %v\n", loggingStr, dataToStore)
+
+	if err := updateData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", loggingStr, dataContainer)
+	return nil
+}
+
+func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error {
+	logger.Log.Debugf("Retrieving %s for %s\n", loggingStr, idToRetrieve)
+
+	if err := getData(dbName, idToRetrieve, loggingStr, &dataContainer); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, dataContainer)
+	return nil
+}
+
+func deleteDataFromCouch(dbName string, idToDelete string, dataContainer interface{}, loggingStr string) error {
+	logger.Log.Debugf("Deleting %s for %s\n", loggingStr, idToDelete)
+
+	// Obtain the value of the existing record for a return value.
+	if err := getDataFromCouch(dbName, idToDelete, &dataContainer, loggingStr); err != nil {
+		logger.Log.Debugf("Unable to fetch %s to delete: %s", loggingStr, err.Error())
+		return err
+	}
+
+	if err := deleteData(dbName, idToDelete, loggingStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", loggingStr, err.Error())
+		return err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, dataContainer)
+	return nil
+}
+
+func getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	fetchedList, err := getAllOfTypeByIDPrefix(dataType, loggingStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	return convertGenericArrayToObject(fetchedList, &dataContainer, loggingStr)
 }

@@ -25,10 +25,7 @@ func GenerateID(obj interface{}, dataType string) (string, error) {
 		cast := obj.(*pb.MonitoredObject)
 		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, trimAndLowercase(cast.GetId())), nil
 	default:
-		uuid, err := uuid.NewV4()
-		if err != nil {
-			return "", err
-		}
+		uuid := uuid.NewV4()
 		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, uuid.String()), nil
 	}
 }

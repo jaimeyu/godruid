@@ -111,10 +111,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 	}
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return nil, err
-	}
+	uuid := uuid.NewV4()
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{
@@ -171,10 +168,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	}
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return nil, err
-	}
+	uuid := uuid.NewV4()
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{
@@ -232,10 +226,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	}
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return nil, err
-	}
+	uuid := uuid.NewV4()
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{

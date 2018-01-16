@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.43.0 
+**Release Date:** Tue Jan 16 18:53:43 UTC 2018     
+## Previous Releases 
 ### 0.42.0 
 **Release Date:** Tue Jan 16 14:50:13 UTC 2018     
-## Previous Releases 
 ### 0.41.0 
 **Release Date:** Tue Jan  9 18:28:44 UTC 2018    
 * add dependency management and refactor db operations. 

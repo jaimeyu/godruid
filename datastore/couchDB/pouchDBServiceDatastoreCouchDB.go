@@ -146,24 +146,7 @@ func (psd *PouchDBServiceDatastoreCouchDB) GetDBRevisionDiff(dbname string, requ
 
 // BulkDBUpdate - CouchDB implementation of BulkDBUpdate
 func (psd *PouchDBServiceDatastoreCouchDB) BulkDBUpdate(dbname string, request map[string]interface{}) ([]map[string]interface{}, error) {
-	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBBulkUpdateStr, request, dbname)
-
-	// Create a resource that can make the bulk update call to Couch
-	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), nil)
-	if err != nil {
-		logger.Log.Debugf("Falied to perform %s: %s", ds.DBBulkUpdateStr, err.Error())
-		return nil, err
-	}
-
-	// Retrieve the checkpoint data from CouchDB
-	fetchedData, err := performBulkUpdate(request, resource)
-	if err != nil {
-		return nil, err
-	}
-
-	// DB Sync Checkpoint retrieved, send the response
-	logger.Log.Debugf("Completed %s on DB %s: %v\n", ds.DBBulkUpdateStr, dbname, fetchedData)
-	return fetchedData, nil
+	return bulkUpdate(createDBPathStr(psd.couchHost, dbname), request)
 }
 
 // CheckDBAvailability - CouchDB inmplementation of CheckDBAvailability
@@ -186,24 +169,7 @@ func (psd *PouchDBServiceDatastoreCouchDB) CheckDBAvailability(dbName string) (m
 
 // GetAllDBDocs - CouchDB inmplementation of GetAllDBDocs
 func (psd *PouchDBServiceDatastoreCouchDB) GetAllDBDocs(dbname string, request map[string]interface{}) (map[string]interface{}, error) {
-	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBAllDocsStr, request, dbname)
-
-	// Create a resource that can make the fetch all docs call to Couch
-	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbname), nil)
-	if err != nil {
-		logger.Log.Debugf("Falied to fetch %s: %s", ds.DBAllDocsStr, err.Error())
-		return nil, err
-	}
-
-	// Retrieve the all doc metadata from CouchDB
-	fetchedData, err := fetchAllDocs(request, resource)
-	if err != nil {
-		return nil, err
-	}
-
-	// All Docs data retrieved, send the response
-	logger.Log.Debugf("Completed fetch of %s on DB %s: %v\n", ds.DBAllDocsStr, dbname, fetchedData)
-	return fetchedData, nil
+	return getAllDocsFromDB(createDBPathStr(psd.couchHost, dbname), request)
 }
 
 // CreateDB - Couch inmplementation of CreateDB
@@ -412,6 +378,78 @@ func parseDataArray(data []byte) ([]map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+func getAllDocsFromDB(dbName string, request map[string]interface{}) (map[string]interface{}, error) {
+	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBAllDocsStr, request, dbName)
+
+	// Create a resource that can make the fetch all docs call to Couch
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to fetch %s: %s", ds.DBAllDocsStr, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the all doc metadata from CouchDB
+	fetchedData, err := fetchAllDocs(request, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// All Docs data retrieved, send the response
+	logger.Log.Debugf("Completed fetch of %s on DB %s\n", ds.DBAllDocsStr, dbName)
+	return fetchedData, nil
+}
+
+func bulkUpdate(dbName string, request map[string]interface{}) ([]map[string]interface{}, error) {
+	logger.Log.Debugf("Performing %s %v on DB %s", ds.DBBulkUpdateStr, request, dbName)
+
+	// Create a resource that can make the bulk update call to Couch
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to perform %s: %s", ds.DBBulkUpdateStr, err.Error())
+		return nil, err
+	}
+
+	// Retrieve the checkpoint data from CouchDB
+	fetchedData, err := performBulkUpdate(request, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// DB Sync Checkpoint retrieved, send the response
+	logger.Log.Debugf("Completed %s on DB %s\n", ds.DBBulkUpdateStr, dbName)
+	return fetchedData, nil
+}
+
+func purgeDB(dbName string) error {
+	// Get a list of all documents from the DB:
+	docs, err := getAllDocsFromDB(dbName, map[string]interface{}{})
+	if err != nil {
+		return fmt.Errorf("Unable to purge DB %s: %s", dbName, err.Error())
+	}
+
+	if docs["rows"] != nil {
+		// There are documents to delete, build up a bulk delete request body for all of them
+		docList := docs["rows"].([]interface{})
+		docsToDelete := make([]map[string]interface{}, 0)
+		for _, doc := range docList {
+			docObj := doc.(map[string]interface{})
+			docID := docObj["id"].(string)
+			docRev := docObj["value"].(map[string]interface{})["rev"].(string)
+			docsToDelete = append(docsToDelete, map[string]interface{}{"_id": docID, "_rev": docRev, "_deleted": true})
+		}
+
+		deleteBody := map[string]interface{}{"docs": docsToDelete}
+		logger.Log.Debugf("Attempting to delete the following from DB %s: %v", dbName, docsToDelete)
+
+		_, err = bulkUpdate(dbName, deleteBody)
+		if err != nil {
+			return fmt.Errorf("Unable to purge DB %s: %s", dbName, err.Error())
+		}
+	}
+
+	return nil
 }
 
 // ************************ End of CouchDB-GoLang functionality ************************ //

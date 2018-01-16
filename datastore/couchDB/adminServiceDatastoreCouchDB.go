@@ -148,6 +148,12 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 		return nil, err
 	}
 
+	// Purge the DB of records:
+	if err = purgeDB(createDBPathStr(asd.couchHost, tenantID)); err != nil {
+		logger.Log.Debugf("Unable to purge DB contents for %s: %s", ds.TenantStr, err.Error())
+		return nil, err
+	}
+
 	// Try to delete the DB for the tenant
 	if err := asd.deleteDatabase(tenantID); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())

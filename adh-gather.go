@@ -22,6 +22,7 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	emp "github.com/golang/protobuf/ptypes/empty"
 )
 
 var (
@@ -160,6 +161,48 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) bool {
+	if (obj1 == nil && obj2 != nil) || (obj1 != nil && obj2 == nil) {
+		return false
+	}
+
+	if obj1 == nil && obj2 == nil {
+		return true
+	}
+
+	// Have 2 valid objects, do parameter comparison.
+	// MonitoredObjectTypes
+	if len(obj1.MonitoredObjectTypes) != len(obj2.MonitoredObjectTypes) {
+		return false
+	}
+	for _, val := range obj1.MonitoredObjectTypes {
+		if !doesSliceContainString(obj2.MonitoredObjectTypes, val) {
+			return false
+		}
+	}
+
+	// MonitoredObjectDeviceTypes
+	if len(obj1.MonitoredObjectDeviceTypes) != len(obj2.MonitoredObjectDeviceTypes) {
+		return false
+	}
+	for _, val := range obj1.MonitoredObjectDeviceTypes {
+		if !doesSliceContainString(obj2.MonitoredObjectDeviceTypes, val) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func doesSliceContainString(container []string, value string) bool {
+	for _, s := range container {
+		if s == value {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	pflag.Parse()
 	v := viper.New()
@@ -203,8 +246,29 @@ func main() {
 		if err != nil {
 			logger.Log.Fatalf("Unable to Add Views to DB %s: %s", adminDB, err.Error())
 		}
-
 	}
+
+	// Make sure the valid types are provisioned.
+	provisionedValidTypes, err := gatherServer.gsh.GetValidTypes(nil, &emp.Empty{})
+	if err != nil {
+		logger.Log.Debugf("Unable to fetch Valid Values from DB %s: %s", adminDB, err.Error())
+
+		// Provision the default values as a new object.
+		provisionedValidTypes, err = gatherServer.gsh.CreateValidTypes(nil, &pb.ValidTypes{Data: gatherServer.gsh.DefaultValidTypes})
+		if err != nil {
+			logger.Log.Fatalf("Unable to Add Valid Values object to DB %s: %s", adminDB, err.Error())
+		}
+	}
+	if !areValidTypesEquivalent(provisionedValidTypes.Data, gatherServer.gsh.DefaultValidTypes) {
+		// Need to add the known default values to the data store
+		provisionedValidTypes.Data.MonitoredObjectTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectTypes
+		provisionedValidTypes.Data.MonitoredObjectDeviceTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectDeviceTypes
+		provisionedValidTypes, err = gatherServer.gsh.UpdateValidTypes(nil, provisionedValidTypes)
+		if err != nil {
+			logger.Log.Fatalf("Unable to Update Valid Values object to DB %s: %s", adminDB, err.Error())
+		}
+	}
+
 	logger.Log.Infof("Using %s as Administrative Database", adminDB)
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)

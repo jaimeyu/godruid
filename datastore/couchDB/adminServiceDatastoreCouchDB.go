@@ -386,6 +386,81 @@ func (asd *AdminServiceDatastoreCouchDB) AddAdminViews() error {
 	return nil
 }
 
+// CreateValidTypes - CouchDB implementation of CreateValidTypes
+func (asd *AdminServiceDatastoreCouchDB) CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	value.XId = ds.GenerateID(value.GetData(), string(ds.ValidTypesType))
+
+	dataType := string(ds.ValidTypesType)
+	dataContainer := pb.ValidTypes{}
+	if err := storeData(asd.dbName, value, dataType, ds.ValidTypesStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.ValidTypesStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// UpdateValidTypes - CouchDB implementation of UpdateValidTypes
+func (asd *AdminServiceDatastoreCouchDB) UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	value.XId = ds.PrependToDataID(value.XId, string(ds.ValidTypesType))
+
+	dataType := string(ds.ValidTypesType)
+	dataContainer := pb.ValidTypes{}
+	if err := updateData(asd.dbName, value, dataType, ds.ValidTypesStr, &dataContainer); err != nil {
+		return nil, err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", ds.ValidTypesStr, dataContainer)
+	return &dataContainer, nil
+}
+
+// GetValidTypes - CouchDB implementation of GetValidTypes
+func (asd *AdminServiceDatastoreCouchDB) GetValidTypes() (*pb.ValidTypes, error) {
+	db, err := getDatabase(asd.dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedData, err := getAllOfTypeByIDPrefix(string(ds.ValidTypesType), ds.ValidTypesStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := pb.ValidTypes{}
+	if len(fetchedData) != 0 {
+		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.ValidTypesStr); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("No %s found", ds.ValidTypesStr)
+	}
+
+	logger.Log.Debugf("Found %s %v\n", ds.ValidTypesStr, res)
+	return &res, nil
+}
+
+// GetSpecificValidTypes - CouchDB implementation of GetSpecificValidTypes
+func (asd *AdminServiceDatastoreCouchDB) GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	currentValidValuesRecord, err := asd.GetValidTypes()
+	if err != nil {
+		return nil, err
+	}
+
+	result := &pb.ValidTypesData{}
+	if value.MonitoredObjectTypes {
+		result.MonitoredObjectTypes = currentValidValuesRecord.Data.MonitoredObjectTypes
+	}
+	if value.MonitoredObjectDeviceTypes {
+		result.MonitoredObjectDeviceTypes = currentValidValuesRecord.Data.MonitoredObjectDeviceTypes
+	}
+
+	logger.Log.Debugf("Found %s %v\n", ds.ValidTypesStr, result)
+	return result, nil
+}
+
 // Produces all of the views/indicies necessary for the Tenant DB
 func generateTenantViews() []map[string]interface{} {
 	result := make([]map[string]interface{}, 0)

@@ -26,6 +26,9 @@ It has these top-level messages:
 	AdminUserList
 	IngestionDictionaryData
 	IngestionDictionary
+	ValidTypesRequest
+	ValidTypesData
+	ValidTypes
 	TenantDomainData
 	TenantDomain
 	TenantDomainList

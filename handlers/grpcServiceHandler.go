@@ -10,14 +10,28 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
 
+var (
+	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
+	ValidMonitoredObjectTypes = map[pb.MonitoredObjectData_MonitoredObjectType]string{
+		pb.MonitoredObjectData_MO_UNKNOWN: "unknown",
+		pb.MonitoredObjectData_TWAMP:      "pe"}
+
+	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
+	ValidMonitoredObjectDeviceTypes = map[pb.MonitoredObjectData_DeviceType]string{
+		pb.MonitoredObjectData_DT_UNKNOWN:    "unknown",
+		pb.MonitoredObjectData_ACCEDIAN_NID:  "accedianNID",
+		pb.MonitoredObjectData_ACCEDIAN_VNID: "accedianVNID"}
+)
+
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
 // implementation details to each unique service handler. When new
 // gRPC services are added, a new Service Handler should be created,
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
-	ash *AdminServiceHandler
-	tsh *TenantServiceHandler
-	msh *MetricServiceHandler
+	ash               *AdminServiceHandler
+	tsh               *TenantServiceHandler
+	msh               *MetricServiceHandler
+	DefaultValidTypes *pb.ValidTypesData
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -29,6 +43,22 @@ func CreateCoordinator() *GRPCServiceHandler {
 	result.ash = CreateAdminServiceHandler()
 	result.tsh = CreateTenantServiceHandler()
 	result.msh = CreateMetricServiceHandler()
+
+	// Setup the known values of the Valid Types for the system
+	// by using the enumerated protobuf values
+	validMonObjTypes := make([]string, 0)
+	validMonObjDevTypes := make([]string, 0)
+
+	for _, val := range ValidMonitoredObjectTypes {
+		validMonObjTypes = append(validMonObjTypes, val)
+	}
+	for _, val := range ValidMonitoredObjectDeviceTypes {
+		validMonObjDevTypes = append(validMonObjDevTypes, val)
+	}
+
+	result.DefaultValidTypes = &pb.ValidTypesData{
+		MonitoredObjectTypes:       validMonObjTypes,
+		MonitoredObjectDeviceTypes: validMonObjDevTypes}
 
 	return result
 }
@@ -348,4 +378,24 @@ func (gsh *GRPCServiceHandler) GetTenantIDByAlias(ctx context.Context, value *wr
 // AddAdminViews - add views to admin db
 func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	return gsh.ash.AddAdminViews()
+}
+
+// CreateValidTypes - Create the valid type definition in the system.
+func (gsh *GRPCServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	return gsh.ash.CreateValidTypes(ctx, value)
+}
+
+// UpdateValidTypes - Update the valid type definition in the system.
+func (gsh *GRPCServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	return gsh.ash.UpdateValidTypes(ctx, value)
+}
+
+// GetValidTypes - retrieve the enire list of ValidTypes in the system.
+func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
+	return gsh.ash.GetValidTypes(ctx, value)
+}
+
+// GetSpecificValidTypes - retrieve a subset of the known ValidTypes in the system.
+func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	return gsh.ash.GetSpecificValidTypes(ctx, value)
 }

@@ -129,6 +129,34 @@ service AdminProvisioningService {
             get: "/api/v1/tenant-by-alias/{value}"
         };
     }
+
+    rpc CreateValidTypes(ValidTypes) returns (ValidTypes) {
+        option (google.api.http) = {
+            post: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc UpdateValidTypes(ValidTypes) returns (ValidTypes) {
+        option (google.api.http) = {
+            put: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc GetValidTypes(google.protobuf.Empty) returns (ValidTypes) {
+        option (google.api.http) = {
+            put: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc GetSpecificValidTypes(ValidTypesRequest) returns (ValidTypesData) {
+        option (google.api.http) = {
+            post: "/api/v1/specific-valid-types"
+            body: "*"
+        };
+    }
 }
 
 

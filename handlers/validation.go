@@ -213,3 +213,15 @@ func validateTenantMetaRequest(request *pb.TenantMetadata, isUpdate bool) error 
 
 	return nil
 }
+
+func validateValidTypes(request *pb.ValidTypes, isUpdate bool) error {
+	if request == nil || request.GetData() == nil {
+		return errors.New("Invalid ValidTypes: no ValidTypes data provided")
+	}
+
+	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
+		return errors.New("Invalid ValidTypes: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}

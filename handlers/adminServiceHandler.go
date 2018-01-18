@@ -305,6 +305,76 @@ func (ash *AdminServiceHandler) AddAdminViews() error {
 	return ash.adminDB.AddAdminViews()
 }
 
+// CreateValidTypes - Create the valid type definition in the system.
+func (ash *AdminServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateValidTypes(value, false); err != nil {
+		return nil, err
+	}
+	logger.Log.Infof("Creating %s: %s", datastore.ValidTypesStr, value.GetXId())
+
+	// Issue request to AdminService DAO to create the record:
+	result, err := ash.adminDB.CreateValidTypes(value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create %s: %s", datastore.ValidTypesStr, err.Error())
+	}
+
+	// Succesfully Created the record
+	logger.Log.Infof("Created %s: %s\n", datastore.ValidTypesStr, result.GetXId())
+	return result, nil
+}
+
+// UpdateValidTypes - Update the valid type definition in the system.
+func (ash *AdminServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	if err := validateValidTypes(value, true); err != nil {
+		return nil, err
+	}
+	logger.Log.Infof("Updating %s: %s", datastore.ValidTypesStr, value.GetXId())
+
+	// Issue request to AdminService DAO to update the record
+	result, err := ash.adminDB.UpdateValidTypes(value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to update %s: %s", datastore.ValidTypesStr, err.Error())
+	}
+
+	// Succesfully updated the record
+	logger.Log.Infof("Updated %s: %s\n", datastore.ValidTypesStr, result.GetXId())
+	return result, nil
+}
+
+// GetValidTypes - retrieve the enire list of ValidTypes in the system.
+func (ash *AdminServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
+	logger.Log.Infof("Retrieving %s", datastore.ValidTypesStr)
+
+	// Issue request to DAO Layer to Get the requested record
+	result, err := ash.adminDB.GetValidTypes()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.ValidTypesStr, err.Error())
+	}
+
+	// Succesfully found the record, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", datastore.ValidTypesStr, result.GetXId())
+	return result, nil
+}
+
+// GetSpecificValidTypes - retrieve a subset of the known ValidTypes in the system.
+func (ash *AdminServiceHandler) GetSpecificValidTypes(ctx context.Context, value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	// Validate the request:
+	if value == nil {
+		value = &pb.ValidTypesRequest{MonitoredObjectTypes: true, MonitoredObjectDeviceTypes: true}
+	}
+
+	// Issue request to DAO Layer to fetch the Tenant Monitored Object Map
+	result, err := ash.adminDB.GetSpecificValidTypes(value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.ValidTypesStr, err.Error())
+	}
+
+	// Succesfully fetched the Monitored Object Map, return the result.
+	logger.Log.Infof("Successfully retrieved %s: %s\n", db.ValidTypesStr)
+	return result, nil
+}
+
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))

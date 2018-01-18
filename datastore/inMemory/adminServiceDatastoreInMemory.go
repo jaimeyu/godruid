@@ -116,3 +116,27 @@ func (memDB *AdminServiceDatastoreInMemory) AddAdminViews() error {
 	// Stub to implement
 	return errors.New("GetTenantIDByName() not implemented for InMemory DB")
 }
+
+// CreateValidTypes - InMemory implementation of CreateValidTypes
+func (memDB *AdminServiceDatastoreInMemory) CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	// Stub to implement
+	return nil, errors.New("CreateValidTypes() not implemented for InMemory DB")
+}
+
+// UpdateValidTypes - InMemory implementation of UpdateValidTypes
+func (memDB *AdminServiceDatastoreInMemory) UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	// Stub to implement
+	return nil, errors.New("UpdateValidTypes() not implemented for InMemory DB")
+}
+
+// GetValidTypes - InMemory implementation of GetValidTypes
+func (memDB *AdminServiceDatastoreInMemory) GetValidTypes() (*pb.ValidTypes, error) {
+	// Stub to implement
+	return nil, errors.New("GetValidTypes() not implemented for InMemory DB")
+}
+
+// GetSpecificValidTypes - InMemory implementation of GetSpecificValidTypes
+func (memDB *AdminServiceDatastoreInMemory) GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	// Stub to implement
+	return nil, errors.New("GetSpecificValidTypes() not implemented for InMemory DB")
+}

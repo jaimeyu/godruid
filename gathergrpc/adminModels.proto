@@ -96,3 +96,24 @@ message IngestionDictionary {
     string _rev = 2;
     IngestionDictionaryData data = 3;
 }
+
+// ValidTypesRequest - used as query parameters to the API which retrieves various value definitions used 
+// in Skylight Datahub
+message ValidTypesRequest {
+    bool monitoredObjectTypes = 1;
+    bool monitoredObjectDeviceTypes = 2;
+}
+
+message ValidTypesData {
+    repeated string monitoredObjectTypes = 1;
+    repeated string monitoredObjectDeviceTypes = 2;
+
+    int64 createdTimestamp = 3;
+    int64 lastModifiedTimestamp = 4;
+}
+// ValidTypes - contains variious type definitions used in Skylight Datahhub
+message ValidTypes {
+    string _id = 1;
+    string _rev = 2;
+    ValidTypesData data = 3;
+}

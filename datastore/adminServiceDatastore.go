@@ -16,6 +16,9 @@ const (
 
 	// IngestionDictionaryType - datatype string used to identify an IngestionDictionary in the datastore record
 	IngestionDictionaryType AdminDataType = "ingestionDictionary"
+
+	// ValidTypesType - datatype string used to identify a ValidTypes object in the datastore record
+	ValidTypesType AdminDataType = "validTypes"
 )
 
 const (
@@ -30,6 +33,9 @@ const (
 
 	// IngestionDictionaryStr - common name of the IngestionDictionary data type for use in logs.
 	IngestionDictionaryStr = "Ingestion Dictionary"
+
+	// ValidTypesStr - common name of the ValidTypes data type for use in logs.
+	ValidTypesStr = "Valid Types object"
 )
 
 // AdminServiceDatastore - interface which provides the functionality
@@ -55,4 +61,9 @@ type AdminServiceDatastore interface {
 	GetIngestionDictionary() (*pb.IngestionDictionary, error)
 
 	GetTenantIDByAlias(name string) (string, error)
+
+	CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error)
+	UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error)
+	GetValidTypes() (*pb.ValidTypes, error)
+	GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error)
 }

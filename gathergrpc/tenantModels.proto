@@ -186,14 +186,14 @@ message MonitoredObjectData {
     string tenantId = 2;
     string datatype = 3;
 
-    DeviceType actuatorType = 4;
+    string actuatorType = 4;
     string actuatorName = 5;
 
-    DeviceType reflectorType = 6;
+    string reflectorType = 6;
     string reflectorName = 7;
     
     string objectName = 8;
-    MonitoredObjectType objectType = 9;  
+    string objectType = 9;  
 
     int64 createdTimestamp = 10;
     int64 lastModifiedTimestamp = 11;

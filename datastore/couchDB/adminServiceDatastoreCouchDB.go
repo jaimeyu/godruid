@@ -58,45 +58,59 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 }
 
 // CreateAdminUser - CouchDB implementation of CreateAdminUser
-func (asd *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	dataContainer := &pb.AdminUserResponse{}
+func (asd *AdminServiceDatastoreCouchDB) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+	user.XId = ds.GenerateID(user.GetData(), string(ds.AdminUserType))
+
+	dataContainer := &pb.AdminUser{}
 	if err := createDataInCouch(asd.dbName, user, dataContainer, string(ds.AdminUserType), ds.AdminUserStr); err != nil {
 		return nil, err
 	}
+
 	return dataContainer, nil
 }
 
 // UpdateAdminUser - CouchDB implementation of UpdateAdminUser
-func (asd *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
-	dataContainer := &pb.AdminUserResponse{}
+func (asd *AdminServiceDatastoreCouchDB) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
+	user.XId = ds.PrependToDataID(user.XId, string(ds.AdminUserType))
+
+	dataContainer := &pb.AdminUser{}
 	if err := updateDataInCouch(asd.dbName, user, dataContainer, string(ds.AdminUserType), ds.AdminUserStr); err != nil {
 		return nil, err
 	}
+
 	return dataContainer, nil
 }
 
 // DeleteAdminUser - CouchDB implementation of DeleteAdminUser
-func (asd *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.AdminUserResponse, error) {
-	dataContainer := pb.AdminUserResponse{}
+func (asd *AdminServiceDatastoreCouchDB) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
+	userID = ds.PrependToDataID(userID, string(ds.AdminUserType))
+
+	dataContainer := pb.AdminUser{}
 	if err := deleteDataFromCouch(asd.dbName, userID, &dataContainer, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
+
+	dataContainer.XId = ds.GetDataIDFromFullID(dataContainer.XId)
 	return &dataContainer, nil
 }
 
 // GetAdminUser - CouchDB implementation of GetAdminUser
-func (asd *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUserResponse, error) {
-	dataContainer := pb.AdminUserResponse{}
+func (asd *AdminServiceDatastoreCouchDB) GetAdminUser(userID string) (*pb.AdminUser, error) {
+	userID = ds.PrependToDataID(userID, string(ds.AdminUserType))
+
+	dataContainer := pb.AdminUser{}
 	if err := getDataFromCouch(asd.dbName, userID, &dataContainer, ds.AdminUserStr); err != nil {
 		return nil, err
 	}
+
+	dataContainer.XId = ds.GetDataIDFromFullID(dataContainer.XId)
 	return &dataContainer, nil
 }
 
 // GetAllAdminUsers - CouchDB implementation of GetAllAdminUsers
-func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserListResponse, error) {
-	res := &pb.AdminUserListResponse{}
-	res.Data = make([]*pb.AdminUserResponse, 0)
+func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, error) {
+	res := &pb.AdminUserList{}
+	res.Data = make([]*pb.AdminUser, 0)
 	if err := getAllOfTypeFromCouch(asd.dbName, string(ds.AdminUserType), ds.AdminUserStr, &res.Data); err != nil {
 		return nil, err
 	}
@@ -105,21 +119,23 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserListRe
 }
 
 // CreateTenant - CouchDB implementation of CreateTenant
-func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	dataContainer := &pb.TenantDescriptorResponse{}
+func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	tenantDescriptor.XId = ds.GenerateID(tenantDescriptor.GetData(), string(ds.TenantDescriptorType))
+
+	dataContainer := &pb.TenantDescriptor{}
 	if err := createDataInCouch(asd.dbName, tenantDescriptor, dataContainer, string(ds.TenantDescriptorType), ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
 
 	// Create a CouchDB database to isolate the tenant data
-	_, err := asd.createDatabase(tenantDescriptor.GetXId())
+	_, err := asd.createDatabase(tenantDescriptor.XId)
 	if err != nil {
 		logger.Log.Debugf("Unable to create database for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
 		return nil, err
 	}
 
 	// Add in the views/indicies necessary for the db:
-	if err = asd.addTenantViewsToDB(tenantDescriptor.GetXId()); err != nil {
+	if err = asd.addTenantViewsToDB(tenantDescriptor.XId); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
 		return nil, err
 	}
@@ -129,8 +145,10 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 }
 
 // UpdateTenantDescriptor - CouchDB implementation of UpdateTenantDescriptor
-func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
-	dataContainer := &pb.TenantDescriptorResponse{}
+func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	tenantDescriptor.XId = ds.PrependToDataID(tenantDescriptor.XId, string(ds.TenantDescriptorType))
+
+	dataContainer := &pb.TenantDescriptor{}
 	if err := updateDataInCouch(asd.dbName, tenantDescriptor, dataContainer, string(ds.TenantDescriptorType), ds.TenantStr); err != nil {
 		return nil, err
 	}
@@ -138,8 +156,8 @@ func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor
 }
 
 // DeleteTenant - CouchDB implementation of DeleteTenant
-func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.TenantDescriptorResponse, error) {
-	logger.Log.Debugf("Deleting %s for %s\n", ds.TenantStr, tenantID)
+func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
+	tenantIDWithPrefix := ds.PrependToDataID(tenantID, string(ds.TenantDescriptorType))
 
 	// Obtain the value of the existing record for a return value.
 	existingTenant, err := asd.GetTenantDescriptor(tenantID)
@@ -149,18 +167,18 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 	}
 
 	// Purge the DB of records:
-	if err = purgeDB(createDBPathStr(asd.couchHost, tenantID)); err != nil {
+	if err = purgeDB(createDBPathStr(asd.couchHost, tenantIDWithPrefix)); err != nil {
 		logger.Log.Debugf("Unable to purge DB contents for %s: %s", ds.TenantStr, err.Error())
 		return nil, err
 	}
 
 	// Try to delete the DB for the tenant
-	if err := asd.deleteDatabase(tenantID); err != nil {
+	if err := asd.deleteDatabase(tenantIDWithPrefix); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())
 		return nil, err
 	}
 
-	if err = deleteData(asd.dbName, tenantID, ds.TenantStr); err != nil {
+	if err = deleteData(asd.dbName, tenantIDWithPrefix, ds.TenantStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.TenantStr, err.Error())
 		return nil, err
 	}
@@ -171,8 +189,10 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 }
 
 // GetTenantDescriptor - CouchDB implementation of GetTenantDescriptor
-func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptorResponse, error) {
-	dataContainer := pb.TenantDescriptorResponse{}
+func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
+	tenantID = ds.PrependToDataID(tenantID, string(ds.TenantDescriptorType))
+
+	dataContainer := pb.TenantDescriptor{}
 	if err := getDataFromCouch(asd.dbName, tenantID, &dataContainer, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
@@ -180,9 +200,9 @@ func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*
 }
 
 // GetAllTenantDescriptors - CouchDB implementation of GetAllTenantDescriptors
-func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDescriptorListResponse, error) {
-	res := &pb.TenantDescriptorListResponse{}
-	res.Data = make([]*pb.TenantDescriptorResponse, 0)
+func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDescriptorList, error) {
+	res := &pb.TenantDescriptorList{}
+	res.Data = make([]*pb.TenantDescriptor, 0)
 	if err := getAllOfTypeFromCouch(asd.dbName, string(ds.TenantDescriptorType), ds.TenantDescriptorStr, &res.Data); err != nil {
 		return nil, err
 	}
@@ -247,7 +267,7 @@ func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 
 // CreateIngestionDictionary - CouchDB implementation of CreateIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.IngestionDictionaryStr, ingDictionary)
+	ingDictionary.XId = ds.GenerateID(ingDictionary.GetData(), string(ds.IngestionDictionaryType))
 
 	dataType := string(ds.IngestionDictionaryType)
 	dataContainer := pb.IngestionDictionary{}
@@ -262,7 +282,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary
 
 // UpdateIngestionDictionary - CouchDB implementation of UpdateIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	logger.Log.Debugf("Updating %s: %v\n", ds.IngestionDictionaryStr, ingDictionary)
+	ingDictionary.XId = ds.PrependToDataID(ingDictionary.XId, string(ds.IngestionDictionaryType))
 
 	dataType := string(ds.IngestionDictionaryType)
 	dataContainer := pb.IngestionDictionary{}
@@ -277,7 +297,6 @@ func (asd *AdminServiceDatastoreCouchDB) UpdateIngestionDictionary(ingDictionary
 
 // DeleteIngestionDictionary - CouchDB implementation of DeleteIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
-	logger.Log.Debugf("Deleting %s\n", ds.IngestionDictionaryStr)
 
 	// Obtain the value of the existing record for a return value.
 	existingDictionary, err := asd.GetIngestionDictionary()
@@ -286,6 +305,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.Ingest
 		return nil, err
 	}
 
+	existingDictionary.XId = ds.PrependToDataID(existingDictionary.XId, string(ds.IngestionDictionaryType))
 	if err = deleteData(asd.dbName, existingDictionary.GetXId(), ds.IngestionDictionaryStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.IngestionDictionaryStr, err.Error())
 		return nil, err
@@ -339,7 +359,7 @@ func (asd *AdminServiceDatastoreCouchDB) GetTenantIDByAlias(name string) (string
 	}
 	obj := rows[0].(map[string]interface{})
 
-	response := obj["value"].(string)
+	response := ds.GetDataIDFromFullID(obj["value"].(string))
 	logger.Log.Debugf("Returning Tenant ID: %vs\n")
 	return response, nil
 }

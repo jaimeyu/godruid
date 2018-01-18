@@ -23,7 +23,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserResponse"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         },
@@ -33,7 +33,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserRequest"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         ],
@@ -48,7 +48,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserResponse"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         },
@@ -58,7 +58,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserRequest"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         ],
@@ -75,7 +75,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserListResponse"
+              "$ref": "#/definitions/gathergrpcAdminUserList"
             }
           }
         },
@@ -92,7 +92,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserResponse"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         },
@@ -115,7 +115,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcAdminUserResponse"
+              "$ref": "#/definitions/gathergrpcAdminUser"
             }
           }
         },
@@ -318,7 +318,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorListResponse"
+              "$ref": "#/definitions/gathergrpcTenantDescriptorList"
             }
           }
         },
@@ -335,7 +335,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         },
@@ -345,7 +345,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorRequest"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         ],
@@ -360,7 +360,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         },
@@ -370,7 +370,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorRequest"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         ],
@@ -387,7 +387,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         },
@@ -403,7 +403,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainRequest"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         ],
@@ -418,7 +418,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         },
@@ -434,7 +434,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainRequest"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         ],
@@ -451,7 +451,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         },
@@ -467,7 +467,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileRequest"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         ],
@@ -482,7 +482,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         },
@@ -498,7 +498,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileRequest"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         ],
@@ -579,7 +579,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         },
@@ -595,7 +595,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectRequest"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         ],
@@ -610,7 +610,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         },
@@ -626,7 +626,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectRequest"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         ],
@@ -643,7 +643,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         },
@@ -659,7 +659,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         ],
@@ -674,7 +674,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         },
@@ -690,7 +690,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileRequest"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         ],
@@ -707,7 +707,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         },
@@ -723,7 +723,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserRequest"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         ],
@@ -738,7 +738,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         },
@@ -754,7 +754,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserRequest"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         ],
@@ -771,7 +771,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         },
@@ -800,7 +800,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+              "$ref": "#/definitions/gathergrpcTenantDomain"
             }
           }
         },
@@ -831,7 +831,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         },
@@ -860,7 +860,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         },
@@ -924,7 +924,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         },
@@ -953,7 +953,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
+              "$ref": "#/definitions/gathergrpcMonitoredObject"
             }
           }
         },
@@ -984,7 +984,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         },
@@ -1013,7 +1013,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
             }
           }
         },
@@ -1044,7 +1044,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         },
@@ -1073,7 +1073,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserResponse"
+              "$ref": "#/definitions/gathergrpcTenantUser"
             }
           }
         },
@@ -1104,7 +1104,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         },
@@ -1127,7 +1127,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+              "$ref": "#/definitions/gathergrpcTenantDescriptor"
             }
           }
         },
@@ -1151,7 +1151,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantIngestionProfileResponse"
+              "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
             }
           }
         },
@@ -1176,7 +1176,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantDomainListResponse"
+              "$ref": "#/definitions/gathergrpcTenantDomainList"
             }
           }
         },
@@ -1249,7 +1249,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcMonitoredObjectListResponse"
+              "$ref": "#/definitions/gathergrpcMonitoredObjectList"
             }
           }
         },
@@ -1274,7 +1274,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantThresholdListResponse"
+              "$ref": "#/definitions/gathergrpcTenantThresholdProfileList"
             }
           }
         },
@@ -1299,7 +1299,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/gathergrpcTenantUserListResponse"
+              "$ref": "#/definitions/gathergrpcTenantUserList"
             }
           }
         },
@@ -1494,7 +1494,7 @@
         }
       }
     },
-    "MonitoredObjectDeviceType": {
+    "MonitoredObjectDataDeviceType": {
       "type": "string",
       "enum": [
         "DT_UNKNOWN",
@@ -1503,29 +1503,29 @@
       ],
       "default": "DT_UNKNOWN"
     },
-    "TenantIngestionProfileMonitoredObjectMap": {
+    "TenantIngestionProfileDataMonitoredObjectMap": {
       "type": "object",
       "properties": {
         "monitoredObjectTypeMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/gathergrpcTenantIngestionProfileMetricMap"
+            "$ref": "#/definitions/gathergrpcTenantIngestionProfileDataMetricMap"
           }
         }
       }
     },
-    "TenantThresholdProfileDirectionMap": {
+    "TenantThresholdProfileDataDirectionMap": {
       "type": "object",
       "properties": {
         "directionMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileEventMap"
+            "$ref": "#/definitions/TenantThresholdProfileDataEventMap"
           }
         }
       }
     },
-    "TenantThresholdProfileEventAttrMap": {
+    "TenantThresholdProfileDataEventAttrMap": {
       "type": "object",
       "properties": {
         "eventAttrMap": {
@@ -1536,29 +1536,44 @@
         }
       }
     },
-    "TenantThresholdProfileEventMap": {
+    "TenantThresholdProfileDataEventMap": {
       "type": "object",
       "properties": {
         "eventMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileEventAttrMap"
+            "$ref": "#/definitions/TenantThresholdProfileDataEventAttrMap"
           }
         }
       }
     },
-    "TenantThresholdProfileMonitoredObjectTypeMap": {
+    "TenantThresholdProfileDataMonitoredObjectTypeMap": {
       "type": "object",
       "properties": {
         "monitoredObjectTypeMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/gathergrpcTenantThresholdProfileMetricMap"
+            "$ref": "#/definitions/gathergrpcTenantThresholdProfileDataMetricMap"
           }
         }
       }
     },
     "gathergrpcAdminUser": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcAdminUserData"
+        }
+      },
+      "description": "AdminUser - wrapper for passing AdminUser\ndata as a request to the service."
+    },
+    "gathergrpcAdminUserData": {
       "type": "object",
       "properties": {
         "datatype": {
@@ -1595,47 +1610,17 @@
       },
       "description": "User data for an Adminstrative User."
     },
-    "gathergrpcAdminUserListResponse": {
+    "gathergrpcAdminUserList": {
       "type": "object",
       "properties": {
         "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcAdminUserResponse"
+            "$ref": "#/definitions/gathergrpcAdminUser"
           }
         }
       },
       "description": "Wrapper message to provide a response in the form of\na container of multiple AdminUser objects."
-    },
-    "gathergrpcAdminUserRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcAdminUser"
-        }
-      },
-      "description": "AdminUserRequest - wrapper for passing AdminUser\ndata as a request to the service."
-    },
-    "gathergrpcAdminUserResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcAdminUser"
-        }
-      },
-      "description": "AdminUserResponse - wrapper for passing AdminUser\ndata as a response from the service."
     },
     "gathergrpcData": {
       "type": "object",
@@ -1826,49 +1811,17 @@
     "gathergrpcMonitoredObject": {
       "type": "object",
       "properties": {
-        "id": {
+        "_id": {
           "type": "string"
         },
-        "tenantId": {
+        "_rev": {
           "type": "string"
         },
-        "datatype": {
-          "type": "string"
-        },
-        "actuatorType": {
-          "$ref": "#/definitions/MonitoredObjectDeviceType"
-        },
-        "actuatorName": {
-          "type": "string"
-        },
-        "reflectorType": {
-          "$ref": "#/definitions/MonitoredObjectDeviceType"
-        },
-        "reflectorName": {
-          "type": "string"
-        },
-        "objectName": {
-          "type": "string"
-        },
-        "objectType": {
-          "$ref": "#/definitions/gathergrpcMonitoredObjectMonitoredObjectType"
-        },
-        "createdTimestamp": {
-          "type": "string",
-          "format": "int64"
-        },
-        "lastModifiedTimestamp": {
-          "type": "string",
-          "format": "int64"
-        },
-        "domainSet": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "data": {
+          "$ref": "#/definitions/gathergrpcMonitoredObjectData"
         }
       },
-      "description": "MonitoredObject - describes a unique device/object which is reporting \ndata from the network."
+      "description": "MonitoredObject - Wrapper for requests involving a MonitoredObject that are \nscoped to a single Tenant."
     },
     "gathergrpcMonitoredObjectCountByDomainRequest": {
       "type": "object",
@@ -1902,12 +1855,79 @@
         "domainToMonitoredObjectSetMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/gathergrpcMonitoredObjectList"
+            "$ref": "#/definitions/gathergrpcMonitoredObjectSet"
           }
         }
       }
     },
+    "gathergrpcMonitoredObjectData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "actuatorType": {
+          "$ref": "#/definitions/MonitoredObjectDataDeviceType"
+        },
+        "actuatorName": {
+          "type": "string"
+        },
+        "reflectorType": {
+          "$ref": "#/definitions/MonitoredObjectDataDeviceType"
+        },
+        "reflectorName": {
+          "type": "string"
+        },
+        "objectName": {
+          "type": "string"
+        },
+        "objectType": {
+          "$ref": "#/definitions/gathergrpcMonitoredObjectDataMonitoredObjectType"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "domainSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "MonitoredObjectData - describes a unique device/object which is reporting \ndata from the network."
+    },
+    "gathergrpcMonitoredObjectDataMonitoredObjectType": {
+      "type": "string",
+      "enum": [
+        "MO_UNKNOWN",
+        "TWAMP"
+      ],
+      "default": "MO_UNKNOWN"
+    },
     "gathergrpcMonitoredObjectList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcMonitoredObject"
+          }
+        }
+      },
+      "description": "MonitoredObjectList - Wrapper for requests which return a list of MonitoredObjects \nscoped to a single Tenant."
+    },
+    "gathergrpcMonitoredObjectSet": {
       "type": "object",
       "properties": {
         "monitoredObjectSet": {
@@ -1917,56 +1937,6 @@
           }
         }
       }
-    },
-    "gathergrpcMonitoredObjectListResponse": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcMonitoredObjectResponse"
-          }
-        }
-      },
-      "description": "MonitoredObjectListResponse - Wrapper for requests which return a list of MonitoredObjects \nscoped to a single Tenant."
-    },
-    "gathergrpcMonitoredObjectMonitoredObjectType": {
-      "type": "string",
-      "enum": [
-        "MO_UNKNOWN",
-        "TWAMP"
-      ],
-      "default": "MO_UNKNOWN"
-    },
-    "gathergrpcMonitoredObjectRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcMonitoredObject"
-        }
-      },
-      "description": "MonitoredObjectRequest - Wrapper for requests involving a MonitoredObject that are \nscoped to a single Tenant."
-    },
-    "gathergrpcMonitoredObjectResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcMonitoredObject"
-        }
-      },
-      "description": "MonitoredObjectRequest - Wrapper for responses involving a MonitoredObject that are \nscoped to a single Tenant."
     },
     "gathergrpcRelationships": {
       "type": "object",
@@ -2017,6 +1987,21 @@
     "gathergrpcTenantDescriptor": {
       "type": "object",
       "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantDescriptorData"
+        }
+      },
+      "description": "TenantDescriptor - wrapper for passing TenantDescriptor\ndata as a request to the service."
+    },
+    "gathergrpcTenantDescriptorData": {
+      "type": "object",
+      "properties": {
         "datatype": {
           "type": "string"
         },
@@ -2040,49 +2025,34 @@
       },
       "description": "Provides the metadata of a Tenant. This information is used to \nidetify/describe a full Tenant entity."
     },
-    "gathergrpcTenantDescriptorListResponse": {
+    "gathergrpcTenantDescriptorList": {
       "type": "object",
       "properties": {
         "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcTenantDescriptorResponse"
+            "$ref": "#/definitions/gathergrpcTenantDescriptor"
           }
         }
       },
       "description": "Wrapper message to provide a response in the form of\na container of multiple TenantDescriptor objects."
     },
-    "gathergrpcTenantDescriptorRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantDescriptor"
-        }
-      },
-      "description": "TenantDescriptorRequest - wrapper for passing TenantDescriptor\ndata as a request to the service."
-    },
-    "gathergrpcTenantDescriptorResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantDescriptor"
-        }
-      },
-      "description": "TenantDescriptorResponse - wrapper for passing TenantDescriptor\ndata as a response from the service."
-    },
     "gathergrpcTenantDomain": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantDomainData"
+        }
+      },
+      "title": "TenantDomain - wrapper for requests that involve a Tenant Domain"
+    },
+    "gathergrpcTenantDomainData": {
       "type": "object",
       "properties": {
         "tenantId": {
@@ -2097,6 +2067,12 @@
         "color": {
           "type": "string"
         },
+        "thresholdProfileSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "createdTimestamp": {
           "type": "string",
           "format": "int64"
@@ -2104,59 +2080,38 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "format": "int64"
-        },
-        "thresholdProfileSet": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       },
-      "description": "TenantDomain - model for a Domain for a single Tenant."
+      "description": "TenantDomainData - model for a Domain for a single Tenant."
     },
-    "gathergrpcTenantDomainListResponse": {
+    "gathergrpcTenantDomainList": {
       "type": "object",
       "properties": {
         "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcTenantDomainResponse"
+            "$ref": "#/definitions/gathergrpcTenantDomain"
           }
         }
       },
       "description": "TenantDomainListResponse - a wrapper for a list of TenantDomain objects that \nare returned as a response to a request.."
     },
-    "gathergrpcTenantDomainRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantDomain"
-        }
-      },
-      "title": "TenantDomainRequest - wrapper for requests that involve a Tenant Domain"
-    },
-    "gathergrpcTenantDomainResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantDomain"
-        }
-      },
-      "title": "TenantDomainResponse - wrapper for responses that involve a Tenant Domain"
-    },
     "gathergrpcTenantIngestionProfile": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantIngestionProfileData"
+        }
+      },
+      "title": "TenantIngestionProfile - wrapper for requests that involve the\nTenant Ingestion Profile"
+    },
+    "gathergrpcTenantIngestionProfileData": {
       "type": "object",
       "properties": {
         "tenantId": {
@@ -2166,7 +2121,7 @@
           "type": "string"
         },
         "metrics": {
-          "$ref": "#/definitions/gathergrpcTenantIngestionProfileVendorMap"
+          "$ref": "#/definitions/gathergrpcTenantIngestionProfileDataVendorMap"
         },
         "createdTimestamp": {
           "type": "string",
@@ -2177,9 +2132,9 @@
           "format": "int64"
         }
       },
-      "description": "TenantIngestionProfile - model for the singleton object that \ngoverns what data is displayed for a Tenant."
+      "description": "TenantIngestionProfileData - model for the singleton object that \ngoverns what data is displayed for a Tenant."
     },
-    "gathergrpcTenantIngestionProfileMetricMap": {
+    "gathergrpcTenantIngestionProfileDataMetricMap": {
       "type": "object",
       "properties": {
         "metricMap": {
@@ -2191,43 +2146,13 @@
         }
       }
     },
-    "gathergrpcTenantIngestionProfileRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
-        }
-      },
-      "title": "TenantIngestionProfileRequest - wrapper for requests that involve the\nTenant Ingestion Profile"
-    },
-    "gathergrpcTenantIngestionProfileResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantIngestionProfile"
-        }
-      },
-      "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
-    },
-    "gathergrpcTenantIngestionProfileVendorMap": {
+    "gathergrpcTenantIngestionProfileDataVendorMap": {
       "type": "object",
       "properties": {
         "vendorMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantIngestionProfileMonitoredObjectMap"
+            "$ref": "#/definitions/TenantIngestionProfileDataMonitoredObjectMap"
           }
         }
       }
@@ -2271,18 +2196,22 @@
         }
       }
     },
-    "gathergrpcTenantThresholdListResponse": {
+    "gathergrpcTenantThresholdProfile": {
       "type": "object",
       "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
         "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/gathergrpcTenantThresholdProfileResponse"
-          }
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfileData"
         }
-      }
+      },
+      "title": "TenantThresholdProfile - wrapper for requests that involve the\nTenant Threshold Profile"
     },
-    "gathergrpcTenantThresholdProfile": {
+    "gathergrpcTenantThresholdProfileData": {
       "type": "object",
       "properties": {
         "tenantId": {
@@ -2295,7 +2224,7 @@
           "type": "string"
         },
         "thresholds": {
-          "$ref": "#/definitions/gathergrpcTenantThresholdProfileVendorMap"
+          "$ref": "#/definitions/gathergrpcTenantThresholdProfileDataVendorMap"
         },
         "createdTimestamp": {
           "type": "string",
@@ -2305,61 +2234,58 @@
           "type": "string",
           "format": "int64"
         }
-      }
+      },
+      "title": "Threshold Profile Data"
     },
-    "gathergrpcTenantThresholdProfileMetricMap": {
+    "gathergrpcTenantThresholdProfileDataMetricMap": {
       "type": "object",
       "properties": {
         "metricMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileDirectionMap"
+            "$ref": "#/definitions/TenantThresholdProfileDataDirectionMap"
           }
         }
       }
     },
-    "gathergrpcTenantThresholdProfileRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
-        }
-      },
-      "title": "TenantThresholdProfileRequest - wrapper for requests that involve the\nTenant Threshold Profile"
-    },
-    "gathergrpcTenantThresholdProfileResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
-        }
-      },
-      "description": "TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile\nin a response."
-    },
-    "gathergrpcTenantThresholdProfileVendorMap": {
+    "gathergrpcTenantThresholdProfileDataVendorMap": {
       "type": "object",
       "properties": {
         "vendorMap": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/TenantThresholdProfileMonitoredObjectTypeMap"
+            "$ref": "#/definitions/TenantThresholdProfileDataMonitoredObjectTypeMap"
+          }
+        }
+      }
+    },
+    "gathergrpcTenantThresholdProfileList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcTenantThresholdProfile"
           }
         }
       }
     },
     "gathergrpcTenantUser": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "_rev": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/gathergrpcTenantUserData"
+        }
+      },
+      "description": "TenantUser - wrapper for requests that involve a User that\nis scoped to a single Tenant."
+    },
+    "gathergrpcTenantUserData": {
       "type": "object",
       "properties": {
         "tenantId": {
@@ -2403,49 +2329,19 @@
           "format": "int64"
         }
       },
-      "description": "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\nTenantUser - model for a User that is scoped to a single Tenant."
+      "description": "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\nTenantUserData - model for a User that is scoped to a single Tenant."
     },
-    "gathergrpcTenantUserListResponse": {
+    "gathergrpcTenantUserList": {
       "type": "object",
       "properties": {
         "data": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcTenantUserResponse"
+            "$ref": "#/definitions/gathergrpcTenantUser"
           }
         }
       },
       "description": "TenantUserListResponse - a wrapper to handle requests that return a\nlist of TenantUser objects."
-    },
-    "gathergrpcTenantUserRequest": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantUser"
-        }
-      },
-      "description": "TenantUserRequest - wrapper for requests that involve a User that\nis scoped to a single Tenant."
-    },
-    "gathergrpcTenantUserResponse": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "_rev": {
-          "type": "string"
-        },
-        "data": {
-          "$ref": "#/definitions/gathergrpcTenantUser"
-        }
-      },
-      "description": "TenantUserResponse - wrapper for responses to requests that involve a User that\nis scoped to a single Tenant."
     },
     "gathergrpcUserState": {
       "type": "string",

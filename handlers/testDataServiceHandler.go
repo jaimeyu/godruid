@@ -184,7 +184,8 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	}
 
 	// Now the TenantDB exisits....add a default user.
-	user, err := generateTenantUser(tenantName, tenantDescriptor.GetXId())
+	dataIDForTenant := tenantDescriptor.GetXId()
+	user, err := generateTenantUser(tenantName, dataIDForTenant)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 		return
@@ -206,7 +207,7 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	tenantDomains := requestBody["domainSet"].([]interface{})
 	createdDomainIDSet := []string{}
 	for _, domainName := range tenantDomains {
-		dom, err := generateTenantDomain(domainName.(string), tenantDescriptor.GetXId(), tenantMeta.GetData().GetDefaultThresholdProfile())
+		dom, err := generateTenantDomain(domainName.(string), dataIDForTenant, tenantMeta.GetData().GetDefaultThresholdProfile())
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 			return
@@ -234,7 +235,7 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 					logger.Log.Errorf("Not creating Monitored Object %v: %s", monObj, err.Error())
 				}
 
-				mo, err := generateMonitoredObject(obj[moIDStr].(string), tenantDescriptor.GetXId(), obj[moActuatorNameStr].(string), obj[moReflectorNameStr].(string), obj[moObjectNameStr].(string), createdDomainIDSet)
+				mo, err := generateMonitoredObject(obj[moIDStr].(string), dataIDForTenant, obj[moActuatorNameStr].(string), obj[moReflectorNameStr].(string), obj[moObjectNameStr].(string), createdDomainIDSet)
 				if err != nil {
 					http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
 					return
@@ -526,11 +527,11 @@ func validateMonitoredObject(monObj map[string]interface{}) error {
 	return nil
 }
 
-func generateTenantDescriptor(name string) (*pb.TenantDescriptorRequest, error) {
-	result := pb.TenantDescriptorRequest{}
+func generateTenantDescriptor(name string) (*pb.TenantDescriptor, error) {
+	result := pb.TenantDescriptor{}
 
 	tenantStr := string(db.TenantDescriptorType)
-	result.Data = &pb.TenantDescriptor{}
+	result.Data = &pb.TenantDescriptorData{}
 	result.Data.Name = name
 	result.Data.UrlSubdomain = strings.ToLower(name) + ".npav.accedian.net"
 	result.Data.State = 2
@@ -538,21 +539,17 @@ func generateTenantDescriptor(name string) (*pb.TenantDescriptorRequest, error) 
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	id, err := db.GenerateID(result.Data, tenantStr)
-	if err != nil {
-		return nil, err
-	}
-	result.XId = id
+	result.XId = db.GenerateID(result.Data, tenantStr)
 
 	return &result, nil
 }
 
-func generateTenantUser(name string, tenantID string) (*pb.TenantUserRequest, error) {
-	result := pb.TenantUserRequest{}
+func generateTenantUser(name string, tenantID string) (*pb.TenantUser, error) {
+	result := pb.TenantUser{}
 
 	tenantUserStr := string(db.TenantUserType)
 
-	result.Data = &pb.TenantUser{}
+	result.Data = &pb.TenantUserData{}
 	result.Data.Datatype = tenantUserStr
 	result.Data.Username = "admin@" + strings.ToLower(name) + ".com"
 	result.Data.TenantId = tenantID
@@ -564,20 +561,16 @@ func generateTenantUser(name string, tenantID string) (*pb.TenantUserRequest, er
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	id, err := db.GenerateID(result.Data, tenantUserStr)
-	if err != nil {
-		return nil, err
-	}
-	result.XId = id
+	result.XId = db.GenerateID(result.Data, tenantUserStr)
 
 	return &result, nil
 }
 
-func generateTenantDomain(name string, tenantID string, defaultThreshPrf string) (*pb.TenantDomainRequest, error) {
-	result := pb.TenantDomainRequest{}
+func generateTenantDomain(name string, tenantID string, defaultThreshPrf string) (*pb.TenantDomain, error) {
+	result := pb.TenantDomain{}
 
 	tenantDomainStr := string(db.TenantDomainType)
-	result.Data = &pb.TenantDomain{}
+	result.Data = &pb.TenantDomainData{}
 	result.Data.Datatype = tenantDomainStr
 	result.Data.Name = name
 	result.Data.TenantId = tenantID
@@ -590,30 +583,26 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result.Data.CreatedTimestamp = time.Now().Unix()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	id, err := db.GenerateID(result.Data, tenantDomainStr)
-	if err != nil {
-		return nil, err
-	}
-	result.XId = id
+	result.XId = db.GenerateID(result.Data, tenantDomainStr)
 
 	return &result, nil
 }
 
-func generateMonitoredObject(id string, tenantID string, actuatorName string, reflectorName string, objectName string, domainIDSet []string) (*pb.MonitoredObjectRequest, error) {
-	result := pb.MonitoredObjectRequest{}
+func generateMonitoredObject(id string, tenantID string, actuatorName string, reflectorName string, objectName string, domainIDSet []string) (*pb.MonitoredObject, error) {
+	result := pb.MonitoredObject{}
 
 	tenantMonObjStr := string(db.TenantMonitoredObjectType)
-	result.Data = &pb.MonitoredObject{}
+	result.Data = &pb.MonitoredObjectData{}
 	result.Data.Datatype = tenantMonObjStr
 
 	result.Data.Id = id
 	result.Data.TenantId = tenantID
 	result.Data.ActuatorName = actuatorName
-	result.Data.ActuatorType = pb.MonitoredObject_ACCEDIAN_VNID
+	result.Data.ActuatorType = pb.MonitoredObjectData_ACCEDIAN_VNID
 	result.Data.ReflectorName = reflectorName
-	result.Data.ReflectorType = pb.MonitoredObject_ACCEDIAN_VNID
+	result.Data.ReflectorType = pb.MonitoredObjectData_ACCEDIAN_VNID
 	result.Data.ObjectName = objectName
-	result.Data.ObjectType = pb.MonitoredObject_TWAMP
+	result.Data.ObjectType = pb.MonitoredObjectData_TWAMP
 
 	// To provision the DomainSet, need to obtain a subset of the passed in domain set.
 
@@ -640,11 +629,7 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 		}
 	}
 
-	id, err := db.GenerateID(result.Data, tenantMonObjStr)
-	if err != nil {
-		return nil, err
-	}
-	result.XId = id
+	result.XId = db.GenerateID(result.Data, tenantMonObjStr)
 
 	return &result, nil
 }

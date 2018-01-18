@@ -16,24 +16,24 @@ var (
 		"lostBurstMax", "packetsReceived"}
 )
 
-func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfile {
-	ingPrf := pb.TenantIngestionProfile{}
+func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
+	ingPrf := pb.TenantIngestionProfileData{}
 	ingPrf.TenantId = tenantID
 	ingPrf.Datatype = string(db.TenantIngestionProfileType)
 	ingPrf.CreatedTimestamp = time.Now().Unix()
 	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
 
 	// Default Values for the metrics:
-	moMap := pb.TenantIngestionProfile_MonitoredObjectMap{}
-	metricMap := pb.TenantIngestionProfile_MetricMap{}
+	moMap := pb.TenantIngestionProfileData_MonitoredObjectMap{}
+	metricMap := pb.TenantIngestionProfileData_MetricMap{}
 	metricMap.MetricMap = createMetricMap(defaultIngestionProfileMetricNames...)
-	moMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfile_MetricMap)
+	moMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
 	moMap.MonitoredObjectTypeMap["pe"] = &metricMap
 	moMap.MonitoredObjectTypeMap["sl"] = &metricMap
 	moMap.MonitoredObjectTypeMap["sf"] = &metricMap
-	metrics := make(map[string]*pb.TenantIngestionProfile_MonitoredObjectMap)
+	metrics := make(map[string]*pb.TenantIngestionProfileData_MonitoredObjectMap)
 	metrics["accedian"] = &moMap
-	vendorMap := &pb.TenantIngestionProfile_VendorMap{}
+	vendorMap := &pb.TenantIngestionProfileData_VendorMap{}
 	vendorMap.VendorMap = metrics
 	ingPrf.Metrics = vendorMap
 
@@ -49,8 +49,8 @@ func createMetricMap(metricNames ...string) map[string]bool {
 	return result
 }
 
-func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile {
-	thrPrf := pb.TenantThresholdProfile{}
+func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfileData {
+	thrPrf := pb.TenantThresholdProfileData{}
 
 	thrPrf.TenantId = tenantID
 	thrPrf.Datatype = string(db.TenantThresholdProfileType)
@@ -78,18 +78,18 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 	return &result
 }
 
-func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
-	return &pb.TenantThresholdProfile_VendorMap{
-		VendorMap: map[string]*pb.TenantThresholdProfile_MonitoredObjectTypeMap{
-			"accedian": &pb.TenantThresholdProfile_MonitoredObjectTypeMap{
-				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfile_MetricMap{
-					"pe": &pb.TenantThresholdProfile_MetricMap{
-						MetricMap: map[string]*pb.TenantThresholdProfile_DirectionMap{
-							"delayP95": &pb.TenantThresholdProfile_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
-									"0": &pb.TenantThresholdProfile_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
-											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
+	return &pb.TenantThresholdProfileData_VendorMap{
+		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+			"accedian": &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
+					"pe": &pb.TenantThresholdProfileData_MetricMap{
+						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
+							"delayP95": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "20000",
 													"lowerStrict": "true",
@@ -97,7 +97,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "ms",
 												},
 											},
-											"major": &pb.TenantThresholdProfile_EventAttrMap{
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "40000",
 													"lowerStrict": "true",
@@ -106,7 +106,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "ms",
 												},
 											},
-											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "65000",
 													"lowerStrict": "true",
@@ -117,11 +117,11 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 									},
 								},
 							},
-							"jitterP95": &pb.TenantThresholdProfile_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
-									"0": &pb.TenantThresholdProfile_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
-											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+							"jitterP95": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "90",
 													"lowerStrict": "true",
@@ -129,7 +129,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "ms",
 												},
 											},
-											"major": &pb.TenantThresholdProfile_EventAttrMap{
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "100",
 													"lowerStrict": "true",
@@ -138,7 +138,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "ms",
 												},
 											},
-											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "120",
 													"lowerStrict": "true",
@@ -149,11 +149,11 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 									},
 								},
 							},
-							"packetsLostPct": &pb.TenantThresholdProfile_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
-									"0": &pb.TenantThresholdProfile_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
-											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+							"packetsLostPct": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "0.13",
 													"lowerStrict": "true",
@@ -161,7 +161,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "pct",
 												},
 											},
-											"major": &pb.TenantThresholdProfile_EventAttrMap{
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "0.17",
 													"lowerStrict": "true",
@@ -170,7 +170,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfile_VendorMap {
 													"unit":        "pct",
 												},
 											},
-											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "0.33",
 													"lowerStrict": "true",

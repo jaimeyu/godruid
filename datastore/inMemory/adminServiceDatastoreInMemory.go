@@ -22,61 +22,61 @@ func CreateAdminServiceDAO() (datastore.AdminServiceDatastore, error) {
 }
 
 // CreateAdminUser - InMemory implementation of CreateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
 	// Stub to implement
 	return nil, errors.New("CreateAdminUser() not implemented for InMemory DB")
 }
 
 // UpdateAdminUser - InMemory implementation of UpdateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
 	// Stub to implement
 	return nil, errors.New("UpdateAdminUser() not implemented for InMemory DB")
 }
 
 // DeleteAdminUser - InMemory implementation of DeleteAdminUser
-func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.AdminUserResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
 	// Stub to implement
 	return nil, errors.New("DeleteAdminUser() not implemented for InMemory DB")
 }
 
 // GetAdminUser - InMemory implementation of GetAdminUser
-func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.AdminUserResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.AdminUser, error) {
 	// Stub to implement
 	return nil, errors.New("GetAdminUser() not implemented for InMemory DB")
 }
 
 // GetAllAdminUsers - InMemory implementation of GetAllAdminUsers
-func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() (*pb.AdminUserListResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() (*pb.AdminUserList, error) {
 	// Stub to implement
 	return nil, errors.New("GetAllAdminUsers() not implemented for InMemory DB")
 }
 
 // CreateTenant - InMemory implementation of CreateTenant
-func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, errors.New("CreateTenant() not implemented for InMemory DB")
 }
 
 // UpdateTenantDescriptor - InMemory implementation of UpdateTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, errors.New("UpdateTenantDescriptor() not implemented for InMemory DB")
 }
 
 // DeleteTenant - InMemory implementation of DeleteTenant
-func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.TenantDescriptorResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, errors.New("DeleteTenant() not implemented for InMemory DB")
 }
 
 // GetTenantDescriptor - InMemory implementation of GetTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptorResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
 	// Stub to implement
 	return nil, errors.New("GetTenantDescriptor() not implemented for InMemory DB")
 }
 
 // GetAllTenantDescriptors - InMemory implementation of GetAllTenantDescriptors
-func (memDB *AdminServiceDatastoreInMemory) GetAllTenantDescriptors() (*pb.TenantDescriptorListResponse, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAllTenantDescriptors() (*pb.TenantDescriptorList, error) {
 	// Stub to implement
 	return nil, errors.New("GetAllTenantDescriptors() not implemented for InMemory DB")
 }

@@ -37,17 +37,17 @@ const (
 type AdminServiceDatastore interface {
 	AddAdminViews() error
 
-	CreateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
-	UpdateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
-	DeleteAdminUser(string) (*pb.AdminUserResponse, error)
-	GetAdminUser(string) (*pb.AdminUserResponse, error)
-	GetAllAdminUsers() (*pb.AdminUserListResponse, error)
+	CreateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
+	UpdateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
+	DeleteAdminUser(string) (*pb.AdminUser, error)
+	GetAdminUser(string) (*pb.AdminUser, error)
+	GetAllAdminUsers() (*pb.AdminUserList, error)
 
-	CreateTenant(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
-	UpdateTenantDescriptor(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
-	DeleteTenant(string) (*pb.TenantDescriptorResponse, error)
-	GetTenantDescriptor(string) (*pb.TenantDescriptorResponse, error)
-	GetAllTenantDescriptors() (*pb.TenantDescriptorListResponse, error)
+	CreateTenant(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
+	UpdateTenantDescriptor(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
+	DeleteTenant(string) (*pb.TenantDescriptor, error)
+	GetTenantDescriptor(string) (*pb.TenantDescriptor, error)
+	GetAllTenantDescriptors() (*pb.TenantDescriptorList, error)
 
 	CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error)
 	UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error)

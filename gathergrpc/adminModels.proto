@@ -7,74 +7,58 @@ import "gathergrpc/commonModels.proto";
 
 // Provides the metadata of a Tenant. This information is used to 
 // idetify/describe a full Tenant entity.
-message TenantDescriptor {
-    string datatype = 1;
+message TenantDescriptorData {
+    string datatype = 2;
 
-    string name = 2;
-    string urlSubdomain = 3;
-    UserState state = 4;
+    string name = 3;
+    string urlSubdomain = 4;
+    UserState state = 5;
 
-    int64 createdTimestamp = 5;
-    int64 lastModifiedTimestamp = 6; 
+    int64 createdTimestamp = 6;
+    int64 lastModifiedTimestamp = 7; 
 }
 
-// TenantDescriptorRequest - wrapper for passing TenantDescriptor
+// TenantDescriptor - wrapper for passing TenantDescriptor
 // data as a request to the service.
-message TenantDescriptorRequest {
+message TenantDescriptor {
     string _id = 1;
     string _rev = 2;
-    TenantDescriptor data = 3;
-}
-
-// TenantDescriptorResponse - wrapper for passing TenantDescriptor
-// data as a response from the service.
-message TenantDescriptorResponse {
-    string _id = 1;
-    string _rev = 2;
-    TenantDescriptor data = 3;
+    TenantDescriptorData data = 3;
 }
 
 // Wrapper message to provide a response in the form of
 // a container of multiple TenantDescriptor objects.
-message TenantDescriptorListResponse {
-    repeated TenantDescriptorResponse data = 1;
+message TenantDescriptorList {
+    repeated TenantDescriptor data = 1;
 }
 
 // User data for an Adminstrative User.
-message AdminUser {
-    string datatype = 3;
+message AdminUserData {
+    string datatype = 2;
 
-    string username = 4;
-    string password = 5;
-    bool sendOnboardingEmail = 6;
-    string onboardingToken = 7;
-    bool userVerified = 8;
-    UserState state = 9;
+    string username = 3;
+    string password = 4;
+    bool sendOnboardingEmail = 5;
+    string onboardingToken = 6;
+    bool userVerified = 7;
+    UserState state = 8;
 
-    int64 createdTimestamp = 10;
-    int64 lastModifiedTimestamp = 11;
+    int64 createdTimestamp = 9;
+    int64 lastModifiedTimestamp = 10;
 }
 
-// AdminUserRequest - wrapper for passing AdminUser
+// AdminUser - wrapper for passing AdminUser
 // data as a request to the service.
-message AdminUserRequest {
+message AdminUser {
     string _id = 1;
     string _rev = 2;
-    AdminUser data = 3;
-}
-
-// AdminUserResponse - wrapper for passing AdminUser
-// data as a response from the service.
-message AdminUserResponse {
-    string _id = 1;
-    string _rev = 2;
-    AdminUser data = 3;
+    AdminUserData data = 3;
 }
 
 // Wrapper message to provide a response in the form of
 // a container of multiple AdminUser objects.
-message AdminUserListResponse {
-    repeated AdminUserResponse data = 1;
+message AdminUserList {
+    repeated AdminUser data = 1;
 }
 
 // Stores the available values of the metrics that may be ingested by ADH.
@@ -98,12 +82,12 @@ message IngestionDictionaryData {
         map<string, MetricDefinition> metricMap = 1;
     }
 
-    string datatype = 1;
+    string datatype = 2;
 
-    map<string, MetricMap> metrics = 2;
+    map<string, MetricMap> metrics = 3;
 
-    int64 createdTimestamp = 10;
-    int64 lastModifiedTimestamp = 11;
+    int64 createdTimestamp = 4;
+    int64 lastModifiedTimestamp = 5;
 }
 
 // Wrapper fos the object that stores the available values of the metrics that may be ingested by ADH.

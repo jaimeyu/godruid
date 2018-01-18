@@ -31,7 +31,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
 func request_AdminProvisioningService_CreateAdminUser_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdminUserRequest
+	var protoReq AdminUser
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -44,7 +44,7 @@ func request_AdminProvisioningService_CreateAdminUser_0(ctx context.Context, mar
 }
 
 func request_AdminProvisioningService_UpdateAdminUser_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AdminUserRequest
+	var protoReq AdminUser
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -120,7 +120,7 @@ func request_AdminProvisioningService_GetAllAdminUsers_0(ctx context.Context, ma
 }
 
 func request_AdminProvisioningService_CreateTenant_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDescriptorRequest
+	var protoReq TenantDescriptor
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -133,7 +133,7 @@ func request_AdminProvisioningService_CreateTenant_0(ctx context.Context, marsha
 }
 
 func request_AdminProvisioningService_UpdateTenantDescriptor_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDescriptorRequest
+	var protoReq TenantDescriptor
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -280,7 +280,7 @@ func request_AdminProvisioningService_GetTenantIDByAlias_0(ctx context.Context, 
 }
 
 func request_TenantProvisioningService_CreateTenantUser_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantUserRequest
+	var protoReq TenantUser
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -311,7 +311,7 @@ func request_TenantProvisioningService_CreateTenantUser_0(ctx context.Context, m
 }
 
 func request_TenantProvisioningService_UpdateTenantUser_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantUserRequest
+	var protoReq TenantUser
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -445,7 +445,7 @@ func request_TenantProvisioningService_GetAllTenantUsers_0(ctx context.Context, 
 }
 
 func request_TenantProvisioningService_CreateTenantDomain_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDomainRequest
+	var protoReq TenantDomain
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -476,7 +476,7 @@ func request_TenantProvisioningService_CreateTenantDomain_0(ctx context.Context,
 }
 
 func request_TenantProvisioningService_UpdateTenantDomain_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantDomainRequest
+	var protoReq TenantDomain
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -610,7 +610,7 @@ func request_TenantProvisioningService_GetAllTenantDomains_0(ctx context.Context
 }
 
 func request_TenantProvisioningService_CreateTenantIngestionProfile_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantIngestionProfileRequest
+	var protoReq TenantIngestionProfile
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -641,7 +641,7 @@ func request_TenantProvisioningService_CreateTenantIngestionProfile_0(ctx contex
 }
 
 func request_TenantProvisioningService_UpdateTenantIngestionProfile_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantIngestionProfileRequest
+	var protoReq TenantIngestionProfile
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -775,7 +775,7 @@ func request_TenantProvisioningService_DeleteTenantIngestionProfile_0(ctx contex
 }
 
 func request_TenantProvisioningService_CreateTenantThresholdProfile_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantThresholdProfileRequest
+	var protoReq TenantThresholdProfile
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -806,7 +806,7 @@ func request_TenantProvisioningService_CreateTenantThresholdProfile_0(ctx contex
 }
 
 func request_TenantProvisioningService_UpdateTenantThresholdProfile_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TenantThresholdProfileRequest
+	var protoReq TenantThresholdProfile
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -940,7 +940,7 @@ func request_TenantProvisioningService_DeleteTenantThresholdProfile_0(ctx contex
 }
 
 func request_TenantProvisioningService_CreateMonitoredObject_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MonitoredObjectRequest
+	var protoReq MonitoredObject
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -971,7 +971,7 @@ func request_TenantProvisioningService_CreateMonitoredObject_0(ctx context.Conte
 }
 
 func request_TenantProvisioningService_UpdateMonitoredObject_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MonitoredObjectRequest
+	var protoReq MonitoredObject
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {

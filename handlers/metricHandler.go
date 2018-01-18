@@ -24,7 +24,7 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 }
 
 // GetThresholdCrossing
-func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
 	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, thresholdProfile)
 
@@ -36,7 +36,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(ctx context.Context, thres
 }
 
 // GetThresholdCrossingByMonitoredObject
-func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfileResponse) (*pb.JSONAPIObject, error) {
+func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
 	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile)
 

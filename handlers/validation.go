@@ -6,15 +6,11 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
-func validateAdminUserRequest(request *pb.AdminUserRequest, isUpdate bool) error {
+func validateAdminUserRequest(request *pb.AdminUser, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid AdminUserRequest: no Admin User data provided")
 	}
 
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid AdminUserRequest: no Admin User ID provided")
-	}
-
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
 		return errors.New("Invalid TenantUserRequest: must provide a createdTimestamp and revision for an update")
 	}
@@ -22,15 +18,11 @@ func validateAdminUserRequest(request *pb.AdminUserRequest, isUpdate bool) error
 	return nil
 }
 
-func validateTenantDescriptorRequest(request *pb.TenantDescriptorRequest, isUpdate bool) error {
+func validateTenantDescriptorRequest(request *pb.TenantDescriptor, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantDescriptorRequest: no Tenant Descriptor data provided")
 	}
 
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantDescriptorRequest: no Tenant ID provided")
-	}
-
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
 		return errors.New("Invalid TenantUserRequest: must provide a createdTimestamp and revision for an update")
 	}
@@ -38,17 +30,13 @@ func validateTenantDescriptorRequest(request *pb.TenantDescriptorRequest, isUpda
 	return nil
 }
 
-func validateTenantUserRequest(request *pb.TenantUserRequest, isUpdate bool) error {
+func validateTenantUserRequest(request *pb.TenantUser, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantUserRequest: no Tenant User data provided")
 	}
 
 	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantUserRequest: no Tenant ID provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantUserRequest: no Tenant User ID provided")
 	}
 
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
@@ -70,17 +58,13 @@ func validateTenantUserIDRequest(request *pb.TenantUserIdRequest) error {
 	return nil
 }
 
-func validateTenantDomainRequest(request *pb.TenantDomainRequest, isUpdate bool) error {
+func validateTenantDomainRequest(request *pb.TenantDomain, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantDomainRequest: no Tenant Domain data provided")
 	}
 
 	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantDomainRequest: no Tenant Id provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantDomainRequest: no Tenant Domain ID provided")
 	}
 
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
@@ -102,17 +86,13 @@ func validateTenantDomainIDRequest(request *pb.TenantDomainIdRequest) error {
 	return nil
 }
 
-func validateTenantIngPrfRequest(request *pb.TenantIngestionProfileRequest, isUpdate bool) error {
+func validateTenantIngPrfRequest(request *pb.TenantIngestionProfile, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Ingestion Profile data provided")
 	}
 
 	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Id provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantIngestionProfileRequest: no Ingestion Profile ID provided")
 	}
 
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
@@ -134,17 +114,13 @@ func validateTenantIngPrfIDRequest(request *pb.TenantIngestionProfileIdRequest) 
 	return nil
 }
 
-func validateTenantThreshPrfRequest(request *pb.TenantThresholdProfileRequest, isUpdate bool) error {
+func validateTenantThreshPrfRequest(request *pb.TenantThresholdProfile, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid TenantThresholdProfileRequest: no Tenant Threshold Profile data provided")
 	}
 
 	if len(request.GetData().GetTenantId()) == 0 {
 		return errors.New("Invalid TenantThresholdProfileRequest: no Tenant Id provided")
-	}
-
-	if len(request.GetXId()) == 0 {
-		return errors.New("Invalid TenantThresholdProfileRequest: no Threshold Profile ID provided")
 	}
 
 	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
@@ -166,7 +142,7 @@ func validateTenantThreshPrfIDRequest(request *pb.TenantThresholdProfileIdReques
 	return nil
 }
 
-func validateMonitoredObjectRequest(request *pb.MonitoredObjectRequest, isUpdate bool) error {
+func validateMonitoredObjectRequest(request *pb.MonitoredObject, isUpdate bool) error {
 	if request == nil || request.GetData() == nil {
 		return errors.New("Invalid MonitoredObjectRequest: no Tenant Monitored Object data provided")
 	}

@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	defaultIngestionProfilePath = "files/defaultIngestionProfile.json"
+	defaultIngestionDictionaryPath = "files/defaultIngestionDictionary.json"
 )
 
 var (
@@ -36,6 +36,7 @@ var (
 	enableTLS      bool
 	tlsKeyFile     string
 	tlsCertFile    string
+	ingDictFilePath string
 )
 
 func init() {
@@ -43,6 +44,7 @@ func init() {
 	pflag.StringVar(&tlsKeyFile, "tlskey", "/run/secrets/tls_key", "Specify a TLS Key file")
 	pflag.StringVar(&tlsCertFile, "tlscert", "/run/secrets/tls_crt", "Specify a TLS Cert file")
 	pflag.BoolVar(&enableTLS, "tls", true, "Specify if TLS should be enabled")
+	pflag.StringVar(&ingDictFilePath, "ingDict", defaultIngestionDictionaryPath, "Specify file path of default Ingestion Dictionary")
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -238,7 +240,7 @@ func ensureAdminDBExists(gatherServer *GatherServer, adminDB string) {
 }
 
 func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string) {
-	defaultDictionaryBytes, err := ioutil.ReadFile(defaultIngestionProfilePath)
+	defaultDictionaryBytes, err := ioutil.ReadFile(ingDictFilePath)
 	if err != nil {
 		logger.Log.Fatalf("Unable to read Default Ingestion Profile from file: %s", err.Error())
 	}
@@ -420,6 +422,7 @@ func main() {
 	enableTLS = v.GetBool("tls")
 	tlsCertFile = v.GetString("tlscert")
 	tlsKeyFile = v.GetString("tlskey")
+	ingDictFilePath = v.GetString("ingDict")
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)

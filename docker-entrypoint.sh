@@ -5,4 +5,4 @@ set -a
  : ${SERVER_CORS_ALLOWEDORIGINS='https://ui.*.npav.accedian.net'}
 
 
-exec /go/bin/adh-gather --config /config/adh-gather.yml $@
+exec /go/bin/adh-gather --config /config/adh-gather.yml --ingDict /files/defaultIngestionDictionary.json $@

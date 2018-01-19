@@ -70,24 +70,24 @@ func TestThresholdCrossingQuery(t *testing.T) {
 
 var metric1 = "delayP95"
 
-var tp = &pb.TenantThresholdProfile{
-	Thresholds: &pb.TenantThresholdProfile_VendorMap{
-		VendorMap: map[string]*pb.TenantThresholdProfile_MonitoredObjectTypeMap{
-			"accedian": &pb.TenantThresholdProfile_MonitoredObjectTypeMap{
-				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfile_MetricMap{
-					"TWAMP": &pb.TenantThresholdProfile_MetricMap{
-						MetricMap: map[string]*pb.TenantThresholdProfile_DirectionMap{
-							"delayP95": &pb.TenantThresholdProfile_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfile_EventMap{
-									"0": &pb.TenantThresholdProfile_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfile_EventAttrMap{
-											"minor": &pb.TenantThresholdProfile_EventAttrMap{
+var tp = &pb.TenantThresholdProfileData{
+	Thresholds: &pb.TenantThresholdProfileData_VendorMap{
+		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+			"accedian": &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
+					"TWAMP": &pb.TenantThresholdProfileData_MetricMap{
+						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
+							"delayP95": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"upperLimit": "30000",
 													"unit":       "ms",
 												},
 											},
-											"major": &pb.TenantThresholdProfile_EventAttrMap{
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "30000",
 													"lowerStrict": "true",
@@ -96,7 +96,7 @@ var tp = &pb.TenantThresholdProfile{
 													"unit":        "ms",
 												},
 											},
-											"critical": &pb.TenantThresholdProfile_EventAttrMap{
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
 													"lowerLimit":  "50000",
 													"lowerStrict": "true",
@@ -115,21 +115,21 @@ var tp = &pb.TenantThresholdProfile{
 	},
 }
 
-var lowerEvent = &pb.TenantThresholdProfile_EventAttrMap{
+var lowerEvent = &pb.TenantThresholdProfileData_EventAttrMap{
 	EventAttrMap: map[string]string{
 		"lowerLimit":  "10000",
 		"lowerStrict": "true",
 	},
 }
 
-var upperEvent = &pb.TenantThresholdProfile_EventAttrMap{
+var upperEvent = &pb.TenantThresholdProfileData_EventAttrMap{
 	EventAttrMap: map[string]string{
 		"upperLimit":  "10000",
 		"upperStrict": "true",
 	},
 }
 
-var bothEvent = &pb.TenantThresholdProfile_EventAttrMap{
+var bothEvent = &pb.TenantThresholdProfileData_EventAttrMap{
 	EventAttrMap: map[string]string{
 		"upperLimit":  "10000",
 		"upperStrict": "true",

@@ -17,19 +17,37 @@ const (
 )
 
 // GenerateID - generates an ID for an object based on the type of the
-// provided object.
-func GenerateID(obj interface{}, dataType string) (string, error) {
-	//
+// provided object. Returns 2 versions of the ID, the first is the full ID used
+// to refer to the object in Couch, the second is the hash portion of the Couch ID
+// which is used to refer to the data object.
+func GenerateID(obj interface{}, dataType string) string {
+
 	switch obj.(type) {
-	case *pb.MonitoredObject:
-		cast := obj.(*pb.MonitoredObject)
-		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, trimAndLowercase(cast.GetId())), nil
+	case *pb.MonitoredObjectData:
+		cast := obj.(*pb.MonitoredObjectData)
+		return PrependToDataID(trimAndLowercase(cast.GetId()), dataType)
 	default:
 		uuid := uuid.NewV4()
-		return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, uuid.String()), nil
+		return PrependToDataID(uuid.String(), dataType)
 	}
 }
 
 func trimAndLowercase(s string) string {
 	return strings.TrimSpace(strings.ToLower(s))
+}
+
+// GetDataIDFromFullID - returns just the hash portion of an ID from the full ID.
+func GetDataIDFromFullID(fullID string) string {
+	parts := strings.Split(fullID, "_")
+
+	if len(parts) == 0 {
+		return ""
+	}
+
+	return parts[len(parts)-1]
+}
+
+// PrependToDataID - generates a full ID from the dataID and the dataType
+func PrependToDataID(dataID string, dataType string) string {
+	return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, dataID)
 }

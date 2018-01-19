@@ -17,7 +17,7 @@ import "gathergrpc/commonModels.proto";
 service AdminProvisioningService {
     
     // Create a User with Administrative access. 
-    rpc CreateAdminUser(AdminUserRequest) returns (AdminUserResponse) {
+    rpc CreateAdminUser(AdminUser) returns (AdminUser) {
         option (google.api.http) = {
             post: "/api/v1/admin"
             body: "*"
@@ -25,7 +25,7 @@ service AdminProvisioningService {
     }
     
     // Update a User with Administrative access. 
-    rpc UpdateAdminUser(AdminUserRequest) returns (AdminUserResponse) {
+    rpc UpdateAdminUser(AdminUser) returns (AdminUser) {
         option (google.api.http) = {
             put: "/api/v1/admin"
             body: "*"
@@ -33,21 +33,21 @@ service AdminProvisioningService {
     } 
     
     // Delete a User with Administrative access. 
-    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUserResponse) {
+    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUser) {
         option (google.api.http) = {
             delete: "/api/v1/admin/{value}"
         };
     }
     
     // Retrieve and Administrative User by id. 
-    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUserResponse) {
+    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUser) {
         option (google.api.http) = {
             get: "/api/v1/admin/{value}"
         };
     }
     
     // Retrieve all Administrative Users. 
-    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserListResponse) {
+    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserList) {
         option (google.api.http) = {
             get: "/api/v1/admin-user-list"
         };
@@ -55,7 +55,7 @@ service AdminProvisioningService {
     
     // Creates a Tenant and returns a TenantDescriptor which provides 
     // metadata for the newly created Tenant.   
-    rpc CreateTenant(TenantDescriptorRequest) returns (TenantDescriptorResponse) {
+    rpc CreateTenant(TenantDescriptor) returns (TenantDescriptor) {
         option (google.api.http) = {
             post: "/api/v1/tenants"
             body: "*"
@@ -64,7 +64,7 @@ service AdminProvisioningService {
     
     // Updates a TenantDescriptor, which provides metadata 
     // for the specified Tenant. 
-    rpc UpdateTenantDescriptor(TenantDescriptorRequest) returns (TenantDescriptorResponse) {
+    rpc UpdateTenantDescriptor(TenantDescriptor) returns (TenantDescriptor) {
         option (google.api.http) = {
             put: "/api/v1/tenants"
             body: "*"
@@ -73,21 +73,21 @@ service AdminProvisioningService {
     
     // Deletes a Tenant and returns a TenantDescriptor which provides
     // metadata for the now deleted Tenant. 
-    rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptorResponse) {
+    rpc DeleteTenant(google.protobuf.StringValue) returns (TenantDescriptor) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{value}"
         };
     }
 
     // Retrieves the metadata of a single Tenant by id.
-    rpc GetTenantDescriptor(google.protobuf.StringValue) returns (TenantDescriptorResponse) {
+    rpc GetTenantDescriptor(google.protobuf.StringValue) returns (TenantDescriptor) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}"
         };
     }
 
     // Retrieve all Users scoped to a single Tenant. 
-    rpc GetAllTenantDescriptors(google.protobuf.Empty) returns (TenantDescriptorListResponse) {
+    rpc GetAllTenantDescriptors(google.protobuf.Empty) returns (TenantDescriptorList) {
         option (google.api.http) = {
             get: "/api/v1/tenant-list"
         };
@@ -129,6 +129,34 @@ service AdminProvisioningService {
             get: "/api/v1/tenant-by-alias/{value}"
         };
     }
+
+    rpc CreateValidTypes(ValidTypes) returns (ValidTypes) {
+        option (google.api.http) = {
+            post: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc UpdateValidTypes(ValidTypes) returns (ValidTypes) {
+        option (google.api.http) = {
+            put: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc GetValidTypes(google.protobuf.Empty) returns (ValidTypes) {
+        option (google.api.http) = {
+            put: "/api/v1/valid-types"
+            body: "*"
+        };
+    }
+
+    rpc GetSpecificValidTypes(ValidTypesRequest) returns (ValidTypesData) {
+        option (google.api.http) = {
+            post: "/api/v1/specific-valid-types"
+            body: "*"
+        };
+    }
 }
 
 
@@ -137,7 +165,7 @@ service AdminProvisioningService {
 service TenantProvisioningService {
     
     // Create a User scoped to a Single Tenant. 
-    rpc CreateTenantUser(TenantUserRequest) returns (TenantUserResponse) {
+    rpc CreateTenantUser(TenantUser) returns (TenantUser) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/users"
             body: "*"
@@ -145,7 +173,7 @@ service TenantProvisioningService {
     }
     
     // Update a User scoped to a single Tenant. 
-    rpc UpdateTenantUser(TenantUserRequest) returns (TenantUserResponse) {
+    rpc UpdateTenantUser(TenantUser) returns (TenantUser) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/users"
             body: "*"
@@ -153,28 +181,28 @@ service TenantProvisioningService {
     } 
     
     // Delete a User scoped to a single Tenant. 
-    rpc DeleteTenantUser(TenantUserIdRequest) returns (TenantUserResponse) {
+    rpc DeleteTenantUser(TenantUserIdRequest) returns (TenantUser) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{tenantId}/users/{userId}"
         };
     }
     
     // Retrieve a User scoped to a single Tenant. 
-    rpc GetTenantUser(TenantUserIdRequest) returns (TenantUserResponse) {
+    rpc GetTenantUser(TenantUserIdRequest) returns (TenantUser) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/users/{userId}"
         };
     }
     
     // Retrieve all Users scoped to a single Tenant. 
-    rpc GetAllTenantUsers(google.protobuf.StringValue) returns (TenantUserListResponse) {
+    rpc GetAllTenantUsers(google.protobuf.StringValue) returns (TenantUserList) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/user-list"
         };
     }
 
     // Create a Domain scoped to a Single Tenant. 
-    rpc CreateTenantDomain(TenantDomainRequest) returns (TenantDomainResponse) {
+    rpc CreateTenantDomain(TenantDomain) returns (TenantDomain) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/domains"
             body: "*"
@@ -182,7 +210,7 @@ service TenantProvisioningService {
     }
     
     // Update a Domain scoped to a single Tenant. 
-    rpc UpdateTenantDomain(TenantDomainRequest) returns (TenantDomainResponse) {
+    rpc UpdateTenantDomain(TenantDomain) returns (TenantDomain) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/domains"
             body: "*"
@@ -190,28 +218,28 @@ service TenantProvisioningService {
     } 
     
     // Delete a Domain scoped to a single Tenant. 
-    rpc DeleteTenantDomain(TenantDomainIdRequest) returns (TenantDomainResponse) {
+    rpc DeleteTenantDomain(TenantDomainIdRequest) returns (TenantDomain) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{tenantId}/domains/{domainId}"
         };
     }
     
     // Retrieve a Domain scoped to a single Tenant. 
-    rpc GetTenantDomain(TenantDomainIdRequest) returns (TenantDomainResponse) {
+    rpc GetTenantDomain(TenantDomainIdRequest) returns (TenantDomain) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/domains/{domainId}"
         };
     }
     
     // Retrieve all Domains scoped to a single Tenant. 
-    rpc GetAllTenantDomains(google.protobuf.StringValue) returns (TenantDomainListResponse) {
+    rpc GetAllTenantDomains(google.protobuf.StringValue) returns (TenantDomainList) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/domain-list"
         };
     }
 
     // Create a Ingestion Profile scoped to a Single Tenant. 
-    rpc CreateTenantIngestionProfile(TenantIngestionProfileRequest) returns (TenantIngestionProfileResponse) {
+    rpc CreateTenantIngestionProfile(TenantIngestionProfile) returns (TenantIngestionProfile) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/ingestion-profiles"
             body: "*"
@@ -220,7 +248,7 @@ service TenantProvisioningService {
     
     // Updates an Ingestion Profile, which provides details on the data 
     // collected for the Tenant. 
-    rpc UpdateTenantIngestionProfile(TenantIngestionProfileRequest) returns (TenantIngestionProfileResponse) {
+    rpc UpdateTenantIngestionProfile(TenantIngestionProfile) returns (TenantIngestionProfile) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/ingestion-profiles"
             body: "*"
@@ -229,20 +257,20 @@ service TenantProvisioningService {
 
     // Retrieves an Ingestion Profile, which provides details on the data 
     // collected for the Tenant. 
-    rpc GetTenantIngestionProfile(TenantIngestionProfileIdRequest) returns (TenantIngestionProfileResponse) {
+    rpc GetTenantIngestionProfile(TenantIngestionProfileIdRequest) returns (TenantIngestionProfile) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}"
         };
     }
 
-    rpc GetActiveTenantIngestionProfile(google.protobuf.StringValue) returns (TenantIngestionProfileResponse) {
+    rpc GetActiveTenantIngestionProfile(google.protobuf.StringValue) returns (TenantIngestionProfile) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/active-ingestion-profile"
         };
     }
 
     // Delete an Ingestion Profile scoped to a single Tenant. 
-    rpc DeleteTenantIngestionProfile(TenantIngestionProfileIdRequest) returns (TenantIngestionProfileResponse) {
+    rpc DeleteTenantIngestionProfile(TenantIngestionProfileIdRequest) returns (TenantIngestionProfile) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}"
         };
@@ -250,7 +278,7 @@ service TenantProvisioningService {
 
 
   // Create a Threshold Profile scoped to a Single Tenant. 
-    rpc CreateTenantThresholdProfile(TenantThresholdProfileRequest) returns (TenantThresholdProfileResponse) {
+    rpc CreateTenantThresholdProfile(TenantThresholdProfile) returns (TenantThresholdProfile) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/threshold-profiles"
             body: "*"
@@ -259,7 +287,7 @@ service TenantProvisioningService {
     
     // Updates an Threshold Profile, which provides details on the data 
     // collected for the Tenant. 
-    rpc UpdateTenantThresholdProfile(TenantThresholdProfileRequest) returns (TenantThresholdProfileResponse) {
+    rpc UpdateTenantThresholdProfile(TenantThresholdProfile) returns (TenantThresholdProfile) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/threshold-profiles"
             body: "*"
@@ -268,21 +296,21 @@ service TenantProvisioningService {
 
     // Retrieves an Threshold Profile, which provides details on the data 
     // collected for the Tenant. 
-    rpc GetTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfileResponse) {
+    rpc GetTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfile) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}"
         };
     }
 
     // Retrieve all Thresholds scoped to a single Tenant. 
-    rpc GetAllTenantThresholdProfiles(google.protobuf.StringValue) returns (TenantThresholdListResponse) {
+    rpc GetAllTenantThresholdProfiles(google.protobuf.StringValue) returns (TenantThresholdProfileList) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/threshold-profile-list"
         };
     }
 
     // Delete an Threshold Profile scoped to a single Tenant. 
-    rpc DeleteTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfileResponse) {
+    rpc DeleteTenantThresholdProfile(TenantThresholdProfileIdRequest) returns (TenantThresholdProfile) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{tenantId}/threshold-profiles/{thresholdProfileId}"
         };
@@ -290,7 +318,7 @@ service TenantProvisioningService {
 
   
     // Create a MonitoredObject scoped to a Single Tenant. 
-    rpc CreateMonitoredObject(MonitoredObjectRequest) returns (MonitoredObjectResponse) {
+    rpc CreateMonitoredObject(MonitoredObject) returns (MonitoredObject) {
         option (google.api.http) = {
             post: "/api/v1/tenants/{data.tenantId}/monitored-objects"
             body: "*"
@@ -298,7 +326,7 @@ service TenantProvisioningService {
     }
     
     // Update a MonitoredObject scoped to a single Tenant. 
-    rpc UpdateMonitoredObject(MonitoredObjectRequest) returns (MonitoredObjectResponse) {
+    rpc UpdateMonitoredObject(MonitoredObject) returns (MonitoredObject) {
         option (google.api.http) = {
             put: "/api/v1/tenants/{data.tenantId}/monitored-objects"
             body: "*"
@@ -306,21 +334,21 @@ service TenantProvisioningService {
     } 
     
     // Delete a MonitoredObject scoped to a single Tenant. 
-    rpc DeleteMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObjectResponse) {
+    rpc DeleteMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObject) {
         option (google.api.http) = {
             delete: "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}"
         };
     }
     
     // Retrieve a MonitoredObject scoped to a single Tenant. 
-    rpc GetMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObjectResponse) {
+    rpc GetMonitoredObject(MonitoredObjectIdRequest) returns (MonitoredObject) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{tenantId}/monitored-objects/{monitoredObjectId}"
         };
     }
     
     // Retrieve all MonitoredObject scoped to a single Tenant. 
-    rpc GetAllMonitoredObjects(google.protobuf.StringValue) returns (MonitoredObjectListResponse) {
+    rpc GetAllMonitoredObjects(google.protobuf.StringValue) returns (MonitoredObjectList) {
         option (google.api.http) = {
             get: "/api/v1/tenants/{value}/monitored-object-list"
         };

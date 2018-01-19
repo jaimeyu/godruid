@@ -51,7 +51,7 @@ func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 }
 
 // CreateTenantUser - creates a user scoped to a single Tenant.
-func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 }
 
 // UpdateTenantUser - updates a user scoped to a single Tenant.
-func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantUserRequest(tenantUserReq, true); err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUse
 }
 
 // DeleteTenantUser - deletes a user scoped to a single Tenant.
-func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	// Validate the request to ensure this operation is valid:
 	if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUse
 }
 
 // GetTenantUser - retrieves a user scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	// Validate the request to ensure this operatin is valid:
 	if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserID
 }
 
 // GetAllTenantUsers - retrieves all users scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserListResponse, error) {
+func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
 	// Validate the request to ensure this operatin is valid:
 
 	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantUserStr, tenantID.Value)
@@ -148,7 +148,7 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
-func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 }
 
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
-func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantDomainRequest(tenantDomainRequest, true); err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantD
 }
 
 // DeleteTenantDomain - deletes a Domain scoped to a single Tenant.
-func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	// Validate the request to ensure this operation is valid:
 	if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantD
 }
 
 // GetTenantDomain - retrieves a Domain scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	// Validate the request to ensure this operatin is valid:
 	if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDoma
 }
 
 // GetAllTenantDomains - retrieves all Domains scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainListResponse, error) {
+func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainList, error) {
 	// Validate the request to ensure this operation is valid:
 
 	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantDomainStr, tenantID.Value)
@@ -245,7 +245,7 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 }
 
 // CreateTenantIngestionProfile - creates an Ingestion Profile scoped to a specific Tenant.
-func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantIngPrfRequest(tenantIngPrfReq, false); err != nil {
 		return nil, err
@@ -265,7 +265,7 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 }
 
 // UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
-func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantIngPrfRequest(tenantIngPrfReq, true); err != nil {
 		return nil, err
@@ -285,7 +285,7 @@ func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Contex
 }
 
 // GetTenantIngestionProfile - retrieves the Ingestion Profile for a single Tenant.
-func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	// Validate the request to ensure the operation is valid:
 	if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
 		return nil, err
@@ -305,7 +305,7 @@ func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, 
 }
 
 // DeleteTenantIngestionProfile - deletes the Ingestion Profile for a single Tenant.
-func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	// Validate the request to ensure the operation is valid:
 	if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
 		return nil, err
@@ -325,7 +325,7 @@ func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Contex
 }
 
 // CreateTenantThresholdProfile - creates an Threshold Profile scoped to a specific Tenant.
-func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, false); err != nil {
 		return nil, err
@@ -345,7 +345,7 @@ func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Contex
 }
 
 // UpdateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
-func (tsh *TenantServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (tsh *TenantServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, true); err != nil {
 		return nil, err
@@ -365,7 +365,7 @@ func (tsh *TenantServiceHandler) UpdateTenantThresholdProfile(ctx context.Contex
 }
 
 // GetTenantThresholdProfile - retrieves the Threshold Profile for a single Tenant.
-func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure the operation is valid:
 	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
 		return nil, err
@@ -385,7 +385,7 @@ func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, 
 }
 
 // DeleteTenantThresholdProfile - deletes the Threshold Profile for a single Tenant.
-func (tsh *TenantServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (tsh *TenantServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure the operation is valid:
 	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
 		return nil, err
@@ -405,23 +405,13 @@ func (tsh *TenantServiceHandler) DeleteTenantThresholdProfile(ctx context.Contex
 }
 
 // CreateMonitoredObject - creates a Monitored Object scoped to a specific tenant
-func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateMonitoredObjectRequest(monitoredObjectReq, false); err != nil {
 		return nil, err
 	}
 
 	logger.Log.Infof("Creating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
-
-	// If no id is provided for the Manged Object, generate one
-	objectID := monitoredObjectReq.GetXId()
-	if len(objectID) == 0 {
-		objectID, err := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
-		if err != nil {
-			return nil, err
-		}
-		monitoredObjectReq.XId = objectID
-	}
 
 	// Issue request to DAO Layer to Create the Tenant Monitored Object
 	result, err := tsh.tenantDB.CreateMonitoredObject(monitoredObjectReq)
@@ -435,23 +425,13 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 }
 
 // UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
-func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateMonitoredObjectRequest(monitoredObjectReq, true); err != nil {
 		return nil, err
 	}
 
 	logger.Log.Infof("Updating %s: %s", db.TenantMonitoredObjectStr, monitoredObjectReq)
-
-	// If no id is provided for the Manged Object, generate one
-	objectID := monitoredObjectReq.GetXId()
-	if len(objectID) == 0 {
-		objectID, err := db.GenerateID(monitoredObjectReq.GetData(), string(db.TenantMonitoredObjectType))
-		if err != nil {
-			return nil, err
-		}
-		monitoredObjectReq.XId = objectID
-	}
 
 	// Issue request to DAO Layer to Update the Tenant Monitored Object
 	result, err := tsh.tenantDB.UpdateMonitoredObject(monitoredObjectReq)
@@ -465,7 +445,7 @@ func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, moni
 }
 
 // GetMonitoredObject - retrieves the MonitoredObject for a singler Tenant.
-func (tsh *TenantServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+func (tsh *TenantServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
 		return nil, err
@@ -483,7 +463,7 @@ func (tsh *TenantServiceHandler) GetMonitoredObject(ctx context.Context, monitor
 }
 
 // DeleteMonitoredObject - deletes the MonitoredObject for a singler Tenant.
-func (tsh *TenantServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+func (tsh *TenantServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure the operation is valid:
 	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
 		return nil, err
@@ -503,7 +483,7 @@ func (tsh *TenantServiceHandler) DeleteMonitoredObject(ctx context.Context, moni
 }
 
 // GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
-func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectListResponse, error) {
+func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectList, error) {
 	// Validate the request to ensure this operation is valid:
 
 	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantMonitoredObjectStr, tenantID.Value)
@@ -609,7 +589,7 @@ func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr
 }
 
 // GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
-func (tsh *TenantServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdListResponse, error) {
+func (tsh *TenantServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdProfileList, error) {
 	logger.Log.Infof("Retrieving all %ss for Tenant: %s", db.TenantThresholdProfileStr, tenantID.Value)
 
 	// Issue request to DAO Layer to fetch the records
@@ -624,7 +604,7 @@ func (tsh *TenantServiceHandler) GetAllTenantThresholdProfiles(ctx context.Conte
 }
 
 // GetActiveTenantIngestionProfile - retrieves the active Ingestion Profile for a single Tenant.
-func (tsh *TenantServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfileResponse, error) {
+func (tsh *TenantServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfile, error) {
 	// Issue request to DAO Layer to fetch the record
 	result, err := tsh.tenantDB.GetActiveTenantIngestionProfile(tenantID.GetValue())
 	if err != nil {

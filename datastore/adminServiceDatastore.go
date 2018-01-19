@@ -16,6 +16,9 @@ const (
 
 	// IngestionDictionaryType - datatype string used to identify an IngestionDictionary in the datastore record
 	IngestionDictionaryType AdminDataType = "ingestionDictionary"
+
+	// ValidTypesType - datatype string used to identify a ValidTypes object in the datastore record
+	ValidTypesType AdminDataType = "validTypes"
 )
 
 const (
@@ -30,6 +33,9 @@ const (
 
 	// IngestionDictionaryStr - common name of the IngestionDictionary data type for use in logs.
 	IngestionDictionaryStr = "Ingestion Dictionary"
+
+	// ValidTypesStr - common name of the ValidTypes data type for use in logs.
+	ValidTypesStr = "Valid Types object"
 )
 
 // AdminServiceDatastore - interface which provides the functionality
@@ -37,17 +43,17 @@ const (
 type AdminServiceDatastore interface {
 	AddAdminViews() error
 
-	CreateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
-	UpdateAdminUser(*pb.AdminUserRequest) (*pb.AdminUserResponse, error)
-	DeleteAdminUser(string) (*pb.AdminUserResponse, error)
-	GetAdminUser(string) (*pb.AdminUserResponse, error)
-	GetAllAdminUsers() (*pb.AdminUserListResponse, error)
+	CreateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
+	UpdateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
+	DeleteAdminUser(string) (*pb.AdminUser, error)
+	GetAdminUser(string) (*pb.AdminUser, error)
+	GetAllAdminUsers() (*pb.AdminUserList, error)
 
-	CreateTenant(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
-	UpdateTenantDescriptor(*pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error)
-	DeleteTenant(string) (*pb.TenantDescriptorResponse, error)
-	GetTenantDescriptor(string) (*pb.TenantDescriptorResponse, error)
-	GetAllTenantDescriptors() (*pb.TenantDescriptorListResponse, error)
+	CreateTenant(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
+	UpdateTenantDescriptor(*pb.TenantDescriptor) (*pb.TenantDescriptor, error)
+	DeleteTenant(string) (*pb.TenantDescriptor, error)
+	GetTenantDescriptor(string) (*pb.TenantDescriptor, error)
+	GetAllTenantDescriptors() (*pb.TenantDescriptorList, error)
 
 	CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error)
 	UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error)
@@ -55,4 +61,9 @@ type AdminServiceDatastore interface {
 	GetIngestionDictionary() (*pb.IngestionDictionary, error)
 
 	GetTenantIDByAlias(name string) (string, error)
+
+	CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error)
+	UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error)
+	GetValidTypes() (*pb.ValidTypes, error)
+	GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error)
 }

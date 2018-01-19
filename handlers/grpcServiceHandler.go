@@ -5,10 +5,52 @@ import (
 	"fmt"
 	"strings"
 
-	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
+)
+
+// MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
+type MonitoredObjectType string
+const (
+	// MonitoredObjectUnknown - value for TWAMP Light monitored objects
+	MonitoredObjectUnknown MonitoredObjectType = "unknown"
+
+	// TwampPE - value for TWAMP PE monitored objects
+	TwampPE MonitoredObjectType = "twamp-pe"
+
+	// TwampSF - value for TWAMP Stateful monitored objects
+	TwampSF MonitoredObjectType = "twamp-sf"
+
+	// TwampSL - value for TWAMP Stateless monitored objects
+	TwampSL MonitoredObjectType = "twamp-sl"
+)
+
+// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for 
+// Skylight Datahub
+type MonitoredObjectDeviceType string
+const (
+	// MonitoredObjectDeviceUnknown - value for TWAMP Light monitored objects
+	MonitoredObjectDeviceUnknown MonitoredObjectDeviceType = "unknown"
+
+	// AccedianNID - value for Accedian NID monitored objects device type
+	AccedianNID MonitoredObjectDeviceType = "accedian-nid"
+
+	// AccedianVNID - value for Accedian VNID monitored objects device type
+	AccedianVNID MonitoredObjectDeviceType = "accedian-vnid"
+)
+
+var (
+	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
+	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
+		string(TwampPE): TwampPE,
+		string(TwampSF): TwampSF,
+		string(TwampSL): TwampSL}
+
+	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
+	ValidMonitoredObjectDeviceTypes = map[string]MonitoredObjectDeviceType{
+		string(AccedianNID): AccedianNID,
+		string(AccedianVNID): AccedianVNID}
 )
 
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
@@ -16,9 +58,10 @@ import (
 // gRPC services are added, a new Service Handler should be created,
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
-	ash *AdminServiceHandler
-	tsh *TenantServiceHandler
-	msh *MetricServiceHandler
+	ash               *AdminServiceHandler
+	tsh               *TenantServiceHandler
+	msh               *MetricServiceHandler
+	DefaultValidTypes *pb.ValidTypesData
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -31,38 +74,60 @@ func CreateCoordinator() *GRPCServiceHandler {
 	result.tsh = CreateTenantServiceHandler()
 	result.msh = CreateMetricServiceHandler()
 
+	// Setup the known values of the Valid Types for the system
+	// by using the enumerated protobuf values
+	validMonObjTypes := make(map[string]string, 0)
+	validMonObjDevTypes := make(map[string]string, 0)
+
+	for key, val := range ValidMonitoredObjectTypes {
+		validMonObjTypes[key] = string(val)
+	}
+	for key, val := range ValidMonitoredObjectDeviceTypes {
+		validMonObjDevTypes[key] = string(val)
+	}
+
+	result.DefaultValidTypes = &pb.ValidTypesData{
+		MonitoredObjectTypes:       validMonObjTypes,
+		MonitoredObjectDeviceTypes: validMonObjDevTypes}
+
 	return result
 }
 
 // CreateAdminUser - Create an Administrative User.
-func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
+func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
 	return gsh.ash.CreateAdminUser(ctx, user)
 }
 
 // UpdateAdminUser - Update an Administrative User.
-func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUserRequest) (*pb.AdminUserResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
 	return gsh.ash.UpdateAdminUser(ctx, user)
 }
 
 // DeleteAdminUser - Delete an Administrative User.
-func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
 	return gsh.ash.DeleteAdminUser(ctx, userID)
 }
 
 // GetAdminUser - Retrieve an Administrative User by the ID.
-func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUserResponse, error) {
+func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
 	return gsh.ash.GetAdminUser(ctx, userID)
 }
 
 // GetAllAdminUsers -  Retrieve all Administrative Users.
-func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
 	return gsh.ash.GetAllAdminUsers(ctx, noValue)
 }
 
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
-func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
+func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	// Check if a tenant already exists with this name.
+	existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
+	if len(existingTenantByName.GetValue()) != 0 {
+		return nil, fmt.Errorf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
+	}
+
 	// Create the Tenant metadata record and reserve space to store isolated Tenant data
 	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
 	if err != nil {
@@ -70,24 +135,17 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	}
 
 	// Create a default Ingestion Profile for the Tenant.
-	ingPrfData := createDefaultTenantIngPrf(result.GetXId())
-	ingPrfID, err := db.GenerateID(ingPrfData, string(db.TenantIngestionProfileType))
-	if err != nil {
-		return nil, err
-	}
-	ingPrfReq := pb.TenantIngestionProfileRequest{XId: ingPrfID, Data: ingPrfData}
+	idForTenant := result.GetXId()
+	ingPrfData := createDefaultTenantIngPrf(idForTenant)
+	ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create a default Threshold Profile for the Tenant
-	threshPrfData := createDefaultTenantThresholdPrf(result.GetXId())
-	threshPrfID, err := db.GenerateID(threshPrfData, string(db.TenantThresholdProfileType))
-	if err != nil {
-		return nil, err
-	}
-	threshPrfReq := pb.TenantThresholdProfileRequest{XId: threshPrfID, Data: threshPrfData}
+	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
+	threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
 	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
 	if err != nil {
 		return nil, err
@@ -96,13 +154,8 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	// Create the tenant metadata
 	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
 	// as this is just relational pouch adaption:
-	threshPrfIDParts := strings.Split(threshProfileResponse.GetXId(), "_")
-	meta := createDefaultTenantMeta(result.GetXId(), threshPrfIDParts[len(threshPrfIDParts)-1], result.GetData().GetName())
-	metaID, err := db.GenerateID(meta, string(db.TenantMetaType))
-	if err != nil {
-		return nil, err
-	}
-	metaReq := pb.TenantMetadata{XId: metaID, Data: meta}
+	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.GetData().GetName())
+	metaReq := pb.TenantMetadata{Data: meta}
 	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
 	if err != nil {
 		return nil, err
@@ -112,13 +165,13 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptorRequest) (*pb.TenantDescriptorResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
 	return gsh.ash.UpdateTenantDescriptor(ctx, tenantMeta)
 }
 
 // DeleteTenant - Delete a Tenant by the provided ID. This operation will remove the Tenant
 // datastore as well as the TenantDescriptor metadata.
-func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
 	// TODO: Add calls here to Tenant Service to delete any related
 	// tenant data.
 
@@ -126,12 +179,12 @@ func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.St
 }
 
 //GetTenantDescriptor - retrieves Tenant metadata for the provided tenantID.
-func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptorResponse, error) {
+func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
 	return gsh.ash.GetTenantDescriptor(ctx, tenantID)
 }
 
 // GetAllTenantDescriptors -  Retrieve all Tenant Descriptors.
-func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noValue *emp.Empty) (*pb.TenantDescriptorListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noValue *emp.Empty) (*pb.TenantDescriptorList, error) {
 	return gsh.ash.GetAllTenantDescriptors(ctx, noValue)
 }
 
@@ -156,127 +209,127 @@ func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noVal
 }
 
 // CreateTenantUser - creates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	return gsh.tsh.CreateTenantUser(ctx, tenantUserReq)
 }
 
 // UpdateTenantUser - updates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUserRequest) (*pb.TenantUserResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	return gsh.tsh.UpdateTenantUser(ctx, tenantUserReq)
 }
 
 // DeleteTenantUser - deletes a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	return gsh.tsh.DeleteTenantUser(ctx, tenantUserIdReq)
 }
 
 // GetTenantUser - retrieves a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUserResponse, error) {
+func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIdReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	return gsh.tsh.GetTenantUser(ctx, tenantUserIdReq)
 }
 
 // GetAllTenantUsers - retrieves all users scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
 	return gsh.tsh.GetAllTenantUsers(ctx, tenantID)
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	return gsh.tsh.CreateTenantDomain(ctx, tenantDomainRequest)
 }
 
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomainRequest) (*pb.TenantDomainResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	return gsh.tsh.UpdateTenantDomain(ctx, tenantDomainRequest)
 }
 
 // DeleteTenantDomain - deletes a Domain scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	return gsh.tsh.DeleteTenantDomain(ctx, tenantDomainIDRequest)
 }
 
 // GetTenantDomain - retrieves a Domain scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomainResponse, error) {
+func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	return gsh.tsh.GetTenantDomain(ctx, tenantDomainIDRequest)
 }
 
 // GetAllTenantDomains - retrieves all Domains scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainList, error) {
 	return gsh.tsh.GetAllTenantDomains(ctx, tenantID)
 }
 
 // CreateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	return gsh.tsh.CreateTenantIngestionProfile(ctx, tenantIngPrfReq)
 }
 
 // UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfileRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	return gsh.tsh.UpdateTenantIngestionProfile(ctx, tenantIngPrfReq)
 }
 
 // GetTenantIngestionProfile - retrieves the Ingestion Profile for a singler Tenant.
-func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	return gsh.tsh.GetTenantIngestionProfile(ctx, tenantID)
 }
 
 // GetActiveTenantIngestionProfile - retrieves the active Ingestion Profile for a single Tenant.
-func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfileResponse, error) {
+func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfile, error) {
 	return gsh.tsh.GetActiveTenantIngestionProfile(ctx, tenantID)
 }
 
 // DeleteTenantIngestionProfile - retrieves the Ingestion Profile for a singler Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfileResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	return gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 }
 
 // CreateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	return gsh.tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 }
 
 // UpdateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfileRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	return gsh.tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 }
 
 // GetTenantThresholdProfile - retrieves the Threshold Profile for a singler Tenant.
-func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	return gsh.tsh.GetTenantThresholdProfile(ctx, tenantID)
 }
 
 // DeleteTenantThresholdProfile - retrieves the Threshold Profile for a singler Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfileResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	return gsh.tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 }
 
 // GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
-func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdProfileList, error) {
 	return gsh.tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 }
 
 // CreateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	return gsh.tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 }
 
 // UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
-func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObjectRequest) (*pb.MonitoredObjectResponse, error) {
+func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	return gsh.tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 }
 
 // GetMonitoredObject - retrieves the MonitoredObject for a singler Tenant.
-func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	return gsh.tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 }
 
 // DeleteMonitoredObject - deletes the MonitoredObject for a singler Tenant.
-func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObjectResponse, error) {
+func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	return gsh.tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 }
 
 // GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectListResponse, error) {
+func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectList, error) {
 	return gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
 }
 
@@ -303,7 +356,7 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 	return gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
 }
 
-// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
+// GetThresholdCrossingByMonitoredObject - Retrieves the Threshold crossings for a given threshold profile,
 // interval, tenant, domain, and groups by monitoredObjectID
 func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
 
@@ -355,4 +408,24 @@ func (gsh *GRPCServiceHandler) GetTenantIDByAlias(ctx context.Context, value *wr
 // AddAdminViews - add views to admin db
 func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	return gsh.ash.AddAdminViews()
+}
+
+// CreateValidTypes - Create the valid type definition in the system.
+func (gsh *GRPCServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	return gsh.ash.CreateValidTypes(ctx, value)
+}
+
+// UpdateValidTypes - Update the valid type definition in the system.
+func (gsh *GRPCServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	return gsh.ash.UpdateValidTypes(ctx, value)
+}
+
+// GetValidTypes - retrieve the enire list of ValidTypes in the system.
+func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
+	return gsh.ash.GetValidTypes(ctx, value)
+}
+
+// GetSpecificValidTypes - retrieve a subset of the known ValidTypes in the system.
+func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	return gsh.ash.GetSpecificValidTypes(ctx, value)
 }

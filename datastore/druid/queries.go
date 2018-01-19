@@ -38,7 +38,7 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 
 // FilterHelper - helper function to select correct druid filter based on
 // a given event and metric
-func FilterHelper(metric string, e *pb.TenantThresholdProfile_EventAttrMap) (*godruid.Filter, error) {
+func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) (*godruid.Filter, error) {
 
 	event := e.GetEventAttrMap()
 
@@ -79,7 +79,7 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfile_EventAttrMap) (*go
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) (*godruid.QueryTimeseries, error) {
+func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -137,7 +137,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfile) (*godruid.QueryGroupBy, error) {
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")

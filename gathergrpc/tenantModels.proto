@@ -4,38 +4,30 @@ package gathergrpc;
 
 import "gathergrpc/commonModels.proto";
 
-// TenantDomain - model for a Domain for a single Tenant.
+// TenantDomainData - model for a Domain for a single Tenant.
+message TenantDomainData {
+    string tenantId = 2;
+    string datatype = 3;
+
+    string name = 4;
+    string color = 5;
+    repeated string thresholdProfileSet = 6;
+
+    int64 createdTimestamp = 7;
+    int64 lastModifiedTimestamp = 8; 
+}
+
+// TenantDomain - wrapper for requests that involve a Tenant Domain
 message TenantDomain {
-    string tenantId = 1;
-    string datatype = 2;
-
-    string name = 3;
-    string color = 4;
-
-    int64 createdTimestamp = 5;
-    int64 lastModifiedTimestamp = 6;
-
-    repeated string thresholdProfileSet = 7;
-}
-
-// TenantDomainRequest - wrapper for requests that involve a Tenant Domain
-message TenantDomainRequest {
     string _id = 1;
     string _rev = 2;
-    TenantDomain data = 3;
-}
-
-// TenantDomainResponse - wrapper for responses that involve a Tenant Domain
-message TenantDomainResponse {
-    string _id = 1;
-    string _rev = 2;
-    TenantDomain data = 3;
+    TenantDomainData data = 3;
 }
 
 // TenantDomainListResponse - a wrapper for a list of TenantDomain objects that 
 // are returned as a response to a request..
-message TenantDomainListResponse {
-    repeated TenantDomainResponse data = 1;
+message TenantDomainList {
+    repeated TenantDomain data = 1;
 }
 
 // TenantDomainIdRequest - wrapper for requests that involve a Tenant Domain, 
@@ -45,24 +37,9 @@ message TenantDomainIdRequest {
     string domainId = 2;
 }
 
-
-// Not dealing with the site tour right now as the concept is not fully 
-// thought out. Leaving this snippet in though as we will need to address
-// the workflow eventually.
-// message TenantSiteTour {
-//     string id = 1;
-//     string rev = 2;
-//     string datatype = 3;
-
-//     bool onboarding = 4;
-
-//     int64 createdTimestamp = 5;
-//     int64 lastModifiedTimestamp = 6;
-// }
-
-// TenantIngestionProfile - model for the singleton object that 
+// TenantIngestionProfileData - model for the singleton object that 
 // governs what data is displayed for a Tenant.
-message TenantIngestionProfile {
+message TenantIngestionProfileData {
     
     message MetricMap {
         map<string, bool> metricMap = 1;
@@ -74,29 +51,21 @@ message TenantIngestionProfile {
         map<string, MonitoredObjectMap> vendorMap = 1;
     }
 
-    string tenantId = 1;
-    string datatype = 2;
+    string tenantId = 2;
+    string datatype = 3;
 
-    VendorMap metrics = 3;
+    VendorMap metrics = 4;
 
-    int64 createdTimestamp = 4;
-    int64 lastModifiedTimestamp = 5;
+    int64 createdTimestamp = 5;
+    int64 lastModifiedTimestamp = 6;
 }
 
-// TenantIngestionProfileRequest - wrapper for requests that involve the
+// TenantIngestionProfile - wrapper for requests that involve the
 // Tenant Ingestion Profile
-message TenantIngestionProfileRequest {
+message TenantIngestionProfile {
     string _id = 1;
     string _rev = 2;
-    TenantIngestionProfile data = 3;
-}
-
-// TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile
-// in a response.
-message TenantIngestionProfileResponse {
-    string _id = 1;
-    string _rev = 2;
-    TenantIngestionProfile data = 3;
+    TenantIngestionProfileData data = 3;
 }
 
 message TenantIngestionProfileIdRequest {
@@ -104,9 +73,8 @@ message TenantIngestionProfileIdRequest {
     string ingestionProfileId = 2;
 }
 
-//Threshold Profile
-
-message TenantThresholdProfile {
+//Threshold Profile Data
+message TenantThresholdProfileData {
 
   message EventAttrMap {
     map<string, string> eventAttrMap = 1;
@@ -132,29 +100,23 @@ message TenantThresholdProfile {
     map<string, MonitoredObjectTypeMap> vendorMap = 1; 
   }
 
-  string tenantId = 1;
-  string datatype = 2;
-  string name = 3;
-  VendorMap thresholds = 4;
-  int64 createdTimestamp = 5;
-  int64 lastModifiedTimestamp = 6;
+  string tenantId = 2;
+  string datatype = 3;
+
+  string name = 4;
+  VendorMap thresholds = 5;
+
+  int64 createdTimestamp = 6;
+  int64 lastModifiedTimestamp = 7;
 
 }
 
-// TenantThresholdProfileRequest - wrapper for requests that involve the
+// TenantThresholdProfile - wrapper for requests that involve the
 // Tenant Threshold Profile
-message TenantThresholdProfileRequest {
+message TenantThresholdProfile {
     string _id = 1;
     string _rev = 2;
-    TenantThresholdProfile data = 3;
-}
-
-// TenantIngestionProfileResponse - wrapper to provide a Tenant Ingestion Profile
-// in a response.
-message TenantThresholdProfileResponse {
-    string _id = 1;
-    string _rev = 2;
-    TenantThresholdProfile data = 3;
+    TenantThresholdProfileData data = 3;
 }
 
 message TenantThresholdProfileIdRequest {
@@ -162,51 +124,42 @@ message TenantThresholdProfileIdRequest {
     string thresholdProfileId = 2;
 }
 
-message TenantThresholdListResponse {
-    repeated TenantThresholdProfileResponse data = 1;
+message TenantThresholdProfileList {
+    repeated TenantThresholdProfile data = 1;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TenantUser - model for a User that is scoped to a single Tenant.
+// TenantUserData - model for a User that is scoped to a single Tenant.
+message TenantUserData {
+    string tenantId = 2;
+    string datatype = 3;
+
+    string username = 4;
+    string password = 5;
+    bool sendOnboardingEmail = 6;
+    string onboardingToken = 7;
+    bool userVerified = 8;
+    UserState state = 9;
+    repeated string domains = 10;
+
+    int64 createdTimestamp = 11;
+    int64 lastModifiedTimestamp = 12;
+}
+
+// TenantUser - wrapper for requests that involve a User that
+// is scoped to a single Tenant.
 message TenantUser {
-    string tenantId = 1;
-    string datatype = 2;
-
-    string username = 3;
-    string password = 4;
-    bool sendOnboardingEmail = 5;
-    string onboardingToken = 6;
-    bool userVerified = 7;
-    UserState state = 8;
-    repeated string domains = 9;
-    // TenantSiteTour siteTour = 11;  --- Come back to this concept when it is fleshed out. ---
-
-    int64 createdTimestamp = 10;
-    int64 lastModifiedTimestamp = 11;
-}
-
-// TenantUserRequest - wrapper for requests that involve a User that
-// is scoped to a single Tenant.
-message TenantUserRequest {
     string _id = 1;
     string _rev = 2;
-    TenantUser data = 3;
-}
-
-// TenantUserResponse - wrapper for responses to requests that involve a User that
-// is scoped to a single Tenant.
-message TenantUserResponse {
-    string _id = 1;
-    string _rev = 2;
-    TenantUser data = 3;
+    TenantUserData data = 3;
 }
 
 // TenantUserListResponse - a wrapper to handle requests that return a
 // list of TenantUser objects.
-message TenantUserListResponse {
-    repeated TenantUserResponse data = 1;
+message TenantUserList {
+    repeated TenantUser data = 1;
 }
 
 // TenantUserIdRequest - wrapper for requests that involve a Tenant User, 
@@ -216,31 +169,31 @@ message TenantUserIdRequest {
     string userId = 2;
 }
 
-// MonitoredObject - describes a unique device/object which is reporting 
+// MonitoredObjectData - describes a unique device/object which is reporting 
 // data from the network.
-message MonitoredObject {
-    enum MonitoredObjectType {
-        MO_UNKNOWN = 0;
-        TWAMP = 1;
-    }
-    enum DeviceType {
-        DT_UNKNOWN = 0;
-        ACCEDIAN_NID = 1;
-        ACCEDIAN_VNID = 2;
-    }
+message MonitoredObjectData {
+    // enum MonitoredObjectType {
+    //     MO_UNKNOWN = 0;
+    //     TWAMP = 1;
+    // }
+    // enum DeviceType {
+    //     DT_UNKNOWN = 0;
+    //     ACCEDIAN_NID = 1;
+    //     ACCEDIAN_VNID = 2;
+    // }
 
     string id = 1;
     string tenantId = 2;
     string datatype = 3;
 
-    DeviceType actuatorType = 4;
+    string actuatorType = 4;
     string actuatorName = 5;
 
-    DeviceType reflectorType = 6;
+    string reflectorType = 6;
     string reflectorName = 7;
     
     string objectName = 8;
-    MonitoredObjectType objectType = 9;  
+    string objectType = 9;  
 
     int64 createdTimestamp = 10;
     int64 lastModifiedTimestamp = 11;
@@ -249,26 +202,18 @@ message MonitoredObject {
 }
 
 
-// MonitoredObjectRequest - Wrapper for requests involving a MonitoredObject that are 
+// MonitoredObject - Wrapper for requests involving a MonitoredObject that are 
 // scoped to a single Tenant.
-message MonitoredObjectRequest {
+message MonitoredObject {
     string _id = 1;
     string _rev = 2;
-    MonitoredObject data = 3;
+    MonitoredObjectData data = 3;
 }
 
-// MonitoredObjectRequest - Wrapper for responses involving a MonitoredObject that are 
+// MonitoredObjectList - Wrapper for requests which return a list of MonitoredObjects 
 // scoped to a single Tenant.
-message MonitoredObjectResponse {
-    string _id = 1;
-    string _rev = 2;
-    MonitoredObject data = 3;
-}
-
-// MonitoredObjectListResponse - Wrapper for requests which return a list of MonitoredObjects 
-// scoped to a single Tenant.
-message MonitoredObjectListResponse {
-    repeated MonitoredObjectResponse data = 3;
+message MonitoredObjectList {
+    repeated MonitoredObject data = 3;
 }
 
 message MonitoredObjectIdRequest {
@@ -287,22 +232,22 @@ message MonitoredObjectCountByDomainRequest {
 
 message MonitoredObjectCountByDomainResponse {
     map<string, int64> domainToMonitoredObjectCountMap = 1;
-    map<string, MonitoredObjectList> domainToMonitoredObjectSetMap = 2;
+    map<string, MonitoredObjectSet> domainToMonitoredObjectSetMap = 2;
 }
 
-message MonitoredObjectList {
+message MonitoredObjectSet {
     repeated string  monitoredObjectSet = 1;
 }
 
 message TenantMeta {
-    string tenantId = 1;
-    string datatype = 2;
+    string tenantId = 2;
+    string datatype = 3;
 
-    string tenantName = 3;
-    string defaultThresholdProfile = 4;
+    string tenantName = 4;
+    string defaultThresholdProfile = 5;
 
-    int64 createdTimestamp = 5;
-    int64 lastModifiedTimestamp = 6;
+    int64 createdTimestamp = 6;
+    int64 lastModifiedTimestamp = 7;
 }
 
 message TenantMetadata {

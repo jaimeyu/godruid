@@ -18,43 +18,39 @@ It has these top-level messages:
 	Links
 	Resource
 	Relationships
+	TenantDescriptorData
 	TenantDescriptor
-	TenantDescriptorRequest
-	TenantDescriptorResponse
-	TenantDescriptorListResponse
+	TenantDescriptorList
+	AdminUserData
 	AdminUser
-	AdminUserRequest
-	AdminUserResponse
-	AdminUserListResponse
+	AdminUserList
 	IngestionDictionaryData
 	IngestionDictionary
+	ValidTypesRequest
+	ValidTypesData
+	ValidTypes
+	TenantDomainData
 	TenantDomain
-	TenantDomainRequest
-	TenantDomainResponse
-	TenantDomainListResponse
+	TenantDomainList
 	TenantDomainIdRequest
+	TenantIngestionProfileData
 	TenantIngestionProfile
-	TenantIngestionProfileRequest
-	TenantIngestionProfileResponse
 	TenantIngestionProfileIdRequest
+	TenantThresholdProfileData
 	TenantThresholdProfile
-	TenantThresholdProfileRequest
-	TenantThresholdProfileResponse
 	TenantThresholdProfileIdRequest
-	TenantThresholdListResponse
+	TenantThresholdProfileList
+	TenantUserData
 	TenantUser
-	TenantUserRequest
-	TenantUserResponse
-	TenantUserListResponse
+	TenantUserList
 	TenantUserIdRequest
+	MonitoredObjectData
 	MonitoredObject
-	MonitoredObjectRequest
-	MonitoredObjectResponse
-	MonitoredObjectListResponse
+	MonitoredObjectList
 	MonitoredObjectIdRequest
 	MonitoredObjectCountByDomainRequest
 	MonitoredObjectCountByDomainResponse
-	MonitoredObjectList
+	MonitoredObjectSet
 	TenantMeta
 	TenantMetadata
 	TenantMetaIdRequest

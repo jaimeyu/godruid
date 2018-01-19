@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 	couchdb "github.com/leesper/couchdb-golang"
 )
@@ -141,7 +142,7 @@ func getAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
 	logger.Log.Debugf("Attempting to retrieve all %ss\n", dataTypeStrForLogging)
 
-	// Get the Admin User from CouchDB
+	// Get the data from CouchDB
 	selector := fmt.Sprintf(`regex(_id, "^%s_")`, dataType)
 	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
 	if err != nil {
@@ -149,7 +150,21 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 		return nil, err
 	}
 
+	// Strip out the prefix on all the IDs
+	for _, data := range fetchedData {
+		stripPrefixFromID(data)
+	}
+
 	return fetchedData, nil
+}
+
+func stripPrefixFromID(data map[string]interface{}) {
+	if data["_id"] != nil {
+		idStr := data["_id"].(string)
+		if len(idStr) != 0 {
+			data["_id"] = ds.GetDataIDFromFullID(idStr)
+		}
+	}
 }
 
 // ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
@@ -243,6 +258,8 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 		return err
 	}
 
+	stripPrefixFromID(storeFormat)
+
 	// Populate the response
 	if err = convertGenericCouchDataToObject(storeFormat, &dataContainer, dataTypeLogStr); err != nil {
 		return err
@@ -277,6 +294,8 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 		return err
 	}
 
+	stripPrefixFromID(storeFormat)
+
 	// Populate the response
 	if err = convertGenericCouchDataToObject(storeFormat, &dataContainer, dataTypeLogStr); err != nil {
 		return err
@@ -299,6 +318,9 @@ func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer 
 	if err != nil {
 		return err
 	}
+
+	// Strip prefix from the ID
+	stripPrefixFromID(fetchedObject)
 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.

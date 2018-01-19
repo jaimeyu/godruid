@@ -14,7 +14,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	ds "github.com/accedian/adh-gather/datastore"
 
 	"github.com/satori/go.uuid"
 )
@@ -85,7 +84,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query, err := HistogramQuery(ds.PrependToDataID(request.GetTenant(), string(ds.TenantUserType)), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
+	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
 
 	if err != nil {
 		return nil, err
@@ -132,7 +131,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingQuery(ds.PrependToDataID(request.GetTenant(), string(ds.TenantUserType)), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
 
 	if err != nil {
 		return nil, err
@@ -190,7 +189,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingByMonitoredObjectQuery(ds.PrependToDataID(request.GetTenant(), string(ds.TenantUserType)), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
 
 	if err != nil {
 		return nil, err

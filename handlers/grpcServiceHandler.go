@@ -43,6 +43,9 @@ const (
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
 	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
+		"pe": TwampPE,
+		"sf": TwampSF,
+		"sl": TwampSL,
 		string(TwampPE): TwampPE,
 		string(TwampSF): TwampSF,
 		string(TwampSL): TwampSL}

@@ -43,8 +43,12 @@ jobs:
     steps:
       - checkout 
       - run: 
-          name: Downloading the dependencies
-          command: go get -v -t -d ./...
+          name: Downloading the dependency management tool
+          command: go get -u github.com/golang/dep/cmd/dep
+
+      - run:
+          name: Download Dependencies
+          command: ~/go/bin/dep ensure
 
       - setup_remote_docker
       

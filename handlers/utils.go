@@ -28,9 +28,9 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	metricMap := pb.TenantIngestionProfileData_MetricMap{}
 	metricMap.MetricMap = createMetricMap(defaultIngestionProfileMetricNames...)
 	moMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
-	moMap.MonitoredObjectTypeMap["pe"] = &metricMap
-	moMap.MonitoredObjectTypeMap["sl"] = &metricMap
-	moMap.MonitoredObjectTypeMap["sf"] = &metricMap
+	moMap.MonitoredObjectTypeMap[string(TwampPE)] = &metricMap
+	moMap.MonitoredObjectTypeMap[string(TwampSL)] = &metricMap
+	moMap.MonitoredObjectTypeMap[string(TwampSF)] = &metricMap
 	metrics := make(map[string]*pb.TenantIngestionProfileData_MonitoredObjectMap)
 	metrics["accedian"] = &moMap
 	vendorMap := &pb.TenantIngestionProfileData_VendorMap{}
@@ -83,7 +83,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
 			"accedian": &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
 				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
-					"pe": &pb.TenantThresholdProfileData_MetricMap{
+					string(TwampPE): &pb.TenantThresholdProfileData_MetricMap{
 						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
 							"delayP95": &pb.TenantThresholdProfileData_DirectionMap{
 								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{

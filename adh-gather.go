@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"io/ioutil"
+	"encoding/json"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/viper"
@@ -23,6 +25,10 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	emp "github.com/golang/protobuf/ptypes/empty"
+)
+
+const (
+	defaultIngestionProfilePath = "files/defaultIngestionProfile.json"
 )
 
 var (
@@ -175,8 +181,8 @@ func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) b
 	if len(obj1.MonitoredObjectTypes) != len(obj2.MonitoredObjectTypes) {
 		return false
 	}
-	for _, val := range obj1.MonitoredObjectTypes {
-		if !doesSliceContainString(obj2.MonitoredObjectTypes, val) {
+	for key, val := range obj1.MonitoredObjectTypes {
+		if obj2.MonitoredObjectTypes[key] != val {
 			return false
 		}
 	}
@@ -185,8 +191,8 @@ func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) b
 	if len(obj1.MonitoredObjectDeviceTypes) != len(obj2.MonitoredObjectDeviceTypes) {
 		return false
 	}
-	for _, val := range obj1.MonitoredObjectDeviceTypes {
-		if !doesSliceContainString(obj2.MonitoredObjectDeviceTypes, val) {
+	for key, val := range obj1.MonitoredObjectDeviceTypes {
+		if obj2.MonitoredObjectDeviceTypes[key] != val {
 			return false
 		}
 	}
@@ -201,6 +207,207 @@ func doesSliceContainString(container []string, value string) bool {
 		}
 	}
 	return false
+}
+
+func provisionCouchData(gatherServer *GatherServer, adminDB string) {
+	ensureAdminDBExists(gatherServer, adminDB)
+	ensureIngestionDictionaryExists(gatherServer, adminDB)
+	ensureValidTypesExists(gatherServer, adminDB)
+}
+
+func ensureAdminDBExists(gatherServer *GatherServer, adminDB string) {
+	// Make sure the admin DB exists:
+	_, err := gatherServer.pouchSH.IsDBAvailable(adminDB)
+	if err != nil {
+		logger.Log.Infof("Database %s does not exist. %s DB will now be created.", adminDB, adminDB)
+
+		// Try to create the DB:
+		_, err = gatherServer.pouchSH.AddDB(adminDB)
+		if err != nil {
+			logger.Log.Fatalf("Unable to create DB %s: %s", adminDB, err.Error())
+		}
+
+		// Also add the Views for Admin DB.
+		err = gatherServer.gsh.AddAdminViews()
+		if err != nil {
+			logger.Log.Fatalf("Unable to Add Views to DB %s: %s", adminDB, err.Error())
+		}
+	}
+
+	logger.Log.Infof("Using %s as Administrative Database", adminDB)
+}
+
+func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string) {
+	defaultDictionaryBytes, err := ioutil.ReadFile(defaultIngestionProfilePath)
+	if err != nil {
+		logger.Log.Fatalf("Unable to read Default Ingestion Profile from file: %s", err.Error())
+	}
+	
+	defaultDictionaryData := &pb.IngestionDictionaryData{}
+	if err = json.Unmarshal(defaultDictionaryBytes, &defaultDictionaryData); err != nil {
+		logger.Log.Fatalf("Unable to construct Default Ingestion Profile from file: %s", err.Error())
+	}
+
+	existingDictionary, err := gatherServer.gsh.GetIngestionDictionary(nil, &emp.Empty{})
+	if err != nil {
+		logger.Log.Debugf("Unable to fetch Ingestion Dictionary from DB %s: %s", adminDB, err.Error())
+
+		// Provision the default IngestionDictionary
+		_, err = gatherServer.gsh.CreateIngestionDictionary(nil, &pb.IngestionDictionary{Data: defaultDictionaryData})
+		if err != nil {
+			logger.Log.Fatalf("Unable to store Default Ingestion Profile from file: %s", err.Error())
+		}
+
+		return
+	}
+
+	// There is an existing dictionary, make sure it matches the known values.
+	if !areIngestionDictionariesEqual(defaultDictionaryData, existingDictionary.Data) {
+		existingDictionary.Data.Metrics = defaultDictionaryData.Metrics
+
+		_, err = gatherServer.gsh.UpdateIngestionDictionary(nil, existingDictionary)
+		if err != nil {
+			logger.Log.Fatalf("Unable to update Default Ingestion Profile from file: %s", err.Error())
+		}
+
+		return
+	}
+}
+
+func areIngestionDictionariesEqual(dict1 *pb.IngestionDictionaryData, dict2 *pb.IngestionDictionaryData) bool {
+	if (dict1 == nil && dict2 != nil) || (dict1 != nil && dict2 == nil) {
+		return false
+	}
+
+	if dict1 == nil && dict2 == nil {
+		return true
+	}
+
+	// Have 2 valid objects, do parameter comparison.
+	for vendor, metricMap := range dict1.Metrics {
+		if dict2.Metrics[vendor] == nil {
+			return false
+		}
+
+		for metric, metricDef := range metricMap.MetricMap {
+			if dict2.Metrics[vendor].MetricMap[metric] == nil {
+				return false
+			}
+
+			if !areUIPartsEqual(metricDef.Ui, dict2.Metrics[vendor].MetricMap[metric].Ui) {
+				return false
+			}
+			
+			for _, monitoredObjectType := range metricDef.MonitoredObjectTypes {
+				if !doesSliceOfMonitoredObjectTypesContain(dict2.Metrics[vendor].MetricMap[metric].MonitoredObjectTypes, monitoredObjectType) {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
+}
+
+func areUIPartsEqual(ui1 *pb.IngestionDictionaryData_UIData, ui2 *pb.IngestionDictionaryData_UIData) bool {
+	if (ui1 == nil && ui2 != nil) || (ui1 != nil && ui2 == nil) {
+		return false
+	}
+
+	if ui1 == nil && ui2 == nil {
+		return true
+	}
+
+	if ui1.Group != ui2.Group {
+		return false
+	}
+	if ui1.Position != ui2.Position {
+		return false
+	}
+
+	return true
+}
+
+func areMonitoredObjectTypesEqual(mot1 *pb.IngestionDictionaryData_MonitoredObjectType, mot2 *pb.IngestionDictionaryData_MonitoredObjectType) bool {
+	if (mot1 == nil && mot2 != nil) || (mot1 != nil && mot2 == nil) {
+		return false
+	}
+
+	if mot1 == nil && mot2 == nil {
+		return true
+	}
+
+	if mot1.Key != mot2.Key {
+		return false
+	}
+	if mot1.RawMetricId != mot2.RawMetricId {
+		return false
+	}
+
+	if !areStringSlicesEqual(mot1.Units, mot2.Units){
+		return false
+	}
+
+	if !areStringSlicesEqual(mot1.Directions, mot2.Directions) {
+		return false
+	}
+
+	return true
+}
+
+func doesSliceOfMonitoredObjectTypesContain(container []*pb.IngestionDictionaryData_MonitoredObjectType, value *pb.IngestionDictionaryData_MonitoredObjectType) bool {
+	for _, s := range container {
+		if areMonitoredObjectTypesEqual(s, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func areStringSlicesEqual(slice1 []string, slice2 []string) bool {
+	if (slice1 == nil && slice2 != nil) || (slice1 != nil && slice2 == nil) {
+		return false
+	}
+
+	if slice1 == nil && slice2 == nil {
+		return true
+	}
+
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	for _, value := range slice1 {
+		if !doesSliceContainString(slice2, value) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func ensureValidTypesExists(gatherServer *GatherServer, adminDB string) {
+	// Make sure the valid types are provisioned.
+	provisionedValidTypes, err := gatherServer.gsh.GetValidTypes(nil, &emp.Empty{})
+	if err != nil {
+		logger.Log.Debugf("Unable to fetch Valid Values from DB %s: %s", adminDB, err.Error())
+
+		// Provision the default values as a new object.
+		provisionedValidTypes, err = gatherServer.gsh.CreateValidTypes(nil, &pb.ValidTypes{Data: gatherServer.gsh.DefaultValidTypes})
+		if err != nil {
+			logger.Log.Fatalf("Unable to Add Valid Values object to DB %s: %s", adminDB, err.Error())
+		}
+		return
+	}
+	if !areValidTypesEquivalent(provisionedValidTypes.Data, gatherServer.gsh.DefaultValidTypes) {
+		// Need to add the known default values to the data store
+		provisionedValidTypes.Data.MonitoredObjectTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectTypes
+		provisionedValidTypes.Data.MonitoredObjectDeviceTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectDeviceTypes
+		provisionedValidTypes, err = gatherServer.gsh.UpdateValidTypes(nil, provisionedValidTypes)
+		if err != nil {
+			logger.Log.Fatalf("Unable to Update Valid Values object to DB %s: %s", adminDB, err.Error())
+		}
+	}
 }
 
 func main() {
@@ -229,47 +436,9 @@ func main() {
 	// Start the REST and gRPC Services
 	gatherServer := newServer()
 
-	// Make sure the admin DB exists:
 	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
-	_, err := gatherServer.pouchSH.IsDBAvailable(adminDB)
-	if err != nil {
-		logger.Log.Infof("Database %s does not exist. %s DB will now be created.", adminDB, adminDB)
+	provisionCouchData(gatherServer, adminDB)
 
-		// Try to create the DB:
-		_, err = gatherServer.pouchSH.AddDB(adminDB)
-		if err != nil {
-			logger.Log.Fatalf("Unable to create DB %s: %s", adminDB, err.Error())
-		}
-
-		// Also add the Views for Admin DB.
-		err = gatherServer.gsh.AddAdminViews()
-		if err != nil {
-			logger.Log.Fatalf("Unable to Add Views to DB %s: %s", adminDB, err.Error())
-		}
-	}
-
-	// Make sure the valid types are provisioned.
-	provisionedValidTypes, err := gatherServer.gsh.GetValidTypes(nil, &emp.Empty{})
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch Valid Values from DB %s: %s", adminDB, err.Error())
-
-		// Provision the default values as a new object.
-		provisionedValidTypes, err = gatherServer.gsh.CreateValidTypes(nil, &pb.ValidTypes{Data: gatherServer.gsh.DefaultValidTypes})
-		if err != nil {
-			logger.Log.Fatalf("Unable to Add Valid Values object to DB %s: %s", adminDB, err.Error())
-		}
-	}
-	if !areValidTypesEquivalent(provisionedValidTypes.Data, gatherServer.gsh.DefaultValidTypes) {
-		// Need to add the known default values to the data store
-		provisionedValidTypes.Data.MonitoredObjectTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectTypes
-		provisionedValidTypes.Data.MonitoredObjectDeviceTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectDeviceTypes
-		provisionedValidTypes, err = gatherServer.gsh.UpdateValidTypes(nil, provisionedValidTypes)
-		if err != nil {
-			logger.Log.Fatalf("Unable to Update Valid Values object to DB %s: %s", adminDB, err.Error())
-		}
-	}
-
-	logger.Log.Infof("Using %s as Administrative Database", adminDB)
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)
 

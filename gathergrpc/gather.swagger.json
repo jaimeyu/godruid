@@ -1537,11 +1537,34 @@
         "monitoredObjectTypes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/gathergrpcIngestionDictionaryDataMonitoredObjectType"
+            "$ref": "#/definitions/IngestionDictionaryDataMonitoredObjectType"
           }
         },
         "ui": {
           "$ref": "#/definitions/IngestionDictionaryDataUIData"
+        }
+      }
+    },
+    "IngestionDictionaryDataMonitoredObjectType": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "rawMetricId": {
+          "type": "string"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "directions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -1783,26 +1806,6 @@
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/IngestionDictionaryDataMetricDefinition"
-          }
-        }
-      }
-    },
-    "gathergrpcIngestionDictionaryDataMonitoredObjectType": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "rawMetricId": {
-          "type": "string"
-        },
-        "unit": {
-          "type": "string"
-        },
-        "directions": {
-          "type": "array",
-          "items": {
-            "type": "string"
           }
         }
       }
@@ -2433,14 +2436,14 @@
       "type": "object",
       "properties": {
         "monitoredObjectTypes": {
-          "type": "array",
-          "items": {
+          "type": "object",
+          "additionalProperties": {
             "type": "string"
           }
         },
         "monitoredObjectDeviceTypes": {
-          "type": "array",
-          "items": {
+          "type": "object",
+          "additionalProperties": {
             "type": "string"
           }
         },

@@ -335,6 +335,8 @@ func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.Ingestion
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, ds.IngestionDictionaryStr); err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, fmt.Errorf("Unable to find %s", ds.IngestionDictionaryStr)
 	}
 
 	logger.Log.Debugf("Found %s %v\n", ds.IngestionDictionaryStr, res)

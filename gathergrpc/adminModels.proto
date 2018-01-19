@@ -71,7 +71,7 @@ message IngestionDictionaryData {
     message MonitoredObjectType {
         string key = 1;
         string rawMetricId = 2;
-        string unit = 3;
+        repeated string units = 3;
         repeated string directions = 4;
     }
     message MetricDefinition {
@@ -105,8 +105,8 @@ message ValidTypesRequest {
 }
 
 message ValidTypesData {
-    repeated string monitoredObjectTypes = 1;
-    repeated string monitoredObjectDeviceTypes = 2;
+    map<string, string> monitoredObjectTypes = 1;
+    map<string, string> monitoredObjectDeviceTypes = 2;
 
     int64 createdTimestamp = 3;
     int64 lastModifiedTimestamp = 4;

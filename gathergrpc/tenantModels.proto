@@ -172,15 +172,15 @@ message TenantUserIdRequest {
 // MonitoredObjectData - describes a unique device/object which is reporting 
 // data from the network.
 message MonitoredObjectData {
-    enum MonitoredObjectType {
-        MO_UNKNOWN = 0;
-        TWAMP = 1;
-    }
-    enum DeviceType {
-        DT_UNKNOWN = 0;
-        ACCEDIAN_NID = 1;
-        ACCEDIAN_VNID = 2;
-    }
+    // enum MonitoredObjectType {
+    //     MO_UNKNOWN = 0;
+    //     TWAMP = 1;
+    // }
+    // enum DeviceType {
+    //     DT_UNKNOWN = 0;
+    //     ACCEDIAN_NID = 1;
+    //     ACCEDIAN_VNID = 2;
+    // }
 
     string id = 1;
     string tenantId = 2;

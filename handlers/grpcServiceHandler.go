@@ -10,17 +10,47 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
 
+// MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
+type MonitoredObjectType string
+const (
+	// MonitoredObjectUnknown - value for TWAMP Light monitored objects
+	MonitoredObjectUnknown MonitoredObjectType = "unknown"
+
+	// TwampPE - value for TWAMP PE monitored objects
+	TwampPE MonitoredObjectType = "twamp-pe"
+
+	// TwampSF - value for TWAMP Stateful monitored objects
+	TwampSF MonitoredObjectType = "twamp-sf"
+
+	// TwampSL - value for TWAMP Stateless monitored objects
+	TwampSL MonitoredObjectType = "twamp-sl"
+)
+
+// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for 
+// Skylight Datahub
+type MonitoredObjectDeviceType string
+const (
+	// MonitoredObjectDeviceUnknown - value for TWAMP Light monitored objects
+	MonitoredObjectDeviceUnknown MonitoredObjectDeviceType = "unknown"
+
+	// AccedianNID - value for Accedian NID monitored objects device type
+	AccedianNID MonitoredObjectDeviceType = "accedian-nid"
+
+	// AccedianVNID - value for Accedian VNID monitored objects device type
+	AccedianVNID MonitoredObjectDeviceType = "accedian-vnid"
+)
+
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
-	ValidMonitoredObjectTypes = map[pb.MonitoredObjectData_MonitoredObjectType]string{
-		pb.MonitoredObjectData_MO_UNKNOWN: "unknown",
-		pb.MonitoredObjectData_TWAMP:      "pe"}
+	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
+		string(TwampPE): TwampPE,
+		string(TwampSF): TwampSF,
+		string(TwampSL): TwampSL}
 
 	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
-	ValidMonitoredObjectDeviceTypes = map[pb.MonitoredObjectData_DeviceType]string{
-		pb.MonitoredObjectData_DT_UNKNOWN:    "unknown",
-		pb.MonitoredObjectData_ACCEDIAN_NID:  "accedianNID",
-		pb.MonitoredObjectData_ACCEDIAN_VNID: "accedianVNID"}
+	ValidMonitoredObjectDeviceTypes = map[string]MonitoredObjectDeviceType{
+		string(AccedianNID): AccedianNID,
+		string(AccedianVNID): AccedianVNID}
 )
 
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
@@ -46,14 +76,14 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	// Setup the known values of the Valid Types for the system
 	// by using the enumerated protobuf values
-	validMonObjTypes := make([]string, 0)
-	validMonObjDevTypes := make([]string, 0)
+	validMonObjTypes := make(map[string]string, 0)
+	validMonObjDevTypes := make(map[string]string, 0)
 
-	for _, val := range ValidMonitoredObjectTypes {
-		validMonObjTypes = append(validMonObjTypes, val)
+	for key, val := range ValidMonitoredObjectTypes {
+		validMonObjTypes[key] = string(val)
 	}
-	for _, val := range ValidMonitoredObjectDeviceTypes {
-		validMonObjDevTypes = append(validMonObjDevTypes, val)
+	for key, val := range ValidMonitoredObjectDeviceTypes {
+		validMonObjDevTypes[key] = string(val)
 	}
 
 	result.DefaultValidTypes = &pb.ValidTypesData{

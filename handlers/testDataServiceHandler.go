@@ -598,11 +598,11 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 	result.Data.Id = id
 	result.Data.TenantId = tenantID
 	result.Data.ActuatorName = actuatorName
-	result.Data.ActuatorType = ValidMonitoredObjectDeviceTypes[pb.MonitoredObjectData_ACCEDIAN_VNID]
+	result.Data.ActuatorType = string(AccedianVNID)
 	result.Data.ReflectorName = reflectorName
-	result.Data.ReflectorType = ValidMonitoredObjectDeviceTypes[pb.MonitoredObjectData_ACCEDIAN_VNID]
+	result.Data.ReflectorType = string(AccedianVNID)
 	result.Data.ObjectName = objectName
-	result.Data.ObjectType = ValidMonitoredObjectTypes[pb.MonitoredObjectData_TWAMP]
+	result.Data.ObjectType = string(TwampPE)
 
 	// To provision the DomainSet, need to obtain a subset of the passed in domain set.
 

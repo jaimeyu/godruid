@@ -309,10 +309,6 @@ func request_AdminProvisioningService_GetValidTypes_0(ctx context.Context, marsh
 	var protoReq empty.Empty
 	var metadata runtime.ServerMetadata
 
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
 	msg, err := client.GetValidTypes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -1885,7 +1881,7 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 
 	})
 
-	mux.Handle("PUT", pattern_AdminProvisioningService_GetValidTypes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_AdminProvisioningService_GetValidTypes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {

@@ -76,15 +76,7 @@ message RawMetricsRequest {
   string monitoredObjectId = 6;
 }
 
-message RawMetricsEvent{
-  google.protobuf.Struct event = 1;  
-}
-
-message RawMetricsResult{
-  repeated RawMetricsEvent events = 1;
-}
-
 message RawMetricsResponse {
-  string timestamp = 1;
-  RawMetricsResult result = 2;
+  google.protobuf.Struct result = 1;  
 }
+

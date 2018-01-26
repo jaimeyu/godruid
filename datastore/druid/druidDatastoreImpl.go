@@ -278,18 +278,31 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	formattedJSON, err := reformatRawMetricsResponse(resp)
 
-	fmt.Println(string(formattedJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	rawMetricResp := new(pb.RawMetricsResponse)
+
+	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), rawMetricResp)
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into RawMetricsResponse. Err: %s", err)
+	}
+
+	data, err := ptypes.MarshalAny(rawMetricResp)
+
+	if err != nil {
+		return nil, err
 	}
 
 	uuid := uuid.NewV4()
 	rr := &pb.JSONAPIObject{
 		Data: []*pb.Data{
 			&pb.Data{
-				Id:   uuid.String(),
-				Type: RawMetrics,
+				Id:         uuid.String(),
+				Type:       RawMetrics,
+				Attributes: data,
 			},
 		},
 	}

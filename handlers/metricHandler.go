@@ -65,7 +65,7 @@ func (msh *MetricServiceHandler) GetRawMetrics(ctx context.Context, rawMetricReq
 	result, err := msh.druidDB.GetRawMetrics(rawMetricReq)
 
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve Histogram. %s:", err.Error())
+		return nil, fmt.Errorf("Unable to retrieve RawMetrics. %s:", err.Error())
 	}
 
 	return result, nil

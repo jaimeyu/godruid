@@ -52,6 +52,27 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 	return res.Bytes(), nil
 }
 
+func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) ([]byte, error) {
+	res := gabs.New()
+	for _, e := range rawMetrics[0].Result.Events {
+		monObj := e.Event["monitoredObjectId"].(string)
+		if !res.ExistsP("result." + monObj) {
+			_, err := res.ArrayP("result." + monObj)
+			if err != nil {
+				return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
+			}
+		}
+		obj := gabs.New()
+		for k, v := range e.Event {
+			if k != "monitoredObjectId" {
+				obj.SetP(v, k)
+			}
+		}
+		res.ArrayAppendP(obj.Data(), "result."+monObj)
+	}
+	return res.Bytes(), nil
+}
+
 // Convert a query object to string, mainly for debugging purposes
 func queryToString(query godruid.Query, debug bool) string {
 	var reqJson []byte

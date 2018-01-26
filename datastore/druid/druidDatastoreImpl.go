@@ -40,6 +40,19 @@ type ThresholdCrossingByMonitoredObjectResponse struct {
 	Event     map[string]interface{}
 }
 
+type RawMetricsEvents struct {
+	Event map[string]interface{}
+}
+
+type RawMetricsResult struct {
+	Events []RawMetricsEvents
+}
+
+type RawMetricsResponse struct {
+	Timestamp string
+	Result    RawMetricsResult
+}
+
 func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error) {
 
 	client := dc.dClient
@@ -245,7 +258,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := RawMetricsQuery("def8f70d-565f-45e4-b073-fd923ef15112", table, "throughputAvg,throughputMax,throughputMin", "2018-01-23T10:00:00.000/2018-01-27T02:00:00.000", "flowmeter", "0", "Network")
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId())
 
 	if err != nil {
 		return nil, err
@@ -253,10 +266,22 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	response, err := dc.executeQuery(query)
 
-	fmt.Println(string(response))
+	//	fmt.Println(string(response))
 
 	if err != nil {
 		return nil, err
+	}
+
+	resp := make([]RawMetricsResponse, 0)
+
+	json.Unmarshal(response, &resp)
+
+	formattedJSON, err := reformatRawMetricsResponse(resp)
+
+	fmt.Println(string(formattedJSON))
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into RawMetricsResponse. Err: %s", err)
 	}
 
 	uuid := uuid.NewV4()

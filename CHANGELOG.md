@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.50.0 
-**Release Date:** Fri Jan 19 21:18:31 UTC 2018     
+**Release Date:** Fri Jan 19 21:18:31 UTC 2018 
+* feat - adding metric tracking for API call duration    
 ## Previous Releases 
 ### 0.49.0 
 **Release Date:** Fri Jan 19 21:07:35 UTC 2018     

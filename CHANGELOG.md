@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.52.0 
+**Release Date:** Fri Jan 26 18:43:03 UTC 2018     
+## Previous Releases 
 ### 0.51.0 
 **Release Date:** Fri Jan 26 15:05:20 UTC 2018   
 * moving monitoring metrics to its own mutex  
-## Previous Releases 
 ### 0.50.0 
 **Release Date:** Fri Jan 19 21:18:31 UTC 2018 
 * feat - adding metric tracking for API call duration    

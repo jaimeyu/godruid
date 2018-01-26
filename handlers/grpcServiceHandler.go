@@ -104,11 +104,11 @@ func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Adm
 
 	res, err := gsh.ash.CreateAdminUser(ctx, user)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateAdminUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateAdminUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateAdminUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateAdminUserStr)
 	return res, nil
 }
 
@@ -117,11 +117,11 @@ func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.Adm
 	startTime := time.Now()
 	res, err := gsh.ash.UpdateAdminUser(ctx, user)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.UpdateAdminUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.UpdateAdminUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateAdminUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateAdminUserStr)
 	return res, nil
 }
 
@@ -130,11 +130,11 @@ func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.S
 	startTime := time.Now()
 	res, err := gsh.ash.DeleteAdminUser(ctx, userID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.DeleteAdminUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.DeleteAdminUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteAdminUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteAdminUserStr)
 	return res, nil
 }
 
@@ -143,11 +143,11 @@ func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.Stri
 	startTime := time.Now()
 	res, err := gsh.ash.GetAdminUser(ctx, userID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.GetAdminUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.GetAdminUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAdminUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAdminUserStr)
 	return res, nil
 }
 
@@ -156,11 +156,11 @@ func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *em
 	startTime := time.Now()
 	res, err := gsh.ash.GetAllAdminUsers(ctx, noValue)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.GetAllAdminUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.GetAllAdminUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAllAdminUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAllAdminUserStr)
 	return res, nil
 }
 
@@ -173,14 +173,14 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	// Check if a tenant already exists with this name.
 	existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
 	if len(existingTenantByName.GetValue()) != 0 {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateTenantStr)
 		return nil, fmt.Errorf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
 	}
 
 	// Create the Tenant metadata record and reserve space to store isolated Tenant data
 	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateTenantStr)
 		return nil, err
 	}
 
@@ -190,7 +190,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
 	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateTenantStr)
 		return nil, err
 	}
 
@@ -199,7 +199,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
 	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateTenantStr)
 		return nil, err
 	}
 
@@ -210,11 +210,11 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 	metaReq := pb.TenantMetadata{Data: meta}
 	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.CreateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.CreateTenantStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateTenantStr)
 	return result, nil
 }
 
@@ -224,11 +224,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenan
 	
 	res, err := gsh.ash.UpdateTenantDescriptor(ctx, tenantMeta)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.UpdateTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.UpdateTenantStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateTenantStr)
 	return res, nil
 }
 
@@ -239,11 +239,11 @@ func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.St
 
 	res, err := gsh.ash.DeleteTenant(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime, "500", mon.DeleteTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.DeleteTenantStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteTenantStr)
 	return res, nil
 }
 
@@ -253,11 +253,11 @@ func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID
 
 	res, err := gsh.ash.GetTenantDescriptor(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantStr)
 	return res, nil
 }
 
@@ -266,11 +266,11 @@ func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noVa
 	startTime := time.Now()
 	res, err := gsh.ash.GetAllTenantDescriptors(ctx, noValue)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantStr)
 	return res, nil
 }
 
@@ -279,11 +279,11 @@ func (gsh *GRPCServiceHandler) CreateIngestionDictionary(ctx context.Context, in
 	startTime := time.Now()
 	res, err := gsh.ash.CreateIngestionDictionary(ctx, ingDictionary)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateIngDictStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateIngDictStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantStr)
 	return res, nil
 }
 
@@ -292,11 +292,11 @@ func (gsh *GRPCServiceHandler) UpdateIngestionDictionary(ctx context.Context, in
 	startTime := time.Now()
 	res, err := gsh.ash.UpdateIngestionDictionary(ctx, ingDictionary)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateIngDictStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateIngDictStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateIngDictStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateIngDictStr)
 	return res, nil
 }
 
@@ -305,11 +305,11 @@ func (gsh *GRPCServiceHandler) DeleteIngestionDictionary(ctx context.Context, no
 	startTime := time.Now()
 	res, err := gsh.ash.DeleteIngestionDictionary(ctx, noValue)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteIngDictStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteIngDictStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteIngDictStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteIngDictStr)
 	return res, nil
 }
 
@@ -318,11 +318,11 @@ func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noVal
 	startTime := time.Now()
 	res, err := gsh.ash.GetIngestionDictionary(ctx, noValue)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetIngDictStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetIngDictStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetIngDictStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetIngDictStr)
 	return res, nil
 }
 
@@ -331,11 +331,11 @@ func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserR
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateTenantUser(ctx, tenantUserReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateTenantUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateTenantUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateTenantUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateTenantUserStr)
 	return res, nil
 }
 
@@ -344,11 +344,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserR
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateTenantUser(ctx, tenantUserReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateTenantUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateTenantUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateTenantUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateTenantUserStr)
 	return res, nil
 }
 
@@ -357,11 +357,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserI
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteTenantUser(ctx, tenantUserIDReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteTenantUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteTenantUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteTenantUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteTenantUserStr)
 	return res, nil
 }
 
@@ -370,11 +370,11 @@ func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDRe
 	startTime := time.Now()
 	res, err := gsh.tsh.GetTenantUser(ctx, tenantUserIDReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantUserStr)
 	return res, nil
 }
 
@@ -383,11 +383,11 @@ func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *
 	startTime := time.Now()
 	res, err := gsh.tsh.GetAllTenantUsers(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetAllTenantUserStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetAllTenantUserStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAllTenantUserStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAllTenantUserStr)
 	return res, nil
 }
 
@@ -396,11 +396,11 @@ func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDom
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateTenantDomain(ctx, tenantDomainRequest)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateTenantDomainStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateTenantDomainStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateTenantDomainStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateTenantDomainStr)
 	return res, nil
 }
 
@@ -409,11 +409,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDom
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateTenantDomain(ctx, tenantDomainRequest)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateTenantDomainStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateTenantDomainStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateTenantDomainStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateTenantDomainStr)
 	return res, nil
 }
 
@@ -422,11 +422,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDom
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteTenantDomain(ctx, tenantDomainIDRequest)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteTenantDomainStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteTenantDomainStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteTenantDomainStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteTenantDomainStr)
 	return res, nil
 }
 
@@ -435,11 +435,11 @@ func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomain
 	startTime := time.Now()
 	res, err := gsh.tsh.GetTenantDomain(ctx, tenantDomainIDRequest)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantDomainStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantDomainStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantDomainStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantDomainStr)
 	return res, nil
 }
 
@@ -448,11 +448,11 @@ func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID
 	startTime := time.Now()
 	res, err := gsh.tsh.GetAllTenantDomains(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetAllTenantDomainStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetAllTenantDomainStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAllTenantDomainStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAllTenantDomainStr)
 	return res, nil
 }
 
@@ -461,11 +461,11 @@ func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateTenantIngestionProfile(ctx, tenantIngPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateIngPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateIngPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateIngPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateIngPrfStr)
 	return res, nil
 }
 
@@ -474,11 +474,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateTenantIngestionProfile(ctx, tenantIngPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateIngPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateIngPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateIngPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateIngPrfStr)
 	return res, nil
 }
 
@@ -487,11 +487,11 @@ func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, te
 	startTime := time.Now()
 	res, err := gsh.tsh.GetTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetIngPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetIngPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetIngPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetIngPrfStr)
 	return res, nil
 }
 
@@ -500,11 +500,11 @@ func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Conte
 	startTime := time.Now()
 	res, err := gsh.tsh.GetActiveTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetActiveIngPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetActiveIngPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetActiveIngPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetActiveIngPrfStr)
 	return res, nil
 }
 
@@ -513,11 +513,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteIngPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteIngPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteIngPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteIngPrfStr)
 	return res, nil
 }
 
@@ -526,11 +526,11 @@ func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateThrPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateThrPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateThrPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateThrPrfStr)
 	return res, nil
 }
 
@@ -539,11 +539,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateThrPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateThrPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateThrPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateThrPrfStr)
 	return res, nil
 }
 
@@ -552,11 +552,11 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 	startTime := time.Now()
 	res, err := gsh.tsh.GetTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetThrPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetThrPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetThrPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetThrPrfStr)
 	return res, nil
 }
 
@@ -565,11 +565,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context,
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteThrPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteThrPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteThrPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteThrPrfStr)
 	return res, nil
 }
 
@@ -578,11 +578,11 @@ func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context
 	startTime := time.Now()
 	res, err := gsh.tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetAllThrPrfStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetAllThrPrfStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAllThrPrfStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAllThrPrfStr)
 	return res, nil
 }
 
@@ -591,11 +591,11 @@ func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monito
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateMonObjStr)
 	return res, nil
 }
 
@@ -604,11 +604,11 @@ func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monito
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateMonObjStr)
 	return res, nil
 }
 
@@ -617,11 +617,11 @@ func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitored
 	startTime := time.Now()
 	res, err := gsh.tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetMonObjStr)
 	return res, nil
 }
 
@@ -630,11 +630,11 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteMonObjStr)
 	return res, nil
 }
 
@@ -643,11 +643,11 @@ func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenan
 	startTime := time.Now()
 	res, err := gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetAllMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetAllMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetAllMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetAllMonObjStr)
 	return res, nil
 }
 
@@ -657,11 +657,11 @@ func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context
 	startTime := time.Now()
 	res, err := gsh.tsh.GetMonitoredObjectToDomainMap(ctx, moByDomReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetMonObjToDomMapStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetMonObjToDomMapStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetMonObjToDomMapStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetMonObjToDomMapStr)
 	return res, nil
 }
 
@@ -682,11 +682,11 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresho
 
 	res, err := gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetThrCrossStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetThrCrossStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetThrCrossStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetThrCrossStr)
 	return res, nil
 }
 
@@ -708,11 +708,11 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context
 
 	res, err := gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetThrCrossByMonObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetThrCrossByMonObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetThrCrossByMonObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetThrCrossByMonObjStr)
 	return res, nil
 }
 
@@ -721,11 +721,11 @@ func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *p
 	startTime := time.Now()
 	res, err := gsh.msh.GetHistogram(ctx, histogramReq)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetHistogramObjStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetHistogramObjStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetHistogramObjStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetHistogramObjStr)
 	return res, nil
 }
 
@@ -734,11 +734,11 @@ func (gsh *GRPCServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.Te
 	startTime := time.Now()
 	res, err := gsh.tsh.CreateTenantMeta(ctx, meta)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateTenantMetaStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateTenantMetaStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateTenantMetaStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateTenantMetaStr)
 	return res, nil
 }
 
@@ -747,11 +747,11 @@ func (gsh *GRPCServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.Te
 	startTime := time.Now()
 	res, err := gsh.tsh.UpdateTenantMeta(ctx, meta)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateTenantMetaStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateTenantMetaStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateTenantMetaStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateTenantMetaStr)
 	return res, nil
 }
 
@@ -760,11 +760,11 @@ func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *w
 	startTime := time.Now()
 	res, err := gsh.tsh.DeleteTenantMeta(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.DeleteTenantMetaStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.DeleteTenantMetaStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.DeleteTenantMetaStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.DeleteTenantMetaStr)
 	return res, nil
 }
 
@@ -773,11 +773,11 @@ func (gsh *GRPCServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.S
 	startTime := time.Now()
 	res, err := gsh.tsh.GetTenantMeta(ctx, tenantID)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantMetaStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantMetaStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantMetaStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantMetaStr)
 	return res, nil
 }
 
@@ -786,11 +786,11 @@ func (gsh *GRPCServiceHandler) GetTenantIDByAlias(ctx context.Context, value *wr
 	startTime := time.Now()
 	res, err := gsh.ash.GetTenantIDByAlias(ctx, value)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetTenantIDByAliasStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetTenantIDByAliasStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetTenantIDByAliasStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetTenantIDByAliasStr)
 	return res, nil
 }
 
@@ -799,11 +799,11 @@ func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	startTime := time.Now()
 	err := gsh.ash.AddAdminViews()
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.AddAdminViewsStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.AddAdminViewsStr)
 		return err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.AddAdminViewsStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.AddAdminViewsStr)
 	return nil
 }
 
@@ -812,11 +812,11 @@ func (gsh *GRPCServiceHandler) CreateValidTypes(ctx context.Context, value *pb.V
 	startTime := time.Now()
 	res, err := gsh.ash.CreateValidTypes(ctx, value)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.CreateValidTypesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.CreateValidTypesStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.CreateValidTypesStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.CreateValidTypesStr)
 	return res, nil
 }
 
@@ -825,11 +825,11 @@ func (gsh *GRPCServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.V
 	startTime := time.Now()
 	res, err := gsh.ash.UpdateValidTypes(ctx, value)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.UpdateValidTypesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.UpdateValidTypesStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.UpdateValidTypesStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.UpdateValidTypesStr)
 	return res, nil
 }
 
@@ -838,11 +838,11 @@ func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Emp
 	startTime := time.Now()
 	res, err := gsh.ash.GetValidTypes(ctx, value)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetValidTypesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetValidTypesStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetValidTypesStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetValidTypesStr)
 	return res, nil
 }
 
@@ -851,10 +851,10 @@ func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value 
 	startTime := time.Now()
 	res, err := gsh.ash.GetSpecificValidTypes(ctx, value)
 	if err != nil {
-		mon.TrackAPITimeMetricInMilli(startTime,"500", mon.GetSpecificValidTypesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.GetSpecificValidTypesStr)
 		return nil, err
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", mon.GetSpecificValidTypesStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetSpecificValidTypesStr)
 	return res, nil
 }

@@ -15,6 +15,7 @@ import (
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
+	"github.com/accedian/adh-gather/monitoring"
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
 	gh "github.com/gorilla/handlers"
@@ -25,6 +26,8 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	emp "github.com/golang/protobuf/ptypes/empty"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -49,13 +52,14 @@ func init() {
 
 // GatherServer - Server which will implement the gRPC Services.
 type GatherServer struct {
-	gsh     *adhh.GRPCServiceHandler
-	pouchSH *adhh.PouchDBPluginServiceHandler
-	testSH  *adhh.TestDataServiceHandler
+	gsh     		*adhh.GRPCServiceHandler
+	pouchSH 		*adhh.PouchDBPluginServiceHandler
+	testSH  		*adhh.TestDataServiceHandler
 
-	mux        *mux.Router
-	gwmux      *runtime.ServeMux
-	jsonAPIMux *runtime.ServeMux
+	mux        		*mux.Router
+	gwmux      		*runtime.ServeMux
+	jsonAPIMux 		*runtime.ServeMux
+	promServerMux 	*http.ServeMux
 }
 
 func newServer() *GatherServer {
@@ -96,9 +100,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	defer cancel()
 
 	gatherServer.mux = mux.NewRouter().StrictSlash(true)
-
 	gatherServer.gwmux = runtime.NewServeMux()
-
 	gatherServer.jsonAPIMux = runtime.NewServeMux(
 		runtime.WithForwardResponseOption(
 			func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
@@ -107,6 +109,9 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 			},
 		),
 	)
+
+	gatherServer.promServerMux = http.NewServeMux()
+	gatherServer.promServerMux.Handle("/metrics", promhttp.Handler())
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
@@ -164,6 +169,8 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		gs.jsonAPIMux.ServeHTTP(w, r)
 	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
 		gs.gwmux.ServeHTTP(w, r)
+	} else if strings.Index(r.URL.Path, "/metrics") == 0  {
+		gs.promServerMux.ServeHTTP(w, r)
 	} else {
 		gs.mux.ServeHTTP(w, r)
 	}
@@ -438,6 +445,9 @@ func main() {
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()
+
+	// Register the metrics to be tracked in Gather
+	monitoring.InitMetrics()
 
 	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
 	provisionCouchData(gatherServer, adminDB)

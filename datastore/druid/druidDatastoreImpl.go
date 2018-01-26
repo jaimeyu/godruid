@@ -156,6 +156,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	resp := new(pb.ThresholdCrossingResponse)
 
 	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
+	if err != nil {
+		return nil, err
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into ThresholdCrossingResponse. Err: %s", err)
@@ -204,6 +207,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	thresholdCrossing := make([]ThresholdCrossingByMonitoredObjectResponse, 0)
 
 	err = json.Unmarshal(response, &thresholdCrossing)
+	if err != nil {
+		return nil, err
+	}
 
 	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
 

@@ -169,9 +169,7 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		gs.jsonAPIMux.ServeHTTP(w, r)
 	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
 		gs.gwmux.ServeHTTP(w, r)
-	} else if strings.Index(r.URL.Path, "/metrics") == 0  {
-		gs.promServerMux.ServeHTTP(w, r)
-	} else {
+	}  else {
 		gs.mux.ServeHTTP(w, r)
 	}
 }
@@ -419,6 +417,21 @@ func ensureValidTypesExists(gatherServer *GatherServer, adminDB string) {
 	}
 }
 
+func startMonitoring(gatherServer *GatherServer, cfg config.Provider) {
+	restBindIP := cfg.GetString(gather.CK_server_rest_ip.String())
+	monPort := cfg.GetInt(gather.CK_server_monitoring_port.String())
+
+	monitoring.InitMetrics()
+	gatherServer.promServerMux = http.NewServeMux()
+
+	logger.Log.Infof("Starting Prometheus Server")
+	gatherServer.promServerMux.Handle("/metrics", promhttp.Handler())
+	addr := fmt.Sprintf("%s:%d", restBindIP, monPort)
+	if err := http.ListenAndServe(addr, gatherServer.promServerMux); err != nil {
+		logger.Log.Fatalf("Unable to start monitoring function: %s", err.Error())
+	}
+}
+
 func main() {
 	pflag.Parse()
 	v := viper.New()
@@ -447,7 +460,7 @@ func main() {
 	gatherServer := newServer()
 
 	// Register the metrics to be tracked in Gather
-	monitoring.InitMetrics()
+	go startMonitoring(gatherServer, cfg)
 
 	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
 	provisionCouchData(gatherServer, adminDB)

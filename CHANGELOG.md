@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.51.0 
-**Release Date:** Fri Jan 26 15:05:20 UTC 2018     
+**Release Date:** Fri Jan 26 15:05:20 UTC 2018   
+* moving monitoring metrics to its own mutex  
 ## Previous Releases 
 ### 0.50.0 
 **Release Date:** Fri Jan 19 21:18:31 UTC 2018 

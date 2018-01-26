@@ -285,6 +285,62 @@
         ]
       }
     },
+    "/api/v1/raw-metrics": {
+      "get": {
+        "summary": "Returns raw metrics from druid",
+        "operationId": "GetRawMetrics",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcJSONAPIObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "interval",
+            "description": "ISO-8601 Intervals.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "objectType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "monitoredObjectId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
     "/api/v1/specific-valid-types": {
       "post": {
         "operationId": "GetSpecificValidTypes",

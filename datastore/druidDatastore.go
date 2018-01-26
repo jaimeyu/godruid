@@ -16,4 +16,7 @@ type DruidDatastore interface {
 
 	// Returns the min,max,avg,median for a given metric
 	GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error)
+
+	// Returns raw metrics from druid
+	GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error)
 }

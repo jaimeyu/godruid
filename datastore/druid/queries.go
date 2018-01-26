@@ -135,7 +135,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	}, nil
 }
 
-// ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
 func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData) (*godruid.QueryGroupBy, error) {
 
@@ -184,6 +184,33 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 		Aggregations: aggregations,
 		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Intervals:    []string{interval},
+		Dimensions: []godruid.DimSpec{
+			godruid.Dimension{
+				Dimension:  "monitoredObjectId",
+				OutputName: "monitoredObjectId",
+			},
+		},
+	}, nil
+}
+
+//RawMetricsQuery  - Query that returns a raw metric values
+func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string) (*godruid.QuerySelect, error) {
+
+	metrics := strings.Split(metric, ",")
+
+	return &godruid.QuerySelect{
+		DataSource:  dataSource,
+		Granularity: godruid.GranAll,
+		Context:     map[string]interface{}{"timeout": 60000},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			godruid.FilterSelector("monitoredObjectId", monitoredObjectId),
+			godruid.FilterSelector("objectType", objectType),
+			godruid.FilterSelector("direction", direction),
+		),
+		Intervals:  []string{interval},
+		Metrics:    metrics,
+		PagingSpec: map[string]interface{}{"threshold": 2000},
 		Dimensions: []godruid.DimSpec{
 			godruid.Dimension{
 				Dimension:  "monitoredObjectId",

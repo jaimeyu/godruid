@@ -12,6 +12,7 @@ import (
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
 type MonitoredObjectType string
+
 const (
 	// MonitoredObjectUnknown - value for TWAMP Light monitored objects
 	MonitoredObjectUnknown MonitoredObjectType = "unknown"
@@ -26,9 +27,10 @@ const (
 	TwampSL MonitoredObjectType = "twamp-sl"
 )
 
-// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for 
+// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for
 // Skylight Datahub
 type MonitoredObjectDeviceType string
+
 const (
 	// MonitoredObjectDeviceUnknown - value for TWAMP Light monitored objects
 	MonitoredObjectDeviceUnknown MonitoredObjectDeviceType = "unknown"
@@ -43,16 +45,16 @@ const (
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
 	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
-		"pe": TwampPE,
-		"sf": TwampSF,
-		"sl": TwampSL,
+		"pe":            TwampPE,
+		"sf":            TwampSF,
+		"sl":            TwampSL,
 		string(TwampPE): TwampPE,
 		string(TwampSF): TwampSF,
 		string(TwampSL): TwampSL}
 
 	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
 	ValidMonitoredObjectDeviceTypes = map[string]MonitoredObjectDeviceType{
-		string(AccedianNID): AccedianNID,
+		string(AccedianNID):  AccedianNID,
 		string(AccedianVNID): AccedianVNID}
 )
 
@@ -377,10 +379,16 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context
 	return gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
 }
 
-// GetHistogram -
+// GetHistogram - Retrieve bucket data from druid
 func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 
 	return gsh.msh.GetHistogram(ctx, histogramReq)
+}
+
+// GetRawMetrics - Retrieve raw metric data from druid
+func (gsh *GRPCServiceHandler) GetRawMetrics(ctx context.Context, rawMetricReq *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
+
+	return gsh.msh.GetRawMetrics(ctx, rawMetricReq)
 }
 
 // CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.

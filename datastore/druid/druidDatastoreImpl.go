@@ -21,6 +21,7 @@ import (
 const (
 	ThresholdCrossingReport = "threshold-crossing-report"
 	EventDistribution       = "event-distribution"
+	RawMetrics              = "raw-metrics"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -233,6 +234,37 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 				Id:         uuid.String(),
 				Type:       ThresholdCrossingReport,
 				Attributes: data,
+			},
+		},
+	}
+
+	return rr, nil
+}
+
+func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
+
+	table := dc.cfg.GetString(gather.CK_druid_table.String())
+
+	query, err := RawMetricsQuery("def8f70d-565f-45e4-b073-fd923ef15112", table, "throughputAvg,throughputMax,throughputMin", "2018-01-23T10:00:00.000/2018-01-27T02:00:00.000", "flowmeter", "0", "Network")
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := dc.executeQuery(query)
+
+	fmt.Println(string(response))
+
+	if err != nil {
+		return nil, err
+	}
+
+	uuid := uuid.NewV4()
+	rr := &pb.JSONAPIObject{
+		Data: []*pb.Data{
+			&pb.Data{
+				Id:   uuid.String(),
+				Type: RawMetrics,
 			},
 		},
 	}

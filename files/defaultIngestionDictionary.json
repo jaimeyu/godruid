@@ -1,6 +1,6 @@
 {
   "metrics": {
-    "accedian": {
+    "accedian-twamp": {
       "metricMap": {
         "delayMin": {
           "ui": {
@@ -1988,6 +1988,110 @@
             }
           ]
         }
+      },
+      "ui": {
+        "metricGroups": [
+          "delay", "delayVar", "jitter", "packets", "unknown"
+        ]
+      }
+    },
+    "accedian-flowmeter": {
+      "metricMap": {
+        "throughputAvg": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputAvg",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "throughputMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputMax",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "througputMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "througputMin",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "bytesReceived": {
+          "ui": {
+            "group": "unknown",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "bytesReceived",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "packetsReceived": {
+          "ui": {
+            "group": "unknown",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "packetsReceived",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups":[
+          "unknown"
+        ]
       }
     }
   }

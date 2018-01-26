@@ -11,6 +11,7 @@ const (
 	CK_server_rest_port           ConfigKey = "server.rest.port"
 	CK_server_grpc_ip             ConfigKey = "server.grpc.ip"
 	CK_server_grpc_port           ConfigKey = "server.grpc.port"
+	CK_server_monitoring_port     ConfigKey = "server.monitoring.port"
 	CK_server_cors_allowedorigins ConfigKey = "server.cors.allowedorigins"
 	CK_args_admindb_name          ConfigKey = "args.admindb.name"
 	CK_args_admindb_impl          ConfigKey = "args.admindb.impl"

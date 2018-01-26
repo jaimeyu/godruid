@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"time"
+	"github.com/accedian/adh-gather/logger"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -123,8 +124,8 @@ var (
 func InitMetrics() {
 	APICallDuration = *prometheus.NewHistogramVec(prometheus.HistogramOpts{
         Name: "gather_api_call_duration",
-        Help: "Time taken to execute an API call",
-	}, []string{"name","code"})
+		Help: "Time taken to execute an API call",
+	}, []string{"code", "name"})
 
 	prometheus.MustRegister(APICallDuration)
 }
@@ -137,8 +138,10 @@ func InitMetrics() {
 // 	return strings.Join(partsWithPrefix, "_")
 // }
 
-// TrackAPITimeMetricInMilli - helper function to track metrics related to API call duration.
-func TrackAPITimeMetricInMilli(startTime time.Time, labels ...string) {
-	duration := time.Since(startTime).Seconds() * float64(time.Millisecond)
+// TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.
+func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
+	duration := time.Since(startTime).Seconds()
+
+	logger.Log.Infof("%v: %d", labels, duration)
 	APICallDuration.WithLabelValues(labels...).Observe(duration)
 }

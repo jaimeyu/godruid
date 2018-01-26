@@ -182,7 +182,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	result, err := psh.pouchPluginDB.GetChanges(dbName, &queryParams)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", getChangesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", getChangesStr)
 		return
 	}
 
@@ -191,11 +191,11 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", getChangesStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", getChangesStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", getChangesStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", getChangesStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -211,7 +211,7 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 	result, err := psh.pouchPluginDB.CheckAvailability()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error checking CouchDB availability: %s", err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", serverHBStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", serverHBStr)
 		return
 	}
 
@@ -219,12 +219,12 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", serverHBStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", serverHBStr)
 		return
 	}
 	logger.Log.Info("CouchDB server is available.\n")
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", serverHBStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", serverHBStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -242,14 +242,14 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", storeCheckpointStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", storeCheckpointStr)
 		return
 	}
 
 	result, err := psh.pouchPluginDB.StoreDBSyncCheckpoint(dbName, &queryParams, requestBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to store %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", storeCheckpointStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", storeCheckpointStr)
 		return
 	}
 
@@ -258,11 +258,11 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", storeCheckpointStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", storeCheckpointStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", storeCheckpointStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", storeCheckpointStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -287,11 +287,11 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	if err != nil {
 		if checkError(err, notFound) {
 			http.Error(w, fmt.Sprintf("%s %s does not exist", db.DBSyncCheckpointStr, documentID), http.StatusNotFound)
-			mon.TrackAPITimeMetricInMilli(startTime, "404", getCheckpointStr)
+			mon.TrackAPITimeMetricInSeconds(startTime, "404", getCheckpointStr)
 			return
 		}
 		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", getCheckpointStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", getCheckpointStr)
 		return
 	}
 
@@ -300,11 +300,11 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", getCheckpointStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", getCheckpointStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", getCheckpointStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", getCheckpointStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -322,7 +322,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", dbDiffStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", dbDiffStr)
 		return
 	}
 
@@ -330,7 +330,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 	result, err := psh.pouchPluginDB.GetDBRevisionDiff(dbName, requestBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", dbDiffStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", dbDiffStr)
 		return
 	}
 
@@ -339,11 +339,11 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBRevDiffStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", dbDiffStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", dbDiffStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", dbDiffStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", dbDiffStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -360,7 +360,7 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", bulkUpdateStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", bulkUpdateStr)
 		return
 	}
 
@@ -368,7 +368,7 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 	result, err := psh.pouchPluginDB.BulkDBUpdate(dbName, requestBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", bulkUpdateStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", bulkUpdateStr)
 		return
 	}
 
@@ -377,11 +377,11 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkUpdateStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", bulkUpdateStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", bulkUpdateStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", bulkUpdateStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", bulkUpdateStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -397,11 +397,11 @@ func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWrite
 	if err != nil {
 		if checkError(err, notFound) {
 			http.Error(w, fmt.Sprintf("DB %s does not exist", dbName), http.StatusNotFound)
-			mon.TrackAPITimeMetricInMilli(startTime, "404", dbHBStr)
+			mon.TrackAPITimeMetricInSeconds(startTime, "404", dbHBStr)
 			return
 		}
 		http.Error(w, fmt.Sprintf("Error checking availability of DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", dbHBStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", dbHBStr)
 		return
 	}
 
@@ -409,12 +409,12 @@ func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWrite
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", dbHBStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", dbHBStr)
 		return
 	}
 	logger.Log.Infof("DB %s is available.\n", dbName)
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", dbHBStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", dbHBStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -431,7 +431,7 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to read %s request content: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", allDocsStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", allDocsStr)
 		return
 	}
 
@@ -439,7 +439,7 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 	result, err := psh.pouchPluginDB.GetAllDBDocs(dbName, requestBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to fetch %s: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", allDocsStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", allDocsStr)
 		return
 	}
 
@@ -448,11 +448,11 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBAllDocsStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", allDocsStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", allDocsStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", allDocsStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", allDocsStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -468,7 +468,7 @@ func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.
 	result, err := psh.AddDB(dbName)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to create DB %s: %s", dbName, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", createDbStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", createDbStr)
 		return
 	}
 
@@ -477,11 +477,11 @@ func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating DB creation response: %s", err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", createDbStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", createDbStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", createDbStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", createDbStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -500,7 +500,7 @@ func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.
 	result, err := psh.pouchPluginDB.GetDoc(dbName, docID, &queryParams, &r.Header)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to retrieve %s %s: %s", db.DBDocStr, docID, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", getDBDocStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", getDBDocStr)
 		return
 	}
 
@@ -509,11 +509,11 @@ func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.
 	response, err := json.Marshal(result["data"]) // Only need the data portion of this wrapper object
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBDocStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", getDBDocStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", getDBDocStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", getDBDocStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", getDBDocStr)
 	fmt.Fprintf(w, string(response))
 }
 
@@ -530,7 +530,7 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", bulkGetStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", bulkGetStr)
 		return
 	}
 
@@ -538,7 +538,7 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	result, err := psh.pouchPluginDB.BulkDBGet(dbName, &queryParams, requestBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInMilli(startTime, "400", bulkGetStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "400", bulkGetStr)
 		return
 	}
 
@@ -547,11 +547,11 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	response, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkGetStr, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInMilli(startTime, "500", bulkGetStr)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", bulkGetStr)
 		return
 	}
 
-	mon.TrackAPITimeMetricInMilli(startTime, "200", bulkGetStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", bulkGetStr)
 	fmt.Fprintf(w, string(response))
 }
 

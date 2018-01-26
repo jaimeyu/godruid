@@ -2033,7 +2033,7 @@
             }
           ]
         },
-        "througputMin": {
+        "throughputMin": {
           "ui": {
             "group": "unknown",
             "position": "3"
@@ -2041,7 +2041,7 @@
           "monitoredObjectTypes": [
             {
               "key": "flowmeter",
-              "rawMetricId": "througputMin",
+              "rawMetricId": "throughputMin",
               "units": [
                 "bps"
               ],

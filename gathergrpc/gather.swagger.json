@@ -845,6 +845,38 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenantId}/bulk/insert/monitored-objects": {
+      "post": {
+        "operationId": "BulkInsertMonitoredObjects",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcBulkOperationResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gathergrpcTenantMonitoredObjectSet"
+            }
+          }
+        ],
+        "tags": [
+          "TenantProvisioningService"
+        ]
+      }
+    },
     "/api/v1/tenants/{tenantId}/domains/{domainId}": {
       "get": {
         "summary": "Retrieve a Domain scoped to a single Tenant.",
@@ -1793,6 +1825,38 @@
       },
       "description": "Wrapper message to provide a response in the form of\na container of multiple AdminUser objects."
     },
+    "gathergrpcBulkOperationResponse": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcBulkOperationResult"
+          }
+        }
+      }
+    },
+    "gathergrpcBulkOperationResult": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
     "gathergrpcData": {
       "type": "object",
       "properties": {
@@ -2339,6 +2403,20 @@
         },
         "data": {
           "$ref": "#/definitions/gathergrpcTenantMeta"
+        }
+      }
+    },
+    "gathergrpcTenantMonitoredObjectSet": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string"
+        },
+        "monitoredObjectSet": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gathergrpcMonitoredObject"
+          }
         }
       }
     },

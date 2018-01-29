@@ -76,3 +76,15 @@ message Relationships {
   map<string, string> metadata = 3;    
   
 }
+
+message BulkOperationResult {
+  bool ok = 1;
+  string id = 2;
+  string rev = 3;
+  string error = 4;
+  string reason = 5; 
+}
+
+message BulkOperationResponse {
+  repeated BulkOperationResult results = 1;
+}

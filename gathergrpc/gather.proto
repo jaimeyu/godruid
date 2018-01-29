@@ -391,6 +391,13 @@ service TenantProvisioningService {
             get: "/api/v1/tenants/{value}/meta"
         };
     }
+
+    rpc BulkInsertMonitoredObjects(TenantMonitoredObjectSet) returns (BulkOperationResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/tenants/{tenantId}/bulk/insert/monitored-objects"
+            body: "*"
+        };
+    }
 }
 
 // Service responsible for retrieving aggregate metrics from druid 

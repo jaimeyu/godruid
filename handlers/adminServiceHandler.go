@@ -371,7 +371,7 @@ func (ash *AdminServiceHandler) GetSpecificValidTypes(ctx context.Context, value
 	}
 
 	// Succesfully fetched the Monitored Object Map, return the result.
-	logger.Log.Infof("Successfully retrieved %s: %s\n", db.ValidTypesStr)
+	logger.Log.Infof("Successfully retrieved %s\n", db.ValidTypesStr)
 	return result, nil
 }
 

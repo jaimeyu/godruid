@@ -200,3 +200,9 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetAllTenantThresholdProfile not implemented")
 }
+
+// BulkInsertMonitoredObjects - InMemory implementation of BulkInsertMonitoredObjects
+func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
+	// Stub to implement
+	return nil, errors.New("BulkInsertMonitoredObjects() not implemented for InMemory DB")
+}

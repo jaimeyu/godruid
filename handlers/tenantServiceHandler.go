@@ -615,3 +615,31 @@ func (tsh *TenantServiceHandler) GetActiveTenantIngestionProfile(ctx context.Con
 	logger.Log.Infof("Retrieved %s: %s\n", db.TenantIngestionProfileStr, result.GetXId())
 	return result, nil
 }
+
+// BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.
+func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context, value *pb.TenantMonitoredObjectSet)  (*pb.BulkOperationResponse, error) {
+	// Validate the request:
+	if value == nil {
+		return nil, fmt.Errorf("Unable to Update %ss in bulk: %s", db.TenantMonitoredObjectStr, "No Monitored Object data provided")
+	}
+
+	for _, mo := range value.MonitoredObjectSet {
+		if err := validateMonitoredObjectRequest(mo, false); err != nil {
+			return nil, err
+		}
+
+		if value.TenantId != mo.Data.TenantId {
+				return nil, fmt.Errorf("Unable to Update %ss in bulk: %s", db.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID " + value.TenantId)
+		}
+	}
+
+	// Issue request to DAO Layer to insert the MOs
+	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to update %ss in bulk: %s", db.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Succesfully inserted the MOs.
+	logger.Log.Infof("Successfully completed bulk request on %ss\n", db.TenantMonitoredObjectStr)
+	return result, nil
+} 

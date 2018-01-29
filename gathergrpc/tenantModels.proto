@@ -213,7 +213,7 @@ message MonitoredObject {
 // MonitoredObjectList - Wrapper for requests which return a list of MonitoredObjects 
 // scoped to a single Tenant.
 message MonitoredObjectList {
-    repeated MonitoredObject data = 3;
+    repeated MonitoredObject data = 1;
 }
 
 message MonitoredObjectIdRequest {
@@ -237,6 +237,11 @@ message MonitoredObjectCountByDomainResponse {
 
 message MonitoredObjectSet {
     repeated string  monitoredObjectSet = 1;
+}
+
+message TenantMonitoredObjectSet {
+    string tenantId = 1;
+    repeated MonitoredObject monitoredObjectSet = 2;
 }
 
 message TenantMeta {

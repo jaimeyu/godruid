@@ -89,4 +89,6 @@ type TenantServiceDatastore interface {
 
 	GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfile, error)
 	GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdProfileList, error)
+
+	BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error)
 }

@@ -2,6 +2,7 @@ package couchDB
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -9,6 +10,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	couchdb "github.com/leesper/couchdb-golang"
 )
 
 const (
@@ -520,4 +522,43 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	}
 
 	return res, nil
+}
+
+// BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
+func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
+	tenantID := ds.PrependToDataID(value.TenantId, string(ds.TenantDescriptorType))
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	resource, err := couchdb.NewResource(tenantDBName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Iterate over the collection and populate necessary fields
+	for _, mo := range value.MonitoredObjectSet {
+		dataType := string(ds.TenantMonitoredObjectType)
+		mo.XId = ds.GenerateID(mo.Data, dataType)
+		mo.Data.Datatype = dataType
+		mo.Data.CreatedTimestamp = time.Now().Unix()
+		mo.Data.LastModifiedTimestamp = mo.Data.GetCreatedTimestamp()
+	}
+	body := map[string]interface{}{
+		"docs": value.MonitoredObjectSet}
+	
+	fetchedData, err := performBulkUpdate(body, resource)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Populate the response
+	res := pb.BulkOperationResponse{}
+	res.Results = make([]*pb.BulkOperationResult, 0)
+	for _, fetched := range fetchedData {
+		newObj := pb.BulkOperationResult{}
+		if err = convertGenericCouchDataToObject(fetched, &newObj, ds.DBBulkUpdateStr); err != nil {
+			return nil, err
+		}
+		res.Results = append(res.Results, &newObj)
+	}
+	
+	return &res, nil
 }

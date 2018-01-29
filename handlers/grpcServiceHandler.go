@@ -871,3 +871,16 @@ func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value 
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetSpecificValidTypesStr)
 	return res, nil
 }
+
+// BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.
+func (gsh *GRPCServiceHandler) BulkInsertMonitoredObjects(ctx context.Context, value *pb.TenantMonitoredObjectSet)  (*pb.BulkOperationResponse, error) {
+	startTime := time.Now()
+	res, err := gsh.tsh.BulkInsertMonitoredObjects(ctx, value)
+	if err != nil {
+		mon.TrackAPITimeMetricInSeconds(startTime,"500", mon.BulkUpdateMonObjStr)
+		return nil, err
+	}
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.BulkUpdateMonObjStr)
+	return res, nil
+} 

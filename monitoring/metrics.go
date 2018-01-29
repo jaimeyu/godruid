@@ -37,6 +37,7 @@ const (
 	// OPGetActiveStr - metric constant for a get operation
 	OPGetActiveStr = "get_active"
 	OPAddStr = "add"
+	OPBulkUpdate = "bulk_update"
 
 	// TimeStr - metric constant for a time metric
 	TimeStr = "time"
@@ -113,6 +114,8 @@ const (
 
 	GetTenantIDByAliasStr = IDStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
 	AddAdminViewsStr = AdminViewsStr + metricNameDelimiter + OPAddStr
+
+	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate 
 )
 	
 var (

@@ -557,6 +557,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 		if err = convertGenericCouchDataToObject(fetched, &newObj, ds.DBBulkUpdateStr); err != nil {
 			return nil, err
 		}
+		newObj.Id = ds.GetDataIDFromFullID(newObj.Id)
 		res.Results = append(res.Results, &newObj)
 	}
 	

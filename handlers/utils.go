@@ -14,6 +14,8 @@ var (
 		"delayMax", "delayP95", "delayPHi", "delayVarP95", "delayVarPHi",
 		"jitterMax", "jitterP95", "jitterPHi", "packetsLost", "packetsLostPct",
 		"lostBurstMax", "packetsReceived"}
+	defaultIngestionProfileFlowmeterMetricNames = []string{
+		"throughputAvg", "throughputMax", "throughputMin", "bytesReceived", "packetsReceived"}
 )
 
 func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
@@ -32,7 +34,16 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	moMap.MonitoredObjectTypeMap[string(TwampSL)] = &metricMap
 	moMap.MonitoredObjectTypeMap[string(TwampSF)] = &metricMap
 	metrics := make(map[string]*pb.TenantIngestionProfileData_MonitoredObjectMap)
-	metrics["accedian"] = &moMap
+	metrics[string(AccedianTwamp)] = &moMap
+
+	// Add flowmeter metrics:
+	flowMOMap := pb.TenantIngestionProfileData_MonitoredObjectMap{}
+	flowMetricMap := pb.TenantIngestionProfileData_MetricMap{}
+	flowMetricMap.MetricMap = createMetricMap(defaultIngestionProfileFlowmeterMetricNames...)
+	flowMOMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
+	flowMOMap.MonitoredObjectTypeMap[string(Flowmeter)] = &flowMetricMap
+	metrics[string(AccedianFlowmeter)] = &flowMOMap
+
 	vendorMap := &pb.TenantIngestionProfileData_VendorMap{}
 	vendorMap.VendorMap = metrics
 	ingPrf.Metrics = vendorMap
@@ -81,7 +92,7 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 	return &pb.TenantThresholdProfileData_VendorMap{
 		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-			"accedian": &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+			string(AccedianTwamp): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
 				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
 					string(TwampPE): &pb.TenantThresholdProfileData_MetricMap{
 						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
@@ -175,6 +186,110 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 													"lowerLimit":  "0.33",
 													"lowerStrict": "true",
 													"unit":        "pct",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			string(AccedianFlowmeter): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
+					string(Flowmeter): &pb.TenantThresholdProfileData_MetricMap{
+						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
+							"throughputAvg": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "20000",
+													"lowerStrict": "true",
+													"upperLimit":  "40000",
+													"unit":        "ms",
+												},
+											},
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "40000",
+													"lowerStrict": "true",
+													"upperLimit":  "65000",
+													"upperStrict": "false",
+													"unit":        "ms",
+												},
+											},
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "65000",
+													"lowerStrict": "true",
+													"unit":        "ms",
+												},
+											},
+										},
+									},
+								},
+							},
+							"throughputMax": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "20000",
+													"lowerStrict": "true",
+													"upperLimit":  "40000",
+													"unit":        "ms",
+												},
+											},
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "40000",
+													"lowerStrict": "true",
+													"upperLimit":  "65000",
+													"upperStrict": "false",
+													"unit":        "ms",
+												},
+											},
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "65000",
+													"lowerStrict": "true",
+													"unit":        "ms",
+												},
+											},
+										},
+									},
+								},
+							},
+							"throughputMin": &pb.TenantThresholdProfileData_DirectionMap{
+								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+									"0": &pb.TenantThresholdProfileData_EventMap{
+										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "20000",
+													"lowerStrict": "true",
+													"upperLimit":  "40000",
+													"unit":        "ms",
+												},
+											},
+											"major": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "40000",
+													"lowerStrict": "true",
+													"upperLimit":  "65000",
+													"upperStrict": "false",
+													"unit":        "ms",
+												},
+											},
+											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
+												map[string]string{
+													"lowerLimit":  "65000",
+													"lowerStrict": "true",
+													"unit":        "ms",
 												},
 											},
 										},

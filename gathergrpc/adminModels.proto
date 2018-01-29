@@ -78,8 +78,12 @@ message IngestionDictionaryData {
         repeated MonitoredObjectType monitoredObjectTypes = 1;
         UIData ui = 2;
     }
+    message UIGroupData {
+        repeated string metricGroups = 1;
+    }
     message MetricMap {
         map<string, MetricDefinition> metricMap = 1;
+        UIGroupData ui = 2;
     }
 
     string datatype = 2;

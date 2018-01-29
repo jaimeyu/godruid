@@ -1649,6 +1649,17 @@
         }
       }
     },
+    "IngestionDictionaryDataUIGroupData": {
+      "type": "object",
+      "properties": {
+        "metricGroups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "LinksRelated": {
       "type": "object",
       "properties": {
@@ -1877,6 +1888,9 @@
           "additionalProperties": {
             "$ref": "#/definitions/IngestionDictionaryDataMetricDefinition"
           }
+        },
+        "ui": {
+          "$ref": "#/definitions/IngestionDictionaryDataUIGroupData"
         }
       }
     },

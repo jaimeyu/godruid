@@ -89,7 +89,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
 	// peyo TODO don't hardcode vendor
-	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian"].GetMonitoredObjectTypeMap() {
+	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian-twamp"].GetMonitoredObjectTypeMap() {
 		// if no objectTypes have been provided, use all of them, otherwise
 		// only include the provided ones
 		if contains(objectTypes, tk) || objectType == "" {
@@ -146,7 +146,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
 	// peyo TODO don't hardcode vendor
-	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian"].GetMonitoredObjectTypeMap() {
+	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian-twamp"].GetMonitoredObjectTypeMap() {
 		for mk, m := range t.GetMetricMap() {
 			// if no metrics have been provided, use all of them, otherwise
 			// only include the provided ones

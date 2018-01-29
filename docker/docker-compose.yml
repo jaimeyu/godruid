@@ -55,9 +55,9 @@ services:
     ports:
       - "5984:5984" # default couch port
     volumes:
-      - couchdata:/usr/local/var/lib/couchdb
+      - couchdata:/opt/couchdb/data
     
-  adh-gather:
+  gather:
     image:  gcr.io/npav-172917/adh-gather:latest
     ports:
       - "10001:10001"  # rest 
@@ -68,6 +68,47 @@ services:
           - node.role == manager
     entrypoint:
       - /docker-entrypoint.sh
-  
+
+  prometheus:
+    image: quay.io/prometheus/prometheus
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    labels:
+      - "deployment.name=${DEPLOYMENT_NAME}"
+      - "deployment.taskname=prometheus"
+      - "interlock.hostname=prometheus.${DEPLOYMENT_NAME}"
+      - "interlock.domain=${DOMAIN_NAME}"
+      - "interlock.port=9090"
+      - "interlock.network=${DEPLOYMENT_NETWORK}" 
+    volumes:
+      -  "/etc/aod/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      -  prometheus-data:/prometheus
+    ports:
+     - 9090
+
+  grafana:
+    image: grafana/grafana
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    labels:
+      - "deployment.name=${DEPLOYMENT_NAME}"
+      - "deployment.taskname=grafana"
+      - "interlock.hostname=grafana.${DEPLOYMENT_NAME}"
+      - "interlock.domain=${DOMAIN_NAME}"
+      - "interlock.port=3000"
+      - "interlock.network=${DEPLOYMENT_NETWORK}"     
+    depends_on:
+      - prometheus
+    ports:
+      - 3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+
 volumes:
   couchdata: 
+  prometheus-data:
+  grafana_data:

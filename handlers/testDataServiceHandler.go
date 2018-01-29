@@ -414,7 +414,9 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	insertBody := map[string]interface{}{"docs": docsToInsert}
 	// logger.Log.Debugf("Attempting to insert %d %ss for Tenant %s", len(docsToInsert), db.DomainSlaReportStr, tenantID)
 
-	_, err = tsh.pouchDB.BulkDBUpdate(tenantID, insertBody)
+	// Prepend the tenant id with the known prefix otherwise the tenant DB will not be found.
+	tenantIDForUpdate := db.PrependToDataID(tenantID, string(db.TenantDescriptorType))
+	_, err = tsh.pouchDB.BulkDBUpdate(tenantIDForUpdate, insertBody)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unable to insert %ss for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
 		mon.TrackAPITimeMetricInSeconds(startTime, "500", generateSLAReportStr)

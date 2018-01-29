@@ -15,7 +15,7 @@ import (
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
 type MonitoredObjectType string
 const (
-	// MonitoredObjectUnknown - value for TWAMP Light monitored objects
+	// MonitoredObjectUnknown - value for Unnkown monitored objects
 	MonitoredObjectUnknown MonitoredObjectType = "unknown"
 
 	// TwampPE - value for TWAMP PE monitored objects
@@ -26,6 +26,19 @@ const (
 
 	// TwampSL - value for TWAMP Stateless monitored objects
 	TwampSL MonitoredObjectType = "twamp-sl"
+
+	// Flowmeter - value for Flowmeter monitored objects
+	Flowmeter MonitoredObjectType = "flowmeter"
+)
+
+// VendorMetricType - defines the known types of Vendor metric categories.
+type VendorMetricType string
+const (
+	// AccedianTwamp - represents Accedian TWAMP vendor metrics.
+	AccedianTwamp VendorMetricType = "accedian-twamp"
+
+	// AccedianFlowmeter - represents Accedian Flowmeter vendor metrics.
+	AccedianFlowmeter VendorMetricType = "accedian-flowmeter"
 )
 
 // MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for 

@@ -64,6 +64,8 @@ It has these top-level messages:
 	Histogram
 	HistogramResponse
 	ThresholdCrossingByMonitoredObjectResponse
+	RawMetricsRequest
+	RawMetricsResponse
 */
 package gathergrpc
 

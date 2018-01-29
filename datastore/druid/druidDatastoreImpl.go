@@ -21,6 +21,7 @@ import (
 const (
 	ThresholdCrossingReport = "threshold-crossing-report"
 	EventDistribution       = "event-distribution"
+	RawMetrics              = "raw-metrics"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -37,6 +38,19 @@ type ThresholdCrossingByMonitoredObjectResponse struct {
 	Version   string
 	Timestamp string
 	Event     map[string]interface{}
+}
+
+type RawMetricsEvents struct {
+	Event map[string]interface{}
+}
+
+type RawMetricsResult struct {
+	Events []RawMetricsEvents
+}
+
+type RawMetricsResponse struct {
+	Timestamp string
+	Result    RawMetricsResult
 }
 
 func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error) {
@@ -238,6 +252,62 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 			&pb.Data{
 				Id:         uuid.String(),
 				Type:       ThresholdCrossingReport,
+				Attributes: data,
+			},
+		},
+	}
+
+	return rr, nil
+}
+
+func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
+
+	table := dc.cfg.GetString(gather.CK_druid_table.String())
+
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId())
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := dc.executeQuery(query)
+
+	//	fmt.Println(string(response))
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]RawMetricsResponse, 0)
+
+	json.Unmarshal(response, &resp)
+
+	formattedJSON, err := reformatRawMetricsResponse(resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rawMetricResp := new(pb.RawMetricsResponse)
+
+	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), rawMetricResp)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into RawMetricsResponse. Err: %s", err)
+	}
+
+	data, err := ptypes.MarshalAny(rawMetricResp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	uuid := uuid.NewV4()
+	rr := &pb.JSONAPIObject{
+		Data: []*pb.Data{
+			&pb.Data{
+				Id:         uuid.String(),
+				Type:       RawMetrics,
 				Attributes: data,
 			},
 		},

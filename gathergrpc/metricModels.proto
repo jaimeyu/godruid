@@ -65,3 +65,18 @@ message HistogramResponse {
 message ThresholdCrossingByMonitoredObjectResponse {
     google.protobuf.Struct result = 1;  
 }
+
+message RawMetricsRequest {
+  //ISO-8601 Intervals
+  string interval = 1;
+  string tenant = 2;
+  string direction = 3;
+  string metric = 4;
+  string objectType = 5;
+  string monitoredObjectId = 6;
+}
+
+message RawMetricsResponse {
+  google.protobuf.Struct result = 1;  
+}
+

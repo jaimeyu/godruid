@@ -14,6 +14,7 @@ import (
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
 type MonitoredObjectType string
+
 const (
 	// MonitoredObjectUnknown - value for Unnkown monitored objects
 	MonitoredObjectUnknown MonitoredObjectType = "unknown"
@@ -41,9 +42,10 @@ const (
 	AccedianFlowmeter VendorMetricType = "accedian-flowmeter"
 )
 
-// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for 
+// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for
 // Skylight Datahub
 type MonitoredObjectDeviceType string
+
 const (
 	// MonitoredObjectDeviceUnknown - value for TWAMP Light monitored objects
 	MonitoredObjectDeviceUnknown MonitoredObjectDeviceType = "unknown"
@@ -58,16 +60,16 @@ const (
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
 	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
-		"pe": TwampPE,
-		"sf": TwampSF,
-		"sl": TwampSL,
+		"pe":            TwampPE,
+		"sf":            TwampSF,
+		"sl":            TwampSL,
 		string(TwampPE): TwampPE,
 		string(TwampSF): TwampSF,
 		string(TwampSL): TwampSL}
 
 	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
 	ValidMonitoredObjectDeviceTypes = map[string]MonitoredObjectDeviceType{
-		string(AccedianNID): AccedianNID,
+		string(AccedianNID):  AccedianNID,
 		string(AccedianVNID): AccedianVNID}
 )
 
@@ -729,7 +731,7 @@ func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context
 	return res, nil
 }
 
-// GetHistogram -
+// GetHistogram - Retrieve bucket data from druid
 func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	startTime := time.Now()
 	res, err := gsh.msh.GetHistogram(ctx, histogramReq)
@@ -740,6 +742,12 @@ func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *p
 
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.GetHistogramObjStr)
 	return res, nil
+}
+
+// GetRawMetrics - Retrieve raw metric data from druid
+func (gsh *GRPCServiceHandler) GetRawMetrics(ctx context.Context, rawMetricReq *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
+
+	return gsh.msh.GetRawMetrics(ctx, rawMetricReq)
 }
 
 // CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.

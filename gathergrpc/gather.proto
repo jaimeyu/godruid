@@ -422,6 +422,13 @@ service MetricsService {
             get: "/api/v1/histogram"
         };
     }
+
+    // Returns raw metrics from druid
+    rpc GetRawMetrics(RawMetricsRequest) returns (JSONAPIObject) {
+        option (google.api.http) = {
+            get: "/api/v1/raw-metrics"
+        };
+    }
   
 }
 

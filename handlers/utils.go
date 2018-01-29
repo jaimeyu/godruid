@@ -14,6 +14,8 @@ var (
 		"delayMax", "delayP95", "delayPHi", "delayVarP95", "delayVarPHi",
 		"jitterMax", "jitterP95", "jitterPHi", "packetsLost", "packetsLostPct",
 		"lostBurstMax", "packetsReceived"}
+	defaultIngestionProfileFlowmeterMetricNames = []string{
+		"throughputAvg", "throughputMax", "throughputMin", "bytesReceived", "packetsReceived"}
 )
 
 func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
@@ -32,7 +34,16 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	moMap.MonitoredObjectTypeMap[string(TwampSL)] = &metricMap
 	moMap.MonitoredObjectTypeMap[string(TwampSF)] = &metricMap
 	metrics := make(map[string]*pb.TenantIngestionProfileData_MonitoredObjectMap)
-	metrics["accedian"] = &moMap
+	metrics[string(AccedianTwamp)] = &moMap
+
+	// Add flowmeter metrics:
+	flowMOMap := pb.TenantIngestionProfileData_MonitoredObjectMap{}
+	flowMetricMap := pb.TenantIngestionProfileData_MetricMap{}
+	flowMetricMap.MetricMap = createMetricMap(defaultIngestionProfileFlowmeterMetricNames...)
+	flowMOMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
+	flowMOMap.MonitoredObjectTypeMap[string(Flowmeter)] = &flowMetricMap
+	metrics[string(AccedianFlowmeter)] = &flowMOMap
+
 	vendorMap := &pb.TenantIngestionProfileData_VendorMap{}
 	vendorMap.VendorMap = metrics
 	ingPrf.Metrics = vendorMap

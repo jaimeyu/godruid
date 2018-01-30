@@ -206,26 +206,26 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "20000",
+													"lowerLimit":  "23000",
 													"lowerStrict": "true",
-													"upperLimit":  "40000",
-													"unit":        "ms",
+													"upperLimit":  "25000",
+													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "40000",
+													"lowerLimit":  "25000",
 													"lowerStrict": "true",
-													"upperLimit":  "65000",
+													"upperLimit":  "27500",
 													"upperStrict": "false",
-													"unit":        "ms",
+													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "65000",
+													"lowerLimit":  "27500",
 													"lowerStrict": "true",
-													"unit":        "ms",
+													"unit":        "bps",
 												},
 											},
 										},
@@ -238,26 +238,26 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "20000",
+													"lowerLimit":  "75000",
 													"lowerStrict": "true",
-													"upperLimit":  "40000",
-													"unit":        "ms",
+													"upperLimit":  "95000",
+													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "40000",
+													"lowerLimit":  "95000",
 													"lowerStrict": "true",
-													"upperLimit":  "65000",
+													"upperLimit":  "110000",
 													"upperStrict": "false",
-													"unit":        "ms",
+													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "65000",
+													"lowerLimit":  "110000",
 													"lowerStrict": "true",
-													"unit":        "ms",
+													"unit":        "bps",
 												},
 											},
 										},
@@ -270,26 +270,27 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "20000",
-													"lowerStrict": "true",
-													"upperLimit":  "40000",
-													"unit":        "ms",
+													"lowerLimit":  "17000",
+													"lowerStrict": "false",
+													"upperLimit":  "20000",
+													"upperStrict": "true",
+													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "40000",
-													"lowerStrict": "true",
-													"upperLimit":  "65000",
-													"upperStrict": "false",
-													"unit":        "ms",
+													"lowerLimit":  "10000",
+													"lowerStrict": "false",
+													"upperLimit":  "17000",
+													"upperStrict": "true",
+													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "65000",
-													"lowerStrict": "true",
-													"unit":        "ms",
+													"upperLimit":  "10000",
+													"upperStrict": "true",
+													"unit":        "bps",
 												},
 											},
 										},

@@ -32,7 +32,11 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) ([]byte, error) {
 	res := gabs.New()
 	for _, tc := range thresholdCrossing {
-		monObj := tc.Event["monitoredObjectId"].(string)
+		monObjId := tc.Event["monitoredObjectId"]
+		monObj := ""
+		if monObjId != nil {
+			monObj = monObjId.(string)
+		}
 		if !res.ExistsP("result." + monObj) {
 			_, err := res.ArrayP("result." + monObj)
 			if err != nil {

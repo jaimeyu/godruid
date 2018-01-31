@@ -29,6 +29,7 @@ message ThresholdCrossingRequest {
   string direction = 6;
   string metric = 7;
   string thresholdProfileId = 8;
+  string vendor = 9;
 }
 
 message HistogramRequest {
@@ -42,6 +43,7 @@ message HistogramRequest {
   string metric = 6;
   int32 granularityBuckets = 7;
   int32 resolution = 8;
+  string vendor = 9;
 }
 
 message HistogramBuckets {
@@ -73,7 +75,7 @@ message RawMetricsRequest {
   string direction = 3;
   string metric = 4;
   string objectType = 5;
-  string monitoredObjectId = 6;
+  string monitoredObjectId = 6;  
 }
 
 message RawMetricsResponse {

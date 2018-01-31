@@ -98,7 +98,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets)
+	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor())
 
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
 
 	if err != nil {
 		return nil, err
@@ -206,7 +206,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data)
+	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
 
 	if err != nil {
 		return nil, err
@@ -282,7 +282,13 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	json.Unmarshal(response, &resp)
 
-	formattedJSON, err := reformatRawMetricsResponse(resp)
+	var formattedJSON []byte
+
+	if len(resp) == 0 {
+		formattedJSON = []byte{}
+	} else {
+		formattedJSON, err = reformatRawMetricsResponse(resp)
+	}
 
 	if err != nil {
 		return nil, err
@@ -290,7 +296,9 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	rawMetricResp := new(pb.RawMetricsResponse)
 
-	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), rawMetricResp)
+	if len(resp) != 0 {
+		err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), rawMetricResp)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into RawMetricsResponse. Err: %s", err)

@@ -14,7 +14,7 @@ const (
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
-func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32) (*godruid.QueryTimeseries, error) {
+func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32, vendor string) (*godruid.QueryTimeseries, error) {
 
 	//peyo TODO need to figure out a better way than just appending Histo
 	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"Histo", resolution, granularityBuckets, "0", "Infinity")
@@ -79,7 +79,7 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData) (*godruid.QueryTimeseries, error) {
+func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -89,7 +89,8 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
 	// peyo TODO don't hardcode vendor
-	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian-twamp"].GetMonitoredObjectTypeMap() {
+	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()[vendor].GetMonitoredObjectTypeMap() {
+
 		// if no objectTypes have been provided, use all of them, otherwise
 		// only include the provided ones
 		if contains(objectTypes, tk) || objectType == "" {
@@ -126,10 +127,10 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	}
 
 	return &godruid.QueryTimeseries{
-		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:      map[string]interface{}{"timeout": 60000, "skipEmptyBuckets": true},
-		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+		DataSource:  dataSource,
+		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:     map[string]interface{}{"timeout": 60000, "skipEmptyBuckets": true},
+		// Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Aggregations: aggregations,
 		Intervals:    []string{interval},
 	}, nil
@@ -137,7 +138,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData) (*godruid.QueryGroupBy, error) {
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -146,7 +147,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
 	// peyo TODO don't hardcode vendor
-	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()["accedian-twamp"].GetMonitoredObjectTypeMap() {
+	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()[vendor].GetMonitoredObjectTypeMap() {
 		for mk, m := range t.GetMetricMap() {
 			// if no metrics have been provided, use all of them, otherwise
 			// only include the provided ones
@@ -182,8 +183,8 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": 60000},
 		Aggregations: aggregations,
-		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-		Intervals:    []string{interval},
+		// 		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+		Intervals: []string{interval},
 		Dimensions: []godruid.DimSpec{
 			godruid.Dimension{
 				Dimension:  "monitoredObjectId",

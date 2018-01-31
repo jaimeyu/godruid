@@ -85,45 +85,52 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	metrics := strings.Split(metric, ",")
 	objectTypes := strings.Split(objectType, ",")
 	directions := strings.Split(direction, ",")
+	vendors := strings.Split(vendor, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	// peyo TODO don't hardcode vendor
-	for tk, t := range thresholdProfile.GetThresholds().GetVendorMap()[vendor].GetMonitoredObjectTypeMap() {
-
-		// if no objectTypes have been provided, use all of them, otherwise
+	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+		// if no vendors have been provided, use all of them, otherwise
 		// only include the provided ones
-		if contains(objectTypes, tk) || objectType == "" {
-			for mk, m := range t.GetMetricMap() {
-				// if no metrics have been provided, use all of them, otherwise
+
+		if contains(vendors, vk) || vendor == "" {
+			for tk, t := range v.GetMonitoredObjectTypeMap() {
+				// if no objectTypes have been provided, use all of them, otherwise
 				// only include the provided ones
-				if contains(metrics, mk) || metric == "" {
-					for dk, d := range m.GetDirectionMap() {
-						if contains(directions, dk) || direction == "" {
-							for ek, e := range d.GetEventMap() {
-								name := tk + "." + mk + "." + ek + "." + dk
-								filter, err := FilterHelper(mk, e)
-								if err != nil {
-									return nil, err
+				if contains(objectTypes, tk) || objectType == "" {
+					for mk, m := range t.GetMetricMap() {
+						// if no metrics have been provided, use all of them, otherwise
+						// only include the provided ones
+						if contains(metrics, mk) || metric == "" {
+							for dk, d := range m.GetDirectionMap() {
+								if contains(directions, dk) || direction == "" {
+									for ek, e := range d.GetEventMap() {
+										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
+										filter, err := FilterHelper(mk, e)
+										if err != nil {
+											return nil, err
+										}
+										aggregation := godruid.AggFiltered(
+											godruid.FilterAnd(
+												filter,
+												godruid.FilterSelector("objectType", tk),
+												godruid.FilterSelector("direction", dk),
+											),
+											&godruid.Aggregation{
+												Type: "count",
+												Name: name,
+											},
+										)
+										aggregations = append(aggregations, aggregation)
+									}
 								}
-								aggregation := godruid.AggFiltered(
-									godruid.FilterAnd(
-										filter,
-										godruid.FilterSelector("objectType", tk),
-										godruid.FilterSelector("direction", dk),
-									),
-									&godruid.Aggregation{
-										Type: "count",
-										Name: name,
-									},
-								)
-								aggregations = append(aggregations, aggregation)
 							}
 						}
 					}
 				}
 			}
 		}
+
 	}
 
 	return &godruid.QueryTimeseries{
@@ -143,34 +150,42 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
 	directions := strings.Split(direction, ",")
+	vendors := strings.Split(vendor, ",")
+	objectTypes := strings.Split(objectType, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	// peyo TODO don't hardcode vendor
-	for _, t := range thresholdProfile.GetThresholds().GetVendorMap()[vendor].GetMonitoredObjectTypeMap() {
-		for mk, m := range t.GetMetricMap() {
-			// if no metrics have been provided, use all of them, otherwise
-			// only include the provided ones
-			if contains(metrics, mk) || metric == "" {
-				for dk, d := range m.GetDirectionMap() {
-					if contains(directions, dk) || direction == "" {
-						for ek, e := range d.GetEventMap() {
-							name := mk + "." + ek + "." + dk
-							filter, err := FilterHelper(mk, e)
-							if err != nil {
-								return nil, err
+	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+		if contains(vendors, vk) || vendor == "" {
+			for tk, t := range v.GetMonitoredObjectTypeMap() {
+				if contains(objectTypes, tk) || objectType == "" {
+					for mk, m := range t.GetMetricMap() {
+						// if no metrics have been provided, use all of them, otherwise
+						// only include the provided ones
+						if contains(metrics, mk) || metric == "" {
+							for dk, d := range m.GetDirectionMap() {
+								if contains(directions, dk) || direction == "" {
+									for ek, e := range d.GetEventMap() {
+										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
+										filter, err := FilterHelper(mk, e)
+										if err != nil {
+											return nil, err
+										}
+										aggregation := godruid.AggFiltered(
+											godruid.FilterAnd(
+												filter,
+												godruid.FilterSelector("objectType", tk),
+												godruid.FilterSelector("direction", dk),
+											),
+											&godruid.Aggregation{
+												Type: "count",
+												Name: name,
+											},
+										)
+										aggregations = append(aggregations, aggregation)
+									}
+								}
 							}
-							aggregation := godruid.AggFiltered(
-								godruid.FilterAnd(
-									filter,
-									godruid.FilterSelector("direction", dk),
-								),
-								&godruid.Aggregation{
-									Type: "count",
-									Name: name,
-								},
-							)
-							aggregations = append(aggregations, aggregation)
 						}
 					}
 				}

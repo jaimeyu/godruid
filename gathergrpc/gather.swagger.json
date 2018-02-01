@@ -196,6 +196,12 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "vendor",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1492,6 +1498,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "vendor",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1557,6 +1569,12 @@
           },
           {
             "name": "thresholdProfileId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "vendor",
             "in": "query",
             "required": false,
             "type": "string"

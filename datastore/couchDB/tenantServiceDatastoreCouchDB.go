@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -538,7 +537,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 		dataType := string(ds.TenantMonitoredObjectType)
 		mo.XId = ds.GenerateID(mo.Data, dataType)
 		mo.Data.Datatype = dataType
-		mo.Data.CreatedTimestamp = time.Now().Unix()
+		mo.Data.CreatedTimestamp = ds.MakeTimestamp()
 		mo.Data.LastModifiedTimestamp = mo.Data.GetCreatedTimestamp()
 	}
 	body := map[string]interface{}{

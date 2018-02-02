@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -22,7 +21,7 @@ func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	ingPrf := pb.TenantIngestionProfileData{}
 	ingPrf.TenantId = tenantID
 	ingPrf.Datatype = string(db.TenantIngestionProfileType)
-	ingPrf.CreatedTimestamp = time.Now().Unix()
+	ingPrf.CreatedTimestamp = db.MakeTimestamp()
 	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
 
 	// Default Values for the metrics:
@@ -69,7 +68,7 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 
 	thrPrf.Thresholds = createDefaultThreshold()
 
-	thrPrf.CreatedTimestamp = time.Now().Unix()
+	thrPrf.CreatedTimestamp = db.MakeTimestamp()
 	thrPrf.LastModifiedTimestamp = thrPrf.GetCreatedTimestamp()
 
 	return &thrPrf
@@ -83,7 +82,7 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 
-	result.CreatedTimestamp = time.Now().Unix()
+	result.CreatedTimestamp = db.MakeTimestamp()
 	result.LastModifiedTimestamp = result.GetCreatedTimestamp()
 
 	return &result

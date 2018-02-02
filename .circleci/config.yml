@@ -2,6 +2,11 @@
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
+
+machine:
+  services:
+    - couchdb
+    
 # Jobs
 
 jobs:
@@ -16,7 +21,7 @@ jobs:
 
     steps:
       - checkout 
-      
+
       - setup_remote_docker
     
       - run: 

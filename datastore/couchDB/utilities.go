@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
@@ -249,7 +248,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	// Give the data a known type, and timestamps:
 	objectData := storeFormat["data"].(map[string]interface{})
 	objectData["datatype"] = dataType
-	objectData["createdTimestamp"] = time.Now().Unix()
+	objectData["createdTimestamp"] = ds.MakeTimestamp()
 	objectData["lastModifiedTimestamp"] = objectData["createdTimestamp"]
 
 	// Store the object in CouchDB
@@ -286,7 +285,7 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 	// Give the data a known type, and timestamps:
 	objectData := storeFormat["data"].(map[string]interface{})
 	objectData["datatype"] = dataType
-	objectData["lastModifiedTimestamp"] = time.Now().Unix()
+	objectData["lastModifiedTimestamp"] = ds.MakeTimestamp()
 
 	// Store the object in CouchDB
 	_, _, err = storeDataInCouchDB(storeFormat, dataTypeLogStr, db)
@@ -418,12 +417,3 @@ func getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, da
 	// can be Marshalled back to the proper type.
 	return convertGenericArrayToObject(fetchedList, &dataContainer, loggingStr)
 }
-
-// type CouchProvider interface {
-// 	createDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error
-// 	updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error
-// 	getDataFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error
-// 	deleteDataFromCouch(dbName string, idToDelete string, dataContainer interface{}, loggingStr string) error 
-// 	getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, dataContainer interface{}) error
-// 	getDatabase(dbConnectionName string) (*couchdb.Database, error)
-// }

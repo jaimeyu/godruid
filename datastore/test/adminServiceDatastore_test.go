@@ -4,20 +4,24 @@ import (
 	"log"
 	"testing"
 	"fmt"
-	"strconv"
+	// "strconv"
 	"io/ioutil"
 	"encoding/json"
+	"time"
+	"os"
 
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/spf13/viper"
+	"github.com/cenkalti/backoff"
+	"github.com/getlantern/deepcopy"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/leesper/couchdb-golang"
 	"github.com/stretchr/testify/assert"
 
-	dockertest "gopkg.in/ory-am/dockertest.v3"
+	// dockertest "gopkg.in/ory-am/dockertest.v3"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	ds "github.com/accedian/adh-gather/datastore"
 	mem "github.com/accedian/adh-gather/datastore/inMemory"
@@ -29,53 +33,77 @@ const (
 )
 
 var (
+	couchHost string
+	couchPort string
 	couchServer *couchdb.Server
 	cfg         config.Provider
 	adminDB 	ds.AdminServiceDatastore
 )
 
 func TestMain(m *testing.M) {
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Fatalf("Could not connect to docker: %s", err)
-	}
+	// pool, err := dockertest.NewPool("")
+	// if err != nil {
+	// 	log.Fatalf("Could not connect to docker: %s", err)
+	// }
 
-	// pulls the couchdb image and start it in a mode that will self-cleanup.
-	resource, err := pool.Run("couchdb", "2.1.1", []string{})
-	if err != nil {
-		log.Fatalf("Could not start resource: %s", err)
-	}
+	// // pulls the couchdb image and start it in a mode that will self-cleanup.
+	// resource, err := pool.Run("couchdb", "2.1.1", []string{})
+	// if err != nil {
+	// 	log.Fatalf("Could not start resource: %s", err)
+	// }
 
-	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-	if err := pool.Retry(func() error {
-		var err error
+	// // exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+	// if err := pool.Retry(func() error {
+	// 	var err error
 
-		// Spin up the couch docker image and make sure we can reach it.
-		couchHost := "http://0.0.0.0"
-		couchPort := resource.GetPort("5984/tcp")
-		couchServer, err = couchdb.NewServer(fmt.Sprintf("%s:%s", couchHost, couchPort))
-		if err != nil {
-			return err
-		}
+	// 	// Spin up the couch docker image and make sure we can reach it.
+	// 	couchHost := "http://0.0.0.0"
+	// 	couchPort := resource.GetPort("5984/tcp")
+	// 	couchServer, err = couchdb.NewServer(fmt.Sprintf("%s:%s", couchHost, couchPort))
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		// Configure the test AdminService DAO to use the newly started couch docker image
-		cfg := gather.LoadConfig("../../config/adh-gather-debug.yml", viper.New())
-		cfg.Set(gather.CK_server_datastore_ip.String(), couchHost)
-		portAsInt, err := strconv.Atoi(couchPort)
-		if err != nil {
-			return err
-		}
-		cfg.Set(gather.CK_server_datastore_port.String(), portAsInt)
+	// 	// Configure the test AdminService DAO to use the newly started couch docker image
+	// 	cfg := gather.LoadConfig("../../config/adh-gather-debug.yml", viper.New())
+	// 	cfg.Set(gather.CK_server_datastore_ip.String(), couchHost)
+	// 	portAsInt, err := strconv.Atoi(couchPort)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	cfg.Set(gather.CK_server_datastore_port.String(), portAsInt)
 
-		ver, err := couchServer.Version()
-		logger.Log.Debugf("Test CouchDB version is: %s", ver)
+	// 	ver, err := couchServer.Version()
+	// 	logger.Log.Debugf("Test CouchDB version is: %s", ver)
 
-		return err
-	}); err != nil {
-		log.Fatalf("Could not connect to docker: %s", err.Error())
-	}
+	// 	return err
+	// }); err != nil {
+	// 	log.Fatalf("Could not connect to docker: %s", err.Error())
+	// }
+
+	// Configure the test AdminService DAO to use the newly started couch docker image
+	cfg := gather.LoadConfig("../../config/adh-gather-debug.yml", viper.New())
 
 	// Before the tests run, setup the adh-admin db
+	couchHost = cfg.GetString(gather.CK_server_datastore_ip.String())
+	couchPort = cfg.GetString(gather.CK_server_datastore_port.String())
+
+	couchServer, err := couchdb.NewServer(fmt.Sprintf("%s:%s", couchHost, couchPort))
+	if err != nil {
+		log.Fatalf("error connecting to couch server: %s", err.Error())
+	}
+
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = 3 *time.Minute
+
+	err = backoff.Retry(func() error {
+		ver, err := couchServer.Version()
+		logger.Log.Debugf("Test CouchDB version is: %s", ver)
+		return err
+	}, b)
+	if err != nil{
+		log.Fatalf("error connecting to couch server: %s", err.Error())
+	}
 
 	// Couch Run.
 	adminDB, err = couchDB.CreateAdminServiceDAO()
@@ -91,13 +119,28 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not populate admin indicies: %s", err.Error())
 	}
 
-	defer func(res *dockertest.Resource) {
-		if err := pool.Purge(resource); err != nil {
-			log.Fatalf("Could not purge resource: %s", err.Error())
-		}
-	}(resource)
+	// defer func(res *dockertest.Resource) {
+	// 	if err := pool.Purge(resource); err != nil {
+	// 		log.Fatalf("Could not purge resource: %s", err.Error())
+	// 	}
+	// }(resource)
 
-	m.Run()
+	code := m.Run()
+
+	// Clean up after the test.
+	dbs, err := couchServer.DBs()
+	if err != nil {
+		log.Fatalf("Could not delete DBs after test: %s", err.Error())
+	}
+	for _, dbname := range dbs {
+		logger.Log.Debugf("Deleting DB %s", dbname)
+		couchServer.Delete(dbname)
+	}
+	
+	// If there were test failures, stop executing
+	if code != 0 {
+		os.Exit(code)
+	}
 
 
 	// InMemory Run:
@@ -106,8 +149,16 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not create in-mem admin DAO: %s", err.Error())
 	}
 
-	m.Run()
+	code = m.Run()
+	os.Exit(code)
+
 }
+
+// func getCouchVersion() error {
+// 	ver, err := couchServer.Version()
+// 	logger.Log.Debugf("Test CouchDB version is: %s", ver)
+// 	return err
+// }
 
 func TestAdminUserCRUD(t *testing.T) {
 	const USER1 = "test1"
@@ -149,13 +200,11 @@ func TestAdminUserCRUD(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, created, fetched, "The retrieved record should be the same as the updated record")
 
-	// Try to create a record that already exists, should fail
-	created, err = adminDB.CreateAdminUser(created)
-	assert.NotNil(t, err)
-	assert.Nil(t, created, "Created should now be nil")
+	time.Sleep(time.Millisecond * 2)
 
 	// Update a record
-	updateRecord := *fetched
+	updateRecord := pb.AdminUser{}
+	deepcopy.Copy(&updateRecord, fetched)
 	updateRecord.Data.Password = PASS2
 	updated, err := adminDB.UpdateAdminUser(&updateRecord)
 	assert.Nil(t, err)
@@ -276,13 +325,11 @@ func TestTenantDescCRUD(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, created, fetched, "The retrieved record should be the same as the updated record")
 
-	// Try to create a record that already exists, should fail
-	created, err = adminDB.CreateTenant(created)
-	assert.NotNil(t, err)
-	assert.Nil(t, created, "Created should now be nil")
+	time.Sleep(time.Millisecond * 2)
 
 	// Update a record
-	updateRecord := *fetched
+	updateRecord := pb.TenantDescriptor{}
+	deepcopy.Copy(&updateRecord, fetched)
 	updateRecord.Data.UrlSubdomain = SUBDOMAIN2
 	updated, err := adminDB.UpdateTenantDescriptor(&updateRecord)
 	assert.Nil(t, err)
@@ -433,8 +480,11 @@ func TestIngDictCRUD(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, created, "Created should now be nil")
 
+	time.Sleep(time.Millisecond * 2)
+
 	// Update a record
-	updateRecord := *fetched
+	updateRecord := pb.IngestionDictionary{}
+	deepcopy.Copy(&updateRecord, fetched)
 	delete(updateRecord.Data.Metrics, accFLOW)
 	updated, err := adminDB.UpdateIngestionDictionary(&updateRecord)
 	assert.Nil(t, err)

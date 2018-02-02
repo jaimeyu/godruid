@@ -1,13 +1,14 @@
 package inMemory
 
 import (
+	"strings"
 	"github.com/satori/go.uuid"
 	"fmt"
 	"errors"
-	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/getlantern/deepcopy"
 )
 
 // AdminServiceDatastoreInMemory - struct responsible for handling
@@ -37,11 +38,12 @@ func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUser) 
 		return nil, fmt.Errorf("%s already exists", ds.AdminUserStr)
 	}
 
-	userCopy := *user
+	userCopy := pb.AdminUser{}
+	deepcopy.Copy(&userCopy, user)
 	userCopy.XId = uuid.NewV4().String()
 	userCopy.XRev = uuid.NewV4().String()
 	userCopy.Data.Datatype = string(ds.AdminUserType)
-	userCopy.Data.CreatedTimestamp = time.Now().Unix()
+	userCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
 	userCopy.Data.LastModifiedTimestamp = userCopy.Data.GetCreatedTimestamp()
 
 	memDB.idToAdminUserMap[userCopy.XId] = &userCopy
@@ -58,10 +60,11 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUser) 
 		return nil, fmt.Errorf("%s must have a revision", ds.AdminUserStr)
 	}
 
-	userCopy := *user
+	userCopy := pb.AdminUser{}
+	deepcopy.Copy(&userCopy, user)
 	userCopy.XRev = uuid.NewV4().String()
 	userCopy.Data.Datatype = string(ds.AdminUserType)
-	userCopy.Data.LastModifiedTimestamp = time.Now().Unix()
+	userCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	memDB.idToAdminUserMap[userCopy.XId] = &userCopy
 
@@ -115,11 +118,12 @@ func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.Te
 		return nil, fmt.Errorf("%s already exists", ds.TenantDescriptorStr)
 	}
 
-	tenantCopy := *tenantDescriptor
+	tenantCopy := pb.TenantDescriptor{}
+	deepcopy.Copy(&tenantCopy, tenantDescriptor)
 	tenantCopy.XId = uuid.NewV4().String()
 	tenantCopy.XRev = uuid.NewV4().String()
 	tenantCopy.Data.Datatype = string(ds.TenantDescriptorType)
-	tenantCopy.Data.CreatedTimestamp = time.Now().Unix()
+	tenantCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
 	tenantCopy.Data.LastModifiedTimestamp = tenantCopy.Data.GetCreatedTimestamp()
 
 	memDB.idToTenantDescMap[tenantCopy.XId] = &tenantCopy
@@ -136,10 +140,11 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescrip
 		return nil, fmt.Errorf("%s must have a revision", ds.TenantDescriptorStr)
 	}
 
-	tenantCopy := *tenantDescriptor
+	tenantCopy := pb.TenantDescriptor{}
+	deepcopy.Copy(&tenantCopy, tenantDescriptor)
 	tenantCopy.XRev = uuid.NewV4().String()
 	tenantCopy.Data.Datatype = string(ds.TenantDescriptorType)
-	tenantCopy.Data.LastModifiedTimestamp = time.Now().Unix()
+	tenantCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	memDB.idToTenantDescMap[tenantCopy.XId] = &tenantCopy
 
@@ -199,11 +204,12 @@ func (memDB *AdminServiceDatastoreInMemory) CreateIngestionDictionary(ingDiction
 		return nil, fmt.Errorf("%s already exists", ds.AdminUserStr)
 	}
 
-	dictCopy := *ingDictionary
+	dictCopy := pb.IngestionDictionary{}
+	deepcopy.Copy(&dictCopy, ingDictionary)
 	dictCopy.XId = uuid.NewV4().String()
 	dictCopy.XRev = uuid.NewV4().String()
 	dictCopy.Data.Datatype = string(ds.IngestionDictionaryType)
-	dictCopy.Data.CreatedTimestamp = time.Now().Unix()
+	dictCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
 	dictCopy.Data.LastModifiedTimestamp = dictCopy.Data.GetCreatedTimestamp()
 
 	memDB.ingDictSlice[0] = &dictCopy
@@ -220,10 +226,11 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDiction
 		return nil, fmt.Errorf("%s must have a revision", ds.IngestionDictionaryStr)
 	}
 
-	dictCopy := *ingDictionary
+	dictCopy := pb.IngestionDictionary{}
+	deepcopy.Copy(&dictCopy, ingDictionary)
 	dictCopy.XRev = uuid.NewV4().String()
-	dictCopy.Data.Datatype = string(ds.TenantDescriptorType)
-	dictCopy.Data.LastModifiedTimestamp = time.Now().Unix()
+	dictCopy.Data.Datatype = string(ds.IngestionDictionaryType)
+	dictCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	memDB.ingDictSlice[0] = &dictCopy
 
@@ -232,18 +239,18 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDiction
 
 // DeleteIngestionDictionary - InMemory implementation of DeleteIngestionDictionary
 func (memDB *AdminServiceDatastoreInMemory) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
-	if len(memDB.ingDictSlice) == 0 {
-		return nil, fmt.Errorf("%s not found", ds.TenantDescriptorStr)
+	existing, err := memDB.GetIngestionDictionary()
+	if err != nil {
+		return nil, err
 	}
 
-	res := memDB.ingDictSlice[0]
 	memDB.ingDictSlice[0] = nil
-	return res, nil
+	return existing, nil
 }
 
 // GetIngestionDictionary - InMemory implementation of GetIngestionDictionary
 func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.IngestionDictionary, error) {
-	if len(memDB.ingDictSlice) == 0 {
+	if len(memDB.ingDictSlice) == 0 || memDB.ingDictSlice[0] == nil {
 		return nil, fmt.Errorf("%s not found", ds.TenantDescriptorStr)
 	}
 
@@ -252,8 +259,13 @@ func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.Ingest
 
 // GetTenantIDByAlias - InMemory impl of GetTenantIDByAlias
 func (memDB *AdminServiceDatastoreInMemory) GetTenantIDByAlias(name string) (string, error) {
-	// Stub to implement
-	return "", errors.New("GetTenantIDByName() not implemented for InMemory DB")
+	for _, value := range memDB.idToTenantDescMap {
+		if strings.ToLower(value.Data.Name) == strings.ToLower(name) {
+			return value.XId, nil
+		}
+	}
+
+	return "", fmt.Errorf("No tenant found for name %s", name)
 }
 
 // AddAdminViews - Adds the admin views (indicies) to the Admin DB.

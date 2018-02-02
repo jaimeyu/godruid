@@ -3,6 +3,7 @@ package datastore
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	uuid "github.com/satori/go.uuid"
@@ -50,4 +51,9 @@ func GetDataIDFromFullID(fullID string) string {
 // PrependToDataID - generates a full ID from the dataID and the dataType
 func PrependToDataID(dataID string, dataType string) string {
 	return fmt.Sprintf("%s%s%s", dataType, PouchDBIdBridgeStr, dataID)
+}
+
+// MakeTimestamp - get a timestamp from epoch in milliseconds
+func MakeTimestamp() int64 {
+    return time.Now().UnixNano() / int64(time.Millisecond)
 }

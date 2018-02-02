@@ -41,7 +41,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// pulls the couchdb image and start it in a mode that will self-cleanup.
-	resource, err := pool.Run("apache/couchdb", "2.1.1", []string{"--rm", "-it"})
+	resource, err := pool.Run("couchdb", "2.1.1", []string{})
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}

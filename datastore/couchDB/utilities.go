@@ -418,3 +418,12 @@ func getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, da
 	// can be Marshalled back to the proper type.
 	return convertGenericArrayToObject(fetchedList, &dataContainer, loggingStr)
 }
+
+// type CouchProvider interface {
+// 	createDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error
+// 	updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error
+// 	getDataFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error
+// 	deleteDataFromCouch(dbName string, idToDelete string, dataContainer interface{}, loggingStr string) error 
+// 	getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, dataContainer interface{}) error
+// 	getDatabase(dbConnectionName string) (*couchdb.Database, error)
+// }

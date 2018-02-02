@@ -1,0 +1,217 @@
+{
+  "metrics": {
+    "accedian-twamp": {
+      "metricMap": {
+        "delayMin": {
+          "ui": {
+            "group": "delay",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayMax": {
+          "ui": {
+            "group": "delay",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayAvg": {
+          "ui": {
+            "group": "delay",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+          "delay", "delayVar", "jitter", "packets", "unknown"
+        ]
+      }
+    },
+    "accedian-flowmeter": {
+      "metricMap": {
+        "throughputAvg": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputAvg",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "throughputMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputMax",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "throughputMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputMin",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups":[
+          "unknown"
+        ]
+      }
+    }
+  }
+}

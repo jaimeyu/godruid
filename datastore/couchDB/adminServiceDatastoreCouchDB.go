@@ -40,7 +40,7 @@ func CreateAdminServiceDAO() (*AdminServiceDatastoreCouchDB, error) {
 	provDBURL := fmt.Sprintf("%s:%d",
 		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
-	logger.Log.Debug("Admin Service CouchDB URL is: ", provDBURL)
+	logger.Log.Debugf("Admin Service CouchDB URL is: %s", provDBURL)
 	result.couchHost = provDBURL
 
 	// Couch DB name configuration
@@ -128,7 +128,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 	}
 
 	// Create a CouchDB database to isolate the tenant data
-	_, err := asd.createDatabase(tenantDescriptor.XId)
+	_, err := asd.CreateDatabase(tenantDescriptor.XId)
 	if err != nil {
 		logger.Log.Debugf("Unable to create database for Tenant %s: %s", tenantDescriptor.GetXId(), err.Error())
 		return nil, err
@@ -210,8 +210,8 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDe
 	return res, nil
 }
 
-// createDatabase - creates a database in CouchDB identified by the provided name.
-func (asd *AdminServiceDatastoreCouchDB) createDatabase(dbName string) (*couchdb.Database, error) {
+// CreateDatabase - creates a database in CouchDB identified by the provided name.
+func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Database, error) {
 	if len(dbName) == 0 {
 		return nil, errors.New("Unable to create database if no identifier is provided")
 	}
@@ -220,7 +220,12 @@ func (asd *AdminServiceDatastoreCouchDB) createDatabase(dbName string) (*couchdb
 	}
 
 	logger.Log.Debugf("Created DB %s\n", dbName)
-	return asd.server.Create(dbName)
+	db, err := asd.server.Create(dbName) 
+	if err != nil {
+		return nil, err
+	}
+	
+	return db, nil
 }
 
 func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error {
@@ -267,6 +272,14 @@ func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 
 // CreateIngestionDictionary - CouchDB implementation of CreateIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+
+	// Only create one if one does not already exist:
+	existing, _ := asd.GetIngestionDictionary()
+	if existing != nil {
+		return nil, fmt.Errorf("Can't create %s, it already exists", ds.IngestionDictionaryStr)
+	}
+
+	// No pre-existing dictionary, go ahead and create one.
 	ingDictionary.XId = ds.GenerateID(ingDictionary.GetData(), string(ds.IngestionDictionaryType))
 
 	dataType := string(ds.IngestionDictionaryType)
@@ -305,8 +318,8 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.Ingest
 		return nil, err
 	}
 
-	existingDictionary.XId = ds.PrependToDataID(existingDictionary.XId, string(ds.IngestionDictionaryType))
-	if err = deleteData(asd.dbName, existingDictionary.GetXId(), ds.IngestionDictionaryStr); err != nil {
+	deleteID := ds.PrependToDataID(existingDictionary.XId, string(ds.IngestionDictionaryType))
+	if err = deleteData(asd.dbName, deleteID, ds.IngestionDictionaryStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", ds.IngestionDictionaryStr, err.Error())
 		return nil, err
 	}

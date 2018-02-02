@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-
-	"github.com/accedian/adh-gather/datastore"
 )
 
 // PouchDBPluginServiceDatastoreInMemory - struct responsible for handling
@@ -16,7 +14,7 @@ type PouchDBPluginServiceDatastoreInMemory struct {
 
 // CreatePouchDBPluginServiceDAO - returns an in-memory implementation of the PouchDB
 // Plugin Service datastore.
-func CreatePouchDBPluginServiceDAO() (datastore.PouchDBPluginServiceDatastore, error) {
+func CreatePouchDBPluginServiceDAO() (*PouchDBPluginServiceDatastoreInMemory, error) {
 	res := new(PouchDBPluginServiceDatastoreInMemory)
 
 	return res, nil

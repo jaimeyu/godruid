@@ -3,7 +3,6 @@ package inMemory
 import (
 	"errors"
 
-	"github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
@@ -15,7 +14,7 @@ type TenantServiceDatastoreInMemory struct {
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
 // datastore.
-func CreateTenantServiceDAO() (datastore.TenantServiceDatastore, error) {
+func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res := new(TenantServiceDatastoreInMemory)
 
 	return res, nil

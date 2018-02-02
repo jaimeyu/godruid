@@ -42,6 +42,7 @@ const (
 // of the AdminService Datastore.
 type AdminServiceDatastore interface {
 	AddAdminViews() error
+	CreateDatabase(dbName string) (Database, error)
 
 	CreateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)
 	UpdateAdminUser(*pb.AdminUser) (*pb.AdminUser, error)

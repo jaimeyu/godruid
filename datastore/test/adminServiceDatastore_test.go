@@ -51,7 +51,7 @@ func TestMain(m *testing.M) {
 		var err error
 
 		// Spin up the couch docker image and make sure we can reach it.
-		couchHost := "http://localhost"
+		couchHost := "http://0.0.0.0"
 		couchPort := resource.GetPort("5984/tcp")
 		couchServer, err = couchdb.NewServer(fmt.Sprintf("%s:%s", couchHost, couchPort))
 		if err != nil {

@@ -23,6 +23,10 @@ jobs:
       - checkout 
 
       - setup_remote_docker
+
+      - run:
+          name: Starting CouchDB
+          command: docker run --rm -it -p 5984:5984 couchdb:2.1.1 
     
       - run: 
           name: Downloading the dependency management tool

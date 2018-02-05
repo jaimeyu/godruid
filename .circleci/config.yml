@@ -21,6 +21,10 @@ jobs:
       - setup_remote_docker
 
       - run:
+          name: Login into docker repository
+          command: docker login -u ${GCR_DOCKER_RO_USERNAME} -p "$(echo $GCR_DOCKER_RW_PASSWORD)" https://gcr.io
+
+      - run:
           name: Starting CouchDB
           command: docker run --rm -it -p 6684:5984 -d gcr.io/npav-172917/docker-couchdb:dev
     

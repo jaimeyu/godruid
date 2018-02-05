@@ -2,10 +2,6 @@
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
-
-machine:
-  services:
-    - couchdb
     
 # Jobs
 
@@ -26,7 +22,7 @@ jobs:
 
       - run:
           name: Starting CouchDB
-          command: docker run --rm -it -p 5984:5984 -v /root/go/src/github.com/accedian/adh-gather/datastore/test/files/local.d/:/opt/couchdb/etc/local.d/ -d couchdb:2.1.1 
+          command: docker run --rm -it -p 6684:5984 -d gcr.io/npav-172917/docker-couchdb:dev
     
       - run: 
           name: Downloading the dependency management tool

@@ -12,6 +12,10 @@ jobs:
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
+      - image: gcr.io/npav-172917/docker-couchdb:dev
+        auth:
+          username: ${GCR_DOCKER_RO_USERNAME}
+          password: ${GCR_DOCKER_RO_PASSWORD}
 
     working_directory: /root/go/src/github.com/accedian/adh-gather
 
@@ -20,9 +24,9 @@ jobs:
 
       - setup_remote_docker
 
-      - run:
-          name: Login into docker repository
-          command: docker login -u ${GCR_DOCKER_RO_USERNAME} -p "$(echo $GCR_DOCKER_RO_PASSWORD)" https://gcr.io
+      # - run:
+      #     name: Login into docker repository
+      #     command: docker login -u ${GCR_DOCKER_RO_USERNAME} -p "$(echo $GCR_DOCKER_RO_PASSWORD)" https://gcr.io
 
       - run:
           name: Starting CouchDB

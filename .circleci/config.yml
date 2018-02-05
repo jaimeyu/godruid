@@ -22,7 +22,7 @@ jobs:
 
       - run:
           name: Login into docker repository
-          command: docker login -u ${GCR_DOCKER_RO_USERNAME} -p "$(echo $GCR_DOCKER_RW_PASSWORD)" https://gcr.io
+          command: docker login -u ${GCR_DOCKER_RO_USERNAME} -p "$(echo $GCR_DOCKER_RO_PASSWORD)" https://gcr.io
 
       - run:
           name: Starting CouchDB

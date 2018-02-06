@@ -101,7 +101,14 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 
 	logger.Log.Debugf("Calling GetHistogram for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor(), request.GetTimeout())
+
+	// peyo TODO we should have a better way to handle default query params
+	timeout := request.GetTimeout()
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor(), timeout)
 
 	if err != nil {
 		return nil, err
@@ -150,7 +157,13 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), request.GetTimeout())
+	// peyo TODO we should have a better way to handle default query params
+	timeout := request.GetTimeout()
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
 
 	if err != nil {
 		return nil, err
@@ -213,7 +226,13 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), request.GetTimeout())
+	// peyo TODO we should have a better way to handle default query params
+	timeout := request.GetTimeout()
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
 
 	if err != nil {
 		return nil, err
@@ -274,7 +293,13 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), request.GetTimeout())
+	// peyo TODO we should have a better way to handle default query params
+	timeout := request.GetTimeout()
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout)
 
 	if err != nil {
 		return nil, err

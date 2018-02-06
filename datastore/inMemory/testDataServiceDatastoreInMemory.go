@@ -3,7 +3,6 @@ package inMemory
 import (
 	"errors"
 
-	"github.com/accedian/adh-gather/datastore"
 )
 
 // TestDataServiceDatastoreInMemory - test data InMemory impl.
@@ -12,7 +11,7 @@ type TestDataServiceDatastoreInMemory struct {
 
 // CreateTestDataServiceDAO - returns an in-memory implementation of the Admin Service
 // datastore.
-func CreateTestDataServiceDAO() (datastore.TestDataServiceDatastore, error) {
+func CreateTestDataServiceDAO() (*TestDataServiceDatastoreInMemory, error) {
 	res := new(TestDataServiceDatastoreInMemory)
 
 	return res, nil

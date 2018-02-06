@@ -1,6 +1,8 @@
 ## Current Release 
 ### 0.60.0 
-**Release Date:** Thu Feb  1 13:27:22 UTC 2018     
+* Updating build process to utilize integration tests
+**Release Date:** Thu Feb  1 13:27:22 UTC 2018  
+* Added a test framework to gather for unit testing   
 ## Previous Releases 
 ### 0.59.0 
 **Release Date:** Mon Jan 29 18:39:39 UTC 2018     

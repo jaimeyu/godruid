@@ -574,7 +574,7 @@ func generateTenantDescriptor(name string) (*pb.TenantDescriptor, error) {
 	result.Data.UrlSubdomain = strings.ToLower(name) + ".npav.accedian.net"
 	result.Data.State = 2
 	result.Data.Datatype = tenantStr
-	result.Data.CreatedTimestamp = time.Now().Unix()
+	result.Data.CreatedTimestamp = db.MakeTimestamp()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
 	result.XId = db.GenerateID(result.Data, tenantStr)
@@ -596,7 +596,7 @@ func generateTenantUser(name string, tenantID string) (*pb.TenantUser, error) {
 	result.Data.SendOnboardingEmail = false
 	result.Data.Password = "admin"
 	result.Data.OnboardingToken = "anonboardingtokenforthedefaulttenantuser"
-	result.Data.CreatedTimestamp = time.Now().Unix()
+	result.Data.CreatedTimestamp = db.MakeTimestamp()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
 	result.XId = db.GenerateID(result.Data, tenantUserStr)
@@ -618,7 +618,7 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	// relational pouch tagging.
 	thrPrfIDParts := strings.Split(defaultThreshPrf, "_")
 	result.Data.ThresholdProfileSet = append(result.Data.GetThresholdProfileSet(), thrPrfIDParts[len(thrPrfIDParts)-1])
-	result.Data.CreatedTimestamp = time.Now().Unix()
+	result.Data.CreatedTimestamp = db.MakeTimestamp()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
 	result.XId = db.GenerateID(result.Data, tenantDomainStr)

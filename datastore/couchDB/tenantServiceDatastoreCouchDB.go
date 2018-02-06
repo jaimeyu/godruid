@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -34,7 +33,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	provDBURL := fmt.Sprintf("%s:%d",
 		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
-	logger.Log.Debug("Tenant Service CouchDB URL is: ", provDBURL)
+	logger.Log.Debugf("Tenant Service CouchDB URL is: %s", provDBURL)
 	result.server = provDBURL
 
 	return result, nil
@@ -538,7 +537,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 		dataType := string(ds.TenantMonitoredObjectType)
 		mo.XId = ds.GenerateID(mo.Data, dataType)
 		mo.Data.Datatype = dataType
-		mo.Data.CreatedTimestamp = time.Now().Unix()
+		mo.Data.CreatedTimestamp = ds.MakeTimestamp()
 		mo.Data.LastModifiedTimestamp = mo.Data.GetCreatedTimestamp()
 	}
 	body := map[string]interface{}{

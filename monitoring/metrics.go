@@ -145,6 +145,6 @@ func InitMetrics() {
 func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 	duration := time.Since(startTime).Seconds()
 
-	logger.Log.Infof("%v: %d", labels, duration)
+	logger.Log.Infof("%v: %b", labels, duration)
 	APICallDuration.WithLabelValues(labels...).Observe(duration)
 }

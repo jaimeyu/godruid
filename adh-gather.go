@@ -247,12 +247,12 @@ func ensureAdminDBExists(gatherServer *GatherServer, adminDB string) {
 func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string) {
 	defaultDictionaryBytes, err := ioutil.ReadFile(ingDictFilePath)
 	if err != nil {
-		logger.Log.Fatalf("Unable to read Default Ingestion Profile from file: %s", err.Error())
+		logger.Log.Fatalf("Unable to read Default Ingestion Dictionary from file: %s", err.Error())
 	}
 	
 	defaultDictionaryData := &pb.IngestionDictionaryData{}
 	if err = json.Unmarshal(defaultDictionaryBytes, &defaultDictionaryData); err != nil {
-		logger.Log.Fatalf("Unable to construct Default Ingestion Profile from file: %s", err.Error())
+		logger.Log.Fatalf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
 	}
 
 	existingDictionary, err := gatherServer.gsh.GetIngestionDictionary(nil, &emp.Empty{})

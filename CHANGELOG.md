@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.63.0 
-**Release Date:** Tue Feb  6 18:38:37 UTC 2018     
+**Release Date:** Tue Feb  6 18:38:37 UTC 2018  
+* Added - metrics to track number of recieved and completed API calls to gather for each service and globally.   
 ## Previous Releases 
 ### 0.62.0 
 **Release Date:** Tue Feb  6 17:08:38 UTC 2018     

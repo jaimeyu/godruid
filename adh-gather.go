@@ -26,6 +26,7 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	emp "github.com/golang/protobuf/ptypes/empty"
+	mon "github.com/accedian/adh-gather/monitoring"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -165,13 +166,18 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 // otherwise.
 func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	mon.RecievedAPICalls.Inc()
 	if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
 		gs.jsonAPIMux.ServeHTTP(w, r)
 	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
 		gs.gwmux.ServeHTTP(w, r)
 	}  else {
+		mon.IncrementCounter(mon.PouchAPIRecieved)
 		gs.mux.ServeHTTP(w, r)
+		mon.IncrementCounter(mon.PouchAPICompleted)
 	}
+
+	mon.CompletedAPICalls.Inc()
 }
 
 func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) bool {

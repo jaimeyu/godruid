@@ -14,7 +14,7 @@ const (
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
-func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32, vendor string) (*godruid.QueryTimeseries, error) {
+func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32, vendor string, timeout int32) (*godruid.QueryTimeseries, error) {
 
 	//peyo TODO need to figure out a better way than just appending Histo
 	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"Histo", resolution, granularityBuckets, "0", "Infinity")
@@ -22,7 +22,7 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
 		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:     map[string]interface{}{"timeout": 60000},
+		Context:     map[string]interface{}{"timeout": timeout},
 		Aggregations: []godruid.Aggregation{
 			godruid.AggFiltered(
 				godruid.FilterAnd(
@@ -79,7 +79,7 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string) (*godruid.QueryTimeseries, error) {
+func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -136,7 +136,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:      map[string]interface{}{"timeout": 60000, "skipEmptyBuckets": true},
+		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
@@ -144,7 +144,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string) (*godruid.QueryGroupBy, error) {
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
 	metrics := strings.Split(metric, ",")
@@ -191,11 +191,11 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 			}
 		}
 	}
-	
+
 	return &godruid.QueryGroupBy{
 		DataSource:   dataSource,
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:      map[string]interface{}{"timeout": 60000},
+		Context:      map[string]interface{}{"timeout": timeout},
 		Aggregations: aggregations,
 		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Intervals:    []string{interval},
@@ -208,14 +208,14 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string) (*godruid.QuerySelect, error) {
+func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32) (*godruid.QuerySelect, error) {
 
 	metrics := strings.Split(metric, ",")
 
 	return &godruid.QuerySelect{
 		DataSource:  dataSource,
 		Granularity: godruid.GranAll,
-		Context:     map[string]interface{}{"timeout": 60000},
+		Context:     map[string]interface{}{"timeout": timeout},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			godruid.FilterSelector("monitoredObjectId", monitoredObjectId),

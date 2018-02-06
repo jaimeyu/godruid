@@ -13,8 +13,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	db "github.com/accedian/adh-gather/datastore"
+	pb "github.com/accedian/adh-gather/gathergrpc"
 
 	"github.com/satori/go.uuid"
 )
@@ -98,10 +98,10 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
-	
+
 	logger.Log.Debugf("Calling GetHistogram for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
-	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor())
+	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor(), request.GetTimeout())
 
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
+	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), request.GetTimeout())
 
 	if err != nil {
 		return nil, err
@@ -213,7 +213,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
+	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), request.GetTimeout())
 
 	if err != nil {
 		return nil, err
@@ -274,7 +274,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId())
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), request.GetTimeout())
 
 	if err != nil {
 		return nil, err

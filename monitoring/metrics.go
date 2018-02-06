@@ -20,6 +20,7 @@ const (
 	MonitoredObjectStr = "mon_obj"
 	ThrCrossStr = "thr_cross"
 	HistogramStr = "histogram"
+	RawMetricStr = "raw_metric"
 	TenantMetaStr = "tenant_meta"
 	AdminViewsStr = "admin_views"
 	ValidTypesStr = "valid_types"
@@ -100,6 +101,7 @@ const (
 	GetThrCrossStr = ThrCrossStr + metricNameDelimiter + OPGetStr
 	GetThrCrossByMonObjStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr = HistogramStr + metricNameDelimiter + OPGetStr
+	GetRawMetricStr = RawMetricStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
@@ -117,10 +119,54 @@ const (
 
 	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate 
 )
+
+type MetricCounterType string
+const (
+	APIRecieved MetricCounterType = "APIRecieved"
+	APICompleted MetricCounterType = "APICompleted"
+	AdminAPIRecieved MetricCounterType = "AdminAPIRecieved"
+	AdminAPICompleted MetricCounterType = "AdminAPICompleted"
+	TenantAPIRecieved MetricCounterType = "TenantAPIRecieved"
+	TenantAPICompleted MetricCounterType = "TenantAPICompleted"
+	PouchAPIRecieved MetricCounterType = "PouchAPIRecieved"
+	PouchAPICompleted MetricCounterType = "PouchAPICompleted"
+	MetricAPIRecieved MetricCounterType = "MetricAPIRecieved"
+	MetricAPICompleted MetricCounterType = "MetricAPICompleted"
+)
 	
 var (
 	// APICallDuration - Time it takes to create a Tenant in Gather.
 	APICallDuration prometheus.HistogramVec
+
+	// RecievedAPICalls - the number of API calls gather has recieved since startup
+	RecievedAPICalls prometheus.Counter
+
+	// CompletedAPICalls - number of API calls gather has completed since startup
+	CompletedAPICalls prometheus.Counter
+
+	// CompletedAdminServiceAPICalls - number of API calls the admin service has completed since startup
+	CompletedAdminServiceAPICalls prometheus.Counter
+
+	// RecievedAdminServiceAPICalls - the number of API calls the admin service has recieved since startup
+	RecievedAdminServiceAPICalls prometheus.Counter
+
+	// CompletedTenantServiceAPICalls - number of API calls the tenant service has completed since startup
+	CompletedTenantServiceAPICalls prometheus.Counter
+
+	// RecievedTenantServiceAPICalls - the number of API calls the tenant service has recieved since startup
+	RecievedTenantServiceAPICalls prometheus.Counter
+
+	// CompletedPouchServiceAPICalls - number of API calls the pouch service has completed since startup
+	CompletedPouchServiceAPICalls prometheus.Counter
+
+	// RecievedPouchServiceAPICalls - the number of API calls pouch service has recieved since startup
+	RecievedPouchServiceAPICalls prometheus.Counter
+
+	// CompletedMetricServiceAPICalls - number of API calls the metric service has completed since startup
+	CompletedMetricServiceAPICalls prometheus.Counter
+
+	// RecievedMetricServiceAPICalls - the number of API calls metric service has recieved since startup
+	RecievedMetricServiceAPICalls prometheus.Counter
 )
 
 // InitMetrics - registers all metrics to be collected for Gather.
@@ -130,16 +176,58 @@ func InitMetrics() {
 		Help: "Time taken to execute an API call",
 	}, []string{"code", "name"})
 
+	RecievedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_api_call_received_since_startup",
+		Help: "Number of API calls recieved by Gather since startup"})
+
+	CompletedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_api_call_completed_since_startup",
+		Help: "Number of API calls completed by Gather since startup"})
+
+	CompletedAdminServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_admin_service_api_completed_since_startup",
+			Help: "Number of API calls completed by the Admin Service since startup"})
+	
+	RecievedAdminServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_admin_service_api_recieved_since_startup",
+			Help: "Number of API calls recieved by the Admin Service since startup"})
+
+	RecievedTenantServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_tenant_service_api_call_received_since_startup",
+			Help: "Number of API calls recieved by the Tenant Service since startup"})
+	
+	CompletedTenantServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_tenant_service_api_call_completed_since_startup",
+			Help: "Number of API calls completed by the Tenant Service since startup"})
+
+	RecievedPouchServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_pouch_service_api_call_received_since_startup",
+			Help: "Number of API calls recieved by the Pouch Service since startup"})
+	
+	CompletedPouchServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_pouch_service_api_call_completed_since_startup",
+			Help: "Number of API calls completed by the Pouch Service since startup"})
+
+	RecievedMetricServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_metric_service_api_call_received_since_startup",
+			Help: "Number of API calls recieved by the Metric Service since startup"})
+	
+	CompletedMetricServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "gather_metric_service_api_call_completed_since_startup",
+			Help: "Number of API calls completed by the Metric Service since startup"})
+
 	prometheus.MustRegister(APICallDuration)
+	prometheus.MustRegister(RecievedAPICalls)
+	prometheus.MustRegister(CompletedAPICalls)
+	prometheus.MustRegister(CompletedAdminServiceAPICalls)
+	prometheus.MustRegister(RecievedAdminServiceAPICalls)
+	prometheus.MustRegister(RecievedTenantServiceAPICalls)
+	prometheus.MustRegister(CompletedTenantServiceAPICalls)
+	prometheus.MustRegister(RecievedPouchServiceAPICalls)
+	prometheus.MustRegister(CompletedPouchServiceAPICalls)
+	prometheus.MustRegister(RecievedMetricServiceAPICalls)
+	prometheus.MustRegister(CompletedMetricServiceAPICalls)
 }
-
-// GenerateMetricName - used to generate a properly formatted name for a metric.
-// func GenerateMetricName(nameParts ...string) string {
-// 	partsWithPrefix := []string{}
-// 	partsWithPrefix = append(partsWithPrefix, nameParts...)
-
-// 	return strings.Join(partsWithPrefix, "_")
-// }
 
 // TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.
 func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
@@ -147,4 +235,33 @@ func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 
 	logger.Log.Infof("%v: %b", labels, duration)
 	APICallDuration.WithLabelValues(labels...).Observe(duration)
+}
+
+// IncrementCounter - increments the value of a counter.
+func IncrementCounter(counterType MetricCounterType) {
+	switch counterType {
+	case APIRecieved:
+		RecievedAPICalls.Inc()
+	case APICompleted:
+		CompletedAPICalls.Inc()
+	case AdminAPICompleted:
+		CompletedAdminServiceAPICalls.Inc()
+	case AdminAPIRecieved:
+		RecievedAdminServiceAPICalls.Inc()
+	case TenantAPICompleted:
+		CompletedTenantServiceAPICalls.Inc()
+	case TenantAPIRecieved:
+		RecievedTenantServiceAPICalls.Inc()
+	case PouchAPICompleted:
+		CompletedPouchServiceAPICalls.Inc()
+	case PouchAPIRecieved:
+		RecievedPouchServiceAPICalls.Inc()
+	case MetricAPICompleted:
+		CompletedMetricServiceAPICalls.Inc()
+	case MetricAPIRecieved:
+		RecievedMetricServiceAPICalls.Inc()
+	default:
+		logger.Log.Debugf("Unable to increment counter type %v", counterType)
+	}
+
 }

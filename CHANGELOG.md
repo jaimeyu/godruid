@@ -1,6 +1,9 @@
 ## Current Release 
 ### 0.61.0 
-**Release Date:** Tue Feb  6 16:11:51 UTC 2018     
+**Release Date:** Tue Feb  6 16:11:51 UTC 2018  
+* Added - flowmeter metrics to the default threshold profile.
+* Added - logging to the queries for the metrics service.
+* Added - metrics tracking for APIs in the metrics service.   
 ## Previous Releases 
 ### 0.60.0 
 * Updating build process to utilize integration tests

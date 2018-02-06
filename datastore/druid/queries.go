@@ -139,8 +139,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 		Context:      map[string]interface{}{"timeout": 60000, "skipEmptyBuckets": true},
 		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 		Aggregations: aggregations,
-		Intervals:    []string{interval},
-	}, nil
+		Intervals:    []string{interval}}, nil
 }
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
@@ -192,7 +191,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 			}
 		}
 	}
-
+	
 	return &godruid.QueryGroupBy{
 		DataSource:   dataSource,
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
@@ -205,8 +204,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 				Dimension:  "monitoredObjectId",
 				OutputName: "monitoredObjectId",
 			},
-		},
-	}, nil
+		}}, nil
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values

@@ -4,6 +4,20 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
+const (
+	// ThresholdCrossingStr - common name of the ThresholdCrossingStr data type for use in logs.
+	ThresholdCrossingStr = "Threshold Crossing"
+
+	// ThresholdCrossingByMonitoredObjectStr - common name for use in logs.
+	ThresholdCrossingByMonitoredObjectStr = "Threshold Crossing by Monitored Object"
+
+	// HistogramStr - common name for use in logs.
+	HistogramStr = "Histogram"
+
+	// RawMetricString - common name for use in logs.
+	RawMetricStr = "Raw Metric"
+)
+
 type DruidDatastore interface {
 
 	// Returns the the number of times a given metric crossed the

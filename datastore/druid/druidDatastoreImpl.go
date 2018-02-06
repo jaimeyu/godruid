@@ -14,6 +14,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	db "github.com/accedian/adh-gather/datastore"
 
 	"github.com/satori/go.uuid"
 )
@@ -97,6 +98,8 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
+	
+	logger.Log.Debugf("Calling GetHistogram for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor())
 
@@ -104,6 +107,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 		return nil, err
 	}
 
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, query)
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -143,6 +147,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
+	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
@@ -151,6 +156,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, query)
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -204,6 +210,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
+	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", request)
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor())
@@ -212,6 +219,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, query)
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -262,6 +270,8 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
 
+	logger.Log.Debugf("Calling GetRawMetrics for request: %v", request)
+
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId())
@@ -270,6 +280,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 		return nil, err
 	}
 
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, query)
 	response, err := dc.executeQuery(query)
 
 	//	fmt.Println(string(response))

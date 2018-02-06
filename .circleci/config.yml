@@ -9,6 +9,9 @@ jobs:
   build:
     docker:
       - image: gcr.io/npav-172917/docker-go-sdk:1.0.1-alpine
+        auth:
+          username: ${GCR_DOCKER_RO_USERNAME}
+          password: ${GCR_DOCKER_RO_PASSWORD}
       - image: gcr.io/npav-172917/docker-couchdb:dev
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}

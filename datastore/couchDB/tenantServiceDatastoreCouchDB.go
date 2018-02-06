@@ -33,7 +33,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	provDBURL := fmt.Sprintf("%s:%d",
 		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
-	logger.Log.Debug("Tenant Service CouchDB URL is: ", provDBURL)
+	logger.Log.Debugf("Tenant Service CouchDB URL is: %s", provDBURL)
 	result.server = provDBURL
 
 	return result, nil

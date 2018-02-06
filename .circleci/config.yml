@@ -12,7 +12,7 @@ jobs:
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
-      - image: gcr.io/npav-172917/docker-couchdb:dev
+      - image: gcr.io/npav-172917/docker-couchdb:test
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
@@ -43,6 +43,7 @@ jobs:
       - run: 
           name: Running unit tests
           command: go test -v ./...
+
       - run:
           name: Building the binaries
           command: make circleci-binaries
@@ -57,6 +58,7 @@ jobs:
     working_directory: /root/go/src/github.com/accedian/adh-gather
     steps:
       - checkout 
+
       - run: 
           name: Downloading the dependency management tool
           command: go get -u github.com/golang/dep/cmd/dep
@@ -78,6 +80,7 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ] && [ "${CIRCLE_PROJECT_USERNAME}" == "Accedian" ]; then
               docker login -u _json_key -p "$(echo $GCR_DOCKER_RW_PASSWORD)" https://gcr.io
             fi
+            
       - run:
           name: "Push image to GCR"
           command: |

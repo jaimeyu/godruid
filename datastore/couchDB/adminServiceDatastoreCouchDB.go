@@ -120,6 +120,7 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, 
 
 // CreateTenant - CouchDB implementation of CreateTenant
 func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	logger.Log.Debugf("Creating %s: %v\n", ds.TenantStr,logger.AsJSONString(tenantDescriptor))
 	tenantDescriptor.XId = ds.GenerateID(tenantDescriptor.GetData(), string(ds.TenantDescriptorType))
 
 	dataContainer := &pb.TenantDescriptor{}
@@ -141,22 +142,27 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.Tenan
 	}
 
 	// Return the provisioned object.
+	logger.Log.Debugf("Created %s: %v\n", ds.TenantStr, logger.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantDescriptor - CouchDB implementation of UpdateTenantDescriptor
 func (asd *AdminServiceDatastoreCouchDB) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.TenantStr, logger.AsJSONString(tenantDescriptor))
 	tenantDescriptor.XId = ds.PrependToDataID(tenantDescriptor.XId, string(ds.TenantDescriptorType))
 
 	dataContainer := &pb.TenantDescriptor{}
 	if err := updateDataInCouch(asd.dbName, tenantDescriptor, dataContainer, string(ds.TenantDescriptorType), ds.TenantStr); err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debugf("Updated %s: %v\n", ds.TenantStr, logger.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // DeleteTenant - CouchDB implementation of DeleteTenant
 func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", ds.TenantStr, tenantID)
 	tenantIDWithPrefix := ds.PrependToDataID(tenantID, string(ds.TenantDescriptorType))
 
 	// Obtain the value of the existing record for a return value.
@@ -184,29 +190,34 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*pb.Tena
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantStr, existingTenant)
+	logger.Log.Debugf("Deleted %s: %v\n", ds.TenantStr, logger.AsJSONString(existingTenant))
 	return existingTenant, nil
 }
 
 // GetTenantDescriptor - CouchDB implementation of GetTenantDescriptor
 func (asd *AdminServiceDatastoreCouchDB) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", ds.TenantStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(ds.TenantDescriptorType))
 
 	dataContainer := pb.TenantDescriptor{}
 	if err := getDataFromCouch(asd.dbName, tenantID, &dataContainer, ds.TenantDescriptorStr); err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.TenantStr, logger.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // GetAllTenantDescriptors - CouchDB implementation of GetAllTenantDescriptors
 func (asd *AdminServiceDatastoreCouchDB) GetAllTenantDescriptors() (*pb.TenantDescriptorList, error) {
+	logger.Log.Debugf("Fetching all %s\n", ds.TenantStr)
 	res := &pb.TenantDescriptorList{}
 	res.Data = make([]*pb.TenantDescriptor, 0)
 	if err := getAllOfTypeFromCouch(asd.dbName, string(ds.TenantDescriptorType), ds.TenantDescriptorStr, &res.Data); err != nil {
 		return nil, err
 	}
 
+	logger.Log.Debugf("Retrieved %d %s\n", len(res.Data), ds.TenantStr)
 	return res, nil
 }
 
@@ -272,7 +283,7 @@ func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
 
 // CreateIngestionDictionary - CouchDB implementation of CreateIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-
+	logger.Log.Debugf("Creating %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(ingDictionary))
 	// Only create one if one does not already exist:
 	existing, _ := asd.GetIngestionDictionary()
 	if existing != nil {
@@ -289,12 +300,13 @@ func (asd *AdminServiceDatastoreCouchDB) CreateIngestionDictionary(ingDictionary
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.IngestionDictionaryStr, dataContainer)
+	logger.Log.Debugf("Created %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // UpdateIngestionDictionary - CouchDB implementation of UpdateIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(ingDictionary))
 	ingDictionary.XId = ds.PrependToDataID(ingDictionary.XId, string(ds.IngestionDictionaryType))
 
 	dataType := string(ds.IngestionDictionaryType)
@@ -304,13 +316,13 @@ func (asd *AdminServiceDatastoreCouchDB) UpdateIngestionDictionary(ingDictionary
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.IngestionDictionaryStr, dataContainer)
+	logger.Log.Debugf("Updated %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // DeleteIngestionDictionary - CouchDB implementation of DeleteIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
-
+	logger.Log.Debugf("Deleting %s\n", ds.IngestionDictionaryStr)
 	// Obtain the value of the existing record for a return value.
 	existingDictionary, err := asd.GetIngestionDictionary()
 	if err != nil {
@@ -325,13 +337,14 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteIngestionDictionary() (*pb.Ingest
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", ds.IngestionDictionaryStr, existingDictionary)
+	logger.Log.Debugf("Deleted %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(existingDictionary))
 	return existingDictionary, nil
 
 }
 
 // GetIngestionDictionary - CouchDB implementation of GetIngestionDictionary
 func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.IngestionDictionary, error) {
+	logger.Log.Debugf("Retrieving %s\n", ds.IngestionDictionaryStr)
 	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
@@ -352,13 +365,13 @@ func (asd *AdminServiceDatastoreCouchDB) GetIngestionDictionary() (*pb.Ingestion
 		return nil, fmt.Errorf("Unable to find %s", ds.IngestionDictionaryStr)
 	}
 
-	logger.Log.Debugf("Found %s %v\n", ds.IngestionDictionaryStr, res)
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.IngestionDictionaryStr, logger.AsJSONString(res))
 	return &res, nil
 }
 
 // GetTenantIDByAlias - InMemory impl of GetTenantIDByAlias
 func (asd *AdminServiceDatastoreCouchDB) GetTenantIDByAlias(name string) (string, error) {
-
+	logger.Log.Debugf("Getting Tenant ID for Tenant %s\n", name)
 	// Retrieve just the subset of values.
 	requestBody := map[string]interface{}{}
 	requestBody["keys"] = []string{strings.ToLower(name)}
@@ -403,6 +416,7 @@ func (asd *AdminServiceDatastoreCouchDB) AddAdminViews() error {
 
 // CreateValidTypes - CouchDB implementation of CreateValidTypes
 func (asd *AdminServiceDatastoreCouchDB) CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	logger.Log.Debugf("Creating %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(value))
 	value.XId = ds.GenerateID(value.GetData(), string(ds.ValidTypesType))
 
 	dataType := string(ds.ValidTypesType)
@@ -412,12 +426,13 @@ func (asd *AdminServiceDatastoreCouchDB) CreateValidTypes(value *pb.ValidTypes) 
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", ds.ValidTypesStr, dataContainer)
+	logger.Log.Debugf("Created %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // UpdateValidTypes - CouchDB implementation of UpdateValidTypes
 func (asd *AdminServiceDatastoreCouchDB) UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+	logger.Log.Debugf("Updating %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(value))
 	value.XId = ds.PrependToDataID(value.XId, string(ds.ValidTypesType))
 
 	dataType := string(ds.ValidTypesType)
@@ -427,12 +442,13 @@ func (asd *AdminServiceDatastoreCouchDB) UpdateValidTypes(value *pb.ValidTypes) 
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", ds.ValidTypesStr, dataContainer)
+	logger.Log.Debugf("Updated %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // GetValidTypes - CouchDB implementation of GetValidTypes
 func (asd *AdminServiceDatastoreCouchDB) GetValidTypes() (*pb.ValidTypes, error) {
+	logger.Log.Debugf("Fetching %s\n", ds.ValidTypesStr)
 	db, err := getDatabase(asd.dbName)
 	if err != nil {
 		return nil, err
@@ -453,12 +469,13 @@ func (asd *AdminServiceDatastoreCouchDB) GetValidTypes() (*pb.ValidTypes, error)
 		return nil, fmt.Errorf("No %s found", ds.ValidTypesStr)
 	}
 
-	logger.Log.Debugf("Found %s %v\n", ds.ValidTypesStr, res)
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(res))
 	return &res, nil
 }
 
 // GetSpecificValidTypes - CouchDB implementation of GetSpecificValidTypes
 func (asd *AdminServiceDatastoreCouchDB) GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+	logger.Log.Debugf("Fetching %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(value))
 	currentValidValuesRecord, err := asd.GetValidTypes()
 	if err != nil {
 		return nil, err
@@ -472,7 +489,7 @@ func (asd *AdminServiceDatastoreCouchDB) GetSpecificValidTypes(value *pb.ValidTy
 		result.MonitoredObjectDeviceTypes = currentValidValuesRecord.Data.MonitoredObjectDeviceTypes
 	}
 
-	logger.Log.Debugf("Found %s %v\n", ds.ValidTypesStr, result)
+	logger.Log.Debugf("Retrieved %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(result))
 	return result, nil
 }
 

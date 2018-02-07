@@ -1,13 +1,19 @@
 package logger
 
 import (
+	"encoding/json"
 	"os"
 
+	"github.com/getlantern/deepcopy"
+
 	logging "github.com/op/go-logging"
+	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
 const (
 	loggingModule = "asmImporter"
+
+	LogRedactStr = "XXXXXXXX"
 )
 
 // Log is the project logger
@@ -37,4 +43,37 @@ func SetDebugLevel(t bool) {
 // IsDebugEnabled returns true if the current log level is set to debug
 func IsDebugEnabled() bool {
 	return logging.GetLevel(loggingModule) == logging.DEBUG
+}
+
+// AsJSONString - returns the object as a json string. If there is sensitive material in the object, 
+// this method can be augmented to hide those details.
+func AsJSONString(obj interface{}) string {
+	switch obj.(type) {
+	case *pb.AdminUser:
+		user := obj.(*pb.AdminUser)
+		userCopy := pb.AdminUser{}
+		deepcopy.Copy(&userCopy, user)
+		userCopy.Data.Password = LogRedactStr
+		res, err := json.MarshalIndent(userCopy, "", "  ")
+		if err != nil {
+			return ""
+		}
+		return string(res)
+	case *pb.TenantUser:
+		user := obj.(*pb.TenantUser)
+		userCopy := pb.TenantUser{}
+		deepcopy.Copy(&userCopy, user)
+		userCopy.Data.Password = LogRedactStr
+		res, err := json.MarshalIndent(userCopy, "", "  ")
+		if err != nil {
+			return ""
+		}
+		return string(res)
+	default:
+		res, err := json.MarshalIndent(obj, "", "  ")
+		if err != nil {
+			return ""
+		}
+		return string(res)
+	}
 }

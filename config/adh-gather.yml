@@ -24,6 +24,9 @@ args:
   testdatadb:
     impl: 1
   debug: true
+  maxConcurrentPouchAPICalls:  1000
+  maxConcurrentProvAPICalls:   1000
+  maxConcurrentMetricAPICalls: 500
 
 druid:
   server: http://aod_broker

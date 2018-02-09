@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.66.0 
+**Release Date:** Fri Feb  9 19:14:20 UTC 2018     
+## Previous Releases 
 ### 0.65.0 
 **Release Date:** Fri Feb  9 14:29:44 UTC 2018     
-## Previous Releases 
 ### 0.64.0 
 **Release Date:** Tue Feb  6 19:53:05 UTC 2018     
 * Added - load shedding configuration for each API grouping.

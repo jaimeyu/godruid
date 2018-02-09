@@ -53,7 +53,10 @@ type Config struct {
 		testdatadb struct {
 			impl DBImpl
 		}
-		debug bool
+		maxConcurrentPouchAPICalls  uint64
+		maxConcurrentProvAPICalls   uint64
+		maxConcurrentMetricAPICalls uint64
+		debug                       bool
 	}
 }
 
@@ -101,7 +104,10 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_pouchplugindb_impl.String(), 1)
 	v.SetDefault(CK_args_testdatadb_impl.String(), 1)
 	v.SetDefault(CK_args_debug.String(), false)
-	v.SetDefault(CK_druid_server.String(), "aod_broker")
-	v.SetDefault(CK_druid_server.String(), 8082)
-	v.SetDefault(CK_druid_table.String(), "NPAVKPI2")
+	v.SetDefault(CK_args_debug.String(), false)
+	v.SetDefault(CK_args_debug.String(), false)
+	v.SetDefault(CK_args_debug.String(), false)
+	v.SetDefault(CK_args_maxConcurrentMetricAPICalls.String(), 500)
+	v.SetDefault(CK_args_maxConcurrentProvAPICalls.String(), 1000)
+	v.SetDefault(CK_args_maxConcurrentPouchAPICalls.String(), 1000)
 }

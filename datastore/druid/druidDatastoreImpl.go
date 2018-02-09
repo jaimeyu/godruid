@@ -99,7 +99,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
 
-	logger.Log.Debugf("Calling GetHistogram for request: %v", request)
+	logger.Log.Debugf("Calling GetHistogram for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -114,7 +114,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, query)
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -154,7 +154,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", request)
+	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -169,7 +169,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, query)
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -223,7 +223,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", request)
+	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -238,7 +238,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, query)
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -289,7 +289,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
 
-	logger.Log.Debugf("Calling GetRawMetrics for request: %v", request)
+	logger.Log.Debugf("Calling GetRawMetrics for request: %v", logger.AsJSONString(request))
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
@@ -305,7 +305,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, query)
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	//	fmt.Println(string(response))

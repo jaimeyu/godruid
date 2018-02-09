@@ -40,6 +40,9 @@ func TestLoadingDefaults(t *testing.T) {
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), false)
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "adh-admin")
 	assert.Equal(t, cfg.GetInt(gather.CK_server_monitoring_port.String()), 9191)
+	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentMetricAPICalls.String()), 500)
+	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentPouchAPICalls.String()), 1000)
+	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentProvAPICalls.String()), 1000)
 }
 
 func TestWithEnvironmentVariables(t *testing.T) {

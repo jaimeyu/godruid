@@ -2,22 +2,24 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"strings"
-	"io/ioutil"
-	"encoding/json"
+	"sync"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
-	"github.com/accedian/adh-gather/monitoring"
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/monitoring"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -25,8 +27,8 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	emp "github.com/golang/protobuf/ptypes/empty"
 	mon "github.com/accedian/adh-gather/monitoring"
+	emp "github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -36,11 +38,23 @@ const (
 )
 
 var (
-	configFilePath string
-	enableTLS      bool
-	tlsKeyFile     string
-	tlsCertFile    string
+	configFilePath  string
+	enableTLS       bool
+	tlsKeyFile      string
+	tlsCertFile     string
 	ingDictFilePath string
+
+	maxConcurrentMetricAPICalls uint64
+	maxConcurrentProvAPICalls   uint64
+	maxConcurrentPouchAPICalls  uint64
+
+	concurrentMetricAPICounter uint64
+	concurrentProvAPICounter   uint64
+	concurrentPouchAPICounter  uint64
+
+	metricAPIMutex = &sync.Mutex{}
+	provAPIMutex   = &sync.Mutex{}
+	pouchAPIMutex  = &sync.Mutex{}
 )
 
 func init() {
@@ -53,14 +67,14 @@ func init() {
 
 // GatherServer - Server which will implement the gRPC Services.
 type GatherServer struct {
-	gsh     		*adhh.GRPCServiceHandler
-	pouchSH 		*adhh.PouchDBPluginServiceHandler
-	testSH  		*adhh.TestDataServiceHandler
+	gsh     *adhh.GRPCServiceHandler
+	pouchSH *adhh.PouchDBPluginServiceHandler
+	testSH  *adhh.TestDataServiceHandler
 
-	mux        		*mux.Router
-	gwmux      		*runtime.ServeMux
-	jsonAPIMux 		*runtime.ServeMux
-	promServerMux 	*http.ServeMux
+	mux           *mux.Router
+	gwmux         *runtime.ServeMux
+	jsonAPIMux    *runtime.ServeMux
+	promServerMux *http.ServeMux
 }
 
 func newServer() *GatherServer {
@@ -168,16 +182,67 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	mon.RecievedAPICalls.Inc()
 	if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
+		if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
+			reportOverloaded(w, r, err.Error())
+			mon.CompletedAPICalls.Inc()
+			return
+		}
 		gs.jsonAPIMux.ServeHTTP(w, r)
+		updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
 	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
+		if err := updateCounter(&concurrentProvAPICounter, provAPIMutex, true, maxConcurrentProvAPICalls); err != nil {
+			reportOverloaded(w, r, err.Error())
+			mon.CompletedAPICalls.Inc()
+			return
+		}
 		gs.gwmux.ServeHTTP(w, r)
-	}  else {
+		updateCounter(&concurrentProvAPICounter, provAPIMutex, false, maxConcurrentProvAPICalls)
+	} else {
+		if err := updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, true, maxConcurrentPouchAPICalls); err != nil {
+			reportOverloaded(w, r, err.Error())
+			mon.CompletedAPICalls.Inc()
+			return
+		}
 		mon.IncrementCounter(mon.PouchAPIRecieved)
 		gs.mux.ServeHTTP(w, r)
 		mon.IncrementCounter(mon.PouchAPICompleted)
+		updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, false, maxConcurrentPouchAPICalls)
 	}
 
 	mon.CompletedAPICalls.Inc()
+}
+
+func reportOverloaded(w http.ResponseWriter, r *http.Request, errorStr string) {
+	msg := fmt.Sprintf("Unable to complete %s API: %s", r.URL.Path, errorStr)
+	logger.Log.Infof(msg)
+	http.Error(w, msg, http.StatusServiceUnavailable)
+}
+
+// updateCounter - updates a counter only if the counter is within the valid range between 0 and maxOperations.
+// returns an error if the counter could not be incremented due to reaching the max.
+func updateCounter(counter *uint64, mutex *sync.Mutex, increment bool, maxOperations uint64) error {
+	// increment, but ensure it stays below max.
+	if increment {
+		mutex.Lock()
+		currentVal := atomic.LoadUint64(counter)
+		if currentVal >= maxOperations {
+			mutex.Unlock()
+			return fmt.Errorf("Server has reached the maximum allowed operation of this type")
+		}
+		atomic.AddUint64(counter, 1)
+		mutex.Unlock()
+		return nil
+	}
+
+	// Decrement but keep at or above 0
+	mutex.Lock()
+	atomic.AddUint64(counter, ^uint64(0))
+	newVal := atomic.LoadUint64(counter)
+	if newVal > ^uint64(0)-1000 {
+		atomic.StoreUint64(counter, 0)
+	}
+	mutex.Unlock()
+	return nil
 }
 
 func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) bool {
@@ -255,7 +320,7 @@ func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string)
 	if err != nil {
 		logger.Log.Fatalf("Unable to read Default Ingestion Dictionary from file: %s", err.Error())
 	}
-	
+
 	defaultDictionaryData := &pb.IngestionDictionaryData{}
 	if err = json.Unmarshal(defaultDictionaryBytes, &defaultDictionaryData); err != nil {
 		logger.Log.Fatalf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
@@ -310,7 +375,7 @@ func areIngestionDictionariesEqual(dict1 *pb.IngestionDictionaryData, dict2 *pb.
 			if !areUIPartsEqual(metricDef.Ui, dict2.Metrics[vendor].MetricMap[metric].Ui) {
 				return false
 			}
-			
+
 			for _, monitoredObjectType := range metricDef.MonitoredObjectTypes {
 				if !doesSliceOfMonitoredObjectTypesContain(dict2.Metrics[vendor].MetricMap[metric].MonitoredObjectTypes, monitoredObjectType) {
 					return false
@@ -357,7 +422,7 @@ func areMonitoredObjectTypesEqual(mot1 *pb.IngestionDictionaryData_MonitoredObje
 		return false
 	}
 
-	if !areStringSlicesEqual(mot1.Units, mot2.Units){
+	if !areStringSlicesEqual(mot1.Units, mot2.Units) {
 		return false
 	}
 
@@ -461,6 +526,11 @@ func main() {
 	}
 
 	logger.Log.Infof("Starting adh-gather broker with config '%s'", configFilePath)
+
+	maxConcurrentMetricAPICalls = uint64(v.GetInt64(gather.CK_args_maxConcurrentMetricAPICalls.String()))
+	maxConcurrentPouchAPICalls = uint64(v.GetInt64(gather.CK_args_maxConcurrentPouchAPICalls.String()))
+	maxConcurrentProvAPICalls = uint64(v.GetInt64(gather.CK_args_maxConcurrentProvAPICalls.String()))
+	logger.Log.Debugf("API caps are set to: Metric-%d Prov-%d Pouch-%d", maxConcurrentMetricAPICalls, maxConcurrentProvAPICalls, maxConcurrentPouchAPICalls)
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()

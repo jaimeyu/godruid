@@ -211,6 +211,12 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32) (*godruid.QuerySelect, error) {
 
 	metrics := strings.Split(metric, ",")
+	monitoredObjects := strings.Split(monitoredObjectId, ",")
+	var monitoredObjectFilters []*godruid.Filter
+
+	for _, m := range monitoredObjects {
+		monitoredObjectFilters = append(monitoredObjectFilters, godruid.FilterSelector("monitoredObjectId", m))
+	}
 
 	return &godruid.QuerySelect{
 		DataSource:  dataSource,
@@ -218,7 +224,7 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 		Context:     map[string]interface{}{"timeout": timeout},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			godruid.FilterSelector("monitoredObjectId", monitoredObjectId),
+			godruid.FilterOr(monitoredObjectFilters...),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),

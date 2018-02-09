@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.65.0 
+**Release Date:** Fri Feb  9 14:29:44 UTC 2018     
+## Previous Releases 
 ### 0.64.0 
 **Release Date:** Tue Feb  6 19:53:05 UTC 2018     
 * Added - load shedding configuration for each API grouping.
-## Previous Releases 
 ### 0.63.0 
 **Release Date:** Tue Feb  6 18:38:37 UTC 2018  
 * Added - metrics to track number of recieved and completed API calls to gather for each service and globally.   

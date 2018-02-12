@@ -30,3 +30,6 @@ protoc -I/usr/local/include -I. \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --swagger_out=logtostderr=true:. \
   gathergrpc/gather.proto       
+
+# Move the swagger file to the proper location.
+mv gathergrpc/gather.swagger.json files/swagger.json

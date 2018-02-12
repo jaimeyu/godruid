@@ -38,6 +38,12 @@
   version = "v1.4.7"
 
 [[projects]]
+  name = "github.com/getlantern/deepcopy"
+  packages = ["."]
+  revision = "b923171e8640f94369e21e324b1b0465cb82ec9f"
+  version = "v1"
+
+[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
@@ -312,6 +318,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a080ad0d46c8091fef3fed46e3bcd12518eedc4dbbce93ba670e5f1fa159e5ad"
+  inputs-digest = "5801465a31d5fafc29ce795e2b1348b52789bbae2263e55f1fbb2b2ad610a519"
   solver-name = "gps-cdcl"
   solver-version = 1

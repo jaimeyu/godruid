@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.68.0 
+**Release Date:** Mon Feb 12 20:17:59 UTC 2018     
+## Previous Releases 
 ### 0.67.0 
 **Release Date:** Mon Feb 12 17:56:27 UTC 2018     
-## Previous Releases 
 ### 0.66.0 
 **Release Date:** Fri Feb  9 19:14:20 UTC 2018   
 * Added - API to serve swagger file  

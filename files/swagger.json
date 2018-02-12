@@ -1,5 +1,6 @@
 {
   "swagger": "2.0",
+  "host": "localhost:10001",
   "info": {
     "title": "gathergrpc/gather.proto",
     "version": "version not set"

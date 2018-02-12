@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -35,6 +36,7 @@ import (
 
 const (
 	defaultIngestionDictionaryPath = "files/defaultIngestionDictionary.json"
+	defaultSwaggerFile             = "files/swagger.json"
 )
 
 var (
@@ -43,6 +45,7 @@ var (
 	tlsKeyFile      string
 	tlsCertFile     string
 	ingDictFilePath string
+	swaggerFilePath string
 
 	maxConcurrentMetricAPICalls uint64
 	maxConcurrentProvAPICalls   uint64
@@ -63,6 +66,7 @@ func init() {
 	pflag.StringVar(&tlsCertFile, "tlscert", "/run/secrets/tls_crt", "Specify a TLS Cert file")
 	pflag.BoolVar(&enableTLS, "tls", true, "Specify if TLS should be enabled")
 	pflag.StringVar(&ingDictFilePath, "ingDict", defaultIngestionDictionaryPath, "Specify file path of default Ingestion Dictionary")
+	pflag.StringVar(&swaggerFilePath, "swag", defaultSwaggerFile, "Specify file path of the Swagger documentation")
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -197,6 +201,12 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		gs.gwmux.ServeHTTP(w, r)
 		updateCounter(&concurrentProvAPICounter, provAPIMutex, false, maxConcurrentProvAPICalls)
+	} else if strings.Index(r.URL.Path, "/swagger.json") == 0 {
+		input, err := ioutil.ReadFile(swaggerFilePath)
+		if err != nil {
+			logger.Log.Fatalf("Unable to locate swagger definition: %s", err.Error())
+		}
+		w.Write(input)
 	} else {
 		if err := updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, true, maxConcurrentPouchAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
@@ -503,6 +513,44 @@ func startMonitoring(gatherServer *GatherServer, cfg config.Provider) {
 	}
 }
 
+func modifySwagger(cfg config.Provider) {
+	apiPort := cfg.GetInt(gather.CK_server_rest_port.String())
+
+	var hostLine string
+	hostFromEnv := os.Getenv("API_TARGET")
+	if len(hostFromEnv) == 0 {
+		hostLine = fmt.Sprintf(`  "host": "localhost:%d",`, apiPort)
+	} else {
+		hostLine = fmt.Sprintf(`  "host": "%s",`, hostFromEnv)
+	}
+
+	// Update the generated swagger file to contain the correct host
+	input, err := ioutil.ReadFile(swaggerFilePath)
+	if err != nil {
+		logger.Log.Fatalf("Unable to locate swagger definition: %s", err.Error())
+	}
+
+	containsHost := false
+	lines := strings.Split(string(input), "\n")
+	for i, line := range lines {
+		if strings.Contains(line, `"host":`) {
+			containsHost = true
+			lines[i] = hostLine
+			break
+		}
+	}
+	if !containsHost {
+		// Insert the host into the swager file
+		lines = append(lines[:2], append([]string{hostLine}, lines[2:]...)...)
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(swaggerFilePath, []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func main() {
 	pflag.Parse()
 	v := viper.New()
@@ -514,6 +562,7 @@ func main() {
 	tlsCertFile = v.GetString("tlscert")
 	tlsKeyFile = v.GetString("tlskey")
 	ingDictFilePath = v.GetString("ingDict")
+	swaggerFilePath = v.GetString("swag")
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)
@@ -537,6 +586,9 @@ func main() {
 
 	// Register the metrics to be tracked in Gather
 	go startMonitoring(gatherServer, cfg)
+
+	// modify the swagger for this deployment
+	modifySwagger(cfg)
 
 	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
 	provisionCouchData(gatherServer, adminDB)

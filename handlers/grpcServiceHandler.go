@@ -872,6 +872,20 @@ func (gsh *GRPCServiceHandler) GetTenantIDByAlias(ctx context.Context, value *wr
 	return res, nil
 }
 
+// GetTenantSummaryByAlias - retrieves Tenant summary by a known alias.
+func (gsh *GRPCServiceHandler) GetTenantSummaryByAlias(ctx context.Context, value *wr.StringValue) (*pb.TenantSummary, error) {
+	startTime := time.Now()
+
+	res, err := gsh.ash.GetTenantIDByAlias(ctx, value)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.GetTenantSummaryByAliasStr)
+		return nil, err
+	}
+
+	trackAPIMetrics(startTime, "200", mon.GetTenantSummaryByAliasStr)
+	return &pb.TenantSummary{Alias: value.Value, Id: res.Value}, nil
+}
+
 // AddAdminViews - add views to admin db
 func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	startTime := time.Now()

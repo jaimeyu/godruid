@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"time"
+
 	"github.com/accedian/adh-gather/logger"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -10,20 +11,20 @@ const (
 	// GatherMetricPrefix - prefix used for all metrics emmitted from gather
 	GatherMetricPrefix = "gather"
 
-	TenantStr = "tenant"
-	AdminUserStr = "admin_user"
+	TenantStr              = "tenant"
+	AdminUserStr           = "admin_user"
 	IngestionDictionaryStr = "ing_dict"
-	IngestionProfileStr = "ing_prf"
-	TenantUserStr = "tenant_user"
-	TenantDomainStr = "domain"
-	ThresholdProfileStr = "thr_prf"
-	MonitoredObjectStr = "mon_obj"
-	ThrCrossStr = "thr_cross"
-	HistogramStr = "histogram"
-	RawMetricStr = "raw_metric"
-	TenantMetaStr = "tenant_meta"
-	AdminViewsStr = "admin_views"
-	ValidTypesStr = "valid_types"
+	IngestionProfileStr    = "ing_prf"
+	TenantUserStr          = "tenant_user"
+	TenantDomainStr        = "domain"
+	ThresholdProfileStr    = "thr_prf"
+	MonitoredObjectStr     = "mon_obj"
+	ThrCrossStr            = "thr_cross"
+	HistogramStr           = "histogram"
+	RawMetricStr           = "raw_metric"
+	TenantMetaStr          = "tenant_meta"
+	AdminViewsStr          = "admin_views"
+	ValidTypesStr          = "valid_types"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -37,13 +38,14 @@ const (
 	OPGetAllStr = "get_all"
 	// OPGetActiveStr - metric constant for a get operation
 	OPGetActiveStr = "get_active"
-	OPAddStr = "add"
-	OPBulkUpdate = "bulk_update"
+	OPAddStr       = "add"
+	OPBulkUpdate   = "bulk_update"
 
 	// TimeStr - metric constant for a time metric
-	TimeStr = "time"
-	MapStr = "map"
-	IDStr = "id"
+	TimeStr    = "time"
+	MapStr     = "map"
+	IDStr      = "id"
+	SummaryStr = "summary"
 
 	// UnitMilliStr - metric constant for a metric measured in milliseconds
 	UnitMilliStr = "ms"
@@ -52,88 +54,90 @@ const (
 
 	CreateTenantStr = TenantStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantStr = TenantStr + metricNameDelimiter + OPUpdateStr
-	GetTenantStr = TenantStr + metricNameDelimiter + OPGetStr
+	GetTenantStr    = TenantStr + metricNameDelimiter + OPGetStr
 	DeleteTenantStr = TenantStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantStr = TenantStr + metricNameDelimiter + OPGetAllStr
 
 	CreateAdminUserStr = AdminUserStr + metricNameDelimiter + OPCreateStr
 	UpdateAdminUserStr = AdminUserStr + metricNameDelimiter + OPUpdateStr
-	GetAdminUserStr = AdminUserStr + metricNameDelimiter + OPGetStr
+	GetAdminUserStr    = AdminUserStr + metricNameDelimiter + OPGetStr
 	DeleteAdminUserStr = AdminUserStr + metricNameDelimiter + OPDeleteStr
 	GetAllAdminUserStr = AdminUserStr + metricNameDelimiter + OPGetAllStr
 
 	CreateIngDictStr = IngestionDictionaryStr + metricNameDelimiter + OPCreateStr
 	UpdateIngDictStr = IngestionDictionaryStr + metricNameDelimiter + OPUpdateStr
-	GetIngDictStr = IngestionDictionaryStr + metricNameDelimiter + OPGetStr
+	GetIngDictStr    = IngestionDictionaryStr + metricNameDelimiter + OPGetStr
 	DeleteIngDictStr = IngestionDictionaryStr + metricNameDelimiter + OPDeleteStr
 
-	CreateIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPCreateStr
-	UpdateIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPUpdateStr
-	GetIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPGetStr
+	CreateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPCreateStr
+	UpdateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPUpdateStr
+	GetIngPrfStr       = IngestionProfileStr + metricNameDelimiter + OPGetStr
 	GetActiveIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPGetActiveStr
-	DeleteIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPDeleteStr
+	DeleteIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPDeleteStr
 
 	CreateTenantUserStr = TenantUserStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantUserStr = TenantUserStr + metricNameDelimiter + OPUpdateStr
-	GetTenantUserStr = TenantUserStr + metricNameDelimiter + OPGetStr
+	GetTenantUserStr    = TenantUserStr + metricNameDelimiter + OPGetStr
 	DeleteTenantUserStr = TenantUserStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantUserStr = TenantUserStr + metricNameDelimiter + OPGetAllStr
 
 	CreateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPUpdateStr
-	GetTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPGetStr
+	GetTenantDomainStr    = TenantDomainStr + metricNameDelimiter + OPGetStr
 	DeleteTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPGetAllStr
 
 	CreateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPUpdateStr
-	GetThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPGetStr
+	GetThrPrfStr    = ThresholdProfileStr + metricNameDelimiter + OPGetStr
 	GetAllThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPGetAllStr
 	DeleteThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPDeleteStr
 
-	CreateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPCreateStr
-	UpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPUpdateStr
-	GetMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPGetStr
-	GetAllMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPGetAllStr
-	DeleteMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPDeleteStr
+	CreateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPCreateStr
+	UpdateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPUpdateStr
+	GetMonObjStr         = MonitoredObjectStr + metricNameDelimiter + OPGetStr
+	GetAllMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPGetAllStr
+	DeleteMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPDeleteStr
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
 
-	GetThrCrossStr = ThrCrossStr + metricNameDelimiter + OPGetStr
+	GetThrCrossStr         = ThrCrossStr + metricNameDelimiter + OPGetStr
 	GetThrCrossByMonObjStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
-	GetHistogramObjStr = HistogramStr + metricNameDelimiter + OPGetStr
-	GetRawMetricStr = RawMetricStr + metricNameDelimiter + OPGetStr
+	GetHistogramObjStr     = HistogramStr + metricNameDelimiter + OPGetStr
+	GetRawMetricStr        = RawMetricStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
-	GetTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPGetStr
+	GetTenantMetaStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
 	DeleteTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
-	CreateValidTypesStr = ValidTypesStr + metricNameDelimiter + OPCreateStr
-	UpdateValidTypesStr = ValidTypesStr + metricNameDelimiter + OPUpdateStr
-	GetValidTypesStr = ValidTypesStr + metricNameDelimiter + OPGetStr
+	CreateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPCreateStr
+	UpdateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPUpdateStr
+	GetValidTypesStr         = ValidTypesStr + metricNameDelimiter + OPGetStr
 	GetSpecificValidTypesStr = ValidTypesStr + metricNameDelimiter + OPGetStr + "_spec"
-	DeleteValidTypesStr = ValidTypesStr + metricNameDelimiter + OPDeleteStr
+	DeleteValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPDeleteStr
 
-	GetTenantIDByAliasStr = IDStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
-	AddAdminViewsStr = AdminViewsStr + metricNameDelimiter + OPAddStr
+	GetTenantIDByAliasStr      = IDStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
+	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
+	AddAdminViewsStr           = AdminViewsStr + metricNameDelimiter + OPAddStr
 
-	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate 
+	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
 )
 
 type MetricCounterType string
+
 const (
-	APIRecieved MetricCounterType = "APIRecieved"
-	APICompleted MetricCounterType = "APICompleted"
-	AdminAPIRecieved MetricCounterType = "AdminAPIRecieved"
-	AdminAPICompleted MetricCounterType = "AdminAPICompleted"
-	TenantAPIRecieved MetricCounterType = "TenantAPIRecieved"
+	APIRecieved        MetricCounterType = "APIRecieved"
+	APICompleted       MetricCounterType = "APICompleted"
+	AdminAPIRecieved   MetricCounterType = "AdminAPIRecieved"
+	AdminAPICompleted  MetricCounterType = "AdminAPICompleted"
+	TenantAPIRecieved  MetricCounterType = "TenantAPIRecieved"
 	TenantAPICompleted MetricCounterType = "TenantAPICompleted"
-	PouchAPIRecieved MetricCounterType = "PouchAPIRecieved"
-	PouchAPICompleted MetricCounterType = "PouchAPICompleted"
-	MetricAPIRecieved MetricCounterType = "MetricAPIRecieved"
+	PouchAPIRecieved   MetricCounterType = "PouchAPIRecieved"
+	PouchAPICompleted  MetricCounterType = "PouchAPICompleted"
+	MetricAPIRecieved  MetricCounterType = "MetricAPIRecieved"
 	MetricAPICompleted MetricCounterType = "MetricAPICompleted"
 )
-	
+
 var (
 	// APICallDuration - Time it takes to create a Tenant in Gather.
 	APICallDuration prometheus.HistogramVec
@@ -172,7 +176,7 @@ var (
 // InitMetrics - registers all metrics to be collected for Gather.
 func InitMetrics() {
 	APICallDuration = *prometheus.NewHistogramVec(prometheus.HistogramOpts{
-        Name: "gather_api_call_duration",
+		Name: "gather_api_call_duration",
 		Help: "Time taken to execute an API call",
 	}, []string{"code", "name"})
 
@@ -185,36 +189,36 @@ func InitMetrics() {
 		Help: "Number of API calls completed by Gather since startup"})
 
 	CompletedAdminServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_admin_service_api_completed_since_startup",
-			Help: "Number of API calls completed by the Admin Service since startup"})
-	
+		Name: "gather_admin_service_api_completed_since_startup",
+		Help: "Number of API calls completed by the Admin Service since startup"})
+
 	RecievedAdminServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_admin_service_api_recieved_since_startup",
-			Help: "Number of API calls recieved by the Admin Service since startup"})
+		Name: "gather_admin_service_api_recieved_since_startup",
+		Help: "Number of API calls recieved by the Admin Service since startup"})
 
 	RecievedTenantServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_tenant_service_api_call_received_since_startup",
-			Help: "Number of API calls recieved by the Tenant Service since startup"})
-	
+		Name: "gather_tenant_service_api_call_received_since_startup",
+		Help: "Number of API calls recieved by the Tenant Service since startup"})
+
 	CompletedTenantServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_tenant_service_api_call_completed_since_startup",
-			Help: "Number of API calls completed by the Tenant Service since startup"})
+		Name: "gather_tenant_service_api_call_completed_since_startup",
+		Help: "Number of API calls completed by the Tenant Service since startup"})
 
 	RecievedPouchServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_pouch_service_api_call_received_since_startup",
-			Help: "Number of API calls recieved by the Pouch Service since startup"})
-	
+		Name: "gather_pouch_service_api_call_received_since_startup",
+		Help: "Number of API calls recieved by the Pouch Service since startup"})
+
 	CompletedPouchServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_pouch_service_api_call_completed_since_startup",
-			Help: "Number of API calls completed by the Pouch Service since startup"})
+		Name: "gather_pouch_service_api_call_completed_since_startup",
+		Help: "Number of API calls completed by the Pouch Service since startup"})
 
 	RecievedMetricServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_metric_service_api_call_received_since_startup",
-			Help: "Number of API calls recieved by the Metric Service since startup"})
-	
+		Name: "gather_metric_service_api_call_received_since_startup",
+		Help: "Number of API calls recieved by the Metric Service since startup"})
+
 	CompletedMetricServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "gather_metric_service_api_call_completed_since_startup",
-			Help: "Number of API calls completed by the Metric Service since startup"})
+		Name: "gather_metric_service_api_call_completed_since_startup",
+		Help: "Number of API calls completed by the Metric Service since startup"})
 
 	prometheus.MustRegister(APICallDuration)
 	prometheus.MustRegister(RecievedAPICalls)

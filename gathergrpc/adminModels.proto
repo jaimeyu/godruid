@@ -121,3 +121,8 @@ message ValidTypes {
     string _rev = 2;
     ValidTypesData data = 3;
 }
+
+message TenantSummary {
+    string alias = 1;
+    string id = 2;
+}

@@ -129,6 +129,12 @@ service AdminProvisioningService {
             get: "/api/v1/tenant-by-alias/{value}"
         };
     }
+    
+    rpc GetTenantSummaryByAlias(google.protobuf.StringValue) returns (TenantSummary) {
+        option (google.api.http) = {
+            get: "/api/v1/tenant-summary-by-alias/{value}"
+        };
+    }
 
     rpc CreateValidTypes(ValidTypes) returns (ValidTypes) {
         option (google.api.http) = {

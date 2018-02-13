@@ -31,6 +31,7 @@ It has these top-level messages:
 	ValidTypesRequest
 	ValidTypesData
 	ValidTypes
+	TenantSummary
 	TenantDomainData
 	TenantDomain
 	TenantDomainList

@@ -184,42 +184,81 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 // otherwise.
 func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	mon.RecievedAPICalls.Inc()
+	isPouch := strings.Index(r.URL.Path, "/pouchdb") == 0
+
+	// Exclude Pouch API calls from the total count as it has expected failures.
+	if !isPouch {
+		mon.RecievedAPICalls.Inc()
+	}
+
 	if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
+		// Handle Metrics Calls
 		if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
 			mon.CompletedAPICalls.Inc()
 			return
 		}
+
+		mon.IncrementCounter(mon.MetricAPIRecieved)
+
 		gs.jsonAPIMux.ServeHTTP(w, r)
+
 		updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
+		mon.IncrementCounter(mon.MetricAPICompleted)
 	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
+		// Handle calls to our Admin and Tenant Services
 		if err := updateCounter(&concurrentProvAPICounter, provAPIMutex, true, maxConcurrentProvAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
 			mon.CompletedAPICalls.Inc()
 			return
 		}
+
+		isTenant := strings.Index(r.URL.Path, "/api/v1/tenants") == 0
+		if isTenant {
+			mon.IncrementCounter(mon.TenantAPIRecieved)
+		} else {
+			mon.IncrementCounter(mon.AdminAPIRecieved)
+		}
+
 		gs.gwmux.ServeHTTP(w, r)
+
 		updateCounter(&concurrentProvAPICounter, provAPIMutex, false, maxConcurrentProvAPICalls)
+		if isTenant {
+			mon.IncrementCounter(mon.TenantAPICompleted)
+		} else {
+			mon.IncrementCounter(mon.AdminAPICompleted)
+		}
 	} else if strings.Index(r.URL.Path, "/swagger.json") == 0 {
+		// Handle requests for the swagger definition
 		input, err := ioutil.ReadFile(swaggerFilePath)
 		if err != nil {
 			logger.Log.Fatalf("Unable to locate swagger definition: %s", err.Error())
 		}
 		w.Write(input)
 	} else {
+		// Hanld eall other endpoints (really just Poiuch and Test Data right now.
 		if err := updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, true, maxConcurrentPouchAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
 			mon.CompletedAPICalls.Inc()
 			return
 		}
-		mon.IncrementCounter(mon.PouchAPIRecieved)
+
+		if isPouch {
+			mon.IncrementCounter(mon.PouchAPIRecieved)
+		}
+
 		gs.mux.ServeHTTP(w, r)
-		mon.IncrementCounter(mon.PouchAPICompleted)
-		updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, false, maxConcurrentPouchAPICalls)
+
+		if isPouch {
+			mon.IncrementCounter(mon.PouchAPICompleted)
+			updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, false, maxConcurrentPouchAPICalls)
+		}
+
 	}
 
-	mon.CompletedAPICalls.Inc()
+	if !isPouch {
+		mon.CompletedAPICalls.Inc()
+	}
 }
 
 func reportOverloaded(w http.ResponseWriter, r *http.Request, errorStr string) {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/getlantern/deepcopy"
 
-	logging "github.com/op/go-logging"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	logging "github.com/op/go-logging"
 )
 
 const (
@@ -45,7 +45,7 @@ func IsDebugEnabled() bool {
 	return logging.GetLevel(loggingModule) == logging.DEBUG
 }
 
-// AsJSONString - returns the object as a json string. If there is sensitive material in the object, 
+// AsJSONString - returns the object as a json string. If there is sensitive material in the object,
 // this method can be augmented to hide those details.
 func AsJSONString(obj interface{}) string {
 	switch obj.(type) {
@@ -54,7 +54,7 @@ func AsJSONString(obj interface{}) string {
 		userCopy := pb.AdminUser{}
 		deepcopy.Copy(&userCopy, user)
 		userCopy.Data.Password = LogRedactStr
-		res, err := json.MarshalIndent(userCopy, "", "  ")
+		res, err := json.Marshal(userCopy)
 		if err != nil {
 			return ""
 		}
@@ -64,13 +64,13 @@ func AsJSONString(obj interface{}) string {
 		userCopy := pb.TenantUser{}
 		deepcopy.Copy(&userCopy, user)
 		userCopy.Data.Password = LogRedactStr
-		res, err := json.MarshalIndent(userCopy, "", "  ")
+		res, err := json.Marshal(userCopy)
 		if err != nil {
 			return ""
 		}
 		return string(res)
 	default:
-		res, err := json.MarshalIndent(obj, "", "  ")
+		res, err := json.Marshal(obj)
 		if err != nil {
 			return ""
 		}

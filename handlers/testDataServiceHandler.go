@@ -13,11 +13,11 @@ import (
 
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
-	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/datastore/inMemory"
 	"github.com/accedian/adh-gather/gather"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/gorilla/mux"
@@ -44,10 +44,10 @@ const (
 	domainSlaReportBucketDurationInMilliseconds = millisecondsPerWeek / domainSlaReportBucketCount
 	domainSlaReportBucketDurationInMinutes      = domainSlaReportBucketDurationInMilliseconds / (1000 * 60)
 
-	populateTestDataStr = "populate_test_data"
-	purgeDBStr = "purge_db"
+	populateTestDataStr  = "populate_test_data"
+	purgeDBStr           = "purge_db"
 	generateSLAReportStr = "gen_sla_report"
-	getDocsByTypeStr = "get_docs_by_type"
+	getDocsByTypeStr     = "get_docs_by_type"
 )
 
 // TestDataServiceHandler - handler for all APIs related to test data provisioning.
@@ -163,7 +163,7 @@ func (tsh *TestDataServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 // PopulateTestData - adds test data to the deployment.
 func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
-	
+
 	// Get the contents of the request:
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
@@ -397,7 +397,7 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	for i := float64(0); i < numReportsPerDomain; i++ {
 		for _, domain := range domainSetForTenant.GetData() {
 			// Add a new Report to the list of documents to insert
-			slaReport, err := generateSLADomainReport(domain.GetData().GetName(), startReportTS, endReportTS)
+			slaReport, err := generateSLADomainReport(domain, startReportTS, endReportTS)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Unable to generate %s content for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
 				mon.TrackAPITimeMetricInSeconds(startTime, "500", generateSLAReportStr)
@@ -458,7 +458,7 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	fmt.Fprintf(w, string(response))
 }
 
-func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS int64) (map[string]interface{}, error) {
+func generateSLADomainReport(domain *pb.TenantDomain, reportStartTS int64, reportEndTS int64) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
 
 	typeName := string(db.DomainSlaReportType)
@@ -468,7 +468,7 @@ func generateSLADomainReport(domainName string, reportStartTS int64, reportEndTS
 	resultContent := map[string]interface{}{}
 	resultContent["datatype"] = typeName
 	resultContent["reportName"] = domainSLAReportName
-	resultContent["domain"] = domainName
+	resultContent["domainId"] = domain.XId
 	resultContent["objectCount"] = 25
 	resultContent["thresholdName"] = "Default"
 

@@ -230,7 +230,7 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 		),
 		Intervals:  []string{interval},
 		Metrics:    metrics,
-		PagingSpec: map[string]interface{}{"threshold": 2000}, // TODO peyo hardcoding threshold, will have to find out what value we want here
+		PagingSpec: map[string]interface{}{"threshold": 50000}, // TODO peyo hardcoding threshold, will have to find out what value we want here
 		Dimensions: []godruid.DimSpec{
 			godruid.Dimension{
 				Dimension:  "monitoredObjectId",

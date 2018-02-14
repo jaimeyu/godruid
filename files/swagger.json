@@ -1653,6 +1653,20 @@
           "AdminProvisioningService"
         ]
       },
+      "delete": {
+        "operationId": "DeleteValidTypes",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/gathergrpcValidTypes"
+            }
+          }
+        },
+        "tags": [
+          "AdminProvisioningService"
+        ]
+      },
       "post": {
         "operationId": "CreateValidTypes",
         "responses": {

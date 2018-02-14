@@ -375,6 +375,21 @@ func (ash *AdminServiceHandler) GetSpecificValidTypes(ctx context.Context, value
 	return result, nil
 }
 
+// DeleteValidTypes - Delete valid types used for the entire deployment.
+func (ash *AdminServiceHandler) DeleteValidTypes(ctx context.Context, noValue *emp.Empty) (*pb.ValidTypes, error) {
+	logger.Log.Infof("Attempting to delete %s", datastore.ValidTypesStr)
+
+	// Issue request to DAO Layer to Delete the record
+	result, err := ash.adminDB.DeleteValidTypes()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.ValidTypesStr, err.Error())
+	}
+
+	// Succesfully removed the record, return the previous record
+	logger.Log.Infof("Successfully deleted %s. Previous %s: %s\n", datastore.ValidTypesStr, datastore.ValidTypesStr, result.GetXId())
+	return result, nil
+}
+
 func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))

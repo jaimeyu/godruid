@@ -120,7 +120,7 @@ func (asd *AdminServiceDatastoreCouchDB) GetAllAdminUsers() (*pb.AdminUserList, 
 
 // CreateTenant - CouchDB implementation of CreateTenant
 func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	logger.Log.Debugf("Creating %s: %v\n", ds.TenantStr,logger.AsJSONString(tenantDescriptor))
+	logger.Log.Debugf("Creating %s: %v\n", ds.TenantStr, logger.AsJSONString(tenantDescriptor))
 	tenantDescriptor.XId = ds.GenerateID(tenantDescriptor.GetData(), string(ds.TenantDescriptorType))
 
 	dataContainer := &pb.TenantDescriptor{}
@@ -231,11 +231,11 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 	}
 
 	logger.Log.Debugf("Created DB %s\n", dbName)
-	db, err := asd.server.Create(dbName) 
+	db, err := asd.server.Create(dbName)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return db, nil
 }
 
@@ -419,6 +419,12 @@ func (asd *AdminServiceDatastoreCouchDB) CreateValidTypes(value *pb.ValidTypes) 
 	logger.Log.Debugf("Creating %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(value))
 	value.XId = ds.GenerateID(value.GetData(), string(ds.ValidTypesType))
 
+	// Only create one if one does not already exist:
+	existing, _ := asd.GetValidTypes()
+	if existing != nil {
+		return nil, fmt.Errorf("Can't create %s, it already exists", ds.ValidTypesStr)
+	}
+
 	dataType := string(ds.ValidTypesType)
 	dataContainer := pb.ValidTypes{}
 	if err := storeData(asd.dbName, value, dataType, ds.ValidTypesStr, &dataContainer); err != nil {
@@ -491,6 +497,28 @@ func (asd *AdminServiceDatastoreCouchDB) GetSpecificValidTypes(value *pb.ValidTy
 
 	logger.Log.Debugf("Retrieved %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(result))
 	return result, nil
+}
+
+// DeleteValidTypes - CouchDB implementation of DeleteValidTypes
+func (asd *AdminServiceDatastoreCouchDB) DeleteValidTypes() (*pb.ValidTypes, error) {
+	logger.Log.Debugf("Deleting %s\n", ds.ValidTypesStr)
+	// Obtain the value of the existing record for a return value.
+	existing, err := asd.GetValidTypes()
+	if err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.ValidTypesStr, err.Error())
+		return nil, err
+	}
+
+	deleteID := ds.PrependToDataID(existing.XId, string(ds.ValidTypesType))
+	if err = deleteData(asd.dbName, deleteID, ds.ValidTypesStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", ds.ValidTypesStr, err.Error())
+		return nil, err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(existing))
+	return existing, nil
+
 }
 
 // Produces all of the views/indicies necessary for the Tenant DB

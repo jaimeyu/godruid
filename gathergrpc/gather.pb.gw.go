@@ -354,6 +354,15 @@ func request_AdminProvisioningService_GetSpecificValidTypes_0(ctx context.Contex
 
 }
 
+func request_AdminProvisioningService_DeleteValidTypes_0(ctx context.Context, marshaler runtime.Marshaler, client AdminProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq empty.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.DeleteValidTypes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
 func request_TenantProvisioningService_CreateTenantUser_0(ctx context.Context, marshaler runtime.Marshaler, client TenantProvisioningServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TenantUser
 	var metadata runtime.ServerMetadata
@@ -2043,6 +2052,35 @@ func RegisterAdminProvisioningServiceHandlerClient(ctx context.Context, mux *run
 
 	})
 
+	mux.Handle("DELETE", pattern_AdminProvisioningService_DeleteValidTypes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		if cn, ok := w.(http.CloseNotifier); ok {
+			go func(done <-chan struct{}, closed <-chan bool) {
+				select {
+				case <-done:
+				case <-closed:
+					cancel()
+				}
+			}(ctx.Done(), cn.CloseNotify())
+		}
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_AdminProvisioningService_DeleteValidTypes_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_AdminProvisioningService_DeleteValidTypes_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -2086,6 +2124,8 @@ var (
 	pattern_AdminProvisioningService_GetValidTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "valid-types"}, ""))
 
 	pattern_AdminProvisioningService_GetSpecificValidTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "specific-valid-types"}, ""))
+
+	pattern_AdminProvisioningService_DeleteValidTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "valid-types"}, ""))
 )
 
 var (
@@ -2128,6 +2168,8 @@ var (
 	forward_AdminProvisioningService_GetValidTypes_0 = runtime.ForwardResponseMessage
 
 	forward_AdminProvisioningService_GetSpecificValidTypes_0 = runtime.ForwardResponseMessage
+
+	forward_AdminProvisioningService_DeleteValidTypes_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterTenantProvisioningServiceHandlerFromEndpoint is same as RegisterTenantProvisioningServiceHandler but

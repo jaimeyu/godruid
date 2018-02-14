@@ -71,7 +71,7 @@ func storeDataInCouchDB(dataToStore map[string]interface{}, dataTypeStrForLoggin
 // db (the CouchDB connector used to store the data.)
 // queryParams (the query parameters passed to the call to store the data)
 func storeDataInCouchDBWithQueryParams(dataToStore map[string]interface{}, dataTypeStrForLogging string, db *couchdb.Database, queryParams *url.Values) (string, string, error) {
-	logger.Log.Debugf("Attempting to store %s: %v", dataTypeStrForLogging, dataToStore)
+	logger.Log.Debugf("Attempting to store %s: %v", dataTypeStrForLogging, logger.AsJSONString(dataToStore))
 
 	// Store the user in PROV DB
 	if queryParams == nil {
@@ -180,7 +180,7 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, logger.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -197,7 +197,7 @@ func convertGenericArrayToObject(genericData []map[string]interface{}, dataConta
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, dataContainer)
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, logger.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -265,7 +265,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", dataTypeLogStr, dataContainer)
+	logger.Log.Debugf("Created %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -301,7 +301,7 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, dataContainer)
+	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -327,7 +327,7 @@ func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer 
 		return err
 	}
 
-	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, dataContainer)
+	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -348,26 +348,26 @@ func deleteData(dbName string, dataID string, dataTypeLogStr string) error {
 }
 
 func createDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
-	logger.Log.Debugf("Creating %s: %v\n", loggingStr, dataToStore)
+	logger.Log.Debugf("Creating %s: %v\n", loggingStr, logger.AsJSONString(dataToStore))
 
 	if err := storeData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
 		return err
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", loggingStr, dataContainer)
+	logger.Log.Debugf("Created %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
 func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
-	logger.Log.Debugf("Updating %s: %v\n", loggingStr, dataToStore)
+	logger.Log.Debugf("Updating %s: %v\n", loggingStr, logger.AsJSONString(dataToStore))
 
 	if err := updateData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
 		return err
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", loggingStr, dataContainer)
+	logger.Log.Debugf("Updated %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -379,7 +379,7 @@ func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interfac
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, dataContainer)
+	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -398,7 +398,7 @@ func deleteDataFromCouch(dbName string, idToDelete string, dataContainer interfa
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, dataContainer)
+	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
 	return nil
 }
 

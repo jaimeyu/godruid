@@ -468,7 +468,7 @@ func generateSLADomainReport(domain *pb.TenantDomain, reportStartTS int64, repor
 	resultContent := map[string]interface{}{}
 	resultContent["datatype"] = typeName
 	resultContent["reportName"] = domainSLAReportName
-	resultContent["domainId"] = domain.XId
+	resultContent["domain"] = domain.XId
 	resultContent["objectCount"] = 25
 	resultContent["thresholdName"] = "Default"
 

@@ -162,6 +162,12 @@ service AdminProvisioningService {
             body: "*"
         };
     }
+
+    rpc DeleteValidTypes(google.protobuf.Empty) returns (ValidTypes) {
+        option (google.api.http) = {
+            delete: "/api/v1/valid-types"
+        };
+    }
 }
 
 

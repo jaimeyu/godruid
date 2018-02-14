@@ -67,4 +67,5 @@ type AdminServiceDatastore interface {
 	UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error)
 	GetValidTypes() (*pb.ValidTypes, error)
 	GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error)
+	DeleteValidTypes() (*pb.ValidTypes, error)
 }

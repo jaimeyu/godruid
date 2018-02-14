@@ -956,6 +956,20 @@ func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value 
 	return res, nil
 }
 
+// DeleteValidTypes - Delete valid types used for the entire deployment.
+func (gsh *GRPCServiceHandler) DeleteValidTypes(ctx context.Context, noValue *emp.Empty) (*pb.ValidTypes, error) {
+	startTime := time.Now()
+
+	res, err := gsh.ash.DeleteValidTypes(ctx, noValue)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.ValidTypesStr)
+		return nil, err
+	}
+
+	trackAPIMetrics(startTime, "200", mon.ValidTypesStr)
+	return res, nil
+}
+
 // BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.
 func (gsh *GRPCServiceHandler) BulkInsertMonitoredObjects(ctx context.Context, value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
 	startTime := time.Now()

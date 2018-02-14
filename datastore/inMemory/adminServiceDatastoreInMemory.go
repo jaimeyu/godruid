@@ -361,6 +361,6 @@ func (memDB *AdminServiceDatastoreInMemory) DeleteValidTypes() (*pb.ValidTypes, 
 
 // CreateDatabase - InMemory implementation of CreateDatabase
 func (memDB *AdminServiceDatastoreInMemory) CreateDatabase(dbName string) (ds.Database, error) {
-	// Stub to implement
-	return nil, errors.New("CreateDatabase() not implemented for InMemory DB")
+	// Nothing to do for in memory
+	return nil, nil
 }

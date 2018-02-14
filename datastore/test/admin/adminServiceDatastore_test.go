@@ -1,13 +1,12 @@
-package test
+package admin
 
 import (
-	"fmt"
-	"log"
-	"testing"
-	// "strconv"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/accedian/adh-gather/gather"
@@ -41,7 +40,7 @@ var (
 
 func TestMain(m *testing.M) {
 	// Configure the test AdminService DAO to use the newly started couch docker image
-	cfg := gather.LoadConfig("../../config/adh-gather-test.yml", viper.New())
+	cfg := gather.LoadConfig("../../../config/adh-gather-test.yml", viper.New())
 
 	// Before the tests run, setup the adh-admin db
 	couchHost = cfg.GetString(gather.CK_server_datastore_ip.String())
@@ -394,7 +393,7 @@ func TestIngDictCRUD(t *testing.T) {
 	assert.Nil(t, ingPrf)
 
 	// Read in the test dictionary from file
-	defaultDictionaryBytes, err := ioutil.ReadFile("./files/testIngestionDictionary.json")
+	defaultDictionaryBytes, err := ioutil.ReadFile("../files/testIngestionDictionary.json")
 	if err != nil {
 		logger.Log.Fatalf("Unable to read Default Ingestion Profile from file: %s", err.Error())
 	}

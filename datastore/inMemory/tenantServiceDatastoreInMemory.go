@@ -2,14 +2,19 @@ package inMemory
 
 import (
 	"errors"
+	"fmt"
 
+	ds "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/getlantern/deepcopy"
+	uuid "github.com/satori/go.uuid"
 )
 
 // TenantServiceDatastoreInMemory - struct responsible for handling
 // database operations for the Admin Service when using local memory
 // as the storage option. Useful for tests.
 type TenantServiceDatastoreInMemory struct {
+	tenantToIDtoTenantUserMap map[string]map[string]*pb.TenantUser
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -17,37 +22,129 @@ type TenantServiceDatastoreInMemory struct {
 func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res := new(TenantServiceDatastoreInMemory)
 
+	res.tenantToIDtoTenantUserMap = map[string]map[string]*pb.TenantUser{}
+
 	return res, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) doesTenantExist(tenantID string) error {
+	if len(tenantID) == 0 {
+		return fmt.Errorf("%s does not exist", tenantID)
+	}
+	if tsd.tenantToIDtoTenantUserMap[tenantID] == nil {
+		return fmt.Errorf("%s does not exist", tenantID)
+	}
+
+	return nil
 }
 
 // CreateTenantUser - InMemory implementation of CreateTenantUser
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: CreateTenantUser not implemented")
+	if len(tenantUserRequest.XId) != 0 {
+		return nil, fmt.Errorf("%s already exists", ds.TenantUserStr)
+	}
+	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoTenantUserMap[tenantUserRequest.Data.TenantId] = map[string]*pb.TenantUser{}
+	}
+
+	userCopy := pb.TenantUser{}
+	deepcopy.Copy(&userCopy, tenantUserRequest)
+	userCopy.XId = uuid.NewV4().String()
+	userCopy.XRev = uuid.NewV4().String()
+	userCopy.Data.Datatype = string(ds.TenantUserType)
+	userCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
+	userCopy.Data.LastModifiedTimestamp = userCopy.Data.GetCreatedTimestamp()
+
+	tsd.tenantToIDtoTenantUserMap[tenantUserRequest.Data.TenantId][userCopy.XId] = &userCopy
+
+	return &userCopy, nil
 }
 
 // UpdateTenantUser - InMemory implementation of UpdateTenantUser
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: UpdateTenantUser not implemented")
+	if len(tenantUserRequest.XId) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", ds.AdminUserStr)
+	}
+	if len(tenantUserRequest.XRev) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", ds.AdminUserStr)
+	}
+	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId); err != nil {
+		return nil, err
+	}
+
+	userCopy := pb.TenantUser{}
+	deepcopy.Copy(&userCopy, tenantUserRequest)
+	userCopy.XRev = uuid.NewV4().String()
+	userCopy.Data.Datatype = string(ds.TenantUserType)
+	userCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoTenantUserMap[tenantUserRequest.Data.TenantId][userCopy.XId] = &userCopy
+
+	return &userCopy, nil
 }
 
 // DeleteTenantUser - InMemory implementation of DeleteTenantUser
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: DeleteTenantUser not implemented")
+	if len(tenantUserIDRequest.UserId) == 0 {
+		return nil, fmt.Errorf("%s must provide a User ID", ds.TenantUserStr)
+	}
+	if len(tenantUserIDRequest.TenantId) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantUserStr)
+	}
+	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId); err != nil {
+		return nil, err
+	}
+
+	user, ok := tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId][tenantUserIDRequest.UserId]
+	if ok {
+		delete(tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId], tenantUserIDRequest.UserId)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId]) == 0 {
+			delete(tsd.tenantToIDtoTenantUserMap, tenantUserIDRequest.TenantId)
+		}
+		return user, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", ds.TenantUserStr)
 }
 
 // GetTenantUser - InMemory implementation of GetTenantUser
 func (tsd *TenantServiceDatastoreInMemory) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetTenantUser not implemented")
+	if len(tenantUserIDRequest.UserId) == 0 {
+		return nil, fmt.Errorf("%s must provide a User ID", ds.TenantUserStr)
+	}
+	if len(tenantUserIDRequest.TenantId) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantUserStr)
+	}
+	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId); err != nil {
+		return nil, err
+	}
+
+	user, ok := tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId][tenantUserIDRequest.UserId]
+	if ok {
+		return user, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", ds.TenantUserStr)
 }
 
 // GetAllTenantUsers - InMemory implementation of GetAllTenantUsers
 func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) (*pb.TenantUserList, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetAllTenantUsers not implemented")
+	err := tsd.doesTenantExist(tenantID)
+	if err != nil {
+		return &pb.TenantUserList{Data: []*pb.TenantUser{}}, nil
+	}
+
+	tenantUserList := pb.TenantUserList{}
+	tenantUserList.Data = make([]*pb.TenantUser, 0)
+
+	for _, user := range tsd.tenantToIDtoTenantUserMap[tenantID] {
+		tenantUserList.Data = append(tenantUserList.Data, user)
+	}
+
+	return &tenantUserList, nil
 }
 
 // CreateTenantDomain - InMemory implementation of CreateTenantDomain

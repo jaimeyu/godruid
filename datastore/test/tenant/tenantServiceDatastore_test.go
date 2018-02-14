@@ -25,6 +25,7 @@ import (
 
 const (
 	adminDBName = "adh-admin"
+	TENANT      = "tenant"
 )
 
 var (
@@ -74,6 +75,12 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not populate admin indicies: %s", err.Error())
 	}
+	// Setup the Tenant DB:
+	_, err = adminDB.CreateDatabase(ds.PrependToDataID(TENANT, string(ds.TenantDescriptorType)))
+	if err != nil {
+		log.Fatalf("Could not create Tenant DB: %s", err.Error())
+	}
+
 	tenantDB, err = couchDB.CreateTenantServiceDAO()
 	if err != nil {
 		log.Fatalf("Could not create couchdb tenant DAO: %s", err.Error())
@@ -121,7 +128,6 @@ func failButContinue(testName string) {
 func TestTenantUserCRUD(t *testing.T) {
 	defer failButContinue("TestTenantUserCRUD")
 
-	const TENANT = "tenant"
 	const USER1 = "test1"
 	const USER2 = "test2"
 	const PASS1 = "pass1"
@@ -129,10 +135,6 @@ func TestTenantUserCRUD(t *testing.T) {
 	const PASS3 = "pass3"
 	const TOKEN1 = "token1"
 	const TOKEN2 = "token2"
-
-	// Setup the Tenant DB:
-	_, err := adminDB.CreateDatabase(ds.PrependToDataID(TENANT, string(ds.TenantDescriptorType)))
-	assert.Nil(t, err)
 
 	// Validate that there are currently no records
 	tenantUserList, err := tenantDB.GetAllTenantUsers(TENANT)
@@ -254,6 +256,138 @@ func TestTenantUserCRUD(t *testing.T) {
 
 	// Get all records - should be empty
 	fetchedList, err = tenantDB.GetAllTenantUsers(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetchedList)
+	assert.Empty(t, fetchedList.Data)
+}
+
+func TestTenantDomainCRUD(t *testing.T) {
+	defer failButContinue("TestTenantDomainCRUD")
+
+	const DOM1 = "domain1"
+	const DOM2 = "domain2"
+	const DOM3 = "domain3"
+	const COLOR1 = "color1"
+	const COLOR2 = "color2"
+	const THRPRF = "ThresholdPrf"
+
+	// Validate that there are currently no records
+	recList, err := tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Empty(t, recList.Data)
+
+	// Create a record
+	tenantDomain := pb.TenantDomainData{
+		Name:                DOM1,
+		TenantId:            TENANT,
+		Color:               COLOR1,
+		ThresholdProfileSet: []string{THRPRF}}
+	created, err := tenantDB.CreateTenantDomain(&pb.TenantDomain{Data: &tenantDomain})
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotNil(t, created.XId)
+	assert.NotNil(t, created.XRev)
+	assert.NotEmpty(t, created.XId)
+	assert.NotEmpty(t, created.XRev)
+	assert.Equal(t, string(ds.TenantDomainType), created.Data.Datatype)
+	assert.Equal(t, created.Data.Name, DOM1, "Name not the same")
+	assert.Equal(t, created.Data.Color, COLOR1, "Color not the same")
+	assert.Equal(t, created.Data.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
+	assert.Equal(t, created.Data.TenantId, TENANT, "Tenant ID not the same")
+	assert.True(t, created.Data.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.Data.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := tenantDB.GetTenantDomain(&pb.TenantDomainIdRequest{TenantId: TENANT, DomainId: created.XId})
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := pb.TenantDomain{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Data.Color = COLOR2
+	updated, err := tenantDB.UpdateTenantDomain(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.XId, fetched.XId)
+	assert.NotEqual(t, updated.XRev, fetched.XRev)
+	assert.Equal(t, string(ds.TenantDomainType), updated.Data.Datatype)
+	assert.Equal(t, updated.Data.Name, DOM1, "Name not the same")
+	assert.Equal(t, updated.Data.Color, COLOR2, "Password was not updated")
+	assert.Equal(t, updated.Data.TenantId, TENANT, "Tenant ID not the same")
+	assert.Equal(t, updated.Data.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
+	assert.Equal(t, updated.Data.CreatedTimestamp, fetched.Data.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.Data.LastModifiedTimestamp > fetched.Data.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	tenantDomain2 := pb.TenantDomainData{
+		Name:     DOM2,
+		TenantId: TENANT,
+		Color:    COLOR1}
+	created2, err := tenantDB.CreateTenantDomain(&pb.TenantDomain{Data: &tenantDomain2})
+	assert.Nil(t, err)
+	assert.NotNil(t, created2)
+	assert.NotNil(t, created2.XId)
+	assert.NotNil(t, created2.XRev)
+	assert.NotEmpty(t, created2.XId)
+	assert.NotEmpty(t, created2.XRev)
+	assert.Equal(t, string(ds.TenantDomainType), created2.Data.Datatype)
+	assert.Equal(t, created2.Data.Name, DOM2, "Name not the same")
+	assert.Equal(t, created2.Data.Color, COLOR1, "Password not the same")
+	assert.Equal(t, created2.Data.TenantId, TENANT, "Tenant ID not the same")
+	assert.True(t, len(created2.Data.ThresholdProfileSet) == 0, "Should not be a Threshold Profile ID")
+	assert.True(t, created2.Data.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created2.Data.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get all records
+	fetchedList, err := tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetchedList)
+	assert.NotEmpty(t, fetchedList.Data)
+	assert.True(t, len(fetchedList.Data) == 2)
+
+	// Delete a record.
+	deleted, err := tenantDB.DeleteTenantDomain(&pb.TenantDomainIdRequest{TenantId: TENANT, DomainId: fetched.XId})
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotNil(t, deleted.XId)
+	assert.NotNil(t, deleted.XRev)
+	assert.NotEmpty(t, deleted.XId)
+	assert.NotEmpty(t, deleted.XRev)
+	assert.Equal(t, deleted.Data.Name, fetched.Data.Name, "Deleted name not the same")
+
+	// Get all records - should be 1
+	fetchedList, err = tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetchedList)
+	assert.NotEmpty(t, fetchedList.Data)
+	assert.True(t, len(fetchedList.Data) == 1)
+
+	// Get a record that does not exist
+	dne, err := tenantDB.GetTenantDomain(&pb.TenantDomainIdRequest{TenantId: TENANT, DomainId: deleted.XId})
+	assert.NotNil(t, err)
+	assert.Nil(t, dne)
+
+	// Delete a record that oes not exist
+	deleteDNE, err := tenantDB.DeleteTenantDomain(&pb.TenantDomainIdRequest{TenantId: TENANT, DomainId: deleted.XId})
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+
+	// Delete the last record
+	deleted, err = tenantDB.DeleteTenantDomain(&pb.TenantDomainIdRequest{TenantId: TENANT, DomainId: created2.XId})
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotNil(t, deleted.XId)
+	assert.NotNil(t, deleted.XRev)
+	assert.NotEmpty(t, deleted.XId)
+	assert.NotEmpty(t, deleted.XRev)
+	assert.Equal(t, deleted.Data.Name, created2.Data.Name, "Deleted name not the same")
+
+	// Get all records - should be empty
+	fetchedList, err = tenantDB.GetAllTenantDomains(TENANT)
 	assert.Nil(t, err)
 	assert.NotNil(t, fetchedList)
 	assert.Empty(t, fetchedList.Data)

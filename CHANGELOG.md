@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.72.0 
+**Release Date:** Wed Feb 14 19:29:30 UTC 2018     
+## Previous Releases 
 ### 0.71.0 
 **Release Date:** Wed Feb 14 16:16:44 UTC 2018     
-## Previous Releases 
 ### 0.70.0 
 **Release Date:** Tue Feb 13 17:51:40 UTC 2018     
 * Added more tests for the Admin serivice

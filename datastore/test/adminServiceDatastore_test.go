@@ -21,7 +21,6 @@ import (
 	"github.com/leesper/couchdb-golang"
 	"github.com/stretchr/testify/assert"
 
-	// dockertest "gopkg.in/ory-am/dockertest.v3"
 	ds "github.com/accedian/adh-gather/datastore"
 	couchDB "github.com/accedian/adh-gather/datastore/couchDB"
 	mem "github.com/accedian/adh-gather/datastore/inMemory"
@@ -106,7 +105,17 @@ func TestMain(m *testing.M) {
 
 }
 
+// Way to bypass the termination of the test executor before the DB can cleanup.
+// Still exits the tests, but due to the os.Exit calls, will still stop execution.
+func failButContinue(testName string) {
+	if r := recover(); r != nil {
+		logger.Log.Debug("Failed Test %s", testName)
+	}
+}
+
 func TestAdminUserCRUD(t *testing.T) {
+	defer failButContinue("TestAdminUserCRUD")
+
 	const USER1 = "test1"
 	const USER2 = "test2"
 	const PASS1 = "pass1"
@@ -236,6 +245,8 @@ func TestAdminUserCRUD(t *testing.T) {
 }
 
 func TestTenantDescCRUD(t *testing.T) {
+	defer failButContinue("TestTenantDescCRUD")
+
 	const COMPANY1 = "test1"
 	const COMPANY2 = "test2"
 	const SUBDOMAIN1 = "pass1"
@@ -364,6 +375,8 @@ func TestTenantDescCRUD(t *testing.T) {
 }
 
 func TestIngDictCRUD(t *testing.T) {
+	defer failButContinue("TestIngDictCRUD")
+
 	var accTWAMP = string(handlers.AccedianTwamp)
 	var accFLOW = string(handlers.AccedianFlowmeter)
 
@@ -468,6 +481,8 @@ func TestIngDictCRUD(t *testing.T) {
 }
 
 func TestValidTypesCRUD(t *testing.T) {
+	defer failButContinue("TestValidTypesCRUD")
+
 	objTypeKey1 := "objTypeKey1"
 	objTypeKey2 := "objTypeKey2"
 	devTypeKey1 := "devTypeKey1"

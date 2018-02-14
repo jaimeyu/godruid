@@ -419,6 +419,12 @@ func (asd *AdminServiceDatastoreCouchDB) CreateValidTypes(value *pb.ValidTypes) 
 	logger.Log.Debugf("Creating %s: %v\n", ds.ValidTypesStr, logger.AsJSONString(value))
 	value.XId = ds.GenerateID(value.GetData(), string(ds.ValidTypesType))
 
+	// Only create one if one does not already exist:
+	existing, _ := asd.GetValidTypes()
+	if existing != nil {
+		return nil, fmt.Errorf("Can't create %s, it already exists", ds.ValidTypesStr)
+	}
+
 	dataType := string(ds.ValidTypesType)
 	dataContainer := pb.ValidTypes{}
 	if err := storeData(asd.dbName, value, dataType, ds.ValidTypesStr, &dataContainer); err != nil {

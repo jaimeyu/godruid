@@ -10,6 +10,8 @@ server:
     port: 10002
   monitoring:
     port: 9191
+  profile:
+    port: 6060
   cors:
     allowedorigins: 
       - http://localhost:4200

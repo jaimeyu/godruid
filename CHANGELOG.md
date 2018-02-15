@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.75.0 
+**Release Date:** Thu Feb 15 20:08:24 UTC 2018     
+## Previous Releases 
 ### 0.74.0 
 **Release Date:** Thu Feb 15 16:21:42 UTC 2018   
 * Added - fix for intermittent test failure on build machine.  
-## Previous Releases 
 ### 0.73.0 
 **Release Date:** Thu Feb 15 15:13:11 UTC 2018   
 * Added - new default threshold for MWC  

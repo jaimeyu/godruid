@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.74.0 
-**Release Date:** Thu Feb 15 16:21:42 UTC 2018     
+**Release Date:** Thu Feb 15 16:21:42 UTC 2018   
+* Added - fix for intermittent test failure on build machine.  
 ## Previous Releases 
 ### 0.73.0 
 **Release Date:** Thu Feb 15 15:13:11 UTC 2018   

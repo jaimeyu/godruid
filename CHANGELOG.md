@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.73.0 
-**Release Date:** Thu Feb 15 15:13:11 UTC 2018     
+**Release Date:** Thu Feb 15 15:13:11 UTC 2018   
+* Added - new default threshold for MWC  
 ## Previous Releases 
 ### 0.72.0 
 **Release Date:** Wed Feb 14 19:29:30 UTC 2018     

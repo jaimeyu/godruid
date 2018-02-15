@@ -126,16 +126,18 @@ const (
 type MetricCounterType string
 
 const (
-	APIRecieved        MetricCounterType = "APIRecieved"
-	APICompleted       MetricCounterType = "APICompleted"
-	AdminAPIRecieved   MetricCounterType = "AdminAPIRecieved"
-	AdminAPICompleted  MetricCounterType = "AdminAPICompleted"
-	TenantAPIRecieved  MetricCounterType = "TenantAPIRecieved"
-	TenantAPICompleted MetricCounterType = "TenantAPICompleted"
-	PouchAPIRecieved   MetricCounterType = "PouchAPIRecieved"
-	PouchAPICompleted  MetricCounterType = "PouchAPICompleted"
-	MetricAPIRecieved  MetricCounterType = "MetricAPIRecieved"
-	MetricAPICompleted MetricCounterType = "MetricAPICompleted"
+	APIRecieved              MetricCounterType = "APIRecieved"
+	APICompleted             MetricCounterType = "APICompleted"
+	AdminAPIRecieved         MetricCounterType = "AdminAPIRecieved"
+	AdminAPICompleted        MetricCounterType = "AdminAPICompleted"
+	TenantAPIRecieved        MetricCounterType = "TenantAPIRecieved"
+	TenantAPICompleted       MetricCounterType = "TenantAPICompleted"
+	PouchAPIRecieved         MetricCounterType = "PouchAPIRecieved"
+	PouchAPICompleted        MetricCounterType = "PouchAPICompleted"
+	PouchChangesAPIRecieved  MetricCounterType = "PouchChangesAPIRecieved"
+	PouchChangesAPICompleted MetricCounterType = "PouchChangesAPICompleted"
+	MetricAPIRecieved        MetricCounterType = "MetricAPIRecieved"
+	MetricAPICompleted       MetricCounterType = "MetricAPICompleted"
 )
 
 var (
@@ -162,6 +164,12 @@ var (
 
 	// CompletedPouchServiceAPICalls - number of API calls the pouch service has completed since startup
 	CompletedPouchServiceAPICalls prometheus.Counter
+
+	// RecievedPouchChangesAPICalls - the number of API calls pouch service has recieved since startup
+	RecievedPouchChangesAPICalls prometheus.Counter
+
+	// CompletedPouchChangesAPICalls - number of API calls the pouch service has completed since startup
+	CompletedPouchChangesAPICalls prometheus.Counter
 
 	// RecievedPouchServiceAPICalls - the number of API calls pouch service has recieved since startup
 	RecievedPouchServiceAPICalls prometheus.Counter
@@ -212,6 +220,14 @@ func InitMetrics() {
 		Name: "gather_pouch_service_api_call_completed_since_startup",
 		Help: "Number of API calls completed by the Pouch Service since startup"})
 
+	RecievedPouchChangesAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_pouch_changes_api_call_received_since_startup",
+		Help: "Number of API calls recieved for the _changes API since startup"})
+
+	CompletedPouchChangesAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_pouch_changes_api_call_completed_since_startup",
+		Help: "Number of API calls completed for the _changes API since startup"})
+
 	RecievedMetricServiceAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "gather_metric_service_api_call_received_since_startup",
 		Help: "Number of API calls recieved by the Metric Service since startup"})
@@ -229,6 +245,8 @@ func InitMetrics() {
 	prometheus.MustRegister(CompletedTenantServiceAPICalls)
 	prometheus.MustRegister(RecievedPouchServiceAPICalls)
 	prometheus.MustRegister(CompletedPouchServiceAPICalls)
+	prometheus.MustRegister(RecievedPouchChangesAPICalls)
+	prometheus.MustRegister(CompletedPouchChangesAPICalls)
 	prometheus.MustRegister(RecievedMetricServiceAPICalls)
 	prometheus.MustRegister(CompletedMetricServiceAPICalls)
 }
@@ -260,6 +278,10 @@ func IncrementCounter(counterType MetricCounterType) {
 		CompletedPouchServiceAPICalls.Inc()
 	case PouchAPIRecieved:
 		RecievedPouchServiceAPICalls.Inc()
+	case PouchChangesAPICompleted:
+		CompletedPouchChangesAPICalls.Inc()
+	case PouchChangesAPIRecieved:
+		RecievedPouchChangesAPICalls.Inc()
 	case MetricAPICompleted:
 		CompletedMetricServiceAPICalls.Inc()
 	case MetricAPIRecieved:

@@ -20,6 +20,7 @@ import (
 	ds "github.com/accedian/adh-gather/datastore"
 	couchDB "github.com/accedian/adh-gather/datastore/couchDB"
 	mem "github.com/accedian/adh-gather/datastore/inMemory"
+	dstest "github.com/accedian/adh-gather/datastore/test"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
@@ -63,6 +64,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Couch Run.
+	dstest.ClearCouch(couchServer)
 	adminDB, err = couchDB.CreateAdminServiceDAO()
 	if err != nil {
 		log.Fatalf("Could not create couchdb admin DAO: %s", err.Error())
@@ -88,14 +90,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	dbs, err := couchServer.DBs()
-	if err != nil {
-		log.Fatalf("Could not delete DBs after test: %s", err.Error())
-	}
-	for _, dbname := range dbs {
-		logger.Log.Debugf("Deleting DB %s", dbname)
-		couchServer.Delete(dbname)
-	}
+	dstest.ClearCouch(couchServer)
 
 	// If there were test failures, stop executing
 	if code != 0 {
@@ -117,16 +112,8 @@ func TestMain(m *testing.M) {
 
 }
 
-// Way to bypass the termination of the test executor before the DB can cleanup.
-// Still exits the tests, but due to the os.Exit calls, will still stop execution.
-func failButContinue(testName string) {
-	if r := recover(); r != nil {
-		logger.Log.Debug("Failed Test %s", testName)
-	}
-}
-
 func TestTenantUserCRUD(t *testing.T) {
-	defer failButContinue("TestTenantUserCRUD")
+	defer dstest.FailButContinue("TestTenantUserCRUD")
 
 	const USER1 = "test1"
 	const USER2 = "test2"
@@ -262,7 +249,7 @@ func TestTenantUserCRUD(t *testing.T) {
 }
 
 func TestTenantDomainCRUD(t *testing.T) {
-	defer failButContinue("TestTenantDomainCRUD")
+	defer dstest.FailButContinue("TestTenantDomainCRUD")
 
 	const DOM1 = "domain1"
 	const DOM2 = "domain2"

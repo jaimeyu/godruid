@@ -23,6 +23,7 @@ import (
 	ds "github.com/accedian/adh-gather/datastore"
 	couchDB "github.com/accedian/adh-gather/datastore/couchDB"
 	mem "github.com/accedian/adh-gather/datastore/inMemory"
+	dstest "github.com/accedian/adh-gather/datastore/test"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 )
 
@@ -64,6 +65,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Couch Run.
+	dstest.ClearCouch(couchServer)
 	adminDB, err = couchDB.CreateAdminServiceDAO()
 	if err != nil {
 		log.Fatalf("Could not create couchdb admin DAO: %s", err.Error())
@@ -79,14 +81,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	dbs, err := couchServer.DBs()
-	if err != nil {
-		log.Fatalf("Could not delete DBs after test: %s", err.Error())
-	}
-	for _, dbname := range dbs {
-		logger.Log.Debugf("Deleting DB %s", dbname)
-		couchServer.Delete(dbname)
-	}
+	dstest.ClearCouch(couchServer)
 
 	// If there were test failures, stop executing
 	if code != 0 {
@@ -104,16 +99,8 @@ func TestMain(m *testing.M) {
 
 }
 
-// Way to bypass the termination of the test executor before the DB can cleanup.
-// Still exits the tests, but due to the os.Exit calls, will still stop execution.
-func failButContinue(testName string) {
-	if r := recover(); r != nil {
-		logger.Log.Debug("Failed Test %s", testName)
-	}
-}
-
 func TestAdminUserCRUD(t *testing.T) {
-	defer failButContinue("TestAdminUserCRUD")
+	defer dstest.FailButContinue("TestAdminUserCRUD")
 
 	const USER1 = "test1"
 	const USER2 = "test2"
@@ -244,7 +231,7 @@ func TestAdminUserCRUD(t *testing.T) {
 }
 
 func TestTenantDescCRUD(t *testing.T) {
-	defer failButContinue("TestTenantDescCRUD")
+	defer dstest.FailButContinue("TestTenantDescCRUD")
 
 	const COMPANY1 = "test1"
 	const COMPANY2 = "test2"
@@ -374,7 +361,7 @@ func TestTenantDescCRUD(t *testing.T) {
 }
 
 func TestIngDictCRUD(t *testing.T) {
-	defer failButContinue("TestIngDictCRUD")
+	defer dstest.FailButContinue("TestIngDictCRUD")
 
 	var accTWAMP = string(handlers.AccedianTwamp)
 	var accFLOW = string(handlers.AccedianFlowmeter)
@@ -480,7 +467,7 @@ func TestIngDictCRUD(t *testing.T) {
 }
 
 func TestValidTypesCRUD(t *testing.T) {
-	defer failButContinue("TestValidTypesCRUD")
+	defer dstest.FailButContinue("TestValidTypesCRUD")
 
 	objTypeKey1 := "objTypeKey1"
 	objTypeKey2 := "objTypeKey2"

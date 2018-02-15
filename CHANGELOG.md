@@ -1,7 +1,7 @@
 ## Current Release 
 ### 0.72.0 
 **Release Date:** Wed Feb 14 19:29:30 UTC 2018     
-* Added - testing for tenant service started and addressed load shedding for pouch issue
+* Added - testing for tenant service started and addressed load shedding for pouch issue.
 ## Previous Releases 
 ### 0.71.0 
 **Release Date:** Wed Feb 14 16:16:44 UTC 2018     

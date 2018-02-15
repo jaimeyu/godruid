@@ -116,7 +116,6 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, logger.AsJSONString(response))
 
 	if err != nil {
 		return nil, err
@@ -124,7 +123,12 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 
 	histogram := []*pb.Histogram{}
 
-	json.Unmarshal(response, &histogram)
+	err = json.Unmarshal(response, &histogram)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, logger.AsJSONString(histogram))
 
 	resp := &pb.HistogramResponse{
 		Data: histogram,
@@ -172,7 +176,6 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, logger.AsJSONString(response))
 
 	if err != nil {
 		return nil, err
@@ -180,10 +183,13 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	thresholdCrossing := []*pb.ThresholdCrossing{}
 
-	json.Unmarshal(response, &thresholdCrossing)
+	err = json.Unmarshal(response, &thresholdCrossing)
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, logger.AsJSONString(thresholdCrossing))
 
 	formattedJSON, err := reformatThresholdCrossingResponse(thresholdCrossing)
-
 	if err != nil {
 		return nil, err
 	}
@@ -235,25 +241,23 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	}
 
 	query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
-
 	if err != nil {
 		return nil, err
 	}
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(response))
-
 	if err != nil {
 		return nil, err
 	}
 
 	thresholdCrossing := make([]ThresholdCrossingByMonitoredObjectResponse, 0)
-
 	err = json.Unmarshal(response, &thresholdCrossing)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(thresholdCrossing))
 
 	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
 
@@ -310,7 +314,6 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
-	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, logger.AsJSONString(response))
 
 	//	fmt.Println(string(response))
 
@@ -320,7 +323,12 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	resp := make([]RawMetricsResponse, 0)
 
-	json.Unmarshal(response, &resp)
+	err = json.Unmarshal(response, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, logger.AsJSONString(resp))
 
 	var formattedJSON []byte
 

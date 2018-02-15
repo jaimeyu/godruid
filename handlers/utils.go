@@ -101,24 +101,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "20000",
+													"lowerLimit":  "135000",
 													"lowerStrict": "true",
-													"upperLimit":  "40000",
+													"upperLimit":  "140000",
 													"unit":        "ms",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "40000",
+													"lowerLimit":  "140000",
 													"lowerStrict": "true",
-													"upperLimit":  "65000",
+													"upperLimit":  "170000",
 													"upperStrict": "false",
 													"unit":        "ms",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "65000",
+													"lowerLimit":  "170000",
 													"lowerStrict": "true",
 													"unit":        "ms",
 												},
@@ -133,24 +133,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "90",
+													"lowerLimit":  "35000",
 													"lowerStrict": "true",
-													"upperLimit":  "100",
+													"upperLimit":  "40000",
 													"unit":        "ms",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "100",
+													"lowerLimit":  "40000",
 													"lowerStrict": "true",
-													"upperLimit":  "120",
+													"upperLimit":  "45000",
 													"upperStrict": "false",
 													"unit":        "ms",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "120",
+													"lowerLimit":  "45000",
 													"lowerStrict": "true",
 													"unit":        "ms",
 												},
@@ -165,24 +165,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.13",
+													"lowerLimit":  "0.20",
 													"lowerStrict": "true",
-													"upperLimit":  "0.17",
+													"upperLimit":  "0.30",
 													"unit":        "pct",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.17",
+													"lowerLimit":  "0.30",
 													"lowerStrict": "true",
-													"upperLimit":  "0.33",
+													"upperLimit":  "0.35",
 													"upperStrict": "false",
 													"unit":        "pct",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.33",
+													"lowerLimit":  "0.35",
 													"lowerStrict": "true",
 													"unit":        "pct",
 												},
@@ -205,24 +205,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "1000000",
+													"lowerLimit":  "35000000",
 													"lowerStrict": "true",
-													"upperLimit":  "2000000",
+													"upperLimit":  "50000000",
 													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "2000000",
+													"lowerLimit":  "50000000",
 													"lowerStrict": "true",
-													"upperLimit":  "5000000",
+													"upperLimit":  "70000000",
 													"upperStrict": "false",
 													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "5000000",
+													"lowerLimit":  "70000000",
 													"lowerStrict": "true",
 													"unit":        "bps",
 												},
@@ -237,24 +237,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "4000000",
+													"lowerLimit":  "35000000",
 													"lowerStrict": "true",
-													"upperLimit":  "7000000",
+													"upperLimit":  "50000000",
 													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "7000000",
+													"lowerLimit":  "50000000",
 													"lowerStrict": "true",
-													"upperLimit":  "30000000",
+													"upperLimit":  "80000000",
 													"upperStrict": "false",
 													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "30000000",
+													"lowerLimit":  "80000000",
 													"lowerStrict": "true",
 													"unit":        "bps",
 												},
@@ -269,24 +269,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "4000000",
+													"lowerLimit":  "35000000",
 													"lowerStrict": "true",
-													"upperLimit":  "7000000",
+													"upperLimit":  "50000000",
 													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "7000000",
+													"lowerLimit":  "50000000",
 													"lowerStrict": "true",
-													"upperLimit":  "30000000",
+													"upperLimit":  "80000000",
 													"upperStrict": "false",
 													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "30000000",
+													"lowerLimit":  "80000000",
 													"lowerStrict": "true",
 													"unit":        "bps",
 												},

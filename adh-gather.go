@@ -235,6 +235,13 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			logger.Log.Fatalf("Unable to locate swagger definition: %s", err.Error())
 		}
 		w.Write(input)
+	} else if isPouch && strings.Index(r.URL.Path, "_changes") > 0 {
+		// This is a pouch _changes call which sometimes is cancelled by the client.
+		// We do not want the same pouchDB load shedder used here as it will get hit for
+		// incorrect reasons.
+		mon.IncrementCounter(mon.PouchChangesAPIRecieved)
+		gs.mux.ServeHTTP(w, r)
+		mon.IncrementCounter(mon.PouchChangesAPICompleted)
 	} else {
 		// Hanld eall other endpoints (really just Poiuch and Test Data right now.
 		if err := updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, true, maxConcurrentPouchAPICalls); err != nil {

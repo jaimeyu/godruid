@@ -96,6 +96,7 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_server_rest_ip.String(), "0.0.0.0")
 	v.SetDefault(CK_server_rest_port.String(), 10001)
 	v.SetDefault(CK_server_monitoring_port.String(), 9191)
+	v.SetDefault(CK_server_profile_port.String(), 6060)
 	v.SetDefault(CK_server_grpc_ip.String(), "0.0.0.0")
 	v.SetDefault(CK_server_grpc_port.String(), 10002)
 	v.SetDefault(CK_args_admindb_name.String(), "adh-admin")

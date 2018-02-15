@@ -21,6 +21,7 @@ import (
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/monitoring"
+	"github.com/accedian/adh-gather/profile"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -75,10 +76,11 @@ type GatherServer struct {
 	pouchSH *adhh.PouchDBPluginServiceHandler
 	testSH  *adhh.TestDataServiceHandler
 
-	mux           *mux.Router
-	gwmux         *runtime.ServeMux
-	jsonAPIMux    *runtime.ServeMux
-	promServerMux *http.ServeMux
+	mux            *mux.Router
+	gwmux          *runtime.ServeMux
+	jsonAPIMux     *runtime.ServeMux
+	promServerMux  *http.ServeMux
+	pprofServerMux *http.ServeMux
 }
 
 func newServer() *GatherServer {
@@ -128,9 +130,6 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 			},
 		),
 	)
-
-	gatherServer.promServerMux = http.NewServeMux()
-	gatherServer.promServerMux.Handle("/metrics", promhttp.Handler())
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
@@ -559,6 +558,21 @@ func startMonitoring(gatherServer *GatherServer, cfg config.Provider) {
 	}
 }
 
+func startProfile(gatherServer *GatherServer, cfg config.Provider) {
+	restBindIP := cfg.GetString(gather.CK_server_rest_ip.String())
+	monPort := cfg.GetInt(gather.CK_server_profile_port.String())
+
+	gatherServer.pprofServerMux = http.NewServeMux()
+
+	profile.AttachProfiler(gatherServer.pprofServerMux)
+
+	logger.Log.Infof("Starting Prfoile Server")
+	addr := fmt.Sprintf("%s:%d", restBindIP, monPort)
+	if err := http.ListenAndServe(addr, gatherServer.pprofServerMux); err != nil {
+		logger.Log.Fatalf("Unable to start profile function: %s", err.Error())
+	}
+}
+
 func modifySwagger(cfg config.Provider) {
 	apiPort := cfg.GetInt(gather.CK_server_rest_port.String())
 
@@ -632,6 +646,9 @@ func main() {
 
 	// Register the metrics to be tracked in Gather
 	go startMonitoring(gatherServer, cfg)
+
+	// Start pprof profiler
+	go startProfile(gatherServer, cfg)
 
 	// modify the swagger for this deployment
 	modifySwagger(cfg)

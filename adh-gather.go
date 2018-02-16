@@ -13,7 +13,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
@@ -75,10 +74,11 @@ type GatherServer struct {
 	gsh     *adhh.GRPCServiceHandler
 	pouchSH *adhh.PouchDBPluginServiceHandler
 	testSH  *adhh.TestDataServiceHandler
+	msh     *adhh.MetricServiceHandler
 
 	mux            *mux.Router
 	gwmux          *runtime.ServeMux
-	jsonAPIMux     *runtime.ServeMux
+	jsonAPIMux     *mux.Router
 	promServerMux  *http.ServeMux
 	pprofServerMux *http.ServeMux
 }
@@ -88,6 +88,8 @@ func newServer() *GatherServer {
 	s.gsh = adhh.CreateCoordinator()
 	s.pouchSH = adhh.CreatePouchDBPluginServiceHandler()
 	s.testSH = adhh.CreateTestDataServiceHandler()
+
+	s.msh = adhh.CreateMetricServiceHandler(s.gsh)
 
 	return s
 }
@@ -104,7 +106,6 @@ func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterAdminProvisioningServiceServer(grpcServer, gatherServer.gsh)
 	pb.RegisterTenantProvisioningServiceServer(grpcServer, gatherServer.gsh)
-	pb.RegisterMetricsServiceServer(grpcServer, gatherServer.gsh)
 
 	logger.Log.Infof("gRPC service intiated on: %s", gRPCAddress)
 	grpcServer.Serve(lis)
@@ -122,14 +123,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 
 	gatherServer.mux = mux.NewRouter().StrictSlash(true)
 	gatherServer.gwmux = runtime.NewServeMux()
-	gatherServer.jsonAPIMux = runtime.NewServeMux(
-		runtime.WithForwardResponseOption(
-			func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
-				w.Header().Set("Content-Type", "application/vnd.api+json")
-				return nil
-			},
-		),
-	)
+	gatherServer.jsonAPIMux = mux.NewRouter().StrictSlash(true)
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
@@ -143,14 +137,10 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
 	}
 
-	// Register the Metrics Service
-	if err := pb.RegisterMetricsServiceHandlerFromEndpoint(ctx, gatherServer.jsonAPIMux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
-		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
-	}
-
 	// Add in handling for non protobuf generated API endpoints:
 	gatherServer.pouchSH.RegisterAPIHandlers(gatherServer.mux)
 	gatherServer.testSH.RegisterAPIHandlers(gatherServer.mux)
+	gatherServer.msh.RegisterAPIHandlers(gatherServer.jsonAPIMux)
 
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)

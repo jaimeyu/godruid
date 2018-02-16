@@ -6,11 +6,12 @@ import (
 
 	"github.com/Jeffail/gabs"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/godruid"
 )
 
 // Format a ThresholdCrossing object into something the UI can consume
-func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing) ([]byte, error) {
+func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing) (map[string]interface{}, error) {
 	res := gabs.New()
 	_, err := res.Array("data")
 
@@ -26,10 +27,16 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 		res.ArrayAppend(obj.Data(), "data")
 	}
 
-	return res.Bytes(), nil
+	dataContainer := map[string]interface{}{}
+	err = json.Unmarshal(res.Bytes(), dataContainer)
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Reformatted threshold crossing data: %v", dataContainer)
+	return dataContainer, nil
 }
 
-func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) ([]byte, error) {
+func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) (map[string]interface{}, error) {
 	res := gabs.New()
 	for _, tc := range thresholdCrossing {
 		monObjId := tc.Event["monitoredObjectId"]
@@ -53,10 +60,15 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 
 	}
 
-	return res.Bytes(), nil
+	dataContainer := map[string]interface{}{}
+	if err := json.Unmarshal(res.Bytes(), dataContainer); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Reformatted threshold crossing by mon obj data: %v", dataContainer)
+	return dataContainer, nil
 }
 
-func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) ([]byte, error) {
+func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
 	res := gabs.New()
 	for _, e := range rawMetrics[0].Result.Events {
 		monObj := e.Event["monitoredObjectId"].(string)
@@ -74,7 +86,13 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) ([]byte, error)
 		}
 		res.ArrayAppendP(obj.Data(), "result."+monObj)
 	}
-	return res.Bytes(), nil
+
+	dataContainer := map[string]interface{}{}
+	if err := json.Unmarshal(res.Bytes(), dataContainer); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Reformatted raw metrics data: %v", dataContainer)
+	return dataContainer, nil
 }
 
 // Convert a query object to string, mainly for debugging purposes

@@ -22,15 +22,15 @@ type DruidDatastore interface {
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error)
+	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error)
+	GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
 	// Returns the min,max,avg,median for a given metric
-	GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error)
+	GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error)
 
 	// Returns raw metrics from druid
-	GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error)
+	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
 }

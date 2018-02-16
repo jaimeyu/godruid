@@ -81,7 +81,6 @@ var (
 type GRPCServiceHandler struct {
 	ash               *AdminServiceHandler
 	tsh               *TenantServiceHandler
-	msh               *MetricServiceHandler
 	DefaultValidTypes *pb.ValidTypesData
 }
 
@@ -93,7 +92,6 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	result.ash = CreateAdminServiceHandler()
 	result.tsh = CreateTenantServiceHandler()
-	result.msh = CreateMetricServiceHandler()
 
 	// Setup the known values of the Valid Types for the system
 	// by using the enumerated protobuf values
@@ -717,88 +715,6 @@ func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context
 	}
 
 	trackAPIMetrics(startTime, "200", mon.GetMonObjToDomMapStr)
-	return res, nil
-}
-
-// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain
-func (gsh *GRPCServiceHandler) GetThresholdCrossing(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
-	startTime := time.Now()
-
-	tenantID := thresholdCrossingReq.Tenant
-
-	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           tenantID,
-		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
-	})
-
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
-	}
-
-	res, err := gsh.msh.GetThresholdCrossing(ctx, thresholdCrossingReq, thresholdProfile)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossStr)
-	return res, nil
-}
-
-// GetThresholdCrossingByMonitoredObject - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain, and groups by monitoredObjectID
-func (gsh *GRPCServiceHandler) GetThresholdCrossingByMonitoredObject(ctx context.Context, thresholdCrossingReq *pb.ThresholdCrossingRequest) (*pb.JSONAPIObject, error) {
-	startTime := time.Now()
-
-	tenantID := thresholdCrossingReq.Tenant
-
-	thresholdProfile, err := gsh.GetTenantThresholdProfile(ctx, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           tenantID,
-		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
-	})
-
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossByMonObjStr)
-		return nil, fmt.Errorf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err)
-	}
-
-	res, err := gsh.msh.GetThresholdCrossingByMonitoredObject(ctx, thresholdCrossingReq, thresholdProfile)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossByMonObjStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjStr)
-	return res, nil
-}
-
-// GetHistogram - Retrieve bucket data from druid
-func (gsh *GRPCServiceHandler) GetHistogram(ctx context.Context, histogramReq *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
-	startTime := time.Now()
-
-	res, err := gsh.msh.GetHistogram(ctx, histogramReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetHistogramObjStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
-	return res, nil
-}
-
-// GetRawMetrics - Retrieve raw metric data from druid
-func (gsh *GRPCServiceHandler) GetRawMetrics(ctx context.Context, rawMetricReq *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
-	startTime := time.Now()
-
-	res, err := gsh.msh.GetRawMetrics(ctx, rawMetricReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetRawMetricStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
 	return res, nil
 }
 

@@ -76,6 +76,10 @@ message TenantIngestionProfileIdRequest {
 //Threshold Profile Data
 message TenantThresholdProfileData {
 
+  message UIEventAttrMap {
+    map<string, string> eventAttrMap = 1;
+  }
+
   message EventAttrMap {
     map<string, string> eventAttrMap = 1;
   }
@@ -94,6 +98,7 @@ message TenantThresholdProfileData {
 
   message MonitoredObjectTypeMap {
     map<string, MetricMap> monitoredObjectTypeMap = 1; 
+    map<string, UIEventAttrMap> metricMap = 2;
   }
 
   message VendorMap {

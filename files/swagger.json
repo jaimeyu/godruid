@@ -1843,6 +1843,23 @@
           "additionalProperties": {
             "$ref": "#/definitions/gathergrpcTenantThresholdProfileDataMetricMap"
           }
+        },
+        "metricMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TenantThresholdProfileDataUIEventAttrMap"
+          }
+        }
+      }
+    },
+    "TenantThresholdProfileDataUIEventAttrMap": {
+      "type": "object",
+      "properties": {
+        "eventAttrMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },

@@ -92,6 +92,32 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 	return &pb.TenantThresholdProfileData_VendorMap{
 		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
 			string(AccedianTwamp): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+				MetricMap: map[string]*pb.TenantThresholdProfileData_UIEventAttrMap{
+					"delayP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "135000",
+							"major":    "140000",
+							"critical": "170000",
+						},
+					},
+					"jitterP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "35000",
+							"major":    "40000",
+							"critical": "45000",
+						},
+					},
+					"packetsLostPct": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "0.20",
+							"major":    "0.30",
+							"critical": "0.35",
+						},
+					},
+				},
 				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
 					string(TwampPE): &pb.TenantThresholdProfileData_MetricMap{
 						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
@@ -196,6 +222,32 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 				},
 			},
 			string(AccedianFlowmeter): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
+				MetricMap: map[string]*pb.TenantThresholdProfileData_UIEventAttrMap{
+					"throughputAvg": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "35000000",
+							"major":    "50000000",
+							"critical": "70000000",
+						},
+					},
+					"throughputMax": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "35000000",
+							"major":    "50000000",
+							"critical": "80000000",
+						},
+					},
+					"throughputMin": &pb.TenantThresholdProfileData_UIEventAttrMap{
+						EventAttrMap: map[string]string{
+							"enabled":  "true",
+							"minor":    "35000000",
+							"major":    "50000000",
+							"critical": "80000000",
+						},
+					},
+				},
 				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
 					string(Flowmeter): &pb.TenantThresholdProfileData_MetricMap{
 						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{

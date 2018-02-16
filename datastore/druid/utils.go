@@ -28,7 +28,7 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	}
 
 	dataContainer := map[string]interface{}{}
-	err = json.Unmarshal(res.Bytes(), dataContainer)
+	err = json.Unmarshal(res.Bytes(), &dataContainer)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 	}
 
 	dataContainer := map[string]interface{}{}
-	if err := json.Unmarshal(res.Bytes(), dataContainer); err != nil {
+	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Reformatted threshold crossing by mon obj data: %v", dataContainer)
@@ -88,7 +88,7 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 	}
 
 	dataContainer := map[string]interface{}{}
-	if err := json.Unmarshal(res.Bytes(), dataContainer); err != nil {
+	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Reformatted raw metrics data: %v", dataContainer)

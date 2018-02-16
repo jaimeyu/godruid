@@ -132,11 +132,13 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
+	data := make([]*pb.HistogramResponse, 0)
+	data = append(data, resp)
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
 			"type":       ThresholdCrossingReport,
-			"attributes": resp,
+			"attributes": data,
 		},
 	}
 
@@ -184,11 +186,13 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
+	data := make([]map[string]interface{}, 0)
+	data = append(data, formattedJSON)
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
 			"type":       ThresholdCrossingReport,
-			"attributes": formattedJSON,
+			"attributes": data,
 		},
 	}
 
@@ -235,11 +239,13 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
+	data := make([]map[string]interface{}, 0)
+	data = append(data, formattedJSON)
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
 			"type":       ThresholdCrossingReport,
-			"attributes": formattedJSON,
+			"attributes": data,
 		},
 	}
 
@@ -292,11 +298,13 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	}
 
 	uuid := uuid.NewV4()
+	data := make([]map[string]interface{}, 0)
+	data = append(data, formattedJSON)
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
 			"type":       ThresholdCrossingReport,
-			"attributes": formattedJSON,
+			"attributes": data,
 		},
 	}
 

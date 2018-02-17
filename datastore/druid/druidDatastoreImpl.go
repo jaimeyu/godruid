@@ -1,17 +1,13 @@
 package druid
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/godruid"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -97,7 +93,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 }
 
 // peyo TODO: implement this query
-func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetHistogram for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
@@ -134,30 +130,25 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (*pb.
 		Data: histogram,
 	}
 
-	data, err := ptypes.MarshalAny(resp)
-
-	if err != nil {
-		return nil, err
-	}
-
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
-	rr := &pb.JSONAPIObject{
-		Data: []*pb.Data{
-			&pb.Data{
-				Id:         uuid.String(),
-				Type:       EventDistribution,
-				Attributes: data,
-			},
+	data := make([]*pb.HistogramResponse, 0)
+	data = append(data, resp)
+	rr := map[string]interface{}{
+		"data": map[string]interface{}{
+			"id":         uuid.String(),
+			"type":       ThresholdCrossingReport,
+			"attributes": data,
 		},
 	}
+
 	return rr, nil
 }
 
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
-func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
@@ -182,7 +173,6 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	}
 
 	thresholdCrossing := []*pb.ThresholdCrossing{}
-
 	err = json.Unmarshal(response, &thresholdCrossing)
 	if err != nil {
 		return nil, err
@@ -194,33 +184,16 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-	resp := new(pb.ThresholdCrossingResponse)
-
-	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into ThresholdCrossingResponse. Err: %s", err)
-	}
-
-	data, err := ptypes.MarshalAny(resp)
-
-	if err != nil {
-		return nil, err
-	}
-
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
-	rr := &pb.JSONAPIObject{
-		Data: []*pb.Data{
-			&pb.Data{
-				Id:         uuid.String(),
-				Type:       ThresholdCrossingReport,
-				Attributes: data,
-			},
-		},
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
 	}
 
 	return rr, nil
@@ -229,7 +202,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
-func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", logger.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
@@ -260,41 +233,26 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(thresholdCrossing))
 
 	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp := new(pb.ThresholdCrossingByMonitoredObjectResponse)
-
-	err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), resp)
-
-	if err != nil {
-		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into ThresholdCrossingResponse. Err: %s", err)
-	}
-
-	data, err := ptypes.MarshalAny(resp)
-
 	if err != nil {
 		return nil, err
 	}
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
-	rr := &pb.JSONAPIObject{
-		Data: []*pb.Data{
-			&pb.Data{
-				Id:         uuid.String(),
-				Type:       ThresholdCrossingReport,
-				Attributes: data,
-			},
-		},
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
 	}
 
 	return rr, nil
 }
 
-func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*pb.JSONAPIObject, error) {
+func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetRawMetrics for request: %v", logger.AsJSONString(request))
 
@@ -330,11 +288,8 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 
 	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, logger.AsJSONString(resp))
 
-	var formattedJSON []byte
-
-	if len(resp) == 0 {
-		formattedJSON = []byte{}
-	} else {
+	formattedJSON := map[string]interface{}{}
+	if len(resp) != 0 {
 		formattedJSON, err = reformatRawMetricsResponse(resp)
 	}
 
@@ -342,31 +297,15 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (*p
 		return nil, err
 	}
 
-	rawMetricResp := new(pb.RawMetricsResponse)
-
-	if len(resp) != 0 {
-		err = jsonpb.Unmarshal(bytes.NewReader(formattedJSON), rawMetricResp)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("Unable to unmarshal formatted JSON into RawMetricsResponse. Err: %s", err)
-	}
-
-	data, err := ptypes.MarshalAny(rawMetricResp)
-
-	if err != nil {
-		return nil, err
-	}
-
 	uuid := uuid.NewV4()
-	rr := &pb.JSONAPIObject{
-		Data: []*pb.Data{
-			&pb.Data{
-				Id:         uuid.String(),
-				Type:       RawMetrics,
-				Attributes: data,
-			},
-		},
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       RawMetrics,
+		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
 	}
 
 	return rr, nil

@@ -186,14 +186,14 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
-	data := make([]map[string]interface{}, 0)
-	data = append(data, formattedJSON)
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": formattedJSON,
+	})
 	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       ThresholdCrossingReport,
-			"attributes": data,
-		},
+		"data": data,
 	}
 
 	return rr, nil
@@ -239,14 +239,14 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
-	data := make([]map[string]interface{}, 0)
-	data = append(data, formattedJSON)
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": formattedJSON,
+	})
 	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       ThresholdCrossingReport,
-			"attributes": data,
-		},
+		"data": data,
 	}
 
 	return rr, nil
@@ -298,14 +298,14 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	}
 
 	uuid := uuid.NewV4()
-	data := make([]map[string]interface{}, 0)
-	data = append(data, formattedJSON)
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       RawMetrics,
+		"attributes": formattedJSON,
+	})
 	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       ThresholdCrossingReport,
-			"attributes": data,
-		},
+		"data": data,
 	}
 
 	return rr, nil

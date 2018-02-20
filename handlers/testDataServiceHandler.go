@@ -612,7 +612,7 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 	result.Data.Datatype = tenantDomainStr
 	result.Data.Name = name
 	result.Data.TenantId = tenantID
-	result.Data.Color = "#0000FF"
+	result.Data.Color = "#4EC5C1"
 
 	// Only use the hash portion of the id for the reference since the thresholdProfile_2_ is all
 	// relational pouch tagging.

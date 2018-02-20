@@ -1,6 +1,7 @@
 ## Current Release 
 ### 0.77.0 
-**Release Date:** Sat Feb 17 01:52:52 UTC 2018     
+**Release Date:** Sat Feb 17 01:52:52 UTC 2018   
+* Change the base color of domain created using the test-data api  
 ## Previous Releases 
 ### 0.76.0 
 **Release Date:** Fri Feb 16 17:56:43 UTC 2018     

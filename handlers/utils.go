@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
 )
 
 var (
@@ -358,4 +361,10 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 func getDBFieldFromRequest(r *http.Request, urlPart int32) string {
 	urlParts := strings.Split(r.URL.Path, "/")
 	return urlParts[urlPart]
+}
+
+func reportError(w http.ResponseWriter, startTime time.Time, code string, objType string, msg string, responseCode int) {
+	trackAPIMetrics(startTime, code, objType)
+	logger.Log.Error(msg)
+	http.Error(w, fmt.Sprintf(msg), responseCode)
 }

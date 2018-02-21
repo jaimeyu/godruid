@@ -50,7 +50,9 @@ func (ash *AdminServiceHandler) CreateAdminUser(ctx context.Context, user *pb.Ad
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.CreateAdminUser(user)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to store %s: %s", datastore.AdminUserStr, err.Error())
+		msg := fmt.Sprintf("Unable to store %s: %s", datastore.AdminUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Created the User, return the result.
@@ -69,7 +71,9 @@ func (ash *AdminServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.Ad
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.UpdateAdminUser(user)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to update %s: %s", datastore.AdminUserStr, err.Error())
+		msg := fmt.Sprintf("Unable to update %s: %s", datastore.AdminUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Updated the User, return the result.
@@ -84,7 +88,9 @@ func (ash *AdminServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.DeleteAdminUser(userID.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.AdminUserStr, err.Error())
+		msg := fmt.Sprintf("Unable to delete %s: %s", datastore.AdminUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Deleted the User, return the result.
@@ -100,7 +106,9 @@ func (ash *AdminServiceHandler) GetAdminUser(ctx context.Context, userID *wr.Str
 	// Issue request to DAO Layer to Get the requested Admin User
 	result, err := ash.adminDB.GetAdminUser(userID.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", datastore.AdminUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the User, return the result.
@@ -116,7 +124,9 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 	// Issue request to DAO Layer to Get the requested Admin User List
 	result, err := ash.adminDB.GetAllAdminUsers()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %ss: %s", datastore.AdminUserStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %ss: %s", datastore.AdminUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the Users, return the result list.
@@ -130,14 +140,18 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantDescriptorRequest(tenantMeta, false); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to create %s: %s", datastore.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Creating %s: %s", datastore.TenantStr, tenantMeta.GetXId())
 
 	// Issue request to AdminService DAO to create the metadata record:
 	result, err := ash.adminDB.CreateTenant(tenantMeta)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create %s: %s", datastore.TenantStr, err.Error())
+		msg := fmt.Sprintf("Unable to create %s: %s", datastore.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Created the Tenant, return the metadata result.
@@ -149,14 +163,18 @@ func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb
 func (ash *AdminServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateTenantDescriptorRequest(tenantMeta, true); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to update %s: %s", datastore.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Updating %s: %s", datastore.TenantDescriptorStr, tenantMeta.GetXId())
 
 	// Issue request to AdminService DAO to update the metadata record:
 	result, err := ash.adminDB.UpdateTenantDescriptor(tenantMeta)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to update %s: %s", datastore.TenantDescriptorStr, err.Error())
+		msg := fmt.Sprintf("Unable to update %s: %s", datastore.TenantDescriptorStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Createds the Tenant, return the metadata result.
@@ -173,7 +191,9 @@ func (ash *AdminServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.S
 	// Issue request to DAO Layer to Delete the requested Tenant
 	result, err := ash.adminDB.DeleteTenant(tenantID.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.TenantStr, err.Error())
+		msg := fmt.Sprintf("Unable to delete %s: %s", datastore.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully removed the Tenant, return the metadata that identified
@@ -190,7 +210,9 @@ func (ash *AdminServiceHandler) GetTenantDescriptor(ctx context.Context, tenantI
 	// Issue request to DAO Layer to Get the requested Tenant Metadata
 	result, err := ash.adminDB.GetTenantDescriptor(tenantID.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.TenantDescriptorStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", datastore.TenantDescriptorStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the Tenant Metadata, return the result.
@@ -206,7 +228,9 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 	// Issue request to DAO Layer to Get the requested Tenant Descriptor List
 	result, err := ash.adminDB.GetAllTenantDescriptors()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %ss: %s", datastore.TenantStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %ss: %s", datastore.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the Tenant Descriptors, return the result list.
@@ -218,14 +242,18 @@ func (ash *AdminServiceHandler) GetAllTenantDescriptors(ctx context.Context, noV
 func (ash *AdminServiceHandler) CreateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateIngestionDictionary(ingDictionary, false); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to create %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Creating %s: %s", datastore.IngestionDictionaryStr, ingDictionary.GetXId())
 
 	// Issue request to AdminService DAO to create the record:
 	result, err := ash.adminDB.CreateIngestionDictionary(ingDictionary)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		msg := fmt.Sprintf("Unable to create %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Created the record
@@ -236,14 +264,18 @@ func (ash *AdminServiceHandler) CreateIngestionDictionary(ctx context.Context, i
 // UpdateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
 func (ash *AdminServiceHandler) UpdateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
 	if err := validateIngestionDictionary(ingDictionary, true); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to update %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Updating %s: %s", datastore.IngestionDictionaryStr, ingDictionary.GetXId())
 
 	// Issue request to AdminService DAO to update the record
 	result, err := ash.adminDB.UpdateIngestionDictionary(ingDictionary)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to update %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		msg := fmt.Sprintf("Unable to update %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully updated the record
@@ -258,7 +290,9 @@ func (ash *AdminServiceHandler) DeleteIngestionDictionary(ctx context.Context, n
 	// Issue request to DAO Layer to Delete the record
 	result, err := ash.adminDB.DeleteIngestionDictionary()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		msg := fmt.Sprintf("Unable to delete %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully removed the record, return the previous record
@@ -273,7 +307,9 @@ func (ash *AdminServiceHandler) GetIngestionDictionary(ctx context.Context, noVa
 	// Issue request to DAO Layer to Get the requested record
 	result, err := ash.adminDB.GetIngestionDictionary()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", datastore.IngestionDictionaryStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the record, return the result.
@@ -289,7 +325,9 @@ func (ash *AdminServiceHandler) GetTenantIDByAlias(ctx context.Context, name *wr
 	// Issue request to DAO Layer to Get the requested Tenant ID
 	result, err := ash.adminDB.GetTenantIDByAlias(name.GetValue())
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve Tenant ID: %s", err.Error())
+		msg := fmt.Sprintf("Unable to retrieve Tenant ID: %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Return Tenant ID
@@ -309,14 +347,18 @@ func (ash *AdminServiceHandler) AddAdminViews() error {
 func (ash *AdminServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
 	// Validate the request to ensure no invalid data is stored:
 	if err := validateValidTypes(value, false); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to create %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Creating %s: %s", datastore.ValidTypesStr, value.GetXId())
 
 	// Issue request to AdminService DAO to create the record:
 	result, err := ash.adminDB.CreateValidTypes(value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create %s: %s", datastore.ValidTypesStr, err.Error())
+		msg := fmt.Sprintf("Unable to create %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Created the record
@@ -327,14 +369,18 @@ func (ash *AdminServiceHandler) CreateValidTypes(ctx context.Context, value *pb.
 // UpdateValidTypes - Update the valid type definition in the system.
 func (ash *AdminServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
 	if err := validateValidTypes(value, true); err != nil {
-		return nil, err
+		msg := fmt.Sprintf("Unable to validate request to update %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 	logger.Log.Infof("Updating %s: %s", datastore.ValidTypesStr, value.GetXId())
 
 	// Issue request to AdminService DAO to update the record
 	result, err := ash.adminDB.UpdateValidTypes(value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to update %s: %s", datastore.ValidTypesStr, err.Error())
+		msg := fmt.Sprintf("Unable to update %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully updated the record
@@ -349,7 +395,9 @@ func (ash *AdminServiceHandler) GetValidTypes(ctx context.Context, value *emp.Em
 	// Issue request to DAO Layer to Get the requested record
 	result, err := ash.adminDB.GetValidTypes()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.ValidTypesStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully found the record, return the result.
@@ -367,7 +415,9 @@ func (ash *AdminServiceHandler) GetSpecificValidTypes(ctx context.Context, value
 	// Issue request to DAO Layer to fetch the Tenant Monitored Object Map
 	result, err := ash.adminDB.GetSpecificValidTypes(value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", db.ValidTypesStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully fetched the Monitored Object Map, return the result.
@@ -382,7 +432,9 @@ func (ash *AdminServiceHandler) DeleteValidTypes(ctx context.Context, noValue *e
 	// Issue request to DAO Layer to Delete the record
 	result, err := ash.adminDB.DeleteValidTypes()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to delete %s: %s", datastore.ValidTypesStr, err.Error())
+		msg := fmt.Sprintf("Unable to delete %s: %s", datastore.ValidTypesStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully removed the record, return the previous record

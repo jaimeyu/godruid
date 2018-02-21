@@ -167,15 +167,15 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	// Get the contents of the request:
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", "Test Data", err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInSeconds(startTime, "400", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", "Test Data", err.Error())
+		reportError(w, startTime, "400", populateTestDataStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = validatePopulateTestDataRequest(requestBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInSeconds(startTime, "400", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to validate %s content: %s", "Test Data", err.Error())
+		reportError(w, startTime, "400", populateTestDataStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -183,14 +183,14 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	tenantName := requestBody["tenantName"].(string)
 	desc, err := generateTenantDescriptor(tenantName)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 	tenantDescriptor, err := tsh.grpcSH.CreateTenant(nil, desc)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -198,22 +198,22 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	dataIDForTenant := tenantDescriptor.GetXId()
 	user, err := generateTenantUser(tenantName, dataIDForTenant)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 	_, err = tsh.grpcSH.CreateTenantUser(nil, user)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Fetch the tenant Meta so that teh default threshold profile id is available:
 	tenantMeta, err := tsh.grpcSH.GetTenantMeta(nil, &wr.StringValue{Value: tenantDescriptor.GetXId()})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -223,14 +223,14 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	for _, domainName := range tenantDomains {
 		dom, err := generateTenantDomain(domainName.(string), dataIDForTenant, tenantMeta.GetData().GetDefaultThresholdProfile())
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-			mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+			msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+			reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 			return
 		}
 		domain, err := tsh.grpcSH.CreateTenantDomain(nil, dom)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-			mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+			msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+			reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 			return
 		}
 
@@ -253,14 +253,14 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 
 				mo, err := generateMonitoredObject(obj[moIDStr].(string), dataIDForTenant, obj[moActuatorNameStr].(string), obj[moReflectorNameStr].(string), obj[moObjectNameStr].(string), createdDomainIDSet)
 				if err != nil {
-					http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-					mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+					msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+					reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 					return
 				}
 				_, err = tsh.grpcSH.CreateMonitoredObject(nil, mo)
 				if err != nil {
-					http.Error(w, fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error()), http.StatusInternalServerError)
-					mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+					msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
+					reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 					return
 				}
 			}
@@ -270,7 +270,8 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 	// All operations successful, just return the Tenant Descriptor as success:
 	response, err := json.Marshal(tenantDescriptor)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Error generating response: %s", err.Error())
+		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -290,8 +291,8 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 		// doing the delete by datatype filter, not all docs.
 		allDocsByType, err := tsh.testDB.GetAllDocsByDatatype(dbName, datatypeFilter)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to purge DB %s of documents of type %s: %s", dbName, datatypeFilter, err.Error()), http.StatusInternalServerError)
-			mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+			msg := fmt.Sprintf("Unable to purge DB %s of documents of type %s: %s", dbName, datatypeFilter, err.Error())
+			reportError(w, startTime, "500", purgeDBStr, msg, http.StatusInternalServerError)
 			return
 		}
 
@@ -308,8 +309,8 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 
 			_, err = tsh.pouchDB.BulkDBUpdate(dbName, deleteBody)
 			if err != nil {
-				http.Error(w, fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
-				mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+				msg := fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error())
+				reportError(w, startTime, "500", purgeDBStr, msg, http.StatusInternalServerError)
 				return
 			}
 		}
@@ -323,8 +324,8 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 	// Get a list of all documents from the DB:
 	docs, err := tsh.pouchDB.GetAllDBDocs(dbName, map[string]interface{}{})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+		msg := fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", purgeDBStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -344,14 +345,14 @@ func (tsh *TestDataServiceHandler) PurgeDB(w http.ResponseWriter, r *http.Reques
 
 		_, err = tsh.pouchDB.BulkDBUpdate(dbName, deleteBody)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
-			mon.TrackAPITimeMetricInSeconds(startTime, "500", populateTestDataStr)
+			msg := fmt.Sprintf("Unable to purge DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", purgeDBStr, msg, http.StatusInternalServerError)
 			return
 		}
 	}
 
 	// Purge complete, send back success details:
-	mon.TrackAPITimeMetricInSeconds(startTime, "200", populateTestDataStr)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", purgeDBStr)
 	fmt.Fprintf(w, "Successfully purged all records from DB "+dbName)
 }
 
@@ -361,15 +362,15 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	// Get the contents of the request:
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", "Test Data", err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInSeconds(startTime, "400", generateSLAReportStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", "Generate SLA Report", err.Error())
+		reportError(w, startTime, "400", generateSLAReportStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = validateGenerateDomainSLAReportRequest(requestBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInSeconds(startTime, "400", generateSLAReportStr)
+		msg := fmt.Sprintf("Unable to validate %s request: %s", "Generate SLA Report", err.Error())
+		reportError(w, startTime, "400", generateSLAReportStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -384,8 +385,8 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	// Get the list of Domain Objects provisioned for this tenant:
 	domainSetForTenant, err := tsh.grpcSH.GetAllTenantDomains(nil, &wr.StringValue{Value: tenantID})
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to generate %s content for Tenant %s: No Domain data provisioned", db.DomainSlaReportStr, tenantID), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", generateSLAReportStr)
+		msg := fmt.Sprintf("Unable to generate %s content for Tenant %s: No Domain data provisioned", db.DomainSlaReportStr, tenantID)
+		reportError(w, startTime, "500", generateSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -399,8 +400,8 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 			// Add a new Report to the list of documents to insert
 			slaReport, err := generateSLADomainReport(domain, startReportTS, endReportTS)
 			if err != nil {
-				http.Error(w, fmt.Sprintf("Unable to generate %s content for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
-				mon.TrackAPITimeMetricInSeconds(startTime, "500", generateSLAReportStr)
+				msg := fmt.Sprintf("Unable to generate %s content for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error())
+				reportError(w, startTime, "500", generateSLAReportStr, msg, http.StatusInternalServerError)
 				return
 			}
 			docsToInsert = append(docsToInsert, slaReport)
@@ -418,8 +419,8 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	tenantIDForUpdate := db.PrependToDataID(tenantID, string(db.TenantDescriptorType))
 	_, err = tsh.pouchDB.BulkDBUpdate(tenantIDForUpdate, insertBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to insert %ss for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", generateSLAReportStr)
+		msg := fmt.Sprintf("Unable to insert %ss for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error())
+		reportError(w, startTime, "500", generateSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -435,23 +436,23 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	docType := getDBFieldFromRequest(r, 3)
 
 	if len(dbName) == 0 || len(docType) == 0 {
-		http.Error(w, fmt.Sprintf("Unable to retrieve documents without a DB name and Document type"), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", getDocsByTypeStr)
+		msg := fmt.Sprintf("Unable to retrieve documents without a DB name and Document type")
+		reportError(w, startTime, "500", getDocsByTypeStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	allDocsByType, err := tsh.testDB.GetAllDocsByDatatype(dbName, docType)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to retrieve documents of type %s from DB %s: %s", docType, dbName, err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", getDocsByTypeStr)
+		msg := fmt.Sprintf("Unable to retrieve documents of type %s from DB %s: %s", docType, dbName, err.Error())
+		reportError(w, startTime, "500", getDocsByTypeStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// All operations successful, just return the Tenant Descriptor as success:
 	response, err := json.Marshal(allDocsByType)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
-		mon.TrackAPITimeMetricInSeconds(startTime, "500", getDocsByTypeStr)
+		msg := fmt.Sprintf("Error generating response: %s", err.Error())
+		reportError(w, startTime, "500", getDocsByTypeStr, msg, http.StatusInternalServerError)
 		return
 	}
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", getDocsByTypeStr)

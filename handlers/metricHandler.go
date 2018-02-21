@@ -189,23 +189,23 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 	})
 
 	if err != nil {
-		trackAPIMetrics(startTime, "404", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), http.StatusNotFound)
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
 	}
 
 	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, thresholdProfile)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to marshal Threshold Crossing. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to marshal Threshold Crossing. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -233,23 +233,23 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 	})
 
 	if err != nil {
-		trackAPIMetrics(startTime, "404", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), http.StatusNotFound)
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
 		return
 	}
 
 	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -270,16 +270,16 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 
 	result, err := msh.druidDB.GetHistogram(histogramReq)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetHistogramObjStr)
-		http.Error(w, fmt.Sprintf("Unable to marshal Histogram response. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to marshal Histogram response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -300,16 +300,16 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 
 	result, err := msh.druidDB.GetRawMetrics(rawMetricReq)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetThrCrossStr)
-		http.Error(w, fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.RawMetricStr)
-		http.Error(w, fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error()), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
 		return
 	}
 

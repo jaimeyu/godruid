@@ -13,7 +13,6 @@ import (
 	"github.com/accedian/adh-gather/datastore/inMemory"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
-	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
 )
@@ -181,8 +180,8 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	queryParams := r.URL.Query()
 	result, err := psh.pouchPluginDB.GetChanges(dbName, &queryParams)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", getChangesStr)
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error())
+		reportError(w, startTime, "400", getChangesStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -190,8 +189,8 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	logger.Log.Infof("Successfully accessed %s changes from DB %s\n", db.ChangeFeedStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.ChangeFeedStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", getChangesStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.ChangeFeedStr, err.Error())
+		reportError(w, startTime, "400", getChangesStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -210,16 +209,16 @@ func (psh *PouchDBPluginServiceHandler) CheckAvailability(w http.ResponseWriter,
 	//Issue request to DAO Layer to access check availability
 	result, err := psh.pouchPluginDB.CheckAvailability()
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error checking CouchDB availability: %s", err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", serverHBStr)
+		msg := fmt.Sprintf("Error checking CouchDB availability: %s", err.Error())
+		reportError(w, startTime, "500", serverHBStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Succesfully accessed the couch server, return the result
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", serverHBStr)
+		msg := fmt.Sprintf("Error generating response: %s", err.Error())
+		reportError(w, startTime, "500", serverHBStr, msg, http.StatusInternalServerError)
 		return
 	}
 	logger.Log.Info("CouchDB server is available.\n")
@@ -241,15 +240,15 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 	queryParams := r.URL.Query()
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "500", storeCheckpointStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", db.DBSyncCheckpointStr, err.Error())
+		reportError(w, startTime, "500", storeCheckpointStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	result, err := psh.pouchPluginDB.StoreDBSyncCheckpoint(dbName, &queryParams, requestBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to store %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", storeCheckpointStr)
+		msg := fmt.Sprintf("Unable to store %s: %s", db.DBSyncCheckpointStr, err.Error())
+		reportError(w, startTime, "500", storeCheckpointStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -257,8 +256,8 @@ func (psh *PouchDBPluginServiceHandler) StoreDBSyncCheckpoint(w http.ResponseWri
 	logger.Log.Infof("Successfully stored %s to DB %s\n", db.DBSyncCheckpointStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", storeCheckpointStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error())
+		reportError(w, startTime, "500", storeCheckpointStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -286,12 +285,12 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	result, err := psh.pouchPluginDB.GetDBSyncCheckpoint(dbName, documentID)
 	if err != nil {
 		if checkError(err, notFound) {
-			http.Error(w, fmt.Sprintf("%s %s does not exist", db.DBSyncCheckpointStr, documentID), http.StatusNotFound)
-			trackAPIMetrics(startTime, "404", getCheckpointStr)
+			msg := fmt.Sprintf("%s %s does not exist", db.DBSyncCheckpointStr, documentID)
+			reportError(w, startTime, "404", getCheckpointStr, msg, http.StatusNotFound)
 			return
 		}
-		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", getCheckpointStr)
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.DBSyncCheckpointStr, err.Error())
+		reportError(w, startTime, "500", getCheckpointStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -299,8 +298,8 @@ func (psh *PouchDBPluginServiceHandler) GetDBSyncCheckpoint(w http.ResponseWrite
 	logger.Log.Infof("Successfully retrieved %s %s from DB %s\n", db.DBSyncCheckpointStr, documentID, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", getCheckpointStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBSyncCheckpointStr, err.Error())
+		reportError(w, startTime, "500", getCheckpointStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -321,16 +320,16 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", dbDiffStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", db.DBRevDiffStr, err.Error())
+		reportError(w, startTime, "400", dbDiffStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	//Issue request to DAO Layer to fetch the Revision Diff
 	result, err := psh.pouchPluginDB.GetDBRevisionDiff(dbName, requestBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to retrieve %s: %s", db.DBRevDiffStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", dbDiffStr)
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.DBRevDiffStr, err.Error())
+		reportError(w, startTime, "400", dbDiffStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -338,8 +337,8 @@ func (psh *PouchDBPluginServiceHandler) GetDBRevisionDiff(w http.ResponseWriter,
 	logger.Log.Infof("Successfully retrieved %s from DB %s\n", db.DBRevDiffStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBRevDiffStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", dbDiffStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBRevDiffStr, err.Error())
+		reportError(w, startTime, "500", dbDiffStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -359,16 +358,16 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
-		mon.TrackAPITimeMetricInSeconds(startTime, "400", bulkUpdateStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", db.DBBulkUpdateStr, err.Error())
+		reportError(w, startTime, "400", bulkUpdateStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	//Issue request to DAO Layer to perform the bulk update
 	result, err := psh.pouchPluginDB.BulkDBUpdate(dbName, requestBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkUpdateStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", bulkUpdateStr)
+		msg := fmt.Sprintf("Unable to complete %s: %s", db.DBBulkUpdateStr, err.Error())
+		reportError(w, startTime, "400", bulkUpdateStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -376,8 +375,8 @@ func (psh *PouchDBPluginServiceHandler) BulkDBUpdate(w http.ResponseWriter, r *h
 	logger.Log.Infof("Successfully completed %s from DB %s\n", db.DBBulkUpdateStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkUpdateStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", bulkUpdateStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBBulkUpdateStr, err.Error())
+		reportError(w, startTime, "500", bulkUpdateStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -396,20 +395,20 @@ func (psh *PouchDBPluginServiceHandler) CheckDBAvailability(w http.ResponseWrite
 	result, err := psh.IsDBAvailable(dbName)
 	if err != nil {
 		if checkError(err, notFound) {
-			http.Error(w, fmt.Sprintf("DB %s does not exist", dbName), http.StatusNotFound)
-			trackAPIMetrics(startTime, "404", dbHBStr)
+			msg := fmt.Sprintf("DB %s does not exist", dbName)
+			reportError(w, startTime, "404", dbHBStr, msg, http.StatusNotFound)
 			return
 		}
-		http.Error(w, fmt.Sprintf("Error checking availability of DB %s: %s", dbName, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", dbHBStr)
+		msg := fmt.Sprintf("Error checking availability of DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", dbHBStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Succesfully accessed the couch server, return the result
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating response: %s", err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", dbHBStr)
+		msg := fmt.Sprintf("Error generating response: %s", err.Error())
+		reportError(w, startTime, "500", dbHBStr, msg, http.StatusInternalServerError)
 		return
 	}
 	logger.Log.Infof("DB %s is available.\n", dbName)
@@ -430,16 +429,16 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s request content: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", allDocsStr)
+		msg := fmt.Sprintf("Unable to read %s request content: %s", db.DBAllDocsStr, err.Error())
+		reportError(w, startTime, "400", allDocsStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	//Issue request to DAO Layer to perform the bulk fetch
 	result, err := psh.pouchPluginDB.GetAllDBDocs(dbName, requestBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to fetch %s: %s", db.DBAllDocsStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", allDocsStr)
+		msg := fmt.Sprintf("Unable to fetch %s: %s", db.DBAllDocsStr, err.Error())
+		reportError(w, startTime, "400", allDocsStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -447,8 +446,8 @@ func (psh *PouchDBPluginServiceHandler) GetAllDBDocs(w http.ResponseWriter, r *h
 	logger.Log.Infof("Successfully retrieved %s from DB %s\n", db.DBAllDocsStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBAllDocsStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", allDocsStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBAllDocsStr, err.Error())
+		reportError(w, startTime, "500", allDocsStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -467,8 +466,8 @@ func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.
 	//Issue request to DAO Layer to perform the DB creation
 	result, err := psh.AddDB(dbName)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to create DB %s: %s", dbName, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", createDbStr)
+		msg := fmt.Sprintf("Unable to create DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "400", createDbStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -476,8 +475,8 @@ func (psh *PouchDBPluginServiceHandler) CreateDB(w http.ResponseWriter, r *http.
 	logger.Log.Infof("Successfully created DB %s\n", dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating DB creation response: %s", err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", createDbStr)
+		msg := fmt.Sprintf("Error generating DB creation response: %s", err.Error())
+		reportError(w, startTime, "500", createDbStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -499,8 +498,8 @@ func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.
 	queryParams := r.URL.Query()
 	result, err := psh.pouchPluginDB.GetDoc(dbName, docID, &queryParams, &r.Header)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to retrieve %s %s: %s", db.DBDocStr, docID, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", getDBDocStr)
+		msg := fmt.Sprintf("Unable to retrieve %s %s: %s", db.DBDocStr, docID, err.Error())
+		reportError(w, startTime, "400", getDBDocStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -508,8 +507,8 @@ func (psh *PouchDBPluginServiceHandler) GetDBDoc(w http.ResponseWriter, r *http.
 	logger.Log.Infof("Successfully accessed %s %s from DB %s\n", db.DBDocStr, docID, dbName)
 	response, err := json.Marshal(result["data"]) // Only need the data portion of this wrapper object
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBDocStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", getDBDocStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBDocStr, err.Error())
+		reportError(w, startTime, "500", getDBDocStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -529,16 +528,16 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	queryParams := r.URL.Query()
 	requestBody, err := getRequestBodyAsGenericObject(r)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to read %s content: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", bulkGetStr)
+		msg := fmt.Sprintf("Unable to read %s content: %s", db.DBBulkGetStr, err.Error())
+		reportError(w, startTime, "400", bulkGetStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	//Issue request to DAO Layer to perform the bulk update
 	result, err := psh.pouchPluginDB.BulkDBGet(dbName, &queryParams, requestBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Unable to complete %s: %s", db.DBBulkGetStr, err.Error()), http.StatusBadRequest)
-		trackAPIMetrics(startTime, "400", bulkGetStr)
+		msg := fmt.Sprintf("Unable to complete %s: %s", db.DBBulkGetStr, err.Error())
+		reportError(w, startTime, "400", bulkGetStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -546,8 +545,8 @@ func (psh *PouchDBPluginServiceHandler) BulkDBGet(w http.ResponseWriter, r *http
 	logger.Log.Infof("Successfully completed %s from DB %s\n", db.DBBulkGetStr, dbName)
 	response, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating %s response: %s", db.DBBulkGetStr, err.Error()), http.StatusInternalServerError)
-		trackAPIMetrics(startTime, "500", bulkGetStr)
+		msg := fmt.Sprintf("Error generating %s response: %s", db.DBBulkGetStr, err.Error())
+		reportError(w, startTime, "500", bulkGetStr, msg, http.StatusInternalServerError)
 		return
 	}
 

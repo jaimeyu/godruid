@@ -141,8 +141,8 @@ const (
 )
 
 var (
-	// APICallDuration - Time it takes to create a Tenant in Gather.
-	APICallDuration prometheus.HistogramVec
+	// APICallDuration - Time it takes to complete a call.
+	APICallDuration prometheus.SummaryVec
 
 	// RecievedAPICalls - the number of API calls gather has recieved since startup
 	RecievedAPICalls prometheus.Counter
@@ -183,9 +183,13 @@ var (
 
 // InitMetrics - registers all metrics to be collected for Gather.
 func InitMetrics() {
-	APICallDuration = *prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	APICallDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Name: "gather_api_call_duration",
 		Help: "Time taken to execute an API call",
+		Objectives: map[float64]float64{
+			0.5:  0.1,
+			0.9:  0.5,
+			0.99: 1.0},
 	}, []string{"code", "name"})
 
 	RecievedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
@@ -255,7 +259,7 @@ func InitMetrics() {
 func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 	duration := time.Since(startTime).Seconds()
 
-	logger.Log.Infof("%v: %b", labels, duration)
+	logger.Log.Infof("%v: %f", labels, duration)
 	APICallDuration.WithLabelValues(labels...).Observe(duration)
 }
 

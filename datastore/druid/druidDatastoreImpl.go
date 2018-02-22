@@ -1,8 +1,11 @@
 package druid
 
 import (
+	"crypto/tls"
 	"encoding/json"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
@@ -50,6 +53,23 @@ type RawMetricsResponse struct {
 	Result    RawMetricsResult
 }
 
+func makeHttpClient() *http.Client {
+	// By default, use 60 second timeout unless specified otherwise
+	// by the caller
+	clientTimeout := 60 * time.Second
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{
+		Timeout:   clientTimeout,
+		Transport: tr,
+	}
+
+	return httpClient
+}
+
 func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error) {
 
 	client := dc.dClient
@@ -80,8 +100,9 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	server := cfg.GetString(gather.CK_druid_server.String())
 	port := cfg.GetString(gather.CK_druid_port.String())
 	client := godruid.Client{
-		Url:   server + ":" + port,
-		Debug: true,
+		Url:        server + ":" + port,
+		Debug:      true,
+		HttpClient: makeHttpClient(),
 	}
 
 	return &DruidDatastoreClient{

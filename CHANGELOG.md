@@ -1,7 +1,10 @@
 ## Current Release 
-### 0.79.0 
-**Release Date:** Wed Feb 21 18:01:57 UTC 2018     
+### 0.80.0 
+**Release Date:** Wed Feb 21 19:59:53 UTC 2018     
 ## Previous Releases 
+### 0.79.0 
+**Release Date:** Wed Feb 21 18:01:57 UTC 2018   
+* update default threshold profile  
 ### 0.78.0 
 **Release Date:** Tue Feb 20 20:31:41 UTC 2018     
 ### 0.77.0 

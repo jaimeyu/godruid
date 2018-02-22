@@ -100,24 +100,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 						EventAttrMap: map[string]string{
 							"enabled":  "true",
 							"minor":    "135000",
-							"major":    "140000",
-							"critical": "170000",
+							"major":    "95000",
+							"critical": "100000",
 						},
 					},
 					"jitterP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
 						EventAttrMap: map[string]string{
 							"enabled":  "true",
-							"minor":    "35000",
-							"major":    "40000",
-							"critical": "45000",
+							"minor":    "15000",
+							"major":    "20000",
+							"critical": "30000",
 						},
 					},
 					"packetsLostPct": &pb.TenantThresholdProfileData_UIEventAttrMap{
 						EventAttrMap: map[string]string{
 							"enabled":  "true",
-							"minor":    "0.20",
-							"major":    "0.30",
-							"critical": "0.35",
+							"minor":    "0.1",
+							"major":    "0.3",
+							"critical": "0.8",
 						},
 					},
 				},
@@ -130,24 +130,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "135000",
+													"lowerLimit":  "92500",
 													"lowerStrict": "true",
-													"upperLimit":  "140000",
+													"upperLimit":  "95000",
 													"unit":        "ms",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "140000",
+													"lowerLimit":  "95000",
 													"lowerStrict": "true",
-													"upperLimit":  "170000",
+													"upperLimit":  "100000",
 													"upperStrict": "false",
 													"unit":        "ms",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "170000",
+													"lowerLimit":  "100000",
 													"lowerStrict": "true",
 													"unit":        "ms",
 												},
@@ -162,24 +162,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "35000",
+													"lowerLimit":  "15000",
 													"lowerStrict": "true",
-													"upperLimit":  "40000",
+													"upperLimit":  "20000",
 													"unit":        "ms",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "40000",
+													"lowerLimit":  "20000",
 													"lowerStrict": "true",
-													"upperLimit":  "45000",
+													"upperLimit":  "30000",
 													"upperStrict": "false",
 													"unit":        "ms",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "45000",
+													"lowerLimit":  "30000",
 													"lowerStrict": "true",
 													"unit":        "ms",
 												},
@@ -194,24 +194,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.20",
+													"lowerLimit":  "0.1",
 													"lowerStrict": "true",
-													"upperLimit":  "0.30",
+													"upperLimit":  "0.3",
 													"unit":        "pct",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.30",
+													"lowerLimit":  "0.3",
 													"lowerStrict": "true",
-													"upperLimit":  "0.35",
+													"upperLimit":  "0.8",
 													"upperStrict": "false",
 													"unit":        "pct",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "0.35",
+													"lowerLimit":  "0.8",
 													"lowerStrict": "true",
 													"unit":        "pct",
 												},
@@ -229,27 +229,29 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 					"throughputAvg": &pb.TenantThresholdProfileData_UIEventAttrMap{
 						EventAttrMap: map[string]string{
 							"enabled":  "true",
-							"minor":    "35000000",
-							"major":    "50000000",
-							"critical": "70000000",
+							"minor":    "18000000",
+							"major":    "20000000",
+							"critical": "25000000",
 						},
 					},
-					"throughputMax": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "35000000",
-							"major":    "50000000",
-							"critical": "80000000",
-						},
-					},
-					"throughputMin": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "35000000",
-							"major":    "50000000",
-							"critical": "80000000",
-						},
-					},
+					// Removing these items for MWC, leaving them commented out in case
+					// there is a desire for them later.
+					// "throughputMax": &pb.TenantThresholdProfileData_UIEventAttrMap{
+					// 	EventAttrMap: map[string]string{
+					// 		"enabled":  "true",
+					// 		"minor":    "16500000",
+					// 		"major":    "17500000",
+					// 		"critical": "20000000",
+					// 	},
+					// },
+					// "throughputMin": &pb.TenantThresholdProfileData_UIEventAttrMap{
+					// 	EventAttrMap: map[string]string{
+					// 		"enabled":  "true",
+					// 		"minor":    "16500000",
+					// 		"major":    "17500000",
+					// 		"critical": "20000000",
+					// 	},
+					// },
 				},
 				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
 					string(Flowmeter): &pb.TenantThresholdProfileData_MetricMap{
@@ -260,24 +262,24 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
 											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "35000000",
+													"lowerLimit":  "18000000",
 													"lowerStrict": "true",
-													"upperLimit":  "50000000",
+													"upperLimit":  "20000000",
 													"unit":        "bps",
 												},
 											},
 											"major": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "50000000",
+													"lowerLimit":  "20000000",
 													"lowerStrict": "true",
-													"upperLimit":  "70000000",
+													"upperLimit":  "25000000",
 													"upperStrict": "false",
 													"unit":        "bps",
 												},
 											},
 											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
 												map[string]string{
-													"lowerLimit":  "70000000",
+													"lowerLimit":  "25000000",
 													"lowerStrict": "true",
 													"unit":        "bps",
 												},
@@ -286,70 +288,72 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 									},
 								},
 							},
-							"throughputMax": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "35000000",
-													"lowerStrict": "true",
-													"upperLimit":  "50000000",
-													"unit":        "bps",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "50000000",
-													"lowerStrict": "true",
-													"upperLimit":  "80000000",
-													"upperStrict": "false",
-													"unit":        "bps",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "80000000",
-													"lowerStrict": "true",
-													"unit":        "bps",
-												},
-											},
-										},
-									},
-								},
-							},
-							"throughputMin": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "35000000",
-													"lowerStrict": "true",
-													"upperLimit":  "50000000",
-													"unit":        "bps",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "50000000",
-													"lowerStrict": "true",
-													"upperLimit":  "80000000",
-													"upperStrict": "false",
-													"unit":        "bps",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "80000000",
-													"lowerStrict": "true",
-													"unit":        "bps",
-												},
-											},
-										},
-									},
-								},
-							},
+							// Removing these items for MWC, leaving them commented out in case
+							// there is a desire for them later.
+							// "throughputMax": &pb.TenantThresholdProfileData_DirectionMap{
+							// 	DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+							// 		"0": &pb.TenantThresholdProfileData_EventMap{
+							// 			EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+							// 				"minor": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "16500000",
+							// 						"lowerStrict": "true",
+							// 						"upperLimit":  "17500000",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 				"major": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "17500000",
+							// 						"lowerStrict": "true",
+							// 						"upperLimit":  "20000000",
+							// 						"upperStrict": "false",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 				"critical": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "20000000",
+							// 						"lowerStrict": "true",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 			},
+							// 		},
+							// 	},
+							// },
+							// "throughputMin": &pb.TenantThresholdProfileData_DirectionMap{
+							// 	DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
+							// 		"0": &pb.TenantThresholdProfileData_EventMap{
+							// 			EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
+							// 				"minor": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "16500000",
+							// 						"lowerStrict": "true",
+							// 						"upperLimit":  "17500000",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 				"major": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "17500000",
+							// 						"lowerStrict": "true",
+							// 						"upperLimit":  "20000000",
+							// 						"upperStrict": "false",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 				"critical": &pb.TenantThresholdProfileData_EventAttrMap{
+							// 					map[string]string{
+							// 						"lowerLimit":  "20000000",
+							// 						"lowerStrict": "true",
+							// 						"unit":        "bps",
+							// 					},
+							// 				},
+							// 			},
+							// 		},
+							// 	},
+							// },
 						},
 					},
 				},

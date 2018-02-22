@@ -99,7 +99,7 @@ func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
 					"delayP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
 						EventAttrMap: map[string]string{
 							"enabled":  "true",
-							"minor":    "135000",
+							"minor":    "92500",
 							"major":    "95000",
 							"critical": "100000",
 						},

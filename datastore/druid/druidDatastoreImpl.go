@@ -282,7 +282,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
 	if timeout == 0 {
-		timeout = 5000
+		timeout = 30000
 	}
 
 	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout)

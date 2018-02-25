@@ -171,6 +171,7 @@ func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error
 // on the API format.
 func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	defer r.Body.Close()
 
 	dbName := getDBFieldFromRequest(r, 2)
 

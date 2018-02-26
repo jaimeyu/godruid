@@ -37,6 +37,11 @@ import (
 const (
 	defaultIngestionDictionaryPath = "files/defaultIngestionDictionary.json"
 	defaultSwaggerFile             = "files/swagger.json"
+	globalChangesDBName            = "_global_changes"
+	replicatorDBName               = "_replicator"
+	metadataDBName                 = "_metadata"
+	usersDBName                    = "_users"
+	statsDBName                    = "_stats"
 )
 
 var (
@@ -333,13 +338,43 @@ func doesSliceContainString(container []string, value string) bool {
 }
 
 func provisionCouchData(gatherServer *GatherServer, adminDB string) {
+	ensureBaseCouchDBsExist(gatherServer)
 	ensureAdminDBExists(gatherServer, adminDB)
 	ensureIngestionDictionaryExists(gatherServer, adminDB)
 	ensureValidTypesExists(gatherServer, adminDB)
 }
 
+func createCouchDB(gatherServer *GatherServer, dbName string) error {
+	// Make sure global changes db exists
+	_, err := gatherServer.pouchSH.IsDBAvailable(dbName)
+	if err != nil {
+		logger.Log.Infof("Database %s does not exist. %s DB will now be created.", dbName, dbName)
+		// Try to create the DB
+		_, err = gatherServer.pouchSH.AddDB(dbName)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func ensureBaseCouchDBsExist(gatherServer *GatherServer) {
+	if err := createCouchDB(gatherServer, globalChangesDBName); err != nil {
+		logger.Log.Fatalf("Unable to create DB %s: %s", globalChangesDBName, err.Error())
+	}
+	if err := createCouchDB(gatherServer, metadataDBName); err != nil {
+		logger.Log.Fatalf("Unable to create DB %s: %s", metadataDBName, err.Error())
+	}
+	if err := createCouchDB(gatherServer, replicatorDBName); err != nil {
+		logger.Log.Fatalf("Unable to create DB %s: %s", replicatorDBName, err.Error())
+	}
+	if err := createCouchDB(gatherServer, usersDBName); err != nil {
+		logger.Log.Fatalf("Unable to create DB %s: %s", usersDBName, err.Error())
+	}
+}
+
 func ensureAdminDBExists(gatherServer *GatherServer, adminDB string) {
-	// Make sure the admin DB exists:
 	_, err := gatherServer.pouchSH.IsDBAvailable(adminDB)
 	if err != nil {
 		logger.Log.Infof("Database %s does not exist. %s DB will now be created.", adminDB, adminDB)

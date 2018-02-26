@@ -216,26 +216,15 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 
 	for _, monObj := range monitoredObjects {
 		for _, metric := range metrics {
-			aggregationCount := godruid.AggFiltered(
-				godruid.FilterAnd(
-					godruid.FilterNot(
-						godruid.FilterSelector(metric, 0),
-					),
-					godruid.FilterSelector("monitoredObjectId", monObj)),
+			aggregationMax := godruid.AggFiltered(
+				godruid.FilterSelector("monitoredObjectId", monObj),
 				&godruid.Aggregation{
 					Type:      "doubleMax",
 					Name:      monObj + "." + metric,
 					FieldName: metric,
 				},
 			)
-			sumAgg := godruid.AggDoubleSum(monObj+"."+metric+"_temporary_sum", metric)
-
-			aggregationSum := godruid.AggFiltered(
-				godruid.FilterSelector("monitoredObjectId", monObj),
-				&sumAgg)
-
-			aggregations = append(aggregations, aggregationCount)
-			aggregations = append(aggregations, aggregationSum)
+			aggregations = append(aggregations, aggregationMax)
 		}
 	}
 
@@ -244,7 +233,6 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Aggregations: aggregations,
-		//		PostAggregations: postAggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			godruid.FilterSelector("objectType", objectType),

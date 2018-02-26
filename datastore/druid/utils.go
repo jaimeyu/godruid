@@ -71,15 +71,26 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 
 func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
 	res := gabs.New()
+	var hasData bool
 	for _, r := range rawMetrics {
 
 		obj := gabs.New()
 		var monObj string
 		for k, v := range r.Result {
+
 			parts := strings.Split(k, ".")
 			monObj = parts[0]
 			lastParts := parts[len(parts)-1]
-			if !strings.Contains(lastParts, "temporary") {
+
+			switch v.(type) {
+			case float32:
+				hasData = true
+			case string:
+				hasData = !strings.Contains(v.(string), "Infinity")
+			default:
+				hasData = true
+			}
+			if !strings.Contains(lastParts, "temporary") && hasData {
 				obj.SetP(v, lastParts)
 			}
 		}
@@ -90,8 +101,11 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 				return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
 			}
 		}
-		obj.SetP(r.Timestamp, "timestamp")
-		res.ArrayAppendP(obj.Data(), "result."+monObj)
+
+		if hasData {
+			obj.SetP(r.Timestamp, "timestamp")
+			res.ArrayAppendP(obj.Data(), "result."+monObj)
+		}
 
 	}
 

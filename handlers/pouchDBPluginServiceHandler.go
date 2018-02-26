@@ -196,6 +196,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 
 	heartbeat := queryParams.Get(heartbeatStr)
 	stopHeartbeat := false
+	clientDisconnected := false
 	if heartbeat != "" {
 		// This is a longpoll, need to handel the open connection
 		heartbeatInterval, err := strconv.Atoi(heartbeat)
@@ -227,6 +228,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 
 				select {
 				case <-cn.CloseNotify():
+					clientDisconnected = true
 					logger.Log.Debug("Client disconnected from changes stream")
 					return
 				default:
@@ -239,7 +241,30 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 		}()
 	}
 
-	result, err := psh.pouchPluginDB.GetChanges(dbName, &queryParams)
+	// Run this request in a go routine so that if the client disconnects, no connections will be leaked.
+	var result map[string]interface{}
+	var err error
+	go func() {
+		result, err = psh.pouchPluginDB.GetChanges(dbName, &queryParams)
+	}()
+
+	// Wait for a result to be returned from the go routine making the couch call.
+	// Note that this loop is terminated if a response comes back, an error occurs, but also
+	// will be cleaned up if the client disconnects
+	for {
+		if clientDisconnected {
+			// Just exit as there is nobody to which to send the response
+			logger.Log.Debugf("Client disconnected. Closing the connections.")
+			trackAPIMetrics(startTime, "500", getChangesStr)
+			return
+		}
+		if result == nil && err == nil {
+			time.Sleep(time.Millisecond * 500)
+			continue
+		}
+		break
+	}
+
 	stopHeartbeat = true
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error())

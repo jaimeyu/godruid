@@ -208,34 +208,36 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32) (*godruid.QuerySelect, error) {
+func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 
 	metrics := strings.Split(metric, ",")
+	var aggregations []godruid.Aggregation
 	monitoredObjects := strings.Split(monitoredObjectId, ",")
-	var monitoredObjectFilters []*godruid.Filter
 
-	for _, m := range monitoredObjects {
-		monitoredObjectFilters = append(monitoredObjectFilters, godruid.FilterSelector("monitoredObjectId", m))
+	for _, monObj := range monitoredObjects {
+		for _, metric := range metrics {
+			aggregationMax := godruid.AggFiltered(
+				godruid.FilterSelector("monitoredObjectId", monObj),
+				&godruid.Aggregation{
+					Type:      "doubleMax",
+					Name:      monObj + "." + metric,
+					FieldName: metric,
+				},
+			)
+			aggregations = append(aggregations, aggregationMax)
+		}
 	}
 
-	return &godruid.QuerySelect{
-		DataSource:  dataSource,
-		Granularity: godruid.GranAll,
-		Context:     map[string]interface{}{"timeout": timeout},
+	return &godruid.QueryTimeseries{
+		DataSource:   dataSource,
+		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			godruid.FilterOr(monitoredObjectFilters...),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
-		Intervals:  []string{interval},
-		Metrics:    metrics,
-		PagingSpec: map[string]interface{}{"threshold": 50000}, // TODO peyo hardcoding threshold, will have to find out what value we want here
-		Dimensions: []godruid.DimSpec{
-			godruid.Dimension{
-				Dimension:  "monitoredObjectId",
-				OutputName: "monitoredObjectId",
-			},
-		},
+		Intervals: []string{interval},
 	}, nil
 }

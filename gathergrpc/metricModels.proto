@@ -79,6 +79,7 @@ message RawMetricsRequest {
   string objectType = 5;
   string monitoredObjectId = 6;
   int32  timeout = 10;
+  string  granularity = 11;
 }
 
 message RawMetricsResponse {

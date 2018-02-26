@@ -1,8 +1,10 @@
 ## Current Release 
+### 0.86.0 
+**Release Date:** Mon Feb 26 14:56:37 UTC 2018     
+## Previous Releases 
 ### 0.85.0 
 **Release Date:** Sun Feb 25 22:08:41 UTC 2018  
 * Added - DBs used by couch to manage the service now created on startup if they are missing.   
-## Previous Releases 
 ### 0.84.0 
 **Release Date:** Fri Feb 23 16:40:13 UTC 2018     
 ### 0.83.0 

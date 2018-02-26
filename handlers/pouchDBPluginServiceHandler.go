@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,6 +36,9 @@ const (
 	allDocsStr         = pouchStr + "_all_docs"
 	createDocStr       = pouchStr + "_db_doc_put"
 	getDBDocStr        = pouchStr + "_db_doc_get"
+
+	heartbeatStr = "heartbeat"
+	heartbeatMax = 25000
 )
 
 // PouchDBPluginServiceHandler - handler of logic related to calls for the
@@ -173,13 +177,70 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 	startTime := time.Now()
 	defer r.Body.Close()
 
+	// Cast an object to be used to send periodic data to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		logger.Log.Debug("Error casting writer to flusher")
+	}
+
+	w.Header().Add("Cache-Control", "must-revalidate")
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("X-Content-Type-Options", "nosniff")
+
 	dbName := getDBFieldFromRequest(r, 2)
 
 	logger.Log.Infof("Looking for changes from DB %s", dbName)
 
 	//Issue request to DAO Layer to access the Changes Feed
 	queryParams := r.URL.Query()
+
+	heartbeat := queryParams.Get(heartbeatStr)
+	stopHeartbeat := false
+	if heartbeat != "" {
+		// This is a longpoll, need to handel the open connection
+		heartbeatInterval, err := strconv.Atoi(heartbeat)
+		if err != nil {
+			msg := fmt.Sprintf("Could not establish hearbeat for %s response: %s", db.ChangeFeedStr, err.Error())
+			reportError(w, startTime, "400", getChangesStr, msg, http.StatusBadRequest)
+			return
+		}
+		if heartbeatInterval > heartbeatMax {
+			heartbeatInterval = heartbeatMax
+		}
+
+		// This request needs to intermittently return blank lines to keep the connection open.
+		// Start a go routine to handle that:
+		go func() {
+			// Setup an object which will notify us when the client closes the connection to this request.
+			cn, ok := w.(http.CloseNotifier)
+			if !ok {
+				msg := fmt.Sprintf("Unable to setup streaming response %s: %s", db.ChangeFeedStr, err.Error())
+				reportError(w, startTime, "500", getChangesStr, msg, http.StatusInternalServerError)
+				return
+			}
+
+			// Run the loop which will keep the connection with the client alive
+			for {
+				if stopHeartbeat {
+					break
+				}
+
+				select {
+				case <-cn.CloseNotify():
+					logger.Log.Debug("Client disconnected from changes stream")
+					return
+				default:
+					logger.Log.Debugf("Changes Heartbeat: %v", time.Now())
+					fmt.Fprintf(w, "\n")
+					flusher.Flush()
+					time.Sleep(time.Duration(time.Millisecond * time.Duration(heartbeatInterval)))
+				}
+			}
+		}()
+	}
+
 	result, err := psh.pouchPluginDB.GetChanges(dbName, &queryParams)
+	stopHeartbeat = true
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", db.ChangeFeedStr, err.Error())
 		reportError(w, startTime, "400", getChangesStr, msg, http.StatusBadRequest)
@@ -188,6 +249,7 @@ func (psh *PouchDBPluginServiceHandler) GetChanges(w http.ResponseWriter, r *htt
 
 	// Succesfully fetched the Changes Feed, return the result. See
 	logger.Log.Infof("Successfully accessed %s changes from DB %s\n", db.ChangeFeedStr, dbName)
+
 	response, err := json.Marshal(result)
 	if err != nil {
 		msg := fmt.Sprintf("Error generating %s response: %s", db.ChangeFeedStr, err.Error())

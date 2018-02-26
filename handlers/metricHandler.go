@@ -150,6 +150,7 @@ func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
 // string objectType = 5;
 // string monitoredObjectId = 6;
 // int32  timeout = 10;
+// string  granularity = 11;
 
 func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
@@ -159,6 +160,7 @@ func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 		Tenant:            queryParams.Get("tenant"),
 		ObjectType:        queryParams.Get("objectType"),
 		MonitoredObjectId: queryParams.Get("monitoredObjectId"),
+		Granularity:       queryParams.Get("granularity"),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))

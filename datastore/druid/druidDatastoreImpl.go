@@ -40,17 +40,9 @@ type ThresholdCrossingByMonitoredObjectResponse struct {
 	Event     map[string]interface{}
 }
 
-type RawMetricsEvents struct {
-	Event map[string]interface{}
-}
-
-type RawMetricsResult struct {
-	Events []RawMetricsEvents
-}
-
 type RawMetricsResponse struct {
 	Timestamp string
-	Result    RawMetricsResult
+	Result    map[string]float32
 }
 
 func makeHttpClient() *http.Client {
@@ -285,7 +277,12 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		timeout = 30000
 	}
 
-	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout)
+	granularity := request.GetGranularity()
+	if granularity == "" {
+		granularity = "PT1M"
+	}
+
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.GetMetric(), request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity)
 
 	if err != nil {
 		return nil, err
@@ -293,8 +290,6 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, logger.AsJSONString(query))
 	response, err := dc.executeQuery(query)
-
-	//	fmt.Println(string(response))
 
 	if err != nil {
 		return nil, err

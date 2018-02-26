@@ -208,34 +208,57 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32) (*godruid.QuerySelect, error) {
+func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 
 	metrics := strings.Split(metric, ",")
+	var aggregations []godruid.Aggregation
+	var postAggregations []godruid.PostAggregation
 	monitoredObjects := strings.Split(monitoredObjectId, ",")
-	var monitoredObjectFilters []*godruid.Filter
 
-	for _, m := range monitoredObjects {
-		monitoredObjectFilters = append(monitoredObjectFilters, godruid.FilterSelector("monitoredObjectId", m))
+	for _, monObj := range monitoredObjects {
+		for _, metric := range metrics {
+			aggregationCount := godruid.AggFiltered(
+				godruid.FilterAnd(
+					godruid.FilterNot(
+						godruid.FilterSelector(metric, 0),
+					),
+					godruid.FilterSelector("monitoredObjectId", monObj)),
+				&godruid.Aggregation{
+					Type: "count",
+					Name: monObj + "." + metric + "_temporary_count",
+				},
+			)
+			sumAgg := godruid.AggDoubleSum(monObj+"."+metric+"_temporary_sum", metric)
+
+			aggregationSum := godruid.AggFiltered(
+				godruid.FilterSelector("monitoredObjectId", monObj),
+				&sumAgg)
+
+			postAgg := godruid.PostAggArithmetic(
+				monObj+"."+metric,
+				"/",
+				[]godruid.PostAggregation{
+					godruid.PostAggFieldAccessor(monObj + "." + metric + "_temporary_sum"),
+					godruid.PostAggFieldAccessor(monObj + "." + metric + "_temporary_count")})
+
+			aggregations = append(aggregations, aggregationCount)
+			aggregations = append(aggregations, aggregationSum)
+
+			postAggregations = append(postAggregations, postAgg)
+		}
 	}
 
-	return &godruid.QuerySelect{
-		DataSource:  dataSource,
-		Granularity: godruid.GranAll,
-		Context:     map[string]interface{}{"timeout": timeout},
+	return &godruid.QueryTimeseries{
+		DataSource:       dataSource,
+		Granularity:      godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:          map[string]interface{}{"timeout": timeout},
+		Aggregations:     aggregations,
+		PostAggregations: postAggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			godruid.FilterOr(monitoredObjectFilters...),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
-		Intervals:  []string{interval},
-		Metrics:    metrics,
-		PagingSpec: map[string]interface{}{"threshold": 50000}, // TODO peyo hardcoding threshold, will have to find out what value we want here
-		Dimensions: []godruid.DimSpec{
-			godruid.Dimension{
-				Dimension:  "monitoredObjectId",
-				OutputName: "monitoredObjectId",
-			},
-		},
+		Intervals: []string{interval},
 	}, nil
 }

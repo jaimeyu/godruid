@@ -3,6 +3,7 @@ package druid
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Jeffail/gabs"
 	pb "github.com/accedian/adh-gather/gathergrpc"
@@ -70,21 +71,28 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 
 func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
 	res := gabs.New()
-	for _, e := range rawMetrics[0].Result.Events {
-		monObj := e.Event["monitoredObjectId"].(string)
+	for _, r := range rawMetrics {
+
+		obj := gabs.New()
+		var monObj string
+		for k, v := range r.Result {
+			parts := strings.Split(k, ".")
+			monObj = parts[0]
+			lastParts := parts[len(parts)-1]
+			if !strings.Contains(lastParts, "temporary") {
+				obj.SetP(v, lastParts)
+			}
+		}
+
 		if !res.ExistsP("result." + monObj) {
 			_, err := res.ArrayP("result." + monObj)
 			if err != nil {
 				return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
 			}
 		}
-		obj := gabs.New()
-		for k, v := range e.Event {
-			if k != "monitoredObjectId" {
-				obj.SetP(v, k)
-			}
-		}
+		obj.SetP(r.Timestamp, "timestamp")
 		res.ArrayAppendP(obj.Data(), "result."+monObj)
+
 	}
 
 	dataContainer := map[string]interface{}{}
@@ -95,7 +103,7 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 	return dataContainer, nil
 }
 
-// Convert a query object to string, mainly for debugging purposes
+// convert a query object to string, mainly for debugging purposes
 func queryToString(query godruid.Query, debug bool) string {
 	var reqJson []byte
 	var err error

@@ -212,7 +212,6 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 
 	metrics := strings.Split(metric, ",")
 	var aggregations []godruid.Aggregation
-	var postAggregations []godruid.PostAggregation
 	monitoredObjects := strings.Split(monitoredObjectId, ",")
 
 	for _, monObj := range monitoredObjects {
@@ -224,8 +223,9 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 					),
 					godruid.FilterSelector("monitoredObjectId", monObj)),
 				&godruid.Aggregation{
-					Type: "count",
-					Name: monObj + "." + metric + "_temporary_count",
+					Type:      "doubleMax",
+					Name:      monObj + "." + metric,
+					FieldName: metric,
 				},
 			)
 			sumAgg := godruid.AggDoubleSum(monObj+"."+metric+"_temporary_sum", metric)
@@ -234,26 +234,17 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 				godruid.FilterSelector("monitoredObjectId", monObj),
 				&sumAgg)
 
-			postAgg := godruid.PostAggArithmetic(
-				monObj+"."+metric,
-				"/",
-				[]godruid.PostAggregation{
-					godruid.PostAggFieldAccessor(monObj + "." + metric + "_temporary_sum"),
-					godruid.PostAggFieldAccessor(monObj + "." + metric + "_temporary_count")})
-
 			aggregations = append(aggregations, aggregationCount)
 			aggregations = append(aggregations, aggregationSum)
-
-			postAggregations = append(postAggregations, postAgg)
 		}
 	}
 
 	return &godruid.QueryTimeseries{
-		DataSource:       dataSource,
-		Granularity:      godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:          map[string]interface{}{"timeout": timeout},
-		Aggregations:     aggregations,
-		PostAggregations: postAggregations,
+		DataSource:   dataSource,
+		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Aggregations: aggregations,
+		//		PostAggregations: postAggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			godruid.FilterSelector("objectType", objectType),

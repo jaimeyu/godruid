@@ -42,7 +42,7 @@ type ThresholdCrossingByMonitoredObjectResponse struct {
 
 type RawMetricsResponse struct {
 	Timestamp string
-	Result    map[string]float32
+	Result    map[string]interface{}
 }
 
 func makeHttpClient() *http.Client {

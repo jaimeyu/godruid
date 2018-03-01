@@ -1,3 +1,5 @@
+* Refactor - changing how the tests run so that code coverage will be used
+
 ## Current Release 
 ### 0.89.0 
 **Release Date:** Mon Feb 26 22:08:31 UTC 2018     

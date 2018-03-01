@@ -230,11 +230,13 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 		return nil, errors.New("Unable to create database '" + dbName + "': database already exists")
 	}
 
-	logger.Log.Debugf("Created DB %s\n", dbName)
+	fmt.Printf("Server is: %v\n", asd.server)
 	db, err := asd.server.Create(dbName)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debugf("Created DB %s\n", dbName)
 
 	return db, nil
 }

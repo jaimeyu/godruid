@@ -128,3 +128,23 @@ type MonitoredObjectType struct {
 	Units       []string `json:"units"`
 	Directions  []string `json:"directions"`
 }
+
+// ValidTypes - defines the ValidTypes data
+type ValidTypes struct {
+	ID                         string            `json:"-"`
+	REV                        string            `json:"_rev"`
+	Datatype                   string            `json:"datatype"`
+	MonitoredObjectTypes       map[string]string `json:"monitoredObjectTypes"`
+	MonitoredObjectDeviceTypes map[string]string `json:"monitoredObjectDeviceTypes"`
+	CreatedTimestamp           int64             `json:"createdTimestamp"`
+	LastModifiedTimestamp      int64             `json:"lastModifiedTimestamp"`
+}
+
+func (vt *ValidTypes) GetID() string {
+	return vt.ID
+}
+
+func (vt *ValidTypes) SetID(s string) error {
+	vt.ID = s
+	return nil
+}

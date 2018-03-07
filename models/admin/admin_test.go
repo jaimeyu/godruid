@@ -89,3 +89,27 @@ func TestIngestionDictionarySerialization(t *testing.T) {
 
 	testUtil.RunSerializationTest(t, original, &IngestionDictionary{}, original.ID, attrKeys)
 }
+
+func TestValidTypesSerialization(t *testing.T) {
+	monitoredObjectTypesMap := map[string]string{
+		fake.CharactersN(8): fake.CharactersN(10),
+		fake.CharactersN(8): fake.CharactersN(10),
+	}
+	monitoredObjectDeviceTypesMap := map[string]string{
+		fake.CharactersN(8): fake.CharactersN(10),
+		fake.CharactersN(8): fake.CharactersN(10),
+	}
+	original := &ValidTypes{
+		ID:                         uuid.NewV4().String(),
+		REV:                        uuid.NewV4().String(),
+		Datatype:                   string(ValidTypesType),
+		MonitoredObjectTypes:       monitoredObjectTypesMap,
+		MonitoredObjectDeviceTypes: monitoredObjectDeviceTypesMap,
+		CreatedTimestamp:           time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+	}
+
+	attrKeys := []string{"_rev", "datatype", "monitoredObjectTypes", "monitoredObjectDeviceTypes", "createdTimestamp", "lastModifiedTimestamp"}
+
+	testUtil.RunSerializationTest(t, original, &ValidTypes{}, original.ID, attrKeys)
+}

@@ -9,6 +9,7 @@ import (
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	ingPrf := pb.TenantIngestionProfileData{}
 	ingPrf.TenantId = tenantID
-	ingPrf.Datatype = string(db.TenantIngestionProfileType)
+	ingPrf.Datatype = string(tenmod.TenantIngestionProfileType)
 	ingPrf.CreatedTimestamp = db.MakeTimestamp()
 	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
 
@@ -66,7 +67,7 @@ func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfile
 	thrPrf := pb.TenantThresholdProfileData{}
 
 	thrPrf.TenantId = tenantID
-	thrPrf.Datatype = string(db.TenantThresholdProfileType)
+	thrPrf.Datatype = string(tenmod.TenantThresholdProfileType)
 	thrPrf.Name = "Default"
 
 	thrPrf.Thresholds = createDefaultThreshold()
@@ -81,7 +82,7 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 	result := pb.TenantMeta{}
 
 	result.TenantId = tenantID
-	result.Datatype = string(db.TenantMetaType)
+	result.Datatype = string(tenmod.TenantMetaType)
 	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 

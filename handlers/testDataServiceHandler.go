@@ -17,6 +17,8 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	admmod "github.com/accedian/adh-gather/models/admin"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
@@ -416,7 +418,7 @@ func (tsh *TestDataServiceHandler) GenerateHistoricalDomainSLAReports(w http.Res
 	// logger.Log.Debugf("Attempting to insert %d %ss for Tenant %s", len(docsToInsert), db.DomainSlaReportStr, tenantID)
 
 	// Prepend the tenant id with the known prefix otherwise the tenant DB will not be found.
-	tenantIDForUpdate := db.PrependToDataID(tenantID, string(db.TenantDescriptorType))
+	tenantIDForUpdate := db.PrependToDataID(tenantID, string(admmod.TenantType))
 	_, err = tsh.pouchDB.BulkDBUpdate(tenantIDForUpdate, insertBody)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to insert %ss for Tenant %s: %s", db.DomainSlaReportStr, tenantID, err.Error())
@@ -569,7 +571,7 @@ func validateMonitoredObject(monObj map[string]interface{}) error {
 func generateTenantDescriptor(name string) (*pb.TenantDescriptor, error) {
 	result := pb.TenantDescriptor{}
 
-	tenantStr := string(db.TenantDescriptorType)
+	tenantStr := string(admmod.TenantType)
 	result.Data = &pb.TenantDescriptorData{}
 	result.Data.Name = name
 	result.Data.UrlSubdomain = strings.ToLower(name) + ".npav.accedian.net"
@@ -586,7 +588,7 @@ func generateTenantDescriptor(name string) (*pb.TenantDescriptor, error) {
 func generateTenantUser(name string, tenantID string) (*pb.TenantUser, error) {
 	result := pb.TenantUser{}
 
-	tenantUserStr := string(db.TenantUserType)
+	tenantUserStr := string(tenmod.TenantUserType)
 
 	result.Data = &pb.TenantUserData{}
 	result.Data.Datatype = tenantUserStr
@@ -608,7 +610,7 @@ func generateTenantUser(name string, tenantID string) (*pb.TenantUser, error) {
 func generateTenantDomain(name string, tenantID string, defaultThreshPrf string) (*pb.TenantDomain, error) {
 	result := pb.TenantDomain{}
 
-	tenantDomainStr := string(db.TenantDomainType)
+	tenantDomainStr := string(tenmod.TenantDomainType)
 	result.Data = &pb.TenantDomainData{}
 	result.Data.Datatype = tenantDomainStr
 	result.Data.Name = name
@@ -630,7 +632,7 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 func generateMonitoredObject(id string, tenantID string, actuatorName string, reflectorName string, objectName string, domainIDSet []string) (*pb.MonitoredObject, error) {
 	result := pb.MonitoredObject{}
 
-	tenantMonObjStr := string(db.TenantMonitoredObjectType)
+	tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
 	result.Data = &pb.MonitoredObjectData{}
 	result.Data.Datatype = tenantMonObjStr
 

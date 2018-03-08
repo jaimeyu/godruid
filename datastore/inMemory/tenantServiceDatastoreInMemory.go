@@ -8,6 +8,8 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/getlantern/deepcopy"
 	uuid "github.com/satori/go.uuid"
+
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
 // TenantServiceDatastoreInMemory - struct responsible for handling
@@ -29,16 +31,16 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	return res, nil
 }
 
-func (tsd *TenantServiceDatastoreInMemory) doesTenantExist(tenantID string, ctx ds.TenantDataType) error {
+func (tsd *TenantServiceDatastoreInMemory) doesTenantExist(tenantID string, ctx tenmod.TenantDataType) error {
 	if len(tenantID) == 0 {
 		return fmt.Errorf("%s does not exist", tenantID)
 	}
 	switch ctx {
-	case ds.TenantUserType:
+	case tenmod.TenantUserType:
 		if tsd.tenantToIDtoTenantUserMap[tenantID] == nil {
 			return fmt.Errorf("%s does not exist", tenantID)
 		}
-	case ds.TenantDomainType:
+	case tenmod.TenantDomainType:
 		if tsd.tenantToIDtoTenantDomainMap[tenantID] == nil {
 			return fmt.Errorf("%s does not exist", tenantID)
 		}
@@ -50,9 +52,9 @@ func (tsd *TenantServiceDatastoreInMemory) doesTenantExist(tenantID string, ctx 
 // CreateTenantUser - InMemory implementation of CreateTenantUser
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
 	if len(tenantUserRequest.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.TenantUserStr)
+		return nil, fmt.Errorf("%s already exists", tenmod.TenantUserStr)
 	}
-	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId, ds.TenantUserType); err != nil {
+	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId, tenmod.TenantUserType); err != nil {
 		// Make a place for the tenant
 		tsd.tenantToIDtoTenantUserMap[tenantUserRequest.Data.TenantId] = map[string]*pb.TenantUser{}
 	}
@@ -61,7 +63,7 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantUser(tenantUserRequest *p
 	deepcopy.Copy(&userCopy, tenantUserRequest)
 	userCopy.XId = uuid.NewV4().String()
 	userCopy.XRev = uuid.NewV4().String()
-	userCopy.Data.Datatype = string(ds.TenantUserType)
+	userCopy.Data.Datatype = string(tenmod.TenantUserType)
 	userCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
 	userCopy.Data.LastModifiedTimestamp = userCopy.Data.GetCreatedTimestamp()
 
@@ -73,19 +75,19 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantUser(tenantUserRequest *p
 // UpdateTenantUser - InMemory implementation of UpdateTenantUser
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
 	if len(tenantUserRequest.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.AdminUserStr)
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantUserStr)
 	}
 	if len(tenantUserRequest.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.AdminUserStr)
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantUserStr)
 	}
-	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId, ds.TenantUserType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.AdminUserStr)
+	if err := tsd.doesTenantExist(tenantUserRequest.Data.TenantId, tenmod.TenantUserType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantUserStr)
 	}
 
 	userCopy := pb.TenantUser{}
 	deepcopy.Copy(&userCopy, tenantUserRequest)
 	userCopy.XRev = uuid.NewV4().String()
-	userCopy.Data.Datatype = string(ds.TenantUserType)
+	userCopy.Data.Datatype = string(tenmod.TenantUserType)
 	userCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	tsd.tenantToIDtoTenantUserMap[tenantUserRequest.Data.TenantId][userCopy.XId] = &userCopy
@@ -96,13 +98,13 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateTenantUser(tenantUserRequest *p
 // DeleteTenantUser - InMemory implementation of DeleteTenantUser
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	if len(tenantUserIDRequest.UserId) == 0 {
-		return nil, fmt.Errorf("%s must provide a User ID", ds.TenantUserStr)
+		return nil, fmt.Errorf("%s must provide a User ID", tenmod.TenantUserStr)
 	}
 	if len(tenantUserIDRequest.TenantId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantUserStr)
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantUserStr)
 	}
-	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId, ds.TenantUserType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.TenantUserStr)
+	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId, tenmod.TenantUserType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantUserStr)
 	}
 
 	user, ok := tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId][tenantUserIDRequest.UserId]
@@ -116,19 +118,19 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantUser(tenantUserIDRequest 
 		return user, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantUserStr)
+	return nil, fmt.Errorf("%s not found", tenmod.TenantUserStr)
 }
 
 // GetTenantUser - InMemory implementation of GetTenantUser
 func (tsd *TenantServiceDatastoreInMemory) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	if len(tenantUserIDRequest.UserId) == 0 {
-		return nil, fmt.Errorf("%s must provide a User ID", ds.TenantUserStr)
+		return nil, fmt.Errorf("%s must provide a User ID", tenmod.TenantUserStr)
 	}
 	if len(tenantUserIDRequest.TenantId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantUserStr)
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantUserStr)
 	}
-	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId, ds.TenantUserType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.TenantUserStr)
+	if err := tsd.doesTenantExist(tenantUserIDRequest.TenantId, tenmod.TenantUserType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantUserStr)
 	}
 
 	user, ok := tsd.tenantToIDtoTenantUserMap[tenantUserIDRequest.TenantId][tenantUserIDRequest.UserId]
@@ -136,12 +138,12 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantUser(tenantUserIDRequest *pb
 		return user, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantUserStr)
+	return nil, fmt.Errorf("%s not found", tenmod.TenantUserStr)
 }
 
 // GetAllTenantUsers - InMemory implementation of GetAllTenantUsers
 func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) (*pb.TenantUserList, error) {
-	err := tsd.doesTenantExist(tenantID, ds.TenantUserType)
+	err := tsd.doesTenantExist(tenantID, tenmod.TenantUserType)
 	if err != nil {
 		return &pb.TenantUserList{Data: []*pb.TenantUser{}}, nil
 	}
@@ -159,9 +161,9 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) (*
 // CreateTenantDomain - InMemory implementation of CreateTenantDomain
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	if len(tenantDomainRequest.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s already exists", tenmod.TenantDomainStr)
 	}
-	if err := tsd.doesTenantExist(tenantDomainRequest.Data.TenantId, ds.TenantDomainType); err != nil {
+	if err := tsd.doesTenantExist(tenantDomainRequest.Data.TenantId, tenmod.TenantDomainType); err != nil {
 		// Make a place for the tenant
 		tsd.tenantToIDtoTenantDomainMap[tenantDomainRequest.Data.TenantId] = map[string]*pb.TenantDomain{}
 	}
@@ -170,7 +172,7 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantDomain(tenantDomainReques
 	deepcopy.Copy(&recCopy, tenantDomainRequest)
 	recCopy.XId = uuid.NewV4().String()
 	recCopy.XRev = uuid.NewV4().String()
-	recCopy.Data.Datatype = string(ds.TenantDomainType)
+	recCopy.Data.Datatype = string(tenmod.TenantDomainType)
 	recCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
 	recCopy.Data.LastModifiedTimestamp = recCopy.Data.GetCreatedTimestamp()
 
@@ -182,19 +184,19 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantDomain(tenantDomainReques
 // UpdateTenantDomain - InMemory implementation of UpdateTenantDomain
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	if len(tenantDomainRequest.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantDomainStr)
 	}
 	if len(tenantDomainRequest.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantDomainStr)
 	}
-	if err := tsd.doesTenantExist(tenantDomainRequest.Data.TenantId, ds.TenantDomainType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.TenantDomainStr)
+	if err := tsd.doesTenantExist(tenantDomainRequest.Data.TenantId, tenmod.TenantDomainType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDomainStr)
 	}
 
 	recCopy := pb.TenantDomain{}
 	deepcopy.Copy(&recCopy, tenantDomainRequest)
 	recCopy.XRev = uuid.NewV4().String()
-	recCopy.Data.Datatype = string(ds.TenantDomainType)
+	recCopy.Data.Datatype = string(tenmod.TenantDomainType)
 	recCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	tsd.tenantToIDtoTenantDomainMap[tenantDomainRequest.Data.TenantId][recCopy.XId] = &recCopy
@@ -205,13 +207,13 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateTenantDomain(tenantDomainReques
 // DeleteTenantDomain - InMemory implementation of DeleteTenantDomain
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	if len(tenantDomainIDRequest.DomainId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Domain ID", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must provide a Domain ID", tenmod.TenantDomainStr)
 	}
 	if len(tenantDomainIDRequest.TenantId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDomainStr)
 	}
-	if err := tsd.doesTenantExist(tenantDomainIDRequest.TenantId, ds.TenantDomainType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.TenantDomainStr)
+	if err := tsd.doesTenantExist(tenantDomainIDRequest.TenantId, tenmod.TenantDomainType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDomainStr)
 	}
 
 	rec, ok := tsd.tenantToIDtoTenantDomainMap[tenantDomainIDRequest.TenantId][tenantDomainIDRequest.DomainId]
@@ -225,19 +227,19 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDomain(tenantDomainIDRequ
 		return rec, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantDomainStr)
+	return nil, fmt.Errorf("%s not found", tenmod.TenantDomainStr)
 }
 
 // GetTenantDomain - InMemory implementation of GetTenantDomain
 func (tsd *TenantServiceDatastoreInMemory) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	if len(tenantDomainIDRequest.DomainId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Domain ID", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must provide a Domain ID", tenmod.TenantDomainStr)
 	}
 	if len(tenantDomainIDRequest.TenantId) == 0 {
-		return nil, fmt.Errorf("%s must provide a Tenant ID", ds.TenantDomainStr)
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDomainStr)
 	}
-	if err := tsd.doesTenantExist(tenantDomainIDRequest.TenantId, ds.TenantDomainType); err != nil {
-		return nil, fmt.Errorf("%s does not exist", ds.TenantDomainStr)
+	if err := tsd.doesTenantExist(tenantDomainIDRequest.TenantId, tenmod.TenantDomainType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDomainStr)
 	}
 
 	rec, ok := tsd.tenantToIDtoTenantDomainMap[tenantDomainIDRequest.TenantId][tenantDomainIDRequest.DomainId]
@@ -245,12 +247,12 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantDomain(tenantDomainIDRequest
 		return rec, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantDomainStr)
+	return nil, fmt.Errorf("%s not found", tenmod.TenantDomainStr)
 }
 
 // GetAllTenantDomains - InMemory implementation of GetAllTenantDomains
 func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDomains(tenantID string) (*pb.TenantDomainList, error) {
-	err := tsd.doesTenantExist(tenantID, ds.TenantDomainType)
+	err := tsd.doesTenantExist(tenantID, tenmod.TenantDomainType)
 	if err != nil {
 		return &pb.TenantDomainList{Data: []*pb.TenantDomain{}}, nil
 	}

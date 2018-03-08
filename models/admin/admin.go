@@ -47,10 +47,12 @@ type Tenant struct {
 	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
+// GetID - required implementation for jsonapi marshalling
 func (t *Tenant) GetID() string {
 	return t.ID
 }
 
+// SetID - required implementation for jsonapi unmarshalling
 func (t *Tenant) SetID(s string) error {
 	t.ID = s
 	return nil
@@ -71,15 +73,18 @@ type User struct {
 	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
+// GetID - required implementation for jsonapi marshalling
 func (u *User) GetID() string {
 	return u.ID
 }
 
+// SetID - required implementation for jsonapi unmarshalling
 func (u *User) SetID(s string) error {
 	u.ID = s
 	return nil
 }
 
+// GetName - required implementation for renaming the type in jsonapi payload
 func (u *User) GetName() string {
 	return jsonapi.Pluralize(string(AdminUserType))
 }
@@ -94,10 +99,12 @@ type IngestionDictionary struct {
 	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
 }
 
+// GetID - required implementation for jsonapi marshalling
 func (dict *IngestionDictionary) GetID() string {
 	return dict.ID
 }
 
+// SetID - required implementation for jsonapi unmarshalling
 func (dict *IngestionDictionary) SetID(s string) error {
 	dict.ID = s
 	return nil
@@ -140,10 +147,12 @@ type ValidTypes struct {
 	LastModifiedTimestamp      int64             `json:"lastModifiedTimestamp"`
 }
 
+// GetID - required implementation for jsonapi marshalling
 func (vt *ValidTypes) GetID() string {
 	return vt.ID
 }
 
+// SetID - required implementation for jsonapi unmarshalling
 func (vt *ValidTypes) SetID(s string) error {
 	vt.ID = s
 	return nil

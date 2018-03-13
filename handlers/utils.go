@@ -19,11 +19,15 @@ import (
 type httpErrorString string
 
 const (
+	// Error search strings
 	notFound httpErrorString = "status 404 - not found"
-)
 
-const (
+	// Custom Error types
 	errorMarshal = -100
+
+	// API Prefix values
+	apiV1Prefix      = "/api/v1/"
+	tenantsAPIPrefix = "tenants/{tenantID}/"
 )
 
 var (

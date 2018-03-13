@@ -54,117 +54,122 @@ func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 
 // CreateTenantUser - creates a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, tenantUserReq)
+	// logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, tenantUserReq)
 
-	// Issue request to DAO Layer to Create the Tenant User
-	result, err := tsh.tenantDB.CreateTenantUser(tenantUserReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Create the Tenant User
+	// result, err := tsh.tenantDB.CreateTenantUser(tenantUserReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Created the User, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantUserStr, result.GetXId())
-	return result, nil
+	// // Succesfully Created the User, return the result.
+	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantUserStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantUser - updates a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantUserRequest(tenantUserReq, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantUserRequest(tenantUserReq, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantUserStr, tenantUserReq)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantUserStr, tenantUserReq)
 
-	// Issue request to DAO Layer to Update the Tenant User
-	result, err := tsh.tenantDB.UpdateTenantUser(tenantUserReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the Tenant User
+	// result, err := tsh.tenantDB.UpdateTenantUser(tenantUserReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the User, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantUserStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the User, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantUserStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteTenantUser - deletes a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	// Validate the request to ensure this operation is valid:
-	if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure this operation is valid:
+	// if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Deleting %s: %s", tenmod.TenantUserStr, tenantUserIDReq.GetUserId())
+	// logger.Log.Infof("Deleting %s: %s", tenmod.TenantUserStr, tenantUserIDReq.GetUserId())
 
-	// Issue request to DAO Layer to Delete the Tenant User
-	result, err := tsh.tenantDB.DeleteTenantUser(tenantUserIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Delete the Tenant User
+	// result, err := tsh.tenantDB.DeleteTenantUser(tenantUserIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Deleted the User, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantUserStr, result.GetXId())
-	return result, nil
+	// // Succesfully Deleted the User, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantUserStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetTenantUser - retrieves a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	// Validate the request to ensure this operatin is valid:
-	if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure this operatin is valid:
+	// if err := validateTenantUserIDRequest(tenantUserIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Retrieving %s: %s", tenmod.TenantUserStr, tenantUserIDReq.GetUserId())
+	// logger.Log.Infof("Retrieving %s: %s", tenmod.TenantUserStr, tenantUserIDReq.GetUserId())
 
-	// Issue request to DAO Layer to fetch the Tenant User
-	result, err := tsh.tenantDB.GetTenantUser(tenantUserIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant User
+	// result, err := tsh.tenantDB.GetTenantUser(tenantUserIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the User, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantUserStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the User, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantUserStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetAllTenantUsers - retrieves all users scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
-	// Validate the request to ensure this operatin is valid:
+	// // Validate the request to ensure this operatin is valid:
 
-	logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantUserStr, tenantID.Value)
+	// logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantUserStr, tenantID.Value)
 
-	// Issue request to DAO Layer to fetch the Tenant Users
-	result, err := tsh.tenantDB.GetAllTenantUsers(tenantID.Value)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantUserStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Users
+	// result, err := tsh.tenantDB.GetAllTenantUsers(tenantID.Value)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantUserStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Users, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantUserStr)
-	return result, nil
+	// // Succesfully fetched the Users, return the result.
+	// logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantUserStr)
+	// return result, nil
+	return nil, nil
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.

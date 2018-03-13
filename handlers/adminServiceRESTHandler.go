@@ -18,10 +18,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	apiV1Prefix = "/api/v1/"
-)
-
 // AdminServiceRESTHandler - handler of logic for REST calls made to the Admin Service.
 type AdminServiceRESTHandler struct {
 	adminDB  db.AdminServiceDatastore

@@ -43,13 +43,13 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 }
 
 // CreateTenantUser - CouchDB implementation of CreateTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *tenmod.User) (*tenmod.User, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserRequest))
-	tenantUserRequest.XId = ds.GenerateID(tenantUserRequest.GetData(), string(tenmod.TenantUserType))
-	tenantID := ds.PrependToDataID(tenantUserRequest.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantUserRequest.ID = ds.GenerateID(tenantUserRequest, string(tenmod.TenantUserType))
+	tenantID := ds.PrependToDataID(tenantUserRequest.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantUser{}
+	dataContainer := &tenmod.User{}
 	if err := createDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(tenmod.TenantUserType), tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
@@ -58,13 +58,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb
 }
 
 // UpdateTenantUser - CouchDB implementation of UpdateTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *tenmod.User) (*tenmod.User, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserRequest))
-	tenantUserRequest.XId = ds.PrependToDataID(tenantUserRequest.XId, string(tenmod.TenantUserType))
-	tenantID := ds.PrependToDataID(tenantUserRequest.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantUserRequest.ID = ds.PrependToDataID(tenantUserRequest.ID, string(tenmod.TenantUserType))
+	tenantID := ds.PrependToDataID(tenantUserRequest.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantUser{}
+	dataContainer := &tenmod.User{}
 	if err := updateDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(tenmod.TenantUserType), tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
@@ -73,14 +73,14 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb
 }
 
 // DeleteTenantUser - CouchDB implementation of DeleteTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserIDRequest))
-	tenantUserIDRequest.UserId = ds.PrependToDataID(tenantUserIDRequest.UserId, string(tenmod.TenantUserType))
-	tenantUserIDRequest.TenantId = ds.PrependToDataID(tenantUserIDRequest.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantID string, dataID string) (*tenmod.User, error) {
+	logger.Log.Debugf("Deleting %s %s\n", tenmod.TenantUserStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantUserType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantUserIDRequest.GetTenantId())
-	dataContainer := pb.TenantUser{}
-	if err := deleteDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, tenmod.TenantUserStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.User{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(dataContainer))
@@ -88,14 +88,14 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *
 }
 
 // GetTenantUser - CouchDB implementation of GetTenantUser
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserIDRequest))
-	tenantUserIDRequest.UserId = ds.PrependToDataID(tenantUserIDRequest.UserId, string(tenmod.TenantUserType))
-	tenantUserIDRequest.TenantId = ds.PrependToDataID(tenantUserIDRequest.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantID string, dataID string) (*tenmod.User, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantUserStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantUserType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantUserIDRequest.GetTenantId())
-	dataContainer := pb.TenantUser{}
-	if err := getDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, tenmod.TenantUserStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.User{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(dataContainer))
@@ -103,18 +103,17 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.
 }
 
 // GetAllTenantUsers - CouchDB implementation of GetAllTenantUsers
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*pb.TenantUserList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]*tenmod.User, error) {
 	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantUserStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	res := &pb.TenantUserList{}
-	res.Data = make([]*pb.TenantUser, 0)
-	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantUserType), tenmod.TenantUserStr, &res.Data); err != nil {
+	res := make([]*tenmod.User, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantUserType), tenmod.TenantUserStr, &res); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Retrieved %d %s\n", len(res.Data), tenmod.TenantUserStr)
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantUserStr)
 	return res, nil
 }
 

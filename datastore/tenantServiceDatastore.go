@@ -2,16 +2,17 @@ package datastore
 
 import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
 // of the TenantService Datastore.
 type TenantServiceDatastore interface {
-	CreateTenantUser(*pb.TenantUser) (*pb.TenantUser, error)
-	UpdateTenantUser(*pb.TenantUser) (*pb.TenantUser, error)
-	DeleteTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetAllTenantUsers(string) (*pb.TenantUserList, error)
+	CreateTenantUser(*tenmod.User) (*tenmod.User, error)
+	UpdateTenantUser(*tenmod.User) (*tenmod.User, error)
+	DeleteTenantUser(tenantID string, userID string) (*tenmod.User, error)
+	GetTenantUser(tenantID string, userID string) (*tenmod.User, error)
+	GetAllTenantUsers(string) ([]*tenmod.User, error)
 
 	CreateTenantDomain(*pb.TenantDomain) (*pb.TenantDomain, error)
 	UpdateTenantDomain(*pb.TenantDomain) (*pb.TenantDomain, error)

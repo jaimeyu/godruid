@@ -75,11 +75,12 @@ func init() {
 
 // GatherServer - Server which will implement the gRPC Services.
 type GatherServer struct {
-	gsh        *adhh.GRPCServiceHandler
-	pouchSH    *adhh.PouchDBPluginServiceHandler
-	testSH     *adhh.TestDataServiceHandler
-	msh        *adhh.MetricServiceHandler
-	adminAPISH *adhh.AdminServiceRESTHandler
+	gsh         *adhh.GRPCServiceHandler
+	pouchSH     *adhh.PouchDBPluginServiceHandler
+	testSH      *adhh.TestDataServiceHandler
+	msh         *adhh.MetricServiceHandler
+	adminAPISH  *adhh.AdminServiceRESTHandler
+	tenantAPISH *adhh.TenantServiceRESTHandler
 
 	mux            *mux.Router
 	jsonAPIMux     *mux.Router
@@ -95,6 +96,7 @@ func newServer() *GatherServer {
 
 	s.msh = adhh.CreateMetricServiceHandler(s.gsh)
 	s.adminAPISH = adhh.CreateAdminServiceRESTHandler()
+	s.tenantAPISH = adhh.CreateTenantServiceRESTHandler()
 
 	return s
 }
@@ -132,6 +134,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	gatherServer.testSH.RegisterAPIHandlers(gatherServer.mux)
 	gatherServer.msh.RegisterAPIHandlers(gatherServer.jsonAPIMux)
 	gatherServer.adminAPISH.RegisterAPIHandlers(gatherServer.mux)
+	gatherServer.tenantAPISH.RegisterAPIHandlers(gatherServer.mux)
 
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)

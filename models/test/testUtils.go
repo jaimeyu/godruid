@@ -32,7 +32,7 @@ func RunSerializationTest(t *testing.T, original interface{}, unmarshalled inter
 	err = json.Unmarshal(out, &jsonData)
 	assert.Nil(t, err)
 
-	logger.Log.Debugf("Original object after conversion to generic: %s", logger.AsJSONString(jsonData))
+	logger.Log.Debugf("Original object after conversion to generic: %v", jsonData)
 
 	// Validate the JSON version:
 	validateObject(t, original, jsonData["data"].(map[string]interface{}), id, attrNames)
@@ -40,7 +40,7 @@ func RunSerializationTest(t *testing.T, original interface{}, unmarshalled inter
 	// Now unmarshal directly into the object:
 	err = jsonapi.Unmarshal(out, unmarshalled)
 	assert.Nil(t, err)
-	logger.Log.Debugf("Unmarshalled object from jsonapi content: %s", logger.AsJSONString(unmarshalled))
+	logger.Log.Debugf("Unmarshalled object from jsonapi content: %v", unmarshalled)
 	assert.Equal(t, original, unmarshalled)
 }
 

@@ -8,7 +8,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	"github.com/icrowley/fake"
 
-	testUtil "github.com/accedian/adh-gather/models"
+	testUtil "github.com/accedian/adh-gather/models/test"
 	uuid "github.com/satori/go.uuid"
 )
 

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/accedian/adh-gather/models/common"
+	test "github.com/accedian/adh-gather/models/test"
 	"github.com/icrowley/fake"
 
-	testUtil "github.com/accedian/adh-gather/models"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -25,7 +25,7 @@ func TestTenantSerialization(t *testing.T) {
 
 	attrKeys := []string{"_rev", "datatype", "name", "urlSubdomain", "state", "createdTimestamp", "lastModifiedTimestamp"}
 
-	testUtil.RunSerializationTest(t, original, &Tenant{}, original.ID, attrKeys)
+	test.RunSerializationTest(t, original, &Tenant{}, original.ID, attrKeys)
 }
 
 func TestAdminUserSerialization(t *testing.T) {
@@ -45,7 +45,7 @@ func TestAdminUserSerialization(t *testing.T) {
 
 	attrKeys := []string{"_rev", "datatype", "username", "password", "sendOnboardingEmail", "state", "onboardingToken", "userVerified", "createdTimestamp", "lastModifiedTimestamp"}
 
-	testUtil.RunSerializationTest(t, original, &User{}, original.ID, attrKeys)
+	test.RunSerializationTest(t, original, &User{}, original.ID, attrKeys)
 }
 
 func TestIngestionDictionarySerialization(t *testing.T) {
@@ -87,7 +87,7 @@ func TestIngestionDictionarySerialization(t *testing.T) {
 
 	attrKeys := []string{"_rev", "datatype", "metrics", "createdTimestamp", "lastModifiedTimestamp"}
 
-	testUtil.RunSerializationTest(t, original, &IngestionDictionary{}, original.ID, attrKeys)
+	test.RunSerializationTest(t, original, &IngestionDictionary{}, original.ID, attrKeys)
 }
 
 func TestValidTypesSerialization(t *testing.T) {
@@ -111,5 +111,5 @@ func TestValidTypesSerialization(t *testing.T) {
 
 	attrKeys := []string{"_rev", "datatype", "monitoredObjectTypes", "monitoredObjectDeviceTypes", "createdTimestamp", "lastModifiedTimestamp"}
 
-	testUtil.RunSerializationTest(t, original, &ValidTypes{}, original.ID, attrKeys)
+	test.RunSerializationTest(t, original, &ValidTypes{}, original.ID, attrKeys)
 }

@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	"github.com/accedian/adh-gather/logger"
+	admmod "github.com/accedian/adh-gather/models/admin"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
@@ -82,7 +80,7 @@ var (
 type GRPCServiceHandler struct {
 	ash               *AdminServiceHandler
 	tsh               *TenantServiceHandler
-	DefaultValidTypes *pb.ValidTypesData
+	DefaultValidTypes *admmod.ValidTypes
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -106,7 +104,7 @@ func CreateCoordinator() *GRPCServiceHandler {
 		validMonObjDevTypes[key] = string(val)
 	}
 
-	result.DefaultValidTypes = &pb.ValidTypesData{
+	result.DefaultValidTypes = &admmod.ValidTypes{
 		MonitoredObjectTypes:       validMonObjTypes,
 		MonitoredObjectDeviceTypes: validMonObjDevTypes}
 
@@ -191,121 +189,126 @@ func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *em
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
 func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	// Check if a tenant already exists with this name.
-	existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
-	if len(existingTenantByName.GetValue()) != 0 {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-		msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Check if a tenant already exists with this name.
+	// existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
+	// if len(existingTenantByName.GetValue()) != 0 {
+	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+	// 	msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Create the Tenant metadata record and reserve space to store isolated Tenant data
-	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-		msg := fmt.Sprintf("Unable to create Tenant %s", err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Create the Tenant metadata record and reserve space to store isolated Tenant data
+	// result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+	// 	msg := fmt.Sprintf("Unable to create Tenant %s", err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Create a default Ingestion Profile for the Tenant.
-	idForTenant := result.GetXId()
-	ingPrfData := createDefaultTenantIngPrf(idForTenant)
-	ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
-	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Create a default Ingestion Profile for the Tenant.
+	// idForTenant := result.GetXId()
+	// ingPrfData := createDefaultTenantIngPrf(idForTenant)
+	// ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
+	// _, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+	// 	msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Create a default Threshold Profile for the Tenant
-	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
-	threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
-	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-		msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Create a default Threshold Profile for the Tenant
+	// threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
+	// threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
+	// threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+	// 	msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Create the tenant metadata
-	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
-	// as this is just relational pouch adaption:
-	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.GetData().GetName())
-	metaReq := pb.TenantMetadata{Data: meta}
-	_, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-		msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Create the tenant metadata
+	// // For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
+	// // as this is just relational pouch adaption:
+	// meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.GetData().GetName())
+	// metaReq := pb.TenantMetadata{Data: meta}
+	// _, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+	// 	msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.CreateTenantStr)
-	return result, nil
+	// trackAPIMetrics(startTime, "200", mon.CreateTenantStr)
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.
 func (gsh *GRPCServiceHandler) UpdateTenantDescriptor(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	res, err := gsh.ash.UpdateTenantDescriptor(ctx, tenantMeta)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateTenantStr)
-		return nil, err
-	}
+	// res, err := gsh.ash.UpdateTenantDescriptor(ctx, tenantMeta)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.UpdateTenantStr)
+	// 	return nil, err
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.UpdateTenantStr)
-	return res, nil
+	// trackAPIMetrics(startTime, "200", mon.UpdateTenantStr)
+	// return res, nil
+	return nil, nil
 }
 
 // DeleteTenant - Delete a Tenant by the provided ID. This operation will remove the Tenant
 // datastore as well as the TenantDescriptor metadata.
 func (gsh *GRPCServiceHandler) DeleteTenant(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	res, err := gsh.ash.DeleteTenant(ctx, tenantID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteTenantStr)
-		return nil, err
-	}
+	// res, err := gsh.ash.DeleteTenant(ctx, tenantID)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.DeleteTenantStr)
+	// 	return nil, err
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.DeleteTenantStr)
-	return res, nil
+	// trackAPIMetrics(startTime, "200", mon.DeleteTenantStr)
+	// return res, nil
+	return nil, nil
 }
 
 //GetTenantDescriptor - retrieves Tenant metadata for the provided tenantID.
 func (gsh *GRPCServiceHandler) GetTenantDescriptor(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDescriptor, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	res, err := gsh.ash.GetTenantDescriptor(ctx, tenantID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetTenantStr)
-		return nil, err
-	}
+	// res, err := gsh.ash.GetTenantDescriptor(ctx, tenantID)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.GetTenantStr)
+	// 	return nil, err
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.GetTenantStr)
-	return res, nil
+	// trackAPIMetrics(startTime, "200", mon.GetTenantStr)
+	// return res, nil
+	return nil, nil
 }
 
 // GetAllTenantDescriptors -  Retrieve all Tenant Descriptors.
 func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noValue *emp.Empty) (*pb.TenantDescriptorList, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	res, err := gsh.ash.GetAllTenantDescriptors(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetTenantStr)
-		return nil, err
-	}
+	// res, err := gsh.ash.GetAllTenantDescriptors(ctx, noValue)
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.GetTenantStr)
+	// 	return nil, err
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.GetTenantStr)
-	return res, nil
+	// trackAPIMetrics(startTime, "200", mon.GetTenantStr)
+	// return res, nil
+	return nil, nil
 }
 
 // CreateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
@@ -815,15 +818,16 @@ func (gsh *GRPCServiceHandler) GetTenantSummaryByAlias(ctx context.Context, valu
 
 // AddAdminViews - add views to admin db
 func (gsh *GRPCServiceHandler) AddAdminViews() error {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	err := gsh.ash.AddAdminViews()
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.AddAdminViewsStr)
-		return err
-	}
+	// err := gsh.ash.AddAdminViews()
+	// if err != nil {
+	// 	trackAPIMetrics(startTime, "500", mon.AddAdminViewsStr)
+	// 	return err
+	// }
 
-	trackAPIMetrics(startTime, "200", mon.AddAdminViewsStr)
+	// trackAPIMetrics(startTime, "200", mon.AddAdminViewsStr)
+	// return nil
 	return nil
 }
 

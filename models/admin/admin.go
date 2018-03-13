@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"errors"
+
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -37,7 +39,7 @@ const (
 
 // Tenant - defines a tenant
 type Tenant struct {
-	ID                    string `json:"-"`
+	ID                    string `json:"_id"`
 	REV                   string `json:"_rev"`
 	Datatype              string `json:"datatype"`
 	Name                  string `json:"name"`
@@ -58,9 +60,21 @@ func (t *Tenant) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (t *Tenant) Validate(isUpdate bool) error {
+	if !isUpdate && len(t.REV) != 0 {
+		return errors.New("Invalid Tenant request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(t.REV) == 0 || t.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // User - defines an Admin user.
 type User struct {
-	ID                    string `json:"-"`
+	ID                    string `json:"_id"`
 	REV                   string `json:"_rev"`
 	Datatype              string `json:"datatype"`
 	Username              string `json:"username"`
@@ -89,9 +103,21 @@ func (u *User) GetName() string {
 	return jsonapi.Pluralize(string(AdminUserType))
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (u *User) Validate(isUpdate bool) error {
+	if !isUpdate && len(u.REV) != 0 {
+		return errors.New("Invalid Admin User request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
+		return errors.New("Invalid Admin User request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // IngestionDictionary - defines an IngestionDictionary.
 type IngestionDictionary struct {
-	ID                    string                `json:"-"`
+	ID                    string                `json:"_id"`
 	REV                   string                `json:"_rev"`
 	Datatype              string                `json:"datatype"`
 	Metrics               map[string]*MetricMap `json:"metrics"`
@@ -107,6 +133,18 @@ func (dict *IngestionDictionary) GetID() string {
 // SetID - required implementation for jsonapi unmarshalling
 func (dict *IngestionDictionary) SetID(s string) error {
 	dict.ID = s
+	return nil
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (dict *IngestionDictionary) Validate(isUpdate bool) error {
+	if !isUpdate && len(dict.REV) != 0 {
+		return errors.New("Invalid Ingestion Dictionaryrequest: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(dict.REV) == 0 || dict.CreatedTimestamp == 0) {
+		return errors.New("Invalid Ingestion Dictionary request: must provide a createdTimestamp and revision for an update")
+	}
+
 	return nil
 }
 
@@ -138,7 +176,7 @@ type MonitoredObjectType struct {
 
 // ValidTypes - defines the ValidTypes data
 type ValidTypes struct {
-	ID                         string            `json:"-"`
+	ID                         string            `json:"_id"`
 	REV                        string            `json:"_rev"`
 	Datatype                   string            `json:"datatype"`
 	MonitoredObjectTypes       map[string]string `json:"monitoredObjectTypes"`
@@ -156,4 +194,28 @@ func (vt *ValidTypes) GetID() string {
 func (vt *ValidTypes) SetID(s string) error {
 	vt.ID = s
 	return nil
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (vt *ValidTypes) Validate(isUpdate bool) error {
+	if !isUpdate && len(vt.REV) != 0 {
+		return errors.New("Invalid Valid Types request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(vt.REV) == 0 || vt.CreatedTimestamp == 0) {
+		return errors.New("Invalid Valid Types request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
+// TenantSummary - provides a Tenant ID and a known alias for the tenant.
+type TenantSummary struct {
+	ID    string `json:"Id"`
+	Alias string `json:"Alias"`
+}
+
+// ValidTypesRequest - request for data from a Valid Types object
+type ValidTypesRequest struct {
+	MonitoredObjectTypes       bool `json:"monitoredObjectTypes"`
+	MonitoredObjectDeviceTypes bool `json:"monitoredObjectDeviceTypes"`
 }

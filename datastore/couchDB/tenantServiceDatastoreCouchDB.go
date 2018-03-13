@@ -7,6 +7,7 @@ import (
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
@@ -43,7 +44,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 
 // CreateTenantUser - CouchDB implementation of CreateTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(tenantUserRequest))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserRequest))
 	tenantUserRequest.XId = ds.GenerateID(tenantUserRequest.GetData(), string(tenmod.TenantUserType))
 	tenantID := ds.PrependToDataID(tenantUserRequest.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -52,13 +53,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantUser(tenantUserRequest *pb
 	if err := createDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(tenmod.TenantUserType), tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Cresated %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Cresated %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantUser - CouchDB implementation of UpdateTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb.TenantUser) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(tenantUserRequest))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserRequest))
 	tenantUserRequest.XId = ds.PrependToDataID(tenantUserRequest.XId, string(tenmod.TenantUserType))
 	tenantID := ds.PrependToDataID(tenantUserRequest.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -67,13 +68,13 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantUser(tenantUserRequest *pb
 	if err := updateDataInCouch(tenantDBName, tenantUserRequest, dataContainer, string(tenmod.TenantUserType), tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(tenantUserRequest))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserRequest))
 	return dataContainer, nil
 }
 
 // DeleteTenantUser - CouchDB implementation of DeleteTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(tenantUserIDRequest))
+	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserIDRequest))
 	tenantUserIDRequest.UserId = ds.PrependToDataID(tenantUserIDRequest.UserId, string(tenmod.TenantUserType))
 	tenantUserIDRequest.TenantId = ds.PrependToDataID(tenantUserIDRequest.TenantId, string(admmod.TenantType))
 
@@ -82,13 +83,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantUser(tenantUserIDRequest *
 	if err := deleteDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // GetTenantUser - CouchDB implementation of GetTenantUser
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(tenantUserIDRequest))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(tenantUserIDRequest))
 	tenantUserIDRequest.UserId = ds.PrependToDataID(tenantUserIDRequest.UserId, string(tenmod.TenantUserType))
 	tenantUserIDRequest.TenantId = ds.PrependToDataID(tenantUserIDRequest.TenantId, string(admmod.TenantType))
 
@@ -97,7 +98,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantUser(tenantUserIDRequest *pb.
 	if err := getDataFromCouch(tenantDBName, tenantUserIDRequest.GetUserId(), &dataContainer, tenmod.TenantUserStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantUserStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantUserStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
@@ -119,7 +120,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) (*p
 
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(tenantDomainRequest))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
 	tenantDomainRequest.XId = ds.GenerateID(tenantDomainRequest.GetData(), string(tenmod.TenantDomainType))
 	tenantID := ds.PrependToDataID(tenantDomainRequest.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -128,13 +129,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest
 	if err := createDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantDomain - CouchDB implementation of UpdateTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(tenantDomainRequest))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
 	tenantDomainRequest.XId = ds.PrependToDataID(tenantDomainRequest.XId, string(tenmod.TenantDomainType))
 	tenantID := ds.PrependToDataID(tenantDomainRequest.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -143,13 +144,13 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest
 	if err := updateDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // DeleteTenantDomain - CouchDB implementation of DeleteTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(tenantDomainIDRequest))
+	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainIDRequest))
 	tenantDomainIDRequest.DomainId = ds.PrependToDataID(tenantDomainIDRequest.DomainId, string(tenmod.TenantDomainType))
 	tenantDomainIDRequest.TenantId = ds.PrependToDataID(tenantDomainIDRequest.TenantId, string(admmod.TenantType))
 
@@ -158,13 +159,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDReque
 	if err := deleteDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // GetTenantDomain - CouchDB implementation of GetTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(tenantDomainIDRequest))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainIDRequest))
 	tenantDomainIDRequest.DomainId = ds.PrependToDataID(tenantDomainIDRequest.DomainId, string(tenmod.TenantDomainType))
 	tenantDomainIDRequest.TenantId = ds.PrependToDataID(tenantDomainIDRequest.TenantId, string(admmod.TenantType))
 
@@ -173,7 +174,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest 
 	if err := getDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDomainStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
@@ -195,7 +196,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (
 
 // CreateTenantIngestionProfile - CouchDB implementation of CreateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(tenantIngPrfReq))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.XId = ds.GenerateID(tenantIngPrfReq.GetData(), string(tenmod.TenantIngestionProfileType))
 	tenantID := ds.PrependToDataID(tenantIngPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -204,13 +205,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantIngestionProfile - CouchDB implementation of UpdateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(tenantIngPrfReq))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.XId = ds.PrependToDataID(tenantIngPrfReq.XId, string(tenmod.TenantIngestionProfileType))
 	tenantID := ds.PrependToDataID(tenantIngPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -219,13 +220,13 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIng
 	if err := updateDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // GetTenantIngestionProfile - CouchDB implementation of GetTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(tenantIngPrfReq))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.IngestionProfileId = ds.PrependToDataID(tenantIngPrfReq.IngestionProfileId, string(tenmod.TenantIngestionProfileType))
 	tenantIngPrfReq.TenantId = ds.PrependToDataID(tenantIngPrfReq.TenantId, string(admmod.TenantType))
 
@@ -234,13 +235,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrf
 	if err := getDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // DeleteTenantIngestionProfile - CouchDB implementation of DeleteTenantIngestionProfile
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(tenantIngPrfReq))
+	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.IngestionProfileId = ds.PrependToDataID(tenantIngPrfReq.IngestionProfileId, string(tenmod.TenantIngestionProfileType))
 	tenantIngPrfReq.TenantId = ds.PrependToDataID(tenantIngPrfReq.TenantId, string(admmod.TenantType))
 
@@ -249,13 +250,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 	if err := deleteDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // CreateTenantThresholdProfile - CouchDB implementation of CreateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(tenantThreshPrfReq))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.XId = ds.GenerateID(tenantThreshPrfReq.GetData(), string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -264,13 +265,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThr
 	if err := createDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantThresholdProfile - CouchDB implementation of UpdateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(tenantThreshPrfReq))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.XId = ds.PrependToDataID(tenantThreshPrfReq.XId, string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -279,13 +280,13 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThr
 	if err := updateDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // GetTenantThresholdProfile - CouchDB implementation of GetTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(tenantThreshPrfReq))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ThresholdProfileId = ds.PrependToDataID(tenantThreshPrfReq.ThresholdProfileId, string(tenmod.TenantThresholdProfileType))
 	tenantThreshPrfReq.TenantId = ds.PrependToDataID(tenantThreshPrfReq.TenantId, string(admmod.TenantType))
 
@@ -294,13 +295,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThresh
 	if err := getDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // DeleteTenantThresholdProfile - CouchDB implementation of DeleteTenantThresholdProfile
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(tenantThreshPrfReq))
+	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ThresholdProfileId = ds.PrependToDataID(tenantThreshPrfReq.ThresholdProfileId, string(tenmod.TenantThresholdProfileType))
 	tenantThreshPrfReq.TenantId = ds.PrependToDataID(tenantThreshPrfReq.TenantId, string(admmod.TenantType))
 
@@ -309,13 +310,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantThr
 	if err := deleteDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // CreateMonitoredObject - CouchDB implementation of CreateMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(monitoredObjectReq))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectReq))
 	monitoredObjectReq.XId = ds.GenerateID(monitoredObjectReq.GetData(), string(tenmod.TenantMonitoredObjectType))
 	tenantID := ds.PrependToDataID(monitoredObjectReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -324,13 +325,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 	if err := createDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateMonitoredObject - CouchDB implementation of UpdateMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(monitoredObjectReq))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectReq))
 	monitoredObjectReq.XId = ds.PrependToDataID(monitoredObjectReq.XId, string(tenmod.TenantMonitoredObjectType))
 	tenantID := ds.PrependToDataID(monitoredObjectReq.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -339,13 +340,13 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectR
 	if err := updateDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // GetMonitoredObject - CouchDB implementation of GetMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(monitoredObjectIDReq))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectIDReq))
 	monitoredObjectIDReq.MonitoredObjectId = ds.PrependToDataID(monitoredObjectIDReq.MonitoredObjectId, string(tenmod.TenantMonitoredObjectType))
 	monitoredObjectIDReq.TenantId = ds.PrependToDataID(monitoredObjectIDReq.TenantId, string(admmod.TenantType))
 
@@ -354,13 +355,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDRe
 	if err := getDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
 // DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(monitoredObjectIDReq))
+	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectIDReq))
 	monitoredObjectIDReq.MonitoredObjectId = ds.PrependToDataID(monitoredObjectIDReq.MonitoredObjectId, string(tenmod.TenantMonitoredObjectType))
 	monitoredObjectIDReq.TenantId = ds.PrependToDataID(monitoredObjectIDReq.TenantId, string(admmod.TenantType))
 
@@ -369,7 +370,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectI
 	if err := deleteDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
 
@@ -391,7 +392,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 
 // GetMonitoredObjectToDomainMap - CouchDB implementation of GetMonitoredObjectToDomainMap
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, logger.AsJSONString(moByDomReq))
+	logger.Log.Debugf("Fetching %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, models.AsJSONString(moByDomReq))
 	moByDomReq.TenantId = ds.PrependToDataID(moByDomReq.TenantId, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, moByDomReq.GetTenantId())
@@ -452,13 +453,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 		response.DomainToMonitoredObjectSetMap = domainMap
 	}
 
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, logger.AsJSONString(response))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, models.AsJSONString(response))
 	return &response, nil
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(meta))
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
 	meta.XId = ds.GenerateID(meta.GetData(), string(tenmod.TenantMetaType))
 	tenantID := ds.PrependToDataID(meta.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -467,13 +468,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetada
 	if err := createDataInCouch(tenantDBName, meta, dataContainer, string(tenmod.TenantMetaType), tenmod.TenantMetaStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
 // UpdateTenantMeta - CouchDB implementation of UpdateTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(meta))
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
 	meta.XId = ds.PrependToDataID(meta.XId, string(tenmod.TenantMetaType))
 	tenantID := ds.PrependToDataID(meta.GetData().GetTenantId(), string(admmod.TenantType))
 
@@ -482,7 +483,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetada
 	if err := updateDataInCouch(tenantDBName, meta, dataContainer, string(tenmod.TenantMetaType), tenmod.TenantMetaStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
 
@@ -505,7 +506,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(existingObject))
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(existingObject))
 	return existingObject, nil
 }
 
@@ -533,7 +534,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.Te
 		}
 	}
 
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMetaStr, logger.AsJSONString(res))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(res))
 	return &res, nil
 }
 
@@ -561,7 +562,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 		}
 	}
 
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, logger.AsJSONString(res))
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(res))
 	return &res, nil
 }
 
@@ -577,13 +578,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 		return nil, err
 	}
 
-	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, logger.AsJSONString(res))
+	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(res))
 	return res, nil
 }
 
 // BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
 func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
-	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(value))
+	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
 	tenantID := ds.PrependToDataID(value.TenantId, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	resource, err := couchdb.NewResource(tenantDBName, nil)
@@ -619,6 +620,6 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 		res.Results = append(res.Results, &newObj)
 	}
 
-	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, logger.AsJSONString(res))
+	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
 	return &res, nil
 }

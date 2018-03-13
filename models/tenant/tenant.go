@@ -1,6 +1,10 @@
 package tenant
 
-import "github.com/manyminds/api2go/jsonapi"
+import (
+	"errors"
+
+	"github.com/manyminds/api2go/jsonapi"
+)
 
 // TenantDataType - enumeration of the types of data stored in the Tenant Datastore
 type TenantDataType string
@@ -50,7 +54,7 @@ const (
 
 // User - defines a Tenant user.
 type User struct {
-	ID                    string   `json:"-"`
+	ID                    string   `json:"_id"`
 	REV                   string   `json:"_rev"`
 	Datatype              string   `json:"datatype"`
 	TenantID              string   `json:"tenantId"`
@@ -76,9 +80,24 @@ func (u *User) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (u *User) Validate(isUpdate bool) error {
+	if len(u.TenantID) == 0 {
+		return errors.New("Invalid Tenant User request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(u.REV) != 0 {
+		return errors.New("Invalid Tenant User request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant User request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // Domain - defines a Tenant Domain.
 type Domain struct {
-	ID                    string   `json:"-"`
+	ID                    string   `json:"_id"`
 	REV                   string   `json:"_rev"`
 	Datatype              string   `json:"datatype"`
 	TenantID              string   `json:"tenantId"`
@@ -100,9 +119,24 @@ func (d *Domain) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (d *Domain) Validate(isUpdate bool) error {
+	if len(d.TenantID) == 0 {
+		return errors.New("Invalid Tenant Domain request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(d.REV) != 0 {
+		return errors.New("Invalid Tenant Domain request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Domain request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // IngestionProfile - defines a Tenant Ingestion Profile.
 type IngestionProfile struct {
-	ID                    string                                `json:"-"`
+	ID                    string                                `json:"_id"`
 	REV                   string                                `json:"_rev"`
 	Datatype              string                                `json:"datatype"`
 	TenantID              string                                `json:"tenantId"`
@@ -122,9 +156,24 @@ func (prf *IngestionProfile) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (prf *IngestionProfile) Validate(isUpdate bool) error {
+	if len(prf.TenantID) == 0 {
+		return errors.New("Invalid Tenant Ingestion Profile request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(prf.REV) != 0 {
+		return errors.New("Invalid Tenant Ingestion Profile request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Ingestion Profile request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // ThresholdProfile - defines a Tenant Threshold Profile.
 type ThresholdProfile struct {
-	ID                    string                            `json:"-"`
+	ID                    string                            `json:"_id"`
 	REV                   string                            `json:"_rev"`
 	Datatype              string                            `json:"datatype"`
 	TenantID              string                            `json:"tenantId"`
@@ -144,6 +193,21 @@ func (prf *ThresholdProfile) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (prf *ThresholdProfile) Validate(isUpdate bool) error {
+	if len(prf.TenantID) == 0 {
+		return errors.New("Invalid Tenant Threshold Profile request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(prf.REV) != 0 {
+		return errors.New("Invalid Tenant Threshold Profile request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Threshold Profile request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 type MonitoredObjectTypeMap struct {
 	MonitoredObjectTypeMap map[string]map[string]map[string]map[string]string
 	MetricMap              map[string]string
@@ -151,7 +215,7 @@ type MonitoredObjectTypeMap struct {
 
 // MonitoredObject - defines a Tenant Monitored Object.
 type MonitoredObject struct {
-	ID                    string   `json:"-"`
+	ID                    string   `json:"_id"`
 	REV                   string   `json:"_rev"`
 	Datatype              string   `json:"datatype"`
 	TenantID              string   `json:"tenantId"`
@@ -179,9 +243,29 @@ func (mo *MonitoredObject) SetID(s string) error {
 	return nil
 }
 
+// Validate - used during validation of incoming REST requests for this object
+func (mo *MonitoredObject) Validate(isUpdate bool) error {
+	if len(mo.TenantID) == 0 {
+		return errors.New("Invalid Tenant Monitored Object request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(mo.REV) != 0 {
+		return errors.New("Invalid Tenant Monitored Object request: must not provide a revision value in a creation request")
+	}
+	if len(mo.MonitoredObjectID) == 0 {
+		return errors.New("Invalid Tenant Monitored Object request: must provide a Monitored Object ID")
+
+	}
+
+	if isUpdate && (len(mo.REV) == 0 || mo.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Monitored object request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
 // Metadata - defines a Tenant Metadata.
 type Metadata struct {
-	ID                      string `json:"-"`
+	ID                      string `json:"_id"`
 	REV                     string `json:"_rev"`
 	Datatype                string `json:"datatype"`
 	TenantID                string `json:"tenantId"`
@@ -205,4 +289,19 @@ func (meta *Metadata) SetID(s string) error {
 // GetName - required implementation for renaming the type in jsonapi payload
 func (meta *Metadata) GetName() string {
 	return jsonapi.Pluralize(string(TenantMetaType))
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (meta *Metadata) Validate(isUpdate bool) error {
+	if len(meta.TenantID) == 0 {
+		return errors.New("Invalid Tenant Metadata request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(meta.REV) != 0 {
+		return errors.New("Invalid Tenant Metadata request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(meta.REV) == 0 || meta.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Metadata request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
 }

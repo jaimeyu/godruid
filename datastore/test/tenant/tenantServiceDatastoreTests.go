@@ -10,6 +10,8 @@ import (
 
 	ds "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	admmod "github.com/accedian/adh-gather/models/admin"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -39,16 +41,16 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantUserCRUD(t *testing.T) 
 	const TOKEN2 = "token2"
 
 	// Create a tenant
-	data := pb.TenantDescriptorData{
+	data := admmod.Tenant{
 		Name:         COMPANY1,
-		UrlSubdomain: SUBDOMAIN1,
-		State:        pb.UserState_ACTIVE}
-	tenantDescriptor, err := runner.adminDB.CreateTenant(&pb.TenantDescriptor{Data: &data})
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
 	assert.Nil(t, err)
 	assert.NotNil(t, tenantDescriptor)
-	assert.Equal(t, COMPANY1, tenantDescriptor.Data.Name)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
 
-	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.XId)
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Validate that there are currently no records
 	tenantUserList, err := runner.tenantDB.GetAllTenantUsers(TENANT)
@@ -185,16 +187,16 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	const THRPRF = "ThresholdPrf"
 
 	// Create a tenant
-	data := pb.TenantDescriptorData{
+	data := admmod.Tenant{
 		Name:         COMPANY1,
-		UrlSubdomain: SUBDOMAIN1,
-		State:        pb.UserState_ACTIVE}
-	tenantDescriptor, err := runner.adminDB.CreateTenant(&pb.TenantDescriptor{Data: &data})
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
 	assert.Nil(t, err)
 	assert.NotNil(t, tenantDescriptor)
-	assert.Equal(t, COMPANY1, tenantDescriptor.Data.Name)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
 
-	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.XId)
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Validate that there are currently no records
 	recList, err := runner.tenantDB.GetAllTenantDomains(TENANT)

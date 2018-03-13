@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -18,11 +17,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type httpErrorString string
-
 const (
-	notFound httpErrorString = "status 404 - not found"
-
 	pouchStr           = "pouch"
 	getChangesStr      = pouchStr + "_changes"
 	serverHBStr        = pouchStr + "_available"
@@ -652,14 +647,6 @@ func getRequestBodyAsGenericObject(r *http.Request) (map[string]interface{}, err
 	defer r.Body.Close()
 
 	return result, nil
-}
-
-func checkError(err error, errorType httpErrorString) bool {
-	if strings.Contains(err.Error(), string(errorType)) {
-		return true
-	}
-
-	return false
 }
 
 // IsDBAvailable - checks if a DB is available.

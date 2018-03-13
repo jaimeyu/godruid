@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	contentTytpe       = "Content-Type"
+	contentType        = "Content-Type"
 	jsonAPIContentType = "application/vnd.api+json"
 )
 
@@ -211,7 +211,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 		return
 	}
 
-	w.Header().Set(contentTytpe, jsonAPIContentType)
+	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
 	trackAPIMetrics(startTime, "200", mon.GetThrCrossStr)
 	fmt.Fprintf(w, string(res))
@@ -255,7 +255,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 		return
 	}
 
-	w.Header().Set(contentTytpe, jsonAPIContentType)
+	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
 	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjStr)
 	fmt.Fprintf(w, string(res))
@@ -285,7 +285,7 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set(contentTytpe, jsonAPIContentType)
+	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, histogramReq)
 	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
 	fmt.Fprintf(w, string(res))
@@ -315,7 +315,7 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	w.Header().Set(contentTytpe, jsonAPIContentType)
+	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, rawMetricReq)
 	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
 	fmt.Fprintf(w, string(res))

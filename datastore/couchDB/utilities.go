@@ -8,6 +8,7 @@ import (
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
@@ -27,8 +28,22 @@ func convertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{
 		return nil, err
 	}
 
+	// Now that the object is generic, need to structure it with Couch specific fields:
+	result := map[string]interface{}{}
+	if genericFormat["_id"] != nil {
+		result["_id"] = genericFormat["_id"]
+		delete(genericFormat, "_id")
+	}
+	if genericFormat["_rev"] != nil {
+		if len(genericFormat["_rev"].(string)) != 0 {
+			result["_rev"] = genericFormat["_rev"]
+		}
+		delete(genericFormat, "_rev")
+	}
+	result["data"] = genericFormat
+
 	// Successfully converted the User
-	return genericFormat, nil
+	return result, nil
 }
 
 // ConvertGenericObjectToBytesWithCouchDbFields - takes a generic set of CouchDB data,
@@ -36,6 +51,7 @@ func convertDataToCouchDbSupportedModel(data interface{}) (map[string]interface{
 // to a []byte. Useful as a preparation step before unmarshalling the bytes into a known
 // ADH data model object.
 func convertGenericObjectToBytesWithCouchDbFields(genericObject map[string]interface{}) ([]byte, error) {
+
 	genericUserInBytes, err := json.Marshal(genericObject)
 	if err != nil {
 		logger.Log.Debugf("Error converting generic data to bytes: %s", err.Error())
@@ -71,7 +87,7 @@ func storeDataInCouchDB(dataToStore map[string]interface{}, dataTypeStrForLoggin
 // db (the CouchDB connector used to store the data.)
 // queryParams (the query parameters passed to the call to store the data)
 func storeDataInCouchDBWithQueryParams(dataToStore map[string]interface{}, dataTypeStrForLogging string, db *couchdb.Database, queryParams *url.Values) (string, string, error) {
-	logger.Log.Debugf("Attempting to store %s: %v", dataTypeStrForLogging, logger.AsJSONString(dataToStore))
+	logger.Log.Debugf("Attempting to store %s: %v", dataTypeStrForLogging, models.AsJSONString(dataToStore))
 
 	// Store the user in PROV DB
 	if queryParams == nil {
@@ -169,7 +185,12 @@ func stripPrefixFromID(data map[string]interface{}) {
 // ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
 // that object with the generic data.
 func convertGenericCouchDataToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
-	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(genericData)
+	// Flatten the object for conversion
+	flattened := genericData["data"].(map[string]interface{})
+	flattened["_id"] = genericData["_id"]
+	flattened["_rev"] = genericData["_rev"]
+
+	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(flattened)
 	if err != nil {
 		return err
 	}
@@ -180,7 +201,31 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+
+	return nil
+}
+
+func convertCouchDataArrayToFlattenedArray(genericData []map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+	flattenedContainer := []map[string]interface{}{}
+	for _, obj := range genericData {
+		flattened := obj["data"].(map[string]interface{})
+		flattened["_id"] = obj["_id"]
+		flattened["_rev"] = obj["_rev"]
+		flattenedContainer = append(flattenedContainer, flattened)
+	}
+
+	flattenedDataInBytes, err := convertGenericObjectToBytes(flattenedContainer)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(flattenedDataInBytes, &dataContainer)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		return err
+	}
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -197,7 +242,7 @@ func convertGenericArrayToObject(genericData []map[string]interface{}, dataConta
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -265,7 +310,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -301,7 +346,7 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -327,7 +372,7 @@ func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer 
 		return err
 	}
 
-	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -348,26 +393,26 @@ func deleteData(dbName string, dataID string, dataTypeLogStr string) error {
 }
 
 func createDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
-	logger.Log.Debugf("Creating %s: %v\n", loggingStr, logger.AsJSONString(dataToStore))
+	logger.Log.Debugf("Creating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
 
 	if err := storeData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
 		return err
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Created %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Created %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
 func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
-	logger.Log.Debugf("Updating %s: %v\n", loggingStr, logger.AsJSONString(dataToStore))
+	logger.Log.Debugf("Updating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
 
 	if err := updateData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
 		return err
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Updated %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -379,7 +424,7 @@ func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interfac
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -398,7 +443,7 @@ func deleteDataFromCouch(dbName string, idToDelete string, dataContainer interfa
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, logger.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
 	return nil
 }
 
@@ -416,4 +461,20 @@ func getAllOfTypeFromCouch(dbName string, dataType string, loggingStr string, da
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	return convertGenericArrayToObject(fetchedList, &dataContainer, loggingStr)
+}
+
+func getAllOfTypeFromCouchAndFlatten(dbName string, dataType string, loggingStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	fetchedList, err := getAllOfTypeByIDPrefix(dataType, loggingStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
 }

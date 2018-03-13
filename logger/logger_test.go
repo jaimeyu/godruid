@@ -4,12 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/accedian/adh-gather/logger"
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
+	"github.com/stretchr/testify/assert"
 )
-
-
 
 func TestPrettyPrint(t *testing.T) {
 	prettyUser := `{
@@ -27,25 +26,24 @@ func TestPrettyPrint(t *testing.T) {
 		  "username": "admin@nopers.com"
 		}
 		}`
-		adminUserData := pb.TenantUserData{
-			CreatedTimestamp: 123,
-			Datatype: "user",
-			LastModifiedTimestamp: 456,
-			OnboardingToken: "token",
-			Password: "admin",
-			State: 2,
-			TenantId: "tenant123",
-			UserVerified: true,
-			Username: "admin@nopers.com"}
-		adminUser := &pb.TenantUser{
-			XId: "someID",
-			XRev: "someREV",
-			Data: &adminUserData}
+	adminUserData := pb.TenantUserData{
+		CreatedTimestamp:      123,
+		Datatype:              "user",
+		LastModifiedTimestamp: 456,
+		OnboardingToken:       "token",
+		Password:              "admin",
+		State:                 2,
+		TenantId:              "tenant123",
+		UserVerified:          true,
+		Username:              "admin@nopers.com"}
+	adminUser := &pb.TenantUser{
+		XId:  "someID",
+		XRev: "someREV",
+		Data: &adminUserData}
 
-		result := logger.AsJSONString(adminUser)
-		assert.NotEmpty(t, result)
-		assert.NotEqual(t, prettyUser, result)
-		assert.True(t, strings.Contains(result, logger.LogRedactStr))
+	result := models.AsJSONString(adminUser)
+	assert.NotEmpty(t, result)
+	assert.NotEqual(t, prettyUser, result)
+	assert.True(t, strings.Contains(result, logger.LogRedactStr))
 
 }
-

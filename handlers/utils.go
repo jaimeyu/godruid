@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -9,7 +11,19 @@ import (
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/manyminds/api2go/jsonapi"
+)
+
+type httpErrorString string
+
+const (
+	notFound httpErrorString = "status 404 - not found"
+)
+
+const (
+	errorMarshal = -100
 )
 
 var (
@@ -20,6 +34,14 @@ var (
 	defaultIngestionProfileFlowmeterMetricNames = []string{
 		"throughputAvg", "throughputMax", "throughputMin", "bytesReceived", "packetsReceived"}
 )
+
+func checkError(err error, errorType httpErrorString) bool {
+	if strings.Contains(err.Error(), string(errorType)) {
+		return true
+	}
+
+	return false
+}
 
 func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
 	ingPrf := pb.TenantIngestionProfileData{}
@@ -372,4 +394,63 @@ func reportError(w http.ResponseWriter, startTime time.Time, code string, objTyp
 	trackAPIMetrics(startTime, code, objType)
 	logger.Log.Error(msg)
 	http.Error(w, fmt.Sprintf(msg), responseCode)
+}
+
+func getRequestBytes(r *http.Request) ([]byte, error) {
+	defer r.Body.Close()
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func unmarshalRequest(r *http.Request, data interface{}, isUpdate bool) error {
+	if err := unmarshalData(r, data); err != nil {
+		return err
+	}
+
+	// Validate the request
+	return validateRESTObject(data, isUpdate)
+}
+
+func unmarshalData(r *http.Request, data interface{}) error {
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(requestBytes, &data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func sendSuccessResponse(result interface{}, w http.ResponseWriter, startTime time.Time, monLogStr string, objTypeStr string, opTypeString string) {
+	// Convert the res to byte[]
+	res, err := jsonapi.Marshal(result)
+	if err != nil {
+		msg := generateErrorMessage(errorMarshal, err.Error())
+		reportError(w, startTime, "500", monLogStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("%s %s: %s", opTypeString, objTypeStr, models.AsJSONString(result))
+	trackAPIMetrics(startTime, "200", monLogStr)
+	fmt.Fprintf(w, string(res))
+}
+
+func generateErrorMessage(errCode int, errMsg string) string {
+	switch errCode {
+	case http.StatusBadRequest:
+		return fmt.Sprintf("Unable to read request: %s", errMsg)
+	case errorMarshal:
+		return fmt.Sprintf("Unable to marshal response: %s", errMsg)
+	default:
+		return errMsg
+	}
+
 }

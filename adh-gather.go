@@ -23,13 +23,12 @@ import (
 	"github.com/accedian/adh-gather/profile"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	admmod "github.com/accedian/adh-gather/models/admin"
 	mon "github.com/accedian/adh-gather/monitoring"
-	emp "github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -76,13 +75,13 @@ func init() {
 
 // GatherServer - Server which will implement the gRPC Services.
 type GatherServer struct {
-	gsh     *adhh.GRPCServiceHandler
-	pouchSH *adhh.PouchDBPluginServiceHandler
-	testSH  *adhh.TestDataServiceHandler
-	msh     *adhh.MetricServiceHandler
+	gsh        *adhh.GRPCServiceHandler
+	pouchSH    *adhh.PouchDBPluginServiceHandler
+	testSH     *adhh.TestDataServiceHandler
+	msh        *adhh.MetricServiceHandler
+	adminAPISH *adhh.AdminServiceRESTHandler
 
 	mux            *mux.Router
-	gwmux          *runtime.ServeMux
 	jsonAPIMux     *mux.Router
 	promServerMux  *http.ServeMux
 	pprofServerMux *http.ServeMux
@@ -95,6 +94,7 @@ func newServer() *GatherServer {
 	s.testSH = adhh.CreateTestDataServiceHandler()
 
 	s.msh = adhh.CreateMetricServiceHandler(s.gsh)
+	s.adminAPISH = adhh.CreateAdminServiceRESTHandler()
 
 	return s
 }
@@ -119,33 +119,19 @@ func gRPCHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	restBindIP := cfg.GetString(gather.CK_server_rest_ip.String())
 	restBindPort := cfg.GetInt(gather.CK_server_rest_port.String())
-	grpcBindIP := cfg.GetString(gather.CK_server_grpc_ip.String())
-	grpcBindPort := cfg.GetInt(gather.CK_server_grpc_port.String())
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	gatherServer.mux = mux.NewRouter().StrictSlash(true)
-	gatherServer.gwmux = runtime.NewServeMux()
 	gatherServer.jsonAPIMux = mux.NewRouter().StrictSlash(true)
 
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-
-	// Register the Admin Service
-	if err := pb.RegisterAdminProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
-		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
-	}
-
-	// Register the Tenant Service
-	if err := pb.RegisterTenantProvisioningServiceHandlerFromEndpoint(ctx, gatherServer.gwmux, fmt.Sprintf("%s:%d", grpcBindIP, grpcBindPort), opts); err != nil {
-		logger.Log.Fatalf("failed to start REST service: %s", err.Error())
-	}
-
-	// Add in handling for non protobuf generated API endpoints:
+	// Register all the API endpoints:
 	gatherServer.pouchSH.RegisterAPIHandlers(gatherServer.mux)
 	gatherServer.testSH.RegisterAPIHandlers(gatherServer.mux)
 	gatherServer.msh.RegisterAPIHandlers(gatherServer.jsonAPIMux)
+	gatherServer.adminAPISH.RegisterAPIHandlers(gatherServer.mux)
 
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)
@@ -214,7 +200,7 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			mon.IncrementCounter(mon.AdminAPIRecieved)
 		}
 
-		gs.gwmux.ServeHTTP(w, r)
+		gs.mux.ServeHTTP(w, r)
 
 		updateCounter(&concurrentProvAPICounter, provAPIMutex, false, maxConcurrentProvAPICalls)
 		if isTenant {
@@ -295,7 +281,7 @@ func updateCounter(counter *uint64, mutex *sync.Mutex, increment bool, maxOperat
 	return nil
 }
 
-func areValidTypesEquivalent(obj1 *pb.ValidTypesData, obj2 *pb.ValidTypesData) bool {
+func areValidTypesEquivalent(obj1 *admmod.ValidTypes, obj2 *admmod.ValidTypes) bool {
 	if (obj1 == nil && obj2 != nil) || (obj1 != nil && obj2 == nil) {
 		return false
 	}
@@ -401,17 +387,17 @@ func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string)
 		logger.Log.Fatalf("Unable to read Default Ingestion Dictionary from file: %s", err.Error())
 	}
 
-	defaultDictionaryData := &pb.IngestionDictionaryData{}
+	defaultDictionaryData := &admmod.IngestionDictionary{}
 	if err = json.Unmarshal(defaultDictionaryBytes, &defaultDictionaryData); err != nil {
 		logger.Log.Fatalf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
 	}
 
-	existingDictionary, err := gatherServer.gsh.GetIngestionDictionary(nil, &emp.Empty{})
+	existingDictionary, err := gatherServer.adminAPISH.GetIngestionDictionaryInternal()
 	if err != nil {
 		logger.Log.Debugf("Unable to fetch Ingestion Dictionary from DB %s: %s", adminDB, err.Error())
 
 		// Provision the default IngestionDictionary
-		_, err = gatherServer.gsh.CreateIngestionDictionary(nil, &pb.IngestionDictionary{Data: defaultDictionaryData})
+		_, err = gatherServer.adminAPISH.CreateIngestionDictionaryInternal(defaultDictionaryData)
 		if err != nil {
 			logger.Log.Fatalf("Unable to store Default Ingestion Profile from file: %s", err.Error())
 		}
@@ -420,10 +406,10 @@ func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string)
 	}
 
 	// There is an existing dictionary, make sure it matches the known values.
-	if !areIngestionDictionariesEqual(defaultDictionaryData, existingDictionary.Data) {
-		existingDictionary.Data.Metrics = defaultDictionaryData.Metrics
+	if !areIngestionDictionariesEqual(defaultDictionaryData, existingDictionary) {
+		existingDictionary.Metrics = defaultDictionaryData.Metrics
 
-		_, err = gatherServer.gsh.UpdateIngestionDictionary(nil, existingDictionary)
+		_, err = gatherServer.adminAPISH.UpdateIngestionDictionaryInternal(existingDictionary)
 		if err != nil {
 			logger.Log.Fatalf("Unable to update Default Ingestion Profile from file: %s", err.Error())
 		}
@@ -432,7 +418,7 @@ func ensureIngestionDictionaryExists(gatherServer *GatherServer, adminDB string)
 	}
 }
 
-func areIngestionDictionariesEqual(dict1 *pb.IngestionDictionaryData, dict2 *pb.IngestionDictionaryData) bool {
+func areIngestionDictionariesEqual(dict1 *admmod.IngestionDictionary, dict2 *admmod.IngestionDictionary) bool {
 	if (dict1 == nil && dict2 != nil) || (dict1 != nil && dict2 == nil) {
 		return false
 	}
@@ -452,7 +438,7 @@ func areIngestionDictionariesEqual(dict1 *pb.IngestionDictionaryData, dict2 *pb.
 				return false
 			}
 
-			if !areUIPartsEqual(metricDef.Ui, dict2.Metrics[vendor].MetricMap[metric].Ui) {
+			if !areUIPartsEqual(metricDef.UIData, dict2.Metrics[vendor].MetricMap[metric].UIData) {
 				return false
 			}
 
@@ -467,7 +453,7 @@ func areIngestionDictionariesEqual(dict1 *pb.IngestionDictionaryData, dict2 *pb.
 	return true
 }
 
-func areUIPartsEqual(ui1 *pb.IngestionDictionaryData_UIData, ui2 *pb.IngestionDictionaryData_UIData) bool {
+func areUIPartsEqual(ui1 *admmod.UIData, ui2 *admmod.UIData) bool {
 	if (ui1 == nil && ui2 != nil) || (ui1 != nil && ui2 == nil) {
 		return false
 	}
@@ -486,7 +472,7 @@ func areUIPartsEqual(ui1 *pb.IngestionDictionaryData_UIData, ui2 *pb.IngestionDi
 	return true
 }
 
-func areMonitoredObjectTypesEqual(mot1 *pb.IngestionDictionaryData_MonitoredObjectType, mot2 *pb.IngestionDictionaryData_MonitoredObjectType) bool {
+func areMonitoredObjectTypesEqual(mot1 *admmod.MonitoredObjectType, mot2 *admmod.MonitoredObjectType) bool {
 	if (mot1 == nil && mot2 != nil) || (mot1 != nil && mot2 == nil) {
 		return false
 	}
@@ -498,7 +484,7 @@ func areMonitoredObjectTypesEqual(mot1 *pb.IngestionDictionaryData_MonitoredObje
 	if mot1.Key != mot2.Key {
 		return false
 	}
-	if mot1.RawMetricId != mot2.RawMetricId {
+	if mot1.RawMetricID != mot2.RawMetricID {
 		return false
 	}
 
@@ -513,7 +499,7 @@ func areMonitoredObjectTypesEqual(mot1 *pb.IngestionDictionaryData_MonitoredObje
 	return true
 }
 
-func doesSliceOfMonitoredObjectTypesContain(container []*pb.IngestionDictionaryData_MonitoredObjectType, value *pb.IngestionDictionaryData_MonitoredObjectType) bool {
+func doesSliceOfMonitoredObjectTypesContain(container []*admmod.MonitoredObjectType, value *admmod.MonitoredObjectType) bool {
 	for _, s := range container {
 		if areMonitoredObjectTypesEqual(s, value) {
 			return true
@@ -546,22 +532,22 @@ func areStringSlicesEqual(slice1 []string, slice2 []string) bool {
 
 func ensureValidTypesExists(gatherServer *GatherServer, adminDB string) {
 	// Make sure the valid types are provisioned.
-	provisionedValidTypes, err := gatherServer.gsh.GetValidTypes(nil, &emp.Empty{})
+	provisionedValidTypes, err := gatherServer.adminAPISH.GetValidTypesInternal()
 	if err != nil {
 		logger.Log.Debugf("Unable to fetch Valid Values from DB %s: %s", adminDB, err.Error())
 
 		// Provision the default values as a new object.
-		provisionedValidTypes, err = gatherServer.gsh.CreateValidTypes(nil, &pb.ValidTypes{Data: gatherServer.gsh.DefaultValidTypes})
+		provisionedValidTypes, err = gatherServer.adminAPISH.CreateValidTypesInternal(gatherServer.gsh.DefaultValidTypes)
 		if err != nil {
 			logger.Log.Fatalf("Unable to Add Valid Values object to DB %s: %s", adminDB, err.Error())
 		}
 		return
 	}
-	if !areValidTypesEquivalent(provisionedValidTypes.Data, gatherServer.gsh.DefaultValidTypes) {
+	if !areValidTypesEquivalent(provisionedValidTypes, gatherServer.gsh.DefaultValidTypes) {
 		// Need to add the known default values to the data store
-		provisionedValidTypes.Data.MonitoredObjectTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectTypes
-		provisionedValidTypes.Data.MonitoredObjectDeviceTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectDeviceTypes
-		provisionedValidTypes, err = gatherServer.gsh.UpdateValidTypes(nil, provisionedValidTypes)
+		provisionedValidTypes.MonitoredObjectTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectTypes
+		provisionedValidTypes.MonitoredObjectDeviceTypes = gatherServer.gsh.DefaultValidTypes.MonitoredObjectDeviceTypes
+		provisionedValidTypes, err = gatherServer.adminAPISH.UpdateValidTypesInternal(provisionedValidTypes)
 		if err != nil {
 			logger.Log.Fatalf("Unable to Update Valid Values object to DB %s: %s", adminDB, err.Error())
 		}

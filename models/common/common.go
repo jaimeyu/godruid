@@ -2,6 +2,11 @@ package common
 
 import "fmt"
 
+// RESTValidator - Interface for validation of models used in REST requests.
+type RESTValidator interface {
+	Validate(isUpdate bool) error
+}
+
 // UserState - enum describing the state of a user.
 type UserState string
 

@@ -10,6 +10,7 @@ import (
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/godruid"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -108,7 +109,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetHistogram for request: %v", logger.AsJSONString(request))
+	logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -123,7 +124,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, logger.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -137,7 +138,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, logger.AsJSONString(histogram))
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
 
 	resp := &pb.HistogramResponse{
 		Data: histogram,
@@ -163,7 +164,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", logger.AsJSONString(request))
+	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -178,7 +179,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, logger.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -190,7 +191,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, logger.AsJSONString(thresholdCrossing))
+	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(thresholdCrossing))
 
 	formattedJSON, err := reformatThresholdCrossingResponse(thresholdCrossing)
 	if err != nil {
@@ -217,7 +218,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", logger.AsJSONString(request))
+	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -231,7 +232,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -243,7 +244,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, logger.AsJSONString(thresholdCrossing))
+	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
 
 	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
 	if err != nil {
@@ -267,7 +268,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetRawMetrics for request: %v", logger.AsJSONString(request))
+	logger.Log.Debugf("Calling GetRawMetrics for request: %v", models.AsJSONString(request))
 
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
@@ -288,7 +289,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, logger.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -302,7 +303,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, logger.AsJSONString(resp))
+	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, models.AsJSONString(resp))
 
 	formattedJSON := map[string]interface{}{}
 	if len(resp) != 0 {

@@ -63,6 +63,36 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "user-list",
 			HandlerFunc: result.GetAllTenantUsers,
 		},
+		server.Route{
+			Name:        "CreateTenantDomain",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains",
+			HandlerFunc: result.CreateTenantDomain,
+		},
+		server.Route{
+			Name:        "UpdateTenantDomain",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains",
+			HandlerFunc: result.UpdateTenantDomain,
+		},
+		server.Route{
+			Name:        "GetTenantDomain",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
+			HandlerFunc: result.GetTenantDomain,
+		},
+		server.Route{
+			Name:        "DeleteTenantDomain",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
+			HandlerFunc: result.DeleteTenantDomain,
+		},
+		server.Route{
+			Name:        "GetAllTenantDomains",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domain-list",
+			HandlerFunc: result.GetAllTenantDomains,
+		},
 	}
 
 	return result
@@ -192,4 +222,117 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantUsers(w http.ResponseWriter, r 
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.GetAllTenantUserStr, tenmod.TenantUserStr, "Retrieved list of")
+}
+
+// CreateTenantDomain - creates a tenant domain
+func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.Domain{}
+	err := unmarshalRequest(r, &data, false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantDomainStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.CreateTenantDomain(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.CreateTenantDomainStr, tenmod.TenantDomainStr, "Created")
+}
+
+// UpdateTenantDomain - updates a tenant domain
+func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.Domain{}
+	err := unmarshalRequest(r, &data, true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantDomainStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantDomain(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
+}
+
+// GetTenantDomain - fetches a tenant domain
+func (tsh *TenantServiceRESTHandler) GetTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantDomainStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetTenantDomain(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetTenantDomainStr, tenmod.TenantDomainStr, "Retrieved")
+}
+
+// DeleteTenantDomain - deletes a tenant domain
+func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.DeleteTenantDomain(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.DeleteTenantDomainStr, tenmod.TenantDomainStr, "Deleted")
+}
+
+// GetAllTenantDomains - fetches list of tenant domains
+func (tsh *TenantServiceRESTHandler) GetAllTenantDomains(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantDomainStr, tenantID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetAllTenantDomains(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.GetAllTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetAllTenantDomainStr, tenmod.TenantDomainStr, "Retrieved list of")
 }

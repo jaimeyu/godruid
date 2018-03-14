@@ -118,13 +118,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]
 }
 
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *tenmod.Domain) (*tenmod.Domain, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
-	tenantDomainRequest.XId = ds.GenerateID(tenantDomainRequest.GetData(), string(tenmod.TenantDomainType))
-	tenantID := ds.PrependToDataID(tenantDomainRequest.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantDomainRequest.ID = ds.GenerateID(tenantDomainRequest, string(tenmod.TenantDomainType))
+	tenantID := ds.PrependToDataID(tenantDomainRequest.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantDomain{}
+	dataContainer := &tenmod.Domain{}
 	if err := createDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
@@ -133,13 +133,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest
 }
 
 // UpdateTenantDomain - CouchDB implementation of UpdateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *tenmod.Domain) (*tenmod.Domain, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
-	tenantDomainRequest.XId = ds.PrependToDataID(tenantDomainRequest.XId, string(tenmod.TenantDomainType))
-	tenantID := ds.PrependToDataID(tenantDomainRequest.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantDomainRequest.ID = ds.PrependToDataID(tenantDomainRequest.ID, string(tenmod.TenantDomainType))
+	tenantID := ds.PrependToDataID(tenantDomainRequest.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantDomain{}
+	dataContainer := &tenmod.Domain{}
 	if err := updateDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
@@ -148,14 +148,14 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest
 }
 
 // DeleteTenantDomain - CouchDB implementation of DeleteTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainIDRequest))
-	tenantDomainIDRequest.DomainId = ds.PrependToDataID(tenantDomainIDRequest.DomainId, string(tenmod.TenantDomainType))
-	tenantDomainIDRequest.TenantId = ds.PrependToDataID(tenantDomainIDRequest.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDomainStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDomainType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantDomainIDRequest.GetTenantId())
-	dataContainer := pb.TenantDomain{}
-	if err := deleteDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, tenmod.TenantDomainStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Domain{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
@@ -163,14 +163,14 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDomain(tenantDomainIDReque
 }
 
 // GetTenantDomain - CouchDB implementation of GetTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainIDRequest))
-	tenantDomainIDRequest.DomainId = ds.PrependToDataID(tenantDomainIDRequest.DomainId, string(tenmod.TenantDomainType))
-	tenantDomainIDRequest.TenantId = ds.PrependToDataID(tenantDomainIDRequest.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantDomainStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDomainType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantDomainIDRequest.GetTenantId())
-	dataContainer := pb.TenantDomain{}
-	if err := getDataFromCouch(tenantDBName, tenantDomainIDRequest.GetDomainId(), &dataContainer, tenmod.TenantDomainStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Domain{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
@@ -178,18 +178,17 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantDomain(tenantDomainIDRequest 
 }
 
 // GetAllTenantDomains - CouchDB implementation of GetAllTenantDomains
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (*pb.TenantDomainList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) ([]*tenmod.Domain, error) {
 	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantDomainStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	res := &pb.TenantDomainList{}
-	res.Data = make([]*pb.TenantDomain, 0)
-	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantDomainType), tenmod.TenantDomainStr, &res.Data); err != nil {
+	res := make([]*tenmod.Domain, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantDomainType), tenmod.TenantDomainStr, &res); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Retrieved %d %s\n", len(res.Data), tenmod.TenantDomainStr)
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantDomainStr)
 	return res, nil
 }
 

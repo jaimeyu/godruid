@@ -174,117 +174,122 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
+	// logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
 
-	// Issue request to DAO Layer to Create the Tenant Domain
-	result, err := tsh.tenantDB.CreateTenantDomain(tenantDomainRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Create the Tenant Domain
+	// result, err := tsh.tenantDB.CreateTenantDomain(tenantDomainRequest)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Created the Domain, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
-	return result, nil
+	// // Succesfully Created the Domain, return the result.
+	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantDomainRequest(tenantDomainRequest, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantDomainRequest(tenantDomainRequest, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
 
-	// Issue request to DAO Layer to Update the Tenant Domain
-	result, err := tsh.tenantDB.UpdateTenantDomain(tenantDomainRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the Tenant Domain
+	// result, err := tsh.tenantDB.UpdateTenantDomain(tenantDomainRequest)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the Domain, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the Domain, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteTenantDomain - deletes a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	// Validate the request to ensure this operation is valid:
-	if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, tenantDomainIDRequest.GetDomainId())
+	// logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, tenantDomainIDRequest.GetDomainId())
 
-	// Issue request to DAO Layer to Delete the Tenant Domain
-	result, err := tsh.tenantDB.DeleteTenantDomain(tenantDomainIDRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Delete the Tenant Domain
+	// result, err := tsh.tenantDB.DeleteTenantDomain(tenantDomainIDRequest)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Deleted the Domain, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
-	return result, nil
+	// // Succesfully Deleted the Domain, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetTenantDomain - retrieves a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	// Validate the request to ensure this operatin is valid:
-	if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantDomainIDRequest(tenantDomainIDRequest); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Retrieving %s: %s", tenmod.TenantDomainStr, tenantDomainIDRequest.GetDomainId())
+	// logger.Log.Infof("Retrieving %s: %s", tenmod.TenantDomainStr, tenantDomainIDRequest.GetDomainId())
 
-	// Issue request to DAO Layer to fetch the Tenant Domain
-	result, err := tsh.tenantDB.GetTenantDomain(tenantDomainIDRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Domain
+	// result, err := tsh.tenantDB.GetTenantDomain(tenantDomainIDRequest)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
 	// Succesfully fetched the Domain, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
-	return result, nil
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetAllTenantDomains - retrieves all Domains scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainList, error) {
 	// Validate the request to ensure this operation is valid:
 
-	logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantDomainStr, tenantID.Value)
+	// logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantDomainStr, tenantID.Value)
 
-	// Issue request to DAO Layer to fetch the Tenant Domains
-	result, err := tsh.tenantDB.GetAllTenantDomains(tenantID.Value)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantDomainStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Domains
+	// result, err := tsh.tenantDB.GetAllTenantDomains(tenantID.Value)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantDomainStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Domains, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantDomainStr)
-	return result, nil
+	// // Succesfully fetched the Domains, return the result.
+	// logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantDomainStr)
+	// return result, nil
+	return nil, nil
 }
 
 // CreateTenantIngestionProfile - creates an Ingestion Profile scoped to a specific Tenant.

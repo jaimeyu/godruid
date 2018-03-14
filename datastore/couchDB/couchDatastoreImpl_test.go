@@ -97,5 +97,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	// Issue the test to the TenantServiceDatastoreTestRunner
 	tester := dstestTenant.InitTestRunner(tenantDB, adminDB)
 	tester.RunTenantUserCRUD(t)
-	// tester.RunTenantDomainCRUD(t)
+	tester.RunTenantDomainCRUD(t)
 }

@@ -294,194 +294,202 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 
 // CreateTenantIngestionProfile - creates an Ingestion Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantIngPrfRequest(tenantIngPrfReq, false); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantIngPrfRequest(tenantIngPrfReq, false); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantIngestionProfileStr, tenantIngPrfReq)
+	// logger.Log.Infof("Creating %s: %s", tenmod.TenantIngestionProfileStr, tenantIngPrfReq)
 
-	// Issue request to DAO Layer to Create the Tenant Ingestion Profile
-	result, err := tsh.tenantDB.CreateTenantIngestionProfile(tenantIngPrfReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Create the Tenant Ingestion Profile
+	// result, err := tsh.tenantDB.CreateTenantIngestionProfile(tenantIngPrfReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Created the Ingestion Profile, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully Created the Ingestion Profile, return the result.
+	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantIngestionProfile - updates an Ingestion Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
-	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantIngPrfRequest(tenantIngPrfReq, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure no invalid data is stored:
+	// if err := validateTenantIngPrfRequest(tenantIngPrfReq, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantIngestionProfileStr, tenantIngPrfReq)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantIngestionProfileStr, tenantIngPrfReq)
 
-	// Issue request to DAO Layer to Update the Tenant Ingestion Profile
-	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(tenantIngPrfReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the Tenant Ingestion Profile
+	// result, err := tsh.tenantDB.UpdateTenantIngestionProfile(tenantIngPrfReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the Ingestion Profile, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the Ingestion Profile, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetTenantIngestionProfile - retrieves the Ingestion Profile for a single Tenant.
 func (tsh *TenantServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	// Validate the request to ensure the operation is valid:
-	if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure the operation is valid:
+	// if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Retrieving %s for Tenant %s", tenmod.TenantIngestionProfileStr, tenantIngPrfIDReq.GetTenantId())
+	// logger.Log.Infof("Retrieving %s for Tenant %s", tenmod.TenantIngestionProfileStr, tenantIngPrfIDReq.GetTenantId())
 
-	// Issue request to DAO Layer to fetch the Tenant Ingestion Profile
-	result, err := tsh.tenantDB.GetTenantIngestionProfile(tenantIngPrfIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Ingestion Profile
+	// result, err := tsh.tenantDB.GetTenantIngestionProfile(tenantIngPrfIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Ingestion Profile, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the Ingestion Profile, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteTenantIngestionProfile - deletes the Ingestion Profile for a single Tenant.
 func (tsh *TenantServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantIngPrfIDReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	// Validate the request to ensure the operation is valid:
-	if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request to ensure the operation is valid:
+	// if err := validateTenantIngPrfIDRequest(tenantIngPrfIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantIngestionProfileStr, tenantIngPrfIDReq.GetTenantId())
+	// logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantIngestionProfileStr, tenantIngPrfIDReq.GetTenantId())
 
-	// Issue request to DAO Layer to delete the Tenant Ingestion Profile
-	result, err := tsh.tenantDB.DeleteTenantIngestionProfile(tenantIngPrfIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to delete the Tenant Ingestion Profile
+	// result, err := tsh.tenantDB.DeleteTenantIngestionProfile(tenantIngPrfIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully deleted the Ingestion Profile, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully deleted the Ingestion Profile, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // CreateTenantThresholdProfile - creates an Threshold Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, false); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, false); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfReq)
+	// logger.Log.Infof("Creating %s: %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfReq)
 
-	// Issue request to DAO Layer to Create the Tenant Threshold Profile
-	result, err := tsh.tenantDB.CreateTenantThresholdProfile(tenantThreshPrfReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Create the Tenant Threshold Profile
+	// result, err := tsh.tenantDB.CreateTenantThresholdProfile(tenantThreshPrfReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Created the Threshold Profile, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully Created the Threshold Profile, return the result.
+	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantThresholdProfile - updates an Threshold Profile scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantThreshPrfRequest(tenantThreshPrfReq, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfReq)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfReq)
 
-	// Issue request to DAO Layer to Update the Tenant Threshold Profile
-	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(tenantThreshPrfReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the Tenant Threshold Profile
+	// result, err := tsh.tenantDB.UpdateTenantThresholdProfile(tenantThreshPrfReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the Threshold Profile, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the Threshold Profile, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetTenantThresholdProfile - retrieves the Threshold Profile for a single Tenant.
 func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure the operation is valid:
-	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Retrieving %s for Tenant %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
+	// logger.Log.Infof("Retrieving %s for Tenant %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
 
-	// Issue request to DAO Layer to fetch the Tenant Threshold Profile
-	result, err := tsh.tenantDB.GetTenantThresholdProfile(tenantThreshPrfIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Threshold Profile
+	// result, err := tsh.tenantDB.GetTenantThresholdProfile(tenantThreshPrfIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Threshold Profile, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the Threshold Profile, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteTenantThresholdProfile - deletes the Threshold Profile for a single Tenant.
 func (tsh *TenantServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantThreshPrfIDReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	// Validate the request to ensure the operation is valid:
-	if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantThreshPrfIDRequest(tenantThreshPrfIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
+	// logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
 
-	// Issue request to DAO Layer to delete the Tenant Threshold Profile
-	result, err := tsh.tenantDB.DeleteTenantThresholdProfile(tenantThreshPrfIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to delete the Tenant Threshold Profile
+	// result, err := tsh.tenantDB.DeleteTenantThresholdProfile(tenantThreshPrfIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully deleted the Threshold Profile, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully deleted the Threshold Profile, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantThresholdProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // CreateMonitoredObject - creates a Monitored Object scoped to a specific tenant
@@ -704,34 +712,36 @@ func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr
 
 // GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
 func (tsh *TenantServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdProfileList, error) {
-	logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantThresholdProfileStr, tenantID.Value)
+	// logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantThresholdProfileStr, tenantID.Value)
 
-	// Issue request to DAO Layer to fetch the records
-	result, err := tsh.tenantDB.GetAllTenantThresholdProfile(tenantID.Value)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %ss: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the records
+	// result, err := tsh.tenantDB.GetAllTenantThresholdProfile(tenantID.Value)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %ss: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the records, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantThresholdProfileStr)
-	return result, nil
+	// // Succesfully fetched the records, return the result.
+	// logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantThresholdProfileStr)
+	// return result, nil
+	return nil, nil
 }
 
 // GetActiveTenantIngestionProfile - retrieves the active Ingestion Profile for a single Tenant.
 func (tsh *TenantServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfile, error) {
-	// Issue request to DAO Layer to fetch the record
-	result, err := tsh.tenantDB.GetActiveTenantIngestionProfile(tenantID.GetValue())
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the record
+	// result, err := tsh.tenantDB.GetActiveTenantIngestionProfile(tenantID.GetValue())
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the record, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the record, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantIngestionProfileStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.

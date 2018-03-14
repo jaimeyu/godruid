@@ -20,15 +20,17 @@ type TenantServiceDatastore interface {
 	GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
 	GetAllTenantDomains(string) ([]*tenmod.Domain, error)
 
-	CreateTenantIngestionProfile(*pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error)
-	UpdateTenantIngestionProfile(*pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error)
-	GetTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
-	DeleteTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
+	CreateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
+	UpdateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
+	GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)
+	DeleteTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)
+	GetActiveTenantIngestionProfile(tenantID string) (*tenmod.IngestionProfile, error)
 
-	CreateTenantThresholdProfile(*pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error)
-	UpdateTenantThresholdProfile(*pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error)
-	GetTenantThresholdProfile(*pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error)
-	DeleteTenantThresholdProfile(*pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error)
+	CreateTenantThresholdProfile(*tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error)
+	UpdateTenantThresholdProfile(*tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error)
+	GetTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
+	DeleteTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
+	GetAllTenantThresholdProfile(tenantID string) ([]*tenmod.ThresholdProfile, error)
 
 	CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
 	UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
@@ -41,9 +43,6 @@ type TenantServiceDatastore interface {
 	UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
 	DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error)
 	GetTenantMeta(tenantID string) (*pb.TenantMetadata, error)
-
-	GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfile, error)
-	GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdProfileList, error)
 
 	BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error)
 }

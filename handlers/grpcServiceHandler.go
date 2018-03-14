@@ -57,6 +57,19 @@ const (
 	AccedianVNID MonitoredObjectDeviceType = "accedian-vnid"
 )
 
+const (
+	VendorMap              = "vendorMap"
+	DirectionMap           = "directionMap"
+	MonitoredObjectTypeMap = "monitoredObjectTypeMap"
+	MetricMap              = "metricMap"
+	EventAttrMap           = "eventAttrMap"
+	EventMap               = "eventMap"
+	Enabled                = "enabled"
+	Critical               = "critical"
+	Major                  = "major"
+	Minor                  = "minor"
+)
+
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
 	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{

@@ -193,13 +193,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDomains(tenantID string) (
 }
 
 // CreateTenantIngestionProfile - CouchDB implementation of CreateTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIngPrfReq *tenmod.IngestionProfile) (*tenmod.IngestionProfile, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
-	tenantIngPrfReq.XId = ds.GenerateID(tenantIngPrfReq.GetData(), string(tenmod.TenantIngestionProfileType))
-	tenantID := ds.PrependToDataID(tenantIngPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantIngPrfReq.ID = ds.GenerateID(tenantIngPrfReq, string(tenmod.TenantIngestionProfileType))
+	tenantID := ds.PrependToDataID(tenantIngPrfReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantIngestionProfile{}
+	dataContainer := &tenmod.IngestionProfile{}
 	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
@@ -208,13 +208,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 }
 
 // UpdateTenantIngestionProfile - CouchDB implementation of UpdateTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIngPrfReq *tenmod.IngestionProfile) (*tenmod.IngestionProfile, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
-	tenantIngPrfReq.XId = ds.PrependToDataID(tenantIngPrfReq.XId, string(tenmod.TenantIngestionProfileType))
-	tenantID := ds.PrependToDataID(tenantIngPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantIngPrfReq.ID = ds.PrependToDataID(tenantIngPrfReq.ID, string(tenmod.TenantIngestionProfileType))
+	tenantID := ds.PrependToDataID(tenantIngPrfReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantIngestionProfile{}
+	dataContainer := &tenmod.IngestionProfile{}
 	if err := updateDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
@@ -223,14 +223,14 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIng
 }
 
 // GetTenantIngestionProfile - CouchDB implementation of GetTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
-	tenantIngPrfReq.IngestionProfileId = ds.PrependToDataID(tenantIngPrfReq.IngestionProfileId, string(tenmod.TenantIngestionProfileType))
-	tenantIngPrfReq.TenantId = ds.PrependToDataID(tenantIngPrfReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantIngestionProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantIngestionProfileType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
-	dataContainer := pb.TenantIngestionProfile{}
-	if err := getDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.IngestionProfile{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
@@ -238,14 +238,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantIngPrf
 }
 
 // DeleteTenantIngestionProfile - CouchDB implementation of DeleteTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIngPrfReq *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
-	tenantIngPrfReq.IngestionProfileId = ds.PrependToDataID(tenantIngPrfReq.IngestionProfileId, string(tenmod.TenantIngestionProfileType))
-	tenantIngPrfReq.TenantId = ds.PrependToDataID(tenantIngPrfReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantIngestionProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantIngestionProfileType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantIngPrfReq.GetTenantId())
-	dataContainer := pb.TenantIngestionProfile{}
-	if err := deleteDataFromCouch(tenantDBName, tenantIngPrfReq.GetIngestionProfileId(), &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.IngestionProfile{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
@@ -253,13 +253,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantIng
 }
 
 // CreateTenantThresholdProfile - CouchDB implementation of CreateTenantThresholdProfile
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThreshPrfReq *tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
-	tenantThreshPrfReq.XId = ds.GenerateID(tenantThreshPrfReq.GetData(), string(tenmod.TenantThresholdProfileType))
-	tenantID := ds.PrependToDataID(tenantThreshPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantThreshPrfReq.ID = ds.GenerateID(tenantThreshPrfReq, string(tenmod.TenantThresholdProfileType))
+	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantThresholdProfile{}
+	dataContainer := &tenmod.ThresholdProfile{}
 	if err := createDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
@@ -268,13 +268,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThr
 }
 
 // UpdateTenantThresholdProfile - CouchDB implementation of UpdateTenantThresholdProfile
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThreshPrfReq *tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
-	tenantThreshPrfReq.XId = ds.PrependToDataID(tenantThreshPrfReq.XId, string(tenmod.TenantThresholdProfileType))
-	tenantID := ds.PrependToDataID(tenantThreshPrfReq.GetData().GetTenantId(), string(admmod.TenantType))
+	tenantThreshPrfReq.ID = ds.PrependToDataID(tenantThreshPrfReq.ID, string(tenmod.TenantThresholdProfileType))
+	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantThresholdProfile{}
+	dataContainer := &tenmod.ThresholdProfile{}
 	if err := updateDataInCouch(tenantDBName, tenantThreshPrfReq, dataContainer, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
@@ -283,14 +283,14 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThr
 }
 
 // GetTenantThresholdProfile - CouchDB implementation of GetTenantThresholdProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
-	tenantThreshPrfReq.ThresholdProfileId = ds.PrependToDataID(tenantThreshPrfReq.ThresholdProfileId, string(tenmod.TenantThresholdProfileType))
-	tenantThreshPrfReq.TenantId = ds.PrependToDataID(tenantThreshPrfReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantThresholdProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantThresholdProfileType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
-	dataContainer := pb.TenantThresholdProfile{}
-	if err := getDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.ThresholdProfile{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
@@ -298,14 +298,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantThresh
 }
 
 // DeleteTenantThresholdProfile - CouchDB implementation of DeleteTenantThresholdProfile
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantThreshPrfReq *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
-	tenantThreshPrfReq.ThresholdProfileId = ds.PrependToDataID(tenantThreshPrfReq.ThresholdProfileId, string(tenmod.TenantThresholdProfileType))
-	tenantThreshPrfReq.TenantId = ds.PrependToDataID(tenantThreshPrfReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantThresholdProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantThresholdProfileType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, tenantThreshPrfReq.GetTenantId())
-	dataContainer := pb.TenantThresholdProfile{}
-	if err := deleteDataFromCouch(tenantDBName, tenantThreshPrfReq.GetThresholdProfileId(), &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.ThresholdProfile{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
@@ -537,7 +537,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.Te
 }
 
 // GetActiveTenantIngestionProfile - CouchDB implementation of GetActiveTenantIngestionProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenantID string) (*tenmod.IngestionProfile, error) {
 	logger.Log.Debugf("Fetching active %s for Tenant %s\n", tenmod.TenantIngestionProfileStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -552,8 +552,10 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 		return nil, err
 	}
 
+	logger.Log.Debugf("Retrieved: %s", models.AsJSONString(fetchedData))
+
 	// Populate the response
-	res := pb.TenantIngestionProfile{}
+	res := tenmod.IngestionProfile{}
 	if len(fetchedData) != 0 {
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, tenmod.TenantIngestionProfileStr); err != nil {
 			return nil, err
@@ -565,14 +567,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 }
 
 // GetAllTenantThresholdProfile - CouchDB implementation of GetAllTenantThresholdProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdProfileList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID string) ([]*tenmod.ThresholdProfile, error) {
 	logger.Log.Debugf("Fetching all %s for Tenant %s\n", tenmod.TenantThresholdProfileStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	res := &pb.TenantThresholdProfileList{}
-	res.Data = make([]*pb.TenantThresholdProfile, 0)
-	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res.Data); err != nil {
+	res := make([]*tenmod.ThresholdProfile, 0)
+	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res); err != nil {
 		return nil, err
 	}
 

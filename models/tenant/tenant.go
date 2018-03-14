@@ -136,13 +136,13 @@ func (d *Domain) Validate(isUpdate bool) error {
 
 // IngestionProfile - defines a Tenant Ingestion Profile.
 type IngestionProfile struct {
-	ID                    string                                `json:"_id"`
-	REV                   string                                `json:"_rev"`
-	Datatype              string                                `json:"datatype"`
-	TenantID              string                                `json:"tenantId"`
-	Metrics               map[string]map[string]map[string]bool `json:"metrics"`
-	CreatedTimestamp      int64                                 `json:"createdTimestamp"`
-	LastModifiedTimestamp int64                                 `json:"lastModifiedTimestamp"`
+	ID                    string                                                                 `json:"_id"`
+	REV                   string                                                                 `json:"_rev"`
+	Datatype              string                                                                 `json:"datatype"`
+	TenantID              string                                                                 `json:"tenantId"`
+	Metrics               map[string]map[string]map[string]map[string]map[string]map[string]bool `json:"metrics"`
+	CreatedTimestamp      int64                                                                  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                                                                  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -173,13 +173,14 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 
 // ThresholdProfile - defines a Tenant Threshold Profile.
 type ThresholdProfile struct {
-	ID                    string                            `json:"_id"`
-	REV                   string                            `json:"_rev"`
-	Datatype              string                            `json:"datatype"`
-	TenantID              string                            `json:"tenantId"`
-	Thresholds            map[string]MonitoredObjectTypeMap `json:"thresholds"`
-	CreatedTimestamp      int64                             `json:"createdTimestamp"`
-	LastModifiedTimestamp int64                             `json:"lastModifiedTimestamp"`
+	ID                    string                                     `json:"_id"`
+	REV                   string                                     `json:"_rev"`
+	Datatype              string                                     `json:"datatype"`
+	TenantID              string                                     `json:"tenantId"`
+	Name                  string                                     `json:"name"`
+	Thresholds            map[string]map[string]MonitoredObjectGroup `json:"thresholds"`
+	CreatedTimestamp      int64                                      `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                                      `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -208,9 +209,9 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 	return nil
 }
 
-type MonitoredObjectTypeMap struct {
-	MonitoredObjectTypeMap map[string]map[string]map[string]map[string]string
-	MetricMap              map[string]string
+type MonitoredObjectGroup struct {
+	MonitoredObjectTypeMap map[string]map[string]map[string]map[string]map[string]map[string]map[string]map[string]map[string]string `json:"monitoredObjectTypeMap"`
+	MetricMap              map[string]map[string]map[string]string                                                                   `json:"metricMap"`
 }
 
 // MonitoredObject - defines a Tenant Monitored Object.

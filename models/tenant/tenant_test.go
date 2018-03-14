@@ -1,15 +1,276 @@
 package tenant
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/common"
 	"github.com/icrowley/fake"
 
 	testUtil "github.com/accedian/adh-gather/models/test"
 	uuid "github.com/satori/go.uuid"
+)
+
+var (
+	defaultThresholdsBytes = []byte(`{
+		"thresholds": {
+			"vendorMap": {
+				"accedian-flowmeter": {
+					"metricMap": {
+						"throughputAvg": {
+							"eventAttrMap": {
+								"critical": "25000000",
+								"enabled": "true",
+								"major": "20000000",
+								"minor": "18000000"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"flowmeter": {
+							"metricMap": {
+								"throughputAvg": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "25000000",
+														"lowerStrict": "true",
+														"unit": "bps"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "25000000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "18000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "20000000"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"accedian-twamp": {
+					"metricMap": {
+						"delayP95": {
+							"eventAttrMap": {
+								"critical": "100000",
+								"enabled": "true",
+								"major": "95000",
+								"minor": "92500"
+							}
+						},
+						"jitterP95": {
+							"eventAttrMap": {
+								"critical": "30000",
+								"enabled": "true",
+								"major": "20000",
+								"minor": "15000"
+							}
+						},
+						"packetsLostPct": {
+							"eventAttrMap": {
+								"critical": "0.8",
+								"enabled": "true",
+								"major": "0.3",
+								"minor": "0.1"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}`)
+
+	defaultIngestionProfileBytes = []byte(`{"metrics": {
+		"vendorMap": {
+		  "accedian-flowmeter": {
+			"monitoredObjectTypeMap": {
+			  "flowmeter": {
+				"metricMap": {
+				  "bytesReceived": true,
+				  "packetsReceived": true,
+				  "throughputAvg": true,
+				  "throughputMax": true,
+				  "throughputMin": true
+				}
+			  }
+			}
+		  },
+		  "accedian-twamp": {
+			"monitoredObjectTypeMap": {
+			  "twamp-pe": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sf": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sl": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  }
+			}
+		  }
+		}
+	  }}`)
 )
 
 func TestTenantUserSerialization(t *testing.T) {
@@ -53,25 +314,18 @@ func TestTenantDomainSerialization(t *testing.T) {
 }
 
 func TestTenantIngestionProfileSerialization(t *testing.T) {
-	metrics := make(map[string]map[string]map[string]bool)
-	company := fake.Company()
-	brand := fake.Brand()
-	metrics[company] = make(map[string]map[string]bool)
-	metrics[company][brand] = make(map[string]bool)
-	metrics[company][brand][fake.JobTitle()] = true
-	metrics[company][brand][fake.JobTitle()] = true
-	metrics[company][brand][fake.JobTitle()] = false
-	company2 := fake.Company()
-	brand2 := fake.Brand()
-	metrics[company2] = make(map[string]map[string]bool)
-	metrics[company2][brand2] = make(map[string]bool)
-	metrics[company2][brand2][fake.JobTitle()] = false
+
+	defaultIngestionProfileShell := &IngestionProfile{}
+	if err := json.Unmarshal(defaultIngestionProfileBytes, &defaultIngestionProfileShell); err != nil {
+		logger.Log.Debugf("Unable to umarshal ingestion profile: %s", err.Error())
+	}
+
 	original := &IngestionProfile{
 		ID:                    uuid.NewV4().String(),
 		REV:                   uuid.NewV4().String(),
 		Datatype:              string(TenantIngestionProfileType),
 		TenantID:              fake.CharactersN(12),
-		Metrics:               metrics,
+		Metrics:               defaultIngestionProfileShell.Metrics,
 		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}
@@ -82,35 +336,18 @@ func TestTenantIngestionProfileSerialization(t *testing.T) {
 }
 
 func TestTenantThresholdProfileSerialization(t *testing.T) {
-	monObjectTypeMap := make(map[string]map[string]map[string]map[string]string)
-	monobj := fake.Brand()
-	metric := fake.JobTitle()
-	dir := "0"
-	dir2 := "1"
-	attr := fake.Industry()
-	attr2 := fake.Industry()
-	monObjectTypeMap[monobj] = make(map[string]map[string]map[string]string)
-	monObjectTypeMap[monobj][metric] = make(map[string]map[string]string)
-	monObjectTypeMap[monobj][metric][dir] = make(map[string]string)
-	monObjectTypeMap[monobj][metric][dir][attr] = fake.Continent()
-	monObjectTypeMap[monobj][metric][dir][attr2] = fake.Continent()
-	monObjectTypeMap[monobj][metric][dir2] = make(map[string]string)
-	monObjectTypeMap[monobj][metric][dir2][attr] = fake.Continent()
-	monObjectTypeMap[monobj][metric][dir2][attr2] = fake.Continent()
 
-	metricMap := map[string]string{fake.Color(): fake.Brand(), fake.Color(): fake.Brand()}
-	thresholds := map[string]MonitoredObjectTypeMap{
-		fake.Company(): MonitoredObjectTypeMap{
-			MonitoredObjectTypeMap: monObjectTypeMap,
-			MetricMap:              metricMap,
-		},
+	defaultThresholdProfileShell := &ThresholdProfile{}
+	if err := json.Unmarshal(defaultThresholdsBytes, &defaultThresholdProfileShell); err != nil {
+		logger.Log.Debugf("Unable to umarshal threshold profile: %s", err.Error())
 	}
+
 	original := &ThresholdProfile{
 		ID:                    uuid.NewV4().String(),
 		REV:                   uuid.NewV4().String(),
 		Datatype:              string(TenantThresholdProfileType),
 		TenantID:              fake.CharactersN(12),
-		Thresholds:            thresholds,
+		Thresholds:            defaultThresholdProfileShell.Thresholds,
 		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}

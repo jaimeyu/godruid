@@ -340,8 +340,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	// Create a default Ingestion Profile for the Tenant.
 	idForTenant := result.ID
 	ingPrfData := createDefaultTenantIngPrf(idForTenant)
-	ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
-	_, err = ash.tenantDB.CreateTenantIngestionProfile(&ingPrfReq)
+	_, err = ash.tenantDB.CreateTenantIngestionProfile(ingPrfData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)
@@ -350,8 +349,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
-	threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
-	threshProfileResponse, err := ash.tenantDB.CreateTenantThresholdProfile(&threshPrfReq)
+	threshProfileResponse, err := ash.tenantDB.CreateTenantThresholdProfile(threshPrfData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)
@@ -361,7 +359,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	// Create the tenant metadata
 	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
 	// as this is just relational pouch adaption:
-	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.Name)
+	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.ID, result.Name)
 	metaReq := pb.TenantMetadata{Data: meta}
 	_, err = ash.tenantDB.CreateTenantMeta(&metaReq)
 	if err != nil {

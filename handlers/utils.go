@@ -37,6 +37,193 @@ var (
 		"lostBurstMax", "packetsReceived"}
 	defaultIngestionProfileFlowmeterMetricNames = []string{
 		"throughputAvg", "throughputMax", "throughputMin", "bytesReceived", "packetsReceived"}
+	defaultThresholdProfileShell *tenmod.ThresholdProfile
+	defaultThresholdsBytes       = []byte(`{
+		"thresholds": {
+			"vendorMap": {
+				"accedian-flowmeter": {
+					"metricMap": {
+						"throughputAvg": {
+							"eventAttrMap": {
+								"critical": "25000000",
+								"enabled": "true",
+								"major": "20000000",
+								"minor": "18000000"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"flowmeter": {
+							"metricMap": {
+								"throughputAvg": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "25000000",
+														"lowerStrict": "true",
+														"unit": "bps"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "25000000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "18000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "20000000"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"accedian-twamp": {
+					"metricMap": {
+						"delayP95": {
+							"eventAttrMap": {
+								"critical": "100000",
+								"enabled": "true",
+								"major": "95000",
+								"minor": "92500"
+							}
+						},
+						"jitterP95": {
+							"eventAttrMap": {
+								"critical": "30000",
+								"enabled": "true",
+								"major": "20000",
+								"minor": "15000"
+							}
+						},
+						"packetsLostPct": {
+							"eventAttrMap": {
+								"critical": "0.8",
+								"enabled": "true",
+								"major": "0.3",
+								"minor": "0.1"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}`)
 )
 
 func checkError(err error, errorType httpErrorString) bool {
@@ -47,35 +234,41 @@ func checkError(err error, errorType httpErrorString) bool {
 	return false
 }
 
-func createDefaultTenantIngPrf(tenantID string) *pb.TenantIngestionProfileData {
-	ingPrf := pb.TenantIngestionProfileData{}
-	ingPrf.TenantId = tenantID
+func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
+
+	ingPrf := tenmod.IngestionProfile{}
+	ingPrf.TenantID = tenantID
 	ingPrf.Datatype = string(tenmod.TenantIngestionProfileType)
 	ingPrf.CreatedTimestamp = db.MakeTimestamp()
-	ingPrf.LastModifiedTimestamp = ingPrf.GetCreatedTimestamp()
+	ingPrf.LastModifiedTimestamp = ingPrf.CreatedTimestamp
 
 	// Default Values for the metrics:
-	moMap := pb.TenantIngestionProfileData_MonitoredObjectMap{}
-	metricMap := pb.TenantIngestionProfileData_MetricMap{}
-	metricMap.MetricMap = createMetricMap(defaultIngestionProfileMetricNames...)
-	moMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
-	moMap.MonitoredObjectTypeMap[string(TwampPE)] = &metricMap
-	moMap.MonitoredObjectTypeMap[string(TwampSL)] = &metricMap
-	moMap.MonitoredObjectTypeMap[string(TwampSF)] = &metricMap
-	metrics := make(map[string]*pb.TenantIngestionProfileData_MonitoredObjectMap)
-	metrics[string(AccedianTwamp)] = &moMap
+	twampStr := string(AccedianTwamp)
+	accfmStr := string(AccedianFlowmeter)
+	peStr := string(TwampPE)
+	sfStr := string(TwampSF)
+	slStr := string(TwampSL)
+	fmStr := string(Flowmeter)
+	ingPrf.Metrics = make(map[string]map[string]map[string]map[string]map[string]map[string]bool)
 
-	// Add flowmeter metrics:
-	flowMOMap := pb.TenantIngestionProfileData_MonitoredObjectMap{}
-	flowMetricMap := pb.TenantIngestionProfileData_MetricMap{}
-	flowMetricMap.MetricMap = createMetricMap(defaultIngestionProfileFlowmeterMetricNames...)
-	flowMOMap.MonitoredObjectTypeMap = make(map[string]*pb.TenantIngestionProfileData_MetricMap)
-	flowMOMap.MonitoredObjectTypeMap[string(Flowmeter)] = &flowMetricMap
-	metrics[string(AccedianFlowmeter)] = &flowMOMap
+	// Build Twamp Profile
+	ingPrf.Metrics[VendorMap] = make(map[string]map[string]map[string]map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][twampStr] = make(map[string]map[string]map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap] = make(map[string]map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][peStr] = make(map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][sfStr] = make(map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][slStr] = make(map[string]map[string]bool)
+	metricMap := createMetricMap(defaultIngestionProfileMetricNames...)
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][peStr][MetricMap] = metricMap
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][sfStr][MetricMap] = metricMap
+	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][slStr][MetricMap] = metricMap
 
-	vendorMap := &pb.TenantIngestionProfileData_VendorMap{}
-	vendorMap.VendorMap = metrics
-	ingPrf.Metrics = vendorMap
+	// Build Flowmeter Profile
+	ingPrf.Metrics[VendorMap][accfmStr] = make(map[string]map[string]map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap] = make(map[string]map[string]map[string]bool)
+	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap][fmStr] = make(map[string]map[string]bool)
+	metricMap = createMetricMap(defaultIngestionProfileFlowmeterMetricNames...)
+	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap][fmStr][MetricMap] = metricMap
 
 	return &ingPrf
 }
@@ -89,17 +282,23 @@ func createMetricMap(metricNames ...string) map[string]bool {
 	return result
 }
 
-func createDefaultTenantThresholdPrf(tenantID string) *pb.TenantThresholdProfileData {
-	thrPrf := pb.TenantThresholdProfileData{}
+func createDefaultTenantThresholdPrf(tenantID string) *tenmod.ThresholdProfile {
+	if defaultThresholdProfileShell == nil {
+		defaultThresholdProfileShell = &tenmod.ThresholdProfile{}
+		if err := json.Unmarshal(defaultThresholdsBytes, &defaultThresholdProfileShell); err != nil {
+			logger.Log.Debugf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
+		}
+		logger.Log.Debugf("The defualt thresholds used will be: %s", models.AsJSONString(defaultThresholdProfileShell))
+	}
+	thrPrf := tenmod.ThresholdProfile{}
 
-	thrPrf.TenantId = tenantID
+	thrPrf.TenantID = tenantID
 	thrPrf.Datatype = string(tenmod.TenantThresholdProfileType)
 	thrPrf.Name = "Default"
-
-	thrPrf.Thresholds = createDefaultThreshold()
+	thrPrf.Thresholds = defaultThresholdProfileShell.Thresholds
 
 	thrPrf.CreatedTimestamp = db.MakeTimestamp()
-	thrPrf.LastModifiedTimestamp = thrPrf.GetCreatedTimestamp()
+	thrPrf.LastModifiedTimestamp = thrPrf.CreatedTimestamp
 
 	return &thrPrf
 }
@@ -116,277 +315,6 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 	result.LastModifiedTimestamp = result.GetCreatedTimestamp()
 
 	return &result
-}
-
-func createDefaultThreshold() *pb.TenantThresholdProfileData_VendorMap {
-	return &pb.TenantThresholdProfileData_VendorMap{
-		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-			string(AccedianTwamp): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-				MetricMap: map[string]*pb.TenantThresholdProfileData_UIEventAttrMap{
-					"delayP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "92500",
-							"major":    "95000",
-							"critical": "100000",
-						},
-					},
-					"jitterP95": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "15000",
-							"major":    "20000",
-							"critical": "30000",
-						},
-					},
-					"packetsLostPct": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "0.1",
-							"major":    "0.3",
-							"critical": "0.8",
-						},
-					},
-				},
-				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
-					string(TwampPE): &pb.TenantThresholdProfileData_MetricMap{
-						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
-							"delayP95": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "92500",
-													"lowerStrict": "true",
-													"upperLimit":  "95000",
-													"unit":        "ms",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "95000",
-													"lowerStrict": "true",
-													"upperLimit":  "100000",
-													"upperStrict": "false",
-													"unit":        "ms",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "100000",
-													"lowerStrict": "true",
-													"unit":        "ms",
-												},
-											},
-										},
-									},
-								},
-							},
-							"jitterP95": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "15000",
-													"lowerStrict": "true",
-													"upperLimit":  "20000",
-													"unit":        "ms",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "20000",
-													"lowerStrict": "true",
-													"upperLimit":  "30000",
-													"upperStrict": "false",
-													"unit":        "ms",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "30000",
-													"lowerStrict": "true",
-													"unit":        "ms",
-												},
-											},
-										},
-									},
-								},
-							},
-							"packetsLostPct": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "0.1",
-													"lowerStrict": "true",
-													"upperLimit":  "0.3",
-													"unit":        "pct",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "0.3",
-													"lowerStrict": "true",
-													"upperLimit":  "0.8",
-													"upperStrict": "false",
-													"unit":        "pct",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "0.8",
-													"lowerStrict": "true",
-													"unit":        "pct",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			string(AccedianFlowmeter): &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-				MetricMap: map[string]*pb.TenantThresholdProfileData_UIEventAttrMap{
-					"throughputAvg": &pb.TenantThresholdProfileData_UIEventAttrMap{
-						EventAttrMap: map[string]string{
-							"enabled":  "true",
-							"minor":    "18000000",
-							"major":    "20000000",
-							"critical": "25000000",
-						},
-					},
-					// Removing these items for MWC, leaving them commented out in case
-					// there is a desire for them later.
-					// "throughputMax": &pb.TenantThresholdProfileData_UIEventAttrMap{
-					// 	EventAttrMap: map[string]string{
-					// 		"enabled":  "true",
-					// 		"minor":    "16500000",
-					// 		"major":    "17500000",
-					// 		"critical": "20000000",
-					// 	},
-					// },
-					// "throughputMin": &pb.TenantThresholdProfileData_UIEventAttrMap{
-					// 	EventAttrMap: map[string]string{
-					// 		"enabled":  "true",
-					// 		"minor":    "16500000",
-					// 		"major":    "17500000",
-					// 		"critical": "20000000",
-					// 	},
-					// },
-				},
-				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
-					string(Flowmeter): &pb.TenantThresholdProfileData_MetricMap{
-						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
-							"throughputAvg": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "18000000",
-													"lowerStrict": "true",
-													"upperLimit":  "20000000",
-													"unit":        "bps",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "20000000",
-													"lowerStrict": "true",
-													"upperLimit":  "25000000",
-													"upperStrict": "false",
-													"unit":        "bps",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "25000000",
-													"lowerStrict": "true",
-													"unit":        "bps",
-												},
-											},
-										},
-									},
-								},
-							},
-							// Removing these items for MWC, leaving them commented out in case
-							// there is a desire for them later.
-							// "throughputMax": &pb.TenantThresholdProfileData_DirectionMap{
-							// 	DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-							// 		"0": &pb.TenantThresholdProfileData_EventMap{
-							// 			EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-							// 				"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "16500000",
-							// 						"lowerStrict": "true",
-							// 						"upperLimit":  "17500000",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 				"major": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "17500000",
-							// 						"lowerStrict": "true",
-							// 						"upperLimit":  "20000000",
-							// 						"upperStrict": "false",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 				"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "20000000",
-							// 						"lowerStrict": "true",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 			},
-							// 		},
-							// 	},
-							// },
-							// "throughputMin": &pb.TenantThresholdProfileData_DirectionMap{
-							// 	DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-							// 		"0": &pb.TenantThresholdProfileData_EventMap{
-							// 			EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-							// 				"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "16500000",
-							// 						"lowerStrict": "true",
-							// 						"upperLimit":  "17500000",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 				"major": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "17500000",
-							// 						"lowerStrict": "true",
-							// 						"upperLimit":  "20000000",
-							// 						"upperStrict": "false",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 				"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-							// 					map[string]string{
-							// 						"lowerLimit":  "20000000",
-							// 						"lowerStrict": "true",
-							// 						"unit":        "bps",
-							// 					},
-							// 				},
-							// 			},
-							// 		},
-							// 	},
-							// },
-						},
-					},
-				},
-			},
-		},
-	}
 }
 
 func getDBFieldFromRequest(r *http.Request, urlPart int32) string {

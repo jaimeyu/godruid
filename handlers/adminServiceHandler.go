@@ -3,9 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
+	admmod "github.com/accedian/adh-gather/models/admin"
 
 	"github.com/accedian/adh-gather/datastore/couchDB"
 	"github.com/accedian/adh-gather/datastore/inMemory"
@@ -141,26 +143,41 @@ func (ash *AdminServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *e
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
 func (ash *AdminServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	// // Validate the request to ensure no invalid data is stored:
-	// if err := validateTenantDescriptorRequest(tenantMeta, false); err != nil {
-	// 	msg := fmt.Sprintf("Unable to validate request to create %s: %s", admmod.TenantStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
-	// logger.Log.Infof("Creating %s: %s", admmod.TenantStr, tenantMeta.GetXId())
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantDescriptorRequest(tenantMeta, false); err != nil {
+		msg := fmt.Sprintf("Unable to validate request to create %s: %s", admmod.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+	logger.Log.Infof("Creating %s: %s", admmod.TenantStr, tenantMeta.GetXId())
 
-	// // Issue request to AdminService DAO to create the metadata record:
-	// result, err := ash.adminDB.CreateTenant(tenantMeta)
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to create %s: %s", admmod.TenantStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Convert the protobuf object to the proper type:
+	converted := admmod.Tenant{}
+	if err := pb.ConvertFromPBObject(tenantMeta, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", admmod.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Succesfully Created the Tenant, return the metadata result.
-	// logger.Log.Infof("Created %s: %s\n", admmod.TenantStr, result.GetXId())
-	// return result, nil
-	return nil, nil
+	// Issue request to AdminService DAO to create the metadata record:
+	result, err := ash.adminDB.CreateTenant(&converted)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to create %s: %s", admmod.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Convert the result back to PB object
+	response := pb.TenantDescriptor{}
+	if err := pb.ConvertToPBObject(result, &response); err != nil {
+		msg := fmt.Sprintf("Unable to convert response to store %s: %s", admmod.TenantStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Succesfully Created the Tenant, return the metadata result.
+	logger.Log.Infof("Created %s: %s\n", admmod.TenantStr, response.GetXId())
+	return &response, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.

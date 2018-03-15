@@ -54,27 +54,42 @@ func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 
 // CreateTenantUser - creates a user scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	// // Validate the request to ensure no invalid data is stored:
-	// if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
-	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantUserRequest(tenantUserReq, false); err != nil {
+		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, tenantUserReq)
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, tenantUserReq)
 
-	// // Issue request to DAO Layer to Create the Tenant User
-	// result, err := tsh.tenantDB.CreateTenantUser(tenantUserReq)
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Convert the protobuf object to the proper type:
+	converted := tenmod.User{}
+	if err := pb.ConvertFromPBObject(tenantUserReq, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Succesfully Created the User, return the result.
-	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantUserStr, result.GetXId())
-	// return result, nil
-	return nil, nil
+	// Issue request to DAO Layer to Create the Tenant User
+	result, err := tsh.tenantDB.CreateTenantUser(&converted)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Convert the result back to PB object
+	response := pb.TenantUser{}
+	if err := pb.ConvertToPBObject(result, &response); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Succesfully Created the User, return the result.
+	logger.Log.Infof("Created %s: %s\n", tenmod.TenantUserStr, response.GetXId())
+	return &response, nil
 }
 
 // UpdateTenantUser - updates a user scoped to a single Tenant.
@@ -174,27 +189,42 @@ func (tsh *TenantServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
-	// // Validate the request to ensure no invalid data is stored:
-	// if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
-	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Validate the request to ensure no invalid data is stored:
+	if err := validateTenantDomainRequest(tenantDomainRequest, false); err != nil {
+		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, tenantDomainRequest)
 
-	// // Issue request to DAO Layer to Create the Tenant Domain
-	// result, err := tsh.tenantDB.CreateTenantDomain(tenantDomainRequest)
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Convert the protobuf object to the proper type:
+	converted := tenmod.Domain{}
+	if err := pb.ConvertFromPBObject(tenantDomainRequest, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Succesfully Created the Domain, return the result.
-	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantDomainStr, result.GetXId())
-	// return result, nil
-	return nil, nil
+	// Issue request to DAO Layer to Create the Tenant Domain
+	result, err := tsh.tenantDB.CreateTenantDomain(&converted)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Convert the result back to PB object
+	response := pb.TenantDomain{}
+	if err := pb.ConvertToPBObject(result, &response); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Succesfully Created the Domain, return the result.
+	logger.Log.Infof("Created %s: %s\n", tenmod.TenantDomainStr, response.GetXId())
+	return &response, nil
 }
 
 // UpdateTenantDomain - updates a Domain scoped to a single Tenant.
@@ -722,17 +752,24 @@ func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID 
 func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
 	// Issue request to DAO Layer to fetch the record
-	// result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMetaStr, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
+	if err != nil {
+		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMetaStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Succesfully fetched the record, return the result.
-	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
-	// return result, nil
-	return nil, nil
+	// Convert the result back to PB object
+	response := pb.TenantMetadata{}
+	if err := pb.ConvertToPBObject(result, &response); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Succesfully fetched the record, return the result.
+	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMetaStr, response.GetXId())
+	return &response, nil
 }
 
 // GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.

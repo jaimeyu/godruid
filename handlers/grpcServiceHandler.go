@@ -2,10 +2,14 @@ package handlers
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
@@ -202,65 +206,87 @@ func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *em
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
 func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	// startTime := time.Now()
+	startTime := time.Now()
 
-	// // Check if a tenant already exists with this name.
-	// existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
-	// if len(existingTenantByName.GetValue()) != 0 {
-	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-	// 	msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Check if a tenant already exists with this name.
+	existingTenantByName, _ := gsh.ash.GetTenantIDByAlias(ctx, &wr.StringValue{Value: strings.ToLower(tenantMeta.GetData().GetName())})
+	if len(existingTenantByName.GetValue()) != 0 {
+		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+		msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", tenantMeta.GetData().GetName())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Create the Tenant metadata record and reserve space to store isolated Tenant data
-	// result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
-	// if err != nil {
-	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-	// 	msg := fmt.Sprintf("Unable to create Tenant %s", err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Create the Tenant metadata record and reserve space to store isolated Tenant data
+	result, err := gsh.ash.CreateTenant(ctx, tenantMeta)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+		msg := fmt.Sprintf("Unable to create Tenant %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Create a default Ingestion Profile for the Tenant.
-	// idForTenant := result.GetXId()
-	// ingPrfData := createDefaultTenantIngPrf(idForTenant)
-	// ingPrfReq := pb.TenantIngestionProfile{Data: ingPrfData}
-	// _, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &ingPrfReq)
-	// if err != nil {
-	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-	// 	msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Create a default Ingestion Profile for the Tenant.
+	idForTenant := result.GetXId()
+	ingPrfData := createDefaultTenantIngPrf(idForTenant)
 
-	// // Create a default Threshold Profile for the Tenant
-	// threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
-	// threshPrfReq := pb.TenantThresholdProfile{Data: threshPrfData}
-	// threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &threshPrfReq)
-	// if err != nil {
-	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-	// 	msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Convert to PB object
+	convertedIP := pb.TenantIngestionProfile{}
+	if err := pb.ConvertToPBObject(ingPrfData, &convertedIP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Create the tenant metadata
-	// // For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
-	// // as this is just relational pouch adaption:
-	// meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.GetData().GetName())
-	// metaReq := pb.TenantMetadata{Data: meta}
-	// _, err = gsh.tsh.CreateTenantMeta(ctx, &metaReq)
-	// if err != nil {
-	// 	trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
-	// 	msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &convertedIP)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// trackAPIMetrics(startTime, "200", mon.CreateTenantStr)
-	// return result, nil
-	return nil, nil
+	// Create a default Threshold Profile for the Tenant
+	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
+
+	// Convert to PB object
+	convertedTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(threshPrfData, &convertedTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &convertedTP)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+		msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Create the tenant metadata
+	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
+	// as this is just relational pouch adaption:
+	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.GetXId(), result.GetData().GetName())
+
+	// Convert to PB object
+	convertedMD := pb.TenantMetadata{}
+	if err := pb.ConvertToPBObject(meta, &convertedMD); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMetaStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+	_, err = gsh.tsh.CreateTenantMeta(ctx, &convertedMD)
+	if err != nil {
+		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
+		msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	trackAPIMetrics(startTime, "200", mon.CreateTenantStr)
+	return result, nil
 }
 
 // UpdateTenantDescriptor - Update the metadata for a Tenant.

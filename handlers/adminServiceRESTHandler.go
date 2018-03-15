@@ -9,7 +9,6 @@ import (
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	admmod "github.com/accedian/adh-gather/models/admin"
@@ -360,8 +359,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	// For the IDs used as references inside other objects, need to strip off the 'thresholdProfile_2_'
 	// as this is just relational pouch adaption:
 	meta := createDefaultTenantMeta(idForTenant, threshProfileResponse.ID, result.Name)
-	metaReq := pb.TenantMetadata{Data: meta}
-	_, err = ash.tenantDB.CreateTenantMeta(&metaReq)
+	_, err = ash.tenantDB.CreateTenantMeta(meta)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)

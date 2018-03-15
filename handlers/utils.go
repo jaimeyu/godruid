@@ -9,7 +9,6 @@ import (
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
@@ -303,16 +302,16 @@ func createDefaultTenantThresholdPrf(tenantID string) *tenmod.ThresholdProfile {
 	return &thrPrf
 }
 
-func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, tenantName string) *pb.TenantMeta {
-	result := pb.TenantMeta{}
+func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, tenantName string) *tenmod.Metadata {
+	result := tenmod.Metadata{}
 
-	result.TenantId = tenantID
+	result.TenantID = tenantID
 	result.Datatype = string(tenmod.TenantMetaType)
 	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 
 	result.CreatedTimestamp = db.MakeTimestamp()
-	result.LastModifiedTimestamp = result.GetCreatedTimestamp()
+	result.LastModifiedTimestamp = result.CreatedTimestamp
 
 	return &result
 }

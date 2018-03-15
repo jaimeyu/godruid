@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	ds "github.com/accedian/adh-gather/datastore"
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	"github.com/getlantern/deepcopy"
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -317,61 +317,61 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantThresholdProfile(tenantID
 }
 
 // CreateMonitoredObject - InMemory implementation of CreateMonitoredObject
-func (tsd *TenantServiceDatastoreInMemory) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreInMemory) CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: CreateMonitoredObject not implemented")
 }
 
 // UpdateMonitoredObject - InMemory implementation of UpdateMonitoredObject
-func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: UpdateMonitoredObject not implemented")
 }
 
 // GetMonitoredObject - InMemory implementation of GetMonitoredObject
-func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetMonitoredObject not implemented")
 }
 
 // DeleteMonitoredObject - InMemory implementation of DeleteMonitoredObject
-func (tsd *TenantServiceDatastoreInMemory) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreInMemory) DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: DeleteMonitoredObject not implemented")
 }
 
 // GetAllMonitoredObjects - InMemory implementation of GetAllMonitoredObjects
-func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectList, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetAllMonitoredObjects not implemented")
 }
 
 // GetMonitoredObjectToDomainMap - InMemory implementation of GetMonitoredObjectToDomainMap
-func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetMonitoredObjectToDomainMap not implemented")
 }
 
 // CreateTenantMeta - InMemory implementation of CreateTenantMeta
-func (tsd *TenantServiceDatastoreInMemory) CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: CreateTenantMeta not implemented")
 }
 
 // UpdateTenantMeta - InMemory implementation of UpdateTenantMeta
-func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: UpdateTenantMeta not implemented")
 }
 
 // DeleteTenantMeta - InMemory implementation of DeleteTenantMeta
-func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: DeleteTenantMeta not implemented")
 }
 
 // GetTenantMeta - InMemory implementation of GetTenantMeta
-func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*tenmod.Metadata, error) {
 	// Stub to implement
 	return nil, errors.New("Unsupported operation: GetTenantMeta not implemented")
 }
@@ -389,7 +389,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID
 }
 
 // BulkInsertMonitoredObjects - InMemory implementation of BulkInsertMonitoredObjects
-func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
+func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
 	// Stub to implement
 	return nil, errors.New("BulkInsertMonitoredObjects() not implemented for InMemory DB")
 }

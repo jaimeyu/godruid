@@ -503,211 +503,236 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantMonitoredObjectStr, monitoredObjectReq)
 
+	// Convert the protobuf object to the proper type:
+	converted := tenmod.MonitoredObject{}
+	if err := pb.ConvertFromPBObject(monitoredObjectReq, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	// Issue request to DAO Layer to Create the Tenant Monitored Object
-	result, err := tsh.tenantDB.CreateMonitoredObject(monitoredObjectReq)
+	result, err := tsh.tenantDB.CreateMonitoredObject(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// Convert the result back to PB object
+	response := pb.MonitoredObject{}
+	if err := pb.ConvertToPBObject(result, &response); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		logger.Log.Error(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
 	// Succesfully Created the Monitored, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
-	return result, nil
+	logger.Log.Infof("Created %s: %s\n", tenmod.TenantMonitoredObjectStr, response.GetXId())
+	return &response, nil
 }
 
 // UpdateMonitoredObject - updates an MonitoredObject scoped to a specific Tenant.
 func (tsh *TenantServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateMonitoredObjectRequest(monitoredObjectReq, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateMonitoredObjectRequest(monitoredObjectReq, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantMonitoredObjectStr, monitoredObjectReq)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantMonitoredObjectStr, monitoredObjectReq)
 
-	// Issue request to DAO Layer to Update the Tenant Monitored Object
-	result, err := tsh.tenantDB.UpdateMonitoredObject(monitoredObjectReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the Tenant Monitored Object
+	// result, err := tsh.tenantDB.UpdateMonitoredObject(monitoredObjectReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the Monitored Object, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the Monitored Object, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetMonitoredObject - retrieves the MonitoredObject for a singler Tenant.
 func (tsh *TenantServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Issue request to DAO Layer to fetch the Tenant Monitored Object
-	result, err := tsh.tenantDB.GetMonitoredObject(monitoredObjectIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Monitored Object
+	// result, err := tsh.tenantDB.GetMonitoredObject(monitoredObjectIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Monitored Object, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the Monitored Object, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteMonitoredObject - deletes the MonitoredObject for a singler Tenant.
 func (tsh *TenantServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	// Validate the request to ensure the operation is valid:
-	if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateMonitoredObjectIDRequest(monitoredObjectIDReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantMonitoredObjectStr, monitoredObjectIDReq.GetTenantId())
+	// logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantMonitoredObjectStr, monitoredObjectIDReq.GetTenantId())
 
-	// Issue request to DAO Layer to delete the Tenant Monitored Object
-	result, err := tsh.tenantDB.DeleteMonitoredObject(monitoredObjectIDReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to delete the Tenant Monitored Object
+	// result, err := tsh.tenantDB.DeleteMonitoredObject(monitoredObjectIDReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully deleted the MonitoredObject, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
-	return result, nil
+	// // Succesfully deleted the MonitoredObject, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantMonitoredObjectStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetAllMonitoredObjects - retrieves all MonitoredObjects scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectList, error) {
 	// Validate the request to ensure this operation is valid:
 
-	logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantMonitoredObjectStr, tenantID.Value)
+	// logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantMonitoredObjectStr, tenantID.Value)
 
-	// Issue request to DAO Layer to fetch the Tenant Monitored Objects
-	result, err := tsh.tenantDB.GetAllMonitoredObjects(tenantID.Value)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Monitored Objects
+	// result, err := tsh.tenantDB.GetAllMonitoredObjects(tenantID.Value)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Monitored Objects, return the result.
-	logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantMonitoredObjectStr)
-	return result, nil
+	// // Succesfully fetched the Monitored Objects, return the result.
+	// logger.Log.Infof("Retrieved %d %ss:\n", len(result.GetData()), tenmod.TenantMonitoredObjectStr)
+	// return result, nil
+	return nil, nil
 }
 
 // GetMonitoredObjectToDomainMap - retrieves a mapping of MonitoredObjects to each Domain. Will retrieve the mapping either as a count, or as a set of all
 // MonitoredObjects that use each Domain.
 func (tsh *TenantServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context, moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
-	// Validate the request:
-	if err := validateMonitoredObjectToDomainMapRequest(moByDomReq); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Validate the request:
+	// if err := validateMonitoredObjectToDomainMapRequest(moByDomReq); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to fetch %s: %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Issue request to DAO Layer to fetch the Tenant Monitored Object Map
-	result, err := tsh.tenantDB.GetMonitoredObjectToDomainMap(moByDomReq)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to fetch the Tenant Monitored Object Map
+	// result, err := tsh.tenantDB.GetMonitoredObjectToDomainMap(moByDomReq)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the Monitored Object Map, return the result.
-	logger.Log.Infof("Successfully retrieved %s: %s\n", tenmod.MonitoredObjectToDomainMapStr)
-	return result, nil
+	// // Succesfully fetched the Monitored Object Map, return the result.
+	// logger.Log.Infof("Successfully retrieved %s: %s\n", tenmod.MonitoredObjectToDomainMapStr)
+	// return result, nil
+	return nil, nil
 }
 
 // CreateTenantMeta - Create TenantMeta scoped to a Single Tenant.
 func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantMetaRequest(meta, false); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantMetaRequest(meta, false); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Creating %s for Tenant %s", tenmod.TenantMetaStr, meta.GetData().GetTenantId())
+	// logger.Log.Infof("Creating %s for Tenant %s", tenmod.TenantMetaStr, meta.GetData().GetTenantId())
 
-	// Issue request to DAO Layer to Create the record
-	result, err := tsh.tenantDB.CreateTenantMeta(meta)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Create the record
+	// result, err := tsh.tenantDB.CreateTenantMeta(meta)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Created the record, return the result.
-	logger.Log.Infof("Created %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
-	return result, nil
+	// // Succesfully Created the record, return the result.
+	// logger.Log.Infof("Created %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // UpdateTenantMeta - Update TenantMeta scoped to a single Tenant.
 func (tsh *TenantServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	// Validate the request to ensure no invalid data is stored:
-	if err := validateTenantMetaRequest(meta, true); err != nil {
-		msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// if err := validateTenantMetaRequest(meta, true); err != nil {
+	// 	msg := fmt.Sprintf("Unable to validate request to store %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, meta)
+	// logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, meta)
 
-	// Issue request to DAO Layer to Update the record
-	result, err := tsh.tenantDB.UpdateTenantMeta(meta)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to Update the record
+	// result, err := tsh.tenantDB.UpdateTenantMeta(meta)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully Updated the record, return the result.
-	logger.Log.Infof("Updated %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
-	return result, nil
+	// // Succesfully Updated the record, return the result.
+	// logger.Log.Infof("Updated %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // DeleteTenantMeta - Delete TenantMeta scoped to a single Tenant.
 func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
-	logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantMetaStr, tenantID.GetValue())
+	// logger.Log.Infof("Deleting %s for Tenant %s", tenmod.TenantMetaStr, tenantID.GetValue())
 
-	// Issue request to DAO Layer to delete the record
-	result, err := tsh.tenantDB.DeleteTenantMeta(tenantID.GetValue())
-	if err != nil {
-		msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// // Issue request to DAO Layer to delete the record
+	// result, err := tsh.tenantDB.DeleteTenantMeta(tenantID.GetValue())
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully deleted the record, return the result.
-	logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
-	return result, nil
+	// // Succesfully deleted the record, return the result.
+	// logger.Log.Infof("Deleted %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetTenantMeta - Retrieve a User scoped to a single Tenant.
 func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
 	// Issue request to DAO Layer to fetch the record
-	result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
-	if err != nil {
-		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMetaStr, err.Error())
-		logger.Log.Error(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	// result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMetaStr, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	return nil, fmt.Errorf(msg)
+	// }
 
-	// Succesfully fetched the record, return the result.
-	logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
-	return result, nil
+	// // Succesfully fetched the record, return the result.
+	// logger.Log.Infof("Retrieved %s: %s\n", tenmod.TenantMetaStr, result.GetXId())
+	// return result, nil
+	return nil, nil
 }
 
 // GetAllTenantThresholdProfiles - retieve all Tenant Thresholds.
@@ -753,6 +778,7 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 		return nil, fmt.Errorf(msg)
 	}
 
+	data := make([]*tenmod.MonitoredObject, 0)
 	for _, mo := range value.MonitoredObjectSet {
 		if err := validateMonitoredObjectRequest(mo, false); err != nil {
 			msg := fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, err.Error())
@@ -765,17 +791,39 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 			logger.Log.Error(msg)
 			return nil, fmt.Errorf(msg)
 		}
+
+		// Convert the PB value to a usable value for the DAO call
+		converted := tenmod.MonitoredObject{}
+		if err := pb.ConvertFromPBObject(mo, &converted); err != nil {
+			msg := fmt.Sprintf("Unable to convert bulk request to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+			logger.Log.Error(msg)
+			return nil, fmt.Errorf(msg)
+		}
+		data = append(data, &converted)
 	}
 
 	// Issue request to DAO Layer to insert the MOs
-	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(value)
+	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(value.TenantId, data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		logger.Log.Error(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
+	// Convert the response objects back to PB objects for response
+	response := pb.BulkOperationResponse{}
+	response.Results = make([]*pb.BulkOperationResult, 0)
+	for _, res := range result {
+		toAdd := pb.BulkOperationResult{}
+		toAdd.Id = res.ID
+		toAdd.Ok = res.OK
+		toAdd.Error = res.ERROR
+		toAdd.Rev = res.REV
+		toAdd.Reason = res.REASON
+		response.Results = append(response.Results, &toAdd)
+	}
+
 	// Succesfully inserted the MOs.
 	logger.Log.Infof("Successfully completed bulk request on %ss\n", tenmod.TenantMonitoredObjectStr)
-	return result, nil
+	return &response, nil
 }

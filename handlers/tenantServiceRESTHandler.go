@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -152,6 +153,72 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "threshold-profile-list",
 			HandlerFunc: result.GetAllTenantThresholdProfiles,
+		},
+		server.Route{
+			Name:        "CreateMonitoredObject",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
+			HandlerFunc: result.CreateMonitoredObject,
+		},
+		server.Route{
+			Name:        "BulkInsertMonitoredObject",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "bulk/insert/monitored-objects",
+			HandlerFunc: result.BulkInsertMonitoredObject,
+		},
+		server.Route{
+			Name:        "UpdateMonitoredObject",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
+			HandlerFunc: result.UpdateMonitoredObject,
+		},
+		server.Route{
+			Name:        "GetMonitoredObject",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
+			HandlerFunc: result.GetMonitoredObject,
+		},
+		server.Route{
+			Name:        "DeleteMonitoredObject",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
+			HandlerFunc: result.DeleteMonitoredObject,
+		},
+		server.Route{
+			Name:        "GetAllMonitoredObjects",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-object-list",
+			HandlerFunc: result.GetAllMonitoredObjects,
+		},
+		server.Route{
+			Name:        "GetMonitoredObjectToDomainMap",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-object-domain-map",
+			HandlerFunc: result.GetMonitoredObjectToDomainMap,
+		},
+		server.Route{
+			Name:        "CreateTenantMeta",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.CreateTenantMeta,
+		},
+		server.Route{
+			Name:        "UpdateTenantMeta",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.UpdateTenantMeta,
+		},
+		server.Route{
+			Name:        "GetTenantMeta",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.GetTenantMeta,
+		},
+		server.Route{
+			Name:        "DeleteTenantMeta",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.DeleteTenantMeta,
 		},
 	}
 
@@ -622,4 +689,297 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantThresholdProfiles(w http.Respon
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.GetAllThrPrfStr, tenmod.TenantThresholdProfileStr, "Retrieved list of")
+}
+
+// CreateMonitoredObject - creates a tenant monitored object
+func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.MonitoredObject{}
+	err := unmarshalRequest(r, &data, false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.CreateMonitoredObject(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
+}
+
+// UpdateMonitoredObject - updates a tenant monitored object
+func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.MonitoredObject{}
+	err := unmarshalRequest(r, &data, true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateMonitoredObject(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
+}
+
+// GetMonitoredObject - fetches a tenant monitored object
+func (tsh *TenantServiceRESTHandler) GetMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	dataID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetMonitoredObject(tenantID, dataID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
+}
+
+// DeleteMonitoredObject - deletes a tenant monitored object
+func (tsh *TenantServiceRESTHandler) DeleteMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	dataID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.DeleteMonitoredObject(tenantID, dataID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.DeleteMonObjStr, tenmod.TenantMonitoredObjectStr, "Deleted")
+}
+
+// GetAllMonitoredObjects - fetches list of tenant monitored objects
+func (tsh *TenantServiceRESTHandler) GetAllMonitoredObjects(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetAllMonitoredObjects(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetAllMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetAllMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved list of")
+}
+
+func (tsh *TenantServiceRESTHandler) GetMonitoredObjectToDomainMap(w http.ResponseWriter, r *http.Request) {
+
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.MonitoredObjectCountByDomainRequest{}
+	err := unmarshalRequest(r, &data, true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Fetching %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, data.TenantID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetMonitoredObjectToDomainMap(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s : %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjToDomMapStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal response for  %s : %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjToDomMapStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Suuceesfully retrieved %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, data.TenantID)
+	trackAPIMetrics(startTime, "200", mon.GetMonObjToDomMapStr)
+	fmt.Fprintf(w, string(res))
+}
+
+// CreateTenantMeta - creates a tenant metadata
+func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.Metadata{}
+	err := unmarshalRequest(r, &data, false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantMetaStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.CreateTenantMeta(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.CreateTenantMetaStr, tenmod.TenantMetaStr, "Created")
+}
+
+// UpdateTenantMeta - updates a tenant metadata
+func (tsh *TenantServiceRESTHandler) UpdateTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	data := tenmod.Metadata{}
+	err := unmarshalRequest(r, &data, true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantMetaStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantMeta(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantMetaStr, tenmod.TenantMetaStr, "Updated")
+}
+
+// GetTenantMeta - fetches a tenant metadata
+func (tsh *TenantServiceRESTHandler) GetTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMetaStr)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetTenantMeta(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetTenantMetaStr, tenmod.TenantMetaStr, "Retrieved")
+}
+
+// DeleteTenantMeta - deletes a tenant metadata
+func (tsh *TenantServiceRESTHandler) DeleteTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantMetaStr)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.DeleteTenantMeta(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.DeleteTenantMetaStr, tenmod.TenantMetaStr, "Deleted")
+}
+
+// BulkInsertMonitoredObject - creates 1 or many monitored objects in one request
+func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	// Unmarshal the request
+	data := []*tenmod.MonitoredObject{}
+	err := unmarshalData(r, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Validate the request data
+	for _, obj := range data {
+		if err = obj.Validate(false); err != nil {
+
+		}
+
+		if obj.TenantID != tenantID {
+			msg := fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID "+tenantID)
+			reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+			return
+		}
+	}
+
+	logger.Log.Infof("Bulk instering %ss: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(tenantID, data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.BulkUpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{}
+	response["results"] = result
+
+	res, err := json.Marshal(response)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal response for  %s : %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.BulkUpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Completed bulk insert of %ss for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
+	trackAPIMetrics(startTime, "200", mon.BulkUpdateMonObjStr)
+	fmt.Fprintf(w, string(res))
 }

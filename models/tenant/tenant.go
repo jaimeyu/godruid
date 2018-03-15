@@ -2,8 +2,6 @@ package tenant
 
 import (
 	"errors"
-
-	"github.com/manyminds/api2go/jsonapi"
 )
 
 // TenantDataType - enumeration of the types of data stored in the Tenant Datastore
@@ -289,7 +287,7 @@ func (meta *Metadata) SetID(s string) error {
 
 // GetName - required implementation for renaming the type in jsonapi payload
 func (meta *Metadata) GetName() string {
-	return jsonapi.Pluralize(string(TenantMetaType))
+	return string(TenantMetaType)
 }
 
 // Validate - used during validation of incoming REST requests for this object
@@ -305,4 +303,26 @@ func (meta *Metadata) Validate(isUpdate bool) error {
 	}
 
 	return nil
+}
+
+// MonitoredObjectCountByDomainRequest - request type for retrieving a MonitoredObject Count by Domain
+type MonitoredObjectCountByDomainRequest struct {
+	TenantID  string   `json:"tenantId"`
+	ByCount   bool     `json:"byCount"`
+	DomainSet []string `json:"domainSet"`
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (req *MonitoredObjectCountByDomainRequest) Validate(isUpdate bool) error {
+	if len(req.TenantID) == 0 {
+		return errors.New("Invalid Tenant Metadata request: must provide a Tenant ID")
+	}
+
+	return nil
+}
+
+// MonitoredObjectCountByDomainResponse response for a request for MonitoredObject Count by Domain
+type MonitoredObjectCountByDomainResponse struct {
+	DomainToMonitoredObjectCountMap map[string]int64    `json:"domainToMonitoredObjectCountMap"`
+	DomainToMonitoredObjectSetMap   map[string][]string `json:"domainToMonitoredObjectSetMap"`
 }

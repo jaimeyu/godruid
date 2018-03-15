@@ -9,8 +9,8 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	couchdb "github.com/leesper/couchdb-golang"
 )
@@ -313,13 +313,13 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantID 
 }
 
 // CreateMonitoredObject - CouchDB implementation of CreateMonitoredObject
-func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectReq))
-	monitoredObjectReq.XId = ds.GenerateID(monitoredObjectReq.GetData(), string(tenmod.TenantMonitoredObjectType))
-	tenantID := ds.PrependToDataID(monitoredObjectReq.GetData().GetTenantId(), string(admmod.TenantType))
+	monitoredObjectReq.ID = ds.GenerateID(monitoredObjectReq, string(tenmod.TenantMonitoredObjectType))
+	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.MonitoredObject{}
+	dataContainer := &tenmod.MonitoredObject{}
 	if err := createDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
@@ -328,13 +328,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 }
 
 // UpdateMonitoredObject - CouchDB implementation of UpdateMonitoredObject
-func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectReq))
-	monitoredObjectReq.XId = ds.PrependToDataID(monitoredObjectReq.XId, string(tenmod.TenantMonitoredObjectType))
-	tenantID := ds.PrependToDataID(monitoredObjectReq.GetData().GetTenantId(), string(admmod.TenantType))
+	monitoredObjectReq.ID = ds.PrependToDataID(monitoredObjectReq.ID, string(tenmod.TenantMonitoredObjectType))
+	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.MonitoredObject{}
+	dataContainer := &tenmod.MonitoredObject{}
 	if err := updateDataInCouch(tenantDBName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
@@ -343,14 +343,14 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObject(monitoredObjectR
 }
 
 // GetMonitoredObject - CouchDB implementation of GetMonitoredObject
-func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Fetching %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectIDReq))
-	monitoredObjectIDReq.MonitoredObjectId = ds.PrependToDataID(monitoredObjectIDReq.MonitoredObjectId, string(tenmod.TenantMonitoredObjectType))
-	monitoredObjectIDReq.TenantId = ds.PrependToDataID(monitoredObjectIDReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantMonitoredObjectStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantMonitoredObjectType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
-	dataContainer := pb.MonitoredObject{}
-	if err := getDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.MonitoredObject{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
@@ -358,14 +358,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(monitoredObjectIDRe
 }
 
 // DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
-func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
-	logger.Log.Debugf("Deleting %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(monitoredObjectIDReq))
-	monitoredObjectIDReq.MonitoredObjectId = ds.PrependToDataID(monitoredObjectIDReq.MonitoredObjectId, string(tenmod.TenantMonitoredObjectType))
-	monitoredObjectIDReq.TenantId = ds.PrependToDataID(monitoredObjectIDReq.TenantId, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantMonitoredObjectStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantMonitoredObjectType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, monitoredObjectIDReq.GetTenantId())
-	dataContainer := pb.MonitoredObject{}
-	if err := deleteDataFromCouch(tenantDBName, monitoredObjectIDReq.GetMonitoredObjectId(), &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.MonitoredObject{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
@@ -373,34 +373,33 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(monitoredObjectI
 }
 
 // GetAllMonitoredObjects - CouchDB implementation of GetAllMonitoredObjects
-func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectList, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantMonitoredObjectStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	res := &pb.MonitoredObjectList{}
-	res.Data = make([]*pb.MonitoredObject, 0)
-	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr, &res.Data); err != nil {
+	res := make([]*tenmod.MonitoredObject, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr, &res); err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Retrieved %d %s\n", len(res.Data), tenmod.TenantMonitoredObjectStr)
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantMonitoredObjectStr)
 	return res, nil
 }
 
 // GetMonitoredObjectToDomainMap - CouchDB implementation of GetMonitoredObjectToDomainMap
-func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
 	logger.Log.Debugf("Fetching %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, models.AsJSONString(moByDomReq))
-	moByDomReq.TenantId = ds.PrependToDataID(moByDomReq.TenantId, string(admmod.TenantType))
+	moByDomReq.TenantID = ds.PrependToDataID(moByDomReq.TenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, moByDomReq.GetTenantId())
+	tenantDBName := createDBPathStr(tsd.server, moByDomReq.TenantID)
 	db, err := getDatabase(tenantDBName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get response data either by subset, or for all domains
-	domainSet := moByDomReq.GetDomainSet()
+	domainSet := moByDomReq.DomainSet
 	var fetchResponse map[string]interface{}
 	if domainSet == nil || len(domainSet) == 0 {
 		// Retrieve values for all domains
@@ -411,7 +410,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	} else {
 		// Retrieve just the subset of values.
 		requestBody := map[string]interface{}{}
-		requestBody["keys"] = moByDomReq.GetDomainSet()
+		requestBody["keys"] = moByDomReq.DomainSet
 
 		fetchResponse, err = fetchDesignDocumentResults(requestBody, tenantDBName, monitoredObjectsByDomainIndex)
 		if err != nil {
@@ -421,13 +420,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	}
 
 	if fetchResponse["rows"] == nil {
-		return &pb.MonitoredObjectCountByDomainResponse{}, nil
+		return &tenmod.MonitoredObjectCountByDomainResponse{}, nil
 	}
 
 	// Response will vary depending on if it is aggregated or not
-	response := pb.MonitoredObjectCountByDomainResponse{}
+	response := tenmod.MonitoredObjectCountByDomainResponse{}
 	rows := fetchResponse["rows"].([]interface{})
-	if moByDomReq.GetByCount() {
+	if moByDomReq.ByCount {
 		// Aggregate the data into a mapping of Domain ID to count.
 		domainMap := map[string]int64{}
 		for _, row := range rows {
@@ -438,15 +437,15 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 		response.DomainToMonitoredObjectCountMap = domainMap
 	} else {
 		// Return the results as a map of Domain name to values.
-		domainMap := map[string]*pb.MonitoredObjectSet{}
+		domainMap := map[string][]string{}
 		for _, row := range rows {
 			obj := row.(map[string]interface{})
 			key := obj["key"].(string)
 			val := ds.GetDataIDFromFullID(obj["value"].(string))
 			if domainMap[key] == nil {
-				domainMap[key] = &pb.MonitoredObjectSet{}
+				domainMap[key] = []string{}
 			}
-			domainMap[key].MonitoredObjectSet = append(domainMap[key].GetMonitoredObjectSet(), val)
+			domainMap[key] = append(domainMap[key], val)
 		}
 		response.DomainToMonitoredObjectSetMap = domainMap
 	}
@@ -456,13 +455,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
-	meta.XId = ds.GenerateID(meta.GetData(), string(tenmod.TenantMetaType))
-	tenantID := ds.PrependToDataID(meta.GetData().GetTenantId(), string(admmod.TenantType))
+	meta.ID = ds.GenerateID(meta, string(tenmod.TenantMetaType))
+	tenantID := ds.PrependToDataID(meta.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantMetadata{}
+	dataContainer := &tenmod.Metadata{}
 	if err := createDataInCouch(tenantDBName, meta, dataContainer, string(tenmod.TenantMetaType), tenmod.TenantMetaStr); err != nil {
 		return nil, err
 	}
@@ -471,13 +470,13 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *pb.TenantMetada
 }
 
 // UpdateTenantMeta - CouchDB implementation of UpdateTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
-	meta.XId = ds.PrependToDataID(meta.XId, string(tenmod.TenantMetaType))
-	tenantID := ds.PrependToDataID(meta.GetData().GetTenantId(), string(admmod.TenantType))
+	meta.ID = ds.PrependToDataID(meta.ID, string(tenmod.TenantMetaType))
+	tenantID := ds.PrependToDataID(meta.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := &pb.TenantMetadata{}
+	dataContainer := &tenmod.Metadata{}
 	if err := updateDataInCouch(tenantDBName, meta, dataContainer, string(tenmod.TenantMetaType), tenmod.TenantMetaStr); err != nil {
 		return nil, err
 	}
@@ -486,7 +485,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *pb.TenantMetada
 }
 
 // DeleteTenantMeta - CouchDB implementation of DeleteTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantMetaStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -498,7 +497,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb
 	}
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	if err := deleteData(tenantDBName, existingObject.GetXId(), tenmod.TenantMetaStr); err != nil {
+	if err := deleteData(tenantDBName, existingObject.ID, tenmod.TenantMetaStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", tenmod.TenantMetaStr, err.Error())
 		return nil, err
 	}
@@ -509,7 +508,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*pb
 }
 
 // GetTenantMeta - CouchDB implementation of GetTenantMeta
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.TenantMetadata, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantMetaStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -525,7 +524,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*pb.Te
 	}
 
 	// Populate the response
-	res := pb.TenantMetadata{}
+	res := tenmod.Metadata{}
 	if len(fetchedData) != 0 {
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, tenmod.TenantMetaStr); err != nil {
 			return nil, err
@@ -582,9 +581,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 }
 
 // BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
-func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
+func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
 	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
-	tenantID := ds.PrependToDataID(value.TenantId, string(admmod.TenantType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	resource, err := couchdb.NewResource(tenantDBName, nil)
 	if err != nil {
@@ -592,15 +591,25 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 	}
 
 	// Iterate over the collection and populate necessary fields
-	for _, mo := range value.MonitoredObjectSet {
+	data := make([]map[string]interface{}, 0)
+	for _, mo := range value {
+		genericMO, err := convertDataToCouchDbSupportedModel(mo)
+		if err != nil {
+			return nil, err
+		}
+
 		dataType := string(tenmod.TenantMonitoredObjectType)
-		mo.XId = ds.GenerateID(mo.Data, dataType)
-		mo.Data.Datatype = dataType
-		mo.Data.CreatedTimestamp = ds.MakeTimestamp()
-		mo.Data.LastModifiedTimestamp = mo.Data.GetCreatedTimestamp()
+		genericMO["_id"] = ds.GenerateID(mo, dataType)
+
+		dataProp := genericMO["data"].(map[string]interface{})
+		dataProp["datatype"] = dataType
+		dataProp["createdTimestamp"] = ds.MakeTimestamp()
+		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
+
+		data = append(data, genericMO)
 	}
 	body := map[string]interface{}{
-		"docs": value.MonitoredObjectSet}
+		"docs": data}
 
 	fetchedData, err := performBulkUpdate(body, resource)
 	if err != nil {
@@ -608,17 +617,29 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(value *pb.T
 	}
 
 	// Populate the response
-	res := pb.BulkOperationResponse{}
-	res.Results = make([]*pb.BulkOperationResult, 0)
+	res := make([]*common.BulkOperationResult, 0)
 	for _, fetched := range fetchedData {
-		newObj := pb.BulkOperationResult{}
-		if err = convertGenericCouchDataToObject(fetched, &newObj, ds.DBBulkUpdateStr); err != nil {
-			return nil, err
+		newObj := common.BulkOperationResult{}
+		if fetched["id"] != nil {
+			newObj.ID = fetched["id"].(string)
 		}
-		newObj.Id = ds.GetDataIDFromFullID(newObj.Id)
-		res.Results = append(res.Results, &newObj)
+		if fetched["rev"] != nil {
+			newObj.REV = fetched["rev"].(string)
+		}
+		if fetched["reason"] != nil {
+			newObj.REASON = fetched["reason"].(string)
+		}
+		if fetched["error"] != nil {
+			newObj.ERROR = fetched["error"].(string)
+		}
+		if fetched["ok"] != nil {
+			newObj.OK = fetched["ok"].(bool)
+		}
+
+		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
+		res = append(res, &newObj)
 	}
 
 	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
-	return &res, nil
+	return res, nil
 }

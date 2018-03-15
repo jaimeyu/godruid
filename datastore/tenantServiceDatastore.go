@@ -1,7 +1,7 @@
 package datastore
 
 import (
-	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -32,17 +32,16 @@ type TenantServiceDatastore interface {
 	DeleteTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
 	GetAllTenantThresholdProfile(tenantID string) ([]*tenmod.ThresholdProfile, error)
 
-	CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
-	UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
-	GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error)
-	DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error)
-	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectList, error)
-	GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error)
+	CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
+	UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
+	GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+	DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+	GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error)
+	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)
+	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 
-	CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
-	UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
-	DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error)
-	GetTenantMeta(tenantID string) (*pb.TenantMetadata, error)
-
-	BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error)
+	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
+	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
+	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)
+	GetTenantMeta(tenantID string) (*tenmod.Metadata, error)
 }

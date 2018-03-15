@@ -21,3 +21,12 @@ const (
 func FailToSetID(s string) error {
 	return fmt.Errorf("Can't set id for %s as no object was provided", s)
 }
+
+// BulkOperationResult - response for a bulk update.
+type BulkOperationResult struct {
+	OK     bool   `json:"ok"`
+	ID     string `json:"id"`
+	REV    string `json:"rev"`
+	ERROR  string `json:"error"`
+	REASON string `json:"reason"`
+}

@@ -580,8 +580,6 @@ func generateTenantDescriptor(name string) (*pb.TenantDescriptor, error) {
 	result.Data.CreatedTimestamp = db.MakeTimestamp()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 
-	result.XId = db.GenerateID(result.Data, tenantStr)
-
 	return &result, nil
 }
 

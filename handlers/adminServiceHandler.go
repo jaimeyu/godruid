@@ -349,20 +349,19 @@ func (ash *AdminServiceHandler) GetIngestionDictionary(ctx context.Context, noVa
 // GetTenantIDByAlias - retrieve a Tenant ID by the common name of the Tenant
 func (ash *AdminServiceHandler) GetTenantIDByAlias(ctx context.Context, name *wr.StringValue) (*wr.StringValue, error) {
 
-	// logger.Log.Infof("Retrieving Tenant ID by name: %s", name)
+	logger.Log.Infof("Retrieving Tenant ID by name: %s", name)
 
-	// // Issue request to DAO Layer to Get the requested Tenant ID
-	// result, err := ash.adminDB.GetTenantIDByAlias(name.GetValue())
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to retrieve Tenant ID: %s", err.Error())
-	// 	logger.Log.Error(msg)
-	// 	return nil, fmt.Errorf(msg)
-	// }
+	// Issue request to DAO Layer to Get the requested Tenant ID
+	result, err := ash.adminDB.GetTenantIDByAlias(name.GetValue())
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Tenant ID: %s", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
-	// // Return Tenant ID
-	// logger.Log.Infof("Retrieved Tenant ID: %s\n", result)
-	// return &wr.StringValue{Value: result}, nil
-	return nil, nil
+	// Return Tenant ID
+	logger.Log.Infof("Retrieved Tenant ID: %s\n", result)
+	return &wr.StringValue{Value: result}, nil
 }
 
 // CreateValidTypes - Create the valid type definition in the system.

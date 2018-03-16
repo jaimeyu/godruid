@@ -23,17 +23,22 @@ const (
 )
 
 type MetricServiceHandler struct {
-	druidDB db.DruidDatastore
-	routes  []server.Route
-	gsh     *GRPCServiceHandler
+	druidDB  db.DruidDatastore
+	tenantDB db.TenantServiceDatastore
+	routes   []server.Route
 }
 
 func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricServiceHandler {
 	result := new(MetricServiceHandler)
 
-	db := druid.NewDruidDatasctoreClient()
+	ddb := druid.NewDruidDatasctoreClient()
+	result.druidDB = ddb
 
-	result.druidDB = db
+	tdb, err := getTenantServiceDatastore()
+	if err != nil {
+		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
+	}
+	result.tenantDB = tdb
 
 	result.routes = []server.Route{
 		server.Route{
@@ -64,8 +69,6 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			HandlerFunc: result.GetRawMetrics,
 		},
 	}
-
-	result.gsh = grpcServiceHandler
 
 	return result
 }
@@ -185,18 +188,22 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 
 	tenantID := thresholdCrossingReq.Tenant
 
-	thresholdProfile, err := msh.gsh.GetTenantThresholdProfile(nil, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           tenantID,
-		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
-	})
-
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, thresholdProfile)
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
@@ -229,18 +236,22 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 
 	tenantID := thresholdCrossingReq.Tenant
 
-	thresholdProfile, err := msh.gsh.GetTenantThresholdProfile(nil, &pb.TenantThresholdProfileIdRequest{
-		TenantId:           tenantID,
-		ThresholdProfileId: thresholdCrossingReq.ThresholdProfileId,
-	})
-
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, thresholdProfile)
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)

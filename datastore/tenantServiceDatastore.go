@@ -1,94 +1,47 @@
 package datastore
 
 import (
-	pb "github.com/accedian/adh-gather/gathergrpc"
-)
-
-// TenantDataType - enumeration of the types of data stored in the Tenant Datastore
-type TenantDataType string
-
-const (
-	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
-	TenantUserType TenantDataType = "user"
-
-	// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
-	TenantDomainType TenantDataType = "domain"
-
-	// TenantIngestionProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
-	TenantIngestionProfileType TenantDataType = "ingestionProfile"
-
-	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
-	TenantMonitoredObjectType TenantDataType = "monitoredObject"
-
-	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
-	TenantThresholdProfileType TenantDataType = "thresholdProfile"
-
-	// TenantMetaType - datatype string used to identify a Tenant Meta in the datastore record
-	TenantMetaType TenantDataType = "tenantMetadata"
-)
-
-const (
-	// TenantUserStr - common name of the TenantUser data type for use in logs.
-	TenantUserStr = "Tenant User"
-
-	// TenantDomainStr - common name of the Tenant Domain data type for use in logs.
-	TenantDomainStr = "Tenant Domain"
-
-	// TenantIngestionProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
-	TenantIngestionProfileStr = "Tenant Ingestion Profile"
-
-	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
-	TenantMonitoredObjectStr = "Tenant Monitored Object"
-
-	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
-	TenantThresholdProfileStr = "Tenant Threshold Profile"
-
-	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Doamin Map for use in logs.
-	MonitoredObjectToDomainMapStr = "Monitored Object to Doamin Map"
-
-	// TenantMetaStr - common name for the Meta for use in logs.
-	TenantMetaStr = "Tenant Meta"
+	"github.com/accedian/adh-gather/models/common"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
 // of the TenantService Datastore.
 type TenantServiceDatastore interface {
-	CreateTenantUser(*pb.TenantUser) (*pb.TenantUser, error)
-	UpdateTenantUser(*pb.TenantUser) (*pb.TenantUser, error)
-	DeleteTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetTenantUser(*pb.TenantUserIdRequest) (*pb.TenantUser, error)
-	GetAllTenantUsers(string) (*pb.TenantUserList, error)
+	CreateTenantUser(*tenmod.User) (*tenmod.User, error)
+	UpdateTenantUser(*tenmod.User) (*tenmod.User, error)
+	DeleteTenantUser(tenantID string, userID string) (*tenmod.User, error)
+	GetTenantUser(tenantID string, userID string) (*tenmod.User, error)
+	GetAllTenantUsers(string) ([]*tenmod.User, error)
 
-	CreateTenantDomain(*pb.TenantDomain) (*pb.TenantDomain, error)
-	UpdateTenantDomain(*pb.TenantDomain) (*pb.TenantDomain, error)
-	DeleteTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
-	GetTenantDomain(*pb.TenantDomainIdRequest) (*pb.TenantDomain, error)
-	GetAllTenantDomains(string) (*pb.TenantDomainList, error)
+	CreateTenantDomain(*tenmod.Domain) (*tenmod.Domain, error)
+	UpdateTenantDomain(*tenmod.Domain) (*tenmod.Domain, error)
+	DeleteTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
+	GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
+	GetAllTenantDomains(string) ([]*tenmod.Domain, error)
 
-	CreateTenantIngestionProfile(*pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error)
-	UpdateTenantIngestionProfile(*pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error)
-	GetTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
-	DeleteTenantIngestionProfile(*pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error)
+	CreateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
+	UpdateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
+	GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)
+	DeleteTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)
+	GetActiveTenantIngestionProfile(tenantID string) (*tenmod.IngestionProfile, error)
 
-	CreateTenantThresholdProfile(*pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error)
-	UpdateTenantThresholdProfile(*pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error)
-	GetTenantThresholdProfile(*pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error)
-	DeleteTenantThresholdProfile(*pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error)
+	CreateTenantThresholdProfile(*tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error)
+	UpdateTenantThresholdProfile(*tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error)
+	GetTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
+	DeleteTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
+	GetAllTenantThresholdProfile(tenantID string) ([]*tenmod.ThresholdProfile, error)
 
-	CreateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
-	UpdateMonitoredObject(monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error)
-	GetMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error)
-	DeleteMonitoredObject(monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error)
-	GetAllMonitoredObjects(tenantID string) (*pb.MonitoredObjectList, error)
-	GetMonitoredObjectToDomainMap(moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error)
+	CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
+	UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
+	GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+	DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+	GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error)
+	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)
+	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 
-	CreateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
-	UpdateTenantMeta(meta *pb.TenantMetadata) (*pb.TenantMetadata, error)
-	DeleteTenantMeta(tenantID string) (*pb.TenantMetadata, error)
-	GetTenantMeta(tenantID string) (*pb.TenantMetadata, error)
-
-	GetActiveTenantIngestionProfile(tenantID string) (*pb.TenantIngestionProfile, error)
-	GetAllTenantThresholdProfile(tenantID string) (*pb.TenantThresholdProfileList, error)
-
-	BulkInsertMonitoredObjects(value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error)
+	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
+	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
+	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)
+	GetTenantMeta(tenantID string) (*tenmod.Metadata, error)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	ds "github.com/accedian/adh-gather/datastore"
-	pb "github.com/accedian/adh-gather/gathergrpc"
+	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/getlantern/deepcopy"
 )
 
@@ -16,10 +16,10 @@ import (
 // database operations for the Admin Service when using local memory
 // as the storage option. Useful for tests.
 type AdminServiceDatastoreInMemory struct {
-	idToAdminUserMap  map[string]*pb.AdminUser
-	idToTenantDescMap map[string]*pb.TenantDescriptor
-	ingDictSlice      []*pb.IngestionDictionary
-	validTypeSlice    []*pb.ValidTypes
+	idToAdminUserMap  map[string]*admmod.User
+	idToTenantDescMap map[string]*admmod.Tenant
+	ingDictSlice      []*admmod.IngestionDictionary
+	validTypeSlice    []*admmod.ValidTypes
 }
 
 // CreateAdminServiceDAO - returns an in-memory implementation of the Admin Service
@@ -27,57 +27,57 @@ type AdminServiceDatastoreInMemory struct {
 func CreateAdminServiceDAO() (*AdminServiceDatastoreInMemory, error) {
 	res := new(AdminServiceDatastoreInMemory)
 
-	res.idToAdminUserMap = make(map[string]*pb.AdminUser, 0)
-	res.idToTenantDescMap = make(map[string]*pb.TenantDescriptor, 0)
-	res.ingDictSlice = make([]*pb.IngestionDictionary, 1)
-	res.validTypeSlice = make([]*pb.ValidTypes, 1)
+	res.idToAdminUserMap = make(map[string]*admmod.User, 0)
+	res.idToTenantDescMap = make(map[string]*admmod.Tenant, 0)
+	res.ingDictSlice = make([]*admmod.IngestionDictionary, 1)
+	res.validTypeSlice = make([]*admmod.ValidTypes, 1)
 
 	return res, nil
 }
 
 // CreateAdminUser - InMemory implementation of CreateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	if len(user.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.AdminUserStr)
+func (memDB *AdminServiceDatastoreInMemory) CreateAdminUser(user *admmod.User) (*admmod.User, error) {
+	if len(user.ID) != 0 {
+		return nil, fmt.Errorf("%s already exists", admmod.AdminUserStr)
 	}
 
-	userCopy := pb.AdminUser{}
+	userCopy := admmod.User{}
 	deepcopy.Copy(&userCopy, user)
-	userCopy.XId = uuid.NewV4().String()
-	userCopy.XRev = uuid.NewV4().String()
-	userCopy.Data.Datatype = string(ds.AdminUserType)
-	userCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
-	userCopy.Data.LastModifiedTimestamp = userCopy.Data.GetCreatedTimestamp()
+	userCopy.ID = uuid.NewV4().String()
+	userCopy.REV = uuid.NewV4().String()
+	userCopy.Datatype = string(admmod.AdminUserType)
+	userCopy.CreatedTimestamp = ds.MakeTimestamp()
+	userCopy.LastModifiedTimestamp = userCopy.CreatedTimestamp
 
-	memDB.idToAdminUserMap[userCopy.XId] = &userCopy
+	memDB.idToAdminUserMap[userCopy.ID] = &userCopy
 
 	return &userCopy, nil
 }
 
 // UpdateAdminUser - InMemory implementation of UpdateAdminUser
-func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *pb.AdminUser) (*pb.AdminUser, error) {
-	if len(user.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.AdminUserStr)
+func (memDB *AdminServiceDatastoreInMemory) UpdateAdminUser(user *admmod.User) (*admmod.User, error) {
+	if len(user.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", admmod.AdminUserStr)
 	}
-	if len(user.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.AdminUserStr)
+	if len(user.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", admmod.AdminUserStr)
 	}
 
-	userCopy := pb.AdminUser{}
+	userCopy := admmod.User{}
 	deepcopy.Copy(&userCopy, user)
-	userCopy.XRev = uuid.NewV4().String()
-	userCopy.Data.Datatype = string(ds.AdminUserType)
-	userCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
+	userCopy.REV = uuid.NewV4().String()
+	userCopy.Datatype = string(admmod.AdminUserType)
+	userCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
-	memDB.idToAdminUserMap[userCopy.XId] = &userCopy
+	memDB.idToAdminUserMap[userCopy.ID] = &userCopy
 
 	return &userCopy, nil
 }
 
 // DeleteAdminUser - InMemory implementation of DeleteAdminUser
-func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*admmod.User, error) {
 	if len(userID) == 0 {
-		return nil, fmt.Errorf("%s must provide an ID", ds.AdminUserStr)
+		return nil, fmt.Errorf("%s must provide an ID", admmod.AdminUserStr)
 	}
 
 	user, ok := memDB.idToAdminUserMap[userID]
@@ -86,13 +86,13 @@ func (memDB *AdminServiceDatastoreInMemory) DeleteAdminUser(userID string) (*pb.
 		return user, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.AdminUserStr)
+	return nil, fmt.Errorf("%s not found", admmod.AdminUserStr)
 }
 
 // GetAdminUser - InMemory implementation of GetAdminUser
-func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.AdminUser, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*admmod.User, error) {
 	if len(userID) == 0 {
-		return nil, fmt.Errorf("%s must provide an ID", ds.AdminUserStr)
+		return nil, fmt.Errorf("%s must provide an ID", admmod.AdminUserStr)
 	}
 
 	user, ok := memDB.idToAdminUserMap[userID]
@@ -100,64 +100,63 @@ func (memDB *AdminServiceDatastoreInMemory) GetAdminUser(userID string) (*pb.Adm
 		return user, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.AdminUserStr)
+	return nil, fmt.Errorf("%s not found", admmod.AdminUserStr)
 }
 
 // GetAllAdminUsers - InMemory implementation of GetAllAdminUsers
-func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() (*pb.AdminUserList, error) {
-	adminUserList := pb.AdminUserList{}
-	adminUserList.Data = make([]*pb.AdminUser, 0)
+func (memDB *AdminServiceDatastoreInMemory) GetAllAdminUsers() ([]*admmod.User, error) {
+	adminUserList := []*admmod.User{}
 
 	for _, user := range memDB.idToAdminUserMap {
-		adminUserList.Data = append(adminUserList.Data, user)
+		adminUserList = append(adminUserList, user)
 	}
 
-	return &adminUserList, nil
+	return adminUserList, nil
 }
 
 // CreateTenant - InMemory implementation of CreateTenant
-func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	if len(tenantDescriptor.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.TenantDescriptorStr)
+func (memDB *AdminServiceDatastoreInMemory) CreateTenant(tenantDescriptor *admmod.Tenant) (*admmod.Tenant, error) {
+	if len(tenantDescriptor.ID) != 0 {
+		return nil, fmt.Errorf("%s already exists", admmod.TenantStr)
 	}
 
-	tenantCopy := pb.TenantDescriptor{}
+	tenantCopy := admmod.Tenant{}
 	deepcopy.Copy(&tenantCopy, tenantDescriptor)
-	tenantCopy.XId = uuid.NewV4().String()
-	tenantCopy.XRev = uuid.NewV4().String()
-	tenantCopy.Data.Datatype = string(ds.TenantDescriptorType)
-	tenantCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
-	tenantCopy.Data.LastModifiedTimestamp = tenantCopy.Data.GetCreatedTimestamp()
+	tenantCopy.ID = uuid.NewV4().String()
+	tenantCopy.REV = uuid.NewV4().String()
+	tenantCopy.Datatype = string(admmod.TenantType)
+	tenantCopy.CreatedTimestamp = ds.MakeTimestamp()
+	tenantCopy.LastModifiedTimestamp = tenantCopy.CreatedTimestamp
 
-	memDB.idToTenantDescMap[tenantCopy.XId] = &tenantCopy
+	memDB.idToTenantDescMap[tenantCopy.ID] = &tenantCopy
 
 	return &tenantCopy, nil
 }
 
 // UpdateTenantDescriptor - InMemory implementation of UpdateTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *pb.TenantDescriptor) (*pb.TenantDescriptor, error) {
-	if len(tenantDescriptor.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.TenantDescriptorStr)
+func (memDB *AdminServiceDatastoreInMemory) UpdateTenantDescriptor(tenantDescriptor *admmod.Tenant) (*admmod.Tenant, error) {
+	if len(tenantDescriptor.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", admmod.TenantStr)
 	}
-	if len(tenantDescriptor.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.TenantDescriptorStr)
+	if len(tenantDescriptor.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", admmod.TenantStr)
 	}
 
-	tenantCopy := pb.TenantDescriptor{}
+	tenantCopy := admmod.Tenant{}
 	deepcopy.Copy(&tenantCopy, tenantDescriptor)
-	tenantCopy.XRev = uuid.NewV4().String()
-	tenantCopy.Data.Datatype = string(ds.TenantDescriptorType)
-	tenantCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
+	tenantCopy.REV = uuid.NewV4().String()
+	tenantCopy.Datatype = string(admmod.TenantType)
+	tenantCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
-	memDB.idToTenantDescMap[tenantCopy.XId] = &tenantCopy
+	memDB.idToTenantDescMap[tenantCopy.ID] = &tenantCopy
 
 	return &tenantCopy, nil
 }
 
 // DeleteTenant - InMemory implementation of DeleteTenant
-func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*admmod.Tenant, error) {
 	if len(tenantID) == 0 {
-		return nil, fmt.Errorf("%s must provide an ID", ds.TenantDescriptorStr)
+		return nil, fmt.Errorf("%s must provide an ID", admmod.TenantStr)
 	}
 
 	tenant, ok := memDB.idToTenantDescMap[tenantID]
@@ -166,13 +165,13 @@ func (memDB *AdminServiceDatastoreInMemory) DeleteTenant(tenantID string) (*pb.T
 		return tenant, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantDescriptorStr)
+	return nil, fmt.Errorf("%s not found", admmod.TenantStr)
 }
 
 // GetTenantDescriptor - InMemory implementation of GetTenantDescriptor
-func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*pb.TenantDescriptor, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string) (*admmod.Tenant, error) {
 	if len(tenantID) == 0 {
-		return nil, fmt.Errorf("%s must provide an ID", ds.TenantDescriptorStr)
+		return nil, fmt.Errorf("%s must provide an ID", admmod.TenantStr)
 	}
 
 	tenant, ok := memDB.idToTenantDescMap[tenantID]
@@ -180,40 +179,39 @@ func (memDB *AdminServiceDatastoreInMemory) GetTenantDescriptor(tenantID string)
 		return tenant, nil
 	}
 
-	return nil, fmt.Errorf("%s not found", ds.TenantDescriptorStr)
+	return nil, fmt.Errorf("%s not found", admmod.TenantStr)
 }
 
 // GetAllTenantDescriptors - InMemory implementation of GetAllTenantDescriptors
-func (memDB *AdminServiceDatastoreInMemory) GetAllTenantDescriptors() (*pb.TenantDescriptorList, error) {
-	tenantDescList := pb.TenantDescriptorList{}
-	tenantDescList.Data = make([]*pb.TenantDescriptor, 0)
+func (memDB *AdminServiceDatastoreInMemory) GetAllTenantDescriptors() ([]*admmod.Tenant, error) {
+	tenantDescList := []*admmod.Tenant{}
 
 	for _, tenant := range memDB.idToTenantDescMap {
-		tenantDescList.Data = append(tenantDescList.Data, tenant)
+		tenantDescList = append(tenantDescList, tenant)
 	}
 
-	return &tenantDescList, nil
+	return tenantDescList, nil
 }
 
 // CreateIngestionDictionary - InMemory implementation of CreateIngestionDictionary
-func (memDB *AdminServiceDatastoreInMemory) CreateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateIngestionDictionary(ingDictionary *admmod.IngestionDictionary) (*admmod.IngestionDictionary, error) {
 	// Make sure one does not already exist
 	existing, _ := memDB.GetIngestionDictionary()
 	if existing != nil {
-		return nil, fmt.Errorf("Can't create %s, it already exists", ds.IngestionDictionaryStr)
+		return nil, fmt.Errorf("Can't create %s, it already exists", admmod.IngestionDictionaryStr)
 	}
 
-	if len(ingDictionary.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.IngestionDictionaryStr)
+	if len(ingDictionary.ID) != 0 {
+		return nil, fmt.Errorf("%s already exists", admmod.IngestionDictionaryStr)
 	}
 
-	dictCopy := pb.IngestionDictionary{}
+	dictCopy := admmod.IngestionDictionary{}
 	deepcopy.Copy(&dictCopy, ingDictionary)
-	dictCopy.XId = uuid.NewV4().String()
-	dictCopy.XRev = uuid.NewV4().String()
-	dictCopy.Data.Datatype = string(ds.IngestionDictionaryType)
-	dictCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
-	dictCopy.Data.LastModifiedTimestamp = dictCopy.Data.GetCreatedTimestamp()
+	dictCopy.ID = uuid.NewV4().String()
+	dictCopy.REV = uuid.NewV4().String()
+	dictCopy.Datatype = string(admmod.IngestionDictionaryType)
+	dictCopy.CreatedTimestamp = ds.MakeTimestamp()
+	dictCopy.LastModifiedTimestamp = dictCopy.CreatedTimestamp
 
 	memDB.ingDictSlice[0] = &dictCopy
 
@@ -221,19 +219,19 @@ func (memDB *AdminServiceDatastoreInMemory) CreateIngestionDictionary(ingDiction
 }
 
 // UpdateIngestionDictionary - InMemory implementation of UpdateIngestionDictionary
-func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	if len(ingDictionary.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.IngestionDictionaryStr)
+func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDictionary *admmod.IngestionDictionary) (*admmod.IngestionDictionary, error) {
+	if len(ingDictionary.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", admmod.IngestionDictionaryStr)
 	}
-	if len(ingDictionary.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.IngestionDictionaryStr)
+	if len(ingDictionary.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", admmod.IngestionDictionaryStr)
 	}
 
-	dictCopy := pb.IngestionDictionary{}
+	dictCopy := admmod.IngestionDictionary{}
 	deepcopy.Copy(&dictCopy, ingDictionary)
-	dictCopy.XRev = uuid.NewV4().String()
-	dictCopy.Data.Datatype = string(ds.IngestionDictionaryType)
-	dictCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
+	dictCopy.REV = uuid.NewV4().String()
+	dictCopy.Datatype = string(admmod.IngestionDictionaryType)
+	dictCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	memDB.ingDictSlice[0] = &dictCopy
 
@@ -241,7 +239,7 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateIngestionDictionary(ingDiction
 }
 
 // DeleteIngestionDictionary - InMemory implementation of DeleteIngestionDictionary
-func (memDB *AdminServiceDatastoreInMemory) DeleteIngestionDictionary() (*pb.IngestionDictionary, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteIngestionDictionary() (*admmod.IngestionDictionary, error) {
 	existing, err := memDB.GetIngestionDictionary()
 	if err != nil {
 		return nil, err
@@ -252,9 +250,9 @@ func (memDB *AdminServiceDatastoreInMemory) DeleteIngestionDictionary() (*pb.Ing
 }
 
 // GetIngestionDictionary - InMemory implementation of GetIngestionDictionary
-func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.IngestionDictionary, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*admmod.IngestionDictionary, error) {
 	if len(memDB.ingDictSlice) == 0 || memDB.ingDictSlice[0] == nil {
-		return nil, fmt.Errorf("%s not found", ds.IngestionDictionaryStr)
+		return nil, fmt.Errorf("%s not found", admmod.IngestionDictionaryStr)
 	}
 
 	return memDB.ingDictSlice[0], nil
@@ -263,8 +261,8 @@ func (memDB *AdminServiceDatastoreInMemory) GetIngestionDictionary() (*pb.Ingest
 // GetTenantIDByAlias - InMemory impl of GetTenantIDByAlias
 func (memDB *AdminServiceDatastoreInMemory) GetTenantIDByAlias(name string) (string, error) {
 	for _, value := range memDB.idToTenantDescMap {
-		if strings.ToLower(value.Data.Name) == strings.ToLower(name) {
-			return value.XId, nil
+		if strings.ToLower(value.Name) == strings.ToLower(name) {
+			return value.ID, nil
 		}
 	}
 
@@ -278,23 +276,23 @@ func (memDB *AdminServiceDatastoreInMemory) AddAdminViews() error {
 }
 
 // CreateValidTypes - InMemory implementation of CreateValidTypes
-func (memDB *AdminServiceDatastoreInMemory) CreateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
+func (memDB *AdminServiceDatastoreInMemory) CreateValidTypes(value *admmod.ValidTypes) (*admmod.ValidTypes, error) {
 	// Make sure one does not already exist
 	existing, _ := memDB.GetValidTypes()
 	if existing != nil {
-		return nil, fmt.Errorf("Can't create %s, it already exists", ds.ValidTypesStr)
+		return nil, fmt.Errorf("Can't create %s, it already exists", admmod.ValidTypesStr)
 	}
 
-	if len(value.XId) != 0 {
-		return nil, fmt.Errorf("%s already exists", ds.ValidTypesStr)
+	if len(value.ID) != 0 {
+		return nil, fmt.Errorf("%s already exists", admmod.ValidTypesStr)
 	}
 
-	vtCopy := pb.ValidTypes{}
+	vtCopy := admmod.ValidTypes{}
 	deepcopy.Copy(&vtCopy, value)
-	vtCopy.XId = uuid.NewV4().String()
-	vtCopy.XRev = uuid.NewV4().String()
-	vtCopy.Data.CreatedTimestamp = ds.MakeTimestamp()
-	vtCopy.Data.LastModifiedTimestamp = vtCopy.Data.GetCreatedTimestamp()
+	vtCopy.ID = uuid.NewV4().String()
+	vtCopy.REV = uuid.NewV4().String()
+	vtCopy.CreatedTimestamp = ds.MakeTimestamp()
+	vtCopy.LastModifiedTimestamp = vtCopy.CreatedTimestamp
 
 	memDB.validTypeSlice[0] = &vtCopy
 
@@ -302,18 +300,18 @@ func (memDB *AdminServiceDatastoreInMemory) CreateValidTypes(value *pb.ValidType
 }
 
 // UpdateValidTypes - InMemory implementation of UpdateValidTypes
-func (memDB *AdminServiceDatastoreInMemory) UpdateValidTypes(value *pb.ValidTypes) (*pb.ValidTypes, error) {
-	if len(value.XId) == 0 {
-		return nil, fmt.Errorf("%s must have an ID", ds.ValidTypesStr)
+func (memDB *AdminServiceDatastoreInMemory) UpdateValidTypes(value *admmod.ValidTypes) (*admmod.ValidTypes, error) {
+	if len(value.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", admmod.ValidTypesStr)
 	}
-	if len(value.XRev) == 0 {
-		return nil, fmt.Errorf("%s must have a revision", ds.ValidTypesStr)
+	if len(value.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", admmod.ValidTypesStr)
 	}
 
-	vtCopy := pb.ValidTypes{}
+	vtCopy := admmod.ValidTypes{}
 	deepcopy.Copy(&vtCopy, value)
-	vtCopy.XRev = uuid.NewV4().String()
-	vtCopy.Data.LastModifiedTimestamp = ds.MakeTimestamp()
+	vtCopy.REV = uuid.NewV4().String()
+	vtCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
 	memDB.validTypeSlice[0] = &vtCopy
 
@@ -321,35 +319,35 @@ func (memDB *AdminServiceDatastoreInMemory) UpdateValidTypes(value *pb.ValidType
 }
 
 // GetValidTypes - InMemory implementation of GetValidTypes
-func (memDB *AdminServiceDatastoreInMemory) GetValidTypes() (*pb.ValidTypes, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetValidTypes() (*admmod.ValidTypes, error) {
 	if len(memDB.validTypeSlice) == 0 || memDB.validTypeSlice[0] == nil {
-		return nil, fmt.Errorf("%s not found", ds.ValidTypesStr)
+		return nil, fmt.Errorf("%s not found", admmod.ValidTypesStr)
 	}
 
 	return memDB.validTypeSlice[0], nil
 }
 
 // GetSpecificValidTypes - InMemory implementation of GetSpecificValidTypes
-func (memDB *AdminServiceDatastoreInMemory) GetSpecificValidTypes(value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
+func (memDB *AdminServiceDatastoreInMemory) GetSpecificValidTypes(value *admmod.ValidTypesRequest) (*admmod.ValidTypes, error) {
 	if len(memDB.validTypeSlice) == 0 || memDB.validTypeSlice[0] == nil {
-		return nil, fmt.Errorf("%s not found", ds.ValidTypesStr)
+		return nil, fmt.Errorf("%s not found", admmod.ValidTypesStr)
 	}
 
-	vtCopy := pb.ValidTypes{}
+	vtCopy := admmod.ValidTypes{}
 	deepcopy.Copy(&vtCopy, memDB.validTypeSlice[0])
 
 	if !value.MonitoredObjectDeviceTypes {
-		vtCopy.Data.MonitoredObjectDeviceTypes = nil
+		vtCopy.MonitoredObjectDeviceTypes = nil
 	}
 	if !value.MonitoredObjectTypes {
-		vtCopy.Data.MonitoredObjectTypes = nil
+		vtCopy.MonitoredObjectTypes = nil
 	}
 
-	return vtCopy.Data, nil
+	return &vtCopy, nil
 }
 
 // DeleteValidTypes - InMemory implementation of DeleteValidTypes
-func (memDB *AdminServiceDatastoreInMemory) DeleteValidTypes() (*pb.ValidTypes, error) {
+func (memDB *AdminServiceDatastoreInMemory) DeleteValidTypes() (*admmod.ValidTypes, error) {
 	existing, err := memDB.GetValidTypes()
 	if err != nil {
 		return nil, err

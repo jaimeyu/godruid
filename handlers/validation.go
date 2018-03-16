@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/common"
 )
 
 func validateAdminUserRequest(request *pb.AdminUser, isUpdate bool) error {
@@ -224,4 +227,14 @@ func validateValidTypes(request *pb.ValidTypes, isUpdate bool) error {
 	}
 
 	return nil
+}
+
+func validateRESTObject(obj interface{}, isUpdate bool) error {
+	switch obj.(type) {
+	case common.RESTValidator:
+		cast := obj.(common.RESTValidator)
+		return cast.Validate(isUpdate)
+	default:
+		return fmt.Errorf("Unable to validate request. Invalid object: %s", models.AsJSONString(obj))
+	}
 }

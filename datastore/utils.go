@@ -6,6 +6,7 @@ import (
 	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -27,6 +28,9 @@ func GenerateID(obj interface{}, dataType string) string {
 	case *pb.MonitoredObjectData:
 		cast := obj.(*pb.MonitoredObjectData)
 		return PrependToDataID(trimAndLowercase(cast.GetId()), dataType)
+	case *tenmod.MonitoredObject:
+		cast := obj.(*tenmod.MonitoredObject)
+		return PrependToDataID(trimAndLowercase(cast.MonitoredObjectID), dataType)
 	default:
 		uuid := uuid.NewV4()
 		return PrependToDataID(uuid.String(), dataType)
@@ -55,5 +59,5 @@ func PrependToDataID(dataID string, dataType string) string {
 
 // MakeTimestamp - get a timestamp from epoch in milliseconds
 func MakeTimestamp() int64 {
-    return time.Now().UnixNano() / int64(time.Millisecond)
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }

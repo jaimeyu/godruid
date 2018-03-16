@@ -20,6 +20,18 @@
   revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
 
 [[projects]]
+  name = "github.com/cenkalti/backoff"
+  packages = ["."]
+  revision = "61153c768f31ee5f130071d08fc82b85208528de"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/corpix/uarand"
+  packages = ["."]
+  revision = "2b8494104d86337cdd41d0a49cbed8e4583c0ab4"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -30,6 +42,12 @@
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gedex/inflector"
+  packages = ["."]
+  revision = "16278e9db8130ac7ec405dc174cfb94344f16325"
 
 [[projects]]
   name = "github.com/getlantern/deepcopy"
@@ -99,6 +117,12 @@
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/icrowley/fake"
+  packages = ["."]
+  revision = "4178557ae428460c3780a381c824a1f3aceb6325"
+
+[[projects]]
   name = "github.com/leesper/couchdb-golang"
   packages = ["."]
   revision = "1fe73a5682dc83913c5944b52a8506b9e2f85717"
@@ -112,6 +136,12 @@
   ]
   revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
   version = "v1.7.6"
+
+[[projects]]
+  name = "github.com/manyminds/api2go"
+  packages = ["jsonapi"]
+  revision = "e7b693844a6ff1798ca2a84d8481884ca81d191a"
+  version = "1.0-RC4"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -313,6 +343,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9ef34969e1cf6ebbbf2102c9364b14dcf6f0b9f0258f8ab98a868519b346a32e"
+  inputs-digest = "a62472d17bde67512135721931dc6e5d729a8c015cadfdc26616663dcf74ecb4"
   solver-name = "gps-cdcl"
   solver-version = 1

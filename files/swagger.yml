@@ -2,7 +2,15 @@ swagger: '2.0'
 host: 'localhost:10001'
 info:
   title: Gather
-  description: "Gather API Documentation"
+  description: |-
+    Gather API Documentation
+
+    Majority of Gather API responses conform to the jsonapi format (http://jsonapi.org/). Conforming
+    to the jsonapi response format means that the response objects will share a common structure, however
+    the data in the response is determined by the context of the request. Using Swagger 2.0 to define this 
+    structure does not allow specific response structures for each API definition. As such, when looking
+    at the response for a given API it is important to look at the structure of the corresponding model 
+    described in the "Models section".  
   version: 1.0.0
   contact:
     email: "mpreston@accedian.com"
@@ -24,9 +32,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'AdminUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: body
           in: body
@@ -42,9 +54,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'AdminUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: body
           in: body
@@ -61,7 +77,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'AdminUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
       tags:
@@ -74,9 +90,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'AdminUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -91,9 +109,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'AdminUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -109,9 +129,15 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'Tenant'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '409':
+          description: "The Tenant being provisioned already exists"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: body
           in: body
@@ -127,9 +153,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'Tenant'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: body
           in: body
@@ -146,9 +176,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'Tenant'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       tags:
         - AdminProvisioningService
   '/v1/tenants/{value}':
@@ -159,9 +191,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'Tenant'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -176,9 +210,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'Tenant'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -197,6 +233,8 @@ paths:
           description: ''
           schema:
                 type: "string"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -215,6 +253,8 @@ paths:
           description: ''
           schema:
             $ref: "#/definitions/TenantSummary"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: value
           in: path
@@ -230,9 +270,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -252,9 +296,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -275,9 +323,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -293,9 +343,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: userId
           in: path
@@ -314,9 +366,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantUser'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: userId
           in: path
@@ -336,9 +390,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantDomain'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -358,9 +416,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantDomain'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -381,9 +443,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantDomain'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -399,9 +463,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantDomain'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: domainId
           in: path
@@ -420,9 +486,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantDomain'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: domainId
           in: path
@@ -442,9 +510,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -464,9 +536,13 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -487,9 +563,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -505,9 +583,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: monObjId
           in: path
@@ -526,9 +606,11 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
             $ref: '#/definitions/JsonApiResponse'
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: monObjId
           in: path
@@ -551,6 +633,10 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/MonitoredObjectCountByDomainResponse'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -574,6 +660,10 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/BulkOperationResult'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: tenantId
           in: path
@@ -594,11 +684,17 @@ paths:
     get:
       summary: Retrieve a histogram of measurements for given time range and metric
       operationId: GetHistogram
+      produces:
+        - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -651,11 +747,17 @@ paths:
     get:
       summary: Returns raw metrics from druid
       operationId: GetRawMetrics
+      produces:
+        - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -697,11 +799,19 @@ paths:
     get:
       summary: Retrieve threshold crossing for given metric.
       operationId: GetThresholdCrossing
+      produces:
+        - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '404':
+          description: "Unable to find Threshold Profile for provided id"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -751,11 +861,19 @@ paths:
   /v1/threshold-crossing-by-monitored-object:
     get:
       operationId: GetThresholdCrossingByMonitoredObject
+      produces:
+        - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '404':
+          description: "Unable to find Threshold Profile for provided id"
+        '500':
+          description: "Unexpected error processing request"
       parameters:
         - name: interval
           description: ISO-8601 Intervals.

@@ -13,6 +13,7 @@ server:
   cors:
     allowedorigins: 
       - http://localhost:4200
+      - http://localhost:9000
 args:
   admindb: 
     name: adh-admin

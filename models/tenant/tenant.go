@@ -225,7 +225,6 @@ type MonitoredObject struct {
 	ReflectorName         string   `json:"reflectorName"`
 	ObjectType            string   `json:"objectType"`
 	ObjectName            string   `json:"objectName"`
-	Color                 string   `json:"color"`
 	DomainSet             []string `json:"domainSet"`
 	CreatedTimestamp      int64    `json:"createdTimestamp"`
 	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
@@ -325,4 +324,9 @@ func (req *MonitoredObjectCountByDomainRequest) Validate(isUpdate bool) error {
 type MonitoredObjectCountByDomainResponse struct {
 	DomainToMonitoredObjectCountMap map[string]int64    `json:"domainToMonitoredObjectCountMap"`
 	DomainToMonitoredObjectSetMap   map[string][]string `json:"domainToMonitoredObjectSetMap"`
+}
+
+// BulkMonitoredObjectRequest - used for requests that pass in a set of Monitored Objects
+type BulkMonitoredObjectRequest struct {
+	MonitoredObjectSet []*MonitoredObject `json:"monitoredObjectSet"`
 }

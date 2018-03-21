@@ -808,8 +808,11 @@ func (tsh *TenantServiceRESTHandler) GetMonitoredObjectToDomainMap(w http.Respon
 
 	startTime := time.Now()
 
+	tenantID := getDBFieldFromRequest(r, 4)
+
 	// Unmarshal the request
 	data := tenmod.MonitoredObjectCountByDomainRequest{}
+	data.TenantID = tenantID
 	err := unmarshalRequest(r, &data, true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())

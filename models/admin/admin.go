@@ -210,8 +210,8 @@ func (vt *ValidTypes) Validate(isUpdate bool) error {
 
 // TenantSummary - provides a Tenant ID and a known alias for the tenant.
 type TenantSummary struct {
-	ID    string `json:"Id"`
-	Alias string `json:"Alias"`
+	ID    string `json:"id"`
+	Alias string `json:"alias"`
 }
 
 // ValidTypesRequest - request for data from a Valid Types object

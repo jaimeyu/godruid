@@ -35,7 +35,7 @@ import (
 
 const (
 	defaultIngestionDictionaryPath = "files/defaultIngestionDictionary.json"
-	defaultSwaggerFile             = "files/swagger.json"
+	defaultSwaggerFile             = "files/swagger.yml"
 	globalChangesDBName            = "_global_changes"
 	replicatorDBName               = "_replicator"
 	metadataDBName                 = "_metadata"
@@ -593,9 +593,9 @@ func modifySwagger(cfg config.Provider) {
 	var hostLine string
 	hostFromEnv := os.Getenv("API_TARGET")
 	if len(hostFromEnv) == 0 {
-		hostLine = fmt.Sprintf(`  "host": "localhost:%d",`, apiPort)
+		hostLine = fmt.Sprintf(`host: 'localhost:%d'`, apiPort)
 	} else {
-		hostLine = fmt.Sprintf(`  "host": "%s",`, hostFromEnv)
+		hostLine = fmt.Sprintf(`host: '%s'`, hostFromEnv)
 	}
 
 	// Update the generated swagger file to contain the correct host
@@ -607,7 +607,7 @@ func modifySwagger(cfg config.Provider) {
 	containsHost := false
 	lines := strings.Split(string(input), "\n")
 	for i, line := range lines {
-		if strings.Contains(line, `"host":`) {
+		if strings.Contains(line, `host:`) {
 			containsHost = true
 			lines[i] = hostLine
 			break

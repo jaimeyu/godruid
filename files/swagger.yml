@@ -1,0 +1,998 @@
+swagger: '2.0'
+host: 'localhost:10001'
+info:
+  title: Gather
+  description: "Gather API Documentation"
+  version: 1.0.0
+  contact:
+    email: "mpreston@accedian.com"
+basePath: "/api"
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+  - application/vnd.api+json
+paths:
+  /v1/admin:
+    post:
+      summary: Create a User with Administrative access.
+      operationId: CreateAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateAdminUserRequest'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a User with Administrative access.
+      operationId: UpdateAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateAdminUserRequest'
+      tags:
+        - AdminProvisioningService
+  /v1/admin-user-list:
+    get:
+      summary: Retrieve all Administrative Users.
+      operationId: GetAllAdminUsers
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      tags:
+        - AdminProvisioningService
+  '/v1/admin/{value}':
+    get:
+      summary: Retrieve an Administrative User by id.
+      operationId: GetAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a User with Administrative access.
+      operationId: DeleteAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  /v1/tenants:
+    post:
+      summary: Create a Tenant.
+      operationId: CreateTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTenantRequest'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a Tenant.
+      operationId: UpdateTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTenantRequest'
+      tags:
+        - AdminProvisioningService
+  /v1/tenant-list:
+    get:
+      summary: Retrieve all Tenants.
+      operationId: GetAllTenants
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      tags:
+        - AdminProvisioningService
+  '/v1/tenants/{value}':
+    get:
+      summary: Retrieve a Tenant by id.
+      operationId: GetTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a Tenant
+      operationId: DeleteTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  '/v1/tenant-by-alias/{value}':
+    get:
+      summary: Returns the ID of a Tenant that matches the provided alias.
+      operationId: GettenantIdByAlias
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: ''
+          schema:
+                type: "string"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  '/v1/tenant-summary-by-alias/{value}':
+    get:
+      summary: Returns a summary of the Tenant that matches the provided alias.
+      operationId: GetTenantSummaryByAlias
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: "#/definitions/TenantSummary"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  /v1/tenants/{tenantId}/users:
+    post:
+      summary: Create a User for a Tenant.
+      operationId: CreateTenantUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTenantUserRequest'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant User
+      operationId: UpdateTenantUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTenantUserRequest'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/user-list:
+    get:
+      summary: Retrieve all Users for the specified Tenant.
+      operationId: GetAllTenantUsers
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/users/{userId}':
+    get:
+      summary: Retrieve a Tenant User by id.
+      operationId: GetTenantUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant User specified by the provided userId.
+      operationId: DeleteTenantUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/domains:
+    post:
+      summary: Create a Domain for a Tenant.
+      operationId: CreateTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTenantDomainRequest'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Domain
+      operationId: UpdateTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTenantDomainRequest'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/domain-list:
+    get:
+      summary: Retrieve all Domains for the specified Tenant.
+      operationId: GetAllTenantDomains
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/domains/{domainId}':
+    get:
+      summary: Retrieve a Tenant Domain by id.
+      operationId: GetTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Domain specified by the provided userId.
+      operationId: DeleteTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/monitored-objects:
+    post:
+      summary: Create a Monitored Object for a Tenant.
+      operationId: CreateTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Monitored Object
+      operationId: UpdateTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTenantMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/monitored-object-list:
+    get:
+      summary: Retrieve all Monitored Objects for the specified Tenant.
+      operationId: GetAllTenantMonitoredObjects
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/monitored-objects/{monObjId}':
+    get:
+      summary: Retrieve a Tenant Monitored Object by id.
+      operationId: GetTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Monitored Object specified by the provided id.
+      operationId: DeleteTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiResponse'
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/monitored-object-domain-map':
+    post:
+      summary: Retrieve a mapping of Monitored Objects that are associated with each Domain.
+      operationId: GetDomainToMonitoredObjectMap
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectCountByDomainResponse'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectCountByDomainRequest'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/bulk/insert/monitored-objects':
+    post:
+      summary: Create one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObjects
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResult'
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: "array"
+            items: 
+              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+definitions:
+
+  AdminUser:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  CreateAdminUserRequest:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+  UpdateAdminUserRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+
+  Tenant:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      name:
+        type: "string"
+      urlSubdomain:
+        type: "string"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  CreateTenantRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      urlSubdomain:
+        type: "string"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+  UpdateTenantRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      name:
+        type: "string"
+      urlSubdomain:
+        type: "string"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+
+  TenantSummary:
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      alias:
+        type: "string"
+        
+  TenantUser:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      domains:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  CreateTenantUserRequest:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      domains:
+        type: "array"
+        items: 
+          type: "string"
+  UpdateTenantUserRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      tenantId:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      domains:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+
+  TenantDomain:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      color: 
+        type: "string"
+      thresholdProfileSet:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  CreateTenantDomainRequest:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      color: 
+        type: "string"
+      thresholdProfileSet:
+        type: "array"
+        items: 
+          type: "string"
+  UpdateTenantDomainRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      color: 
+        type: "string"
+      thresholdProfileSet:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+
+  TenantMonitoredObject:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      id:
+        type: "string"
+      actuatorName: 
+        type: "string"
+      actuatorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      reflectorName: 
+        type: "string"
+      reflectorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      objectName: 
+        type: "string"
+      objectType: 
+        type: "string"
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  CreateTenantMonitoredObjectRequest:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      id:
+        type: "string"
+      actuatorName: 
+        type: "string"
+      actuatorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      reflectorName: 
+        type: "string"
+      reflectorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      objectName: 
+        type: "string"
+      objectType: 
+        type: "string"
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+  UpdateTenantMonitoredObjectRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      tenantId:
+        type: "string"
+      id:
+        type: "string"
+      actuatorName: 
+        type: "string"
+      actuatorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      reflectorName: 
+        type: "string"
+      reflectorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      objectName: 
+        type: "string"
+      objectType: 
+        type: "string"
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+  MonitoredObjectCountByDomainRequest:
+    type: "object"
+    properties:
+      byCount: 
+        type: "boolean"
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+  MonitoredObjectCountByDomainResponse:
+    type: "object"
+    properties:
+      domainToMonitoredObjectCountMap:
+        type: "object"
+        additionalProperties:
+          type: "integer"
+      domainToMonitoredObjectSetMap:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items: 
+            type: "string"
+
+  BulkOperationResult:
+    type: "object"
+    properties:
+      ok:
+        type: "boolean"
+      id:
+        type: "string"
+      rev:
+        type: "string"
+      error:
+        type: "string"
+      reason:
+        type: "string"
+
+  JsonApiResponse:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           - $ref: '#/definitions/AdminUser'
+           - $ref: '#/definitions/Tenant'
+           - $ref: '#/definitions/TenantUser'
+           - $ref: '#/definitions/TenantDomain'
+           - $ref: '#/definitions/TenantMonitoredObject'
+      # relationships:
+      #   type: "array"
+      #   items:
+      #     - $ref: '#/definitions/relationshipsJoe'
+      #     - $ref: '#/definitions/relationshipsBob'

@@ -24,12 +24,3 @@ protoc -I/usr/local/include -I. \
   --grpc-gateway_out=logtostderr=true,request_context=true:. \
   gathergrpc/gather.proto       
   
-# Generate the Swagger definition of the REST service.
-protoc -I/usr/local/include -I. \
-  -I$GOPATH/src \
-  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-  --swagger_out=logtostderr=true:. \
-  gathergrpc/gather.proto       
-
-# Move the swagger file to the proper location.
-mv gathergrpc/gather.swagger.json files/swagger.json

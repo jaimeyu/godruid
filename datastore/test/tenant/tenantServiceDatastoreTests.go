@@ -1,6 +1,7 @@
 package tenant
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -9,9 +10,269 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+)
+
+var (
+	defaultThresholdsBytes = []byte(`{
+		"thresholds": {
+			"vendorMap": {
+				"accedian-flowmeter": {
+					"metricMap": {
+						"throughputAvg": {
+							"eventAttrMap": {
+								"critical": "25000000",
+								"enabled": "true",
+								"major": "20000000",
+								"minor": "18000000"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"flowmeter": {
+							"metricMap": {
+								"throughputAvg": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "25000000",
+														"lowerStrict": "true",
+														"unit": "bps"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "25000000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "18000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "20000000"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"accedian-twamp": {
+					"metricMap": {
+						"delayP95": {
+							"eventAttrMap": {
+								"critical": "100000",
+								"enabled": "true",
+								"major": "95000",
+								"minor": "92500"
+							}
+						},
+						"jitterP95": {
+							"eventAttrMap": {
+								"critical": "30000",
+								"enabled": "true",
+								"major": "20000",
+								"minor": "15000"
+							}
+						},
+						"packetsLostPct": {
+							"eventAttrMap": {
+								"critical": "0.8",
+								"enabled": "true",
+								"major": "0.3",
+								"minor": "0.1"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}`)
+
+	defaultIngestionProfileBytes = []byte(`{"metrics": {
+		"vendorMap": {
+		  "accedian-flowmeter": {
+			"monitoredObjectTypeMap": {
+			  "flowmeter": {
+				"metricMap": {
+				  "bytesReceived": true,
+				  "packetsReceived": true,
+				  "throughputAvg": true,
+				  "throughputMax": true,
+				  "throughputMin": true
+				}
+			  }
+			}
+		  },
+		  "accedian-twamp": {
+			"monitoredObjectTypeMap": {
+			  "twamp-pe": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sf": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sl": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  }
+			}
+		  }
+		}
+	  }}`)
 )
 
 // TenantServiceDatastoreTestRunner - object used to run tests for any iplementation
@@ -619,6 +880,118 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing
 
 	// Delete a record that oes not exist
 	deleteDNE, err := runner.tenantDB.DeleteTenantMeta(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantIngestionProfileCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const DOM1 = "domain1"
+	const DOM2 = "domain2"
+	const DOM3 = "domain3"
+	const COLOR1 = "color1"
+	const COLOR2 = "color2"
+	const THRPRF = "ThresholdPrf"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	rec, err := runner.tenantDB.GetActiveTenantIngestionProfile(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, rec)
+
+	// Try to fetch a record even though none exist:
+	fail, err := runner.tenantDB.GetTenantIngestionProfile(TENANT, "someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Try to Update a record that does not exist:
+	fail, err = runner.tenantDB.UpdateTenantIngestionProfile(&tenmod.IngestionProfile{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	defaultIngestionProfileShell := &tenmod.IngestionProfile{}
+	if err := json.Unmarshal(defaultIngestionProfileBytes, &defaultIngestionProfileShell); err != nil {
+		logger.Log.Debugf("Unable to umarshal ingestion profile: %s", err.Error())
+	}
+
+	ingPrf := tenmod.IngestionProfile{
+		Datatype: string(tenmod.TenantIngestionProfileType),
+		TenantID: TENANT,
+		Metrics:  defaultIngestionProfileShell.Metrics,
+	}
+	created, err := runner.tenantDB.CreateTenantIngestionProfile(&ingPrf)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantIngestionProfileType), created.Datatype)
+	assert.Equal(t, created.Metrics, defaultIngestionProfileShell.Metrics, "Metrics not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantIngestionProfile(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.IngestionProfile{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Metrics["badStuff"] = nil
+	updated, err := runner.tenantDB.UpdateTenantIngestionProfile(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantIngestionProfileType), updated.Datatype)
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.NotEqual(t, updated.Metrics, defaultIngestionProfileShell.Metrics, "Metrics were not updated")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record - should fail.
+	tenantDomain2 := tenmod.IngestionProfile{
+		Datatype: string(tenmod.TenantIngestionProfileType),
+		TenantID: TENANT,
+		Metrics:  defaultIngestionProfileShell.Metrics,
+	}
+	created2, err := runner.tenantDB.CreateTenantIngestionProfile(&tenantDomain2)
+	assert.NotNil(t, err)
+	assert.Nil(t, created2)
+
+	// Get active records
+	active, err := runner.tenantDB.GetActiveTenantIngestionProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, active)
+	assert.Equal(t, updated, active)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantIngestionProfile(TENANT, active.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, active, deleted, "Deleted not the same")
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantDomain(TENANT, deleted.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, deleteDNE)
 }

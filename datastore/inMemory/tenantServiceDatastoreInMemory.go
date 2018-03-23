@@ -22,7 +22,8 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
 	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
 
-	tenantIDtoMetaSlice map[string][]*tenmod.Metadata
+	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
+	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -35,6 +36,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
+	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
 
 	return res, nil
 }
@@ -61,6 +63,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantMetaType:
 		if tsd.tenantIDtoMetaSlice[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantIngestionProfileType:
+		if tsd.tenantIDtoIngPrfSlice[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -283,26 +289,93 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDomains(tenantID string) 
 
 // CreateTenantIngestionProfile - InMemory implementation of CreateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantIngestionProfile(tenantIngPrfReq *tenmod.IngestionProfile) (*tenmod.IngestionProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: CreateTenantIngestionProfile not implemented")
+	if err := tsd.DoesTenantExist(tenantIngPrfReq.TenantID, tenmod.TenantIngestionProfileType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantIDtoIngPrfSlice[tenantIngPrfReq.TenantID] = make([]*tenmod.IngestionProfile, 1)
+	}
+
+	existing, _ := tsd.GetActiveTenantIngestionProfile(tenantIngPrfReq.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantIngestionProfileStr)
+	}
+
+	recCopy := tenmod.IngestionProfile{}
+	deepcopy.Copy(&recCopy, tenantIngPrfReq)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantIngestionProfileType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantIDtoIngPrfSlice[tenantIngPrfReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
 }
 
 // UpdateTenantIngestionProfile - InMemory implementation of UpdateTenantIngestionProfile
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantIngestionProfile(tenantIngPrfReq *tenmod.IngestionProfile) (*tenmod.IngestionProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: UpdateTenantIngestionProfile not implemented")
+	if len(tenantIngPrfReq.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantIngestionProfileStr)
+	}
+	if len(tenantIngPrfReq.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantIngestionProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantIngPrfReq.TenantID, tenmod.TenantIngestionProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+
+	recCopy := tenmod.IngestionProfile{}
+	deepcopy.Copy(&recCopy, tenantIngPrfReq)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantIngestionProfileType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantIDtoIngPrfSlice[tenantIngPrfReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
 }
 
 // GetTenantIngestionProfile - InMemory implementation of GetTenantIngestionProfile
 func (tsd *TenantServiceDatastoreInMemory) GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetTenantIngestionProfile not implemented")
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantIngestionProfileStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Ingestion Proile ID", tenmod.TenantIngestionProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantIngestionProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+	existing := tsd.tenantIDtoIngPrfSlice[tenantID][0]
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+
+	return existing, nil
 }
 
 // DeleteTenantIngestionProfile - InMemory implementation of DeleteTenantIngestionProfile
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: DeleteTenantIngestionProfile not implemented")
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantIngestionProfileStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Ingestion Proile ID", tenmod.TenantIngestionProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantIngestionProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+	existing, err := tsd.GetActiveTenantIngestionProfile(tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+
+	tsd.tenantIDtoIngPrfSlice[tenantID][0] = nil
+
+	return existing, nil
 }
 
 // CreateTenantThresholdProfile - InMemory implementation of CreateTenantThresholdProfile
@@ -524,8 +597,18 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*tenm
 
 // GetActiveTenantIngestionProfile - InMemory implementation of GetActiveTenantIngestionProfile
 func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantIngestionProfile(tenantID string) (*tenmod.IngestionProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetActiveTenantIngestionProfile not implemented")
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantIngestionProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantIngestionProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
+	}
+
+	if tsd.tenantIDtoIngPrfSlice[tenantID][0] == nil {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantIngestionProfileStr)
+	}
+
+	return tsd.tenantIDtoIngPrfSlice[tenantID][0], nil
 }
 
 // GetAllTenantThresholdProfile - InMemory implementation of GetAllTenantThresholdProfile

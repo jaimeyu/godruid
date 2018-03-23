@@ -198,6 +198,12 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 	tenantIngPrfReq.ID = ds.GenerateID(tenantIngPrfReq, string(tenmod.TenantIngestionProfileType))
 	tenantID := ds.PrependToDataID(tenantIngPrfReq.TenantID, string(admmod.TenantType))
 
+	// Only create one if one does not already exist:
+	existing, _ := tsd.GetActiveTenantIngestionProfile(tenantIngPrfReq.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantIngestionProfileStr)
+	}
+
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.IngestionProfile{}
 	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
@@ -568,6 +574,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, tenmod.TenantIngestionProfileStr); err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantIngestionProfileStr)
 	}
 
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(res))

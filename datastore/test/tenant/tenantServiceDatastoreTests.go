@@ -471,7 +471,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	assert.NotNil(t, err)
 	assert.Nil(t, dne)
 
-	// Delete a record that oes not exist
+	// Delete a record that does not exist
 	deleteDNE, err := runner.tenantDB.DeleteMonitoredObject(TENANT, deleted.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, deleteDNE)
@@ -488,4 +488,137 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
+
+	// Create some records in Bulk:
+	bulkReq := []*tenmod.MonitoredObject{&tenmod.MonitoredObject{
+		MonitoredObjectID: OBJID2,
+		ObjectName:        OBJNAME2,
+		TenantID:          TENANT,
+		ActuatorName:      ACTNAME2,
+		ActuatorType:      ACTTYPE2,
+		DomainSet:         DOMAINSET1},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID1,
+			ObjectName:        OBJNAME1,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME1,
+			ActuatorType:      ACTTYPE1,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET1,
+		}}
+	bulkResult, err := runner.tenantDB.BulkInsertMonitoredObjects(TENANT, bulkReq)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, bulkResult)
+	assert.Equal(t, 2, len(bulkResult))
+
+	// Delete the remaining records
+	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Equal(t, 2, len(fetchedList))
+
+	for _, val := range fetchedList {
+		del, err := runner.tenantDB.DeleteMonitoredObject(TENANT, val.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, del)
+		assert.NotEmpty(t, del.ID)
+		assert.NotEmpty(t, del.REV)
+	}
+
+	// Get all records - should be empty
+	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Empty(t, fetchedList)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const THRPRF = "ThresholdPrf"
+	const THRPRF2 = "ThresholdPrf2"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	record, err := runner.tenantDB.GetTenantMeta(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, record)
+
+	// Try to Update a record that does not exist:
+	fail, err := runner.tenantDB.UpdateTenantMeta(&tenmod.Metadata{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	meta := tenmod.Metadata{
+		TenantName:              COMPANY1,
+		TenantID:                TENANT,
+		DefaultThresholdProfile: THRPRF}
+	created, err := runner.tenantDB.CreateTenantMeta(&meta)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantMetaType), created.Datatype)
+	assert.Equal(t, created.TenantName, COMPANY1, "Name not the same")
+	assert.Equal(t, created.DefaultThresholdProfile, THRPRF, "Threshold Profile not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantMeta(TENANT)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.Metadata{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.DefaultThresholdProfile = THRPRF2
+	updated, err := runner.tenantDB.UpdateTenantMeta(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantMetaType), updated.Datatype)
+	assert.Equal(t, updated.TenantName, COMPANY1, "Name not the same")
+	assert.Equal(t, updated.DefaultThresholdProfile, THRPRF2, "Threshold Profile was not updated")
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	meta2 := tenmod.Metadata{
+		TenantName:              COMPANY1,
+		TenantID:                TENANT,
+		DefaultThresholdProfile: THRPRF}
+	created2, err := runner.tenantDB.CreateTenantMeta(&meta2)
+	assert.NotNil(t, err)
+	assert.Nil(t, created2)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantMeta(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.Equal(t, deleted.TenantName, fetched.TenantName, "Deleted name not the same")
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantMeta(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
 }

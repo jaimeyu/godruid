@@ -21,6 +21,8 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantUserMap            map[string]map[string]*tenmod.User
 	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
 	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
+
+	tenantIDtoMetaSlice map[string][]*tenmod.Metadata
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -32,6 +34,8 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantDomainMap = map[string]map[string]*tenmod.Domain{}
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
 
+	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
+
 	return res, nil
 }
 
@@ -40,18 +44,24 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 	if len(tenantID) == 0 {
 		return fmt.Errorf("%s does not exist", tenantID)
 	}
+
+	tenantDNE := fmt.Errorf("%s does not exist", tenantID)
 	switch ctx {
 	case tenmod.TenantUserType:
 		if tsd.tenantToIDtoTenantUserMap[tenantID] == nil {
-			return fmt.Errorf("%s does not exist", tenantID)
+			return tenantDNE
 		}
 	case tenmod.TenantDomainType:
 		if tsd.tenantToIDtoTenantDomainMap[tenantID] == nil {
-			return fmt.Errorf("%s does not exist", tenantID)
+			return tenantDNE
 		}
 	case tenmod.TenantMonitoredObjectType:
 		if tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID] == nil {
-			return fmt.Errorf("%s does not exist", tenantID)
+			return tenantDNE
+		}
+	case tenmod.TenantMetaType:
+		if tsd.tenantIDtoMetaSlice[tenantID] == nil {
+			return tenantDNE
 		}
 	default:
 		return fmt.Errorf("Invalid data type %s provided", string(ctx))
@@ -432,26 +442,84 @@ func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDom
 
 // CreateTenantMeta - InMemory implementation of CreateTenantMeta
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: CreateTenantMeta not implemented")
+	if err := tsd.DoesTenantExist(meta.TenantID, tenmod.TenantMetaType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantIDtoMetaSlice[meta.TenantID] = make([]*tenmod.Metadata, 1)
+	}
+
+	existing, _ := tsd.GetTenantMeta(meta.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantMetaStr)
+	}
+
+	recCopy := tenmod.Metadata{}
+	deepcopy.Copy(&recCopy, meta)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetaType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantIDtoMetaSlice[meta.TenantID][0] = &recCopy
+
+	return &recCopy, nil
 }
 
 // UpdateTenantMeta - InMemory implementation of UpdateTenantMeta
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: UpdateTenantMeta not implemented")
+	if len(meta.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantMetaStr)
+	}
+	if len(meta.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantMetaStr)
+	}
+	if err := tsd.DoesTenantExist(meta.TenantID, tenmod.TenantMetaType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetaStr)
+	}
+
+	recCopy := tenmod.Metadata{}
+	deepcopy.Copy(&recCopy, meta)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetaType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantIDtoMetaSlice[meta.TenantID][0] = &recCopy
+
+	return &recCopy, nil
 }
 
 // DeleteTenantMeta - InMemory implementation of DeleteTenantMeta
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: DeleteTenantMeta not implemented")
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetaStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetaType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetaStr)
+	}
+	existing, err := tsd.GetTenantMeta(tenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	tsd.tenantIDtoMetaSlice[tenantID][0] = nil
+
+	return existing, nil
 }
 
 // GetTenantMeta - InMemory implementation of GetTenantMeta
 func (tsd *TenantServiceDatastoreInMemory) GetTenantMeta(tenantID string) (*tenmod.Metadata, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetTenantMeta not implemented")
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMonitoredObjectStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetaType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetaStr)
+	}
+
+	if tsd.tenantIDtoMetaSlice[tenantID][0] == nil {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantMetaStr)
+	}
+
+	return tsd.tenantIDtoMetaSlice[tenantID][0], nil
 }
 
 // GetActiveTenantIngestionProfile - InMemory implementation of GetActiveTenantIngestionProfile
@@ -468,6 +536,28 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID
 
 // BulkInsertMonitoredObjects - InMemory implementation of BulkInsertMonitoredObjects
 func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
-	// Stub to implement
-	return nil, errors.New("BulkInsertMonitoredObjects() not implemented for InMemory DB")
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMonitoredObjectType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID] = map[string]*tenmod.MonitoredObject{}
+	}
+
+	result := make([]*common.BulkOperationResult, 0)
+	for _, val := range value {
+		created, err := tsd.CreateMonitoredObject(val)
+		if err != nil {
+			entry := common.BulkOperationResult{
+				OK:     false,
+				REASON: err.Error(),
+			}
+			result = append(result, &entry)
+		} else {
+			entry := common.BulkOperationResult{
+				OK: true,
+				ID: created.ID,
+			}
+			result = append(result, &entry)
+		}
+	}
+
+	return result, nil
 }

@@ -72,4 +72,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunTenantUserCRUD(t)
 	tester.RunTenantDomainCRUD(t)
 	tester.RunTenantMonitoredObjectCRUD(t)
+	tester.RunTenantMetadataCRUD(t)
 }

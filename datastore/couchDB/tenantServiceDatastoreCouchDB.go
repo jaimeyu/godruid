@@ -460,6 +460,12 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *tenmod.Metadata
 	meta.ID = ds.GenerateID(meta, string(tenmod.TenantMetaType))
 	tenantID := ds.PrependToDataID(meta.TenantID, string(admmod.TenantType))
 
+	// Only create one if one does not already exist:
+	existing, _ := tsd.GetTenantMeta(meta.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantMetaStr)
+	}
+
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.Metadata{}
 	if err := createDataInCouch(tenantDBName, meta, dataContainer, string(tenmod.TenantMetaType), tenmod.TenantMetaStr); err != nil {
@@ -487,7 +493,6 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantMeta(meta *tenmod.Metadata
 // DeleteTenantMeta - CouchDB implementation of DeleteTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantMetaStr, tenantID)
-	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	// Obtain the value of the existing record for a return value.
 	existingObject, err := tsd.GetTenantMeta(tenantID)
@@ -496,8 +501,10 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantMeta(tenantID string) (*te
 		return nil, err
 	}
 
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	if err := deleteData(tenantDBName, existingObject.ID, tenmod.TenantMetaStr); err != nil {
+	objectID := ds.PrependToDataID(existingObject.ID, string(tenmod.TenantMetaType))
+	if err := deleteData(tenantDBName, objectID, tenmod.TenantMetaStr); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", tenmod.TenantMetaStr, err.Error())
 		return nil, err
 	}
@@ -529,6 +536,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantMeta(tenantID string) (*tenmo
 		if err = convertGenericCouchDataToObject(fetchedData[0], &res, tenmod.TenantMetaStr); err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, fmt.Errorf("Unable to find %s", tenmod.TenantMetaStr)
 	}
 
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(res))

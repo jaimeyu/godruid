@@ -79,7 +79,7 @@ func TestCouchDBImplMain(t *testing.T) {
 	couchServer := setupCouchDB()
 	defer dstest.ClearCouch(couchServer)
 
-	// RunAdminServiceDatastoreTests(t)
+	RunAdminServiceDatastoreTests(t)
 	RunTenantServiceDatastoreTests(t)
 }
 
@@ -99,4 +99,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunTenantUserCRUD(t)
 	tester.RunTenantDomainCRUD(t)
 	tester.RunTenantMonitoredObjectCRUD(t)
+	tester.RunTenantMetadataCRUD(t)
 }

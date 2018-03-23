@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/getlantern/deepcopy"
 )
 
@@ -29,6 +30,16 @@ func AsJSONString(obj interface{}) string {
 	case *admmod.User:
 		user := obj.(*admmod.User)
 		userCopy := admmod.User{}
+		deepcopy.Copy(&userCopy, user)
+		userCopy.Password = LogRedactStr
+		res, err := json.Marshal(userCopy)
+		if err != nil {
+			return ""
+		}
+		return string(res)
+	case *tenmod.User:
+		user := obj.(*tenmod.User)
+		userCopy := tenmod.User{}
 		deepcopy.Copy(&userCopy, user)
 		userCopy.Password = LogRedactStr
 		res, err := json.Marshal(userCopy)

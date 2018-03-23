@@ -9,6 +9,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/common"
 	"github.com/icrowley/fake"
+	"github.com/stretchr/testify/assert"
 
 	testUtil "github.com/accedian/adh-gather/models/test"
 	uuid "github.com/satori/go.uuid"
@@ -295,6 +296,37 @@ func TestTenantUserSerialization(t *testing.T) {
 	testUtil.RunSerializationTest(t, original, &User{}, original.ID, attrKeys)
 }
 
+func TestTenantUserValidation(t *testing.T) {
+	original := &User{}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
+}
+
 func TestTenantDomainSerialization(t *testing.T) {
 	original := &Domain{
 		ID:                    uuid.NewV4().String(),
@@ -311,6 +343,37 @@ func TestTenantDomainSerialization(t *testing.T) {
 	attrKeys := []string{"_rev", "datatype", "tenantId", "name", "color", "thresholdProfileSet", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &Domain{}, original.ID, attrKeys)
+}
+
+func TestTenantDomainValidation(t *testing.T) {
+	original := &Domain{}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
 }
 
 func TestTenantIngestionProfileSerialization(t *testing.T) {
@@ -335,6 +398,37 @@ func TestTenantIngestionProfileSerialization(t *testing.T) {
 	testUtil.RunSerializationTest(t, original, &IngestionProfile{}, original.ID, attrKeys)
 }
 
+func TestTenantIngestionProfileValidation(t *testing.T) {
+	original := &IngestionProfile{}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
+}
+
 func TestTenantThresholdProfileSerialization(t *testing.T) {
 
 	defaultThresholdProfileShell := &ThresholdProfile{}
@@ -355,6 +449,37 @@ func TestTenantThresholdProfileSerialization(t *testing.T) {
 	attrKeys := []string{"_rev", "datatype", "tenantId", "thresholds", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &ThresholdProfile{}, original.ID, attrKeys)
+}
+
+func TestTenantThresholdProfileValidation(t *testing.T) {
+	original := &ThresholdProfile{}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
 }
 
 func TestTenantMonitoredObjectSerialization(t *testing.T) {
@@ -384,6 +509,46 @@ func TestTenantMonitoredObjectSerialization(t *testing.T) {
 	testUtil.RunSerializationTest(t, original, &MonitoredObject{}, original.ID, attrKeys)
 }
 
+func TestTenantMonitoredObjectValidation(t *testing.T) {
+	original := &MonitoredObject{MonitoredObjectID: "something"}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must have MonitoredObjectID
+	original.MonitoredObjectID = ""
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.MonitoredObjectID = "newone"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
+}
+
 func TestTenantMetadataSerialization(t *testing.T) {
 	original := &Metadata{
 		ID:                      uuid.NewV4().String(),
@@ -399,4 +564,35 @@ func TestTenantMetadataSerialization(t *testing.T) {
 	attrKeys := []string{"_rev", "datatype", "tenantId", "tenantName", "defaultThresholdProfile", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &Metadata{}, original.ID, attrKeys)
+}
+
+func TestTenantMetadataValidation(t *testing.T) {
+	original := &Metadata{}
+
+	// Must have TenantID
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.TenantID = "something"
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err = original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
 }

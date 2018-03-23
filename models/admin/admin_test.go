@@ -7,6 +7,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	test "github.com/accedian/adh-gather/models/test"
 	"github.com/icrowley/fake"
+	"github.com/stretchr/testify/assert"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -28,6 +29,29 @@ func TestTenantSerialization(t *testing.T) {
 	test.RunSerializationTest(t, original, &Tenant{}, original.ID, attrKeys)
 }
 
+func TestTenantValidation(t *testing.T) {
+	original := &Tenant{}
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
+}
+
 func TestAdminUserSerialization(t *testing.T) {
 	original := &User{
 		ID:                    uuid.NewV4().String(),
@@ -46,6 +70,29 @@ func TestAdminUserSerialization(t *testing.T) {
 	attrKeys := []string{"_rev", "datatype", "username", "password", "sendOnboardingEmail", "state", "onboardingToken", "userVerified", "createdTimestamp", "lastModifiedTimestamp"}
 
 	test.RunSerializationTest(t, original, &User{}, original.ID, attrKeys)
+}
+
+func TestUserValidation(t *testing.T) {
+	original := &User{}
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
 }
 
 func TestIngestionDictionarySerialization(t *testing.T) {
@@ -90,6 +137,29 @@ func TestIngestionDictionarySerialization(t *testing.T) {
 	test.RunSerializationTest(t, original, &IngestionDictionary{}, original.ID, attrKeys)
 }
 
+func TestIngestionDictionaryValidation(t *testing.T) {
+	original := &IngestionDictionary{}
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
+}
+
 func TestValidTypesSerialization(t *testing.T) {
 	monitoredObjectTypesMap := map[string]string{
 		fake.CharactersN(8): fake.CharactersN(10),
@@ -112,4 +182,27 @@ func TestValidTypesSerialization(t *testing.T) {
 	attrKeys := []string{"_rev", "datatype", "monitoredObjectTypes", "monitoredObjectDeviceTypes", "createdTimestamp", "lastModifiedTimestamp"}
 
 	test.RunSerializationTest(t, original, &ValidTypes{}, original.ID, attrKeys)
+}
+
+func TestValidTypesValidation(t *testing.T) {
+	original := &ValidTypes{}
+
+	// Must not provide REV if it is not an Update
+	original.REV = "oops"
+	err := original.Validate(false)
+	assert.NotNil(t, err)
+
+	original.REV = ""
+	err = original.Validate(false)
+	assert.Nil(t, err)
+
+	// If it is an update, make sure REV and CreatedTimestamp are there
+	original.CreatedTimestamp = 0
+	err = original.Validate(true)
+	assert.NotNil(t, err)
+
+	original.REV = "update"
+	original.CreatedTimestamp = 123
+	err = original.Validate(true)
+	assert.Nil(t, err)
 }

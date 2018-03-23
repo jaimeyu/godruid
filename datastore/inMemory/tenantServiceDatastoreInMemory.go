@@ -1,7 +1,6 @@
 package inMemory
 
 import (
-	"errors"
 	"fmt"
 
 	ds "github.com/accedian/adh-gather/datastore"
@@ -21,6 +20,7 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantUserMap            map[string]map[string]*tenmod.User
 	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
 	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
+	tenantToIDtoTenantThrPrfMap          map[string]map[string]*tenmod.ThresholdProfile
 
 	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
@@ -34,6 +34,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantUserMap = map[string]map[string]*tenmod.User{}
 	res.tenantToIDtoTenantDomainMap = map[string]map[string]*tenmod.Domain{}
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
+	res.tenantToIDtoTenantThrPrfMap = map[string]map[string]*tenmod.ThresholdProfile{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
@@ -67,6 +68,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantIngestionProfileType:
 		if tsd.tenantIDtoIngPrfSlice[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantThresholdProfileType:
+		if tsd.tenantToIDtoTenantThrPrfMap[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -380,26 +385,91 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantIngestionProfile(tenantID
 
 // CreateTenantThresholdProfile - InMemory implementation of CreateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreInMemory) CreateTenantThresholdProfile(tenantThreshPrfReq *tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: CreateTenantThresholdProfile not implemented")
+	if err := tsd.DoesTenantExist(tenantThreshPrfReq.TenantID, tenmod.TenantThresholdProfileType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoTenantThrPrfMap[tenantThreshPrfReq.TenantID] = map[string]*tenmod.ThresholdProfile{}
+	}
+
+	recCopy := tenmod.ThresholdProfile{}
+	deepcopy.Copy(&recCopy, tenantThreshPrfReq)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantThresholdProfileType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoTenantThrPrfMap[tenantThreshPrfReq.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
 }
 
 // UpdateTenantThresholdProfile - InMemory implementation of UpdateTenantThresholdProfile
 func (tsd *TenantServiceDatastoreInMemory) UpdateTenantThresholdProfile(tenantThreshPrfReq *tenmod.ThresholdProfile) (*tenmod.ThresholdProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: UpdateTenantThresholdProfile not implemented")
+	if len(tenantThreshPrfReq.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantThresholdProfileStr)
+	}
+	if len(tenantThreshPrfReq.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantThresholdProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantThreshPrfReq.TenantID, tenmod.TenantThresholdProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantThresholdProfileStr)
+	}
+
+	recCopy := tenmod.ThresholdProfile{}
+	deepcopy.Copy(&recCopy, tenantThreshPrfReq)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantThresholdProfileType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoTenantThrPrfMap[tenantThreshPrfReq.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
 }
 
 // GetTenantThresholdProfile - InMemory implementation of GetTenantThresholdProfile
 func (tsd *TenantServiceDatastoreInMemory) GetTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetTenantThresholdProfile not implemented")
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Domain ID", tenmod.TenantDomainStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDomainStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantThresholdProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantThresholdProfileStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantThrPrfMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantThresholdProfileStr)
 }
 
 // DeleteTenantThresholdProfile - InMemory implementation of DeleteTenantThresholdProfile
 func (tsd *TenantServiceDatastoreInMemory) DeleteTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: DeleteTenantThresholdProfile not implemented")
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Domain ID", tenmod.TenantThresholdProfileStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantThresholdProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantThresholdProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantThresholdProfileStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantThrPrfMap[tenantID][dataID]
+	if ok {
+		delete(tsd.tenantToIDtoTenantThrPrfMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoTenantThrPrfMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoTenantThrPrfMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantDomainStr)
 }
 
 // CreateMonitoredObject - InMemory implementation of CreateMonitoredObject
@@ -509,8 +579,74 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 
 // GetMonitoredObjectToDomainMap - InMemory implementation of GetMonitoredObjectToDomainMap
 func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetMonitoredObjectToDomainMap not implemented")
+	err := tsd.DoesTenantExist(moByDomReq.TenantID, tenmod.TenantMonitoredObjectType)
+	if err != nil {
+		return nil, fmt.Errorf("Tenant does not have any Monitored Objects")
+	}
+	err = tsd.DoesTenantExist(moByDomReq.TenantID, tenmod.TenantDomainType)
+	if err != nil {
+		return nil, fmt.Errorf("Tenant does not have any Domains")
+	}
+
+	// Get response data either by subset, or for all domains
+	response := tenmod.MonitoredObjectCountByDomainResponse{}
+	domainSet := moByDomReq.DomainSet
+	if domainSet == nil || len(domainSet) == 0 {
+		// Retrieve values for all domains
+		response.DomainToMonitoredObjectSetMap = map[string][]string{}
+		for _, mo := range tsd.tenantToIDtoTenantMonitoredObjectMap[moByDomReq.TenantID] {
+			for _, dom := range mo.DomainSet {
+				if response.DomainToMonitoredObjectSetMap[dom] == nil {
+					response.DomainToMonitoredObjectSetMap[dom] = []string{mo.ID}
+					continue
+				}
+				if !contains(response.DomainToMonitoredObjectSetMap[dom], mo.ID) {
+					response.DomainToMonitoredObjectSetMap[dom] = append(response.DomainToMonitoredObjectSetMap[dom], mo.ID)
+				}
+			}
+
+		}
+	} else {
+		// Retrieve just the subset of values.
+		response.DomainToMonitoredObjectSetMap = map[string][]string{}
+		for _, mo := range tsd.tenantToIDtoTenantMonitoredObjectMap[moByDomReq.TenantID] {
+			for _, dom := range mo.DomainSet {
+				if !contains(domainSet, dom) {
+					continue
+				}
+				if response.DomainToMonitoredObjectSetMap[dom] == nil {
+					response.DomainToMonitoredObjectSetMap[dom] = []string{mo.ID}
+					continue
+				}
+				if !contains(response.DomainToMonitoredObjectSetMap[dom], mo.ID) {
+					response.DomainToMonitoredObjectSetMap[dom] = append(response.DomainToMonitoredObjectSetMap[dom], mo.ID)
+				}
+			}
+
+		}
+	}
+
+	// Filtering is done, do the count
+	if moByDomReq.ByCount {
+		response.DomainToMonitoredObjectCountMap = map[string]int64{}
+		for key, val := range response.DomainToMonitoredObjectSetMap {
+			response.DomainToMonitoredObjectCountMap[key] = int64(len(val))
+		}
+
+		// Null out the other response
+		response.DomainToMonitoredObjectSetMap = nil
+	}
+
+	return &response, nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 // CreateTenantMeta - InMemory implementation of CreateTenantMeta
@@ -613,8 +749,18 @@ func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantIngestionProfile(tenan
 
 // GetAllTenantThresholdProfile - InMemory implementation of GetAllTenantThresholdProfile
 func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID string) ([]*tenmod.ThresholdProfile, error) {
-	// Stub to implement
-	return nil, errors.New("Unsupported operation: GetAllTenantThresholdProfile not implemented")
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantThresholdProfileType)
+	if err != nil {
+		return []*tenmod.ThresholdProfile{}, nil
+	}
+
+	recList := make([]*tenmod.ThresholdProfile, 0)
+
+	for _, rec := range tsd.tenantToIDtoTenantThrPrfMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	return recList, nil
 }
 
 // BulkInsertMonitoredObjects - InMemory implementation of BulkInsertMonitoredObjects

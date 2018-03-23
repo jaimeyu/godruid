@@ -101,4 +101,6 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunTenantMonitoredObjectCRUD(t)
 	tester.RunTenantMetadataCRUD(t)
 	tester.RunTenantIngestionProfileCRUD(t)
+	tester.RunTenantThresholdProfileCRUD(t)
+	tester.RunGetMonitoredObjectByDomainMapTest(t)
 }

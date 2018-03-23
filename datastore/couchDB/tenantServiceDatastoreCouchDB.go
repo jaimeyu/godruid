@@ -396,9 +396,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 // GetMonitoredObjectToDomainMap - CouchDB implementation of GetMonitoredObjectToDomainMap
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
 	logger.Log.Debugf("Fetching %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, models.AsJSONString(moByDomReq))
-	moByDomReq.TenantID = ds.PrependToDataID(moByDomReq.TenantID, string(admmod.TenantType))
+	tenantID := ds.PrependToDataID(moByDomReq.TenantID, string(admmod.TenantType))
 
-	tenantDBName := createDBPathStr(tsd.server, moByDomReq.TenantID)
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	db, err := getDatabase(tenantDBName)
 	if err != nil {
 		return nil, err

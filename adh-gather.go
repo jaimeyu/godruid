@@ -375,7 +375,7 @@ func ensureAdminDBExists(gatherServer *GatherServer, adminDB string) {
 		}
 
 		// Also add the Views for Admin DB.
-		err = gatherServer.gsh.AddAdminViews()
+		err = gatherServer.adminAPISH.AddAdminViews()
 		if err != nil {
 			logger.Log.Fatalf("Unable to Add Views to DB %s: %s", adminDB, err.Error())
 		}

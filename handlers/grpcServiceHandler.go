@@ -15,52 +15,6 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 )
 
-// MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
-type MonitoredObjectType string
-
-const (
-	// MonitoredObjectUnknown - value for Unnkown monitored objects
-	MonitoredObjectUnknown MonitoredObjectType = "unknown"
-
-	// TwampPE - value for TWAMP PE monitored objects
-	TwampPE MonitoredObjectType = "twamp-pe"
-
-	// TwampSF - value for TWAMP Stateful monitored objects
-	TwampSF MonitoredObjectType = "twamp-sf"
-
-	// TwampSL - value for TWAMP Stateless monitored objects
-	TwampSL MonitoredObjectType = "twamp-sl"
-
-	// Flowmeter - value for Flowmeter monitored objects
-	Flowmeter MonitoredObjectType = "flowmeter"
-)
-
-// VendorMetricType - defines the known types of Vendor metric categories.
-type VendorMetricType string
-
-const (
-	// AccedianTwamp - represents Accedian TWAMP vendor metrics.
-	AccedianTwamp VendorMetricType = "accedian-twamp"
-
-	// AccedianFlowmeter - represents Accedian Flowmeter vendor metrics.
-	AccedianFlowmeter VendorMetricType = "accedian-flowmeter"
-)
-
-// MonitoredObjectDeviceType - defines the known types of devices (actuators / reflectors) for
-// Skylight Datahub
-type MonitoredObjectDeviceType string
-
-const (
-	// MonitoredObjectDeviceUnknown - value for TWAMP Light monitored objects
-	MonitoredObjectDeviceUnknown MonitoredObjectDeviceType = "unknown"
-
-	// AccedianNID - value for Accedian NID monitored objects device type
-	AccedianNID MonitoredObjectDeviceType = "accedian-nid"
-
-	// AccedianVNID - value for Accedian VNID monitored objects device type
-	AccedianVNID MonitoredObjectDeviceType = "accedian-vnid"
-)
-
 const (
 	VendorMap              = "vendorMap"
 	DirectionMap           = "directionMap"
@@ -76,18 +30,18 @@ const (
 
 var (
 	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
-	ValidMonitoredObjectTypes = map[string]MonitoredObjectType{
-		"pe":            TwampPE,
-		"sf":            TwampSF,
-		"sl":            TwampSL,
-		string(TwampPE): TwampPE,
-		string(TwampSF): TwampSF,
-		string(TwampSL): TwampSL}
+	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
+		"pe": tenmod.TwampPE,
+		"sf": tenmod.TwampSF,
+		"sl": tenmod.TwampSL,
+		string(tenmod.TwampPE): tenmod.TwampPE,
+		string(tenmod.TwampSF): tenmod.TwampSF,
+		string(tenmod.TwampSL): tenmod.TwampSL}
 
 	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
-	ValidMonitoredObjectDeviceTypes = map[string]MonitoredObjectDeviceType{
-		string(AccedianNID):  AccedianNID,
-		string(AccedianVNID): AccedianVNID}
+	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
+		string(tenmod.AccedianNID):  tenmod.AccedianNID,
+		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
 )
 
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads

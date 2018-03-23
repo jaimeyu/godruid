@@ -242,12 +242,12 @@ func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
 	ingPrf.LastModifiedTimestamp = ingPrf.CreatedTimestamp
 
 	// Default Values for the metrics:
-	twampStr := string(AccedianTwamp)
-	accfmStr := string(AccedianFlowmeter)
-	peStr := string(TwampPE)
-	sfStr := string(TwampSF)
-	slStr := string(TwampSL)
-	fmStr := string(Flowmeter)
+	twampStr := string(tenmod.AccedianTwamp)
+	accfmStr := string(tenmod.AccedianFlowmeter)
+	peStr := string(tenmod.TwampPE)
+	sfStr := string(tenmod.TwampSF)
+	slStr := string(tenmod.TwampSL)
+	fmStr := string(tenmod.Flowmeter)
 	ingPrf.Metrics = make(map[string]map[string]map[string]map[string]map[string]map[string]bool)
 
 	// Build Twamp Profile

@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/stretchr/testify/assert"
 
 	dstestAdmin "github.com/accedian/adh-gather/datastore/test/admin"
 	dstestTenant "github.com/accedian/adh-gather/datastore/test/tenant"
@@ -13,6 +15,10 @@ import (
 var (
 	adminDB  ds.AdminServiceDatastore
 	tenantDB ds.TenantServiceDatastore
+)
+
+const (
+	InvalidTenantDataType tenmod.TenantDataType = "invalid"
 )
 
 func setupInMemoryDB() {
@@ -30,9 +36,25 @@ func setupInMemoryDB() {
 
 func TestInMemoryImplMain(t *testing.T) {
 	setupInMemoryDB()
+	TestPackageSpecificFunctions(t)
 
 	RunAdminServiceDatastoreTests(t)
 	RunTenantServiceDatastoreTests(t)
+}
+
+func TestPackageSpecificFunctions(t *testing.T) {
+	// Test failure condition of DoesTenantExist
+	testDB, err := CreateTenantServiceDAO()
+	assert.Nil(t, err)
+	assert.NotNil(t, testDB)
+
+	err = testDB.DoesTenantExist("", tenmod.TenantUserType)
+	assert.NotNil(t, err, "Should not be able to validate a Tenant with no Tenant data")
+
+	err = nil
+
+	err = testDB.DoesTenantExist("something", InvalidTenantDataType)
+	assert.NotNil(t, err, "Should not be able to validate a Tenant with an invalid datatype")
 }
 
 func RunAdminServiceDatastoreTests(t *testing.T) {
@@ -49,4 +71,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester := dstestTenant.InitTestRunner(tenantDB, adminDB)
 	tester.RunTenantUserCRUD(t)
 	tester.RunTenantDomainCRUD(t)
+	tester.RunTenantMonitoredObjectCRUD(t)
 }

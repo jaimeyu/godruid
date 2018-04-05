@@ -1,6 +1,7 @@
 package tenant
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -9,9 +10,269 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+)
+
+var (
+	defaultThresholdsBytes = []byte(`{
+		"thresholds": {
+			"vendorMap": {
+				"accedian-flowmeter": {
+					"metricMap": {
+						"throughputAvg": {
+							"eventAttrMap": {
+								"critical": "25000000",
+								"enabled": "true",
+								"major": "20000000",
+								"minor": "18000000"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"flowmeter": {
+							"metricMap": {
+								"throughputAvg": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "25000000",
+														"lowerStrict": "true",
+														"unit": "bps"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "25000000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "18000000",
+														"lowerStrict": "true",
+														"unit": "bps",
+														"upperLimit": "20000000"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"accedian-twamp": {
+					"metricMap": {
+						"delayP95": {
+							"eventAttrMap": {
+								"critical": "100000",
+								"enabled": "true",
+								"major": "95000",
+								"minor": "92500"
+							}
+						},
+						"jitterP95": {
+							"eventAttrMap": {
+								"critical": "30000",
+								"enabled": "true",
+								"major": "20000",
+								"minor": "15000"
+							}
+						},
+						"packetsLostPct": {
+							"eventAttrMap": {
+								"critical": "0.8",
+								"enabled": "true",
+								"major": "0.3",
+								"minor": "0.1"
+							}
+						}
+					},
+					"monitoredObjectTypeMap": {
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}`)
+
+	defaultIngestionProfileBytes = []byte(`{"metrics": {
+		"vendorMap": {
+		  "accedian-flowmeter": {
+			"monitoredObjectTypeMap": {
+			  "flowmeter": {
+				"metricMap": {
+				  "bytesReceived": true,
+				  "packetsReceived": true,
+				  "throughputAvg": true,
+				  "throughputMax": true,
+				  "throughputMin": true
+				}
+			  }
+			}
+		  },
+		  "accedian-twamp": {
+			"monitoredObjectTypeMap": {
+			  "twamp-pe": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sf": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sl": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  }
+			}
+		  }
+		}
+	  }}`)
 )
 
 // TenantServiceDatastoreTestRunner - object used to run tests for any iplementation
@@ -471,7 +732,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	assert.NotNil(t, err)
 	assert.Nil(t, dne)
 
-	// Delete a record that oes not exist
+	// Delete a record that does not exist
 	deleteDNE, err := runner.tenantDB.DeleteMonitoredObject(TENANT, deleted.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, deleteDNE)
@@ -488,4 +749,544 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
+
+	// Create some records in Bulk:
+	bulkReq := []*tenmod.MonitoredObject{&tenmod.MonitoredObject{
+		MonitoredObjectID: OBJID2,
+		ObjectName:        OBJNAME2,
+		TenantID:          TENANT,
+		ActuatorName:      ACTNAME2,
+		ActuatorType:      ACTTYPE2,
+		DomainSet:         DOMAINSET1},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID1,
+			ObjectName:        OBJNAME1,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME1,
+			ActuatorType:      ACTTYPE1,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET1,
+		}}
+	bulkResult, err := runner.tenantDB.BulkInsertMonitoredObjects(TENANT, bulkReq)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, bulkResult)
+	assert.Equal(t, 2, len(bulkResult))
+
+	// Delete the remaining records
+	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Equal(t, 2, len(fetchedList))
+
+	for _, val := range fetchedList {
+		del, err := runner.tenantDB.DeleteMonitoredObject(TENANT, val.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, del)
+		assert.NotEmpty(t, del.ID)
+		assert.NotEmpty(t, del.REV)
+	}
+
+	// Get all records - should be empty
+	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Empty(t, fetchedList)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const THRPRF = "ThresholdPrf"
+	const THRPRF2 = "ThresholdPrf2"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	record, err := runner.tenantDB.GetTenantMeta(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, record)
+
+	// Try to Update a record that does not exist:
+	fail, err := runner.tenantDB.UpdateTenantMeta(&tenmod.Metadata{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	meta := tenmod.Metadata{
+		TenantName:              COMPANY1,
+		TenantID:                TENANT,
+		DefaultThresholdProfile: THRPRF}
+	created, err := runner.tenantDB.CreateTenantMeta(&meta)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantMetaType), created.Datatype)
+	assert.Equal(t, created.TenantName, COMPANY1, "Name not the same")
+	assert.Equal(t, created.DefaultThresholdProfile, THRPRF, "Threshold Profile not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantMeta(TENANT)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.Metadata{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.DefaultThresholdProfile = THRPRF2
+	updated, err := runner.tenantDB.UpdateTenantMeta(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantMetaType), updated.Datatype)
+	assert.Equal(t, updated.TenantName, COMPANY1, "Name not the same")
+	assert.Equal(t, updated.DefaultThresholdProfile, THRPRF2, "Threshold Profile was not updated")
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	meta2 := tenmod.Metadata{
+		TenantName:              COMPANY1,
+		TenantID:                TENANT,
+		DefaultThresholdProfile: THRPRF}
+	created2, err := runner.tenantDB.CreateTenantMeta(&meta2)
+	assert.NotNil(t, err)
+	assert.Nil(t, created2)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantMeta(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.Equal(t, deleted.TenantName, fetched.TenantName, "Deleted name not the same")
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantMeta(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantIngestionProfileCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	rec, err := runner.tenantDB.GetActiveTenantIngestionProfile(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, rec)
+
+	// Try to fetch a record even though none exist:
+	fail, err := runner.tenantDB.GetTenantIngestionProfile(TENANT, "someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Try to Update a record that does not exist:
+	fail, err = runner.tenantDB.UpdateTenantIngestionProfile(&tenmod.IngestionProfile{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	defaultIngestionProfileShell := &tenmod.IngestionProfile{}
+	if err := json.Unmarshal(defaultIngestionProfileBytes, &defaultIngestionProfileShell); err != nil {
+		logger.Log.Debugf("Unable to umarshal ingestion profile: %s", err.Error())
+	}
+
+	ingPrf := tenmod.IngestionProfile{
+		Datatype: string(tenmod.TenantIngestionProfileType),
+		TenantID: TENANT,
+		Metrics:  defaultIngestionProfileShell.Metrics,
+	}
+	created, err := runner.tenantDB.CreateTenantIngestionProfile(&ingPrf)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantIngestionProfileType), created.Datatype)
+	assert.Equal(t, created.Metrics, defaultIngestionProfileShell.Metrics, "Metrics not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantIngestionProfile(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.IngestionProfile{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Metrics["badStuff"] = nil
+	updated, err := runner.tenantDB.UpdateTenantIngestionProfile(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantIngestionProfileType), updated.Datatype)
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.NotEqual(t, updated.Metrics, defaultIngestionProfileShell.Metrics, "Metrics were not updated")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record - should fail.
+	tenantDomain2 := tenmod.IngestionProfile{
+		Datatype: string(tenmod.TenantIngestionProfileType),
+		TenantID: TENANT,
+		Metrics:  defaultIngestionProfileShell.Metrics,
+	}
+	created2, err := runner.tenantDB.CreateTenantIngestionProfile(&tenantDomain2)
+	assert.NotNil(t, err)
+	assert.Nil(t, created2)
+
+	// Get active records
+	active, err := runner.tenantDB.GetActiveTenantIngestionProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, active)
+	assert.Equal(t, updated, active)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantIngestionProfile(TENANT, active.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, active, deleted, "Deleted not the same")
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantDomain(TENANT, deleted.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantThresholdProfileCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const NAME1 = "name1"
+	const NAME2 = "name2"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	recList, err := runner.tenantDB.GetAllTenantThresholdProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+
+	// Try to fetch a record even though none exist:
+	fail, err := runner.tenantDB.GetTenantThresholdProfile(TENANT, "someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Try to Update a record that does not exist:
+	fail, err = runner.tenantDB.UpdateTenantThresholdProfile(&tenmod.ThresholdProfile{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	defaultThresholdProfileShell := &tenmod.ThresholdProfile{}
+	if err := json.Unmarshal(defaultThresholdsBytes, &defaultThresholdProfileShell); err != nil {
+		logger.Log.Debugf("Unable to umarshal threshold profile: %s", err.Error())
+	}
+
+	original := tenmod.ThresholdProfile{
+		Datatype:   string(tenmod.TenantThresholdProfileType),
+		TenantID:   TENANT,
+		Name:       NAME1,
+		Thresholds: defaultThresholdProfileShell.Thresholds,
+	}
+	created, err := runner.tenantDB.CreateTenantThresholdProfile(&original)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantThresholdProfileType), created.Datatype)
+	assert.Equal(t, created.Name, NAME1, "Names not the same")
+	assert.Equal(t, created.Thresholds, defaultThresholdProfileShell.Thresholds, "Thresholds not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantThresholdProfile(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.ThresholdProfile{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Thresholds["badStuff"] = nil
+	updated, err := runner.tenantDB.UpdateTenantThresholdProfile(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantThresholdProfileType), updated.Datatype)
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.NotEqual(t, updated.Thresholds, fetched.Thresholds, "Thresholds were not updated")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	second := tenmod.ThresholdProfile{
+		Datatype:   string(tenmod.TenantThresholdProfileType),
+		TenantID:   TENANT,
+		Name:       NAME2,
+		Thresholds: defaultThresholdProfileShell.Thresholds}
+	created2, err := runner.tenantDB.CreateTenantThresholdProfile(&second)
+	assert.Nil(t, err)
+	assert.NotNil(t, created2)
+	assert.NotEmpty(t, created2.ID)
+	assert.NotEmpty(t, created2.REV)
+	assert.Equal(t, string(tenmod.TenantThresholdProfileType), created2.Datatype)
+	assert.Equal(t, created2.Name, NAME2, "Name not the same")
+	assert.Equal(t, created2.TenantID, TENANT, "Tenant ID not the same")
+	assert.Equal(t, created2.Thresholds, defaultThresholdProfileShell.Thresholds, "Thresholds not the same")
+	assert.True(t, created2.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get all records
+	fetchedList, err := runner.tenantDB.GetAllTenantThresholdProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchedList)
+	assert.True(t, len(fetchedList) == 2)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantThresholdProfile(TENANT, fetched.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, deleted.Name, fetched.Name, "Deleted name not the same")
+
+	// Get all records - should be 1
+	fetchedList, err = runner.tenantDB.GetAllTenantThresholdProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchedList)
+	assert.True(t, len(fetchedList) == 1)
+
+	// Get a record that does not exist
+	dne, err := runner.tenantDB.GetTenantThresholdProfile(TENANT, deleted.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, dne)
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantThresholdProfile(TENANT, deleted.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+
+	// Delete the last record
+	deleted, err = runner.tenantDB.DeleteTenantThresholdProfile(TENANT, created2.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, deleted.Name, created2.Name, "Deleted name not the same")
+
+	// Get all records - should be empty
+	fetchedList, err = runner.tenantDB.GetAllTenantThresholdProfile(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunGetMonitoredObjectByDomainMapTest(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const NAME1 = "name1"
+	const NAME2 = "name2"
+	const DOM1 = "domain1"
+	const DOM2 = "domain2"
+	const DOM3 = "domain3"
+	const COLOR1 = "color1"
+	const COLOR2 = "color2"
+	const THRPRF = "ThresholdPrf"
+
+	const OBJNAME1 = "obj1"
+	const OBJID1 = "object1"
+	const OBJNAME2 = "obj2"
+	const OBJID2 = "object2"
+	const OBJNAME3 = "obj3"
+	const OBJID3 = "object3"
+	const ACTNAME1 = "actName1"
+	const ACTTYPE1 = string(tenmod.AccedianVNID)
+	const ACTNAME2 = "actName2"
+	const ACTTYPE2 = string(tenmod.AccedianNID)
+	const REFNAME1 = "refname1"
+	const REFTYPE1 = string(tenmod.AccedianNID)
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Create a couple Domains
+	// Create a record
+	tenantDomain := tenmod.Domain{
+		Name:                DOM1,
+		TenantID:            TENANT,
+		Color:               COLOR1,
+		ThresholdProfileSet: []string{THRPRF}}
+	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	tenantDomain = tenmod.Domain{
+		Name:                DOM2,
+		TenantID:            TENANT,
+		Color:               COLOR2,
+		ThresholdProfileSet: []string{THRPRF}}
+	created2, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, created2)
+
+	// Validate they were created
+	recList, err := runner.tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, recList)
+	assert.Equal(t, 2, len(recList))
+
+	// Now create some MonitoredObjects
+	DOMAINSET1 := []string{created.ID}
+	DOMAINSET2 := []string{created2.ID}
+	DOMAINSET3 := []string{created2.ID}
+	bulkReq := []*tenmod.MonitoredObject{&tenmod.MonitoredObject{
+		MonitoredObjectID: OBJID2,
+		ObjectName:        OBJNAME2,
+		TenantID:          TENANT,
+		ActuatorName:      ACTNAME2,
+		ActuatorType:      ACTTYPE2,
+		DomainSet:         DOMAINSET1},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID1,
+			ObjectName:        OBJNAME1,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME1,
+			ActuatorType:      ACTTYPE1,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET2,
+		},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID3,
+			ObjectName:        OBJNAME3,
+			TenantID:          TENANT,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET3,
+		}}
+	bulkResult, err := runner.tenantDB.BulkInsertMonitoredObjects(TENANT, bulkReq)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, bulkResult)
+	assert.Equal(t, 3, len(bulkResult))
+
+	moByDomReq := tenmod.MonitoredObjectCountByDomainRequest{}
+
+	// Fail first due to no tenant ID
+	resp, err := runner.tenantDB.GetMonitoredObjectToDomainMap(&moByDomReq)
+	assert.NotNil(t, err)
+	assert.Nil(t, resp)
+
+	// Add tenant ID
+	moByDomReq.TenantID = TENANT
+	resp, err = runner.tenantDB.GetMonitoredObjectToDomainMap(&moByDomReq)
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Empty(t, resp.DomainToMonitoredObjectCountMap)
+	assert.Equal(t, int64(1), int64(len(resp.DomainToMonitoredObjectSetMap[created.ID])))
+	assert.Equal(t, int64(2), int64(len(resp.DomainToMonitoredObjectSetMap[created2.ID])))
+
+	// By Count
+	moByDomReq.ByCount = true
+	resp, err = runner.tenantDB.GetMonitoredObjectToDomainMap(&moByDomReq)
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Empty(t, resp.DomainToMonitoredObjectSetMap)
+	assert.Equal(t, int64(1), resp.DomainToMonitoredObjectCountMap[created.ID])
+	assert.Equal(t, int64(2), resp.DomainToMonitoredObjectCountMap[created2.ID])
+
+	// Filter the list
+	moByDomReq.DomainSet = []string{created.ID}
+	resp, err = runner.tenantDB.GetMonitoredObjectToDomainMap(&moByDomReq)
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Empty(t, resp.DomainToMonitoredObjectSetMap)
+	assert.Equal(t, int64(1), int64(resp.DomainToMonitoredObjectCountMap[created.ID]))
+	assert.Equal(t, int64(0), resp.DomainToMonitoredObjectCountMap[created2.ID])
+
+	// Cleanup
+	domList, err := runner.tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, domList)
+	for _, val := range domList {
+		del, err := runner.tenantDB.DeleteTenantDomain(TENANT, val.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, del)
+	}
+
+	domList, err = runner.tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.Empty(t, domList)
+
+	moList, err := runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, moList)
+	for _, val := range moList {
+		del, err := runner.tenantDB.DeleteMonitoredObject(TENANT, val.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, del)
+	}
+
+	moList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.Empty(t, moList)
 }

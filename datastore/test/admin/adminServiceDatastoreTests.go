@@ -66,6 +66,11 @@ func (runner *AdminServiceDatastoreTestRunner) RunAdminUserCRUD(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, created, fetched, "The retrieved record should be the same as the updated record")
 
+	// Try to fetch a record even though none exist:
+	fail, err := runner.adminDB.GetAdminUser("someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
 	time.Sleep(time.Millisecond * 2)
 
 	// Update a record
@@ -180,6 +185,11 @@ func (runner *AdminServiceDatastoreTestRunner) RunTenantDescCRUD(t *testing.T) {
 	fetched, err := runner.adminDB.GetTenantDescriptor(created.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, created, fetched, "The retrieved record should be the same as the updated record")
+
+	// Try to fetch a record even though none exist:
+	fail, err := runner.adminDB.GetTenantDescriptor("someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
 
 	time.Sleep(time.Millisecond * 2)
 

@@ -17,7 +17,6 @@ info:
 basePath: "/api"
 schemes:
   - http
-  - https
 consumes:
   - application/json
 produces:

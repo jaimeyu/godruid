@@ -591,11 +591,14 @@ func modifySwagger(cfg config.Provider) {
 	apiPort := cfg.GetInt(gather.CK_server_rest_port.String())
 
 	var hostLine string
+	var schemeLine string
 	hostFromEnv := os.Getenv("API_TARGET")
 	if len(hostFromEnv) == 0 {
 		hostLine = fmt.Sprintf(`host: 'localhost:%d'`, apiPort)
+		schemeLine = "  - http"
 	} else {
 		hostLine = fmt.Sprintf(`host: '%s'`, hostFromEnv)
+		schemeLine = "  - https"
 	}
 
 	// Update the generated swagger file to contain the correct host
@@ -604,6 +607,7 @@ func modifySwagger(cfg config.Provider) {
 		logger.Log.Fatalf("Unable to locate swagger definition: %s", err.Error())
 	}
 
+	// Replace the host line
 	containsHost := false
 	lines := strings.Split(string(input), "\n")
 	for i, line := range lines {
@@ -617,6 +621,16 @@ func modifySwagger(cfg config.Provider) {
 		// Insert the host into the swager file
 		lines = append(lines[:2], append([]string{hostLine}, lines[2:]...)...)
 	}
+
+	// Append the appropriate scheme line:
+	var index int
+	for i, line := range lines {
+		if strings.Contains(line, `schemes:`) {
+			index = i + 1
+			break
+		}
+	}
+	lines[index] = schemeLine
 
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(swaggerFilePath, []byte(output), 0644)

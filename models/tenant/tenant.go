@@ -2,6 +2,8 @@ package tenant
 
 import (
 	"errors"
+
+	"github.com/manyminds/api2go/jsonapi"
 )
 
 // TenantDataType - enumeration of the types of data stored in the Tenant Datastore
@@ -161,6 +163,66 @@ func (d *Domain) GetID() string {
 func (d *Domain) SetID(s string) error {
 	d.ID = s
 	return nil
+}
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (d *Domain) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: "thresholdProfiles",
+			Name: "thresholdProfiles",
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (d *Domain) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	for _, tpID := range d.ThresholdProfileSet {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   tpID,
+			Type: "thresholdProfiles",
+			Name: "thresholdProfiles",
+		})
+	}
+
+	return result
+}
+
+// SetToManyReferenceIDs sets the threshold profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (d *Domain) SetToManyReferenceIDs(name string, IDs []string) error {
+	if name == "thresholdProfiles" {
+		d.ThresholdProfileSet = IDs
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// AddToManyIDs adds new threshold profiles tot he reference list
+func (d *Domain) AddToManyIDs(name string, IDs []string) error {
+	if name == "thresholdProfiles" {
+		d.ThresholdProfileSet = append(d.ThresholdProfileSet, IDs...)
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// DeleteToManyIDs removes threshold profiles from the reference list
+func (d *Domain) DeleteToManyIDs(name string, IDs []string) error {
+	if name == "thresholdProfiles" {
+		for _, ID := range IDs {
+			for pos, oldID := range d.ThresholdProfileSet {
+				if ID == oldID {
+					// match, this ID must be removed
+					d.ThresholdProfileSet = append(d.ThresholdProfileSet[:pos], d.ThresholdProfileSet[pos+1:]...)
+				}
+			}
+		}
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 // Validate - used during validation of incoming REST requests for this object
@@ -328,6 +390,66 @@ func (mo *MonitoredObject) SetID(s string) error {
 	return nil
 }
 
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (mo *MonitoredObject) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: "domains",
+			Name: "domains",
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (mo *MonitoredObject) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	for _, domID := range mo.DomainSet {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   domID,
+			Type: "domains",
+			Name: "domains",
+		})
+	}
+
+	return result
+}
+
+// SetToManyReferenceIDs sets domain reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (mo *MonitoredObject) SetToManyReferenceIDs(name string, IDs []string) error {
+	if name == "domains" {
+		mo.DomainSet = IDs
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// AddToManyIDs adds new domains to the reference list
+func (mo *MonitoredObject) AddToManyIDs(name string, IDs []string) error {
+	if name == "thresholdProfiles" {
+		mo.DomainSet = append(mo.DomainSet, IDs...)
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// DeleteToManyIDs removes domains from the reference list
+func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
+	if name == "thresholdProfiles" {
+		for _, ID := range IDs {
+			for pos, oldID := range mo.DomainSet {
+				if ID == oldID {
+					// match, this ID must be removed
+					mo.DomainSet = append(mo.DomainSet[:pos], mo.DomainSet[pos+1:]...)
+				}
+			}
+		}
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
 // Validate - used during validation of incoming REST requests for this object
 func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	if len(mo.TenantID) == 0 {
@@ -374,6 +496,38 @@ func (meta *Metadata) SetID(s string) error {
 // GetName - required implementation for renaming the type in jsonapi payload
 func (meta *Metadata) GetName() string {
 	return string(TenantMetaType)
+}
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (meta *Metadata) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: "defaultThresholdProfile",
+			Name: "defaultThresholdProfile",
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (meta *Metadata) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	result = append(result, jsonapi.ReferenceID{
+		ID:   meta.DefaultThresholdProfile,
+		Type: "defaultThresholdProfile",
+		Name: "defaultThresholdProfile",
+	})
+
+	return result
+}
+
+// SetToOneReferenceID sets domain reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (meta *Metadata) SetToOneReferenceID(name string, ID string) error {
+	if name == "defaultThresholdProfile" {
+		meta.DefaultThresholdProfile = ID
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 // Validate - used during validation of incoming REST requests for this object

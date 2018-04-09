@@ -223,7 +223,7 @@ func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data))
+	logger.Log.Infof("Creating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.CreateAdminUser(&data[0])
@@ -263,7 +263,7 @@ func (ash *AdminServiceRESTHandler) UpdateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data))
+	logger.Log.Infof("Updating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer
 	result, err := ash.adminDB.UpdateAdminUser(&data[0])
@@ -369,7 +369,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.TenantStr, models.AsJSONString(&data))
+	logger.Log.Infof("Creating %s: %s", admmod.TenantStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer to Create the Admin User
 	result, err := ash.adminDB.CreateTenant(&data[0])
@@ -439,7 +439,7 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.TenantStr, models.AsJSONString(&data))
+	logger.Log.Infof("Updating %s: %s", admmod.TenantStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer
 	result, err := ash.adminDB.UpdateTenantDescriptor(&data[0])
@@ -572,18 +572,33 @@ func (ash *AdminServiceRESTHandler) CreateIngestionDictionary(w http.ResponseWri
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.IngestionDictionary{}
-	err := unmarshalRequest(r, &data, false)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateIngDictStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data))
+	data := []admmod.IngestionDictionary{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data[0].Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer to Create the record
-	result, err := ash.CreateIngestionDictionaryInternal(&data)
+	result, err := ash.CreateIngestionDictionaryInternal(&data[0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateIngDictStr, msg, http.StatusInternalServerError)
@@ -604,18 +619,32 @@ func (ash *AdminServiceRESTHandler) UpdateIngestionDictionary(w http.ResponseWri
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.IngestionDictionary{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateIngDictStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data))
+	data := []admmod.IngestionDictionary{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data[0].Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer
-	result, err := ash.UpdateIngestionDictionaryInternal(&data)
+	result, err := ash.UpdateIngestionDictionaryInternal(&data[0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateIngDictStr, msg, http.StatusInternalServerError)
@@ -676,18 +705,33 @@ func (ash *AdminServiceRESTHandler) CreateValidTypes(w http.ResponseWriter, r *h
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.ValidTypes{}
-	err := unmarshalRequest(r, &data, false)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateValidTypesStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data))
+	data := []admmod.ValidTypes{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data[0].Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer to Create the record
-	result, err := ash.CreateValidTypesInternal(&data)
+	result, err := ash.CreateValidTypesInternal(&data[0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateValidTypesStr, msg, http.StatusInternalServerError)
@@ -708,18 +752,33 @@ func (ash *AdminServiceRESTHandler) UpdateValidTypes(w http.ResponseWriter, r *h
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.ValidTypes{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateValidTypesStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data))
+	data := []admmod.ValidTypes{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data[0].Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer
-	result, err := ash.UpdateValidTypesInternal(&data)
+	result, err := ash.UpdateValidTypesInternal(&data[0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateValidTypesStr, msg, http.StatusInternalServerError)

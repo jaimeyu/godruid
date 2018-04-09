@@ -2,9 +2,7 @@ swagger: '2.0'
 host: 'localhost:10001'
 info:
   title: Gather
-  description: |-
-    Gather API Documentation
-
+  description: Gather API Documentation
   version: 1.0.0
   contact:
     email: "mpreston@accedian.com"
@@ -28,7 +26,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'AdminUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
         '400':
@@ -52,7 +50,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'AdminUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
         '400':
@@ -75,7 +73,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'AdminUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
       tags:
@@ -88,7 +86,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'AdminUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
         '500':
@@ -107,7 +105,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'AdminUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
         '500':
@@ -129,7 +127,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'Tenant'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
         '400':
@@ -155,7 +153,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'Tenant'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
         '400':
@@ -178,7 +176,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'Tenant'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
         '500':
@@ -193,7 +191,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'Tenant'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
         '500':
@@ -212,7 +210,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'Tenant'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
         '500':
@@ -264,6 +262,160 @@ paths:
           type: string
       tags:
         - AdminProvisioningService
+  /v1/ingestion-dictionaries:
+    post:
+      summary: Create an Ingestion Dictionary. 
+      operationId: CreateIngestionDictionary
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update an Ingestion Dictionary. 
+      operationId: UpdateIngestionDictionary
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+      tags:
+        - AdminProvisioningService
+    get:
+      summary: Retrieve an Ingestion Dictionary.
+      operationId: GetIngestionDictionary
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '500':
+          description: "Unexpected error processing request"
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete an Ingestion Dictionary.
+      operationId: DeleteIngestionDictionary
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '500':
+          description: "Unexpected error processing request"
+      tags:
+        - AdminProvisioningService
+  /v1/valid-types:
+    post:
+      summary: Create a Valid Types object. 
+      operationId: CreateValidTypes
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a Valid Types object. 
+      operationId: UpdateValidTypes
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+      tags:
+        - AdminProvisioningService
+    get:
+      summary: Retrieve a Valid Types object.
+      operationId: GetValidTypes
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '500':
+          description: "Unexpected error processing request"
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a Valid Types object.
+      operationId: DeleteValidTypes
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '500':
+          description: "Unexpected error processing request"
+      tags:
+        - AdminProvisioningService
   /v1/tenants/{tenantId}/users:
     post:
       summary: Create a User for a Tenant.
@@ -274,7 +426,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantUser'
         '400':
@@ -302,7 +454,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantUser'
         '400':
@@ -329,7 +481,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantUser'
         '500':
@@ -349,7 +501,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantUser'
         '500':
@@ -372,7 +524,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantUser'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantUser'
         '500':
@@ -398,7 +550,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantDomain'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':
@@ -426,7 +578,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantDomain'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':
@@ -453,7 +605,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantDomain'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '500':
@@ -473,7 +625,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantDomain'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '500':
@@ -496,7 +648,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantDomain'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '500':
@@ -522,7 +674,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantMonitoredObject'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
@@ -550,7 +702,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantMonitoredObject'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
@@ -577,7 +729,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantMonitoredObject'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
@@ -597,7 +749,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantMonitoredObject'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
@@ -620,7 +772,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: "Response object model is of type 'TenantMonitoredObject'"
+          description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
@@ -1020,6 +1172,88 @@ definitions:
       lastModifiedTimestamp:
         type: "integer"
 
+  JsonApiIngestionDictionary:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/IngestionDictionary'
+  IngestionDictionary:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionDictionaries]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/IngestionDictionaryAttr'
+  IngestionDictionaryAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      metrics:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/IngestionDictionaryMetrics'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  IngestionDictionaryMetrics:
+    type: "object"
+    additionalProperties:
+      $ref: '#/definitions/IngestionDictionaryMetricMap'
+  IngestionDictionaryMetricMap:
+    type: "object"
+    properties:
+      ui:
+        $ref: '#/definitions/IngestionDictionaryMetricMapUI'
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinition'
+  IngestionDictionaryMetricMapUI:
+    type: "array"
+    items:
+      type: "string"
+  IngestionDictionaryMetricMapMetricDefinition:
+    type: "object"
+    properties:
+      monitoredObjectTypes:
+        type: "array"
+        items:
+          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
+      uiData:
+        $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
+  IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      rawMetricId:
+        type: "string"
+      units:
+        type: "array"
+        items:
+          type: "string"
+      directions:
+        type: "array"
+        items:
+          type: "string"
+  IngestionDictionaryMetricMapMetricDefinitionUIData:
+    type: "object"
+    properties:
+      group:
+        type: "string"
+      position:
+        type: "string"
   TenantSummary:
     type: "object"
     properties:
@@ -1027,6 +1261,45 @@ definitions:
         type: "string"
       alias:
         type: "string"
+
+  JsonApiValidTypes:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/ValidTypes'
+  ValidTypes:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [validTypes]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/ValidTypesAttr'
+  ValidTypesAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      monitoredObjectTypes:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      monitoredObjectDeviceTypes:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
 
   JsonApiTenantUser:
     type: "object"

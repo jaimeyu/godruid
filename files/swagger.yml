@@ -75,7 +75,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiAdminUser'
+            $ref: '#/definitions/JsonApiAdminUserList'
       tags:
         - AdminProvisioningService
   '/v1/admin/{value}':
@@ -178,7 +178,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenant'
+            $ref: '#/definitions/JsonApiTenantList'
         '500':
           description: "Unexpected error processing request"
       tags:
@@ -483,7 +483,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantUser'
+            $ref: '#/definitions/JsonApiTenantUserList'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -607,7 +607,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
+            $ref: '#/definitions/JsonApiTenantDomainList'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -855,7 +855,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+            $ref: '#/definitions/JsonApiTenantThresholdProfileList'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -979,7 +979,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+            $ref: '#/definitions/JsonApiTenantMonitoredObjectList'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -1437,6 +1437,11 @@ definitions:
     type: "object"
     properties:
       data:
+        $ref: '#/definitions/AdminUser'
+  JsonApiAdminUserList:
+    type: "object"
+    properties:
+      data:
         type: "array"
         items:
            $ref: '#/definitions/AdminUser'
@@ -1483,6 +1488,11 @@ definitions:
     type: "object"
     properties:
       data:
+        $ref: '#/definitions/Tenant'
+  JsonApiTenantList:
+    type: "object"
+    properties:
+      data:
         type: "array"
         items:
            $ref: '#/definitions/Tenant'
@@ -1521,9 +1531,7 @@ definitions:
     type: "object"
     properties:
       data:
-        type: "array"
-        items:
-           $ref: '#/definitions/IngestionDictionary'
+        $ref: '#/definitions/IngestionDictionary'
   IngestionDictionary:
     type: "object"
     properties:
@@ -1611,9 +1619,7 @@ definitions:
     type: "object"
     properties:
       data:
-        type: "array"
-        items:
-           $ref: '#/definitions/ValidTypes'
+        $ref: '#/definitions/ValidTypes'
   ValidTypes:
     type: "object"
     properties:
@@ -1647,6 +1653,11 @@ definitions:
         type: "integer"
 
   JsonApiTenantUser:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantUser'
+  JsonApiTenantUserList:
     type: "object"
     properties:
       data:
@@ -1700,6 +1711,11 @@ definitions:
     type: "object"
     properties:
       data:
+        $ref: '#/definitions/TenantDomain'
+  JsonApiTenantDomainList:
+    type: "object"
+    properties:
+      data:
         type: "array"
         items:
            $ref: '#/definitions/TenantDomain'
@@ -1738,6 +1754,11 @@ definitions:
         type: "integer"
 
   JsonApiTenantMonitoredObject:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantMonitoredObject'
+  JsonApiTenantMonitoredObjectList:
     type: "object"
     properties:
       data:
@@ -1858,9 +1879,7 @@ definitions:
     type: "object"
     properties:
       data:
-        type: "array"
-        items:
-           $ref: '#/definitions/TenantIngestionProfile'
+        $ref: '#/definitions/TenantIngestionProfile'
   TenantIngestionProfile:
     type: "object"
     properties:
@@ -1908,6 +1927,11 @@ definitions:
       type: "boolean"
 
   JsonApiTenantThresholdProfile:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantThresholdProfile'
+  JsonApiTenantThresholdProfileList:
     type: "object"
     properties:
       data:
@@ -1999,9 +2023,7 @@ definitions:
     type: "object"
     properties:
       data:
-        type: "array"
-        items:
-           $ref: '#/definitions/TenantMetadata'
+        $ref: '#/definitions/TenantMetadata'
   TenantMetadata:
     type: "object"
     properties:

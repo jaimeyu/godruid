@@ -208,7 +208,7 @@ func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	data := []admmod.User{}
+	data := admmod.User{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -216,17 +216,17 @@ func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer to Create the Admin User
-	result, err := ash.adminDB.CreateAdminUser(&data[0])
+	result, err := ash.adminDB.CreateAdminUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.AdminUserStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateAdminUserStr, msg, http.StatusInternalServerError)
@@ -248,7 +248,7 @@ func (ash *AdminServiceRESTHandler) UpdateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	data := []admmod.User{}
+	data := admmod.User{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -256,17 +256,17 @@ func (ash *AdminServiceRESTHandler) UpdateAdminUser(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", admmod.AdminUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := ash.adminDB.UpdateAdminUser(&data[0])
+	result, err := ash.adminDB.UpdateAdminUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.AdminUserStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateAdminUserStr, msg, http.StatusInternalServerError)
@@ -346,7 +346,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	data := []admmod.Tenant{}
+	data := admmod.Tenant{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -354,7 +354,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -362,17 +362,17 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	}
 
 	// Check if a tenant already exists with this name.
-	existingTenantByName, _ := ash.adminDB.GetTenantIDByAlias(strings.ToLower(data[0].Name))
+	existingTenantByName, _ := ash.adminDB.GetTenantIDByAlias(strings.ToLower(data.Name))
 	if len(existingTenantByName) != 0 {
-		msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", data[0].Name)
+		msg := fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", data.Name)
 		reportError(w, startTime, "409", mon.CreateTenantStr, msg, http.StatusConflict)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.TenantStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", admmod.TenantStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer to Create the Admin User
-	result, err := ash.adminDB.CreateTenant(&data[0])
+	result, err := ash.adminDB.CreateTenant(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.TenantStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)
@@ -424,7 +424,7 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	data := []admmod.Tenant{}
+	data := admmod.Tenant{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -432,17 +432,17 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.TenantStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", admmod.TenantStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := ash.adminDB.UpdateTenantDescriptor(&data[0])
+	result, err := ash.adminDB.UpdateTenantDescriptor(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.TenantStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantStr, msg, http.StatusInternalServerError)
@@ -579,7 +579,7 @@ func (ash *AdminServiceRESTHandler) CreateIngestionDictionary(w http.ResponseWri
 		return
 	}
 
-	data := []admmod.IngestionDictionary{}
+	data := admmod.IngestionDictionary{}
 	logger.Log.Debugf("byte data: %s", string(requestBytes))
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
@@ -588,17 +588,17 @@ func (ash *AdminServiceRESTHandler) CreateIngestionDictionary(w http.ResponseWri
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer to Create the record
-	result, err := ash.CreateIngestionDictionaryInternal(&data[0])
+	result, err := ash.CreateIngestionDictionaryInternal(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateIngDictStr, msg, http.StatusInternalServerError)
@@ -626,7 +626,7 @@ func (ash *AdminServiceRESTHandler) UpdateIngestionDictionary(w http.ResponseWri
 		return
 	}
 
-	data := []admmod.IngestionDictionary{}
+	data := admmod.IngestionDictionary{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -634,17 +634,17 @@ func (ash *AdminServiceRESTHandler) UpdateIngestionDictionary(w http.ResponseWri
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", admmod.IngestionDictionaryStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := ash.UpdateIngestionDictionaryInternal(&data[0])
+	result, err := ash.UpdateIngestionDictionaryInternal(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateIngDictStr, msg, http.StatusInternalServerError)
@@ -712,7 +712,7 @@ func (ash *AdminServiceRESTHandler) CreateValidTypes(w http.ResponseWriter, r *h
 		return
 	}
 
-	data := []admmod.ValidTypes{}
+	data := admmod.ValidTypes{}
 	logger.Log.Debugf("byte data: %s", string(requestBytes))
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
@@ -721,17 +721,17 @@ func (ash *AdminServiceRESTHandler) CreateValidTypes(w http.ResponseWriter, r *h
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer to Create the record
-	result, err := ash.CreateValidTypesInternal(&data[0])
+	result, err := ash.CreateValidTypesInternal(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateValidTypesStr, msg, http.StatusInternalServerError)

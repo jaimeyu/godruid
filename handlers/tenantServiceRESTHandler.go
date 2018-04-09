@@ -251,7 +251,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 		return
 	}
 
-	data := []tenmod.User{}
+	data := tenmod.User{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -259,7 +259,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -269,7 +269,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantUser(&data[0])
+	result, err := tsh.tenantDB.CreateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantUserStr, msg, http.StatusInternalServerError)
@@ -291,7 +291,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 		return
 	}
 
-	data := []tenmod.User{}
+	data := tenmod.User{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -299,7 +299,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -309,7 +309,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantUser(&data[0])
+	result, err := tsh.tenantDB.UpdateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
@@ -392,7 +392,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
-	data := []tenmod.Domain{}
+	data := tenmod.Domain{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -400,7 +400,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -410,7 +410,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantDomain(&data[0])
+	result, err := tsh.tenantDB.CreateTenantDomain(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantDomainStr, msg, http.StatusInternalServerError)
@@ -432,7 +432,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
-	data := []tenmod.Domain{}
+	data := tenmod.Domain{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -440,7 +440,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -450,7 +450,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantDomain(&data[0])
+	result, err := tsh.tenantDB.UpdateTenantDomain(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantDomainStr, msg, http.StatusInternalServerError)
@@ -533,7 +533,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 		return
 	}
 
-	data := []tenmod.IngestionProfile{}
+	data := tenmod.IngestionProfile{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -541,17 +541,17 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantIngestionProfile(&data[0])
+	result, err := tsh.tenantDB.CreateTenantIngestionProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateIngPrfStr, msg, http.StatusInternalServerError)
@@ -573,7 +573,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantIngestionProfile(w http.Respons
 		return
 	}
 
-	data := []tenmod.IngestionProfile{}
+	data := tenmod.IngestionProfile{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -581,17 +581,17 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantIngestionProfile(w http.Respons
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(&data[0])
+	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateIngPrfStr, msg, http.StatusInternalServerError)
@@ -675,7 +675,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantThresholdProfile(w http.Respons
 		return
 	}
 
-	data := []tenmod.ThresholdProfile{}
+	data := tenmod.ThresholdProfile{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -683,17 +683,17 @@ func (tsh *TenantServiceRESTHandler) CreateTenantThresholdProfile(w http.Respons
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantThresholdProfile(&data[0])
+	result, err := tsh.tenantDB.CreateTenantThresholdProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateThrPrfStr, msg, http.StatusInternalServerError)
@@ -715,7 +715,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantThresholdProfile(w http.Respons
 		return
 	}
 
-	data := []tenmod.ThresholdProfile{}
+	data := tenmod.ThresholdProfile{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -723,17 +723,17 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantThresholdProfile(w http.Respons
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(&data[0])
+	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateThrPrfStr, msg, http.StatusInternalServerError)
@@ -816,7 +816,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	data := []tenmod.MonitoredObject{}
+	data := tenmod.MonitoredObject{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -824,7 +824,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -834,7 +834,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateMonitoredObject(&data[0])
+	result, err := tsh.tenantDB.CreateMonitoredObject(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateMonObjStr, msg, http.StatusInternalServerError)
@@ -856,7 +856,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	data := []tenmod.MonitoredObject{}
+	data := tenmod.MonitoredObject{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -864,7 +864,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -874,7 +874,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateMonitoredObject(&data[0])
+	result, err := tsh.tenantDB.UpdateMonitoredObject(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
@@ -995,7 +995,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 		return
 	}
 
-	data := []tenmod.Metadata{}
+	data := tenmod.Metadata{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -1003,17 +1003,17 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 		return
 	}
 
-	err = data[0].Validate(false)
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantMeta(&data[0])
+	result, err := tsh.tenantDB.CreateTenantMeta(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantMetaStr, msg, http.StatusInternalServerError)
@@ -1035,7 +1035,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantMeta(w http.ResponseWriter, r *
 		return
 	}
 
-	data := []tenmod.Metadata{}
+	data := tenmod.Metadata{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -1043,17 +1043,17 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantMeta(w http.ResponseWriter, r *
 		return
 	}
 
-	err = data[0].Validate(true)
+	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data[0]))
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantMeta(&data[0])
+	result, err := tsh.tenantDB.UpdateTenantMeta(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantMetaStr, msg, http.StatusInternalServerError)

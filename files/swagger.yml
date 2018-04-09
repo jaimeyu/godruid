@@ -224,7 +224,7 @@ paths:
         - AdminProvisioningService
   '/v1/tenant-by-alias/{value}':
     get:
-      summary: Returns the ID of a Tenant that matches the provided alias.
+      summary: Returns the Id of a Tenant that matches the provided alias.
       operationId: GettenantIdByAlias
       produces:
         - text/plain
@@ -619,7 +619,7 @@ paths:
         - TenantProvisioningService
   '/v1/tenants/{tenantId}/domains/{domainId}':
     get:
-      summary: Retrieve a Tenant Domain by id.
+      summary: Retrieve a Tenant Domain by Id.
       operationId: GetTenantDomain
       produces:
         - application/vnd.api+json
@@ -642,7 +642,7 @@ paths:
       tags:
         - TenantProvisioningService
     delete:
-      summary: Delete a Tenant Domain specified by the provided userId.
+      summary: Delete a Tenant Domain specified by the provided Domain Id.
       operationId: DeleteTenantDomain
       produces:
         - application/vnd.api+json
@@ -655,6 +655,254 @@ paths:
           description: "Unexpected error processing request"
       parameters:
         - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/ingestion-profiles:
+    post:
+      summary: Create an Ingestion Profile for a Tenant.
+      operationId: CreateIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Ingestion Profile
+      operationId: UpdateTenantIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/active-ingestion-profile:
+    get:
+      summary: Retrieve the active Ingestion Profile for the specified Tenant.
+      operationId: GetActiveIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}':
+    get:
+      summary: Retrieve a Tenant Ingestion Profile by id.
+      operationId: GetTenantIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Ingestion Profile specified by the provided Ingestion Profile Id.
+      operationId: DeleteTenantIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/threshold-profiles:
+    post:
+      summary: Create a Threshold Profile for a Tenant.
+      operationId: CreateTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Threshold Profile
+      operationId: UpdateTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/threshold-profile-list:
+    get:
+      summary: Retrieve all Threshold Profiles for the specified Tenant.
+      operationId: GetAllTenantThresholdProfiles
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/threshold-profiles/{thrPrfId}':
+    get:
+      summary: Retrieve a Tenant Threshold Profile by id.
+      operationId: GetTenantThresholdProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Threshold Profile specified by the provided id.
+      operationId: DeleteTenantThresholdProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: thrPrfId
           in: path
           required: true
           type: string
@@ -844,6 +1092,103 @@ paths:
               - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
+  /v1/tenants/{tenantId}/meta:
+    post:
+      summary: Create a Metadata record for a Tenant.
+      operationId: CreateTenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Metadata record
+      operationId: UpdateTenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    get:
+      summary: Retrieve a Tenant Metadata record
+      operationId: GetTenantMetadata
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Metadata record
+      operationId: DeleteTenantMetadata
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+
+
 # All API definitions below here are for the MetricsService and will need to be modified
 # when the MetricsService is altered to use the jsonapi implementation.
   /v1/histogram:
@@ -1508,7 +1853,185 @@ definitions:
         type: "string"
       reason:
         type: "string"
-  
+
+  JsonApiTenantIngestionProfile:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantIngestionProfile'
+  TenantIngestionProfile:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionProfiles]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantIngestionProfileAttr'
+  TenantIngestionProfileAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      metrics:
+        $ref: '#/definitions/TenantIngestionProfileVendorMap'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantIngestionProfileVendorMap:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantIngestionProfileVendorMapMonitoredObjectTypeMap'
+  TenantIngestionProfileVendorMapMonitoredObjectTypeMap:
+    type: "object"
+    properties:
+      monitoredObjectTypeMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantIngestionProfileVendorMapMonitoredObjectTypeMapMetricMap'
+  TenantIngestionProfileVendorMapMonitoredObjectTypeMapMetricMap:
+    type: "object"
+    additionalProperties:
+      type: "boolean"
+
+  JsonApiTenantThresholdProfile:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantThresholdProfile'
+  TenantThresholdProfile:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [thresholdProfiles]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantThresholdProfileAttr'
+  TenantThresholdProfileAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      thresholds:
+        $ref: '#/definitions/TenantThresholdProfileVendorMap'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantThresholdProfileVendorMap:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMetric'
+  TenantThresholdProfileMetric:
+    type: "object"
+    properties:
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileUIEventAttrMap'
+      monitoredObjectTypeMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMap'
+  TenantThresholdProfileUIEventAttrMap:
+    type: "object"
+    properties:
+      eventAttrMap:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMap:
+    type: "object"
+    properties:
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap:
+    type: "object"
+    properties:
+      directionMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap:
+    type: "object"
+    properties:
+      eventMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEventAttrMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEventAttrMap:
+    type: "object"
+    properties:
+      eventAttrMap:
+        type: "object"
+        additionalProperties:
+          type: "string"
+
+  JsonApiTenantMetadata:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantMetadata'
+  TenantMetadata:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [tenantMetadata]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantMetadataAttr'
+  TenantMetadataAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantName:
+        type: "string"
+      defaultThresholdProfile:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
   # Here down are Metrics Service object definitions that are currently carried over from the 
   # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation
   # this will remain

@@ -589,7 +589,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	res := make([]*tenmod.ThresholdProfile, 0)
-	if err := getAllOfTypeFromCouch(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res); err != nil {
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res); err != nil {
 		return nil, err
 	}
 

@@ -948,7 +948,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantIngestionProfileCRUD(t 
 	// Update a record
 	updateRecord := tenmod.IngestionProfile{}
 	deepcopy.Copy(&updateRecord, fetched)
-	updateRecord.Metrics["badStuff"] = nil
+	updateRecord.Metrics.VendorMap["badStuff"] = tenmod.IngPrfMonitoredObjectTypeMap{}
 	updated, err := runner.tenantDB.UpdateTenantIngestionProfile(&updateRecord)
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)
@@ -1058,7 +1058,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantThresholdProfileCRUD(t 
 	// Update a record
 	updateRecord := tenmod.ThresholdProfile{}
 	deepcopy.Copy(&updateRecord, fetched)
-	updateRecord.Thresholds["badStuff"] = nil
+	updateRecord.Thresholds.VendorMap["badstuff"] = tenmod.ThrPrfMetric{}
 	updated, err := runner.tenantDB.UpdateTenantThresholdProfile(&updateRecord)
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)

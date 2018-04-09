@@ -223,6 +223,77 @@ var (
 			}
 		}
 	}`)
+
+	defaultIngstionProfileShell  *tenmod.IngestionProfile
+	defaultIngestionMetricsBytes = []byte(`"metrics": {
+		"vendorMap": {
+		  "accedian-flowmeter": {
+			"monitoredObjectTypeMap": {
+			  "flowmeter": {
+				"metricMap": {
+				  "bytesReceived": true,
+				  "packetsReceived": true,
+				  "throughputAvg": true,
+				  "throughputMax": true,
+				  "throughputMin": true
+				}
+			  }
+			}
+		  },
+		  "accedian-twamp": {
+			"monitoredObjectTypeMap": {
+			  "twamp-pe": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sf": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  },
+			  "twamp-sl": {
+				"metricMap": {
+				  "delayMax": true,
+				  "delayP95": true,
+				  "delayPHi": true,
+				  "delayVarP95": true,
+				  "delayVarPHi": true,
+				  "jitterMax": true,
+				  "jitterP95": true,
+				  "jitterPHi": true,
+				  "lostBurstMax": true,
+				  "packetsLost": true,
+				  "packetsLostPct": true,
+				  "packetsReceived": true
+				}
+			  }
+			}
+		  }
+		}
+	  }`)
 )
 
 func checkError(err error, errorType httpErrorString) bool {
@@ -234,6 +305,12 @@ func checkError(err error, errorType httpErrorString) bool {
 }
 
 func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
+	if defaultIngstionProfileShell == nil {
+		defaultIngstionProfileShell = &tenmod.IngestionProfile{}
+		if err := json.Unmarshal(defaultIngestionMetricsBytes, &defaultIngstionProfileShell); err != nil {
+			logger.Log.Debugf("Unable to construct Default Ingestion Profile from bytes: %s", err.Error())
+		}
+	}
 
 	ingPrf := tenmod.IngestionProfile{}
 	ingPrf.TenantID = tenantID
@@ -241,44 +318,9 @@ func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
 	ingPrf.CreatedTimestamp = db.MakeTimestamp()
 	ingPrf.LastModifiedTimestamp = ingPrf.CreatedTimestamp
 
-	// Default Values for the metrics:
-	twampStr := string(tenmod.AccedianTwamp)
-	accfmStr := string(tenmod.AccedianFlowmeter)
-	peStr := string(tenmod.TwampPE)
-	sfStr := string(tenmod.TwampSF)
-	slStr := string(tenmod.TwampSL)
-	fmStr := string(tenmod.Flowmeter)
-	ingPrf.Metrics = make(map[string]map[string]map[string]map[string]map[string]map[string]bool)
-
-	// Build Twamp Profile
-	ingPrf.Metrics[VendorMap] = make(map[string]map[string]map[string]map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][twampStr] = make(map[string]map[string]map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap] = make(map[string]map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][peStr] = make(map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][sfStr] = make(map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][slStr] = make(map[string]map[string]bool)
-	metricMap := createMetricMap(defaultIngestionProfileMetricNames...)
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][peStr][MetricMap] = metricMap
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][sfStr][MetricMap] = metricMap
-	ingPrf.Metrics[VendorMap][twampStr][MonitoredObjectTypeMap][slStr][MetricMap] = metricMap
-
-	// Build Flowmeter Profile
-	ingPrf.Metrics[VendorMap][accfmStr] = make(map[string]map[string]map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap] = make(map[string]map[string]map[string]bool)
-	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap][fmStr] = make(map[string]map[string]bool)
-	metricMap = createMetricMap(defaultIngestionProfileFlowmeterMetricNames...)
-	ingPrf.Metrics[VendorMap][accfmStr][MonitoredObjectTypeMap][fmStr][MetricMap] = metricMap
+	ingPrf.Metrics = defaultIngstionProfileShell.Metrics
 
 	return &ingPrf
-}
-
-func createMetricMap(metricNames ...string) map[string]bool {
-	result := make(map[string]bool)
-	for _, s := range metricNames {
-		result[s] = true
-	}
-
-	return result
 }
 
 func createDefaultTenantThresholdPrf(tenantID string) *tenmod.ThresholdProfile {

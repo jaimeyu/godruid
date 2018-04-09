@@ -180,13 +180,13 @@ func (d *Domain) Validate(isUpdate bool) error {
 
 // IngestionProfile - defines a Tenant Ingestion Profile.
 type IngestionProfile struct {
-	ID                    string                                                                 `json:"_id"`
-	REV                   string                                                                 `json:"_rev"`
-	Datatype              string                                                                 `json:"datatype"`
-	TenantID              string                                                                 `json:"tenantId"`
-	Metrics               map[string]map[string]map[string]map[string]map[string]map[string]bool `json:"metrics"`
-	CreatedTimestamp      int64                                                                  `json:"createdTimestamp"`
-	LastModifiedTimestamp int64                                                                  `json:"lastModifiedTimestamp"`
+	ID                    string          `json:"_id"`
+	REV                   string          `json:"_rev"`
+	Datatype              string          `json:"datatype"`
+	TenantID              string          `json:"tenantId"`
+	Metrics               IngPrfVendorMap `json:"metrics"`
+	CreatedTimestamp      int64           `json:"createdTimestamp"`
+	LastModifiedTimestamp int64           `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -215,16 +215,28 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 	return nil
 }
 
+type IngPrfVendorMap struct {
+	VendorMap map[string]IngPrfMonitoredObjectTypeMap `json:"vendorMap"`
+}
+
+type IngPrfMonitoredObjectTypeMap struct {
+	MonitoredObjectTypeMap map[string]IngPrfMetricMap `json:"monitoredObjectTypeMap"`
+}
+
+type IngPrfMetricMap struct {
+	MetricMap map[string]bool `json:"metricMap"`
+}
+
 // ThresholdProfile - defines a Tenant Threshold Profile.
 type ThresholdProfile struct {
-	ID                    string                                     `json:"_id"`
-	REV                   string                                     `json:"_rev"`
-	Datatype              string                                     `json:"datatype"`
-	TenantID              string                                     `json:"tenantId"`
-	Name                  string                                     `json:"name"`
-	Thresholds            map[string]map[string]MonitoredObjectGroup `json:"thresholds"`
-	CreatedTimestamp      int64                                      `json:"createdTimestamp"`
-	LastModifiedTimestamp int64                                      `json:"lastModifiedTimestamp"`
+	ID                    string          `json:"_id"`
+	REV                   string          `json:"_rev"`
+	Datatype              string          `json:"datatype"`
+	TenantID              string          `json:"tenantId"`
+	Name                  string          `json:"name"`
+	Thresholds            ThrPrfVendorMap `json:"thresholds"`
+	CreatedTimestamp      int64           `json:"createdTimestamp"`
+	LastModifiedTimestamp int64           `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -236,6 +248,35 @@ func (prf *ThresholdProfile) GetID() string {
 func (prf *ThresholdProfile) SetID(s string) error {
 	prf.ID = s
 	return nil
+}
+
+type ThrPrfVendorMap struct {
+	VendorMap map[string]ThrPrfMetric `json:"vendorMap"`
+}
+
+type ThrPrfMetric struct {
+	MetricMap              map[string]ThrPrfUIEvtAttrMap `json:"metricMap"`
+	MonitoredObjectTypeMap map[string]ThrPrfMetricMap    `json:"monitoredObjectTypeMap"`
+}
+
+type ThrPrfUIEvtAttrMap struct {
+	EventAttrMap map[string]string `json:"eventAttrMap"`
+}
+
+type ThrPrfMetricMap struct {
+	MetricMap map[string]ThrPrfDirectionMap `json:"metricMap"`
+}
+
+type ThrPrfDirectionMap struct {
+	DirectionMap map[string]ThrPrfEventMap `json:"directionMap"`
+}
+
+type ThrPrfEventMap struct {
+	EventMap map[string]ThrPrfEventAttrMap `json:"eventMap"`
+}
+
+type ThrPrfEventAttrMap struct {
+	EventAttrMap map[string]string `json:"eventAttrMap"`
 }
 
 // Validate - used during validation of incoming REST requests for this object

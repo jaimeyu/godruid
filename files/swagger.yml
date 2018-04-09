@@ -5,12 +5,6 @@ info:
   description: |-
     Gather API Documentation
 
-    Majority of Gather API responses conform to the jsonapi format (http://jsonapi.org/). Conforming
-    to the jsonapi response format means that the response objects will share a common structure, however
-    the data in the response is determined by the context of the request. Using Swagger 2.0 to define this 
-    structure does not allow specific response structures for each API definition. As such, when looking
-    at the response for a given API it is important to look at the structure of the corresponding model 
-    described in the "Models section".  
   version: 1.0.0
   contact:
     email: "mpreston@accedian.com"
@@ -19,6 +13,7 @@ schemes:
   - http
 consumes:
   - application/json
+  - application/vnd.api+json
 produces:
   - application/json
   - application/vnd.api+json
@@ -27,13 +22,15 @@ paths:
     post:
       summary: Create a User with Administrative access.
       operationId: CreateAdminUser
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'AdminUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiAdminUser'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -43,19 +40,21 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/CreateAdminUserRequest'
+            $ref: '#/definitions/JsonApiAdminUser'
       tags:
         - AdminProvisioningService
     put:
       summary: Update a User with Administrative access.
       operationId: UpdateAdminUser
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'AdminUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiAdminUser'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -65,7 +64,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateAdminUserRequest'
+            $ref: '#/definitions/JsonApiAdminUser'
       tags:
         - AdminProvisioningService
   /v1/admin-user-list:
@@ -78,7 +77,7 @@ paths:
         '200':
           description: "Response object model is of type 'AdminUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiAdminUser'
       tags:
         - AdminProvisioningService
   '/v1/admin/{value}':
@@ -91,7 +90,7 @@ paths:
         '200':
           description: "Response object model is of type 'AdminUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiAdminUser'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -110,7 +109,7 @@ paths:
         '200':
           description: "Response object model is of type 'AdminUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiAdminUser'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -124,13 +123,15 @@ paths:
     post:
       summary: Create a Tenant.
       operationId: CreateTenant
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'Tenant'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
         '409':
@@ -142,19 +143,21 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/CreateTenantRequest'
+            $ref: '#/definitions/JsonApiTenant'
       tags:
         - AdminProvisioningService
     put:
       summary: Update a Tenant.
       operationId: UpdateTenant
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'Tenant'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -164,7 +167,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateTenantRequest'
+            $ref: '#/definitions/JsonApiTenant'
       tags:
         - AdminProvisioningService
   /v1/tenant-list:
@@ -177,7 +180,7 @@ paths:
         '200':
           description: "Response object model is of type 'Tenant'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenant'
         '500':
           description: "Unexpected error processing request"
       tags:
@@ -192,7 +195,7 @@ paths:
         '200':
           description: "Response object model is of type 'Tenant'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenant'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -211,7 +214,7 @@ paths:
         '200':
           description: "Response object model is of type 'Tenant'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenant'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -265,13 +268,15 @@ paths:
     post:
       summary: Create a User for a Tenant.
       operationId: CreateTenantUser
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantUser'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -285,19 +290,21 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/CreateTenantUserRequest'
+            $ref: '#/definitions/JsonApiTenantUser'
       tags:
         - TenantProvisioningService
     put:
       summary: Update a Tenant User
       operationId: UpdateTenantUser
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantUser'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -311,7 +318,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateTenantUserRequest'
+            $ref: '#/definitions/JsonApiTenantUser'
       tags:
         - TenantProvisioningService
   /v1/tenants/{tenantId}/user-list:
@@ -324,7 +331,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantUser'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -344,7 +351,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantUser'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -367,7 +374,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantUser'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantUser'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -385,13 +392,15 @@ paths:
     post:
       summary: Create a Domain for a Tenant.
       operationId: CreateTenantDomain
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantDomain'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantDomain'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -405,19 +414,21 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/CreateTenantDomainRequest'
+            $ref: '#/definitions/JsonApiTenantDomain'
       tags:
         - TenantProvisioningService
     put:
       summary: Update a Tenant Domain
       operationId: UpdateTenantDomain
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantDomain'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantDomain'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -431,7 +442,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateTenantDomainRequest'
+            $ref: '#/definitions/JsonApiTenantDomain'
       tags:
         - TenantProvisioningService
   /v1/tenants/{tenantId}/domain-list:
@@ -444,7 +455,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantDomain'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantDomain'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -464,7 +475,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantDomain'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantDomain'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -487,7 +498,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantDomain'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantDomain'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -505,13 +516,15 @@ paths:
     post:
       summary: Create a Monitored Object for a Tenant.
       operationId: CreateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -525,19 +538,21 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
       tags:
         - TenantProvisioningService
     put:
       summary: Update a Tenant Monitored Object
       operationId: UpdateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -551,7 +566,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateTenantMonitoredObjectRequest'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
       tags:
         - TenantProvisioningService
   /v1/tenants/{tenantId}/monitored-object-list:
@@ -564,7 +579,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -584,7 +599,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -607,7 +622,7 @@ paths:
         '200':
           description: "Response object model is of type 'TenantMonitoredObject'"
           schema:
-            $ref: '#/definitions/JsonApiResponse'
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -921,9 +936,28 @@ paths:
         - MetricsService
 definitions:
 
+  JsonApiAdminUser:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/AdminUser'
+
   AdminUser:
     type: "object"
     properties:
+      type: 
+        type: "string"
+        enum: [adminUsers]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/AdminUserAttr'
+
+  AdminUserAttr:
+    type: "object"
+    properties:
       _id:
         type: "string"
       _rev:
@@ -947,48 +981,27 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  CreateAdminUserRequest:
-    type: "object"
-    properties:
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-  UpdateAdminUserRequest:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
 
+  JsonApiTenant:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Tenant'
   Tenant:
     type: "object"
     properties:
+      type: 
+        type: "string"
+        enum: [tenants]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantAttr'
+  TenantAttr:
+    type: "object"
+    properties:
       _id:
         type: "string"
       _rev:
@@ -1005,32 +1018,6 @@ definitions:
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:
-        type: "integer"
-  CreateTenantRequest:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-      urlSubdomain:
-        type: "string"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-  UpdateTenantRequest:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      name:
-        type: "string"
-      urlSubdomain:
-        type: "string"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
         type: "integer"
 
   TenantSummary:
@@ -1040,10 +1027,27 @@ definitions:
         type: "string"
       alias:
         type: "string"
-        
+
+  JsonApiTenantUser:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantUser'
   TenantUser:
     type: "object"
     properties:
+      type: 
+        type: "string"
+        enum: [users]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantUserAttr'  
+  TenantUserAttr:
+    type: "object"
+    properties:
       _id:
         type: "string"
       _rev:
@@ -1073,60 +1077,27 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  CreateTenantUserRequest:
-    type: "object"
-    properties:
-      tenantId:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      domains:
-        type: "array"
-        items: 
-          type: "string"
-  UpdateTenantUserRequest:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      tenantId:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      domains:
-        type: "array"
-        items: 
-          type: "string"
-      createdTimestamp:
-        type: "integer"
 
+  JsonApiTenantDomain:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantDomain'
   TenantDomain:
     type: "object"
     properties:
+      type: 
+        type: "string"
+        enum: [domains]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantDomainAttr'
+  TenantDomainAttr:
+    type: "object"
+    properties:
       _id:
         type: "string"
       _rev:
@@ -1147,40 +1118,25 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  CreateTenantDomainRequest:
-    type: "object"
-    properties:
-      tenantId:
-        type: "string"
-      name:
-        type: "string"
-      color: 
-        type: "string"
-      thresholdProfileSet:
-        type: "array"
-        items: 
-          type: "string"
-  UpdateTenantDomainRequest:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      tenantId:
-        type: "string"
-      name:
-        type: "string"
-      color: 
-        type: "string"
-      thresholdProfileSet:
-        type: "array"
-        items: 
-          type: "string"
-      createdTimestamp:
-        type: "integer"
 
+  JsonApiTenantMonitoredObject:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantMonitoredObject'
   TenantMonitoredObject:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantMonitoredObjectAttr'
+  TenantMonitoredObjectAttr:
     type: "object"
     properties:
       _id:
@@ -1242,38 +1198,7 @@ definitions:
         type: "array"
         items: 
           type: "string"
-  UpdateTenantMonitoredObjectRequest:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      tenantId:
-        type: "string"
-      id:
-        type: "string"
-      actuatorName: 
-        type: "string"
-      actuatorType: 
-        type: "string"
-        enum: [unknown, accedian-nid, accedian-vnid]
-      reflectorName: 
-        type: "string"
-      reflectorType: 
-        type: "string"
-        enum: [unknown, accedian-nid, accedian-vnid]
-      objectName: 
-        type: "string"
-      objectType: 
-        type: "string"
-        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
-      domainSet:
-        type: "array"
-        items: 
-          type: "string"
-      createdTimestamp:
-        type: "integer"
+
   MonitoredObjectCountByDomainRequest:
     type: "object"
     properties:
@@ -1310,23 +1235,6 @@ definitions:
         type: "string"
       reason:
         type: "string"
-
-  JsonApiResponse:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           - $ref: '#/definitions/AdminUser'
-           - $ref: '#/definitions/Tenant'
-           - $ref: '#/definitions/TenantUser'
-           - $ref: '#/definitions/TenantDomain'
-           - $ref: '#/definitions/TenantMonitoredObject'
-      # relationships:
-      #   type: "array"
-      #   items:
-      #     - $ref: '#/definitions/relationshipsJoe'
-      #     - $ref: '#/definitions/relationshipsBob'
   
   # Here down are Metrics Service object definitions that are currently carried over from the 
   # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation

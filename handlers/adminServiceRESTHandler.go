@@ -382,12 +382,14 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	// Create a default Ingestion Profile for the Tenant.
 	idForTenant := result.ID
 	ingPrfData := createDefaultTenantIngPrf(idForTenant)
-	_, err = ash.tenantDB.CreateTenantIngestionProfile(ingPrfData)
+	logger.Log.Debugf("Sending to DAO: %s", models.AsJSONString(ingPrfData))
+	prf, err := ash.tenantDB.CreateTenantIngestionProfile(ingPrfData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)
 		return
 	}
+	logger.Log.Debugf("Got back from DAO: %s", models.AsJSONString(prf))
 
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)

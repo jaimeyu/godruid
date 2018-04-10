@@ -225,7 +225,7 @@ var (
 	}`)
 
 	defaultIngstionProfileShell  *tenmod.IngestionProfile
-	defaultIngestionMetricsBytes = []byte(`"metrics": {
+	defaultIngestionMetricsBytes = []byte(`{"metrics": {
 		"vendorMap": {
 		  "accedian-flowmeter": {
 			"monitoredObjectTypeMap": {
@@ -293,7 +293,7 @@ var (
 			}
 		  }
 		}
-	  }`)
+	  }}`)
 )
 
 func checkError(err error, errorType httpErrorString) bool {
@@ -312,6 +312,8 @@ func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
 		}
 	}
 
+	logger.Log.Debugf("Will use: %s", models.AsJSONString(defaultIngstionProfileShell))
+
 	ingPrf := tenmod.IngestionProfile{}
 	ingPrf.TenantID = tenantID
 	ingPrf.Datatype = string(tenmod.TenantIngestionProfileType)
@@ -319,6 +321,8 @@ func createDefaultTenantIngPrf(tenantID string) *tenmod.IngestionProfile {
 	ingPrf.LastModifiedTimestamp = ingPrf.CreatedTimestamp
 
 	ingPrf.Metrics = defaultIngstionProfileShell.Metrics
+
+	logger.Log.Debugf("Generated: %s", models.AsJSONString(ingPrf))
 
 	return &ingPrf
 }

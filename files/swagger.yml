@@ -1583,7 +1583,7 @@ definitions:
         type: "array"
         items:
           $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
-      uiData:
+      ui:
         $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
   IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
     type: "object"

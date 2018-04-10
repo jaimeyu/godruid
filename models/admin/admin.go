@@ -159,7 +159,7 @@ type UIGroupData struct {
 
 type MetricDefinition struct {
 	MonitoredObjectTypes []*MonitoredObjectType `json:"monitoredObjectTypes"`
-	UIData               *UIData                `json:"uiData"`
+	UIData               *UIData                `json:"ui"`
 }
 
 type UIData struct {

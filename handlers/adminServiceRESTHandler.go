@@ -15,6 +15,7 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
+	"github.com/manyminds/api2go/jsonapi"
 )
 
 // AdminServiceRESTHandler - handler of logic for REST calls made to the Admin Service.
@@ -200,8 +201,22 @@ func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *ht
 	startTime := time.Now()
 
 	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
 	data := admmod.User{}
-	err := unmarshalRequest(r, &data, false)
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -226,11 +241,25 @@ func (ash *AdminServiceRESTHandler) UpdateAdminUser(w http.ResponseWriter, r *ht
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.User{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.User{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -310,11 +339,25 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.Tenant{}
-	err := unmarshalRequest(r, &data, false)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateTenantStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.Tenant{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -339,12 +382,14 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	// Create a default Ingestion Profile for the Tenant.
 	idForTenant := result.ID
 	ingPrfData := createDefaultTenantIngPrf(idForTenant)
-	_, err = ash.tenantDB.CreateTenantIngestionProfile(ingPrfData)
+	logger.Log.Debugf("Sending to DAO: %s", models.AsJSONString(ingPrfData))
+	prf, err := ash.tenantDB.CreateTenantIngestionProfile(ingPrfData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantStr, msg, http.StatusInternalServerError)
 		return
 	}
+	logger.Log.Debugf("Got back from DAO: %s", models.AsJSONString(prf))
 
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
@@ -374,11 +419,25 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.Tenant{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateTenantStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.Tenant{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -515,11 +574,26 @@ func (ash *AdminServiceRESTHandler) CreateIngestionDictionary(w http.ResponseWri
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.IngestionDictionary{}
-	err := unmarshalRequest(r, &data, false)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateIngDictStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.IngestionDictionary{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -547,11 +621,25 @@ func (ash *AdminServiceRESTHandler) UpdateIngestionDictionary(w http.ResponseWri
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.IngestionDictionary{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateIngDictStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.IngestionDictionary{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -619,11 +707,26 @@ func (ash *AdminServiceRESTHandler) CreateValidTypes(w http.ResponseWriter, r *h
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.ValidTypes{}
-	err := unmarshalRequest(r, &data, false)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateValidTypesStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := admmod.ValidTypes{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -651,18 +754,33 @@ func (ash *AdminServiceRESTHandler) UpdateValidTypes(w http.ResponseWriter, r *h
 	startTime := time.Now()
 
 	// Unmarshal the request
-	data := admmod.ValidTypes{}
-	err := unmarshalRequest(r, &data, true)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateValidTypesStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data))
+	data := []admmod.ValidTypes{}
+	logger.Log.Debugf("byte data: %s", string(requestBytes))
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data[0].Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", admmod.ValidTypesStr, models.AsJSONString(&data[0]))
 
 	// Issue request to DAO Layer
-	result, err := ash.UpdateValidTypesInternal(&data)
+	result, err := ash.UpdateValidTypesInternal(&data[0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateValidTypesStr, msg, http.StatusInternalServerError)

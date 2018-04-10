@@ -174,21 +174,7 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		mon.RecievedAPICalls.Inc()
 	}
 
-	if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
-		// Handle Metrics Calls
-		if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
-			reportOverloaded(w, r, err.Error())
-			mon.CompletedAPICalls.Inc()
-			return
-		}
-
-		mon.IncrementCounter(mon.MetricAPIRecieved)
-
-		gs.jsonAPIMux.ServeHTTP(w, r)
-
-		updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
-		mon.IncrementCounter(mon.MetricAPICompleted)
-	} else if strings.Index(r.URL.Path, "/api/v1/") == 0 {
+	if strings.Index(r.URL.Path, "/api/v1/") == 0 {
 		// Handle calls to our Admin and Tenant Services
 		if err := updateCounter(&concurrentProvAPICounter, provAPIMutex, true, maxConcurrentProvAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
@@ -211,6 +197,20 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			mon.IncrementCounter(mon.AdminAPICompleted)
 		}
+	} else if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
+		// Handle Metrics Calls
+		if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
+			reportOverloaded(w, r, err.Error())
+			mon.CompletedAPICalls.Inc()
+			return
+		}
+
+		mon.IncrementCounter(mon.MetricAPIRecieved)
+
+		gs.jsonAPIMux.ServeHTTP(w, r)
+
+		updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
+		mon.IncrementCounter(mon.MetricAPICompleted)
 	} else if strings.Index(r.URL.Path, "/swagger.json") == 0 {
 		// Handle requests for the swagger definition
 		input, err := ioutil.ReadFile(swaggerFilePath)

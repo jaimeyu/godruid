@@ -12,6 +12,8 @@ import (
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
+const defaultQueryResultsLimit = 1000
+
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
 // that can be stored. Changes the provided object into a map[string]interface{} generic
 // object.
@@ -143,7 +145,7 @@ func getAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Dat
 
 	// Get the Admin User from CouchDB
 	selector := fmt.Sprintf(`data.datatype == "%s"`, dataType)
-	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
+	fetchedData, err := db.Query(nil, selector, nil, defaultQueryResultsLimit, nil, nil)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
 		return nil, err
@@ -159,7 +161,7 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 
 	// Get the data from CouchDB
 	selector := fmt.Sprintf(`regex(_id, "^%s_")`, dataType)
-	fetchedData, err := db.Query(nil, selector, nil, nil, nil, nil)
+	fetchedData, err := db.Query(nil, selector, nil, defaultQueryResultsLimit, nil, nil)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
 		return nil, err

@@ -1,3 +1,4 @@
+* Adding missing dependencies and adding in a very necessary return statement.
 ## Current Release 
 ### 0.98.0 
 **Release Date:** Thu Apr 12 16:27:55 UTC 2018     

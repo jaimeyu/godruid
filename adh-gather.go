@@ -62,6 +62,8 @@ var (
 	metricAPIMutex = &sync.Mutex{}
 	provAPIMutex   = &sync.Mutex{}
 	pouchAPIMutex  = &sync.Mutex{}
+
+	metricServiceEndpoints []string
 )
 
 func init() {
@@ -71,6 +73,8 @@ func init() {
 	pflag.BoolVar(&enableTLS, "tls", true, "Specify if TLS should be enabled")
 	pflag.StringVar(&ingDictFilePath, "ingDict", defaultIngestionDictionaryPath, "Specify file path of default Ingestion Dictionary")
 	pflag.StringVar(&swaggerFilePath, "swag", defaultSwaggerFile, "Specify file path of the Swagger documentation")
+
+	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing"}
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -167,6 +171,8 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 // otherwise.
 func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	logger.Log.Debugf("Received API call: %s", r.URL.Path)
+
 	isPouch := strings.Index(r.URL.Path, "/pouchdb") == 0
 
 	// Exclude Pouch API calls from the total count as it has expected failures.
@@ -175,6 +181,22 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Index(r.URL.Path, "/api/v1/") == 0 {
+		if isMetricAPICall(r.URL.Path) {
+			// Handle Metrics Calls
+			if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
+				reportOverloaded(w, r, err.Error())
+				mon.CompletedAPICalls.Inc()
+				return
+			}
+
+			mon.IncrementCounter(mon.MetricAPIRecieved)
+
+			gs.jsonAPIMux.ServeHTTP(w, r)
+
+			updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
+			mon.IncrementCounter(mon.MetricAPICompleted)
+		}
+
 		// Handle calls to our Admin and Tenant Services
 		if err := updateCounter(&concurrentProvAPICounter, provAPIMutex, true, maxConcurrentProvAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
@@ -197,20 +219,6 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			mon.IncrementCounter(mon.AdminAPICompleted)
 		}
-	} else if strings.Compare("application/vnd.api+json", r.Header.Get("Content-Type")) == 0 {
-		// Handle Metrics Calls
-		if err := updateCounter(&concurrentMetricAPICounter, metricAPIMutex, true, maxConcurrentMetricAPICalls); err != nil {
-			reportOverloaded(w, r, err.Error())
-			mon.CompletedAPICalls.Inc()
-			return
-		}
-
-		mon.IncrementCounter(mon.MetricAPIRecieved)
-
-		gs.jsonAPIMux.ServeHTTP(w, r)
-
-		updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
-		mon.IncrementCounter(mon.MetricAPICompleted)
 	} else if strings.Index(r.URL.Path, "/swagger.json") == 0 {
 		// Handle requests for the swagger definition
 		input, err := ioutil.ReadFile(swaggerFilePath)
@@ -226,7 +234,7 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		gs.mux.ServeHTTP(w, r)
 		mon.IncrementCounter(mon.PouchChangesAPICompleted)
 	} else {
-		// Hanld eall other endpoints (really just Poiuch and Test Data right now.
+		// Handle all other endpoints (really just Pouch and Test Data right now.
 		if err := updateCounter(&concurrentPouchAPICounter, pouchAPIMutex, true, maxConcurrentPouchAPICalls); err != nil {
 			reportOverloaded(w, r, err.Error())
 			mon.CompletedAPICalls.Inc()
@@ -249,6 +257,16 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !isPouch {
 		mon.CompletedAPICalls.Inc()
 	}
+}
+
+func isMetricAPICall(url string) bool {
+	for _, val := range metricServiceEndpoints {
+		if strings.Index(url, val) == 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 func reportOverloaded(w http.ResponseWriter, r *http.Request, errorStr string) {

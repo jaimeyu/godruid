@@ -1,8 +1,10 @@
-* Adding missing dependencies and adding in a very necessary return statement.
 ## Current Release 
+### 0.99.0 
+**Release Date:** Thu Apr 12 18:49:20 UTC 2018     
+## Previous Releases 
+* Adding missing dependencies and adding in a very necessary return statement.
 ### 0.98.0 
 **Release Date:** Thu Apr 12 16:27:55 UTC 2018     
-## Previous Releases 
 * Fix - addressing issue that caused all metrics service APIs to return 404
 ### 0.97.0 
 **Release Date:** Thu Apr 12 13:34:28 UTC 2018     

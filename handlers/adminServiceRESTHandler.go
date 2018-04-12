@@ -528,7 +528,7 @@ func (ash *AdminServiceRESTHandler) GetTenantIDByAlias(w http.ResponseWriter, r 
 		return
 	}
 
-	logger.Log.Infof("Suuceesfully retrieved ID %s for alias %s", result, tenantName)
+	logger.Log.Infof("Successfully retrieved ID %s for alias %s", result, tenantName)
 	trackAPIMetrics(startTime, "200", mon.GetTenantIDByAliasStr)
 	fmt.Fprintf(w, result)
 }
@@ -558,7 +558,7 @@ func (ash *AdminServiceRESTHandler) GetTenantSummaryByAlias(w http.ResponseWrite
 		return
 	}
 
-	logger.Log.Infof("Suuceesfully retrieved ID %s for alias %s", result, tenantName)
+	logger.Log.Infof("Successfully retrieved ID %s for alias %s", result, tenantName)
 	trackAPIMetrics(startTime, "200", mon.GetTenantIDByAliasStr)
 	fmt.Fprintf(w, string(response))
 }

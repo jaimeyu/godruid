@@ -34,3 +34,6 @@ druid:
   server: http://aod_broker
   port: 8082
   table: "npav-ts-metrics"
+
+kafka:
+  broker: kafka:9092

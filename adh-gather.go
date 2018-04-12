@@ -580,7 +580,7 @@ func startProfile(gatherServer *GatherServer, cfg config.Provider) {
 
 	profile.AttachProfiler(gatherServer.pprofServerMux)
 
-	logger.Log.Infof("Starting Prfoile Server")
+	logger.Log.Infof("Starting Profile Server")
 	addr := fmt.Sprintf("%s:%d", restBindIP, monPort)
 	if err := http.ListenAndServe(addr, gatherServer.pprofServerMux); err != nil {
 		logger.Log.Fatalf("Unable to start profile function: %s", err.Error())
@@ -677,6 +677,9 @@ func main() {
 
 	// Start pprof profiler
 	go startProfile(gatherServer, cfg)
+
+	// Start monitoring changes and sending notifications
+	go adhh.SendChangeNotifications()
 
 	// modify the swagger for this deployment
 	modifySwagger(cfg)

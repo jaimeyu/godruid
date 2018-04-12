@@ -1,6 +1,7 @@
 * Feature - Added poller for notifying changes in monitored objects.
 * Feature - increase default CouchDB query results to 1000
 * Fix - typos in logs
+
 ## Current Release 
 ### 0.96.0 
 **Release Date:** Tue Apr 10 18:12:19 UTC 2018     

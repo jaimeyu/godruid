@@ -26,6 +26,7 @@ const (
 	CK_druid_server                     ConfigKey = "druid.server"
 	CK_druid_port                       ConfigKey = "druid.port"
 	CK_druid_table                      ConfigKey = "druid.table"
+	CK_kafka_broker                     ConfigKey = "kafka.broker"
 )
 
 func (key ConfigKey) String() string {

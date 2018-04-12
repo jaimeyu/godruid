@@ -30,7 +30,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 	// Setup the DB implementation based on configuration
 	tdb, err := getTenantServiceDatastore()
 	if err != nil {
-		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
+		logger.Log.Fatalf("Unable to instantiate TenantServiceRESTHandler: %s", err.Error())
 	}
 	result.tenantDB = tdb
 
@@ -978,7 +978,7 @@ func (tsh *TenantServiceRESTHandler) GetMonitoredObjectToDomainMap(w http.Respon
 		return
 	}
 
-	logger.Log.Infof("Suuceesfully retrieved %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, data.TenantID)
+	logger.Log.Infof("Successfully retrieved %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, data.TenantID)
 	trackAPIMetrics(startTime, "200", mon.GetMonObjToDomMapStr)
 	fmt.Fprintf(w, string(res))
 }

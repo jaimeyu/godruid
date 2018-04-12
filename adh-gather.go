@@ -171,6 +171,8 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 // otherwise.
 func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	logger.Log.Debugf("Received API call: %s", r.URL.Path)
+
 	isPouch := strings.Index(r.URL.Path, "/pouchdb") == 0
 
 	// Exclude Pouch API calls from the total count as it has expected failures.

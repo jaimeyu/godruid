@@ -1,8 +1,10 @@
-* Fix - addressing issue that caused all metrics service APIs to return 404
 ## Current Release 
+### 0.98.0 
+**Release Date:** Thu Apr 12 16:27:55 UTC 2018     
+## Previous Releases 
+* Fix - addressing issue that caused all metrics service APIs to return 404
 ### 0.97.0 
 **Release Date:** Thu Apr 12 13:34:28 UTC 2018     
-## Previous Releases 
 * Feature - Added poller for notifying changes in monitored objects.
 * Feature - increase default CouchDB query results to 1000
 * Fix - typos in logs

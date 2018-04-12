@@ -195,6 +195,7 @@ func (gs *GatherServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			updateCounter(&concurrentMetricAPICounter, metricAPIMutex, false, maxConcurrentMetricAPICalls)
 			mon.IncrementCounter(mon.MetricAPICompleted)
+			return
 		}
 
 		// Handle calls to our Admin and Tenant Services

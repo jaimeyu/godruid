@@ -79,13 +79,9 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32) (*godruid.QueryTimeseries, error) {
+func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
-	metrics := strings.Split(metric, ",")
-	objectTypes := strings.Split(objectType, ",")
-	directions := strings.Split(direction, ",")
-	vendors := strings.Split(vendor, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
@@ -93,17 +89,17 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 		// if no vendors have been provided, use all of them, otherwise
 		// only include the provided ones
 
-		if contains(vendors, vk) || vendor == "" {
+		if vendors == nil || contains(vendors, vk) {
 			for tk, t := range v.GetMonitoredObjectTypeMap() {
 				// if no objectTypes have been provided, use all of them, otherwise
 				// only include the provided ones
-				if contains(objectTypes, tk) || objectType == "" {
+				if objectTypes == nil || contains(objectTypes, tk) {
 					for mk, m := range t.GetMetricMap() {
 						// if no metrics have been provided, use all of them, otherwise
 						// only include the provided ones
-						if contains(metrics, mk) || metric == "" {
+						if metrics == nil || contains(metrics, mk) {
 							for dk, d := range m.GetDirectionMap() {
-								if contains(directions, dk) || direction == "" {
+								if directions == nil || contains(directions, dk) {
 									for ek, e := range d.GetEventMap() {
 										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
 										filter, err := FilterHelper(mk, e)
@@ -134,36 +130,35 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metric string, gra
 	}
 
 	return &godruid.QueryTimeseries{
-		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
-		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
-		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+		DataSource:  dataSource,
+		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(domains),
+		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
 }
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32) (*godruid.QueryGroupBy, error) {
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, domains []string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
-	metrics := strings.Split(metric, ",")
-	directions := strings.Split(direction, ",")
-	vendors := strings.Split(vendor, ",")
-	objectTypes := strings.Split(objectType, ",")
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
 	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
-		if contains(vendors, vk) || vendor == "" {
+		if vendors == nil || contains(vendors, vk) {
 			for tk, t := range v.GetMonitoredObjectTypeMap() {
-				if contains(objectTypes, tk) || objectType == "" {
+				if objectTypes == nil || contains(objectTypes, tk) {
 					for mk, m := range t.GetMetricMap() {
 						// if no metrics have been provided, use all of them, otherwise
 						// only include the provided ones
-						if contains(metrics, mk) || metric == "" {
+						if metrics == nil || contains(metrics, mk) {
 							for dk, d := range m.GetDirectionMap() {
-								if contains(directions, dk) || direction == "" {
+								if directions == nil || contains(directions, dk) {
 									for ek, e := range d.GetEventMap() {
 										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
 										filter, err := FilterHelper(mk, e)
@@ -197,8 +192,11 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
 		Context:      map[string]interface{}{"timeout": timeout},
 		Aggregations: aggregations,
-		Filter:       godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-		Intervals:    []string{interval},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(domains),
+		),
+		Intervals: []string{interval},
 		Dimensions: []godruid.DimSpec{
 			godruid.Dimension{
 				Dimension:  "monitoredObjectId",
@@ -208,11 +206,9 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, m
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metric string, interval string, objectType string, direction string, monitoredObjectId string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
+func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, direction string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 
-	metrics := strings.Split(metric, ",")
 	var aggregations []godruid.Aggregation
-	monitoredObjects := strings.Split(monitoredObjectId, ",")
 
 	for _, monObj := range monitoredObjects {
 		for _, metric := range metrics {
@@ -240,4 +236,16 @@ func RawMetricsQuery(tenant string, dataSource string, metric string, interval s
 		),
 		Intervals: []string{interval},
 	}, nil
+}
+
+func buildDomainFilter(domains []string) *godruid.Filter {
+	if len(domains) < 1 {
+		return nil
+	}
+	filters := make([]*godruid.Filter, len(domains))
+	for i, domain := range domains {
+		filters[i] = godruid.FilterSelector("domains", domain)
+	}
+	return godruid.FilterOr(filters...)
+
 }

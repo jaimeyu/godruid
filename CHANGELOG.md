@@ -1,3 +1,4 @@
+* Support domains in metrics queries
 ## Current Release 
 ### 0.99.0 
 **Release Date:** Thu Apr 12 18:49:20 UTC 2018     

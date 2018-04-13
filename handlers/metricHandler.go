@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -89,15 +90,15 @@ func (msh *MetricServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCrossingRequest {
 
 	thresholdCrossingReq := pb.ThresholdCrossingRequest{
-		Direction:          queryParams.Get("direction"),
-		Domain:             queryParams.Get("domain"),
+		Direction:          toStringSplice(queryParams.Get("direction")),
+		Domain:             toStringSplice(queryParams.Get("domain")),
 		Granularity:        queryParams.Get("granularity"),
 		Interval:           queryParams.Get("interval"),
-		Metric:             queryParams.Get("metric"),
-		ObjectType:         queryParams.Get("objectType"),
+		Metric:             toStringSplice(queryParams.Get("metric")),
+		ObjectType:         toStringSplice(queryParams.Get("objectType")),
 		Tenant:             queryParams.Get("tenant"),
 		ThresholdProfileId: queryParams.Get("thresholdProfileId"),
-		Vendor:             queryParams.Get("vendor"),
+		Vendor:             toStringSplice(queryParams.Get("vendor")),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
@@ -159,10 +160,10 @@ func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
 		Direction:         queryParams.Get("direction"),
 		Interval:          queryParams.Get("interval"),
-		Metric:            queryParams.Get("metric"),
+		Metric:            toStringSplice(queryParams.Get("metric")),
 		Tenant:            queryParams.Get("tenant"),
 		ObjectType:        queryParams.Get("objectType"),
-		MonitoredObjectId: queryParams.Get("monitoredObjectId"),
+		MonitoredObjectId: toStringSplice(queryParams.Get("monitoredObjectId")),
 		Granularity:       queryParams.Get("granularity"),
 	}
 
@@ -330,4 +331,12 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, rawMetricReq)
 	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
 	fmt.Fprintf(w, string(res))
+}
+
+func toStringSplice(paramCSV string) []string {
+	if len(paramCSV) < 1 {
+		return nil
+	}
+
+	return strings.Split(paramCSV, ",")
 }

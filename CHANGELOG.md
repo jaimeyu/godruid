@@ -1,8 +1,10 @@
-* Support domains in metrics queries
 ## Current Release 
+### 0.100.0 
+**Release Date:** Fri Apr 13 19:13:58 UTC 2018     
+## Previous Releases 
+* Support domains in metrics queries
 ### 0.99.0 
 **Release Date:** Thu Apr 12 18:49:20 UTC 2018     
-## Previous Releases 
 * Adding missing dependencies and adding in a very necessary return statement.
 ### 0.98.0 
 **Release Date:** Thu Apr 12 16:27:55 UTC 2018     

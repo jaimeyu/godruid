@@ -1286,7 +1286,9 @@ paths:
         - name: metric
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: objectType
           in: query
           required: false
@@ -1294,7 +1296,9 @@ paths:
         - name: monitoredObjectId
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: timeout
           in: query
           required: false
@@ -1327,33 +1331,44 @@ paths:
         - name: interval
           description: ISO-8601 Intervals.
           in: query
-          required: false
+          required: true
           type: string
         - name: tenant
+          description: Tenant ID
           in: query
-          required: false
+          required: true
           type: string
         - name: domain
+          description: Domain ID
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: granularity
           description: ISO-8601 period combination.
           in: query
           required: false
           type: string
         - name: objectType
+          description: the type of object (e.g. twamp-pe)
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: direction
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: metric
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: thresholdProfileId
           in: query
           required: false
@@ -1361,7 +1376,9 @@ paths:
         - name: vendor
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: timeout
           in: query
           required: false
@@ -1389,16 +1406,20 @@ paths:
         - name: interval
           description: ISO-8601 Intervals.
           in: query
-          required: false
+          required: true
           type: string
         - name: tenant
+          description: Tenant ID
           in: query
-          required: false
+          required: true
           type: string
         - name: domain
+          description: Domain ID
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: granularity
           description: ISO-8601 period combination.
           in: query
@@ -1407,15 +1428,21 @@ paths:
         - name: objectType
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: direction
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: metric
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: thresholdProfileId
           in: query
           required: false
@@ -1423,7 +1450,9 @@ paths:
         - name: vendor
           in: query
           required: false
-          type: string
+          type: array
+          items:
+            type: string
         - name: timeout
           in: query
           required: false

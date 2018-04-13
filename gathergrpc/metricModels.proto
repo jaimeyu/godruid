@@ -22,14 +22,14 @@ message ThresholdCrossingRequest {
   //ISO-8601 Intervals
   string interval = 1;
   string tenant = 2;
-  string domain = 3;
+  repeated string domain = 3;
   //ISO-8601 period combination
   string granularity = 4;
-  string objectType = 5;
-  string direction = 6;
-  string metric = 7;
+  repeated string objectType = 5;
+  repeated string direction = 6;
+  repeated string metric = 7;
   string thresholdProfileId = 8;
-  string vendor = 9;
+  repeated string vendor = 9;
   int32  timeout = 10;
 }
 
@@ -75,9 +75,9 @@ message RawMetricsRequest {
   string interval = 1;
   string tenant = 2;
   string direction = 3;
-  string metric = 4;
+  repeated string metric = 4;
   string objectType = 5;
-  string monitoredObjectId = 6;
+  repeated string monitoredObjectId = 6;
   int32  timeout = 10;
   string  granularity = 11;
 }

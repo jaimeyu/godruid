@@ -20,6 +20,7 @@ import (
 type TenantServiceRESTHandler struct {
 	tenantDB db.TenantServiceDatastore
 	routes   []server.Route
+	notifH   *ChangeNotificationHandler
 }
 
 // CreateTenantServiceRESTHandler - used to create a Tenant Service REST handler which provides
@@ -33,6 +34,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceRESTHandler: %s", err.Error())
 	}
 	result.tenantDB = tdb
+	result.notifH = getChangeNotificationHandler()
 
 	result.routes = []server.Route{
 		server.Route{
@@ -841,6 +843,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
+	NotifyMonitoredObjects(&data)
 	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
 }
 
@@ -881,6 +884,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
+	NotifyMonitoredObjects(&data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
 }
 
@@ -1141,6 +1145,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 		return
 	}
 
+	NotifyMonitoredObjects(data...)
 	response := map[string]interface{}{}
 	response["results"] = result
 
@@ -1154,4 +1159,14 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	logger.Log.Infof("Completed bulk insert of %ss for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
 	trackAPIMetrics(startTime, "200", mon.BulkUpdateMonObjStr)
 	fmt.Fprintf(w, string(res))
+}
+
+func NotifyMonitoredObjects(monitoredObjects ...*tenmod.MonitoredObject) {
+	handler := getChangeNotificationHandler()
+	if handler != nil {
+		logger.Log.Debugf("Sending %d monitored objects to notification handler: %v", len(monitoredObjects), monitoredObjects)
+		handler.monitoredObjectChanges <- monitoredObjects
+	} else {
+		logger.Log.Warningf("No notification handler found")
+	}
 }

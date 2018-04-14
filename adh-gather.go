@@ -606,6 +606,12 @@ func startProfile(gatherServer *GatherServer, cfg config.Provider) {
 	}
 }
 
+func startChangeNotificationHandler() {
+	// Start monitoring changes and sending notifications
+	hdlr := adhh.CreateChangeNotificationHandler()
+	hdlr.SendChangeNotifications()
+}
+
 func modifySwagger(cfg config.Provider) {
 	apiPort := cfg.GetInt(gather.CK_server_rest_port.String())
 
@@ -688,6 +694,9 @@ func main() {
 	maxConcurrentProvAPICalls = uint64(v.GetInt64(gather.CK_args_maxConcurrentProvAPICalls.String()))
 	logger.Log.Debugf("API caps are set to: Metric-%d Prov-%d Pouch-%d", maxConcurrentMetricAPICalls, maxConcurrentProvAPICalls, maxConcurrentPouchAPICalls)
 
+	// Start monitoring changes and sending notifications
+	go startChangeNotificationHandler()
+
 	// Start the REST and gRPC Services
 	gatherServer := newServer()
 
@@ -696,9 +705,6 @@ func main() {
 
 	// Start pprof profiler
 	go startProfile(gatherServer, cfg)
-
-	// Start monitoring changes and sending notifications
-	go adhh.SendChangeNotifications()
 
 	// modify the swagger for this deployment
 	modifySwagger(cfg)

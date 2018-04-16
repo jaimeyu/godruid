@@ -911,6 +911,8 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 		return nil, fmt.Errorf(msg)
 	}
 
+	NotifyMonitoredObjects(data...)
+
 	// Convert the response objects back to PB objects for response
 	response := pb.BulkOperationResponse{}
 	response.Results = make([]*pb.BulkOperationResult, 0)

@@ -1,4 +1,4 @@
-* Feature - send change notification for insert/update monitored object
+* Feature - send change notification for insert/update monitored object 
 ## Current Release 
 ### 0.100.0 
 **Release Date:** Fri Apr 13 19:13:58 UTC 2018     

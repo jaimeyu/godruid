@@ -1,8 +1,10 @@
-* Feature - send change notification for insert/update monitored object 
 ## Current Release 
+### 0.101.0 
+**Release Date:** Mon Apr 16 11:14:53 UTC 2018     
+## Previous Releases 
+* Feature - send change notification for insert/update monitored object 
 ### 0.100.0 
 **Release Date:** Fri Apr 13 19:13:58 UTC 2018     
-## Previous Releases 
 * Support domains in metrics queries
 ### 0.99.0 
 **Release Date:** Thu Apr 12 18:49:20 UTC 2018     

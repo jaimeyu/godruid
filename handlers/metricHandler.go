@@ -13,6 +13,8 @@ import (
 	"github.com/accedian/adh-gather/datastore/druid"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/metrics"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
@@ -54,6 +56,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			Method:      "GET",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object",
 			HandlerFunc: result.GetThresholdCrossingByMonitoredObject,
+		},
+
+		server.Route{
+			Name:        "GetSLAReport",
+			Method:      "GET",
+			Pattern:     "/api/v1/sla-report",
+			HandlerFunc: result.GetSLAReport,
 		},
 
 		server.Route{
@@ -109,6 +118,25 @@ func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCross
 	}
 
 	return &thresholdCrossingReq
+}
+
+func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest {
+
+	request := metrics.SLAReportRequest{
+		TenantID:           queryParams.Get("tenant"),
+		Interval:           queryParams.Get("interval"),
+		Domain:             toStringSplice(queryParams.Get("domain")),
+		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
+	}
+
+	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
+	if err == nil {
+		request.Timeout = int32(timeout)
+	} else {
+		request.Timeout = 0
+	}
+
+	return &request
 }
 
 func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
@@ -222,6 +250,52 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
 	trackAPIMetrics(startTime, "200", mon.GetThrCrossStr)
+	fmt.Fprintf(w, string(res))
+}
+
+func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Turn the query Params into the request object:
+	queryParams := r.URL.Query()
+	slaReqportRequest := populateSLAReportRequest(queryParams)
+	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReqportRequest))
+
+	tenantID := slaReqportRequest.TenantID
+
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReqportRequest.ThresholdProfileID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReqportRequest), err.Error())
+		reportError(w, startTime, "404", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		return
+	}
+
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.SLAReportStr, err.Error())
+		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetSLAReport(slaReqportRequest, &pbTP)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.SLAReportStr, models.AsJSONString(slaReqportRequest))
+	trackAPIMetrics(startTime, "200", mon.GetSLAReportStr)
 	fmt.Fprintf(w, string(res))
 }
 

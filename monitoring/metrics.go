@@ -22,6 +22,7 @@ const (
 	ThrCrossStr            = "thr_cross"
 	HistogramStr           = "histogram"
 	RawMetricStr           = "raw_metric"
+	SLAReportStr           = "sla_report"
 	TenantMetaStr          = "tenant_meta"
 	AdminViewsStr          = "admin_views"
 	ValidTypesStr          = "valid_types"
@@ -104,6 +105,7 @@ const (
 	GetThrCrossByMonObjStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr     = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr        = RawMetricStr + metricNameDelimiter + OPGetStr
+	GetSLAReportStr        = SLAReportStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr

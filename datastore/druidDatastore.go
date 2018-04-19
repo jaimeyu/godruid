@@ -2,6 +2,7 @@ package datastore
 
 import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/models/metrics"
 )
 
 const (
@@ -16,6 +17,9 @@ const (
 
 	// RawMetricString - common name for use in logs.
 	RawMetricStr = "Raw Metric"
+
+	// SLAReport - common name for use in logs.
+	SLAReportStr = "SLA Report"
 )
 
 type DruidDatastore interface {
@@ -23,6 +27,8 @@ type DruidDatastore interface {
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+
+	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object

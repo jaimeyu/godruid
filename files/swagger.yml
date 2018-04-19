@@ -1460,6 +1460,54 @@ paths:
           format: int32
       tags:
         - MetricsService
+  /v1/sla-report:
+    get:
+      summary: Generate an SLA Report.
+      operationId: GetSLAReport
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '404':
+          description: "Unable to find Threshold Profile for provided id"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenant
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: thresholdProfileId
+          description: ID of the ThresholdProfile to use for the report
+          in: query
+          required: true
+          type: string
+        - name: timeout
+          description: database query timeout in milliseconds
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
 definitions:
 
   JsonApiAdminUser:

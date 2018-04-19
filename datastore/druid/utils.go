@@ -6,8 +6,11 @@ import (
 	"strings"
 
 	"github.com/Jeffail/gabs"
+	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
 )
 
@@ -143,4 +146,129 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
+}
+
+type druidTimeSeriesEntry struct {
+	Timestamp string
+	Result    map[string]interface{}
+}
+
+func reformatSLASummary(druidResponse []byte) (*metrics.SLASummary, error) {
+	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
+	entries := []*druidTimeSeriesEntry{}
+	if err := json.Unmarshal(druidResponse, &entries); err != nil {
+		return nil, err
+	}
+
+	if len(entries) < 1 {
+		return &metrics.SLASummary{}, nil
+	}
+
+	// For a summary, we expect only 1 entry in the druid results so just use the first entry.
+	obj := gabs.New()
+	for k, v := range entries[0].Result {
+		if strings.Contains(k, ".sla.") {
+			obj.SetP(v, "perMetricSummary."+k)
+		} else {
+			obj.SetP(v, k)
+		}
+	}
+
+	summary := metrics.SLASummary{}
+	if err := json.Unmarshal(obj.Bytes(), &summary); err != nil {
+		return nil, err
+	}
+	if summary.TotalDuration > 0 {
+		summary.SLACompliancePercent = (float32(summary.TotalDuration) - float32(summary.TotalViolationDuration)) * 100.0 / float32(summary.TotalDuration)
+	}
+
+	logger.Log.Debugf("Formatted result for %s: %v", db.SLAReportStr, models.AsJSONString(summary))
+	return &summary, nil
+}
+
+func reformatSLATimeSeries(druidResponse []byte) ([]metrics.TimeSeriesEntry, error) {
+	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
+	entries := []*druidTimeSeriesEntry{}
+	if err := json.Unmarshal(druidResponse, &entries); err != nil {
+		return nil, err
+	}
+
+	res := make([]metrics.TimeSeriesEntry, len(entries))
+	for i, tc := range entries {
+
+		obj := gabs.New()
+		for k, v := range tc.Result {
+			if strings.Contains(k, ".sla.") {
+				obj.SetP(v, "PerMetricResult."+k)
+			} else {
+				obj.SetP(v, k)
+			}
+		}
+		timeseriesEntryResult := metrics.TimeSeriesResult{}
+		if err := json.Unmarshal(obj.Bytes(), &timeseriesEntryResult); err != nil {
+			return nil, err
+		}
+
+		res[i] = metrics.TimeSeriesEntry{
+			Timestamp: tc.Timestamp,
+			Result:    timeseriesEntryResult,
+		}
+	}
+
+	logger.Log.Debugf("Formatted result for %s: %v", db.SLAReportStr, models.AsJSONString(res))
+	return res, nil
+}
+
+type druidTopNEntry struct {
+	Timestamp string
+	Result    []map[string]interface{}
+}
+
+func reformatSLABucketResponse(druidResponse []byte, resultMap map[string]interface{}) (map[string]interface{}, error) {
+	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
+	entries := []*druidTopNEntry{}
+	if err := json.Unmarshal(druidResponse, &entries); err != nil {
+		return nil, err
+	}
+
+	// There should be max 1 entry in the response array
+	if len(entries) < 0 {
+		return nil, nil
+	}
+
+	formattedJSON, err := reformatBucketResponse(entries[0].Result, resultMap)
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Formatted result for %s: %v", db.SLAReportStr, models.AsJSONString(formattedJSON))
+	return formattedJSON, nil
+}
+
+func reformatBucketResponse(buckets []map[string]interface{}, resultMap map[string]interface{}) (map[string]interface{}, error) {
+
+	if resultMap == nil {
+		resultMap = make(map[string]interface{}, len(buckets))
+	}
+
+	for _, result := range buckets {
+		bucketValue := gabs.New()
+		var bucketName string
+		for k, v := range result {
+			if _, ok := v.(string); ok {
+				bucketName = v.(string)
+			} else {
+				bucketValue.SetP(v, k)
+			}
+		}
+
+		if existingBucketValue, ok := resultMap[bucketName]; !ok {
+			resultMap[bucketName] = bucketValue.Data()
+		} else {
+			merge, _ := gabs.Consume(existingBucketValue)
+			merge.Merge(bucketValue)
+			resultMap[bucketName] = merge.Data()
+		}
+	}
+
+	return resultMap, nil
 }

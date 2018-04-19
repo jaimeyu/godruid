@@ -1371,7 +1371,7 @@ paths:
             type: string
         - name: thresholdProfileId
           in: query
-          required: false
+          required: true
           type: string
         - name: vendor
           in: query
@@ -1445,7 +1445,7 @@ paths:
             type: string
         - name: thresholdProfileId
           in: query
-          required: false
+          required: true
           type: string
         - name: vendor
           in: query

@@ -117,6 +117,10 @@ func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCross
 		thresholdCrossingReq.Timeout = 0
 	}
 
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
+
 	return &thresholdCrossingReq
 }
 
@@ -232,6 +236,12 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 		return
 	}
 
+	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		return
+	}
+
 	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
@@ -258,14 +268,20 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 
 	// Turn the query Params into the request object:
 	queryParams := r.URL.Query()
-	slaReqportRequest := populateSLAReportRequest(queryParams)
-	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReqportRequest))
+	slaReportRequest := populateSLAReportRequest(queryParams)
+	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
 
-	tenantID := slaReqportRequest.TenantID
+	tenantID := slaReportRequest.TenantID
 
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReqportRequest.ThresholdProfileID)
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReqportRequest), err.Error())
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
+		reportError(w, startTime, "404", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		return
+	}
+
+	if err = msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
 		reportError(w, startTime, "404", mon.GetSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
@@ -278,7 +294,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(slaReqportRequest, &pbTP)
+	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
@@ -294,7 +310,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.SLAReportStr, models.AsJSONString(slaReqportRequest))
+	logger.Log.Infof("Completed %s fetch for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
 	trackAPIMetrics(startTime, "200", mon.GetSLAReportStr)
 	fmt.Fprintf(w, string(res))
 }
@@ -322,7 +338,13 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
 		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
+		return
+	}
+
+	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
 		return
 	}
 
@@ -413,4 +435,17 @@ func toStringSplice(paramCSV string) []string {
 	}
 
 	return strings.Split(paramCSV, ",")
+}
+
+func (msh *MetricServiceHandler) validateDomains(tenantId string, domains []string) error {
+	if domains == nil || len(domains) == 0 {
+		return nil
+	}
+	for _, dom := range domains {
+		if _, err := msh.tenantDB.GetTenantDomain(tenantId, dom); err != nil {
+			return err
+		}
+	}
+	return nil
+
 }

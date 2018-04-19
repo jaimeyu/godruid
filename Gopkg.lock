@@ -4,14 +4,13 @@
 [[projects]]
   name = "github.com/Jeffail/gabs"
   packages = ["."]
-  revision = "2a3aa15961d5fee6047b8151b67ac2f08ba2c48c"
-  version = "1.0"
+  revision = "44cbc27"
 
 [[projects]]
   branch = "master"
   name = "github.com/accedian/godruid"
   packages = ["."]
-  revision = "11180c0c5fd5edcab1cd56eb5d69e5b3116cae9d"
+  revision = "811beb21bccf0403a37946dc0cc142e6eb900843"
 
 [[projects]]
   branch = "master"
@@ -391,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "49196b6c50e184d5ca83521285782eeeb13f0913f811c342b4e48046de3019e8"
+  inputs-digest = "ddc6439a8ebe18b1c66b3f0014abed11c89f3eca808feb6111f5ac1a622cc2b3"
   solver-name = "gps-cdcl"
   solver-version = 1

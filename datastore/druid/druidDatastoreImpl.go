@@ -11,6 +11,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -23,6 +24,7 @@ const (
 	ThresholdCrossingReport = "threshold-crossing-report"
 	EventDistribution       = "event-distribution"
 	RawMetrics              = "raw-metrics"
+	SLAReport               = "sla-report"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -259,6 +261,129 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		"type":       ThresholdCrossingReport,
 		"attributes": formattedJSON,
 	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	return rr, nil
+}
+
+type Debug struct {
+	Data map[string]interface{} `json:"data"`
+}
+
+func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	var query godruid.Query
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, "all", request.Interval, thresholdProfile.Data, timeout)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	slaSummary, err := reformatSLASummary(response)
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(slaSummary))
+
+	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, "PT1H", request.Interval, thresholdProfile.Data, timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	response, err = dc.executeQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	slaTimeSeries, err := reformatSLATimeSeries(response)
+	if err != nil {
+		return nil, err
+	}
+
+	var hourOfDayBucketMap map[string]interface{}
+	var dayOfWeekBucketMap map[string]interface{}
+
+	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
+		for tk, t := range v.GetMonitoredObjectTypeMap() {
+			for mk, m := range t.GetMetricMap() {
+				for dk, d := range m.GetDirectionMap() {
+					for ek, e := range d.GetEventMap() {
+						if ek != "sla" {
+							continue
+						}
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, vk, tk, mk, dk, "sla", e, "all", request.Interval, timeout)
+						if err != nil {
+							return nil, err
+						}
+
+						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						response, err = dc.executeQuery(query)
+						if err != nil {
+							return nil, err
+						}
+
+						dayOfWeekBucketMap, err = reformatSLABucketResponse(response, dayOfWeekBucketMap)
+						if err != nil {
+							return nil, err
+						}
+
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, vk, tk, mk, dk, "sla", e, "all", request.Interval, timeout)
+						if err != nil {
+							return nil, err
+						}
+
+						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						response, err = dc.executeQuery(query)
+						if err != nil {
+							return nil, err
+						}
+
+						hourOfDayBucketMap, err = reformatSLABucketResponse(response, hourOfDayBucketMap)
+						if err != nil {
+							return nil, err
+						}
+					}
+				}
+			}
+		}
+	}
+
+	reportID := uuid.NewV4().String()
+
+	slaReport := metrics.SLAReport{
+		ReportInstanceID:     reportID,
+		ReportCompletionTime: time.Now().UTC().Format(time.RFC3339),
+		TenantID:             request.TenantID,
+		ReportTimeRange:      request.Interval,
+		SLASummary:           *slaSummary,
+		TimeSeriesResult:     slaTimeSeries,
+		ByHourOfDayResult:    hourOfDayBucketMap,
+		ByDayOfWeekResult:    dayOfWeekBucketMap,
+	}
+
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         reportID,
+		"type":       SLAReport,
+		"attributes": slaReport,
+	})
+
 	rr := map[string]interface{}{
 		"data": data,
 	}

@@ -1,8 +1,10 @@
-* Fix - add domain validation to metric API
 ## Current Release 
+### 0.103.0 
+**Release Date:** Thu Apr 19 20:11:20 UTC 2018     
+## Previous Releases 
+* Fix - add domain validation to metric API
 ### 0.102.0 
 **Release Date:** Thu Apr 19 19:16:40 UTC 2018     
-## Previous Releases 
 * Feature - SLA Report
 ### 0.101.0 
 **Release Date:** Mon Apr 16 11:14:53 UTC 2018     

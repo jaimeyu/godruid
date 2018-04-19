@@ -1,3 +1,4 @@
+* Fix - add domain validation to metric API
 ## Current Release 
 ### 0.102.0 
 **Release Date:** Thu Apr 19 19:16:40 UTC 2018     

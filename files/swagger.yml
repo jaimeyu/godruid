@@ -1500,6 +1500,12 @@ paths:
           in: query
           required: true
           type: string
+        - name: granularity
+          description: the granularity for timeseries in ISO-8601 Duration format
+          in: query
+          required: false
+          type: string
+          default: PT1H
         - name: timeout
           description: database query timeout in milliseconds
           in: query

@@ -12,9 +12,10 @@ import (
 type TimeBucket int
 
 const (
-	TimeZoneUTC            = "UTC"
-	HourOfDay   TimeBucket = 0
-	DayOfWeek   TimeBucket = 1
+	TimeZoneUTC                = "UTC"
+	Granularity_All            = "all"
+	HourOfDay       TimeBucket = 0
+	DayOfWeek       TimeBucket = 1
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
@@ -185,7 +186,7 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, gran
 							dirFilters.ThresholdFilters = append(dirFilters.ThresholdFilters, thresholdFilter)
 						}
 
-						aggName := vk + "." + tk + "." + mk + "." + ek + "." + dk + ".violationCount"
+						aggNamePrefix := vk + "." + tk + "." + mk + "." + ek + "." + dk
 						// Count violations for this metric
 						aggregations = append(aggregations, godruid.AggFiltered(
 							godruid.FilterAnd(
@@ -194,10 +195,33 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, gran
 							),
 							&godruid.Aggregation{
 								Type: "count",
-								Name: aggName,
+								Name: aggNamePrefix + ".violationCount",
 							},
 						))
-						violationCountAggs = append(violationCountAggs, aggName)
+						violationCountAggs = append(violationCountAggs, aggNamePrefix+".violationCount")
+
+						// Sum the total duration this metric was measured.
+						aggregations = append(aggregations, godruid.AggFiltered(
+							objectTypeAndDirectionFilter,
+							&godruid.Aggregation{
+								Type:      "longSum",
+								FieldName: "duration",
+								Name:      aggNamePrefix + ".totalDuration",
+							},
+						))
+
+						// Sum the duration while this metric was in violation.
+						aggregations = append(aggregations, godruid.AggFiltered(
+							godruid.FilterAnd(
+								thresholdFilter,
+								objectTypeAndDirectionFilter,
+							),
+							&godruid.Aggregation{
+								Type:      "longSum",
+								FieldName: "duration",
+								Name:      aggNamePrefix + ".violationDuration",
+							},
+						))
 
 					}
 				}
@@ -498,7 +522,7 @@ func buildPostAggregationFields(fieldNames []string) []godruid.PostAggregation {
 }
 
 func toGranularity(granularityStr string) godruid.Granlarity {
-	if granularityStr == "all" {
+	if granularityStr == Granularity_All {
 		return godruid.GranAll
 	}
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")

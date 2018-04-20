@@ -1,8 +1,10 @@
-* Fix - improvements to SLA report
 ## Current Release 
+### 0.104.0 
+**Release Date:** Fri Apr 20 15:09:28 UTC 2018     
+## Previous Releases 
+* Fix - improvements to SLA report
 ### 0.103.0 
 **Release Date:** Thu Apr 19 20:11:20 UTC 2018     
-## Previous Releases 
 * Fix - add domain validation to metric API
 ### 0.102.0 
 **Release Date:** Thu Apr 19 19:16:40 UTC 2018     

@@ -282,7 +282,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		timeout = 5000
 	}
 
-	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, "all", request.Interval, thresholdProfile.Data, timeout)
+	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, Granularity_All, request.Interval, thresholdProfile.Data, timeout)
 
 	if err != nil {
 		return nil, err
@@ -300,7 +300,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 	}
 	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(slaSummary))
 
-	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, "PT1H", request.Interval, thresholdProfile.Data, timeout)
+	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 						if ek != "sla" {
 							continue
 						}
-						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, vk, tk, mk, dk, "sla", e, "all", request.Interval, timeout)
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
 						if err != nil {
 							return nil, err
 						}
@@ -343,7 +343,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 							return nil, err
 						}
 
-						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, vk, tk, mk, dk, "sla", e, "all", request.Interval, timeout)
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
 						if err != nil {
 							return nil, err
 						}

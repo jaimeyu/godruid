@@ -7,6 +7,7 @@ type SLAReportRequest struct {
 	Domain   []string `json:"domain,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
+	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
 }
 

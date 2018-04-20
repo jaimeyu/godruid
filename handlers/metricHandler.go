@@ -131,6 +131,7 @@ func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest 
 		Interval:           queryParams.Get("interval"),
 		Domain:             toStringSplice(queryParams.Get("domain")),
 		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
+		Granularity:        queryParams.Get("granularity"),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
@@ -138,6 +139,10 @@ func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest 
 		request.Timeout = int32(timeout)
 	} else {
 		request.Timeout = 0
+	}
+
+	if len(request.Granularity) == 0 {
+		request.Granularity = "PT1H"
 	}
 
 	return &request

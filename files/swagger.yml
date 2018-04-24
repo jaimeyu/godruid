@@ -1509,7 +1509,7 @@ paths:
           type: string
         - name: metric
           in: query
-          required: false
+          required: true
           type: string
         - name: thresholdProfileId
           in: query

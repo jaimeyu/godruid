@@ -484,8 +484,6 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		aggregation := godruid.AggFiltered(
 			godruid.FilterAnd(
 				filter,
-				godruid.FilterSelector("objectType", objectType),
-				godruid.FilterSelector("direction", direction),
 			),
 			&godruid.Aggregation{
 				Type: "count",
@@ -510,6 +508,8 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			buildDomainFilter(domains),
+			godruid.FilterSelector("objectType", objectType),
+			godruid.FilterSelector("direction", direction),
 		),
 		PostAggregations: []godruid.PostAggregation{
 			godruid.PostAggArithmetic("scored", "+", postAggregations),

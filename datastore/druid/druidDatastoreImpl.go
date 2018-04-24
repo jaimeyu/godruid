@@ -43,6 +43,11 @@ type ThresholdCrossingByMonitoredObjectResponse struct {
 	Event     map[string]interface{}
 }
 
+type TopNThresholdCrossingByMonitoredObjectResponse struct {
+	Timestamp string
+	Result    []map[string]interface{}
+}
+
 type RawMetricsResponse struct {
 	Timestamp string
 	Result    map[string]interface{}
@@ -215,7 +220,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	return rr, nil
 }
 
-// GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
+// GetThresholdCrossingByMonitoredObject - Executes a GroupBy 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
@@ -260,6 +265,56 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		"id":         uuid.String(),
 		"type":       ThresholdCrossingReport,
 		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	return rr, nil
+}
+
+// GetThresholdCrossingByMonitoredObjectTopN - Executes a TopN 'threshold crossing' query against druid. Wraps the
+// result in a JSON API wrapper.
+// peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
+func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_table.String())
+
+	// peyo TODO we should have a better way to handle default query params
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, "jitterP95", request.Granularity, request.Interval, "twamp-pe", "0", thresholdProfile.Data, "accedian-twamp", timeout)
+
+	// query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Domain, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	thresholdCrossing := make([]TopNThresholdCrossingByMonitoredObjectResponse, 0)
+	err = json.Unmarshal(response, &thresholdCrossing)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+
+	// peyo TODO: need to figure out where to get this ID and Type from.
+	uuid := uuid.NewV4()
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": thresholdCrossing,
 	})
 	rr := map[string]interface{}{
 		"data": data,

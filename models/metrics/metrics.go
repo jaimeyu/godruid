@@ -42,3 +42,18 @@ type TimeSeriesResult struct {
 	TotalViolationDuration int64       `json:"totalViolationDuration"`
 	PerMetricResult        interface{} `json:"perMetricResult"`
 }
+
+type ThresholdCrossingTopNRequest struct {
+	ObjectType string `json:"objectType"`
+	Direction  string `json:"direction"`
+	Metric     string `json:"metric"`
+	Vendor     string `json:"vendor"`
+	TenantID   string `json:"tenantId"`
+	// ISO-8601 Intervals
+	Interval string   `json:"interval,omitempty"`
+	Domain   []string `json:"domain,omitempty"`
+	// ISO-8601 period combination
+	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
+	Granularity        string `json:"granularity,omitempty"`
+	Timeout            int32  `json:"timeout,omitempty"`
+}

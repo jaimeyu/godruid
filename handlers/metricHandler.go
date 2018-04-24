@@ -59,6 +59,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 		},
 
 		server.Route{
+			Name:        "GetThresholdCrossingByMonitoredObjectTopN",
+			Method:      "GET",
+			Pattern:     "/api/v1/threshold-crossing-by-monitored-object-top-n",
+			HandlerFunc: result.GetThresholdCrossingByMonitoredObjectTopN,
+		},
+
+		server.Route{
 			Name:        "GetSLAReport",
 			Method:      "GET",
 			Pattern:     "/api/v1/sla-report",
@@ -108,6 +115,34 @@ func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCross
 		Tenant:             queryParams.Get("tenant"),
 		ThresholdProfileId: queryParams.Get("thresholdProfileId"),
 		Vendor:             toStringSplice(queryParams.Get("vendor")),
+	}
+
+	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
+	if err == nil {
+		thresholdCrossingReq.Timeout = int32(timeout)
+	} else {
+		thresholdCrossingReq.Timeout = 0
+	}
+
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
+
+	return &thresholdCrossingReq
+}
+
+func populateThresholdCrossingTopNRequest(queryParams url.Values) *metrics.ThresholdCrossingTopNRequest {
+
+	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{
+		Direction:          queryParams.Get("direction"),
+		Domain:             toStringSplice(queryParams.Get("domain")),
+		Granularity:        queryParams.Get("granularity"),
+		Interval:           queryParams.Get("interval"),
+		Metric:             queryParams.Get("metric"),
+		ObjectType:         queryParams.Get("objectType"),
+		TenantID:           queryParams.Get("tenantId"),
+		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
+		Vendor:             queryParams.Get("vendor"),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
@@ -371,6 +406,60 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
 	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjStr)
+	fmt.Fprintf(w, string(res))
+}
+
+// GetThresholdCrossingByMonitoredObjectTopN - Retrieves the TopN Threshold crossings for a given threshold profile,
+// interval, tenant, domain, and groups by monitoredObjectID
+func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Turn the query Params into the request object:
+	queryParams := r.URL.Query()
+	thresholdCrossingReq := populateThresholdCrossingTopNRequest(queryParams)
+	logger.Log.Infof("Retrieving %s for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
+
+	tenantID := thresholdCrossingReq.TenantID
+
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
+		return
+	}
+
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
+		return
+	}
+
+	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.Domain); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(thresholdCrossingReq, &pbTP)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
+	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjTopNStr)
 	fmt.Fprintf(w, string(res))
 }
 

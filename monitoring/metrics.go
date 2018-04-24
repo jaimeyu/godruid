@@ -20,6 +20,7 @@ const (
 	ThresholdProfileStr    = "thr_prf"
 	MonitoredObjectStr     = "mon_obj"
 	ThrCrossStr            = "thr_cross"
+	ThrCrossStrTopN        = "thr_cross_topn"
 	HistogramStr           = "histogram"
 	RawMetricStr           = "raw_metric"
 	SLAReportStr           = "sla_report"
@@ -101,11 +102,12 @@ const (
 	DeleteMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPDeleteStr
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
 
-	GetThrCrossStr         = ThrCrossStr + metricNameDelimiter + OPGetStr
-	GetThrCrossByMonObjStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
-	GetHistogramObjStr     = HistogramStr + metricNameDelimiter + OPGetStr
-	GetRawMetricStr        = RawMetricStr + metricNameDelimiter + OPGetStr
-	GetSLAReportStr        = SLAReportStr + metricNameDelimiter + OPGetStr
+	GetThrCrossStr             = ThrCrossStr + metricNameDelimiter + OPGetStr
+	GetThrCrossByMonObjStr     = ThrCrossStrTopN + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
+	GetThrCrossByMonObjTopNStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
+	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
+	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
+	GetSLAReportStr            = SLAReportStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr

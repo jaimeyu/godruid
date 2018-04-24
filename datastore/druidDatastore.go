@@ -12,6 +12,9 @@ const (
 	// ThresholdCrossingByMonitoredObjectStr - common name for use in logs.
 	ThresholdCrossingByMonitoredObjectStr = "Threshold Crossing by Monitored Object"
 
+	// ThresholdCrossingByMonitoredObjectStr - common name for use in logs.
+	TopNThresholdCrossingByMonitoredObjectStr = "TopN Threshold Crossing by Monitored Object"
+
 	// HistogramStr - common name for use in logs.
 	HistogramStr = "Histogram"
 
@@ -33,6 +36,11 @@ type DruidDatastore interface {
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+
+	// Returns the the number of times a given metric crossed the
+	// minor,major,critical thresholds of a given threshold object
+	// Uses TopN query.
+	GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
 	// Returns the min,max,avg,median for a given metric
 	GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error)

@@ -1460,6 +1460,72 @@ paths:
           format: int32
       tags:
         - MetricsService
+  /v1/threshold-crossing-by-monitored-object-top-n:
+    get:
+      operationId: GetThresholdCrossingByMonitoredObjectTopN
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '404':
+          description: "Unable to find Threshold Profile for provided id"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenantId
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: granularity
+          description: ISO-8601 period combination.
+          in: query
+          required: false
+          type: string
+        - name: objectType
+          in: query
+          required: false
+          type: string
+        - name: direction
+          in: query
+          required: false
+          type: string
+        - name: metric
+          in: query
+          required: false
+          type: string
+        - name: thresholdProfileId
+          in: query
+          required: true
+          type: string
+        - name: vendor
+          in: query
+          required: false
+          type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
   /v1/sla-report:
     get:
       summary: Generate an SLA Report.

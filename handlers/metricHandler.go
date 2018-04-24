@@ -149,7 +149,14 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) *metrics.Thres
 	if err == nil {
 		thresholdCrossingReq.Timeout = int32(timeout)
 	} else {
-		thresholdCrossingReq.Timeout = 0
+		thresholdCrossingReq.Timeout = 5000 // default value
+	}
+
+	numResults, err := strconv.Atoi(queryParams.Get("numResults"))
+	if err == nil {
+		thresholdCrossingReq.NumResults = int32(numResults)
+	} else {
+		thresholdCrossingReq.NumResults = 10 // default value
 	}
 
 	if len(thresholdCrossingReq.Granularity) == 0 {

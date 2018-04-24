@@ -1524,6 +1524,11 @@ paths:
           required: false
           type: integer
           format: int32
+        - name: numResults
+          in: query
+          required: false
+          type: integer
+          format: int32
       tags:
         - MetricsService
   /v1/sla-report:

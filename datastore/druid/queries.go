@@ -460,7 +460,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, domains []string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32) (*godruid.QueryTopN, error) {
+func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, domains []string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations []godruid.PostAggregation
@@ -516,7 +516,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		},
 		Intervals: []string{interval},
 		Metric:    "scored",
-		Threshold: 20,
+		Threshold: int(numResults),
 		Dimension: "monitoredObjectId",
 	}, nil
 }

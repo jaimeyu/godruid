@@ -56,4 +56,5 @@ type ThresholdCrossingTopNRequest struct {
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
+	NumResults         int32  `json:"numResults,omitempty"`
 }

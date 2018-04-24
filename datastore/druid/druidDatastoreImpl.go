@@ -281,15 +281,8 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_table.String())
 
-	// peyo TODO we should have a better way to handle default query params
-	timeout := request.Timeout
-	if timeout == 0 {
-		timeout = 5000
-	}
+	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, "jitterP95", request.Granularity, request.Interval, "twamp-pe", "0", thresholdProfile.Data, "accedian-twamp", request.Timeout, request.NumResults)
 
-	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, "jitterP95", request.Granularity, request.Interval, "twamp-pe", "0", thresholdProfile.Data, "accedian-twamp", timeout)
-
-	// query, err := ThresholdCrossingByMonitoredObjectQuery(request.GetTenant(), table, request.Domain, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
 	if err != nil {
 		return nil, err
 	}

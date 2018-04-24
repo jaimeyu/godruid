@@ -1,3 +1,4 @@
+* Fix - add missing kafka config for local builds to start.
 ## Current Release 
 ### 0.104.0 
 **Release Date:** Fri Apr 20 15:09:28 UTC 2018     

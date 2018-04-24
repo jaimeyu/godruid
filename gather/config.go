@@ -111,4 +111,5 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_maxConcurrentMetricAPICalls.String(), 500)
 	v.SetDefault(CK_args_maxConcurrentProvAPICalls.String(), 1000)
 	v.SetDefault(CK_args_maxConcurrentPouchAPICalls.String(), 1000)
+	v.SetDefault(CK_kafka_broker.String(), "kafka:9092")
 }

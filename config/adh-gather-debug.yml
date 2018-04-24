@@ -29,6 +29,9 @@ args:
   maxConcurrentProvAPICalls:   1000
   maxConcurrentMetricAPICalls: 500
 
+kafka:
+  broker: kafka:9092
+
 druid:
   server: "https://broker.mpreston.npav.accedian.net"
   table: "npav-ts-metrics"

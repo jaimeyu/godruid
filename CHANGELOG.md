@@ -1,7 +1,10 @@
 ## Current Release 
+### 0.105.0 
+**Release Date:** Tue Apr 24 19:56:43 UTC 2018     
+## Previous Releases 
+* Fix - add missing kafka config for local builds to start.
 ### 0.104.0 
 **Release Date:** Fri Apr 20 15:09:28 UTC 2018     
-## Previous Releases 
 * Fix - improvements to SLA report
 ### 0.103.0 
 **Release Date:** Thu Apr 19 20:11:20 UTC 2018     

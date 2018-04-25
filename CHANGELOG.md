@@ -1,8 +1,10 @@
-* Fix - adding 'changeNotifications' flag to be able to bypass change notification sub-routine if not needed.
 ## Current Release 
+### 0.107.0 
+**Release Date:** Wed Apr 25 19:21:16 UTC 2018     
+## Previous Releases 
+* Fix - adding 'changeNotifications' flag to be able to bypass change notification sub-routine if not needed.
 ### 0.106.0 
 **Release Date:** Wed Apr 25 14:44:33 UTC 2018     
-## Previous Releases 
 ### 0.105.0 
 **Release Date:** Tue Apr 24 19:56:43 UTC 2018     
 * Fix - add missing kafka config for local builds to start.

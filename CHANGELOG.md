@@ -1,3 +1,4 @@
+* Fix - SLA report when no metric rows exist for time range
 ## Current Release 
 ### 0.107.0 
 **Release Date:** Wed Apr 25 19:21:16 UTC 2018     

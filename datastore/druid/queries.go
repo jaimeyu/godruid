@@ -458,6 +458,69 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 		}}, nil
 }
 
+// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// defined by the supplied threshold profile. Groups results my monitored object ID.
+func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, domains []string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
+
+	var aggregations []godruid.Aggregation
+	var postAggregations []godruid.PostAggregation
+
+	var eventWeights = make(map[string]float32)
+	eventWeights["minor"] = 0.0001
+	eventWeights["major"] = 0.001
+	eventWeights["critical"] = 1
+
+	aggregations = append(aggregations, godruid.AggCount("total"))
+
+	vendorMap := thresholdProfile.GetThresholds().GetVendorMap()
+	events := vendorMap[vendor].GetMonitoredObjectTypeMap()[objectType].GetMetricMap()[metric].GetDirectionMap()[direction].GetEventMap()
+
+	for ek, e := range events {
+		name := ek
+		filter, err := FilterHelper(metric, e)
+		if err != nil {
+			return nil, err
+		}
+		aggregation := godruid.AggFiltered(
+			godruid.FilterAnd(
+				filter,
+			),
+			&godruid.Aggregation{
+				Type: "count",
+				Name: name,
+			},
+		)
+
+		postAggregation := godruid.PostAggArithmetic("", "*", []godruid.PostAggregation{
+			godruid.PostAggConstant("", eventWeights[ek]),
+			godruid.PostAggFieldAccessor(ek),
+		})
+
+		postAggregations = append(postAggregations, postAggregation)
+		aggregations = append(aggregations, aggregation)
+	}
+
+	return &godruid.QueryTopN{
+		DataSource:   dataSource,
+		Granularity:  toGranularity(granularity),
+		Context:      map[string]interface{}{"timeout": timeout},
+		Aggregations: aggregations,
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(domains),
+			godruid.FilterSelector("objectType", objectType),
+			godruid.FilterSelector("direction", direction),
+		),
+		PostAggregations: []godruid.PostAggregation{
+			godruid.PostAggArithmetic("scored", "+", postAggregations),
+		},
+		Intervals: []string{interval},
+		Metric:    "scored",
+		Threshold: int(numResults),
+		Dimension: "monitoredObjectId",
+	}, nil
+}
+
 //RawMetricsQuery  - Query that returns a raw metric values
 func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, direction string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 

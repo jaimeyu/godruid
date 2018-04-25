@@ -74,7 +74,8 @@ func init() {
 	pflag.StringVar(&ingDictFilePath, "ingDict", defaultIngestionDictionaryPath, "Specify file path of default Ingestion Dictionary")
 	pflag.StringVar(&swaggerFilePath, "swag", defaultSwaggerFile, "Specify file path of the Swagger documentation")
 
-	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing", "/api/v1/sla-report"}
+	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object",
+		"/api/v1/threshold-crossing", "/api/v1/sla-report", "/api/v1/threshold-crossing-by-monitored-object-top-n"}
 }
 
 // GatherServer - Server which will implement the gRPC Services.

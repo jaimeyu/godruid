@@ -63,7 +63,8 @@ var (
 	provAPIMutex   = &sync.Mutex{}
 	pouchAPIMutex  = &sync.Mutex{}
 
-	metricServiceEndpoints []string
+	metricServiceEndpoints    []string
+	enableChangeNotifications bool
 )
 
 func init() {
@@ -73,6 +74,8 @@ func init() {
 	pflag.BoolVar(&enableTLS, "tls", true, "Specify if TLS should be enabled")
 	pflag.StringVar(&ingDictFilePath, "ingDict", defaultIngestionDictionaryPath, "Specify file path of default Ingestion Dictionary")
 	pflag.StringVar(&swaggerFilePath, "swag", defaultSwaggerFile, "Specify file path of the Swagger documentation")
+
+	pflag.BoolVar(&enableChangeNotifications, "changeNotifications", true, "Specify if Change Notifications should be enabled")
 
 	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object",
 		"/api/v1/threshold-crossing", "/api/v1/sla-report", "/api/v1/threshold-crossing-by-monitored-object-top-n"}
@@ -677,6 +680,7 @@ func main() {
 	tlsKeyFile = v.GetString("tlskey")
 	ingDictFilePath = v.GetString("ingDict")
 	swaggerFilePath = v.GetString("swag")
+	enableChangeNotifications = v.GetBool("changeNotifications")
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)
@@ -695,8 +699,10 @@ func main() {
 	maxConcurrentProvAPICalls = uint64(v.GetInt64(gather.CK_args_maxConcurrentProvAPICalls.String()))
 	logger.Log.Debugf("API caps are set to: Metric-%d Prov-%d Pouch-%d", maxConcurrentMetricAPICalls, maxConcurrentProvAPICalls, maxConcurrentPouchAPICalls)
 
-	// Start monitoring changes and sending notifications
-	go startChangeNotificationHandler()
+	if enableChangeNotifications {
+		// Start monitoring changes and sending notifications
+		go startChangeNotificationHandler()
+	}
 
 	// Start the REST and gRPC Services
 	gatherServer := newServer()

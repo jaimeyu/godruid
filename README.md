@@ -59,3 +59,4 @@ The following command line arguments are also available when executing the adh-g
 	2. tls: Specify if TLS should be enabled (--tls=true/false, default: true)
 	3. tlskey: Specify a TLS Key file. (--tlskey=path_to_tls_key, default: "/run/secrets/tls_key")
 	4. tlscert: Specify a TLS Cert file. (--tlscert=path_to_tls_cert, default: "/run/secrets/tls_crt")
+	5. changeNotifications: Specify if Change Notifications should be enabled. (--changeNotifications=true/false, default: true)

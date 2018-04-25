@@ -1,3 +1,4 @@
+* Fix - adding 'changeNotifications' flag to be able to bypass change notification sub-routine if not needed.
 ## Current Release 
 ### 0.106.0 
 **Release Date:** Wed Apr 25 14:44:33 UTC 2018     

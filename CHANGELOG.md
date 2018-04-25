@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.106.0 
+**Release Date:** Wed Apr 25 14:44:33 UTC 2018     
+## Previous Releases 
 ### 0.105.0 
 **Release Date:** Tue Apr 24 19:56:43 UTC 2018     
-## Previous Releases 
 * Fix - add missing kafka config for local builds to start.
 ### 0.104.0 
 **Release Date:** Fri Apr 20 15:09:28 UTC 2018     

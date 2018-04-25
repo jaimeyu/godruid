@@ -231,11 +231,11 @@ func reformatSLABucketResponse(druidResponse []byte, resultMap map[string]interf
 		return nil, err
 	}
 
-	// There should be max 1 entry in the response array
-	if len(entries) < 0 {
+	if len(entries) < 1 {
 		return nil, nil
 	}
 
+	// There should be max 1 entry in the response array
 	formattedJSON, err := reformatBucketResponse(entries[0].Result, resultMap)
 	if err != nil {
 		return nil, err

@@ -1,8 +1,10 @@
-* Feature - Use Druid lookups for domain filtering.
 ## Current Release 
+### 0.109.0 
+**Release Date:** Sun May  6 21:05:18 UTC 2018     
+## Previous Releases 
+* Feature - Use Druid lookups for domain filtering.
 ### 0.108.0 
 **Release Date:** Wed Apr 25 19:40:48 UTC 2018     
-## Previous Releases 
 * Fix - SLA report when no metric rows exist for time range
 ### 0.107.0 
 **Release Date:** Wed Apr 25 19:21:16 UTC 2018     

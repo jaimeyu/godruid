@@ -1,3 +1,4 @@
+* Feature - Use Druid lookups for domain filtering.
 ## Current Release 
 ### 0.108.0 
 **Release Date:** Wed Apr 25 19:40:48 UTC 2018     

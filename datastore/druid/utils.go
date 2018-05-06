@@ -1,8 +1,12 @@
 package druid
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/Jeffail/gabs"
@@ -271,4 +275,54 @@ func reformatBucketResponse(buckets []map[string]interface{}, resultMap map[stri
 	}
 
 	return resultMap, nil
+}
+
+func buildLookupName(dimType, tenantID, dimValue string) string {
+	return strings.ToLower(dimType + "|" + tenantID + "|" + dimValue)
+}
+
+func buildLookupNamePrefix(dimType, tenantID string) string {
+	return strings.ToLower(dimType + "|" + tenantID)
+}
+
+func sendRequest(method string, httpClient *http.Client, endpoint, authToken string, req []byte) (result []byte, err error) {
+
+	ep := endpoint + "?pretty"
+
+	var reqBody io.Reader
+	if req != nil {
+		reqBody = bytes.NewBuffer(req)
+	} else {
+		reqBody = http.NoBody
+	}
+	request, err := http.NewRequest(method, ep, reqBody)
+	if err != nil {
+		return
+	}
+	request.Header.Set("Content-Type", "application/json")
+	if authToken != "" {
+		request.Header.Set("Authorization", "Bearer "+authToken)
+	}
+
+	resp, err := httpClient.Do(request)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+
+	if err != nil {
+		return
+	}
+
+	result, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		err = fmt.Errorf("%s: %s", resp.Status, string(result))
+	}
+
+	return
 }

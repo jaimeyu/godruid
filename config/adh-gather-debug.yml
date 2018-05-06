@@ -33,8 +33,9 @@ kafka:
   broker: kafka:9092
 
 druid:
-  server: "https://broker.mpreston.npav.accedian.net"
-  table: "npav-ts-metrics"
-  auth: "https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1/73yKOIRcqC7WEFIDA-p1nnnhoXvQvBMKAryS967P7SU&grant_type=refresh_token&audience=627634877761-m2ag3kvptgns0mk53s1pqvkfq2va8b1n.apps.googleusercontent.com"
+  broker:
+    server: "https://broker.mpreston.npav.accedian.net"
+    table: "npav-ts-metrics"
+    auth: "https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1/73yKOIRcqC7WEFIDA-p1nnnhoXvQvBMKAryS967P7SU&grant_type=refresh_token&audience=627634877761-m2ag3kvptgns0mk53s1pqvkfq2va8b1n.apps.googleusercontent.com"
 
     #"https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1%2FDfvhAZKYRY2MM90DbK66VfIvbsx7Phh1fLnVSxqRbYc&grant_type=refresh_token&audience=627634877761-fuiuhml29ce7985ua5rcjm2s3adk797v.apps.googleusercontent.com"

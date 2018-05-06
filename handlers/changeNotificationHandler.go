@@ -1,42 +1,64 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/druid"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 
-	"github.com/shopify/sarama"
+	"github.com/segmentio/kafka-go"
 )
 
-/*
-	Pushes provisioning changes to other system via Kafka.
-	Currently this just sends all monitored object data to Kafka at a regular interval.
-*/
+type EventType int16
 
-const pollingFrequencySecs = 60
-const refreshFrequencyMillis = int64(5 * time.Minute / time.Millisecond)
-const defaultKafkaTopic = "monitored-object"
+const (
+	MonitoredObjectCreated = 0
+	MonitoredObjectDeleted = 1
+	MonitoredObjectUpdated = 2
+	DomainCreated          = 10
+	DomainUpdated          = 11
+	DomainDeleted          = 12
+)
 
-var changeNotifH ChangeNotificationHandler
-
-type ChangeNotificationHandler struct {
-	monitoredObjectChanges chan []*tenmod.MonitoredObject
-	brokers                []string
-	topic                  string
-	adminDB                *datastore.AdminServiceDatastore
-	tenantDB               *datastore.TenantServiceDatastore
+type ChangeEvent struct {
+	eventType EventType
+	tenantID  string
+	payload   interface{}
 }
+
+const pollingFrequencySecs = 60                                          // How often to poll tenantDB for recent changes
+const refreshFrequencyMillis = int64(5 * time.Minute / time.Millisecond) // How often to push a full refresh of tenantDB
+const defaultKafkaTopic = "monitored-object"                             // The topic where changes are pushed.
+
+/*
+ The ChangeNotificationHandler is the entry point for handling changes to provisioning resources.
+ Provisioning changes are either pushed to the ChangeNotificationHandler from provisioning workflows (i.e. API calls) or
+ they are polled from the tenantDB.
+ The polling mechanism serves more of a backup mechanism in situations where pushed events are lost and gives the opportunity
+ for subscribers of events to perform a full resync of their systems with the tenantDB.
+*/
+type ChangeNotificationHandler struct {
+	provisioningEvents chan *ChangeEvent
+	brokers            []string
+	topic              string
+	adminDB            *datastore.AdminServiceDatastore
+	tenantDB           *datastore.TenantServiceDatastore
+	metricsDB          datastore.DruidDatastore
+}
+
+// ChangeNotificationHandler singleton
+var changeNotifH ChangeNotificationHandler
 
 func getChangeNotificationHandler() *ChangeNotificationHandler {
 	return &changeNotifH
 }
 
 func CreateChangeNotificationHandler() *ChangeNotificationHandler {
-	changeNotifH = ChangeNotificationHandler{}
 
 	cfg := gather.GetConfig()
 	broker := cfg.GetString(gather.CK_kafka_broker.String())
@@ -44,38 +66,35 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		logger.Log.Warning("No Kafka broker configured for notifications")
 		return nil
 	}
-	changeNotifH.brokers = []string{broker}
-	changeNotifH.topic = defaultKafkaTopic
 
 	tenantDB, err := getTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantDB: %s", err.Error())
 		return nil
 	}
-	changeNotifH.tenantDB = &tenantDB
-
 	adminDB, err := getAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminDB: %s", err.Error())
 		return nil
 	}
-	changeNotifH.adminDB = &adminDB
 
-	changeNotifH.monitoredObjectChanges = make(chan []*tenmod.MonitoredObject)
+	changeNotifH = ChangeNotificationHandler{
+		brokers:            []string{broker},
+		topic:              defaultKafkaTopic,
+		tenantDB:           &tenantDB,
+		adminDB:            &adminDB,
+		provisioningEvents: make(chan *ChangeEvent, 20),
+		metricsDB:          druid.NewDruidDatasctoreClient(),
+	}
+
+	//	go changeNotifH.readFromKafka(broker, defaultKafkaTopic)
 
 	return &changeNotifH
 }
 
-type changeNotifier struct {
-	brokers              []string
-	topic                string
-	adminDB              *datastore.AdminServiceDatastore
-	tenantDB             *datastore.TenantServiceDatastore
-	lastSuccessTimestamp int64
-	hasErrors            bool
-	fullRefresh          bool
-}
-
+/*
+The main loop
+*/
 func (c *ChangeNotificationHandler) SendChangeNotifications() {
 
 	lastFullRefresh := int64(0)
@@ -86,122 +105,317 @@ func (c *ChangeNotificationHandler) SendChangeNotifications() {
 	quit := make(chan struct{})
 
 	for {
-		var mo []*tenmod.MonitoredObject
 		select {
 		case <-ticker.C:
 
 			// Time to run the audit to push changes we may have missed through the channel.
+			// If needsRefresh is false, just push changes detected since last push; otherwise
+			// push all provisioning data that others are interested in.
+			// Note: right now, this is a synchronous operation. If needed it could be handled in
+			// a separate dedicated thread.
 			startTime := time.Now().UnixNano() / int64(time.Millisecond)
 			needsRefresh := lastFullRefresh <= (startTime - refreshFrequencyMillis)
-
-			notifier := c.createNotifier(lastSuccess, needsRefresh)
-			notifier.pollChanges()
-			if !notifier.hasErrors {
+			if err := c.pollChanges(lastSuccess, needsRefresh); err == nil {
 				lastSuccess = startTime
 				if needsRefresh {
 					lastFullRefresh = startTime
 				}
 			}
 
-		case mo = <-c.monitoredObjectChanges:
-			// A monitoredObject was changed. Push to kafka
-			logger.Log.Debugf("Received a changed notification for %v", mo)
-			c.sendToKafkaAsync(mo)
+		case event := <-c.provisioningEvents:
+			// Something changed, lets batch the events if we can.  This helps to
+			// reduce the number of updates in the metrics DB to update metadata.
+			logger.Log.Debugf("Received a changed notification %v", event)
+			bufferedEvents := []*ChangeEvent{}
+			bufferedEvents = append(bufferedEvents, event)
+			t := time.After(5 * time.Second)
+			buffering := true
+			for buffering {
+				select {
+				case event := <-c.provisioningEvents:
+					bufferedEvents = append(bufferedEvents, event)
+				case <-t:
+					buffering = false
+				}
+			}
+			c.processEvents(bufferedEvents)
 
 		case <-quit:
 			ticker.Stop()
 			return
+
 		}
 	}
 }
 
-func (c *ChangeNotificationHandler) sendToKafkaAsync(monitoredObjects []*tenmod.MonitoredObject) {
-	producer := newAsyncKafkaProducer(c.brokers)
-	// Create a callback for handling errors
-	go func() {
-		for err := range producer.Errors() {
-			logger.Log.Errorf("Failed to write monitored object: %s", err)
+func NotifyMonitoredObjectCreated(tenantID string, obj ...*tenmod.MonitoredObject) {
+	NotifyEvent(&ChangeEvent{
+		eventType: MonitoredObjectCreated,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyMonitoredObjectUpdated(tenantID string, obj ...*tenmod.MonitoredObject) {
+	NotifyEvent(&ChangeEvent{
+		eventType: MonitoredObjectUpdated,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyMonitoredObjectDeleted(tenantID string, obj ...*tenmod.MonitoredObject) {
+	NotifyEvent(&ChangeEvent{
+		eventType: MonitoredObjectDeleted,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyDomainCreated(tenantID string, obj ...*tenmod.Domain) {
+	NotifyEvent(&ChangeEvent{
+		eventType: DomainCreated,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyDomainUpdated(tenantID string, obj ...*tenmod.Domain) {
+	NotifyEvent(&ChangeEvent{
+		eventType: DomainUpdated,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyDomainDeleted(tenantID string, obj ...*tenmod.Domain) {
+	NotifyEvent(&ChangeEvent{
+		eventType: DomainDeleted,
+		tenantID:  tenantID,
+		payload:   obj,
+	})
+}
+
+func NotifyEvent(event *ChangeEvent) {
+	changeNotifH.provisioningEvents <- event
+}
+
+func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {
+	processedTenantIds := make(map[string]bool)
+	for _, e := range events {
+		metadataChange := false
+		switch e.eventType {
+		case MonitoredObjectCreated, MonitoredObjectUpdated:
+			c.sendToKafka(e.tenantID, e.payload.([]*tenmod.MonitoredObject))
+			metadataChange = true
+		case MonitoredObjectDeleted, DomainCreated, DomainUpdated, DomainDeleted:
+			metadataChange = true
 		}
+
+		if metadataChange {
+			// Currently any metadataChange is handled by resynchronizing all metadata for the tenant so we
+			// don't really care what the nature of the change was.
+			// This approach is nice and simple but is also effectively similar to dropping a table
+			// and re-populating it. If it becomes inefficient we'll have to update this to do
+			// more of a CRUD approach to the metadata.
+			if _, ok := processedTenantIds[e.tenantID]; !ok {
+				c.updateMetricsDatastoreMetadata(e.tenantID)
+				processedTenantIds[e.tenantID] = true
+			}
+		}
+	}
+}
+
+func (c *ChangeNotificationHandler) sendToKafka(tenantID string, monitoredObjects []*tenmod.MonitoredObject) {
+	w := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:  c.brokers,
+		Topic:    c.topic,
+		Balancer: &kafka.LeastBytes{},
+	})
+	defer func() {
+		logger.Log.Info("closing kafka producer")
+		w.Close()
 	}()
 
-	sendMonitoredObjects(producer, c.topic, monitoredObjects)
+	sendMonitoredObjects(w, tenantID, monitoredObjects)
 
-	producer.AsyncClose()
 }
 
-func (c *ChangeNotificationHandler) createNotifier(lastSuccess int64, needsRefresh bool) *changeNotifier {
-	notifier := new(changeNotifier)
-	notifier.adminDB = c.adminDB
-	notifier.tenantDB = c.tenantDB
-	notifier.topic = c.topic
-	notifier.brokers = c.brokers
-	notifier.lastSuccessTimestamp = lastSuccess
-	notifier.fullRefresh = needsRefresh
-	return notifier
+func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
+	monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(tenantID)
+	if err != nil {
+		logger.Log.Error("Failed to get objects", err.Error())
+		return
+	}
+	domains, err := (*c.tenantDB).GetAllTenantDomains(tenantID)
+	if err != nil {
+		logger.Log.Error("Failed to get domains", err.Error())
+		return
+	}
+	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
+		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
+	}
 }
 
-func (cn *changeNotifier) pollChanges() {
-
-	logger.Log.Infof("pollChanges fullRefresh=%v, lastSuccess=%d", cn.fullRefresh, cn.lastSuccessTimestamp)
-	tenants, err := (*cn.adminDB).GetAllTenantDescriptors()
+func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
+	logger.Log.Debugf("pollChanges fullRefresh=%v, lastSuccess=%d", fullRefresh, lastSyncTimestamp)
+	tenants, err := (*c.adminDB).GetAllTenantDescriptors()
 	if err != nil {
 		logger.Log.Error("Unable to fetch list of tenants: %s", err.Error())
-		cn.hasErrors = true
-		return
+		return err
 	}
 
 	if len(tenants) < 1 {
 		logger.Log.Warning("No tenants found")
-		return
+		return nil
 	}
 
-	if cn.fullRefresh {
-		logger.Log.Debugf("Performing a full refresh")
-	}
-
-	kafkaProducer := newAsyncKafkaProducer(cn.brokers)
-	// Create a callback for handling errors
-	go func() {
-		for err := range kafkaProducer.Errors() {
-			logger.Log.Errorf("Failed to write monitored object: %s", err)
-			cn.hasErrors = true
-		}
+	kafkaProducer := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:  c.brokers,
+		Topic:    c.topic,
+		Balancer: &kafka.LeastBytes{},
+	})
+	defer func() {
+		kafkaProducer.Close()
 	}()
 
 	logger.Log.Debug("Started Kafka Producer")
 
+	var lastError error
 	for _, t := range tenants {
 
 		logger.Log.Debugf("Fetching Monitored Objects for tenant %s", t.ID)
 
-		monitoredObjects, err := (*cn.tenantDB).GetAllMonitoredObjects(t.ID)
+		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
 		if err != nil {
-			logger.Log.Errorf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
-			cn.hasErrors = true
+			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue
 		}
 
-		cn.sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
+		domains, err := (*c.tenantDB).GetAllTenantDomains(t.ID)
+		if err != nil {
+			logger.Log.Warningf("Failed to fetch Domains for tenant %s: %s", t.ID, err.Error())
+			continue
+		}
+
+		changeDetected := false
+		if fullRefresh {
+			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
+		} else {
+			for _, mo := range monitoredObjects {
+				if mo.CreatedTimestamp > lastSyncTimestamp || mo.LastModifiedTimestamp > lastSyncTimestamp {
+					changeDetected = true
+					sendMonitoredObject(kafkaProducer, mo)
+				}
+			}
+
+			for i := 0; !changeDetected && i < len(domains); i++ {
+				if domains[i].CreatedTimestamp > lastSyncTimestamp || domains[i].LastModifiedTimestamp > lastSyncTimestamp {
+					changeDetected = true
+				}
+			}
+
+		}
+
+		if fullRefresh || changeDetected {
+			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
+				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
+				lastError = err
+				continue
+			}
+		}
+
 	}
 
-	// Perform a synchronous close. Wait for remaining messages to be sent and close the producer.
-	err = kafkaProducer.Close()
-	if err != nil {
-		cn.hasErrors = true
-	}
-
+	return lastError
 }
 
-func (cn *changeNotifier) sendMonitoredObjects(kafkaProducer sarama.AsyncProducer, tenantID string, monitoredObjects []*tenmod.MonitoredObject) {
+/*
+Not used but could be if we wanted to 'persist' a channel of ChangeEvents and use a kafka reader for processing change
+events rather than right off a non-persistant go channel.
+func (c *ChangeNotificationHandler) readFromKafka(broker, topic string) {
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  []string{broker},
+		Topic:    topic,
+		GroupID:  "gather-mo-consumer",
+		MinBytes: 10,
+		MaxBytes: 1e6,
+	})
+
+	defer func() {
+		r.Close()
+	}()
+
+	for {
+
+		ctx := context.Background()
+		messages := []kafka.Message{}
+
+		logger.Log.Debugf("readFromKafka blocking on first message on broker %s, topic %s", broker, topic)
+		// Block until the next message is available
+		m, err := r.FetchMessage(ctx)
+		if err != nil {
+			logger.Log.Warningf("Failed to fetch messages from %s: %v", topic, err.Error())
+			continue
+		}
+		logger.Log.Debugf("message at topic/partition/offset %v/%v/%v: %s = %s\n", m.Topic, m.Partition, m.Offset, string(m.Key), string(m.Value))
+		messages = append(messages, m)
+
+		logger.Log.Debugf("readFromKafka blocking on next messages with timeout")
+		// Keep collecting messages until we timeout; we want to batch operations
+		for {
+			subCtx, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
+
+			m, err := r.FetchMessage(subCtx)
+			if err != nil {
+				if err != context.DeadlineExceeded {
+					logger.Log.Warningf("Failed to fetch messages from %s: %v", topic, err.Error())
+				}
+				break
+			}
+			logger.Log.Debugf("message at topic/partition/offset %v/%v/%v: %s = %s\n", m.Topic, m.Partition, m.Offset, string(m.Key), string(m.Value))
+
+			messages = append(messages, m)
+			cancelFunc()
+		}
+
+		logger.Log.Debugf("processing %d messages", len(messages))
+
+		// Process messages. For each tenant tell the Metrics DB to update metadata.
+		processedTenantIds := make(map[string]bool)
+		for _, m := range messages {
+			mo := tenmod.MonitoredObject{}
+
+			if err = json.Unmarshal(m.Value, &mo); err != nil {
+				logger.Log.Error("Failed to parse message", err.Error())
+			} else if _, ok := processedTenantIds[mo.TenantID]; !ok {
+
+				monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(mo.TenantID)
+				if err != nil {
+					logger.Log.Error("Failed to get objects", err.Error())
+					break
+				}
+				if err = c.metricsDB.UpdateMonitoredObjectMetadata(mo.TenantID, monitoredObjects, nil, true); err != nil {
+					logger.Log.Error("Failed to UpdateMonitoredObjectMetadata", err.Error())
+					break
+				}
+				processedTenantIds[mo.TenantID] = true
+			}
+
+			logger.Log.Debugf("Committing message %v/%v/%v: %s", m.Topic, m.Partition, m.Offset, string(m.Key))
+			if err = r.CommitMessages(ctx, m); err != nil {
+				logger.Log.Error("Failed to commit messages", err.Error())
+			}
+		}
+	}
+}
+*/
+
+func sendMonitoredObjects(writer *kafka.Writer, tenantID string, monitoredObjects []*tenmod.MonitoredObject) {
 
 	logger.Log.Debugf("Got %d monitored objects for tenant %s", len(monitoredObjects), tenantID)
 	sentCount := 0
 	for _, mo := range monitoredObjects {
-
-		if !cn.fullRefresh && mo.CreatedTimestamp < cn.lastSuccessTimestamp && mo.LastModifiedTimestamp < cn.lastSuccessTimestamp {
-			// This MO was already sent since it last changed and we aren't doing a full refresh
-			continue
-		}
 
 		// Workaround for bug where tenantId and id attributes were cleared by UI.
 		mo.TenantID = tenantID
@@ -209,24 +423,14 @@ func (cn *changeNotifier) sendMonitoredObjects(kafkaProducer sarama.AsyncProduce
 			mo.ID = mo.ObjectName
 		}
 
-		sendMonitoredObject(kafkaProducer, cn.topic, mo)
+		sendMonitoredObject(writer, mo)
 		sentCount++
 	}
 	logger.Log.Infof("Sent %d monitored object notifications for tenant %s", sentCount, tenantID)
 
 }
 
-func sendMonitoredObjects(kafkaProducer sarama.AsyncProducer, topic string, monitoredObjects []*tenmod.MonitoredObject) {
-	for _, mo := range monitoredObjects {
-		if mo == nil {
-			continue
-		}
-		sendMonitoredObject(kafkaProducer, topic, mo)
-	}
-
-}
-
-func sendMonitoredObject(kafkaProducer sarama.AsyncProducer, topic string, monitoredObject *tenmod.MonitoredObject) {
+func sendMonitoredObject(writer *kafka.Writer, monitoredObject *tenmod.MonitoredObject) {
 	// Generate a json payload and send it.
 	// Later we can serialized object but right now we don't guarantee the the receiver knows how
 	// to deserialize objects.
@@ -239,26 +443,8 @@ func sendMonitoredObject(kafkaProducer sarama.AsyncProducer, topic string, monit
 
 	logger.Log.Debugf("sending %s", monitoredObject.ObjectName)
 
-	kafkaProducer.Input() <- &sarama.ProducerMessage{
-		Topic: topic,
-		Key:   sarama.StringEncoder(monitoredObject.ID),
-		Value: sarama.StringEncoder(b),
-	}
-}
-
-func newAsyncKafkaProducer(brokers []string) sarama.AsyncProducer {
-
-	logger.Log.Debug("Starting Kafka Producer")
-
-	config := sarama.NewConfig()
-
-	config.Producer.Compression = sarama.CompressionSnappy
-	config.Producer.Flush.Frequency = 100 * time.Millisecond
-
-	producer, err := sarama.NewAsyncProducer(brokers, config)
-	if err != nil {
-		logger.Log.Fatalf("Failed to start Kafka producer. %s", err)
-	}
-
-	return producer
+	writer.WriteMessages(context.Background(), kafka.Message{
+		Key:   []byte(monitoredObject.ID),
+		Value: []byte(b),
+	})
 }

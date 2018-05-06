@@ -3,6 +3,7 @@ package datastore
 import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/models/metrics"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
 const (
@@ -47,4 +48,7 @@ type DruidDatastore interface {
 
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
+
+	// Update Monitored Object meta-data
+	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error
 }

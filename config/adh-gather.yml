@@ -31,9 +31,13 @@ args:
   maxConcurrentMetricAPICalls: 500
 
 druid:
-  server: http://aod_broker
-  port: 8082
-  table: "npav-ts-metrics"
+  broker:
+    server: http://aod_broker
+    port: 8082
+    table: "npav-ts-metrics"
+  coordinator:
+    server: http://aod_coordinator
+    port: 8081
 
 kafka:
   broker: kafka:9092

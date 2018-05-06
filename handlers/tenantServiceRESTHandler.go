@@ -419,6 +419,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
+	NotifyDomainCreated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.CreateTenantDomainStr, tenmod.TenantDomainStr, "Created")
 }
 
@@ -459,6 +460,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
+	NotifyDomainUpdated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
 }
 
@@ -501,6 +503,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r
 		return
 	}
 
+	NotifyDomainDeleted(tenantID, result)
 	sendSuccessResponse(result, w, startTime, mon.DeleteTenantDomainStr, tenmod.TenantDomainStr, "Deleted")
 }
 
@@ -843,7 +846,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	NotifyMonitoredObjects(&data)
+	NotifyMonitoredObjectCreated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
 }
 
@@ -884,7 +887,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 		return
 	}
 
-	NotifyMonitoredObjects(&data)
+	NotifyMonitoredObjectUpdated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
 }
 
@@ -1145,7 +1148,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 		return
 	}
 
-	NotifyMonitoredObjects(data...)
+	NotifyMonitoredObjectCreated(tenantID, data...)
 	response := map[string]interface{}{}
 	response["results"] = result
 
@@ -1159,14 +1162,4 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	logger.Log.Infof("Completed bulk insert of %ss for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
 	trackAPIMetrics(startTime, "200", mon.BulkUpdateMonObjStr)
 	fmt.Fprintf(w, string(res))
-}
-
-func NotifyMonitoredObjects(monitoredObjects ...*tenmod.MonitoredObject) {
-	handler := getChangeNotificationHandler()
-	if handler != nil {
-		logger.Log.Debugf("Sending %d monitored objects to notification handler: %v", len(monitoredObjects), monitoredObjects)
-		handler.monitoredObjectChanges <- monitoredObjects
-	} else {
-		logger.Log.Warningf("No notification handler found")
-	}
 }

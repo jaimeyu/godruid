@@ -140,7 +140,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			buildDomainFilter(domains),
+			buildDomainFilter(tenant, domains),
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
@@ -311,25 +311,11 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, gran
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			buildDomainFilter(domains),
+			buildDomainFilter(tenant, domains),
 		),
 		Aggregations:     aggregations,
 		PostAggregations: postAggregations,
 		Intervals:        []string{interval}}, nil
-}
-
-type TimeExtractionDimensionSpec struct {
-	Type               string             `json:"type"`
-	Dimension          string             `json:"dimension"`
-	OutputName         string             `json:"outputName"`
-	ExtractionFunction ExtractionFunction `json:"extractionFn"`
-}
-
-type ExtractionFunction struct {
-	Type     string `json:"type"`
-	Format   string `json:"format"`
-	TimeZone string `json:"timeZone"`
-	Locale   string `json:"locale"`
 }
 
 func SLATimeBucketQuery(tenant string, dataSource string, domains []string, timeBucket TimeBucket, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, error) {
@@ -338,22 +324,22 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, time
 	threshold := 0
 	if timeBucket == DayOfWeek {
 		threshold = 7
-		dimension = TimeExtractionDimensionSpec{
+		dimension = godruid.TimeExtractionDimensionSpec{
 			Type:       "extraction",
 			Dimension:  "__time",
 			OutputName: "dayOfWeek",
-			ExtractionFunction: ExtractionFunction{
+			ExtractionFunction: godruid.TimeExtractionFn{
 				Type:   "timeFormat",
 				Format: "e",
 			},
 		}
 	} else if timeBucket == HourOfDay {
 		threshold = 24
-		dimension = TimeExtractionDimensionSpec{
+		dimension = godruid.TimeExtractionDimensionSpec{
 			Type:       "extraction",
 			Dimension:  "__time",
 			OutputName: "hourOfDay",
-			ExtractionFunction: ExtractionFunction{
+			ExtractionFunction: godruid.TimeExtractionFn{
 				Type:   "timeFormat",
 				Format: "HH",
 			},
@@ -380,7 +366,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, time
 		Context:     map[string]interface{}{"timeout": timeout},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			buildDomainFilter(domains),
+			buildDomainFilter(tenant, domains),
 			thresholdFilter,
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
@@ -447,7 +433,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			buildDomainFilter(domains),
+			buildDomainFilter(tenant, domains),
 		),
 		Intervals: []string{interval},
 		Dimensions: []godruid.DimSpec{
@@ -507,7 +493,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			buildDomainFilter(domains),
+			buildDomainFilter(tenant, domains),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
@@ -554,8 +540,29 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 	}, nil
 }
 
-func buildDomainFilter(domains []string) *godruid.Filter {
-	return buildOrFilter("domains", domains)
+func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
+	if len(domains) < 1 {
+		return nil
+	}
+
+	filters := make([]*godruid.Filter, len(domains))
+	for i, domID := range domains {
+		var ef godruid.ExtractionFn
+
+		ef = godruid.RegisteredLookupExtractionFn{
+			Type:   "registeredLookup",
+			Lookup: buildLookupName("dom", tenantID, domID),
+		}
+
+		filters[i] = &godruid.Filter{
+			Type:         "selector",
+			Dimension:    "monitoredObjectId",
+			Value:        domID,
+			ExtractionFn: &ef,
+		}
+	}
+
+	return godruid.FilterOr(filters...)
 }
 
 func buildOrFilter(dimensionName string, values []string) *godruid.Filter {

@@ -12,6 +12,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/metrics"
+	"github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/godruid"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -30,11 +31,13 @@ const (
 // DruidDatastoreClient - struct responsible for handling
 // database operations for druid
 type DruidDatastoreClient struct {
-	server     string
-	cfg        config.Provider
-	dClient    godruid.Client
-	AuthToken  string
-	numRetries int
+	server            string
+	cfg               config.Provider
+	dClient           godruid.Client
+	AuthToken         string
+	numRetries        int
+	coordinatorServer string
+	coordinatorPort   string
 }
 
 type ThresholdCrossingByMonitoredObjectResponse struct {
@@ -97,8 +100,8 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 // peyo TODO: the auth functionality here needs to be changed, this is only valid for dev
 func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
-	server := cfg.GetString(gather.CK_druid_server.String())
-	port := cfg.GetString(gather.CK_druid_port.String())
+	server := cfg.GetString(gather.CK_druid_broker_server.String())
+	port := cfg.GetString(gather.CK_druid_broker_port.String())
 	client := godruid.Client{
 		Url:        server + ":" + port,
 		Debug:      true,
@@ -106,10 +109,12 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	}
 
 	return &DruidDatastoreClient{
-		cfg:       cfg,
-		server:    server,
-		dClient:   client,
-		AuthToken: GetAuthCode(cfg),
+		cfg:               cfg,
+		server:            server,
+		dClient:           client,
+		AuthToken:         GetAuthCode(cfg),
+		coordinatorServer: cfg.GetString(gather.CK_druid_coordinator_server.String()),
+		coordinatorPort:   cfg.GetString(gather.CK_druid_coordinator_port.String()),
 	}
 }
 
@@ -117,7 +122,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
@@ -172,7 +177,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
@@ -181,7 +186,6 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	}
 
 	query, err := ThresholdCrossingQuery(request.GetTenant(), table, request.Domain, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.GetVendor(), timeout)
-
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +230,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
@@ -279,7 +283,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, "jitterP95", request.Granularity, request.Interval, "twamp-pe", "0", thresholdProfile.Data, "accedian-twamp", request.Timeout, request.NumResults)
 
@@ -322,7 +326,7 @@ type Debug struct {
 
 func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 	var query godruid.Query
 
 	timeout := request.Timeout
@@ -443,7 +447,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 
 	logger.Log.Debugf("Calling GetRawMetrics for request: %v", models.AsJSONString(request))
 
-	table := dc.cfg.GetString(gather.CK_druid_table.String())
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
@@ -499,4 +503,97 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	}
 
 	return rr, nil
+}
+
+type lookup struct {
+	Version                string    `json:"version"`
+	LookupExtractorFactory mapLookup `json:"lookupExtractorFactory"`
+}
+
+type mapLookup struct {
+	LookupType string            `json:"type"`
+	Data       map[string]string `json:"map"`
+}
+
+func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenant.MonitoredObject, domains []*tenant.Domain, reset bool) error {
+	version := time.Now().Format(time.RFC3339)
+	lookupEndpoint := dc.coordinatorServer + ":" + dc.coordinatorPort + "/druid/coordinator/v1/lookups/config"
+	lookups := make(map[string]lookup)
+
+	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
+	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
+	// Every domain should have a map even if it has no monitored objects.
+	for _, domain := range domains {
+		lookupName := buildLookupName("dom", tenantID, domain.ID)
+		domLookup := lookup{
+			Version: version,
+			LookupExtractorFactory: mapLookup{
+				LookupType: "map",
+				Data:       map[string]string{},
+			},
+		}
+		lookups[lookupName] = domLookup
+	}
+
+	// Fetch existing lookup names and delete any existing lookups on the server that are nolonger valid.
+	// Use the lookup map created in the previous step to identify valid domains.
+	url := lookupEndpoint + "/__default"
+	result, err := sendRequest("GET", dc.dClient.HttpClient, url, dc.AuthToken, nil)
+	if err != nil {
+		logger.Log.Errorf("Failed to fetch lookups", err.Error())
+		return err
+	}
+
+	lookupNames := []string{}
+	err = json.Unmarshal(result, &lookupNames)
+
+	// Only delete orphaned domain lookups for this tenant
+	lookupPrefix := buildLookupNamePrefix("dom", tenantID)
+	for _, lookupName := range lookupNames {
+		if !strings.HasPrefix(lookupName, lookupPrefix) {
+			continue
+		}
+
+		if _, ok := lookups[lookupName]; !ok {
+
+			url = lookupEndpoint + "/__default/" + lookupName
+			logger.Log.Debugf("Deleting lookup %s, url is %s", lookupName, url)
+			if _, err := sendRequest("DELETE", dc.dClient.HttpClient, url, dc.AuthToken, nil); err != nil {
+				logger.Log.Errorf("Failed to delete lookup %s", lookupName, err.Error())
+			}
+		}
+	}
+
+	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
+	for _, mo := range monitoredObjects {
+		if len(mo.DomainSet) < 1 {
+			continue
+		}
+		for _, domain := range mo.DomainSet {
+			lookupName := buildLookupName("dom", tenantID, domain)
+			domLookup, ok := lookups[lookupName]
+			if ok {
+				domLookup.LookupExtractorFactory.Data[mo.ObjectName] = domain
+			}
+		}
+	}
+
+	// Domain lookups are assigned to the __default tier
+	b, err := json.Marshal(map[string]map[string]lookup{"__default": lookups})
+
+	if err != nil {
+		logger.Log.Error("Failed to marshal lookupRequest", err.Error())
+		return err
+	}
+
+	//logger.Log.Debugf("Sending lookup request %s", string(b))
+	result, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
+	if err != nil {
+		logger.Log.Errorf("Failed to update lookup", err.Error())
+		return err
+	}
+
+	//logger.Log.Debugf("Got result %s", string(result))
+
+	return nil
 }

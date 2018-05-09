@@ -285,7 +285,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
-	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, "jitterP95", request.Granularity, request.Interval, "twamp-pe", "0", thresholdProfile.Data, "accedian-twamp", request.Timeout, request.NumResults)
+	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.Vendor, request.Timeout, request.NumResults)
 
 	if err != nil {
 		return nil, err

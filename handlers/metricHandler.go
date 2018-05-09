@@ -163,6 +163,14 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) *metrics.Thres
 		thresholdCrossingReq.Granularity = "PT1H"
 	}
 
+	if len(thresholdCrossingReq.Vendor) == 0 {
+		thresholdCrossingReq.Vendor = "accedian-twamp"
+	}
+
+	if len(thresholdCrossingReq.ObjectType) == 0 {
+		thresholdCrossingReq.ObjectType = "twamp-pe"
+	}
+
 	return &thresholdCrossingReq
 }
 

@@ -1501,7 +1501,7 @@ paths:
           type: string
         - name: objectType
           in: query
-          required: false
+          required: true
           type: string
         - name: direction
           in: query
@@ -1517,7 +1517,7 @@ paths:
           type: string
         - name: vendor
           in: query
-          required: false
+          required: true
           type: string
         - name: timeout
           in: query

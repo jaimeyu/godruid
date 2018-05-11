@@ -1,3 +1,4 @@
+* Fix - Adding validity checks to Threshold query by TopN to avoid invalid Druid queries
 ## Current Release 
 ### 0.110.0 
 **Release Date:** Wed May  9 16:25:23 UTC 2018     

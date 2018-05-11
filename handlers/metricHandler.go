@@ -131,7 +131,7 @@ func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCross
 	return &thresholdCrossingReq
 }
 
-func populateThresholdCrossingTopNRequest(queryParams url.Values) *metrics.ThresholdCrossingTopNRequest {
+func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.ThresholdCrossingTopNRequest, error) {
 
 	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{
 		Direction:          queryParams.Get("direction"),
@@ -163,15 +163,25 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) *metrics.Thres
 		thresholdCrossingReq.Granularity = "PT1H"
 	}
 
-	if len(thresholdCrossingReq.Vendor) == 0 {
+	if thresholdCrossingReq.Metric == "throughputAvg" || thresholdCrossingReq.Metric == "packetsLostPct" {
+		thresholdCrossingReq.Vendor = "accedian-flowmeter"
+		thresholdCrossingReq.ObjectType = "flowmeter"
+	} else {
 		thresholdCrossingReq.Vendor = "accedian-twamp"
-	}
-
-	if len(thresholdCrossingReq.ObjectType) == 0 {
 		thresholdCrossingReq.ObjectType = "twamp-pe"
 	}
 
-	return &thresholdCrossingReq
+	if len(thresholdCrossingReq.Vendor) == 0 {
+		err = fmt.Errorf("vendor is required")
+		return nil, err
+	}
+
+	if len(thresholdCrossingReq.ObjectType) == 0 {
+		err = fmt.Errorf("objectType is required")
+		return nil, err
+	}
+
+	return &thresholdCrossingReq, nil
 }
 
 func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest {
@@ -431,7 +441,11 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 
 	// Turn the query Params into the request object:
 	queryParams := r.URL.Query()
-	thresholdCrossingReq := populateThresholdCrossingTopNRequest(queryParams)
+	thresholdCrossingReq, err := populateThresholdCrossingTopNRequest(queryParams)
+	if err != nil {
+		reportError(w, startTime, "602", mon.GetThrCrossByMonObjTopNStr, err.Error(), 602)
+		return
+	}
 	logger.Log.Infof("Retrieving %s for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
 
 	tenantID := thresholdCrossingReq.TenantID
@@ -448,6 +462,11 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
 		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
+		return
+	}
+
+	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Vendor, thresholdCrossingReq.ObjectType, thresholdCrossingReq.Metric, &pbTP); err != nil {
+		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -556,5 +575,24 @@ func (msh *MetricServiceHandler) validateDomains(tenantId string, domains []stri
 		}
 	}
 	return nil
+}
 
+func validateMetricForThresholdProfile(vendor, objectType, metric string, thresholdProfile *pb.TenantThresholdProfile) error {
+	vendorMap := thresholdProfile.Data.GetThresholds().GetVendorMap()
+	vendorEntry, ok := vendorMap[vendor]
+	if !ok {
+		return fmt.Errorf("Vendor %s not found in threshold profile with ID %s", vendor, thresholdProfile.GetXId())
+	}
+
+	objectTypeEntry, ok := vendorEntry.GetMonitoredObjectTypeMap()[objectType]
+	if !ok {
+		return fmt.Errorf("Object type %s for vendor %s not found in threshold profile with ID %s", objectType, vendor, thresholdProfile.GetXId())
+	}
+
+	_, ok = objectTypeEntry.GetMetricMap()[metric]
+	if !ok {
+		return fmt.Errorf("Metric %s for vendor %s and object type %s not found in threshold profile with ID %s", metric, vendor, objectType, thresholdProfile.GetXId())
+	}
+
+	return nil
 }

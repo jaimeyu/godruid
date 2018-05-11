@@ -486,6 +486,15 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		aggregations = append(aggregations, aggregation)
 	}
 
+	var scoredPostAggregation []godruid.PostAggregation
+	if len(postAggregations) == 0 {
+		scoredPostAggregation = []godruid.PostAggregation{}
+	} else {
+		scoredPostAggregation = []godruid.PostAggregation{
+			godruid.PostAggArithmetic("scored", "+", postAggregations),
+		}
+	}
+
 	return &godruid.QueryTopN{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
@@ -497,13 +506,11 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
-		PostAggregations: []godruid.PostAggregation{
-			godruid.PostAggArithmetic("scored", "+", postAggregations),
-		},
-		Intervals: []string{interval},
-		Metric:    "scored",
-		Threshold: int(numResults),
-		Dimension: "monitoredObjectId",
+		PostAggregations: scoredPostAggregation,
+		Intervals:        []string{interval},
+		Metric:           "scored",
+		Threshold:        int(numResults),
+		Dimension:        "monitoredObjectId",
 	}, nil
 }
 

@@ -80,6 +80,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.UpdateTenantDomain,
 		},
 		server.Route{
+			Name:        "PatchTenantDomain",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
+			HandlerFunc: result.PatchTenantDomain,
+		},
+		server.Route{
 			Name:        "GetTenantDomain",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
@@ -462,6 +468,99 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 
 	NotifyDomainUpdated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
+}
+
+/* PatchTenantDomain - Patches a tenant domain
+ * Takes in a partial Tenant domain payload and determines which elements need to be updated.
+ * Works by
+ * - Unmarshals the payload into a tenant domain struct
+ * - Validates the data
+ * - Gets the latest document from the DB.
+ * - For each element that is a non-zero length string,
+ * - Overwrite the latest document element.
+ * - Store the changes.
+ * Note that limited validation is done on the payload itself. I'm pushing the onus
+ * to the database to reject the document if there is an error in the ID/REV.
+ */
+func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Model
+	data := tenmod.Domain{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// This only checks if the ID&REV is set.
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Get the IDs from the URL
+	tenantID := data.TenantID
+	domainID := data.ID
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantDomainStr, domainID)
+
+	// Issue request to DAO Layer
+	oldDomain, err := tsh.tenantDB.GetTenantDomain(tenantID, domainID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Overwrite the id&rev and let the db validate it rather than having us do it
+	// and find out the data is out of sync anyways.
+	oldDomain.ID = data.ID
+	oldDomain.REV = data.REV
+	oldDomain.TenantID = data.TenantID
+
+	// Check the new data structure for elements that are non-zero.
+	if len(data.Color) != 0 {
+		fmt.Println("Patching color:", oldDomain.Color, " to ", data.Color)
+		oldDomain.Color = data.Color
+	}
+	if len(data.Name) != 0 {
+		fmt.Println("Name patch:", oldDomain.Name, " to ", data.Name)
+		oldDomain.Name = data.Name
+	}
+	if len(data.Datatype) != 0 {
+		fmt.Println("Data type patch:", oldDomain.Datatype, " to ", data.Datatype)
+		oldDomain.Datatype = data.Datatype
+	}
+	if len(data.ThresholdProfileSet) != 0 {
+		fmt.Println("Threshold Profile Set patch:", oldDomain.ThresholdProfileSet, " to ", data.ThresholdProfileSet)
+		oldDomain.ThresholdProfileSet = data.ThresholdProfileSet
+	}
+
+	// Done checking for differences
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantDomain(oldDomain)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyDomainUpdated(oldDomain.TenantID, oldDomain)
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Patched")
 }
 
 // GetTenantDomain - fetches a tenant domain

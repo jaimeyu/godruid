@@ -76,7 +76,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 		server.Route{
 			Name:        "UpdateTenantDomain",
 			Method:      "PUT",
-			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
 			HandlerFunc: result.UpdateTenantDomain,
 		},
 		server.Route{

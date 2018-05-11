@@ -569,34 +569,6 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
       tags:
         - TenantProvisioningService
-    put:
-      summary: Update a Tenant Domain
-      operationId: UpdateTenantDomain
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-      tags:
-        - TenantProvisioningService
   /v1/tenants/{tenantId}/domain-list:
     get:
       summary: Retrieve all Domains for the specified Tenant.
@@ -641,6 +613,38 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+    put:
+      summary: Update a Tenant Domain
+      operationId: UpdateTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
     patch:
       summary: Patch update a Tenant Domain
       operationId: PatchTenantDomain
@@ -650,7 +654,7 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Successfully patched tenant domain.'
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':

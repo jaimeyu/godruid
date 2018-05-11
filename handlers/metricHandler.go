@@ -163,14 +163,6 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.Thre
 		thresholdCrossingReq.Granularity = "PT1H"
 	}
 
-	if thresholdCrossingReq.Metric == "throughputAvg" || thresholdCrossingReq.Metric == "packetsLostPct" {
-		thresholdCrossingReq.Vendor = "accedian-flowmeter"
-		thresholdCrossingReq.ObjectType = "flowmeter"
-	} else {
-		thresholdCrossingReq.Vendor = "accedian-twamp"
-		thresholdCrossingReq.ObjectType = "twamp-pe"
-	}
-
 	if len(thresholdCrossingReq.Vendor) == 0 {
 		err = fmt.Errorf("vendor is required")
 		return nil, err

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
+	//	"reflect"
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -201,6 +201,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.UpdateMonitoredObject,
 		},
 		server.Route{
+			Name:        "PatchMonitoredObject",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
+			HandlerFunc: result.UpdateMonitoredObject,
+		},
+		server.Route{
 			Name:        "GetMonitoredObject",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
@@ -229,6 +235,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Method:      "POST",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
 			HandlerFunc: result.CreateTenantMeta,
+		},
+		server.Route{
+			Name:        "PatchTenantMeta",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.PatchTenantMeta,
 		},
 		server.Route{
 			Name:        "UpdateTenantMeta",
@@ -336,12 +348,12 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	// Issue request to DAO Layer
 	oldData, err := tsh.tenantDB.GetTenantUser(data.TenantID, data.ID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
-		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantUserStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantUserStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	errMerge := mergeObjWithMap(oldData, requestBytes)
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -552,128 +564,6 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
 }
 
-/* Takes in a generic map (from jsonapi) and dump it out) */
-func dbgDumpMapReflection(list map[string]interface{}, tabs int) {
-	for n, v := range list {
-		for i := 0; i < tabs; i++ {
-			fmt.Printf("\t")
-		}
-		fmt.Printf("index:%s  value:%v  kind:%s  type:%s\n", n, v, reflect.TypeOf(v).Kind(), reflect.TypeOf(v))
-		// The payload is found in the attributes key
-		if n == "attributes" {
-			list2 := list[n].(map[string]interface{})
-			dbgDumpMapReflection(list2, tabs+1)
-		}
-	}
-}
-
-/* Compares two maps and dumps info for debugging */
-func dbgCompareMaps(src1 map[string]interface{}, src2 map[string]interface{}) {
-	fmt.Println("Dumping src2:%v", src2)
-	for n, v := range src1 {
-		fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, src2[n], v != src2[n])
-	}
-}
-
-/* Merges two maps
- * It takes two maps and the dst map is the one getting modified.
- * If the dst map is empty, then the function should just copy the src to dst.
- * Otherwise, you can pre-populate the dst map with some data and the function will
- * update the keys with the new values.
- */
-
-func mergeMaps(dst map[string]interface{}, src map[string]interface{}) {
-	fmt.Println("Merging maps")
-	fmt.Println("Dumping src2:%v", dst)
-	for n, v := range src {
-		//fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, dst[n], v != dst[n])
-		dst[n] = v
-	}
-}
-
-/* Merges a JSON API request into an object
- * Trying to be as generic as possible to accept different kinds of structs
- * Works by transforming data several times to do the merge.
- *
- * Transforms the orig interface into a map.
- * Transforms the JSON []byte into a map.
- * Calls mergeMap which takes in two maps and does a merge.
- * Gets the merged map as an output.
- * Transforms the map back into the originating interface.
- *
- * It works because I'm trying to keep the input interface's struct meta data.
- * If we only deal with maps, we may not know about how to transform the maps
- * back into the struct.
- */
-func mergeObjWithMap(orig interface{}, reqJson []byte) error {
-	requestMap := make(map[string]interface{})
-
-	// Convert the request JSON into a map
-	errMap := json.Unmarshal(reqJson, &requestMap)
-	if errMap != nil {
-		return errMap
-	}
-
-	// The request payload into a map
-	origData, umerr := json.Marshal(orig)
-	if umerr != nil {
-		fmt.Println("Error marshalling:", umerr)
-		return umerr
-	}
-
-	// Get the element with data
-	mapData := requestMap["data"].(map[string]interface{})
-	// Get the element for attributes
-	req := mapData["attributes"].(map[string]interface{})
-	//fmt.Println("Reflection of rcvd:")
-	//dbgDumpMapReflection(the_list["attributes"].(map[string]interface{}), 0)
-
-	// Convert the original data struct as a map
-	var omap map[string]interface{}
-	errT1 := json.Unmarshal(origData, &omap)
-	if errT1 != nil {
-		return errT1
-	}
-
-	// Merge the request map into the original data map
-	mergeMaps(omap, req)
-
-	// Marshall the map into a JSON
-	fmt.Println("merged!")
-	jstr, errT2 := json.Marshal(omap)
-	if errT2 != nil {
-		return errT2
-	}
-
-	// Unmarshal the data into an known struct.
-	fmt.Println("unmarshalling ", string(jstr))
-	json.Unmarshal(jstr, orig)
-	fmt.Println("New merged object: ", orig)
-
-	return nil
-}
-
-/* Converts an object into a generic map */
-func convertObj2Map(item interface{}) map[string]interface{} {
-	// debug marshall obj into json so we can merge the [] bytes
-	orig, umerr := json.Marshal(item)
-	if umerr != nil {
-		fmt.Println("Error marshalling:", umerr)
-	}
-
-	var omap map[string]interface{}
-	err := json.Unmarshal(orig, &omap)
-	if err != nil {
-		fmt.Println("Error unmarshalling:", err)
-	}
-	for field, val := range omap {
-		fmt.Println("KV Pair: ", field, val)
-	}
-
-	return omap
-
-}
-
 /* PatchTenantDomain - Patches a tenant domain
  * Takes in a partial Tenant domain payload and determines which elements need to be updated.
  * Works by
@@ -728,7 +618,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 		return
 	}
 
-	errMerge := mergeObjWithMap(oldDomain, requestBytes)
+	errMerge := models.MergeObjWithMap(oldDomain, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -893,7 +783,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 		return
 	}
 
-	errMerge := mergeObjWithMap(origData, requestBytes)
+	errMerge := models.MergeObjWithMap(origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
@@ -1089,14 +979,14 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 		return
 	}
 
-	errMerge := mergeObjWithMap(origData, requestBytes)
+	errMerge := models.MergeObjWithMap(origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data))
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, origData)
 
 	// Issue request to DAO Layer
 	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(origData)
@@ -1249,6 +1139,70 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 
 	NotifyMonitoredObjectCreated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
+}
+
+// PatchUpdateMonitoredObject - Patch a tenant monitored object
+func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.MonitoredObject{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	oldData, err := tsh.tenantDB.GetMonitoredObject(data.TenantID, data.ID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+
+	}
+	// This only checks if the ID&REV is set.
+	err = oldData.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateMonitoredObject(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyMonitoredObjectUpdated(data.TenantID, oldData)
+	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
 
 // UpdateMonitoredObject - updates a tenant monitored object
@@ -1429,6 +1383,68 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.CreateTenantMetaStr, tenmod.TenantMetaStr, "Created")
+}
+
+// PatchTenantMeta - Patch a tenant metadata
+func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.Metadata{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	oldData, err := tsh.tenantDB.GetTenantMeta(data.TenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMetaStr, oldData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantMeta(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantMetaStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantMetaStr, tenmod.TenantMetaStr, "Patched")
 }
 
 // UpdateTenantMeta - updates a tenant metadata

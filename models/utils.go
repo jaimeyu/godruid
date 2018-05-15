@@ -69,7 +69,7 @@ func AsJSONString(obj interface{}) string {
 }
 
 /* Takes in a generic map (from jsonapi) and dump it out) */
-func dbgDumpMapReflection(list map[string]interface{}, tabs int) {
+func DbgDumpMapReflection(list map[string]interface{}, tabs int) {
 	for n, v := range list {
 		for i := 0; i < tabs; i++ {
 			fmt.Printf("\t")
@@ -78,16 +78,16 @@ func dbgDumpMapReflection(list map[string]interface{}, tabs int) {
 		// The payload is found in the attributes key
 		if n == "attributes" {
 			list2 := list[n].(map[string]interface{})
-			dbgDumpMapReflection(list2, tabs+1)
+			DbgDumpMapReflection(list2, tabs+1)
 		}
 	}
 }
 
 /* Compares two maps and dumps info for debugging */
-func dbgCompareMaps(src1 map[string]interface{}, src2 map[string]interface{}) {
-	fmt.Println("Dumping src2:%v", src2)
+func DbgCompareMaps(src1 map[string]interface{}, src2 map[string]interface{}) {
+	fmt.Printf("Dumping src2:%+v\n", src2)
 	for n, v := range src1 {
-		fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, src2[n], v != src2[n])
+		fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%T \n", n, v, src2[n], v != src2[n])
 	}
 }
 
@@ -98,9 +98,9 @@ func dbgCompareMaps(src1 map[string]interface{}, src2 map[string]interface{}) {
  * update the keys with the new values.
  */
 
-func mergeMaps(dst map[string]interface{}, src map[string]interface{}) {
+func MergeMaps(dst map[string]interface{}, src map[string]interface{}) {
 	fmt.Println("Merging maps")
-	fmt.Println("Dumping src2:%v", dst)
+	fmt.Printf("Dumping src2:%v\n", dst)
 	for n, v := range src {
 		//fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, dst[n], v != dst[n])
 		dst[n] = v
@@ -121,7 +121,7 @@ func mergeMaps(dst map[string]interface{}, src map[string]interface{}) {
  * If we only deal with maps, we may not know about how to transform the maps
  * back into the struct.
  */
-func mergeObjWithMap(orig interface{}, reqJson []byte) error {
+func MergeObjWithMap(orig interface{}, reqJson []byte) error {
 	requestMap := make(map[string]interface{})
 
 	// Convert the request JSON into a map
@@ -152,7 +152,7 @@ func mergeObjWithMap(orig interface{}, reqJson []byte) error {
 	}
 
 	// Merge the request map into the original data map
-	mergeMaps(omap, req)
+	MergeMaps(omap, req)
 
 	// Marshall the map into a JSON
 	fmt.Println("merged!")
@@ -170,7 +170,7 @@ func mergeObjWithMap(orig interface{}, reqJson []byte) error {
 }
 
 /* Converts an object into a generic map */
-func convertObj2Map(item interface{}) map[string]interface{} {
+func ConvertObj2Map(item interface{}) map[string]interface{} {
 	// debug marshall obj into json so we can merge the [] bytes
 	orig, umerr := json.Marshal(item)
 	if umerr != nil {

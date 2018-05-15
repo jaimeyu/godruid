@@ -32,6 +32,8 @@ const (
 	OPCreateStr = "create"
 	// OPUpdateStr - metric constant for an update operation
 	OPUpdateStr = "update"
+	// OPPatchStr - metric constant for a patch operation
+	OPPatchStr = "patch"
 	// OPGetStr - metric constant for a get operation
 	OPGetStr = "get"
 	// OPDeleteStr - metric constant for a delete operation
@@ -57,6 +59,7 @@ const (
 	CreateTenantStr = TenantStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantStr = TenantStr + metricNameDelimiter + OPUpdateStr
 	GetTenantStr    = TenantStr + metricNameDelimiter + OPGetStr
+	PatchTenantStr  = TenantStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantStr = TenantStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantStr = TenantStr + metricNameDelimiter + OPGetAllStr
 

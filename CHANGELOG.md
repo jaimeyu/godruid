@@ -1,3 +1,4 @@
+* Fix - handle lookup not found errors from druid
 ## Current Release 
 ### 0.112.0 
 **Release Date:** Fri May 11 18:47:21 UTC 2018     

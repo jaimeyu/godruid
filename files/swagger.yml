@@ -1269,6 +1269,35 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Metadata record
+      operationId: Patch TenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+
     put:
       summary: Update a Tenant Metadata record
       operationId: UpdateTenantMetadata

@@ -2,8 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
-	"reflect"
+	//"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
@@ -68,46 +67,26 @@ func AsJSONString(obj interface{}) string {
 	}
 }
 
-/* Takes in a generic map (from jsonapi) and dump it out) */
-func DbgDumpMapReflection(list map[string]interface{}, tabs int) {
-	for n, v := range list {
-		for i := 0; i < tabs; i++ {
-			fmt.Printf("\t")
-		}
-		fmt.Printf("index:%s  value:%v  kind:%s  type:%s\n", n, v, reflect.TypeOf(v).Kind(), reflect.TypeOf(v))
-		// The payload is found in the attributes key
-		if n == "attributes" {
-			list2 := list[n].(map[string]interface{})
-			DbgDumpMapReflection(list2, tabs+1)
-		}
-	}
-}
-
-/* Compares two maps and dumps info for debugging */
-func DbgCompareMaps(src1 map[string]interface{}, src2 map[string]interface{}) {
-	fmt.Printf("Dumping src2:%+v\n", src2)
-	for n, v := range src1 {
-		fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%T \n", n, v, src2[n], v != src2[n])
-	}
-}
-
-/* Merges two maps
+/* MergeMaps - Merges two maps
  * It takes two maps and the dst map is the one getting modified.
  * If the dst map is empty, then the function should just copy the src to dst.
  * Otherwise, you can pre-populate the dst map with some data and the function will
  * update the keys with the new values.
+ * Note dst is modified on error, potentially could be avoid by copying dst into a new container.
  */
-
 func MergeMaps(dst map[string]interface{}, src map[string]interface{}) {
-	fmt.Println("Merging maps")
-	fmt.Printf("Dumping src2:%v\n", dst)
+	//fmt.Println("Merging maps")
+	//fmt.Printf("Input dst:\t%v\n", dst)
+	//fmt.Printf("Input src:\t%v\n", src)
 	for n, v := range src {
 		//fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, dst[n], v != dst[n])
 		dst[n] = v
 	}
+	//fmt.Printf("Output dst:\t%v\n", dst)
 }
 
-/* Merges a JSON API request into an object
+/*MergeObjWithMap
+ * Merges a JSON API request into an object
  * Trying to be as generic as possible to accept different kinds of structs
  * Works by transforming data several times to do the merge.
  *
@@ -130,62 +109,57 @@ func MergeObjWithMap(orig interface{}, reqJson []byte) error {
 		return errMap
 	}
 
-	// The request payload into a map
-	origData, umerr := json.Marshal(orig)
-	if umerr != nil {
-		fmt.Println("Error marshalling:", umerr)
-		return umerr
+	omap, errconv := ConvertObj2Map(orig)
+	if errconv != nil {
+		return errconv
 	}
 
+	// Assumes the request map is based on JSON-API
 	// Get the element with data
 	mapData := requestMap["data"].(map[string]interface{})
 	// Get the element for attributes
 	req := mapData["attributes"].(map[string]interface{})
-	//fmt.Println("Reflection of rcvd:")
-	//dbgDumpMapReflection(the_list["attributes"].(map[string]interface{}), 0)
-
-	// Convert the original data struct as a map
-	var omap map[string]interface{}
-	errT1 := json.Unmarshal(origData, &omap)
-	if errT1 != nil {
-		return errT1
-	}
 
 	// Merge the request map into the original data map
 	MergeMaps(omap, req)
 
 	// Marshall the map into a JSON
-	fmt.Println("merged!")
+	//fmt.Println("merged!")
 	jstr, errT2 := json.Marshal(omap)
 	if errT2 != nil {
 		return errT2
 	}
 
 	// Unmarshal the data into an known struct.
-	fmt.Println("unmarshalling ", string(jstr))
-	json.Unmarshal(jstr, orig)
-	fmt.Println("New merged object: ", orig)
+	//fmt.Println("unshalling json to obj ", string(jstr), orig, reflect.TypeOf(orig))
+	errUnMarsh := json.Unmarshal(jstr, orig)
+	if errUnMarsh != nil {
+		return errUnMarsh
+	}
+	//fmt.Printf("New merged object: %+v\n", orig)
 
 	return nil
 }
 
-/* Converts an object into a generic map */
-func ConvertObj2Map(item interface{}) map[string]interface{} {
+/*ConvertObj2Map --  Converts an object into a generic map */
+func ConvertObj2Map(item interface{}) (map[string]interface{}, error) {
 	// debug marshall obj into json so we can merge the [] bytes
 	orig, umerr := json.Marshal(item)
 	if umerr != nil {
-		fmt.Println("Error marshalling:", umerr)
+		//		fmt.Println("Error marshalling:", umerr)
+		return nil, umerr
 	}
 
 	var omap map[string]interface{}
 	err := json.Unmarshal(orig, &omap)
 	if err != nil {
-		fmt.Println("Error unmarshalling:", err)
+		//		fmt.Println("Error unmarshalling:", err)
+		return nil, err
 	}
-	for field, val := range omap {
-		fmt.Println("KV Pair: ", field, val)
-	}
+	//	for field, val := range omap {
+	//		fmt.Println("KV Pair: ", field, val)
+	//	}
 
-	return omap
+	return omap, nil
 
 }

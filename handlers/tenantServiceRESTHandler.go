@@ -564,7 +564,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
 }
 
-/* PatchTenantDomain - Patches a tenant domain
+/*PatchTenantDomain - Patches a tenant domain
  * Takes in a partial Tenant domain payload and determines which elements need to be updated.
  * Works by
  * - Unmarshals the payload into a tenant domain struct
@@ -749,7 +749,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 	sendSuccessResponse(result, w, startTime, mon.CreateIngPrfStr, tenmod.TenantIngestionProfileStr, "Created")
 }
 
-// PatchTenantIngestionProfile - updates a tenant ingestion profile
+//PatchTenantIngestionProfile - updates a tenant ingestion profile
 func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
@@ -1141,7 +1141,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
 }
 
-// PatchUpdateMonitoredObject - Patch a tenant monitored object
+//PatchUpdateMonitoredObject - Patch a tenant monitored object
 func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
@@ -1385,7 +1385,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 	sendSuccessResponse(result, w, startTime, mon.CreateTenantMetaStr, tenmod.TenantMetaStr, "Created")
 }
 
-// PatchTenantMeta - Patch a tenant metadata
+//PatchTenantMeta - Patch a tenant metadata
 func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 

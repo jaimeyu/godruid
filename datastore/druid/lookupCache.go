@@ -9,7 +9,9 @@ import (
 // It helps when building queries and need to supply lookup names that should be fully active on druid.
 // The lookup cache is updated when pushing lookups to Druid but there is some delay before they are fully
 // propagated and active Druid so each lookup is timestamped in the cache in order to identify those
-// that should be active.
+// that should be active. Note, by 'active' we mean created and known to druid nodes.  It may have some pending
+// updates but that's ok we are just trying to avoid getting 'lookup not found' errors. We allow queries
+// on out-of-date lookups as we accept eventual consistency in Druid queries
 var lookups = lookupCache{
 	lookupNames: nil,
 }
@@ -18,6 +20,8 @@ const (
 	druidLookupWriteDelay time.Duration = 15 * time.Second // This should really be coordinated with Druid's config
 )
 
+// Lookup cache with lazy initialization.  The cache is not guaranteed to be initialized immediately because
+// on server startup the DB may not be ready.
 type lookupCache struct {
 	lookupNames map[string]*time.Time
 }
@@ -56,18 +60,19 @@ func getLookupNamePrefix(dimType, tenantID string) string {
 	return strings.ToLower(dimType + "|" + tenantID)
 }
 
-func refreshLookups(lookupMap map[string]lookup) {
-
+func updateLookupCache(lookupMap map[string]*lookup) {
 	// Update the lookup cache.  Map each lookup name to the earliest timestamp it was created.
 	curTs := time.Now()
+	epoch := time.Unix(0, 0)
 	var earliestTs *time.Time
 	newLookupNames := make(map[string]*time.Time, len(lookupMap))
-	for k := range lookupMap {
+	for k, v := range lookupMap {
 		earliestTs = &curTs
 		if lookups.lookupNames == nil {
-			// This is the initial loading of the cache so just use epoch and assume these
-			// lookups have existed for some time and are ready to use.
-			earliestTs = &time.Time{}
+			// This is the initial loading of the cache so just use epoch for active lookups
+			if v.active {
+				earliestTs = &epoch
+			}
 		} else if prevTs, ok := lookups.lookupNames[k]; ok {
 			// The lookup already exists so use its existing timestamp.
 			earliestTs = prevTs

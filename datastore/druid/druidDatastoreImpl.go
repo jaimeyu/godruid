@@ -508,6 +508,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 type lookup struct {
 	Version                string    `json:"version"`
 	LookupExtractorFactory mapLookup `json:"lookupExtractorFactory"`
+	active                 bool
 }
 
 type mapLookup struct {
@@ -518,11 +519,11 @@ type mapLookup struct {
 func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenant.MonitoredObject, domains []*tenant.Domain, reset bool) error {
 	version := time.Now().Format(time.RFC3339)
 	lookupEndpoint := dc.coordinatorServer + ":" + dc.coordinatorPort + "/druid/coordinator/v1/lookups/config"
-	lookups := make(map[string]lookup, len(domains))
 
 	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
 	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
 	// Every domain should have a map even if it has no monitored objects.
+	lookups := make(map[string]*lookup, len(domains))
 	for _, domain := range domains {
 		lookupName := buildLookupName("dom", tenantID, domain.ID)
 		domLookup := lookup{
@@ -532,7 +533,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 				Data:       map[string]string{},
 			},
 		}
-		lookups[lookupName] = domLookup
+		lookups[lookupName] = &domLookup
 	}
 
 	// Fetch existing lookup names and delete any existing lookups on the server that are nolonger valid.
@@ -564,13 +565,14 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 			continue
 		}
 
-		if _, ok := lookups[lookupName]; !ok {
-
-			url = lookupEndpoint + "/__default/" + lookupName
+		if lookup, ok := lookups[lookupName]; !ok {
+			url := lookupEndpoint + "/__default/" + lookupName
 			logger.Log.Debugf("Deleting lookup %s, url is %s", lookupName, url)
 			if _, err := sendRequest("DELETE", dc.dClient.HttpClient, url, dc.AuthToken, nil); err != nil {
 				logger.Log.Errorf("Failed to delete lookup %s", lookupName, err.Error())
 			}
+		} else {
+			lookup.active = true
 		}
 	}
 
@@ -589,22 +591,18 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 	}
 
 	// Domain lookups are assigned to the __default tier
-	b, err := json.Marshal(map[string]map[string]lookup{"__default": lookups})
-
+	b, err := json.Marshal(map[string]map[string]*lookup{"__default": lookups})
 	if err != nil {
 		logger.Log.Error("Failed to marshal lookupRequest", err.Error())
 		return err
 	}
 
 	//logger.Log.Debugf("Sending lookup request %s", string(b))
-	result, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
+	_, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
 	if err != nil {
 		logger.Log.Errorf("Failed to update lookup", err.Error())
 		return err
 	}
-	refreshLookups(lookups)
-
-	//logger.Log.Debugf("Got result %s", string(result))
-
+	updateLookupCache(lookups)
 	return nil
 }

@@ -19,6 +19,7 @@ import (
 type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantUserMap            map[string]map[string]*tenmod.User
 	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
+	tenantToIDtoTenantConnectorMap       map[string]map[string]*tenmod.Connector
 	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
 	tenantToIDtoTenantThrPrfMap          map[string]map[string]*tenmod.ThresholdProfile
 
@@ -33,6 +34,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 
 	res.tenantToIDtoTenantUserMap = map[string]map[string]*tenmod.User{}
 	res.tenantToIDtoTenantDomainMap = map[string]map[string]*tenmod.Domain{}
+	res.tenantToIDtoTenantConnectorMap = map[string]map[string]*tenmod.Connector{}
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
 	res.tenantToIDtoTenantThrPrfMap = map[string]map[string]*tenmod.ThresholdProfile{}
 
@@ -56,6 +58,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantDomainType:
 		if tsd.tenantToIDtoTenantDomainMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantConnectorType:
+		if tsd.tenantToIDtoTenantConnectorMap[tenantID] == nil {
 			return tenantDNE
 		}
 	case tenmod.TenantMonitoredObjectType:
@@ -184,6 +190,112 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantUsers(tenantID string) ([
 	}
 
 	return tenantUserList, nil
+}
+
+// CreateTenantConnector - InMemory implementation of CreateTenantConnector
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantConnector(tenantConnectorRequest *tenmod.Connector) (*tenmod.Connector, error) {
+	if err := tsd.DoesTenantExist(tenantConnectorRequest.TenantID, tenmod.TenantConnectorType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoTenantConnectorMap[tenantConnectorRequest.TenantID] = map[string]*tenmod.Connector{}
+	}
+
+	recCopy := tenmod.Connector{}
+	deepcopy.Copy(&recCopy, tenantConnectorRequest)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantConnectorType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoTenantConnectorMap[tenantConnectorRequest.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// UpdateTenantConnector - InMemory implementation of UpdateTenantConnector
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantConnector(tenantConnectorRequest *tenmod.Connector) (*tenmod.Connector, error) {
+	if len(tenantConnectorRequest.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantConnectorStr)
+	}
+	if len(tenantConnectorRequest.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantConnectorStr)
+	}
+	if err := tsd.DoesTenantExist(tenantConnectorRequest.TenantID, tenmod.TenantConnectorType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantConnectorStr)
+	}
+
+	recCopy := tenmod.Connector{}
+	deepcopy.Copy(&recCopy, tenantConnectorRequest)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantConnectorType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoTenantConnectorMap[tenantConnectorRequest.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// DeleteTenantConnector - InMemory implementation of DeleteTenantConnector
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Connector ID", tenmod.TenantConnectorStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantConnectorStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantConnectorType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantConnectorStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantConnectorMap[tenantID][dataID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoTenantConnectorMap))
+	if ok {
+		delete(tsd.tenantToIDtoTenantConnectorMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoTenantConnectorMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoTenantConnectorMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantConnectorStr)
+}
+
+// GetTenantConnector - InMemory implementation of GetTenantConnector
+func (tsd *TenantServiceDatastoreInMemory) GetTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Connector ID", tenmod.TenantConnectorStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantConnectorStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantConnectorType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantConnectorStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantConnectorMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantConnectorStr)
+}
+
+// GetAllTenantConnectors - InMemory implementation of GetAllTenantConnectors
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantConnectors(tenantID string) ([]*tenmod.Connector, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantConnectorType)
+	if err != nil {
+		return []*tenmod.Connector{}, nil
+	}
+
+	recList := make([]*tenmod.Connector, 0)
+
+	for _, rec := range tsd.tenantToIDtoTenantConnectorMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	return recList, nil
 }
 
 // CreateTenantDomain - InMemory implementation of CreateTenantDomain

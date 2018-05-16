@@ -98,6 +98,36 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetAllTenantDomains,
 		},
 		server.Route{
+			Name:        "CreateTenantConnector",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connectors",
+			HandlerFunc: result.CreateTenantConnector,
+		},
+		server.Route{
+			Name:        "UpdateTenantConnector",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connectors",
+			HandlerFunc: result.UpdateTenantConnector,
+		},
+		server.Route{
+			Name:        "GetTenantConnector",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connectors/{connectorID}",
+			HandlerFunc: result.GetTenantConnector,
+		},
+		server.Route{
+			Name:        "DeleteTenantConnector",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connectors/{connectorID}",
+			HandlerFunc: result.DeleteTenantConnector,
+		},
+		server.Route{
+			Name:        "GetAllTenantConnectors",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-list",
+			HandlerFunc: result.GetAllTenantConnectors,
+		},
+		server.Route{
 			Name:        "CreateTenantIngestionProfile",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "ingestion-profiles",
@@ -380,6 +410,153 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantUsers(w http.ResponseWriter, r 
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.GetAllTenantUserStr, tenmod.TenantUserStr, "Retrieved list of")
+}
+
+// CreateTenantConnector - creates a tenant Connector
+func (tsh *TenantServiceRESTHandler) CreateTenantConnector(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+
+	logger.Log.Infof("REQUEST----> %v", string(requestBytes))
+
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.Connector{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantConnectorStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.CreateTenantConnector(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantConnectorStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateTenantConnectorStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyConnectorCreated(data.TenantID, &data)
+	sendSuccessResponse(result, w, startTime, mon.CreateTenantConnectorStr, tenmod.TenantConnectorStr, "Created")
+}
+
+// UpdateTenantConnector - updates a tenant Connector
+func (tsh *TenantServiceRESTHandler) UpdateTenantConnector(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.Connector{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantConnectorStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantConnector(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantConnectorStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantConnectorStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyConnectorUpdated(data.TenantID, &data)
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantConnectorStr, tenmod.TenantConnectorStr, "Updated")
+}
+
+// GetTenantConnector - fetches a tenant Connector
+func (tsh *TenantServiceRESTHandler) GetTenantConnector(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantConnectorStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetTenantConnector(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantConnectorStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantConnectorStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetTenantConnectorStr, tenmod.TenantConnectorStr, "Retrieved")
+}
+
+// DeleteTenantConnector - deletes a tenant Connector
+func (tsh *TenantServiceRESTHandler) DeleteTenantConnector(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantConnectorStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.DeleteTenantConnector(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantConnectorStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantConnectorStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyConnectorDeleted(tenantID, result)
+	sendSuccessResponse(result, w, startTime, mon.DeleteTenantConnectorStr, tenmod.TenantConnectorStr, "Deleted")
+}
+
+// GetAllTenantConnectors - fetches list of tenant Connectors
+func (tsh *TenantServiceRESTHandler) GetAllTenantConnectors(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantConnectorStr, tenantID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.GetAllTenantConnectors(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantConnectorStr, err.Error())
+		reportError(w, startTime, "500", mon.GetAllTenantConnectorStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetAllTenantConnectorStr, tenmod.TenantConnectorStr, "Retrieved list of")
 }
 
 // CreateTenantDomain - creates a tenant domain

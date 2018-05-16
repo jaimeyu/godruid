@@ -17,6 +17,7 @@ const (
 	IngestionProfileStr    = "ing_prf"
 	TenantUserStr          = "tenant_user"
 	TenantDomainStr        = "domain"
+	TenantConnectorStr     = "connector"
 	ThresholdProfileStr    = "thr_prf"
 	MonitoredObjectStr     = "mon_obj"
 	ThrCrossStr            = "thr_cross"
@@ -88,6 +89,12 @@ const (
 	GetTenantDomainStr    = TenantDomainStr + metricNameDelimiter + OPGetStr
 	DeleteTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPGetAllStr
+
+	CreateTenantConnectorStr = TenantConnectorStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantConnectorStr = TenantConnectorStr + metricNameDelimiter + OPUpdateStr
+	GetTenantConnectorStr    = TenantConnectorStr + metricNameDelimiter + OPGetStr
+	DeleteTenantConnectorStr = TenantConnectorStr + metricNameDelimiter + OPDeleteStr
+	GetAllTenantConnectorStr = TenantConnectorStr + metricNameDelimiter + OPGetAllStr
 
 	CreateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPUpdateStr

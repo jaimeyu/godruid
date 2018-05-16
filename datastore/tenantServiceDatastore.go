@@ -20,6 +20,12 @@ type TenantServiceDatastore interface {
 	GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
 	GetAllTenantDomains(string) ([]*tenmod.Domain, error)
 
+	CreateTenantConnector(*tenmod.Connector) (*tenmod.Connector, error)
+	UpdateTenantConnector(*tenmod.Connector) (*tenmod.Connector, error)
+	DeleteTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
+	GetTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
+	GetAllTenantConnectors(string) ([]*tenmod.Connector, error)
+
 	CreateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
 	UpdateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
 	GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)

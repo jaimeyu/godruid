@@ -13,6 +13,9 @@ const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
 	TenantUserType TenantDataType = "user"
 
+	// TenantConnectorType - datatype string used to identify a Tenant Connector in the datastore record
+	TenantConnectorType TenantDataType = "connector"
+
 	// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
 	TenantDomainType TenantDataType = "domain"
 
@@ -79,6 +82,9 @@ const (
 	// TenantUserStr - common name of the TenantUser data type for use in logs.
 	TenantUserStr = "Tenant User"
 
+	// TenantConnectorStr - common name of the Tenant Connector data type for use in logs.
+	TenantConnectorStr = "Tenant Connector"
+
 	// TenantDomainStr - common name of the Tenant Domain data type for use in logs.
 	TenantDomainStr = "Tenant Domain"
 
@@ -136,6 +142,52 @@ func (u *User) Validate(isUpdate bool) error {
 	}
 	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
 		return errors.New("Invalid Tenant User request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
+// Connector - defines a Tenant Connector
+type Connector struct {
+	ID                              string `json:"_id"`
+	REV                             string `json:"_rev"`
+	Datatype                        string `json:"datatype"`
+	URL                             string `json:"url"`
+	Port                            int    `json:"port"`
+	PollingFrequency                int    `json:"pollingFrequency"`
+	Username                        string `json:"username"`
+	Password                        string `json:"password"`
+	ExportGroup                     string `json:"exportGroup"`
+	DatahubHearbeatFrequency        int    `json:"datahubHeartbeatFrequency"`
+	DatahubConnectionRetryFrequency int    `json:"datahubConnectionRetryFrequency"`
+	TenantID                        string `json:"tenantId"`
+	Name                            string `json:"name"`
+	Type                            string `json:"type"`
+	CreatedTimestamp                int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp           int64  `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (d *Connector) GetID() string {
+	return d.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (d *Connector) SetID(s string) error {
+	d.ID = s
+	return nil
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (d *Connector) Validate(isUpdate bool) error {
+	if len(d.TenantID) == 0 {
+		return errors.New("Invalid Tenant Connector request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(d.REV) != 0 {
+		return errors.New("Invalid Tenant Connector request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant Connector request: must provide a createdTimestamp and revision for an update")
 	}
 
 	return nil

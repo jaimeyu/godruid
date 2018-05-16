@@ -117,6 +117,81 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantUsers(tenantID string) ([]
 	return res, nil
 }
 
+// CreateTenantConnector - CouchDB implementation of CreateTenantConnector
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantConnector(tenantConnectorRequest *tenmod.Connector) (*tenmod.Connector, error) {
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(tenantConnectorRequest))
+	tenantConnectorRequest.ID = ds.GenerateID(tenantConnectorRequest, string(tenmod.TenantConnectorType))
+	tenantID := ds.PrependToDataID(tenantConnectorRequest.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.Connector{}
+	if err := createDataInCouch(tenantDBName, tenantConnectorRequest, dataContainer, string(tenmod.TenantConnectorType), tenmod.TenantConnectorStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// UpdateTenantConnector - CouchDB implementation of UpdateTenantConnector
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantConnector(tenantConnectorRequest *tenmod.Connector) (*tenmod.Connector, error) {
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(tenantConnectorRequest))
+	tenantConnectorRequest.ID = ds.PrependToDataID(tenantConnectorRequest.ID, string(tenmod.TenantConnectorType))
+	tenantID := ds.PrependToDataID(tenantConnectorRequest.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.Connector{}
+	if err := updateDataInCouch(tenantDBName, tenantConnectorRequest, dataContainer, string(tenmod.TenantConnectorType), tenmod.TenantConnectorStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// DeleteTenantConnector - CouchDB implementation of DeleteTenantConnector
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantConnectorStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantConnectorType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Connector{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantConnectorStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
+// GetTenantConnector - CouchDB implementation of GetTenantConnector
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantConnectorStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantConnectorType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Connector{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantConnectorStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
+// GetAllTenantConnectors - CouchDB implementation of GetAllTenantConnectors
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantConnectors(tenantID string) ([]*tenmod.Connector, error) {
+	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantConnectorStr)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.Connector, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantConnectorType), tenmod.TenantConnectorStr, &res); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantConnectorStr)
+	return res, nil
+}
+
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *tenmod.Domain) (*tenmod.Domain, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))

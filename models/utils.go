@@ -2,12 +2,12 @@ package models
 
 import (
 	"encoding/json"
-	//"fmt"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/getlantern/deepcopy"
+	"github.com/peterbourgon/mergemap"
 )
 
 const (
@@ -75,14 +75,8 @@ func AsJSONString(obj interface{}) string {
  * Note dst is modified on error, potentially could be avoid by copying dst into a new container.
  */
 func MergeMaps(dst map[string]interface{}, src map[string]interface{}) {
-	//fmt.Println("Merging maps")
-	//fmt.Printf("Input dst:\t%v\n", dst)
-	//fmt.Printf("Input src:\t%v\n", src)
-	for n, v := range src {
-		//fmt.Printf("index:%s  src1v:%v  src2v:%v diff:%b \n", n, v, dst[n], v != dst[n])
-		dst[n] = v
-	}
-	//fmt.Printf("Output dst:\t%v\n", dst)
+	mergemap.Merge(dst, src)
+	return
 }
 
 /*MergeObjWithMap

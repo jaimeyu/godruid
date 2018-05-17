@@ -137,23 +137,16 @@ func MergeObjWithMap(orig interface{}, reqJson []byte) error {
 
 /*ConvertObj2Map --  Converts an object into a generic map */
 func ConvertObj2Map(item interface{}) (map[string]interface{}, error) {
-	// debug marshall obj into json so we can merge the [] bytes
 	orig, umerr := json.Marshal(item)
 	if umerr != nil {
-		//		fmt.Println("Error marshalling:", umerr)
 		return nil, umerr
 	}
 
 	var omap map[string]interface{}
 	err := json.Unmarshal(orig, &omap)
 	if err != nil {
-		//		fmt.Println("Error unmarshalling:", err)
 		return nil, err
 	}
-	//	for field, val := range omap {
-	//		fmt.Println("KV Pair: ", field, val)
-	//	}
-
 	return omap, nil
 
 }

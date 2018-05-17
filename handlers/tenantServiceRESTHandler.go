@@ -204,7 +204,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Name:        "PatchMonitoredObject",
 			Method:      "PATCH",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
-			HandlerFunc: result.UpdateMonitoredObject,
+			HandlerFunc: result.PatchMonitoredObject,
 		},
 		server.Route{
 			Name:        "GetMonitoredObject",

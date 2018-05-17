@@ -77,30 +77,35 @@ const (
 	CreateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPUpdateStr
 	GetIngPrfStr       = IngestionProfileStr + metricNameDelimiter + OPGetStr
+	PatchIngPrfStr     = IngestionProfileStr + metricNameDelimiter + OPPatchStr
 	GetActiveIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPGetActiveStr
 	DeleteIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPDeleteStr
 
 	CreateTenantUserStr = TenantUserStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantUserStr = TenantUserStr + metricNameDelimiter + OPUpdateStr
 	GetTenantUserStr    = TenantUserStr + metricNameDelimiter + OPGetStr
+	PatchTenantUserStr  = TenantUserStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantUserStr = TenantUserStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantUserStr = TenantUserStr + metricNameDelimiter + OPGetAllStr
 
 	CreateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPUpdateStr
 	GetTenantDomainStr    = TenantDomainStr + metricNameDelimiter + OPGetStr
+	PatchTenantDomainStr  = TenantDomainStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPGetAllStr
 
 	CreateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPUpdateStr
 	GetThrPrfStr    = ThresholdProfileStr + metricNameDelimiter + OPGetStr
+	PatchThrPrfStr  = ThresholdProfileStr + metricNameDelimiter + OPPatchStr
 	GetAllThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPGetAllStr
 	DeleteThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPDeleteStr
 
 	CreateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPCreateStr
 	UpdateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPUpdateStr
 	GetMonObjStr         = MonitoredObjectStr + metricNameDelimiter + OPGetStr
+	PatchMonObjStr       = MonitoredObjectStr + metricNameDelimiter + OPPatchStr
 	GetAllMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPGetAllStr
 	DeleteMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPDeleteStr
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
@@ -115,6 +120,7 @@ const (
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
 	GetTenantMetaStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
+	PatchTenantMetaStr  = TenantMetaStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
 	CreateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPCreateStr

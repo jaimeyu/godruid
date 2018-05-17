@@ -320,12 +320,13 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 // PatchTenantUser - updates a tenant user
 func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.PatchTenantUserStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -333,14 +334,14 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -355,7 +356,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	errMerge := models.MergeObjWithMap(oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 
 	}
@@ -363,7 +364,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	err = oldData.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -413,11 +414,11 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 	result, err := tsh.tenantDB.UpdateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateTenantUserStr, tenmod.TenantUserStr, "Updated")
+	sendSuccessResponse(result, w, startTime, mon.PatchTenantStr, tenmod.TenantUserStr, "Updated")
 }
 
 // GetTenantUser - fetches a tenant user
@@ -577,12 +578,13 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
  */
 func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.PatchTenantStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -591,7 +593,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -599,7 +601,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -620,7 +622,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	errMerge := models.MergeObjWithMap(oldDomain, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 
 	}
@@ -628,22 +630,22 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	err = oldDomain.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 	// Done checking for differences
-	logger.Log.Infof("Patching %s: %s", tenmod.TenantDomainStr, oldDomain)
+	logger.Log.Infof("Patching %s: %s", opStr, oldDomain)
 
 	// Issue request to DAO Layer
 	result, err := tsh.tenantDB.UpdateTenantDomain(oldDomain)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateTenantDomainStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	NotifyDomainUpdated(oldDomain.TenantID, oldDomain)
-	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Patched")
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantDomainStr, "Patched")
 }
 
 // GetTenantDomain - fetches a tenant domain
@@ -751,12 +753,13 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 //PatchTenantIngestionProfile - updates a tenant ingestion profile
 func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.PatchIngPrfStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -764,28 +767,28 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	origData, err2 := tsh.tenantDB.GetTenantIngestionProfile(data.TenantID, data.ID)
 	if err2 != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	errMerge := models.MergeObjWithMap(origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -795,11 +798,11 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(origData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateIngPrfStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateIngPrfStr, tenmod.TenantIngestionProfileStr, "Patched")
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantIngestionProfileStr, "Patched")
 }
 
 // UpdateTenantIngestionProfile - updates a tenant ingestion profile
@@ -947,12 +950,13 @@ func (tsh *TenantServiceRESTHandler) CreateTenantThresholdProfile(w http.Respons
 // UpdateTenantThresholdProfile - updates a tenant threshold profile
 func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.UpdateThrPrfStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -960,28 +964,28 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	origData, err2 := tsh.tenantDB.GetTenantThresholdProfile(data.TenantID, data.ID)
 	if err2 != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	errMerge := models.MergeObjWithMap(origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -991,11 +995,11 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(origData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateThrPrfStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateThrPrfStr, tenmod.TenantThresholdProfileStr, "Updated")
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantThresholdProfileStr, "Patched")
 }
 
 // UpdateTenantThresholdProfile - updates a tenant threshold profile
@@ -1143,12 +1147,13 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 //PatchUpdateMonitoredObject - Patch a tenant monitored object
 func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.PatchMonObjStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1156,14 +1161,14 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1171,14 +1176,14 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	oldData, err := tsh.tenantDB.GetMonitoredObject(data.TenantID, data.ID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	errMerge := models.MergeObjWithMap(oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 
 	}
@@ -1186,7 +1191,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	err = oldData.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1196,12 +1201,12 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	result, err := tsh.tenantDB.UpdateMonitoredObject(oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	NotifyMonitoredObjectUpdated(data.TenantID, oldData)
-	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Patched")
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
 
 // UpdateMonitoredObject - updates a tenant monitored object
@@ -1387,12 +1392,13 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 //PatchTenantMeta - Patch a tenant metadata
 func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.PatchTenantMetaStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1400,14 +1406,14 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1415,21 +1421,21 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 	oldData, err := tsh.tenantDB.GetTenantMeta(data.TenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
-		reportError(w, startTime, "500", mon.GetTenantMetaStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	errMerge := models.MergeObjWithMap(oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1439,11 +1445,11 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 	result, err := tsh.tenantDB.UpdateTenantMeta(oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateTenantMetaStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateTenantMetaStr, tenmod.TenantMetaStr, "Patched")
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMetaStr, "Patched")
 }
 
 // UpdateTenantMeta - updates a tenant metadata

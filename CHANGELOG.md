@@ -1,7 +1,10 @@
 ## Current Release 
+### 0.113.0 
+**Release Date:** Wed May 16 16:41:53 UTC 2018     
+## Previous Releases 
+* Fix - handle lookup not found errors from druid
 ### 0.112.0 
 **Release Date:** Fri May 11 18:47:21 UTC 2018     
-## Previous Releases 
 ### 0.111.0 
 **Release Date:** Fri May 11 17:53:36 UTC 2018     
 * Fix - Adding validity checks to Threshold query by TopN to avoid invalid Druid queries

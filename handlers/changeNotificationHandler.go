@@ -31,9 +31,9 @@ type ChangeEvent struct {
 	payload   interface{}
 }
 
-const pollingFrequencySecs = 60                                          // How often to poll tenantDB for recent changes
-const refreshFrequencyMillis = int64(5 * time.Minute / time.Millisecond) // How often to push a full refresh of tenantDB
-const defaultKafkaTopic = "monitored-object"                             // The topic where changes are pushed.
+const defaultPollingFrequency = 60 * time.Second // How often to poll tenantDB for recent changes
+//const refreshFrequencyMillis = int64(gather. * time.Second / time.Millisecond) // How often to push a full refresh of tenantDB
+const defaultKafkaTopic = "monitored-object" // The topic where changes are pushed.
 
 /*
  The ChangeNotificationHandler is the entry point for handling changes to provisioning resources.
@@ -97,11 +97,15 @@ The main loop
 */
 func (c *ChangeNotificationHandler) SendChangeNotifications() {
 
-	lastFullRefresh := int64(0)
-	lastSuccess := int64(0)
-
+	lastFullRefresh := time.Time{}
+	lastSuccess := time.Time{}
+	refreshFrequency := (time.Duration)(gather.GetConfig().GetInt(gather.CK_server_changenotif_refreshFreqSeconds.String())) * time.Second
+	pollingFrequency := defaultPollingFrequency
+	if refreshFrequency < pollingFrequency {
+		pollingFrequency = refreshFrequency
+	}
 	// Run an auditer to do a refresh at regular intervals
-	ticker := time.NewTicker(pollingFrequencySecs * time.Second)
+	ticker := time.NewTicker(pollingFrequency)
 	quit := make(chan struct{})
 
 	for {
@@ -113,9 +117,9 @@ func (c *ChangeNotificationHandler) SendChangeNotifications() {
 			// push all provisioning data that others are interested in.
 			// Note: right now, this is a synchronous operation. If needed it could be handled in
 			// a separate dedicated thread.
-			startTime := time.Now().UnixNano() / int64(time.Millisecond)
-			needsRefresh := lastFullRefresh <= (startTime - refreshFrequencyMillis)
-			if err := c.pollChanges(lastSuccess, needsRefresh); err == nil {
+			startTime := time.Now().Truncate(time.Second)
+			needsRefresh := !lastFullRefresh.Add(refreshFrequency).After(startTime)
+			if err := c.pollChanges(lastSuccess.UnixNano()/int64(1000), needsRefresh); err == nil {
 				lastSuccess = startTime
 				if needsRefresh {
 					lastFullRefresh = startTime
@@ -322,6 +326,8 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err
 				continue
+			} else {
+				logger.Log.Infof("Updated metadata in metrid DB for tenant %s", t.ID)
 			}
 		}
 

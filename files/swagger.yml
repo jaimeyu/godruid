@@ -222,6 +222,34 @@ paths:
           type: string
       tags:
         - AdminProvisioningService
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant
+      tags:
+        - AdminProvisioningService
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.

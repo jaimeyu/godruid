@@ -87,6 +87,12 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 			HandlerFunc: result.UpdateTenant,
 		},
 		server.Route{
+			Name:        "PatchTenant",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}",
+			HandlerFunc: result.PatchTenant,
+		},
+		server.Route{
 			Name:        "GetTenant",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
@@ -342,7 +348,7 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -350,14 +356,14 @@ func (ash *AdminServiceRESTHandler) CreateTenant(w http.ResponseWriter, r *http.
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -422,7 +428,7 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -430,14 +436,14 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateTenantStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -452,6 +458,67 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantStr, admmod.TenantStr, "Updated")
+}
+
+// Logic to update a tenant based on a potential subset of Tenant attribute value pairs from an HTTP request.
+// Reports HTTP error responses for the following conditions:
+// 	400 - if the request could not be parsed or if it failed Tenant validation logic
+//  500 - if the tenant could not be retrieved from the datastore, if the merge failed, or if the merged data could not be pushed into the datastore
+// Params:
+//  w - the HTTP response to populate based on the success/failure of the request
+//  r - the initiating HTTP patch request to run the business logic on
+// Returns:
+//  void
+func (ash *AdminServiceRESTHandler) PatchTenant(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the ID from the URL in order to fetch the tenant from the DB
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	// Retrieve tne request bytes from the payload in order to convert it to a map
+	patchRequestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.PatchTenantStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Attempt to retrieve the tenant that we are trying to patch from the DB in order to do a merge
+	fetchedTenant, err := ash.adminDB.GetTenantDescriptor(tenantID)
+	if err != nil {
+		//TODO we should try to return a 404 if the tenant is indeed not found. Unfortunately the response code from the db is buried in an error string
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", mon.PatchTenantStr, err.Error())
+		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Merge the attributes passed in with the patch request to the tenant fetched from the datastore
+	var patchedTenant *admmod.Tenant
+	if err := models.MergeObjWithMap(fetchedTenant, patchRequestBytes); err != nil {
+		msg := fmt.Sprintf("Unable to patch tenant with id %s: %s", tenantID, err.Error())
+		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
+		return
+	} else {
+		patchedTenant = fetchedTenant
+	}
+
+	// Ensure that the tenant is properly constructed following the merge prior to updating the record in the datastore
+	err = patchedTenant.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.PatchTenantStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Finally update the tenant in the datastore with the merged map and fetched tenant
+	result, err := ash.adminDB.UpdateTenantDescriptor(patchedTenant)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.PatchTenantStr, admmod.TenantStr, "Patched")
 }
 
 // GetTenant - fetches a Tenant
@@ -546,7 +613,7 @@ func (ash *AdminServiceRESTHandler) GetTenantSummaryByAlias(w http.ResponseWrite
 	result, err := ash.adminDB.GetTenantIDByAlias(tenantName)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s summary for %s: %s", admmod.TenantStr, tenantName, err.Error())
-		reportError(w, startTime, "500", mon.GetTenantIDByAliasStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.GetTenantSummaryByAliasStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -554,12 +621,12 @@ func (ash *AdminServiceRESTHandler) GetTenantSummaryByAlias(w http.ResponseWrite
 	response, err := json.Marshal(summary)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal response summary response for %s %s: %s", admmod.TenantStr, tenantName, err.Error())
-		reportError(w, startTime, "500", mon.GetTenantIDByAliasStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.GetTenantSummaryByAliasStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	logger.Log.Infof("Successfully retrieved ID %s for alias %s", result, tenantName)
-	trackAPIMetrics(startTime, "200", mon.GetTenantIDByAliasStr)
+	trackAPIMetrics(startTime, "200", mon.GetTenantSummaryByAliasStr)
 	fmt.Fprintf(w, string(response))
 }
 

@@ -5,8 +5,11 @@ import (
 
 	"net/http"
 
+	"github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/couchDB"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models/tenant"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,14 +17,23 @@ import (
 type ServerStruct struct {
 	ConnectionMap map[string]*websocket.Conn
 	Upgrader      websocket.Upgrader
+	TenantDB      *couchDB.TenantServiceDatastoreCouchDB
 }
 
 // ConnectorMessage is a format for communicating to connector instances
+
 type ConnectorMessage struct {
+	Filename    string
+	Tenant      string
+	Hostname    string
 	ConnectorID string
+	DataType    string
 	MsgType     string
 	ErrorMsg    string
+	MsgID       int
 	ErrorCode   int
+	Data        []byte
+	Zone        string
 }
 
 // Reader - Function which reads websocket messages coming through the websocket connection
@@ -38,17 +50,83 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 		json.Unmarshal(p, msg)
 
 		switch msg.MsgType {
+		case "Config":
+			{
+				tenantID := msg.Tenant
+				zone := msg.Zone
+
+				logger.Log.Infof("Received config request from Connector with ID: %s", connectorID)
+
+				// Check if ConnectorInstances has an entry for connectorID
+				connectorInstance, err := wsServer.TenantDB.GetTenantConnectorInstance(tenantID, connectorID)
+				if err != nil {
+					logger.Log.Errorf("Unable to retrieve connector instance for tenant: %v and connectorID: %v. Error: %v", tenantID, connectorID, err)
+				}
+
+				// if connector hasn't been added to connector instances, add it
+				if connectorInstance == nil {
+					connectorInstance = &tenant.ConnectorInstance{
+						ID:       connectorID,
+						Hostname: msg.Hostname,
+						TenantID: tenantID,
+					}
+					wsServer.TenantDB.CreateTenantConnectorInstance(connectorInstance)
+					if err != nil {
+						logger.Log.Errorf("Unable to create TenantConnectorInstance for tenant: %v. Error: %v", tenantID, err)
+						break
+					}
+				}
+
+				// get all available configs
+				configs, err := wsServer.TenantDB.GetAllAvailableTenantConnectors(tenantID, zone)
+
+				if err != nil {
+					logger.Log.Errorf("Unable to find connectors for tenant: %v and zone: %v", tenantID, zone)
+					break
+				}
+
+				// take the first available config, and assign a connector instance ID to it
+				if len(configs) == 0 {
+					logger.Log.Errorf("No available configurations for Connector with ID: %v", connectorID)
+					break
+				}
+
+				selectedConfig := configs[0]
+
+				selectedConfig.ID = datastore.GetDataIDFromFullID(selectedConfig.ID)
+				selectedConfig.ConnectorInstanceID = connectorID
+
+				// Send the config to the connector
+				configJSON, _ := json.Marshal(selectedConfig)
+
+				returnMsg := &ConnectorMessage{
+					MsgType: "Config",
+					Data:    configJSON,
+				}
+
+				msgJSON, _ := json.Marshal(returnMsg)
+
+				err = wsServer.ConnectionMap[connectorID].WriteMessage(websocket.BinaryMessage, msgJSON)
+				if err != nil {
+					logger.Log.Errorf("Error sending configuration to Connector with ID: %v", connectorID)
+					break
+				}
+
+				// After successfully sending config to connector, update ConnectorConfig with the instance iD
+				_, err = wsServer.TenantDB.UpdateTenantConnector(selectedConfig)
+				if err != nil {
+					logger.Log.Errorf("Unable to update TenantConnector: %v, for tenant: %v. Error: %v", selectedConfig.ID, tenantID, err)
+					break
+				}
+
+			}
 		case "Heartbeat":
 			{
-				logger.Log.Infof("Received Heartbeat from Connector with ID: %s", msg.ConnectorID)
-			}
-		case "Data":
-			{
-				logger.Log.Infof("Received Heartbeat from Connector with ID: %s", msg.ConnectorID)
+				logger.Log.Infof("Received Heartbeat from Connector with ID: %s", connectorID)
 			}
 		default:
 			{
-				logger.Log.Errorf("Error from connector: %v. Error: %v. Message: %s", msg.ConnectorID, msg.ErrorCode, msg.ErrorMsg)
+				logger.Log.Errorf("Error from connector: %v. Error: %v. Message: %s", connectorID, msg.ErrorCode, msg.ErrorMsg)
 			}
 		}
 	}
@@ -76,6 +154,11 @@ func Server() *ServerStruct {
 
 	cfg := gather.GetConfig()
 
+	tenantDB, err := couchDB.CreateTenantServiceDAO()
+	if err != nil {
+		logger.Log.Errorf("Could not create couchdb tenant DAO: %s", err.Error())
+	}
+
 	wsServer := &ServerStruct{
 		ConnectionMap: make(map[string]*websocket.Conn),
 		Upgrader: websocket.Upgrader{
@@ -83,6 +166,7 @@ func Server() *ServerStruct {
 			WriteBufferSize:   1024,
 			EnableCompression: true,
 		},
+		TenantDB: tenantDB,
 	}
 
 	http.HandleFunc("/wsstatus", wsServer.serveWs)

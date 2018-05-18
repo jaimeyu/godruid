@@ -545,11 +545,17 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantConnectors(w http.ResponseWrite
 	startTime := time.Now()
 
 	tenantID := getDBFieldFromRequest(r, 4)
+	zones := r.URL.Query()["zone"]
+	zone := ""
+
+	if len(zones) > 0 {
+		zone = zones[0]
+	}
 
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantConnectorStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetAllTenantConnectors(tenantID)
+	result, err := tsh.tenantDB.GetAllTenantConnectors(tenantID, zone)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantConnectorStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllTenantConnectorStr, msg, http.StatusInternalServerError)

@@ -662,6 +662,10 @@ paths:
           in: path
           required: true
           type: string
+        - name: zone
+          in: query
+          required: false
+          type: string
       tags:
         - TenantProvisioningService
   /v1/tenants/{tenantId}/domains:

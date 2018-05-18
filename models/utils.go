@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
@@ -95,6 +96,8 @@ func MergeMaps(dst map[string]interface{}, src map[string]interface{}) {
  * back into the struct.
  */
 func MergeObjWithMap(orig interface{}, reqJson []byte) error {
+	const KEY_DATA = "data"
+	const KEY_ATTR = "attributes"
 	requestMap := make(map[string]interface{})
 
 	// Convert the request JSON into a map
@@ -110,9 +113,15 @@ func MergeObjWithMap(orig interface{}, reqJson []byte) error {
 
 	// Assumes the request map is based on JSON-API
 	// Get the element with data
-	mapData := requestMap["data"].(map[string]interface{})
+	if requestMap[KEY_DATA] == nil {
+		return errors.New("Cannot merge as 'data' key is missing.")
+	}
+	mapData := requestMap[KEY_DATA].(map[string]interface{})
 	// Get the element for attributes
-	req := mapData["attributes"].(map[string]interface{})
+	if mapData[KEY_ATTR] == nil {
+		return errors.New("Cannot merge as 'attributes' key is missing.")
+	}
+	req := mapData[KEY_ATTR].(map[string]interface{})
 
 	// Merge the request map into the original data map
 	MergeMaps(omap, req)

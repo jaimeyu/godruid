@@ -22,6 +22,26 @@ type SLAReport struct {
 	ByDayOfWeekResult    interface{}       `json:"byDayOfWeekResult"`
 }
 
+type SLASchedulerConfig struct {
+	TenantID string `json:"tenantId"`
+
+	// Report parameters
+	DatePeriodDays     int
+	Domain             []string `json:"domain,omitempty"`
+	ThresholdProfileID string   `json:"thresholdProfileId,omitempty"`
+	Granularity        string   `json:"granularity,omitempty"`
+	Timeout            int32    `json:"timeout,omitempty"`
+	//Timezone           int      //TODO
+
+	// Scheduling Execution timing
+	ReportName string
+	Minute     string
+	Hour       string
+	DayOfMonth string
+	Month      string
+	DayOfWeek  string
+}
+
 type SLASummary struct {
 	TotalDuration          int64       `json:"totalDuration"`
 	TotalViolationCount    int32       `json:"totalViolationCount"`

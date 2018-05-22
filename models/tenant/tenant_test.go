@@ -335,7 +335,6 @@ func TestTenantDomainSerialization(t *testing.T) {
 		TenantID:              fake.CharactersN(12),
 		Name:                  fake.State(),
 		Color:                 fake.HexColor(),
-		ThresholdProfileSet:   []string{uuid.NewV4().String(), uuid.NewV4().String()},
 		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}

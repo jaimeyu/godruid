@@ -143,15 +143,14 @@ func (u *User) Validate(isUpdate bool) error {
 
 // Domain - defines a Tenant Domain.
 type Domain struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	Name                  string   `json:"name"`
-	Color                 string   `json:"color"`
-	ThresholdProfileSet   []string `json:"thresholdProfileSet"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Name                  string `json:"name"`
+	Color                 string `json:"color"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -173,56 +172,6 @@ func (d *Domain) GetReferences() []jsonapi.Reference {
 			Name: "thresholdProfiles",
 		},
 	}
-}
-
-// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
-func (d *Domain) GetReferencedIDs() []jsonapi.ReferenceID {
-	result := []jsonapi.ReferenceID{}
-	for _, tpID := range d.ThresholdProfileSet {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tpID,
-			Type: "thresholdProfiles",
-			Name: "thresholdProfiles",
-		})
-	}
-
-	return result
-}
-
-// SetToManyReferenceIDs sets the threshold profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (d *Domain) SetToManyReferenceIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = IDs
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// AddToManyIDs adds new threshold profiles tot he reference list
-func (d *Domain) AddToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = append(d.ThresholdProfileSet, IDs...)
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// DeleteToManyIDs removes threshold profiles from the reference list
-func (d *Domain) DeleteToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		for _, ID := range IDs {
-			for pos, oldID := range d.ThresholdProfileSet {
-				if ID == oldID {
-					// match, this ID must be removed
-					d.ThresholdProfileSet = append(d.ThresholdProfileSet[:pos], d.ThresholdProfileSet[pos+1:]...)
-				}
-			}
-		}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 // Validate - used during validation of incoming REST requests for this object

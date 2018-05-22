@@ -277,14 +277,6 @@ func reformatBucketResponse(buckets []map[string]interface{}, resultMap map[stri
 	return resultMap, nil
 }
 
-func buildLookupName(dimType, tenantID, dimValue string) string {
-	return strings.ToLower(dimType + "|" + tenantID + "|" + dimValue)
-}
-
-func buildLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + "|" + tenantID)
-}
-
 func sendRequest(method string, httpClient *http.Client, endpoint, authToken string, req []byte) (result []byte, err error) {
 
 	ep := endpoint + "?pretty"

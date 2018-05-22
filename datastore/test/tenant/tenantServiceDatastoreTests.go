@@ -457,7 +457,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Validate that there are currently no records
-	recList, err := runner.tenantDB.GetAllTenantConnectors(TENANT)
+	recList, err := runner.tenantDB.GetAllTenantConnectors(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
 
@@ -531,7 +531,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
 	// Get all records
-	fetchedList, err := runner.tenantDB.GetAllTenantConnectors(TENANT)
+	fetchedList, err := runner.tenantDB.GetAllTenantConnectors(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fetchedList)
 	assert.True(t, len(fetchedList) == 2)
@@ -545,7 +545,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.Equal(t, deleted.Name, fetched.Name, "Deleted name not the same")
 
 	// Get all records - should be 1
-	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT)
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fetchedList)
 	assert.True(t, len(fetchedList) == 1)
@@ -569,7 +569,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.Equal(t, deleted.Name, created2.Name, "Deleted name not the same")
 
 	// Get all records - should be empty
-	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT)
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
 }

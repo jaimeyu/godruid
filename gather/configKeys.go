@@ -26,6 +26,7 @@ const (
 	CK_args_maxConcurrentMetricAPICalls      ConfigKey = "args.maxConcurrentMetricAPICalls"
 	CK_args_maxConcurrentProvAPICalls        ConfigKey = "args.maxConcurrentProvAPICalls"
 	CK_args_maxConcurrentPouchAPICalls       ConfigKey = "args.maxConcurrentPouchAPICalls"
+	CK_connector_maxSecondsWithoutHeartbeat  ConfigKey = "connector.maxSecondsWithoutHeartbeat"
 	CK_druid_broker_server                   ConfigKey = "druid.broker.server"
 	CK_druid_broker_port                     ConfigKey = "druid.broker.port"
 	CK_druid_broker_table                    ConfigKey = "druid.broker.table"

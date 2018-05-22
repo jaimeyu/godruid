@@ -45,6 +45,10 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	return res, nil
 }
 
+func (tsd *TenantServiceDatastoreInMemory) GetConnectorUpdateChan() chan *tenmod.Connector {
+	return nil
+}
+
 // DoesTenantExist - helper function to determine if a Tenant does have data stored for a particular type of data.
 func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx tenmod.TenantDataType) error {
 	if len(tenantID) == 0 {
@@ -403,6 +407,16 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantConnectors(tenantID, zone
 	}
 
 	return recList, nil
+}
+
+// GetAllAvailableTenantConnectors - Returns all tenant connectors matching tenantID, zone, that aren't already being used
+func (tsd *TenantServiceDatastoreInMemory) GetAllAvailableTenantConnectors(tenantID, zone string) ([]*tenmod.Connector, error) {
+	return nil, nil
+}
+
+// GetAllTenantConnectorsByInstanceID - Returns the TenantConnectorConfigs with the given instance ID
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantConnectorsByInstanceID(tenantID, instanceID string) ([]*tenmod.Connector, error) {
+	return nil, nil
 }
 
 // CreateTenantDomain - InMemory implementation of CreateTenantDomain

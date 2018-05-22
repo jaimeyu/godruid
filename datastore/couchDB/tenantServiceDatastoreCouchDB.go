@@ -23,8 +23,9 @@ const (
 // database operations for the Tenant Service when using CouchDB
 // as the storage option.
 type TenantServiceDatastoreCouchDB struct {
-	server string
-	cfg    config.Provider
+	server              string
+	cfg                 config.Provider
+	connectorUpdateChan chan *tenmod.Connector
 }
 
 // CreateTenantServiceDAO - instantiates a CouchDB implementation of the
@@ -32,14 +33,19 @@ type TenantServiceDatastoreCouchDB struct {
 func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	result := new(TenantServiceDatastoreCouchDB)
 	result.cfg = gather.GetConfig()
+	result.connectorUpdateChan = make(chan *tenmod.Connector)
 
 	provDBURL := fmt.Sprintf("%s:%d",
 		result.cfg.GetString(gather.CK_server_datastore_ip.String()),
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
-	logger.Log.Debugf("Tenant Service CouchDB URL is: %s", provDBURL)
+	logger.Log.Debugf("Tenant Service CouchDB URL is: %s, %v", provDBURL, result.connectorUpdateChan)
 	result.server = provDBURL
 
 	return result, nil
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) GetConnectorUpdateChan() chan *tenmod.Connector {
+	return tsd.connectorUpdateChan
 }
 
 // CreateTenantUser - CouchDB implementation of CreateTenantUser
@@ -226,6 +232,16 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantConnector(tenantConnectorR
 		return nil, err
 	}
 	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+
+	// put update on channel - don't block
+	select {
+	case tsd.connectorUpdateChan <- dataContainer:
+		logger.Log.Debugf("Sending %s: %v to websocket server\n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+	default:
+		logger.Log.Debugf("Websocket server not listening to %s: %v \n", tenmod.TenantConnectorStr, models.AsJSONString(dataContainer))
+		break
+	}
+
 	return dataContainer, nil
 }
 
@@ -319,6 +335,31 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllAvailableTenantConnectors(tenant
 		}
 	}
 
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantConnectorStr)
+	return res, nil
+}
+
+// GetAllTenantConnectorsByInstanceID - Returns the TenantConnectorConfigs with the given instance ID
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantConnectorsByInstanceID(tenantID, instanceID string) ([]*tenmod.Connector, error) {
+	logger.Log.Debugf("Fetching %s with instance ID %s\n", tenmod.TenantConnectorStr, instanceID)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.Connector, 0)
+
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	fetchedList, err := getAllOfAny(string(tenmod.TenantConnectorType), "connectorInstanceId", instanceID, string(tenmod.TenantConnectorStr), db)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := convertCouchDataArrayToFlattenedArray(fetchedList, &res, tenmod.TenantConnectorStr); err != nil {
+		return nil, err
+	}
 	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantConnectorStr)
 	return res, nil
 }

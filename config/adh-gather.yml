@@ -35,6 +35,9 @@ args:
   maxConcurrentProvAPICalls:   1000
   maxConcurrentMetricAPICalls: 500
 
+connector:
+  maxSecondsWithoutHeartbeat: 120
+
 druid:
   broker:
     server: http://aod_broker

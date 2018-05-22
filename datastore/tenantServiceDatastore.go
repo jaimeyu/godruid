@@ -25,6 +25,9 @@ type TenantServiceDatastore interface {
 	DeleteTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
 	GetTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
 	GetAllTenantConnectors(tenantID, zone string) ([]*tenmod.Connector, error)
+	GetAllAvailableTenantConnectors(tenantID, zone string) ([]*tenmod.Connector, error)
+	GetAllTenantConnectorsByInstanceID(tenantID, instanceID string) ([]*tenmod.Connector, error)
+	GetConnectorUpdateChan() chan *tenmod.Connector
 
 	CreateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)
 	UpdateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)

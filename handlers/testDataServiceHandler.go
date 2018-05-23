@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,20 +47,23 @@ const (
 	domainSlaReportBucketDurationInMilliseconds = millisecondsPerWeek / domainSlaReportBucketCount
 	domainSlaReportBucketDurationInMinutes      = domainSlaReportBucketDurationInMilliseconds / (1000 * 60)
 
-	populateTestDataStr  = "populate_test_data"
-	purgeDBStr           = "purge_db"
-	generateSLAReportStr = "gen_sla_report"
-	getDocsByTypeStr     = "get_docs_by_type"
+	populateTestDataStr                 = "populate_test_data"
+	populateTestDataBulkRandomizedMOStr = "populate_test_data_bulk_randomize_MO"
+	purgeDBStr                          = "purge_db"
+	generateSLAReportStr                = "gen_sla_report"
+	getDocsByTypeStr                    = "get_docs_by_type"
+
+	stringGeneratorCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
 
 // TestDataServiceHandler - handler for all APIs related to test data provisioning.
 type TestDataServiceHandler struct {
 	routes []server.Route
 	// adminDB  db.AdminServiceDatastore
-	// tenantDB db.TenantServiceDatastore
-	pouchDB db.PouchDBPluginServiceDatastore
-	grpcSH  *GRPCServiceHandler
-	testDB  db.TestDataServiceDatastore
+	tenantDB db.TenantServiceDatastore
+	pouchDB  db.PouchDBPluginServiceDatastore
+	grpcSH   *GRPCServiceHandler
+	testDB   db.TestDataServiceDatastore
 }
 
 // CreateTestDataServiceHandler - generates a TestDataServiceHandler to handle all test
@@ -80,6 +84,13 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Method:      "POST",
 			Pattern:     "/test-data",
 			HandlerFunc: result.PopulateTestData,
+		},
+
+		server.Route{
+			Name:        "PopulateTestDataBulkRandomizedMO",
+			Method:      "POST",
+			Pattern:     "/test-data/bulkRandomizedMO",
+			HandlerFunc: result.PopulateTestDataBulkRandomizedMO,
 		},
 
 		server.Route{
@@ -111,11 +122,11 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 	// }
 	// result.adminDB = admindb
 
-	// tenantdb, err := getTenantServiceDatastore()
-	// if err != nil {
-	// 	logger.Log.Fatalf("Unable to instantiate TestDataServiceHandler: %s", err.Error())
-	// }
-	// result.tenantDB = tenantdb
+	tenantdb, err := getTenantServiceDatastore()
+	if err != nil {
+		logger.Log.Fatalf("Unable to instantiate TestDataServiceHandler: %s", err.Error())
+	}
+	result.tenantDB = tenantdb
 
 	pouchdb, err := getPouchDBPluginServiceDatastore()
 	if err != nil {
@@ -461,6 +472,108 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	fmt.Fprintf(w, string(response))
 }
 
+// Generates a set of monitored objects with randomized values according to query parameters provided in the incoming rest request
+// Supported query parameters are:
+//			count: the number of desires monitored objects to be generated. Defaults to 1
+//			batchSize: the number of monitored objects that should be placed in a batch to be sent to the db. Defaults to 1000
+//			tenant: the ID of the tenant to associate the monitored objects with
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
+func (tsh *TestDataServiceHandler) PopulateTestDataBulkRandomizedMO(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	queryParams := r.URL.Query()
+
+	var (
+		moRequestCount  uint64 = 1
+		moRequestTenant string
+		batchSize       uint64 = 1000
+		err             error
+	)
+
+	// Defines the number of monitored objects that we want to create. Defaults to 1
+	if queryParams["count"] != nil {
+		moRequestCount, err = strconv.ParseUint(queryParams["count"][0], 10, 64)
+		if err != nil {
+			msg := fmt.Sprintf("Unacceptable value provided for monitored object count: %s", err.Error())
+			reportError(w, startTime, "400", populateTestDataBulkRandomizedMOStr, msg, http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Defines the number of monitored objects we want to place in a batch request to the datastore
+	if queryParams["batchSize"] != nil {
+		batchSize, err = strconv.ParseUint(queryParams["batchSize"][0], 10, 64)
+		if err != nil {
+			msg := fmt.Sprintf("Unacceptable value provided for monitored object batch size: %s", err.Error())
+			reportError(w, startTime, "400", populateTestDataBulkRandomizedMOStr, msg, http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Defines the tenant to place the monitored objects against. This is a required field
+	if len(queryParams["tenant"]) == 0 {
+		msg := fmt.Sprintf("Tenant ID must be provided")
+		reportError(w, startTime, "400", populateTestDataBulkRandomizedMOStr, msg, http.StatusBadRequest)
+		return
+	} else {
+		moRequestTenant = queryParams["tenant"][0]
+	}
+
+	// Retrieve all the domains associated with the tenant in order to associate a random subset of them against the monitored object
+	domainSet, err := tsh.tenantDB.GetAllTenantDomains(moRequestTenant)
+	if err != nil {
+		msg := fmt.Sprintf("(Unable to retrieve domain set for tenant %s: %s", moRequestTenant, err.Error())
+		reportError(w, startTime, "500", populateTestDataBulkRandomizedMOStr, msg, http.StatusInternalServerError)
+		return
+	}
+	domainSetIDs := make([]string, len(domainSet))
+	for i, d := range domainSet {
+		domainSetIDs[i] = d.ID
+	}
+
+	// Create our initial empty bucket of MOs
+	moData := make([]*tenmod.MonitoredObject, min(batchSize, moRequestCount))
+	expectedSize := batchSize
+
+	for i := uint64(0); i < moRequestCount; i++ {
+		// We have hit the limit of our bucket size
+		if i%expectedSize == 0 && i != 0 {
+			// Actually attempt to insert the batch of MOs to the datastore
+			_, err = tsh.tenantDB.BulkInsertMonitoredObjects(moRequestTenant, moData)
+			if err != nil {
+				msg := fmt.Sprintf("Unable to provision monitored object content for tenant %s: %s", moRequestTenant, err.Error())
+				reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
+			}
+			logger.Log.Debugf("Finished batch: %d", i)
+
+			// Only bother creating a new array if we know that we are not at the end of our request count size
+			if i != (moRequestCount - 1) {
+				// We may potentially adjust our expected size if we have less MOs that need to be generated that the desired batch size
+				expectedSize = min(batchSize, (moRequestCount - i))
+				moData = make([]*tenmod.MonitoredObject, expectedSize)
+				// We know that we will be looping one more time so set the first value of the array
+				moData[0] = generateRandomMonitoredObject(moRequestTenant, domainSetIDs)
+			}
+		} else {
+			moData[i%expectedSize] = generateRandomMonitoredObject(moRequestTenant, domainSetIDs)
+		}
+	}
+
+	// Insert any remaining MOs to the datastore
+	if len(moData) != 0 {
+		_, err = tsh.tenantDB.BulkInsertMonitoredObjects(moRequestTenant, moData)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to provision monitored object content for tenant %s: %s", moRequestTenant, err.Error())
+			reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
+		}
+	}
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", populateTestDataBulkRandomizedMOStr)
+	fmt.Fprintf(w, "Success")
+}
+
 func generateSLADomainReport(domain *pb.TenantDomain, reportStartTS int64, reportEndTS int64) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
 
@@ -642,31 +755,85 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 	result.Data.ObjectType = string(tenmod.TwampPE)
 
 	// To provision the DomainSet, need to obtain a subset of the passed in domain set.
-
-	lengthOfDomainSet := len(domainIDSet)
-	if lengthOfDomainSet == 1 {
-		// Only 1 domain, coinflip to see if it is selected.
-		rand.Seed(time.Now().Unix())
-		if rand.Intn(10)%2 == 0 {
-			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet...)
-		}
-	} else if lengthOfDomainSet != 0 {
-		numDomainsToSelect := rand.Intn(lengthOfDomainSet) + 1
-		switch numDomainsToSelect {
-		case 1:
-			// Just take a random one.
-			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet[rand.Intn(lengthOfDomainSet)])
-		case lengthOfDomainSet:
-			// Take them all
-			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet...)
-		default:
-			// Take a subset.
-			indextToStopAt := rand.Intn(lengthOfDomainSet) + 1
-			result.GetData().DomainSet = append(result.GetData().GetDomainSet(), domainIDSet[:indextToStopAt]...)
-		}
-	}
+	result.Data.DomainSet = generateRandomStringArray(domainIDSet)
 
 	result.XId = db.GenerateID(result.Data, tenantMonObjStr)
 
 	return &result, nil
+}
+
+// Generates monitored object with random field values associated with a specific tenant and provided domainSet
+// Params:
+//		tenantID: the tenant to associate this monitored object with
+//		domainSet: the domains to consider for random association with this monitored object
+// Returns:
+//		A monitored object populate with random field values
+func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.MonitoredObject {
+	result := tenmod.MonitoredObject{DomainSet: generateRandomStringArray(domainSet)}
+
+	tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
+
+	// Generate basic field values randomly and associate the appropriate tenant with the MO
+	result.MonitoredObjectID = db.GenerateID(result, tenantMonObjStr)
+	result.TenantID = tenantID
+	result.ActuatorName = generateRandomString(10)
+	result.ActuatorType = string(tenmod.AccedianVNID)
+	result.ReflectorName = generateRandomString(10)
+	result.ReflectorType = string(tenmod.AccedianVNID)
+	result.ObjectName = generateRandomString(10)
+	result.ObjectType = string(tenmod.TwampPE)
+
+	return &result
+}
+
+// Compares two uint64 and returns the smallest one
+// Params:
+//		a: the first number to compare
+//		b: the second number to compare
+// Returns:
+//		the smaller of the two provided numbers
+func min(a uint64, b uint64) uint64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// Generates a random subset of the provided string array
+// Params:
+//		stringset: the full set of strings that we wish to take a subset of
+// Returns:
+//		a random subset of the provided string array
+func generateRandomStringArray(stringSet []string) []string {
+	// If the passed in set is nil then return a nil value
+	if stringSet == nil {
+		return nil
+	}
+	setLength := len(stringSet)
+	// If we have zero length array then pass back a zero length slice
+	if setLength == 0 {
+		return stringSet[:0]
+	}
+	take := rand.Intn(setLength + 1)
+	// If we are meant to only take a single string then choose an arbitrary one
+	if take == 1 {
+		randVal := rand.Intn(setLength)
+		return stringSet[randVal : randVal+1]
+	}
+
+	// Otherwise return a subset from 0 to the randomly chosen size of the new slice
+	return stringSet[:take]
+}
+
+// Generate a string with arbitrary characters based on the provided length
+// Params:
+//		length: the size of the desired randomized string
+// Returns:
+//		a randomly generated string of the provided length
+func generateRandomString(length int) string {
+	generated := make([]byte, length)
+	for i := range generated {
+		generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
+	}
+	return string(generated)
 }

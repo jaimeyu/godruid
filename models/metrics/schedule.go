@@ -13,20 +13,20 @@ type ReportScheduleConfig struct {
 	TenantID string `json:"tenantId"`
 
 	// Report parameters
-	DatePeriodDays     int      `json:"datePeriodDays,omitempty"`
+	DatePeriodDays     string   `json:"datePeriodDays,omitempty"`
 	Domain             []string `json:"domain,omitempty"`
 	ThresholdProfileID string   `json:"thresholdProfileId,omitempty"`
 	Granularity        string   `json:"granularity,omitempty"`
 	Timeout            int32    `json:"timeout,omitempty"`
-	//Timezone           int      //TODO
+	Timezone           string   `json:"timezone,omitempty"`
 
 	// Scheduling Execution timing
 	ReportName string `json:"reportName"`
-	Minute     int    `json:"minute"`
-	Hour       int    `json:"hour"`
-	DayOfMonth int    `json:"dayMonth"`
-	Month      int    `json:"month"`
-	DayOfWeek  int    `json:"dayWeek"`
+	Minute     string `json:"minute"`
+	Hour       string `json:"hour"`
+	DayOfMonth string `json:"dayMonth"`
+	Month      string `json:"month"`
+	DayOfWeek  string `json:"dayWeek"`
 }
 
 // GetID - required implementation for jsonapi marshalling

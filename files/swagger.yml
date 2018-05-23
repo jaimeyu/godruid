@@ -2239,7 +2239,7 @@ definitions:
       tenantId:
         type: "string"
       datePeriodDays: 
-        type: "integer"
+        type: "string"
       domain: 
         type: "array"
         items: 
@@ -2250,20 +2250,20 @@ definitions:
         type: "string"
       timeout: 
         type: "integer"
-      #timezone: 
-      #  type: "integer"
+      timezone: 
+        type: "string"
       reportName: 
         type: "string"
       minute: 
-        type: "integer"
+        type: "string"
       hour: 
-        type: "integer"
+        type: "string"
       dayMonth: 
-        type: "integer"
+        type: "string"
       month: 
-        type: "integer"
+        type: "string"
       dayWeek: 
-        type: "integer"
+        type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:

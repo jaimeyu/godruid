@@ -58,9 +58,9 @@ func AsJSONString(obj interface{}) string {
 			return ""
 		}
 		return string(res)
-	case *metmod.SLAScheduleConfig:
-		user := obj.(*metmod.SLAScheduleConfig)
-		userCopy := metmod.SLAScheduleConfig{}
+	case *metmod.ReportScheduleConfig:
+		user := obj.(*metmod.ReportScheduleConfig)
+		userCopy := metmod.ReportScheduleConfig{}
 		deepcopy.Copy(&userCopy, user)
 		res, err := json.Marshal(userCopy)
 		if err != nil {

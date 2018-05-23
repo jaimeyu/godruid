@@ -35,28 +35,28 @@ func CreateSchedulerServiceRESTHandler() *SchedulerServiceRESTHandler {
 
 	result.routes = []server.Route{
 		server.Route{
-			Name:        "CreateScheduleConfig",
+			Name:        "CreateReportScheduleConfig",
 			Method:      "POST",
-			Pattern:     apiV1Prefix + "schedules",
-			HandlerFunc: result.CreateScheduleConfig,
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-configs",
+			HandlerFunc: result.CreateReportScheduleConfig,
 		},
 		server.Route{
-			Name:        "UpdateScheduleConfig",
+			Name:        "UpdateReportScheduleConfig",
 			Method:      "PUT",
-			Pattern:     apiV1Prefix + "schedules",
-			HandlerFunc: result.UpdateScheduleConfig,
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-configs",
+			HandlerFunc: result.UpdateReportScheduleConfig,
 		},
 		server.Route{
-			Name:        "GetScheduleConfig",
+			Name:        "GetReportScheduleConfig",
 			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/schedules/{configID}",
-			HandlerFunc: result.GetScheduleConfig,
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-configs/{configID}",
+			HandlerFunc: result.GetReportScheduleConfig,
 		},
 		server.Route{
-			Name:        "DeleteScheduleConfig",
+			Name:        "DeleteReportScheduleConfig",
 			Method:      "DELETE",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/schedules/{configID}",
-			HandlerFunc: result.DeleteScheduleConfig,
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-configs/{configID}",
+			HandlerFunc: result.DeleteReportScheduleConfig,
 		},
 	}
 
@@ -89,112 +89,112 @@ func getSchedulerServiceDatastore() (db.SchedulerServiceDatastore, error) {
 	return nil, errors.New("No DB implementation provided for Scheduler Service. Check configuration")
 }
 
-func (ssh *SchedulerServiceRESTHandler) CreateScheduleConfig(w http.ResponseWriter, r *http.Request) {
+func (ssh *SchedulerServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	data := metmod.SLAScheduleConfig{}
+	data := metmod.ReportScheduleConfig{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Creating %s: %s", metmod.SLAScheduleConfigStr, models.AsJSONString(&data))
+	logger.Log.Infof("Creating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
 
-	result, err := ssh.schedulerDB.CreateScheduleConfig(&data)
+	result, err := ssh.schedulerDB.CreateReportScheduleConfig(&data)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", metmod.SLAScheduleConfigStr, err.Error())
-		reportError(w, startTime, "500", mon.CreateScheduleConfigStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateReportScheduleConfigStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.CreateScheduleConfigStr, metmod.SLAScheduleConfigStr, "Created")
+	sendSuccessResponse(result, w, startTime, mon.CreateReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Created")
 }
 
-func (ssh *SchedulerServiceRESTHandler) UpdateScheduleConfig(w http.ResponseWriter, r *http.Request) {
+func (ssh *SchedulerServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	data := metmod.SLAScheduleConfig{}
+	data := metmod.ReportScheduleConfig{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.UpdateScheduleConfigStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.UpdateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", metmod.SLAScheduleConfigStr, models.AsJSONString(&data))
+	logger.Log.Infof("Updating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
 
-	result, err := ssh.schedulerDB.UpdateScheduleConfig(&data)
+	result, err := ssh.schedulerDB.UpdateReportScheduleConfig(&data)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", metmod.SLAScheduleConfigStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateScheduleConfigStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateReportScheduleConfigStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateScheduleConfigStr, metmod.SLAScheduleConfigStr, "Updated")
+	sendSuccessResponse(result, w, startTime, mon.UpdateReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Updated")
 }
 
-func (ssh *SchedulerServiceRESTHandler) GetScheduleConfig(w http.ResponseWriter, r *http.Request) {
+func (ssh *SchedulerServiceRESTHandler) GetReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
 	tenantID := getDBFieldFromRequest(r, 4)
 	configID := getDBFieldFromRequest(r, 6)
 
-	logger.Log.Infof("Fetching %s: %s", metmod.SLAScheduleConfigStr, configID)
+	logger.Log.Infof("Fetching %s: %s", metmod.ReportScheduleConfigStr, configID)
 
-	result, err := ssh.schedulerDB.GetScheduleConfig(tenantID, configID)
+	result, err := ssh.schedulerDB.GetReportScheduleConfig(tenantID, configID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.SLAScheduleConfigStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.SLAScheduleConfigStr, "Retrieved")
+	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.ReportScheduleConfigStr, "Retrieved")
 }
 
-func (ssh *SchedulerServiceRESTHandler) DeleteScheduleConfig(w http.ResponseWriter, r *http.Request) {
+func (ssh *SchedulerServiceRESTHandler) DeleteReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
 	tenantID := getDBFieldFromRequest(r, 4)
 	configID := getDBFieldFromRequest(r, 6)
 
-	logger.Log.Infof("Deleting %s: %s", metmod.SLAScheduleConfigStr, configID)
+	logger.Log.Infof("Deleting %s: %s", metmod.ReportScheduleConfigStr, configID)
 
-	result, err := ssh.schedulerDB.DeleteScheduleConfig(tenantID, configID)
+	result, err := ssh.schedulerDB.DeleteReportScheduleConfig(tenantID, configID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.SLAScheduleConfigStr, err.Error())
-		reportError(w, startTime, "500", mon.DeleteScheduleConfigStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteReportScheduleConfigStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.DeleteScheduleConfigStr, metmod.SLAScheduleConfigStr, "Deleted")
+	sendSuccessResponse(result, w, startTime, mon.DeleteReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Deleted")
 }

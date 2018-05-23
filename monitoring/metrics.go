@@ -114,10 +114,10 @@ const (
 	GetTenantMetaStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
 	DeleteTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
-	CreateScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
-	UpdateScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
-	GetScheduleConfigStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
-	DeleteScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
+	CreateReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
+	UpdateReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
+	GetReportScheduleConfigStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
+	DeleteReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
 	CreateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPCreateStr
 	UpdateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPUpdateStr

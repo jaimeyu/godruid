@@ -31,56 +31,56 @@ func CreateSchedulerServiceDAO() (*SchedulerServiceDatastoreCouchDB, error) {
 	return result, nil
 }
 
-func (ssd *SchedulerServiceDatastoreCouchDB) CreateScheduleConfig(slaConfig *metmod.SLAScheduleConfig) (*metmod.SLAScheduleConfig, error) {
-	logger.Log.Debugf("Creating %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(slaConfig))
-	slaConfig.ID = ds.GenerateID(slaConfig, "slaConfigType") //TODO Create an actual type
+func (ssd *SchedulerServiceDatastoreCouchDB) CreateReportScheduleConfig(slaConfig *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
+	logger.Log.Debugf("Creating %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
+	slaConfig.ID = ds.GenerateID(slaConfig, string(metmod.ReportScheduleConfigType))
 	tenantID := ds.PrependToDataID(slaConfig.TenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(ssd.server, tenantID)
 
-	dataContainer := &metmod.SLAScheduleConfig{}
-	if err := createDataInCouch(tenantDBName, slaConfig, dataContainer, "slaConfigType", metmod.SLAScheduleConfigStr); err != nil {
+	dataContainer := &metmod.ReportScheduleConfig{}
+	if err := createDataInCouch(tenantDBName, slaConfig, dataContainer, string(metmod.ReportScheduleConfigType), metmod.ReportScheduleConfigStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(slaConfig))
+	logger.Log.Debugf("Updated %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	return dataContainer, nil
 
 }
-func (ssd *SchedulerServiceDatastoreCouchDB) UpdateScheduleConfig(slaConfig *metmod.SLAScheduleConfig) (*metmod.SLAScheduleConfig, error) {
-	logger.Log.Debugf("Updating %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(slaConfig))
-	slaConfig.ID = ds.PrependToDataID(slaConfig.ID, "slaConfigType") //TODO Create an actual type
+func (ssd *SchedulerServiceDatastoreCouchDB) UpdateReportScheduleConfig(slaConfig *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
+	logger.Log.Debugf("Updating %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
+	slaConfig.ID = ds.PrependToDataID(slaConfig.ID, string(metmod.ReportScheduleConfigType))
 	tenantID := ds.PrependToDataID(slaConfig.TenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(ssd.server, tenantID)
 
-	dataContainer := &metmod.SLAScheduleConfig{}
-	if err := updateDataInCouch(tenantDBName, slaConfig, dataContainer, "slaConfigType", metmod.SLAScheduleConfigStr); err != nil {
+	dataContainer := &metmod.ReportScheduleConfig{}
+	if err := updateDataInCouch(tenantDBName, slaConfig, dataContainer, string(metmod.ReportScheduleConfigType), metmod.ReportScheduleConfigStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(slaConfig))
+	logger.Log.Debugf("Updated %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	return dataContainer, nil
 }
-func (ssd *SchedulerServiceDatastoreCouchDB) DeleteScheduleConfig(tenantID string, configID string) (*metmod.SLAScheduleConfig, error) {
-	logger.Log.Debugf("Deleting %s %s\n", metmod.SLAScheduleConfigStr, configID)
-	configID = ds.PrependToDataID(configID, "slaConfigType")
+func (ssd *SchedulerServiceDatastoreCouchDB) DeleteReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
+	logger.Log.Debugf("Deleting %s %s\n", metmod.ReportScheduleConfigStr, configID)
+	configID = ds.PrependToDataID(configID, string(metmod.ReportScheduleConfigType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(ssd.server, tenantID)
-	dataContainer := &metmod.SLAScheduleConfig{}
-	if err := deleteDataFromCouch(tenantDBName, configID, &dataContainer, metmod.SLAScheduleConfigStr); err != nil {
+	dataContainer := &metmod.ReportScheduleConfig{}
+	if err := deleteDataFromCouch(tenantDBName, configID, &dataContainer, metmod.ReportScheduleConfigStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(dataContainer))
+	logger.Log.Debugf("Deleted %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
-func (ssd *SchedulerServiceDatastoreCouchDB) GetScheduleConfig(tenantID string, configID string) (*metmod.SLAScheduleConfig, error) {
-	logger.Log.Debugf("Fetching %s: %s\n", metmod.SLAScheduleConfigStr, configID)
-	configID = ds.PrependToDataID(configID, "slaConfigType")
+func (ssd *SchedulerServiceDatastoreCouchDB) GetReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", metmod.ReportScheduleConfigStr, configID)
+	configID = ds.PrependToDataID(configID, string(metmod.ReportScheduleConfigType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(ssd.server, tenantID)
-	dataContainer := &metmod.SLAScheduleConfig{}
-	if err := getDataFromCouch(tenantDBName, configID, &dataContainer, metmod.SLAScheduleConfigStr); err != nil {
+	dataContainer := &metmod.ReportScheduleConfig{}
+	if err := getDataFromCouch(tenantDBName, configID, &dataContainer, metmod.ReportScheduleConfigStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", metmod.SLAScheduleConfigStr, models.AsJSONString(dataContainer))
+	logger.Log.Debugf("Retrieved %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }

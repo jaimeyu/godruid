@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -21,6 +22,7 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
 	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
 	tenantToIDtoTenantThrPrfMap          map[string]map[string]*tenmod.ThresholdProfile
+	tenantToIDtoTenantSLAReportMap       map[string]map[string]*metmod.SLAReport
 
 	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
@@ -35,6 +37,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantDomainMap = map[string]map[string]*tenmod.Domain{}
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
 	res.tenantToIDtoTenantThrPrfMap = map[string]map[string]*tenmod.ThresholdProfile{}
+	res.tenantToIDtoTenantSLAReportMap = map[string]map[string]*metmod.SLAReport{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
@@ -72,6 +75,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantThresholdProfileType:
 		if tsd.tenantToIDtoTenantThrPrfMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantSLAReportStr:
+		if tsd.tenantToIDtoTenantSLAReportMap[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -789,4 +796,77 @@ func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(tenantID s
 	}
 
 	return result, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
+	if err := tsd.DoesTenantExist(slaReport.TenantID, tenmod.TenantSLAReportType); err != nil {
+		tsd.tenantToIDtoTenantSLAReportMap[slaReport.TenantID] = map[string]*metmod.SLAReport{}
+	}
+
+	recCopy := metmod.SLAReport{}
+	deepcopy.Copy(&recCopy, slaReport)
+	recCopy.ReportInstanceID = uuid.NewV4().String()
+
+	tsd.tenantToIDtoTenantSLAReportMap[slaReport.TenantID][recCopy.ReportInstanceID] = &recCopy
+
+	return &recCopy, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
+	if len(slaReportID) == 0 {
+		return nil, fmt.Errorf("%s must provide a SLA Report ID", tenmod.TenantSLAReportStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantSLAReportStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantSLAReportStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantSLAReportMap[tenantID][slaReportID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoTenantSLAReportMap))
+	if ok {
+		delete(tsd.tenantToIDtoTenantSLAReportMap[tenantID], slaReportID)
+
+		if len(tsd.tenantToIDtoTenantSLAReportMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoTenantSLAReportMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantSLAReportStr)
+}
+
+func (tsd *TenantServiceDatastoreInMemory) GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
+	if len(slaReportID) == 0 {
+		return nil, fmt.Errorf("%s must provide a SLA report ID", tenmod.TenantSLAReportStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantSLAReportStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantSLAReportStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantSLAReportMap[tenantID][slaReportID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantSLAReportStr)
+}
+
+func (tsd *TenantServiceDatastoreInMemory) GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType)
+	if err != nil {
+		return []*metmod.SLAReport{}, nil
+	}
+
+	recList := make([]*metmod.SLAReport, 0)
+
+	for _, rec := range tsd.tenantToIDtoTenantSLAReportMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	return recList, nil
 }

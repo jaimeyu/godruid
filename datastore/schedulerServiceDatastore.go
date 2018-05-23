@@ -7,4 +7,5 @@ type SchedulerServiceDatastore interface {
 	UpdateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error)
 	DeleteReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error)
 	GetReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error)
+	GetAllReportScheduleConfigs(tenantID string) ([]*metmod.ReportScheduleConfig, error)
 }

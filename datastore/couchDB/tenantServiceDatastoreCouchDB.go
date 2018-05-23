@@ -11,6 +11,7 @@ import (
 
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	couchdb "github.com/leesper/couchdb-golang"
 )
@@ -658,5 +659,58 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 	}
 
 	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
+	return res, nil
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(slaReport))
+	slaReport.ReportInstanceID = ds.GenerateID(slaReport, string(tenmod.TenantSLAReportType))
+	tenantID := ds.PrependToDataID(slaReport.TenantID, string(admmod.TenantType))
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+
+	dataContainer := &metmod.SLAReport{}
+	if err := createDataInCouch(tenantDBName, slaReport, dataContainer, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
+	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &metmod.SLAReport{}
+	if err := getDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
+	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &metmod.SLAReport{}
+	if err := getDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error) {
+	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantSLAReportStr)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*metmod.SLAReport, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr, &res); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantSLAReportStr)
 	return res, nil
 }

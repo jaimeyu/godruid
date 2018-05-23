@@ -84,3 +84,16 @@ func (ssd *SchedulerServiceDatastoreCouchDB) GetReportScheduleConfig(tenantID st
 	logger.Log.Debugf("Retrieved %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+func (ssd *SchedulerServiceDatastoreCouchDB) GetAllReportScheduleConfigs(tenantID string) ([]*metmod.ReportScheduleConfig, error) {
+	logger.Log.Debugf("Fetching all %s\n", metmod.ReportScheduleConfigStr)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(ssd.server, tenantID)
+	res := make([]*metmod.ReportScheduleConfig, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(metmod.ReportScheduleConfigType), metmod.ReportScheduleConfigStr, &res); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Retrieved %d %s\n", len(res), metmod.ReportScheduleConfigStr)
+	return res, nil
+}

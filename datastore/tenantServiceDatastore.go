@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -44,4 +45,9 @@ type TenantServiceDatastore interface {
 	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)
 	GetTenantMeta(tenantID string) (*tenmod.Metadata, error)
+
+	CreateSLAReport(meta *metmod.SLAReport) (*metmod.SLAReport, error)
+	DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
+	GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
+	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
 }

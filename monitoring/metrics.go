@@ -25,6 +25,7 @@ const (
 	RawMetricStr           = "raw_metric"
 	SLAReportStr           = "sla_report"
 	TenantMetaStr          = "tenant_meta"
+	ReportSchedConfigStr   = "report_sched_conf"
 	AdminViewsStr          = "admin_views"
 	ValidTypesStr          = "valid_types"
 
@@ -114,10 +115,11 @@ const (
 	GetTenantMetaStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
 	DeleteTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
-	CreateReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
-	UpdateReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
-	GetReportScheduleConfigStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
-	DeleteReportScheduleConfigStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
+	CreateReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPCreateStr
+	UpdateReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPUpdateStr
+	GetReportScheduleConfigStr    = ReportSchedConfigStr + metricNameDelimiter + OPGetStr
+	GetAllReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPGetAllStr
+	DeleteReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPDeleteStr
 
 	CreateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPCreateStr
 	UpdateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPUpdateStr

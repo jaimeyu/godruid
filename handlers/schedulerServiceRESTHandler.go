@@ -58,6 +58,12 @@ func CreateSchedulerServiceRESTHandler() *SchedulerServiceRESTHandler {
 			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-configs/{configID}",
 			HandlerFunc: result.DeleteReportScheduleConfig,
 		},
+		server.Route{
+			Name:        "GetAllReportScheduleConfigs",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-schedule-config-list",
+			HandlerFunc: result.GetAllReportScheduleConfigs,
+		},
 	}
 
 	return result
@@ -179,6 +185,23 @@ func (ssh *SchedulerServiceRESTHandler) GetReportScheduleConfig(w http.ResponseW
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.ReportScheduleConfigStr, "Retrieved")
+}
+
+func (ssh *SchedulerServiceRESTHandler) GetAllReportScheduleConfigs(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s list for Tenant %s", metmod.ReportScheduleConfigStr, tenantID)
+
+	result, err := ssh.schedulerDB.GetAllReportScheduleConfigs(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.GetAllTenantUserStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetAllTenantUserStr, metmod.ReportScheduleConfigStr, "Retrieved list of")
 }
 
 func (ssh *SchedulerServiceRESTHandler) DeleteReportScheduleConfig(w http.ResponseWriter, r *http.Request) {

@@ -700,6 +700,26 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+  '/v1/tenants/{tenantId}/report-schedule-config-list':
+    get:
+      summary: Retrieve all report schedule configs for the specified Tenant.
+      operationId: GetAllReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfigList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
   /v1/tenants/{tenantId}/domain-list:
     get:
       summary: Retrieve all Domains for the specified Tenant.
@@ -2217,6 +2237,13 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/TenantReportScheduleConfig'
+  JsonApiTenantReportScheduleConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
   TenantReportScheduleConfig:
     type: "object"
     properties:

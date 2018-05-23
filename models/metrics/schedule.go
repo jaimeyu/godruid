@@ -3,7 +3,7 @@ package metrics
 import "errors"
 
 const (
-	ReportScheduleConfigType = "reportScheduleConfigType"
+	ReportScheduleConfigType = "reportScheduleConfig"
 	ReportScheduleConfigStr  = "Report Schedule Config"
 )
 

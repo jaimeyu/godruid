@@ -27,6 +27,9 @@ const (
 
 	// TenantMetaType - datatype string used to identify a Tenant Meta in the datastore record
 	TenantMetaType TenantDataType = "tenantMetadata"
+
+	// TenantSLAReportType - datatype string used to identify a Tenant SLA Report in the datastore record
+	TenantSLAReportType TenantDataType = "tenantSLAReport"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -91,11 +94,14 @@ const (
 	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantThresholdProfileStr = "Tenant Threshold Profile"
 
-	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Doamin Map for use in logs.
-	MonitoredObjectToDomainMapStr = "Monitored Object to Doamin Map"
+	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Domain Map for use in logs.
+	MonitoredObjectToDomainMapStr = "Monitored Object to Domain Map"
 
 	// TenantMetaStr - common name for the Meta for use in logs.
 	TenantMetaStr = "Tenant Meta"
+
+	// TenantSLAReportStr - common name for the sla report for use in logs.
+	TenantSLAReportStr = "Tenant SLA Report"
 )
 
 // User - defines a Tenant user.

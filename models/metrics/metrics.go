@@ -1,5 +1,11 @@
 package metrics
 
+import "errors"
+
+const (
+	SLAScheduleConfigStr = "SLA Schedule Config"
+)
+
 type SLAReportRequest struct {
 	TenantID string `json:"tenantId"`
 	// ISO-8601 Intervals
@@ -22,7 +28,9 @@ type SLAReport struct {
 	ByDayOfWeekResult    interface{}       `json:"byDayOfWeekResult"`
 }
 
-type SLASchedulerConfig struct {
+type SLAScheduleConfig struct {
+	ID       string `json:"_id"`
+	REV      string `json:"_rev"`
 	TenantID string `json:"tenantId"`
 
 	// Report parameters
@@ -34,12 +42,31 @@ type SLASchedulerConfig struct {
 	//Timezone           int      //TODO
 
 	// Scheduling Execution timing
-	ReportName string
-	Minute     string
-	Hour       string
-	DayOfMonth string
-	Month      string
-	DayOfWeek  string
+	ReportName string `json:"reportName"`
+	Minute     string `json:"minute"`
+	Hour       string `json:"hour"`
+	DayOfMonth string `json:"dayMonth"`
+	Month      string `json:"month"`
+	DayOfWeek  string `json:"dayWeek"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (ssc *SLAScheduleConfig) GetID() string {
+	return ssc.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (ssc *SLAScheduleConfig) SetID(s string) error {
+	ssc.ID = s
+	return nil
+}
+
+func (ssc *SLAScheduleConfig) Validate(isUpdate bool) error {
+	if len(ssc.TenantID) == 0 {
+		return errors.New("Invalid SLA Config request: must provide a Tenant ID")
+	}
+
+	return nil
 }
 
 type SLASummary struct {

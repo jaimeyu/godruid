@@ -1915,10 +1915,6 @@ definitions:
         type: "string"
       color: 
         type: "string"
-      # thresholdProfileSet:
-      #   type: "array"
-      #   items: 
-      #     type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:

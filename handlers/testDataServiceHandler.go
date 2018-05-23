@@ -617,8 +617,6 @@ func generateTenantDomain(name string, tenantID string, defaultThreshPrf string)
 
 	// Only use the hash portion of the id for the reference since the thresholdProfile_2_ is all
 	// relational pouch tagging.
-	thrPrfIDParts := strings.Split(defaultThreshPrf, "_")
-	result.Data.ThresholdProfileSet = append(result.Data.GetThresholdProfileSet(), thrPrfIDParts[len(thrPrfIDParts)-1])
 	result.Data.CreatedTimestamp = db.MakeTimestamp()
 	result.Data.LastModifiedTimestamp = result.GetData().GetCreatedTimestamp()
 

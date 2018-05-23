@@ -339,7 +339,7 @@ func TestTenantDomainSerialization(t *testing.T) {
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
-	attrKeys := []string{"_rev", "datatype", "tenantId", "name", "color", "thresholdProfileSet", "createdTimestamp", "lastModifiedTimestamp"}
+	attrKeys := []string{"_rev", "datatype", "tenantId", "name", "color", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &Domain{}, original.ID, attrKeys)
 }

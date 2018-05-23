@@ -222,6 +222,34 @@ paths:
           type: string
       tags:
         - AdminProvisioningService
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant
+      tags:
+        - AdminProvisioningService
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.
@@ -445,6 +473,34 @@ paths:
             $ref: '#/definitions/JsonApiTenantUser'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Update a Tenant User
+      operationId: PatchTenantUser
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantUser'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantUser'
+      tags:
+        - TenantProvisioningService
     put:
       summary: Update a Tenant User
       operationId: UpdateTenantUser
@@ -569,34 +625,6 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
       tags:
         - TenantProvisioningService
-    put:
-      summary: Update a Tenant Domain
-      operationId: UpdateTenantDomain
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-      tags:
-        - TenantProvisioningService
   /v1/tenants/{tenantId}/domain-list:
     get:
       summary: Retrieve all Domains for the specified Tenant.
@@ -641,6 +669,70 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+    put:
+      summary: Update a Tenant Domain
+      operationId: UpdateTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch update a Tenant Domain
+      operationId: PatchTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'Successfully patched tenant domain.'
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
     delete:
       summary: Delete a Tenant Domain specified by the provided Domain Id.
       operationId: DeleteTenantDomain
@@ -668,6 +760,34 @@ paths:
     post:
       summary: Create an Ingestion Profile for a Tenant.
       operationId: CreateIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Ingestion Profile
+      operationId: PatchTenantIngestionProfile
       consumes:
         - application/vnd.api+json
       produces:
@@ -817,6 +937,34 @@ paths:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Threshold Profile
+      operationId: PatchTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
     put:
       summary: Update a Tenant Threshold Profile
       operationId: UpdateTenantThresholdProfile
@@ -916,6 +1064,34 @@ paths:
     post:
       summary: Create a Monitored Object for a Tenant.
       operationId: CreateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Monitored Object
+      operationId: PatchTenantMonitoredObject
       consumes:
         - application/vnd.api+json
       produces:
@@ -1121,6 +1297,35 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Metadata record
+      operationId: Patch TenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+
     put:
       summary: Update a Tenant Metadata record
       operationId: UpdateTenantMetadata

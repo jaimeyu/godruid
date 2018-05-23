@@ -147,7 +147,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)
 	originsOption := gh.AllowedOrigins(allowedOrigins)
-	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
+	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
 	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
 

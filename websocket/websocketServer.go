@@ -244,14 +244,17 @@ func (wsServer *ServerStruct) serveWs(w http.ResponseWriter, r *http.Request) {
 			case <-heartbeatChan:
 				ticker = time.NewTicker(time.Duration(maxTimeWithoutHeartbeat) * time.Second)
 			case <-ticker.C:
+				// If connection gets marked for closing, exit this loop. It will be recreated for the new connection
 				logger.Log.Errorf("Haven't received heartbeat from Connector: %s for %v seconds. Resetting connection.", connectorID, maxTimeWithoutHeartbeat)
 				if wsServer.ConnectionMeta[connectorID] != nil {
 					wsServer.Lock.Lock()
 					wsServer.ConnectionMeta[connectorID].CloseConnection = true
 					wsServer.Lock.Unlock()
 				}
+				return
 			}
 		}
+
 	}()
 
 	wsServer.Reader(ws, connectorID)
@@ -263,9 +266,9 @@ func (wsServer *ServerStruct) listenToConnectorChanges() {
 	// if a connector config changes, push it to the connector
 	for config := range wsServer.TenantDB.GetConnectorUpdateChan() {
 		instanceID := config.ConnectorInstanceID
-		if instanceID != "" {
-
-			wsConn := wsServer.ConnectionMeta[instanceID].Connection
+		meta := wsServer.ConnectionMeta[instanceID]
+		if instanceID != "" && meta != nil {
+			wsConn := meta.Connection
 			configJSON, _ := json.Marshal(config)
 
 			returnMsg := &ConnectorMessage{

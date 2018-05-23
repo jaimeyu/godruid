@@ -1,3 +1,4 @@
+* Fix - remove ThresholdProfileSet from the domain model
 ## Current Release 
 ### 0.114.0 
 **Release Date:** Wed May 23 13:14:24 UTC 2018     

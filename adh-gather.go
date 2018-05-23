@@ -714,7 +714,6 @@ func main() {
 	// Start pprof profiler
 	go startProfile(gatherServer, cfg)
 
-	fmt.Println("STARTING WEBSOCKET---->", gatherServer.gsh.Tsh.TenantDB.GetConnectorUpdateChan())
 	// Start websocket server
 	websocket.Server(gatherServer.tenantAPISH.TenantDB)
 

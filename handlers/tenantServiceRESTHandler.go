@@ -419,8 +419,6 @@ func (tsh *TenantServiceRESTHandler) CreateTenantConnector(w http.ResponseWriter
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 
-	logger.Log.Infof("REQUEST----> %v", string(requestBytes))
-
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateTenantConnectorStr, msg, http.StatusBadRequest)

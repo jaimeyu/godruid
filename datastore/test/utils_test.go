@@ -14,8 +14,9 @@ func TestStripPrefixFromFullID(t *testing.T) {
 	}
 	mt := []qa{
 		{q: "adminUser_2_someID", a: "someID"},
-		{q: "hello_world", a: ""},
-		{q: "hello", a: ""},
+		{q: "hello_world", a: "hello_world"},
+		{q: "hello", a: "hello"},
+		{q: "", a: ""},
 		{q: "monitoredObject_2_monitoredObject_id", a: "monitoredObject_id"},
 		{q: "tenant_2_123456789", a: "123456789"},
 	}

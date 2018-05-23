@@ -53,21 +53,20 @@ func trimAndLowercase(s string) string {
 func GetDataIDFromFullID(fullID string) string {
 	const OFFSET int = 2
 	const UNDERSCORE string = "_"
-	//fmt.Println("Original ID:", fullID)
+	if len(fullID) == 0 {
+		return ""
+	}
 	loc1 := strings.Index(fullID, UNDERSCORE)
 	if loc1 < 0 {
-		return ""
+		return fullID
 	}
 	loc2 := strings.Index(fullID[loc1+1:], UNDERSCORE)
 	if loc2 < 0 {
-		return ""
+		return fullID
 	}
 
-	//fmt.Println("loc1", loc1)
-	//fmt.Println("loc2", loc2)
 	stripIdx := loc1 + loc2 + OFFSET
 	stripped := fullID[stripIdx:]
-	//fmt.Println("stripped ID:", stripped)
 	return stripped
 }
 

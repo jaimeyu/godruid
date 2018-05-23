@@ -1,6 +1,8 @@
 ## Current Release 
 ### 0.114.0 
 **Release Date:** Wed May 23 13:14:24 UTC 2018     
+* Fix - Bug where underscores in monitoredObject's ID would incorrectly copy ID to payload
+* Feature - Adding PATCH support for Tenant Domains and Tenant Admin
 ## Previous Releases 
 ### 0.113.0 
 **Release Date:** Wed May 16 16:41:53 UTC 2018     

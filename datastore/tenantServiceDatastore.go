@@ -46,6 +46,12 @@ type TenantServiceDatastore interface {
 	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)
 	GetTenantMeta(tenantID string) (*tenmod.Metadata, error)
 
+	CreateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error)
+	UpdateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error)
+	DeleteReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error)
+	GetReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error)
+	GetAllReportScheduleConfigs(tenantID string) ([]*metmod.ReportScheduleConfig, error)
+
 	CreateSLAReport(meta *metmod.SLAReport) (*metmod.SLAReport, error)
 	DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)

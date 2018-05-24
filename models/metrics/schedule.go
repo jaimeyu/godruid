@@ -8,9 +8,11 @@ const (
 )
 
 type ReportScheduleConfig struct {
-	ID       string `json:"_id"`
-	REV      string `json:"_rev"`
-	TenantID string `json:"tenantId"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
+	TenantID              string `json:"tenantId"`
 
 	// Report parameters
 	DatePeriodDays     string   `json:"datePeriodDays,omitempty"`

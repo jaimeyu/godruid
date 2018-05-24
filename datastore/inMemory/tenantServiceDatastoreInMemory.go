@@ -18,11 +18,12 @@ import (
 // database operations for the Admin Service when using local memory
 // as the storage option. Useful for tests.
 type TenantServiceDatastoreInMemory struct {
-	tenantToIDtoTenantUserMap            map[string]map[string]*tenmod.User
-	tenantToIDtoTenantDomainMap          map[string]map[string]*tenmod.Domain
-	tenantToIDtoTenantMonitoredObjectMap map[string]map[string]*tenmod.MonitoredObject
-	tenantToIDtoTenantThrPrfMap          map[string]map[string]*tenmod.ThresholdProfile
-	tenantToIDtoTenantSLAReportMap       map[string]map[string]*metmod.SLAReport
+	tenantToIDtoTenantUserMap                 map[string]map[string]*tenmod.User
+	tenantToIDtoTenantDomainMap               map[string]map[string]*tenmod.Domain
+	tenantToIDtoTenantMonitoredObjectMap      map[string]map[string]*tenmod.MonitoredObject
+	tenantToIDtoTenantThrPrfMap               map[string]map[string]*tenmod.ThresholdProfile
+	tenantToIDtoTenantReportScheduleConfigMap map[string]map[string]*metmod.ReportScheduleConfig
+	tenantToIDtoTenantSLAReportMap            map[string]map[string]*metmod.SLAReport
 
 	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
@@ -75,6 +76,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantThresholdProfileType:
 		if tsd.tenantToIDtoTenantThrPrfMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantReportScheduleConfigType:
+		if tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID] == nil {
 			return tenantDNE
 		}
 	case tenmod.TenantSLAReportStr:
@@ -796,6 +801,99 @@ func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(tenantID s
 	}
 
 	return result, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
+	if err := tsd.DoesTenantExist(config.TenantID, tenmod.TenantReportScheduleConfigType); err != nil {
+		tsd.tenantToIDtoTenantReportScheduleConfigMap[config.TenantID] = map[string]*metmod.ReportScheduleConfig{}
+	}
+
+	recCopy := metmod.ReportScheduleConfig{}
+	deepcopy.Copy(&recCopy, config)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoTenantReportScheduleConfigMap[config.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+func (tsd *TenantServiceDatastoreInMemory) UpdateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
+	if len(config.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantReportScheduleConfigStr)
+	}
+	if len(config.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantReportScheduleConfigStr)
+	}
+	if err := tsd.DoesTenantExist(config.TenantID, tenmod.TenantReportScheduleConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantReportScheduleConfigStr)
+	}
+
+	recCopy := metmod.ReportScheduleConfig{}
+	deepcopy.Copy(&recCopy, config)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoTenantReportScheduleConfigMap[config.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+func (tsd *TenantServiceDatastoreInMemory) DeleteReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
+	if len(configID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Report schedule config ID", tenmod.TenantReportScheduleConfigStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantReportScheduleConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportScheduleConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantReportScheduleConfigStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID][configID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoTenantReportScheduleConfigMap))
+	if ok {
+		delete(tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID], configID)
+
+		if len(tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoTenantReportScheduleConfigMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantReportScheduleConfigStr)
+}
+func (tsd *TenantServiceDatastoreInMemory) GetReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
+	if len(configID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Report schedule config ID", tenmod.TenantReportScheduleConfigStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantReportScheduleConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportScheduleConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantReportScheduleConfigStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID][configID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantReportScheduleConfigStr)
+}
+func (tsd *TenantServiceDatastoreInMemory) GetAllReportScheduleConfigs(tenantID string) ([]*metmod.ReportScheduleConfig, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportScheduleConfigType)
+	if err != nil {
+		return []*metmod.ReportScheduleConfig{}, nil
+	}
+
+	recList := make([]*metmod.ReportScheduleConfig, 0)
+
+	for _, rec := range tsd.tenantToIDtoTenantReportScheduleConfigMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	return recList, nil
 }
 
 func (tsd *TenantServiceDatastoreInMemory) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {

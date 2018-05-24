@@ -18,7 +18,6 @@ const (
 	CK_args_admindb_name                     ConfigKey = "args.admindb.name"
 	CK_args_admindb_impl                     ConfigKey = "args.admindb.impl"
 	CK_args_tenantdb_impl                    ConfigKey = "args.tenantdb.impl"
-	CK_args_schedulerdb_impl                 ConfigKey = "args.schedulerdb.impl"
 	CK_args_pouchplugindb_impl               ConfigKey = "args.pouchplugindb.impl"
 	CK_args_testdatadb_impl                  ConfigKey = "args.testdatadb.impl"
 	CK_args_debug                            ConfigKey = "args.debug"

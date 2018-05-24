@@ -291,6 +291,7 @@ func Server(tenantDB datastore.TenantServiceDatastore) *ServerStruct {
 			now := time.Now().Unix()
 			for cID, meta := range wsServer.ConnectionMeta {
 				if now-meta.LastHeartbeat > maxSecondsWithoutHeartbeat {
+					logger.Log.Errorf("No Heartbeat messages have been received from Connector with ID: %v for %v seconds. Terminating connection.", cID, maxSecondsWithoutHeartbeat)
 					wsServer.Lock.Lock()
 					wsServer.ConnectionMeta[cID].Connection.Close()
 					wsServer.Lock.Unlock()

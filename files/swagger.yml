@@ -1736,6 +1736,32 @@ paths:
           format: int32
       tags:
         - MetricsService
+  /v1/aggregated-metrics:
+    post:
+      summary: Query metrics and perform aggregations
+      operationId: QueryAggregatedMetrics
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricResultsResponseObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AggregateMetricsAPIRequestObject'
+      tags:
+        - MetricsService
+
   /v1/sla-report:
     get:
       summary: Generate an SLA Report.
@@ -2445,6 +2471,77 @@ definitions:
     properties:
       defaultThresholdProfile:
         $ref: '#/definitions/JsonApiRelationship'
+
+  AggregateMetricsAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - aggregation
+      - metrics
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domainIds:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      aggregation:
+        type: object
+        description: the aggregation function
+        properties:
+          name:
+            type: string
+            example: avg
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+
+  MetricIdentifierObject:
+    type: object
+    required:
+      - vendor
+      - objectType
+      - name
+    properties:
+      vendor:
+        type: string
+        example: accedian-twamp
+      objectType:
+        type: string
+        example: twamp-pe
+      name:
+        type: string
+        example: delayP95
+      direction:
+        type: integer
+        example: 0
+        default: 0
+
+  MetricResultsResponseObject:
+    type: object
+    properties:
+      results:
+        type: array
+        items: object
 
   # Here down are Metrics Service object definitions that are currently carried over from the 
   # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation

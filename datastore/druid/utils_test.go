@@ -1,6 +1,7 @@
 package druid
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -133,4 +134,49 @@ func TestFormatSLABucketResponse(t *testing.T) {
 	formattedResponse, err = reformatSLABucketResponse(responseStr2, formattedResponse)
 	assert.Nil(t, err)
 	fmt.Printf("%v\n", models.AsJSONString(formattedResponse))
+}
+
+func TestPostprocessResults(t *testing.T) {
+	//throughputAvgCount:0 delayP95Sum:2.53765403e+08 throughputAvgSum:0
+	//jitterP95Sum:3.229835e+06 jitterP95:728.096257889991 delayP95:57205.906898106405
+	//throughputAvg:0 jitterP95Count:4436 delayP95Count:4436]
+
+	resultStr := []byte(`
+		[{
+      "Timestamp": "2018-05-22T21:00:00.000Z",
+      "Result": {
+        "delayP95": 57205.906898106405,
+        "jitterP95": 728.096257889991,
+				"throughputAvg": 0,
+				"throughputAvgCount": 0,
+				"throughputAvgSum": 0
+      }
+    },
+    {
+      "Timestamp": "2018-05-22T22:00:00.000Z",
+      "Result": {
+        "delayP95": 50485.39688888889,
+        "jitterP95": 514.4817777777778,
+				"throughputAvg": 0,
+				"throughputAvgCount": 0,
+				"throughputAvgSum": 0
+			      }
+		}]`)
+
+	response := make([]AggMetricsResponse, 0)
+	err := json.Unmarshal(resultStr, &response)
+	assert.Nil(t, err)
+
+	pp := DropKeysPostprocessor{
+		keysToDrop: []string{"throughputAvgCount", "throughputAvgSum"},
+		countKeys:  map[string][]string{"throughputAvgCount": []string{"throughputAvg"}},
+	}
+
+	response = pp.Apply(response)
+	_, ok := response[0].Result["throughputAvgCount"]
+	assert.False(t, ok)
+	_, ok = response[0].Result["throughputAvg"]
+	assert.False(t, ok)
+	_, ok = response[0].Result["throughputAvgSum"]
+	assert.False(t, ok)
 }

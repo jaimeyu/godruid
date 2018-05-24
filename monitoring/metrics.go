@@ -27,6 +27,7 @@ const (
 	TenantMetaStr          = "tenant_meta"
 	AdminViewsStr          = "admin_views"
 	ValidTypesStr          = "valid_types"
+	AggMetricsStr          = "aggr_metrics"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -116,6 +117,7 @@ const (
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
 	GetSLAReportStr            = SLAReportStr + metricNameDelimiter + OPGetStr
+	QueryAggregatedMetricsStr  = AggMetricsStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr

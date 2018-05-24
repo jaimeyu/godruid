@@ -7,6 +7,7 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
 )
 
@@ -546,6 +547,86 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 		),
 		Intervals: []string{interval},
 	}, nil
+}
+
+//AggMetricsQuery  - Query that returns a aggregated metric values
+func AggMetricsQuery(tenant string, dataSource string, interval string, domains []string, aggregationFunc metrics.AggregationSpec, metrics []metrics.MetricIdentifier, timeout int32, granularity string) (*godruid.QueryTimeseries, *PostProcessor, error) {
+
+	var aggregations []godruid.Aggregation
+	var pp PostProcessor
+	postAggs := []godruid.PostAggregation{}
+
+	keyToDrop := []string{}
+	countKeys := map[string][]string{}
+
+	for _, metric := range metrics {
+		countName := metric.Name + "Count"
+		keyToDrop = append(keyToDrop, countName)
+		countKeys[countName] = []string{metric.Name}
+		aggregations = append(aggregations, buildMetricAggregation("count", &metric, countName))
+		if aggregationFunc.Name == "max" {
+			aggregations = append(aggregations, buildMetricAggregation("doubleMax", &metric))
+
+		} else if aggregationFunc.Name == "min" {
+			aggregations = append(aggregations, buildMetricAggregation("doubleMin", &metric))
+
+		} else if aggregationFunc.Name == "avg" {
+
+			aggregations = append(aggregations, buildMetricAggregation("doubleSum", &metric, metric.Name+"Sum"))
+
+			keyToDrop = append(keyToDrop, metric.Name+"Sum")
+
+			postAgg := godruid.PostAggArithmetic(
+				metric.Name,
+				"/",
+				[]godruid.PostAggregation{godruid.PostAggFieldAccessor(metric.Name + "Sum"), godruid.PostAggFieldAccessor(metric.Name + "Count")},
+			)
+			postAggs = append(postAggs, postAgg)
+		} else {
+			return nil, nil, fmt.Errorf("Invalid value for 'aggregation' : %v", aggregationFunc)
+		}
+
+	}
+
+	// Drop the intermediate sum and count aggregations after the response returns from druid.
+	// There doesn't seem to be an option in the druid query to do this.
+	pp = DropKeysPostprocessor{
+		keysToDrop: keyToDrop,
+		countKeys:  countKeys,
+	}
+
+	return &godruid.QueryTimeseries{
+		DataSource:   dataSource,
+		Granularity:  toGranularity(granularity),
+		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Aggregations: aggregations,
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(tenant, domains),
+		),
+		Intervals:        []string{interval},
+		PostAggregations: postAggs,
+	}, &pp, nil
+}
+
+func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, name ...string) godruid.Aggregation {
+	var aggName string
+	if len(name) == 0 {
+		aggName = metric.Name
+	} else {
+		aggName = name[0]
+	}
+	return godruid.AggFiltered(
+		godruid.FilterAnd(
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			godruid.FilterSelector("direction", metric.Direction),
+		),
+		&godruid.Aggregation{
+			Type:      aggType,
+			Name:      aggName,
+			FieldName: metric.Name,
+		})
+
 }
 
 func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {

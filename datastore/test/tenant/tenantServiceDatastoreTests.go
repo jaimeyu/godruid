@@ -614,10 +614,10 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 
 	// Create a record
 	tenantDomain := tenmod.Domain{
-		Name:                DOM1,
-		TenantID:            TENANT,
-		Color:               COLOR1,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
+
 	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
@@ -626,7 +626,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, string(tenmod.TenantDomainType), created.Datatype)
 	assert.Equal(t, created.Name, DOM1, "Name not the same")
 	assert.Equal(t, created.Color, COLOR1, "Color not the same")
-	assert.Equal(t, created.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
 	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
 	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
@@ -651,7 +650,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, updated.Name, DOM1, "Name not the same")
 	assert.Equal(t, updated.Color, COLOR2, "Password was not updated")
 	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
-	assert.Equal(t, updated.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
 	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
 	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
 
@@ -669,7 +667,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, created2.Name, DOM2, "Name not the same")
 	assert.Equal(t, created2.Color, COLOR1, "Password not the same")
 	assert.Equal(t, created2.TenantID, TENANT, "Tenant ID not the same")
-	assert.True(t, len(created2.ThresholdProfileSet) == 0, "Should not be a Threshold Profile ID")
 	assert.True(t, created2.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
@@ -1312,18 +1309,16 @@ func (runner *TenantServiceDatastoreTestRunner) RunGetMonitoredObjectByDomainMap
 	// Create a couple Domains
 	// Create a record
 	tenantDomain := tenmod.Domain{
-		Name:                DOM1,
-		TenantID:            TENANT,
-		Color:               COLOR1,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
 	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
 	tenantDomain = tenmod.Domain{
-		Name:                DOM2,
-		TenantID:            TENANT,
-		Color:               COLOR2,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM2,
+		TenantID: TENANT,
+		Color:    COLOR2}
 	created2, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created2)

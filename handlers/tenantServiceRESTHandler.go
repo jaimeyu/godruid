@@ -50,6 +50,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.UpdateTenantUser,
 		},
 		server.Route{
+			Name:        "PatchTenantUser",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "users",
+			HandlerFunc: result.PatchTenantUser,
+		},
+		server.Route{
 			Name:        "GetTenantUser",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "users/{userID}",
@@ -76,8 +82,14 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 		server.Route{
 			Name:        "UpdateTenantDomain",
 			Method:      "PUT",
-			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
 			HandlerFunc: result.UpdateTenantDomain,
+		},
+		server.Route{
+			Name:        "PatchTenantDomain",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domains/{domainID}",
+			HandlerFunc: result.PatchTenantDomain,
 		},
 		server.Route{
 			Name:        "GetTenantDomain",
@@ -140,6 +152,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.UpdateTenantIngestionProfile,
 		},
 		server.Route{
+			Name:        "PatchTenantIngestionProfile",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "ingestion-profiles",
+			HandlerFunc: result.PatchTenantIngestionProfile,
+		},
+		server.Route{
 			Name:        "GetTenantIngestionProfile",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "ingestion-profiles/{dataID}",
@@ -168,6 +186,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "threshold-profiles",
 			HandlerFunc: result.UpdateTenantThresholdProfile,
+		},
+		server.Route{
+			Name:        "PatchTenantThresholdProfile",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "threshold-profiles",
+			HandlerFunc: result.PatchTenantThresholdProfile,
 		},
 		server.Route{
 			Name:        "GetTenantThresholdProfile",
@@ -206,6 +230,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.UpdateMonitoredObject,
 		},
 		server.Route{
+			Name:        "PatchMonitoredObject",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
+			HandlerFunc: result.PatchMonitoredObject,
+		},
+		server.Route{
 			Name:        "GetMonitoredObject",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
@@ -234,6 +264,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Method:      "POST",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
 			HandlerFunc: result.CreateTenantMeta,
+		},
+		server.Route{
+			Name:        "PatchTenantMeta",
+			Method:      "PATCH",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "meta",
+			HandlerFunc: result.PatchTenantMeta,
 		},
 		server.Route{
 			Name:        "UpdateTenantMeta",
@@ -311,6 +347,70 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 	sendSuccessResponse(result, w, startTime, mon.CreateTenantUserStr, tenmod.TenantUserStr, "Created")
 }
 
+// PatchTenantUser - updates a tenant user
+func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.PatchTenantUserStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.User{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	oldData, err := tsh.tenantDB.GetTenantUser(data.TenantID, data.ID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantUserStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantUserStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+
+	}
+	// This only checks if the ID&REV is set.
+	err = oldData.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantUserStr, oldData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantUser(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantUserStr, tenmod.TenantUserStr, "Patched")
+}
+
 // UpdateTenantUser - updates a tenant user
 func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
@@ -344,11 +444,11 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 	result, err := tsh.TenantDB.UpdateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
-		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.UpdateTenantUserStr, tenmod.TenantUserStr, "Updated")
+	sendSuccessResponse(result, w, startTime, mon.PatchTenantStr, tenmod.TenantUserStr, "Updated")
 }
 
 // GetTenantUser - fetches a tenant user
@@ -642,6 +742,90 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantDomainStr, tenmod.TenantDomainStr, "Updated")
 }
 
+/*PatchTenantDomain - Patches a tenant domain
+ * Takes in a partial Tenant domain payload and determines which elements need to be updated.
+ * Works by
+ * - Unmarshals the payload into a tenant domain struct
+ * - Validates the data
+ * - Gets the latest document from the DB.
+ * - For each element that is a non-zero length string,
+ * - Overwrite the latest document element.
+ * - Store the changes.
+ * Note that limited validation is done on the payload itself. I'm pushing the onus
+ * to the database to reject the document if there is an error in the ID/REV.
+ */
+func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.PatchTenantStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Model
+	data := tenmod.Domain{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// This only checks if the ID&REV is set.
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Get the IDs from the URL
+	tenantID := data.TenantID
+	domainID := data.ID
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantDomainStr, domainID)
+
+	// Issue request to DAO Layer
+	oldDomain, err := tsh.tenantDB.GetTenantDomain(tenantID, domainID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldDomain, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+
+	}
+	// This only checks if the ID&REV is set.
+	err = oldDomain.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+	// Done checking for differences
+	logger.Log.Infof("Patching %s: %s", opStr, oldDomain)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantDomain(oldDomain)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyDomainUpdated(oldDomain.TenantID, oldDomain)
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantDomainStr, "Patched")
+}
+
 // GetTenantDomain - fetches a tenant domain
 func (tsh *TenantServiceRESTHandler) GetTenantDomain(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
@@ -742,6 +926,61 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.CreateIngPrfStr, tenmod.TenantIngestionProfileStr, "Created")
+}
+
+//PatchTenantIngestionProfile - updates a tenant ingestion profile
+func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.PatchIngPrfStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.IngestionProfile{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	origData, err2 := tsh.tenantDB.GetTenantIngestionProfile(data.TenantID, data.ID)
+	if err2 != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(origData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching%s: %s", tenmod.TenantIngestionProfileStr, origData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(origData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantIngestionProfileStr, "Patched")
 }
 
 // UpdateTenantIngestionProfile - updates a tenant ingestion profile
@@ -887,6 +1126,61 @@ func (tsh *TenantServiceRESTHandler) CreateTenantThresholdProfile(w http.Respons
 }
 
 // UpdateTenantThresholdProfile - updates a tenant threshold profile
+func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.UpdateThrPrfStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.ThresholdProfile{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	origData, err2 := tsh.tenantDB.GetTenantThresholdProfile(data.TenantID, data.ID)
+	if err2 != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(origData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, origData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(origData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantThresholdProfileStr, "Patched")
+}
+
+// UpdateTenantThresholdProfile - updates a tenant threshold profile
 func (tsh *TenantServiceRESTHandler) UpdateTenantThresholdProfile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
@@ -1026,6 +1320,71 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 
 	NotifyMonitoredObjectCreated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.CreateMonObjStr, tenmod.TenantMonitoredObjectStr, "Created")
+}
+
+//PatchUpdateMonitoredObject - Patch a tenant monitored object
+func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.PatchMonObjStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.MonitoredObject{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	oldData, err := tsh.tenantDB.GetMonitoredObject(data.TenantID, data.ID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+
+	}
+	// This only checks if the ID&REV is set.
+	err = oldData.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateMonitoredObject(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyMonitoredObjectUpdated(data.TenantID, oldData)
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
 
 // UpdateMonitoredObject - updates a tenant monitored object
@@ -1206,6 +1565,69 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.CreateTenantMetaStr, tenmod.TenantMetaStr, "Created")
+}
+
+//PatchTenantMeta - Patch a tenant metadata
+func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	opStr := mon.PatchTenantMetaStr
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.Metadata{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	oldData, err := tsh.tenantDB.GetTenantMeta(data.TenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	if errMerge != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMetaStr, oldData)
+
+	// Issue request to DAO Layer
+	result, err := tsh.tenantDB.UpdateTenantMeta(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMetaStr, "Patched")
 }
 
 // UpdateTenantMeta - updates a tenant metadata

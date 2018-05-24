@@ -85,6 +85,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			Pattern:     "/api/v1/raw-metrics",
 			HandlerFunc: result.GetRawMetrics,
 		},
+
+		server.Route{
+			Name:        "QueryAggregatedMetrics",
+			Method:      "POST",
+			Pattern:     "/api/v1/aggregated-metrics",
+			HandlerFunc: result.QueryAggregatedMetrics,
+		},
 	}
 
 	return result
@@ -546,6 +553,50 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, rawMetricReq)
 	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
+	fmt.Fprintf(w, string(res))
+}
+
+func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	request := metrics.AggregateMetricsAPIRequest{}
+	if err := json.Unmarshal(requestBytes, &request); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
+
+	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
+		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetAggregatedMetrics(&request)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Aggregated Metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Aggregated Metrics response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.AggMetricsStr, request)
+	trackAPIMetrics(startTime, "200", mon.QueryAggregatedMetricsStr)
 	fmt.Fprintf(w, string(res))
 }
 

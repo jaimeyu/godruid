@@ -146,7 +146,7 @@ func (u *User) Validate(isUpdate bool) error {
 	if !isUpdate && len(u.REV) != 0 {
 		return errors.New("Invalid Tenant User request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
+	if isUpdate && (len(u.REV) == 0) {
 		return errors.New("Invalid Tenant User request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -247,15 +247,14 @@ func (d *ConnectorConfig) Validate(isUpdate bool) error {
 
 // Domain - defines a Tenant Domain.
 type Domain struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	Name                  string   `json:"name"`
-	Color                 string   `json:"color"`
-	ThresholdProfileSet   []string `json:"thresholdProfileSet"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Name                  string `json:"name"`
+	Color                 string `json:"color"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -279,56 +278,6 @@ func (d *Domain) GetReferences() []jsonapi.Reference {
 	}
 }
 
-// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
-func (d *Domain) GetReferencedIDs() []jsonapi.ReferenceID {
-	result := []jsonapi.ReferenceID{}
-	for _, tpID := range d.ThresholdProfileSet {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tpID,
-			Type: "thresholdProfiles",
-			Name: "thresholdProfiles",
-		})
-	}
-
-	return result
-}
-
-// SetToManyReferenceIDs sets the threshold profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (d *Domain) SetToManyReferenceIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = IDs
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// AddToManyIDs adds new threshold profiles tot he reference list
-func (d *Domain) AddToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = append(d.ThresholdProfileSet, IDs...)
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// DeleteToManyIDs removes threshold profiles from the reference list
-func (d *Domain) DeleteToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		for _, ID := range IDs {
-			for pos, oldID := range d.ThresholdProfileSet {
-				if ID == oldID {
-					// match, this ID must be removed
-					d.ThresholdProfileSet = append(d.ThresholdProfileSet[:pos], d.ThresholdProfileSet[pos+1:]...)
-				}
-			}
-		}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
 // Validate - used during validation of incoming REST requests for this object
 func (d *Domain) Validate(isUpdate bool) error {
 	if len(d.TenantID) == 0 {
@@ -337,7 +286,7 @@ func (d *Domain) Validate(isUpdate bool) error {
 	if !isUpdate && len(d.REV) != 0 {
 		return errors.New("Invalid Tenant Domain request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+	if isUpdate && (len(d.REV) == 0) {
 		return errors.New("Invalid Tenant Domain request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -374,7 +323,7 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 	if !isUpdate && len(prf.REV) != 0 {
 		return errors.New("Invalid Tenant Ingestion Profile request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+	if isUpdate && (len(prf.REV) == 0) {
 		return errors.New("Invalid Tenant Ingestion Profile request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -453,7 +402,7 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 	if !isUpdate && len(prf.REV) != 0 {
 		return errors.New("Invalid Tenant Threshold Profile request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+	if isUpdate && (len(prf.REV) == 0) {
 		return errors.New("Invalid Tenant Threshold Profile request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -567,7 +516,7 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 
 	}
 
-	if isUpdate && (len(mo.REV) == 0 || mo.CreatedTimestamp == 0) {
+	if isUpdate && (len(mo.REV) == 0) {
 		return errors.New("Invalid Tenant Monitored object request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -642,7 +591,7 @@ func (meta *Metadata) Validate(isUpdate bool) error {
 	if !isUpdate && len(meta.REV) != 0 {
 		return errors.New("Invalid Tenant Metadata request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(meta.REV) == 0 || meta.CreatedTimestamp == 0) {
+	if isUpdate && (len(meta.REV) == 0) {
 		return errors.New("Invalid Tenant Metadata request: must provide a createdTimestamp and revision for an update")
 	}
 

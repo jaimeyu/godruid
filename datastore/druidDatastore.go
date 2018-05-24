@@ -22,6 +22,9 @@ const (
 	// RawMetricString - common name for use in logs.
 	RawMetricStr = "Raw Metric"
 
+	// AggMetricsStr - common name for use in logs.
+	AggMetricsStr = "Agg Metric"
+
 	// SLAReport - common name for use in logs.
 	SLAReportStr = "SLA Report"
 )
@@ -48,6 +51,9 @@ type DruidDatastore interface {
 
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
+
+	// Get aggregated metrics from druid
+	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest) (map[string]interface{}, error)
 
 	// Update Monitored Object meta-data
 	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error

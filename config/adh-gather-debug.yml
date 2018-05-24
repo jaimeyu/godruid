@@ -20,8 +20,6 @@ args:
     impl: 1
   tenantdb: 
     impl: 1
-  schedulerdb:
-    impl: 1
   pouchplugindb:
     impl: 1
   testdatadb:

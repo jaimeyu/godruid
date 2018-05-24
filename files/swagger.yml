@@ -30,6 +30,7 @@ paths:
           schema:
             $ref: '#/definitions/JsonApiAdminUser'
         '400':
+          description: "Request data does not pass validation"
         '500':
           description: "Unexpected error processing request"
       parameters:

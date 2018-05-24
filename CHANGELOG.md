@@ -1,3 +1,4 @@
+* Feature - aggregated metrics query
 ## Current Release 
 ### 0.117.0 
 **Release Date:** Thu May 24 16:28:07 UTC 2018     

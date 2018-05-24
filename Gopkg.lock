@@ -167,6 +167,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/peterbourgon/mergemap"
+  packages = ["."]
+  revision = "e21c03b7a721e413718d2703181ead350d3c9d6f"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -348,6 +354,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ef96e19485861b6b89215ceb3d227dc847d1639715a3071ed7241f3f0f65c801"
+  inputs-digest = "19f1cb9abd8ee45be45795375d32845d31e1759b9f7cd03c696ee7266ce6a48a"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -77,8 +77,15 @@ func init() {
 
 	pflag.BoolVar(&enableChangeNotifications, "changeNotifications", true, "Specify if Change Notifications should be enabled")
 
-	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object",
-		"/api/v1/threshold-crossing", "/api/v1/sla-report", "/api/v1/threshold-crossing-by-monitored-object-top-n"}
+	metricServiceEndpoints = []string{
+		"/api/v1/histogram",
+		"/api/v1/raw-metrics",
+		"/api/v1/threshold-crossing-by-monitored-object",
+		"/api/v1/threshold-crossing",
+		"/api/v1/sla-report",
+		"/api/v1/threshold-crossing-by-monitored-object-top-n",
+		"/api/v1/aggregated-metrics",
+	}
 }
 
 // GatherServer - Server which will implement the gRPC Services.

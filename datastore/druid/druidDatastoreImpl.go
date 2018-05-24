@@ -56,6 +56,11 @@ type RawMetricsResponse struct {
 	Result    map[string]interface{}
 }
 
+type AggMetricsResponse struct {
+	Timestamp string
+	Result    map[string]interface{}
+}
+
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
@@ -316,6 +321,40 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 	rr := map[string]interface{}{
 		"data": data,
 	}
+
+	return rr, nil
+}
+
+func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest) (map[string]interface{}, error) {
+	logger.Log.Debugf("Calling GetAggregatedMetrics for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	query, pp, err := AggMetricsQuery(request.TenantID, table, request.Interval, request.DomainIDs, request.Aggregation, request.Metrics, request.Timeout, request.Granularity)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.AggMetricsStr, models.AsJSONString(query))
+	druidResponse, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	response := make([]AggMetricsResponse, 0)
+	err = json.Unmarshal(druidResponse, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(response))
+
+	response = (*pp).Apply(response)
+
+	rr := map[string]interface{}{
+		"results": response,
+	}
+
+	logger.Log.Debugf("Processed response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(rr))
 
 	return rr, nil
 }

@@ -58,3 +58,24 @@ type ThresholdCrossingTopNRequest struct {
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
 }
+
+type AggregateMetricsAPIRequest struct {
+	TenantID    string             `json:"tenantId"`
+	DomainIDs   []string           `json:"domainIds,omitempty"`
+	Interval    string             `json:"interval,omitempty"`
+	Granularity string             `json:"granularity,omitempty"`
+	Timeout     int32              `json:"timeout,omitempty"`
+	Aggregation AggregationSpec    `json:"aggregation"`
+	Metrics     []MetricIdentifier `json:"metrics,omitempty"`
+}
+
+type AggregationSpec struct {
+	Name string `json:"name"`
+}
+
+type MetricIdentifier struct {
+	Vendor     string `json:"vendor"`
+	ObjectType string `json:"objectType"`
+	Name       string `json:"name"`
+	Direction  int32  `json:"direction"`
+}

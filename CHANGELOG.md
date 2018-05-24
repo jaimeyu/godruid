@@ -1,3 +1,4 @@
+* Fix - Removed 'createdTimestamp' requirement for model validation in Admin Tenant, Tenant User, Tenant Domain, Tenant Ingestion Profile, Tenant Threshold Profile, Tenant Metadata.
 ## Current Release 
 ### 0.116.0 
 **Release Date:** Wed May 23 18:25:07 UTC 2018     

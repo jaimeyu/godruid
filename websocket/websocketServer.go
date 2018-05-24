@@ -64,6 +64,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 			for _, c := range connectorConfigs {
 				c.ID = datastore.GetDataIDFromFullID(c.ID)
 				c.ConnectorInstanceID = ""
+
 				_, err = wsServer.TenantDB.UpdateTenantConnector(c)
 				if err != nil {
 					logger.Log.Errorf("Unable to remove connectorInstanceID from ConnectorConfig: %v, for tenant: %v. Error: %v", c.ID, tenantID, err)
@@ -155,7 +156,8 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				}
 
 				// pick the first available connector
-				selectedConfig := configs[0]
+				selectedID := datastore.GetDataIDFromFullID(configs[0].ID)
+				selectedConfig, _ := wsServer.TenantDB.GetTenantConnector(tenantID, selectedID)
 
 				logger.Log.Infof("Sending following config: %v to connector with ID: %s", selectedConfig, connectorID)
 
@@ -219,8 +221,9 @@ func (wsServer *ServerStruct) serveWs(w http.ResponseWriter, r *http.Request) {
 		Connection:    ws,
 		LastHeartbeat: time.Now().Unix(),
 	}
-
+	wsServer.Lock.Lock()
 	wsServer.ConnectionMeta[connectorID] = connectionMeta
+	wsServer.Lock.Unlock()
 
 	logger.Log.Infof("Connector with ID: %v, successfully connected.", connectorID)
 

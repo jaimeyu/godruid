@@ -1,8 +1,10 @@
-* Feature - aggregated metrics query
 ## Current Release 
+### 0.118.0 
+**Release Date:** Thu May 24 21:26:46 UTC 2018     
+## Previous Releases 
+* Feature - aggregated metrics query
 ### 0.117.0 
 **Release Date:** Thu May 24 16:28:07 UTC 2018     
-## Previous Releases 
 * Fix - Removed 'createdTimestamp' requirement for model validation in Admin Tenant, Tenant User, Tenant Domain, Tenant Ingestion Profile, Tenant Threshold Profile, Tenant Metadata.
 ### 0.116.0 
 **Release Date:** Wed May 23 18:25:07 UTC 2018     

@@ -19,7 +19,7 @@ import (
 type ConnectionMeta struct {
 	Connection      *websocket.Conn
 	TenantID        string
-	HeartbeatChan   chan string
+	LastHeartbeat   int64
 	CloseConnection bool // mark connection to be closed as soon as possible
 }
 
@@ -51,7 +51,8 @@ type ConnectorMessage struct {
 // Reader - Function which reads websocket messages coming through the websocket connection
 func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
-	for {
+	for ws != nil {
+
 		_, p, err := ws.ReadMessage()
 		if err != nil {
 			logger.Log.Errorf("Lost connection to Connector with ID: %v. Error: %v", connectorID, err)
@@ -69,10 +70,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					break
 				}
 			}
-
-			// delete from connection map
-			delete(wsServer.ConnectionMeta, connectorID)
-
 			break
 		}
 		msg := &ConnectorMessage{}
@@ -87,6 +84,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				var configs []*tenant.Connector
 
 				logger.Log.Infof("Received config request from Connector with ID: %s", connectorID)
+
 				wsServer.Lock.Lock()
 				wsServer.ConnectionMeta[connectorID].TenantID = tenantID
 				wsServer.Lock.Unlock()
@@ -97,7 +95,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					logger.Log.Errorf("Unable to retrieve connector instance for tenant: %v and connectorID: %v. Error: %v", tenantID, connectorID, err)
 				}
 
-				// The following is logic for choosing which connection to give to an incoming connector:
+				// The following is logic for choosing which configuration to give to an incoming connector:
 				// if connector hasn't been added to connector instances, add it
 				if connectorInstance == nil {
 					connectorInstance = &tenant.ConnectorInstance{
@@ -106,7 +104,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 						TenantID: tenantID,
 					}
 
-					wsServer.TenantDB.CreateTenantConnectorInstance(connectorInstance)
+					_, err = wsServer.TenantDB.CreateTenantConnectorInstance(connectorInstance)
 					if err != nil {
 						logger.Log.Errorf("Unable to create TenantConnectorInstance for tenant: %v. Error: %v", tenantID, err)
 						break
@@ -159,7 +157,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				// pick the first available connector
 				selectedConfig := configs[0]
 
-				logger.Log.Debugf("Sending following config: %v to connector with ID: %s", selectedConfig, connectorID)
+				logger.Log.Infof("Sending following config: %v to connector with ID: %s", selectedConfig, connectorID)
 
 				// remove the couchDB type prefix from the ID
 				selectedConfig.ID = datastore.GetDataIDFromFullID(selectedConfig.ID)
@@ -188,14 +186,13 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					logger.Log.Errorf("Unable to update TenantConnector: %v, for tenant: %v. Error: %v", selectedConfig.ID, tenantID, err)
 					break
 				}
-
 			}
 		case "Heartbeat":
 			{
 				logger.Log.Debugf("Received Heartbeat from Connector with ID: %s", connectorID)
-
-				// Notify our hearbeat monitor that we've received a heartbeat
-				wsServer.ConnectionMeta[connectorID].HeartbeatChan <- connectorID
+				wsServer.Lock.Lock()
+				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
+				wsServer.Lock.Unlock()
 
 			}
 		default:
@@ -203,19 +200,13 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				logger.Log.Errorf("Error from connector: %v. Error: %v. Message: %s", connectorID, msg.ErrorCode, msg.ErrorMsg)
 			}
 		}
-
-		// Cleanup any connections marked for closing
-		if wsServer.ConnectionMeta[connectorID].CloseConnection {
-			wsServer.ConnectionMeta[connectorID].Connection.Close()
-			break
-		}
 	}
 }
 
+// Create initial websocket connection
 func (wsServer *ServerStruct) serveWs(w http.ResponseWriter, r *http.Request) {
 	ws, err := wsServer.Upgrader.Upgrade(w, r, nil)
 	connectorID := r.Header["Connectorid"][0]
-	heartbeatChan := make(chan string)
 
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
@@ -226,36 +217,12 @@ func (wsServer *ServerStruct) serveWs(w http.ResponseWriter, r *http.Request) {
 
 	connectionMeta := &ConnectionMeta{
 		Connection:    ws,
-		HeartbeatChan: heartbeatChan,
+		LastHeartbeat: time.Now().Unix(),
 	}
 
 	wsServer.ConnectionMeta[connectorID] = connectionMeta
 
 	logger.Log.Infof("Connector with ID: %v, successfully connected.", connectorID)
-
-	// If we don't get a heartbeat message in the required amount of time, mark connection for closing
-	go func() {
-
-		maxTimeWithoutHeartbeat := wsServer.Config.GetInt(gather.CK_connector_maxSecondsWithoutHeartbeat.String())
-		ticker := time.NewTicker(time.Duration(maxTimeWithoutHeartbeat) * time.Second)
-
-		for {
-			select {
-			case <-heartbeatChan:
-				ticker = time.NewTicker(time.Duration(maxTimeWithoutHeartbeat) * time.Second)
-			case <-ticker.C:
-				// If connection gets marked for closing, exit this loop. It will be recreated for the new connection
-				logger.Log.Errorf("Haven't received heartbeat from Connector: %s for %v seconds. Resetting connection.", connectorID, maxTimeWithoutHeartbeat)
-				if wsServer.ConnectionMeta[connectorID] != nil {
-					wsServer.Lock.Lock()
-					wsServer.ConnectionMeta[connectorID].CloseConnection = true
-					wsServer.Lock.Unlock()
-				}
-				return
-			}
-		}
-
-	}()
 
 	wsServer.Reader(ws, connectorID)
 }
@@ -313,6 +280,23 @@ func Server(tenantDB datastore.TenantServiceDatastore) *ServerStruct {
 	go func() {
 		logger.Log.Infof("Starting Websocket Server on: %v:%v", host, port)
 		http.ListenAndServe(addr, nil)
+	}()
+
+	// If we don't see heartbeats for the maximum time allowed, close the websocket connection
+	go func() {
+		maxSecondsWithoutHeartbeat := int64(cfg.GetInt("connector.maxSecondsWithoutHeartbeat"))
+
+		heartbeatTicker := time.NewTicker(time.Duration(maxSecondsWithoutHeartbeat) * time.Second)
+		for range heartbeatTicker.C {
+			now := time.Now().Unix()
+			for cID, meta := range wsServer.ConnectionMeta {
+				if now-meta.LastHeartbeat > maxSecondsWithoutHeartbeat {
+					wsServer.Lock.Lock()
+					wsServer.ConnectionMeta[cID].Connection.Close()
+					wsServer.Lock.Unlock()
+				}
+			}
+		}
 	}()
 
 	go wsServer.listenToConnectorChanges()

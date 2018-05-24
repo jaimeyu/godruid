@@ -540,10 +540,10 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  /v1/tenants/{tenantId}/connectors:
+  /v1/tenants/{tenantId}/connector-configs:
     post:
-      summary: Create a Connector for a Tenant.
-      operationId: CreateTenantConnector
+      summary: Create a ConnectorConfig for a Tenant.
+      operationId: CreateTenantConnectorConfig
       consumes:
         - application/vnd.api+json
       produces:
@@ -552,7 +552,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -566,12 +566,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
       tags:
         - TenantProvisioningService
     put:
-      summary: Update a Tenant Connector
-      operationId: UpdateTenantConnector
+      summary: Update a Tenant ConnectorConfig
+      operationId: UpdateTenantConnectorConfig
       consumes:
         - application/vnd.api+json
       produces:
@@ -580,7 +580,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -594,20 +594,20 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
       tags:
         - TenantProvisioningService
-  '/v1/tenants/{tenantId}/connectors/{connectorId}':
+  '/v1/tenants/{tenantId}/connector-configs/{connectorId}':
     get:
-      summary: Retrieve a Tenant Connector by Id.
-      operationId: GetTenantConnector
+      summary: Retrieve a Tenant ConnectorConfig by Id.
+      operationId: GetTenantConnectorConfig
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -622,15 +622,15 @@ paths:
       tags:
         - TenantProvisioningService
     delete:
-      summary: Delete a Tenant Connector specified by the provided Connector Id.
-      operationId: DeleteTenantConnector
+      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: DeleteTenantConnectorConfig
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantConnector'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -644,17 +644,17 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  /v1/tenants/{tenantId}/connector-list:
+  /v1/tenants/{tenantId}/connector-config-list:
     get:
-      summary: Retrieve all Connectors for the specified Tenant.
-      operationId: GetAllTenantConnectors
+      summary: Retrieve all ConnectorConfigs for the specified Tenant.
+      operationId: GetAllTenantConnectorConfigs
       produces:
         - application/vnd.api+json
       responses:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantConnectorList'
+            $ref: '#/definitions/JsonApiTenantConnectorConfigList'
         '500':
           description: "Unexpected error processing request"
       parameters:
@@ -2004,19 +2004,19 @@ definitions:
       id:
         type: "string"
 
-  JsonApiTenantConnector:
+  JsonApiTenantConnectorConfig:
     type: "object"
     properties:
       data:
-        $ref: '#/definitions/TenantConnector'
-  JsonApiTenantConnectorList:
+        $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorConfigList:
     type: "object"
     properties:
       data:
         type: "array"
         items:
-           $ref: '#/definitions/TenantConnector'
-  TenantConnector:
+           $ref: '#/definitions/TenantConnectorConfig'
+  TenantConnectorConfig:
     type: "object"
     properties:
       type: 
@@ -2025,10 +2025,10 @@ definitions:
       id:
         type: "string"
       attributes:
-        $ref: '#/definitions/TenantConnectorAttr'
+        $ref: '#/definitions/TenantConnectorConfigAttr'
       relationships:
-        $ref: '#/definitions/TenantConnectorRelationships'
-  TenantConnectorAttr:
+        $ref: '#/definitions/TenantConnectorConfigRelationships'
+  TenantConnectorConfigAttr:
     type: "object"
     properties:
       _id:
@@ -2063,7 +2063,7 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  TenantConnectorRelationships:
+  TenantConnectorConfigRelationships:
     type: "object"
     properties:
       thresholdProfiles:

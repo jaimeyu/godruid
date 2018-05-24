@@ -58,14 +58,14 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 			logger.Log.Errorf("Lost connection to Connector with ID: %v. Error: %v", connectorID, err)
 
 			tenantID := wsServer.ConnectionMeta[connectorID].TenantID
-			connectorConfigs, _ := wsServer.TenantDB.GetAllTenantConnectorsByInstanceID(tenantID, connectorID)
+			connectorConfigs, _ := wsServer.TenantDB.GetAllTenantConnectorConfigsByInstanceID(tenantID, connectorID)
 
 			// Lost connection to the connector, so we need to remove connectorInstanceID from any configs that have it
 			for _, c := range connectorConfigs {
 				c.ID = datastore.GetDataIDFromFullID(c.ID)
 				c.ConnectorInstanceID = ""
 
-				_, err = wsServer.TenantDB.UpdateTenantConnector(c)
+				_, err = wsServer.TenantDB.UpdateTenantConnectorConfig(c)
 				if err != nil {
 					logger.Log.Errorf("Unable to remove connectorInstanceID from ConnectorConfig: %v, for tenant: %v. Error: %v", c.ID, tenantID, err)
 					break
@@ -82,7 +82,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 			{
 				tenantID := msg.Tenant
 				zone := msg.Zone
-				var configs []*tenant.Connector
+				var configs []*tenant.ConnectorConfig
 
 				logger.Log.Infof("Received config request from Connector with ID: %s", connectorID)
 
@@ -112,25 +112,25 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					}
 
 					// get all available configs
-					configs, err = wsServer.TenantDB.GetAllAvailableTenantConnectors(tenantID, zone)
+					configs, err = wsServer.TenantDB.GetAllAvailableTenantConnectorConfigs(tenantID, zone)
 
 				} else {
 					// We have a connectorInstance for the incoming connectorID
 
 					// find configs that have an instanceID that matches connectorID
-					configs, err = wsServer.TenantDB.GetAllTenantConnectorsByInstanceID(tenantID, connectorID)
+					configs, err = wsServer.TenantDB.GetAllTenantConnectorConfigsByInstanceID(tenantID, connectorID)
 
 					// if none of the configs are used by the connector instances, get available configs
 					if len(configs) == 0 {
 						// get all available configs
-						configs, err = wsServer.TenantDB.GetAllAvailableTenantConnectors(tenantID, zone)
+						configs, err = wsServer.TenantDB.GetAllAvailableTenantConnectorConfigs(tenantID, zone)
 					}
 
 					// if there are no available configs, make sure that the used configs are being used by a valid connector
 					// and not by any stale connectors (Could happen if gather crashes)
 
 					if len(configs) == 0 {
-						allConfigs, err := wsServer.TenantDB.GetAllTenantConnectors(tenantID, zone)
+						allConfigs, err := wsServer.TenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
 						if err != nil {
 							logger.Log.Errorf("Unable to find connectors for tenant: %v and zone: %v", tenantID, zone)
 							break
@@ -157,7 +157,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 				// pick the first available connector
 				selectedID := datastore.GetDataIDFromFullID(configs[0].ID)
-				selectedConfig, _ := wsServer.TenantDB.GetTenantConnector(tenantID, selectedID)
+				selectedConfig, _ := wsServer.TenantDB.GetTenantConnectorConfig(tenantID, selectedID)
 
 				logger.Log.Infof("Sending following config: %v to connector with ID: %s", selectedConfig, connectorID)
 
@@ -183,9 +183,9 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				}
 
 				// After successfully sending config to connector, update ConnectorConfig with the instance iD
-				_, err = wsServer.TenantDB.UpdateTenantConnector(selectedConfig)
+				_, err = wsServer.TenantDB.UpdateTenantConnectorConfig(selectedConfig)
 				if err != nil {
-					logger.Log.Errorf("Unable to update TenantConnector: %v, for tenant: %v. Error: %v", selectedConfig.ID, tenantID, err)
+					logger.Log.Errorf("Unable to update TenantConnectorConfig: %v, for tenant: %v. Error: %v", selectedConfig.ID, tenantID, err)
 					break
 				}
 			}
@@ -234,7 +234,7 @@ func (wsServer *ServerStruct) serveWs(w http.ResponseWriter, r *http.Request) {
 func (wsServer *ServerStruct) listenToConnectorChanges() {
 
 	// if a connector config changes, push it to the connector
-	for config := range wsServer.TenantDB.GetConnectorUpdateChan() {
+	for config := range wsServer.TenantDB.GetConnectorConfigUpdateChan() {
 		instanceID := config.ConnectorInstanceID
 		meta := wsServer.ConnectionMeta[instanceID]
 		if instanceID != "" && meta != nil {

@@ -435,7 +435,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantUserCRUD(t *testing.T) 
 	assert.NotNil(t, tenantUserList)
 }
 
-func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testing.T) {
+func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorConfigCRUD(t *testing.T) {
 
 	const COMPANY1 = "ConnectorCompany"
 	const SUBDOMAIN1 = "subdom1"
@@ -457,33 +457,33 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Validate that there are currently no records
-	recList, err := runner.tenantDB.GetAllTenantConnectors(TENANT, "")
+	recList, err := runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
 
 	// Try to fetch a record even though none exist:
-	fail, err := runner.tenantDB.GetTenantConnector(TENANT, "someID")
+	fail, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, "someID")
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
 	// Try to Update a record that does not exist:
-	fail, err = runner.tenantDB.UpdateTenantConnector(&tenmod.Connector{})
+	fail, err = runner.tenantDB.UpdateTenantConnectorConfig(&tenmod.Connector{})
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
 	// Create a record
-	tenantConnector := tenmod.Connector{
+	TenantConnectorConfig := tenmod.Connector{
 		Name:        CONN1,
 		TenantID:    TENANT,
 		ExportGroup: EXPORTGROUP1,
 	}
 
-	created, err := runner.tenantDB.CreateTenantConnector(&tenantConnector)
+	created, err := runner.tenantDB.CreateTenantConnectorConfig(&TenantConnectorConfig)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
 	assert.NotEmpty(t, created.ID)
 	assert.NotEmpty(t, created.REV)
-	assert.Equal(t, string(tenmod.TenantConnectorType), created.Datatype)
+	assert.Equal(t, string(tenmod.TenantConnectorConfigType), created.Datatype)
 	assert.Equal(t, created.Name, CONN1, "Name not the same")
 	assert.Equal(t, created.ExportGroup, EXPORTGROUP1, "Export group not the same")
 	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
@@ -491,7 +491,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
 	// Get a record
-	fetched, err := runner.tenantDB.GetTenantConnector(TENANT, created.ID)
+	fetched, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, created.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
 
@@ -501,7 +501,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	updateRecord := tenmod.Connector{}
 	deepcopy.Copy(&updateRecord, fetched)
 	updateRecord.ExportGroup = EXPORTGROUP2
-	updated, err := runner.tenantDB.UpdateTenantConnector(&updateRecord)
+	updated, err := runner.tenantDB.UpdateTenantConnectorConfig(&updateRecord)
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)
 	assert.Equal(t, updated.ID, fetched.ID)
@@ -514,11 +514,11 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
 
 	// Add a second record.
-	tenantConnector2 := tenmod.Connector{
+	TenantConnectorConfig2 := tenmod.Connector{
 		Name:        CONN2,
 		TenantID:    TENANT,
 		ExportGroup: EXPORTGROUP1}
-	created2, err := runner.tenantDB.CreateTenantConnector(&tenantConnector2)
+	created2, err := runner.tenantDB.CreateTenantConnectorConfig(&TenantConnectorConfig2)
 	assert.Nil(t, err)
 	assert.NotNil(t, created2)
 	assert.NotEmpty(t, created2.ID)
@@ -531,13 +531,13 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
 	// Get all records
-	fetchedList, err := runner.tenantDB.GetAllTenantConnectors(TENANT, "")
+	fetchedList, err := runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fetchedList)
 	assert.True(t, len(fetchedList) == 2)
 
 	// Delete a record.
-	deleted, err := runner.tenantDB.DeleteTenantConnector(TENANT, fetched.ID)
+	deleted, err := runner.tenantDB.DeleteTenantConnectorConfig(TENANT, fetched.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, deleted)
 	assert.NotEmpty(t, deleted.ID)
@@ -545,23 +545,23 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.Equal(t, deleted.Name, fetched.Name, "Deleted name not the same")
 
 	// Get all records - should be 1
-	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT, "")
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fetchedList)
 	assert.True(t, len(fetchedList) == 1)
 
 	// Get a record that does not exist
-	dne, err := runner.tenantDB.GetTenantConnector(TENANT, deleted.ID)
+	dne, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, deleted.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, dne)
 
 	// Delete a record that oes not exist
-	deleteDNE, err := runner.tenantDB.DeleteTenantConnector(TENANT, deleted.ID)
+	deleteDNE, err := runner.tenantDB.DeleteTenantConnectorConfig(TENANT, deleted.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, deleteDNE)
 
 	// Delete the last record
-	deleted, err = runner.tenantDB.DeleteTenantConnector(TENANT, created2.ID)
+	deleted, err = runner.tenantDB.DeleteTenantConnectorConfig(TENANT, created2.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, deleted)
 	assert.NotEmpty(t, deleted.ID)
@@ -569,7 +569,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorCRUD(t *testin
 	assert.Equal(t, deleted.Name, created2.Name, "Deleted name not the same")
 
 	// Get all records - should be empty
-	fetchedList, err = runner.tenantDB.GetAllTenantConnectors(TENANT, "")
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
 }

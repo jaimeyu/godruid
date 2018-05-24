@@ -13,8 +13,8 @@ const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
 	TenantUserType TenantDataType = "user"
 
-	// TenantConnectorType - datatype string used to identify a Tenant Connector in the datastore record
-	TenantConnectorType TenantDataType = "connector"
+	// TenantConnectorConfigType - datatype string used to identify a Tenant ConnectorConfig in the datastore record
+	TenantConnectorConfigType TenantDataType = "connectorConfig"
 
 	// TenantConnectorInstanceType - datatype string used to identify a Tenant ConnectorInstance in the datastore record
 	TenantConnectorInstanceType TenantDataType = "connectorInstance"
@@ -85,8 +85,8 @@ const (
 	// TenantUserStr - common name of the TenantUser data type for use in logs.
 	TenantUserStr = "Tenant User"
 
-	// TenantConnectorStr - common name of the Tenant Connector data type for use in logs.
-	TenantConnectorStr = "Tenant Connector"
+	// TenantConnectorConfigStr - common name of the Tenant Connector data type for use in logs.
+	TenantConnectorConfigStr = "Tenant Connector"
 
 	// TenantConnectorInstanceStr - common name of the Tenant ConnectorInstance data type for use in logs.
 	TenantConnectorInstanceStr = "Tenant ConnectorInstance"
@@ -197,8 +197,8 @@ func (d *ConnectorInstance) Validate(isUpdate bool) error {
 	return nil
 }
 
-// Connector - defines a Tenant Connector
-type Connector struct {
+// ConnectorConfig - defines a Tenant ConnectorConfig
+type ConnectorConfig struct {
 	ID                              string `json:"_id"`
 	REV                             string `json:"_rev"`
 	Datatype                        string `json:"datatype"`
@@ -220,26 +220,26 @@ type Connector struct {
 }
 
 // GetID - required implementation for jsonapi marshalling
-func (d *Connector) GetID() string {
+func (d *ConnectorConfig) GetID() string {
 	return d.ID
 }
 
 // SetID - required implementation for jsonapi unmarshalling
-func (d *Connector) SetID(s string) error {
+func (d *ConnectorConfig) SetID(s string) error {
 	d.ID = s
 	return nil
 }
 
 // Validate - used during validation of incoming REST requests for this object
-func (d *Connector) Validate(isUpdate bool) error {
+func (d *ConnectorConfig) Validate(isUpdate bool) error {
 	if len(d.TenantID) == 0 {
-		return errors.New("Invalid Tenant Connector request: must provide a Tenant ID")
+		return errors.New("Invalid Tenant ConnectorConfig request: must provide a Tenant ID")
 	}
 	if !isUpdate && len(d.REV) != 0 {
-		return errors.New("Invalid Tenant Connector request: must not provide a revision value in a creation request")
+		return errors.New("Invalid Tenant ConnectorConfig request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
-		return errors.New("Invalid Tenant Connector request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant ConnectorConfig request: must provide a createdTimestamp and revision for an update")
 	}
 
 	return nil

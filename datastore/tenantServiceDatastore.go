@@ -20,14 +20,14 @@ type TenantServiceDatastore interface {
 	GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
 	GetAllTenantDomains(string) ([]*tenmod.Domain, error)
 
-	CreateTenantConnector(*tenmod.Connector) (*tenmod.Connector, error)
-	UpdateTenantConnector(*tenmod.Connector) (*tenmod.Connector, error)
-	DeleteTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
-	GetTenantConnector(tenantID string, dataID string) (*tenmod.Connector, error)
-	GetAllTenantConnectors(tenantID, zone string) ([]*tenmod.Connector, error)
-	GetAllAvailableTenantConnectors(tenantID, zone string) ([]*tenmod.Connector, error)
-	GetAllTenantConnectorsByInstanceID(tenantID, instanceID string) ([]*tenmod.Connector, error)
-	GetConnectorUpdateChan() chan *tenmod.Connector
+	CreateTenantConnectorConfig(*tenmod.ConnectorConfig) (*tenmod.ConnectorConfig, error)
+	UpdateTenantConnectorConfig(*tenmod.ConnectorConfig) (*tenmod.ConnectorConfig, error)
+	DeleteTenantConnectorConfig(tenantID string, dataID string) (*tenmod.ConnectorConfig, error)
+	GetTenantConnectorConfig(tenantID string, dataID string) (*tenmod.ConnectorConfig, error)
+	GetAllTenantConnectorConfigs(tenantID, zone string) ([]*tenmod.ConnectorConfig, error)
+	GetAllAvailableTenantConnectorConfigs(tenantID, zone string) ([]*tenmod.ConnectorConfig, error)
+	GetAllTenantConnectorConfigsByInstanceID(tenantID, instanceID string) ([]*tenmod.ConnectorConfig, error)
+	GetConnectorConfigUpdateChan() chan *tenmod.ConnectorConfig
 
 	CreateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)
 	UpdateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)

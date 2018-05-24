@@ -23,9 +23,6 @@ const (
 	DomainCreated          = 10
 	DomainUpdated          = 11
 	DomainDeleted          = 12
-	ConnectorCreated       = 20
-	ConnectorUpdated       = 21
-	ConnectorDeleted       = 22
 )
 
 type ChangeEvent struct {
@@ -174,30 +171,6 @@ func NotifyMonitoredObjectUpdated(tenantID string, obj ...*tenmod.MonitoredObjec
 func NotifyMonitoredObjectDeleted(tenantID string, obj ...*tenmod.MonitoredObject) {
 	NotifyEvent(&ChangeEvent{
 		eventType: MonitoredObjectDeleted,
-		tenantID:  tenantID,
-		payload:   obj,
-	})
-}
-
-func NotifyConnectorCreated(tenantID string, obj ...*tenmod.Connector) {
-	NotifyEvent(&ChangeEvent{
-		eventType: ConnectorCreated,
-		tenantID:  tenantID,
-		payload:   obj,
-	})
-}
-
-func NotifyConnectorUpdated(tenantID string, obj ...*tenmod.Connector) {
-	NotifyEvent(&ChangeEvent{
-		eventType: ConnectorUpdated,
-		tenantID:  tenantID,
-		payload:   obj,
-	})
-}
-
-func NotifyConnectorDeleted(tenantID string, obj ...*tenmod.Connector) {
-	NotifyEvent(&ChangeEvent{
-		eventType: ConnectorDeleted,
 		tenantID:  tenantID,
 		payload:   obj,
 	})

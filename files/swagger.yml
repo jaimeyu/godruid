@@ -2321,8 +2321,7 @@ definitions:
         type: "string"
       attributes:
         $ref: '#/definitions/TenantDomainAttr'
-      relationships:
-        $ref: '#/definitions/TenantDomainRelationships'
+
   TenantDomainAttr:
     type: "object"
     properties:
@@ -2342,11 +2341,6 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  TenantDomainRelationships:
-    type: "object"
-    properties:
-      thresholdProfiles:
-        $ref: '#/definitions/JsonApiRelationship'
 
   JsonApiTenantMonitoredObject:
     type: "object"

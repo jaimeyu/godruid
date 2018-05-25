@@ -1828,7 +1828,7 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 
 	// Attempt to create a config entry in the datastore for the scheduler to pick up
 	logger.Log.Infof("Creating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
-	result, err := tsh.tenantDB.CreateReportScheduleConfig(&data)
+	result, err := tsh.TenantDB.CreateReportScheduleConfig(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateReportScheduleConfigStr, msg, http.StatusInternalServerError)
@@ -1871,7 +1871,7 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 
 	// Attempt to update a config entry in the datastore for the scheduler to pick up
 	logger.Log.Infof("Updating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
-	result, err := tsh.tenantDB.UpdateReportScheduleConfig(&data)
+	result, err := tsh.TenantDB.UpdateReportScheduleConfig(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateReportScheduleConfigStr, msg, http.StatusInternalServerError)
@@ -1894,7 +1894,7 @@ func (tsh *TenantServiceRESTHandler) GetReportScheduleConfig(w http.ResponseWrit
 
 	// Attempt to fetch the config entry from the datastore
 	logger.Log.Infof("Fetching %s: %s", metmod.ReportScheduleConfigStr, configID)
-	result, err := tsh.tenantDB.GetReportScheduleConfig(tenantID, configID)
+	result, err := tsh.TenantDB.GetReportScheduleConfig(tenantID, configID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
@@ -1916,7 +1916,7 @@ func (tsh *TenantServiceRESTHandler) GetAllReportScheduleConfigs(w http.Response
 
 	// Attempt to fetch all the config entries from the datastore
 	logger.Log.Infof("Fetching %s list for Tenant %s", metmod.ReportScheduleConfigStr, tenantID)
-	result, err := tsh.tenantDB.GetAllReportScheduleConfigs(tenantID)
+	result, err := tsh.TenantDB.GetAllReportScheduleConfigs(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllTenantUserStr, msg, http.StatusInternalServerError)
@@ -1939,7 +1939,7 @@ func (tsh *TenantServiceRESTHandler) DeleteReportScheduleConfig(w http.ResponseW
 
 	// Attempt to delete the specified configuration entry for the tenant
 	logger.Log.Infof("Deleting %s: %s", metmod.ReportScheduleConfigStr, configID)
-	result, err := tsh.tenantDB.DeleteReportScheduleConfig(tenantID, configID)
+	result, err := tsh.TenantDB.DeleteReportScheduleConfig(tenantID, configID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteReportScheduleConfigStr, msg, http.StatusInternalServerError)

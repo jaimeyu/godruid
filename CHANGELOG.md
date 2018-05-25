@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.119.0 
+**Release Date:** Thu May 24 23:55:47 UTC 2018     
+## Previous Releases 
 ### 0.118.0 
 **Release Date:** Thu May 24 21:26:46 UTC 2018     
-## Previous Releases 
 * Feature - aggregated metrics query
 ### 0.117.0 
 **Release Date:** Thu May 24 16:28:07 UTC 2018     

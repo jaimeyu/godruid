@@ -247,7 +247,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenant
+            $ref: '#/definitions/JsonApiTenant'
       tags:
         - AdminProvisioningService
   '/v1/tenant-by-alias/{value}':
@@ -1864,7 +1864,7 @@ paths:
           format: int32
       tags:
         - MetricsService
-  /v1/aggregated-metrics:
+  '/v1/aggregated-metrics':
     post:
       summary: Query metrics and perform aggregations
       operationId: QueryAggregatedMetrics
@@ -2679,7 +2679,8 @@ definitions:
       domainIds:
         type: array
         description: set of domains identifiers to use for filtering
-        items: string
+        items:
+          type: string
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
@@ -2733,7 +2734,8 @@ definitions:
     properties:
       results:
         type: array
-        items: object
+        items: 
+          type: object
 
   # Here down are Metrics Service object definitions that are currently carried over from the 
   # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation

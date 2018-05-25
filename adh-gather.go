@@ -21,6 +21,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/profile"
+	"github.com/accedian/adh-gather/websocket"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/spf13/pflag"
@@ -719,6 +720,9 @@ func main() {
 
 	// Start pprof profiler
 	go startProfile(gatherServer, cfg)
+
+	// Start websocket server
+	websocket.Server(gatherServer.tenantAPISH.TenantDB)
 
 	// modify the swagger for this deployment
 	modifySwagger(cfg)

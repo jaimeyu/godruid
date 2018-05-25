@@ -50,7 +50,7 @@ var (
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
 	ash               *AdminServiceHandler
-	tsh               *TenantServiceHandler
+	Tsh               *TenantServiceHandler
 	DefaultValidTypes *admmod.ValidTypes
 }
 
@@ -61,7 +61,7 @@ func CreateCoordinator() *GRPCServiceHandler {
 	result := new(GRPCServiceHandler)
 
 	result.ash = CreateAdminServiceHandler()
-	result.tsh = CreateTenantServiceHandler()
+	result.Tsh = CreateTenantServiceHandler()
 
 	// Setup the known values of the Valid Types for the system
 	// by using the enumerated protobuf values
@@ -192,7 +192,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 		return nil, fmt.Errorf(msg)
 	}
 
-	_, err = gsh.tsh.CreateTenantIngestionProfile(ctx, &convertedIP)
+	_, err = gsh.Tsh.CreateTenantIngestionProfile(ctx, &convertedIP)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
 		msg := fmt.Sprintf("Unable to create default Ingestion Profile %s", err.Error())
@@ -211,7 +211,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 		return nil, fmt.Errorf(msg)
 	}
 
-	threshProfileResponse, err := gsh.tsh.CreateTenantThresholdProfile(ctx, &convertedTP)
+	threshProfileResponse, err := gsh.Tsh.CreateTenantThresholdProfile(ctx, &convertedTP)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
 		msg := fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error())
@@ -231,7 +231,7 @@ func (gsh *GRPCServiceHandler) CreateTenant(ctx context.Context, tenantMeta *pb.
 		logger.Log.Error(msg)
 		return nil, fmt.Errorf(msg)
 	}
-	_, err = gsh.tsh.CreateTenantMeta(ctx, &convertedMD)
+	_, err = gsh.Tsh.CreateTenantMeta(ctx, &convertedMD)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantStr)
 		msg := fmt.Sprintf("Unable to create Tenant metadata %s", err.Error())
@@ -364,7 +364,7 @@ func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noVal
 func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateTenantUser(ctx, tenantUserReq)
+	res, err := gsh.Tsh.CreateTenantUser(ctx, tenantUserReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantUserStr)
 		return nil, err
@@ -378,7 +378,7 @@ func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserR
 func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateTenantUser(ctx, tenantUserReq)
+	res, err := gsh.Tsh.UpdateTenantUser(ctx, tenantUserReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateTenantUserStr)
 		return nil, err
@@ -392,7 +392,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserR
 func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteTenantUser(ctx, tenantUserIDReq)
+	res, err := gsh.Tsh.DeleteTenantUser(ctx, tenantUserIDReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteTenantUserStr)
 		return nil, err
@@ -406,7 +406,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserI
 func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetTenantUser(ctx, tenantUserIDReq)
+	res, err := gsh.Tsh.GetTenantUser(ctx, tenantUserIDReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetTenantUserStr)
 		return nil, err
@@ -420,7 +420,7 @@ func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDRe
 func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetAllTenantUsers(ctx, tenantID)
+	res, err := gsh.Tsh.GetAllTenantUsers(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetAllTenantUserStr)
 		return nil, err
@@ -434,7 +434,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *
 func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateTenantDomain(ctx, tenantDomainRequest)
+	res, err := gsh.Tsh.CreateTenantDomain(ctx, tenantDomainRequest)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantDomainStr)
 		return nil, err
@@ -448,7 +448,7 @@ func (gsh *GRPCServiceHandler) CreateTenantDomain(ctx context.Context, tenantDom
 func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDomainRequest *pb.TenantDomain) (*pb.TenantDomain, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateTenantDomain(ctx, tenantDomainRequest)
+	res, err := gsh.Tsh.UpdateTenantDomain(ctx, tenantDomainRequest)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateTenantDomainStr)
 		return nil, err
@@ -462,7 +462,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantDomain(ctx context.Context, tenantDom
 func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteTenantDomain(ctx, tenantDomainIDRequest)
+	res, err := gsh.Tsh.DeleteTenantDomain(ctx, tenantDomainIDRequest)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteTenantDomainStr)
 		return nil, err
@@ -476,7 +476,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantDomain(ctx context.Context, tenantDom
 func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomainIDRequest *pb.TenantDomainIdRequest) (*pb.TenantDomain, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetTenantDomain(ctx, tenantDomainIDRequest)
+	res, err := gsh.Tsh.GetTenantDomain(ctx, tenantDomainIDRequest)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetTenantDomainStr)
 		return nil, err
@@ -490,7 +490,7 @@ func (gsh *GRPCServiceHandler) GetTenantDomain(ctx context.Context, tenantDomain
 func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantDomainList, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetAllTenantDomains(ctx, tenantID)
+	res, err := gsh.Tsh.GetAllTenantDomains(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetAllTenantDomainStr)
 		return nil, err
@@ -504,7 +504,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantDomains(ctx context.Context, tenantID
 func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateTenantIngestionProfile(ctx, tenantIngPrfReq)
+	res, err := gsh.Tsh.CreateTenantIngestionProfile(ctx, tenantIngPrfReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateIngPrfStr)
 		return nil, err
@@ -518,7 +518,7 @@ func (gsh *GRPCServiceHandler) CreateTenantIngestionProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context, tenantIngPrfReq *pb.TenantIngestionProfile) (*pb.TenantIngestionProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateTenantIngestionProfile(ctx, tenantIngPrfReq)
+	res, err := gsh.Tsh.UpdateTenantIngestionProfile(ctx, tenantIngPrfReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateIngPrfStr)
 		return nil, err
@@ -532,7 +532,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantIngestionProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetTenantIngestionProfile(ctx, tenantID)
+	res, err := gsh.Tsh.GetTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetIngPrfStr)
 		return nil, err
@@ -546,7 +546,7 @@ func (gsh *GRPCServiceHandler) GetTenantIngestionProfile(ctx context.Context, te
 func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantIngestionProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetActiveTenantIngestionProfile(ctx, tenantID)
+	res, err := gsh.Tsh.GetActiveTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetActiveIngPrfStr)
 		return nil, err
@@ -560,7 +560,7 @@ func (gsh *GRPCServiceHandler) GetActiveTenantIngestionProfile(ctx context.Conte
 func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context, tenantID *pb.TenantIngestionProfileIdRequest) (*pb.TenantIngestionProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteTenantIngestionProfile(ctx, tenantID)
+	res, err := gsh.Tsh.DeleteTenantIngestionProfile(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteIngPrfStr)
 		return nil, err
@@ -574,7 +574,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantIngestionProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
+	res, err := gsh.Tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateThrPrfStr)
 		return nil, err
@@ -588,7 +588,7 @@ func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context, tenantThreshPrfReq *pb.TenantThresholdProfile) (*pb.TenantThresholdProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
+	res, err := gsh.Tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateThrPrfStr)
 		return nil, err
@@ -602,7 +602,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetTenantThresholdProfile(ctx, tenantID)
+	res, err := gsh.Tsh.GetTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetThrPrfStr)
 		return nil, err
@@ -616,7 +616,7 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context, tenantID *pb.TenantThresholdProfileIdRequest) (*pb.TenantThresholdProfile, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteTenantThresholdProfile(ctx, tenantID)
+	res, err := gsh.Tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteThrPrfStr)
 		return nil, err
@@ -630,7 +630,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context,
 func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantThresholdProfileList, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
+	res, err := gsh.Tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetAllThrPrfStr)
 		return nil, err
@@ -644,7 +644,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context
 func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
+	res, err := gsh.Tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateMonObjStr)
 		return nil, err
@@ -658,7 +658,7 @@ func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monito
 func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monitoredObjectReq *pb.MonitoredObject) (*pb.MonitoredObject, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
+	res, err := gsh.Tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateMonObjStr)
 		return nil, err
@@ -672,7 +672,7 @@ func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monito
 func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
+	res, err := gsh.Tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetMonObjStr)
 		return nil, err
@@ -686,7 +686,7 @@ func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitored
 func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monitoredObjectIDReq *pb.MonitoredObjectIdRequest) (*pb.MonitoredObject, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
+	res, err := gsh.Tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteMonObjStr)
 		return nil, err
@@ -700,7 +700,7 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenantID *wr.StringValue) (*pb.MonitoredObjectList, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetAllMonitoredObjects(ctx, tenantID)
+	res, err := gsh.Tsh.GetAllMonitoredObjects(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetAllMonObjStr)
 		return nil, err
@@ -715,7 +715,7 @@ func (gsh *GRPCServiceHandler) GetAllMonitoredObjects(ctx context.Context, tenan
 func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context, moByDomReq *pb.MonitoredObjectCountByDomainRequest) (*pb.MonitoredObjectCountByDomainResponse, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetMonitoredObjectToDomainMap(ctx, moByDomReq)
+	res, err := gsh.Tsh.GetMonitoredObjectToDomainMap(ctx, moByDomReq)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetMonObjToDomMapStr)
 		return nil, err
@@ -729,7 +729,7 @@ func (gsh *GRPCServiceHandler) GetMonitoredObjectToDomainMap(ctx context.Context
 func (gsh *GRPCServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.CreateTenantMeta(ctx, meta)
+	res, err := gsh.Tsh.CreateTenantMeta(ctx, meta)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.CreateTenantMetaStr)
 		return nil, err
@@ -743,7 +743,7 @@ func (gsh *GRPCServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.Te
 func (gsh *GRPCServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.TenantMetadata) (*pb.TenantMetadata, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.UpdateTenantMeta(ctx, meta)
+	res, err := gsh.Tsh.UpdateTenantMeta(ctx, meta)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.UpdateTenantMetaStr)
 		return nil, err
@@ -757,7 +757,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantMeta(ctx context.Context, meta *pb.Te
 func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.DeleteTenantMeta(ctx, tenantID)
+	res, err := gsh.Tsh.DeleteTenantMeta(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.DeleteTenantMetaStr)
 		return nil, err
@@ -771,7 +771,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID *w
 func (gsh *GRPCServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.GetTenantMeta(ctx, tenantID)
+	res, err := gsh.Tsh.GetTenantMeta(ctx, tenantID)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetTenantMetaStr)
 		return nil, err
@@ -898,7 +898,7 @@ func (gsh *GRPCServiceHandler) DeleteValidTypes(ctx context.Context, noValue *em
 func (gsh *GRPCServiceHandler) BulkInsertMonitoredObjects(ctx context.Context, value *pb.TenantMonitoredObjectSet) (*pb.BulkOperationResponse, error) {
 	startTime := time.Now()
 
-	res, err := gsh.tsh.BulkInsertMonitoredObjects(ctx, value)
+	res, err := gsh.Tsh.BulkInsertMonitoredObjects(ctx, value)
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.BulkUpdateMonObjStr)
 		return nil, err

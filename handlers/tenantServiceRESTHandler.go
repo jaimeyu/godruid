@@ -18,7 +18,7 @@ import (
 
 // TenantServiceRESTHandler - handler of logic for REST calls made to the Tenant Service.
 type TenantServiceRESTHandler struct {
-	tenantDB db.TenantServiceDatastore
+	TenantDB db.TenantServiceDatastore
 	routes   []server.Route
 	notifH   *ChangeNotificationHandler
 }
@@ -33,7 +33,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceRESTHandler: %s", err.Error())
 	}
-	result.tenantDB = tdb
+	result.TenantDB = tdb
 	result.notifH = getChangeNotificationHandler()
 
 	result.routes = []server.Route{
@@ -108,6 +108,36 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "domain-list",
 			HandlerFunc: result.GetAllTenantDomains,
+		},
+		server.Route{
+			Name:        "CreateTenantConnectorConfig",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-configs",
+			HandlerFunc: result.CreateTenantConnectorConfig,
+		},
+		server.Route{
+			Name:        "UpdateTenantConnectorConfig",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-configs",
+			HandlerFunc: result.UpdateTenantConnectorConfig,
+		},
+		server.Route{
+			Name:        "GetTenantConnectorConfig",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-configs/{connectorID}",
+			HandlerFunc: result.GetTenantConnectorConfig,
+		},
+		server.Route{
+			Name:        "DeleteTenantConnectorConfig",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-configs/{connectorID}",
+			HandlerFunc: result.DeleteTenantConnectorConfig,
+		},
+		server.Route{
+			Name:        "GetAllTenantConnectorConfigs",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-config-list",
+			HandlerFunc: result.GetAllTenantConnectorConfigs,
 		},
 		server.Route{
 			Name:        "CreateTenantIngestionProfile",
@@ -307,7 +337,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantUser(w http.ResponseWriter, r *
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantUser(&data)
+	result, err := tsh.TenantDB.CreateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantUserStr, msg, http.StatusInternalServerError)
@@ -346,7 +376,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	}
 
 	// Issue request to DAO Layer
-	oldData, err := tsh.tenantDB.GetTenantUser(data.TenantID, data.ID)
+	oldData, err := tsh.TenantDB.GetTenantUser(data.TenantID, data.ID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.GetTenantUserStr, msg, http.StatusInternalServerError)
@@ -371,7 +401,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 	logger.Log.Infof("Patching %s: %s", tenmod.TenantUserStr, oldData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantUser(oldData)
+	result, err := tsh.TenantDB.UpdateTenantUser(oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
@@ -411,7 +441,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantUser(w http.ResponseWriter, r *
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantUserStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantUser(&data)
+	result, err := tsh.TenantDB.UpdateTenantUser(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
@@ -432,7 +462,7 @@ func (tsh *TenantServiceRESTHandler) GetTenantUser(w http.ResponseWriter, r *htt
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantUserStr, userID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetTenantUser(tenantID, userID)
+	result, err := tsh.TenantDB.GetTenantUser(tenantID, userID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.GetTenantUserStr, msg, http.StatusInternalServerError)
@@ -453,7 +483,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantUser(w http.ResponseWriter, r *
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantUserStr, userID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteTenantUser(tenantID, userID)
+	result, err := tsh.TenantDB.DeleteTenantUser(tenantID, userID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteTenantUserStr, msg, http.StatusInternalServerError)
@@ -472,7 +502,7 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantUsers(w http.ResponseWriter, r 
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantUserStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetAllTenantUsers(tenantID)
+	result, err := tsh.TenantDB.GetAllTenantUsers(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllTenantUserStr, msg, http.StatusInternalServerError)
@@ -480,6 +510,154 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantUsers(w http.ResponseWriter, r 
 	}
 
 	sendSuccessResponse(result, w, startTime, mon.GetAllTenantUserStr, tenmod.TenantUserStr, "Retrieved list of")
+}
+
+// CreateTenantConnectorConfig - creates a tenant ConnectorConfig
+func (tsh *TenantServiceRESTHandler) CreateTenantConnectorConfig(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.ConnectorConfig{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(false)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Creating %s: %s", tenmod.TenantConnectorConfigStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.CreateTenantConnectorConfig(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantConnectorConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateTenantConnectorConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.CreateTenantConnectorConfigStr, tenmod.TenantConnectorConfigStr, "Created")
+}
+
+// UpdateTenantConnectorConfig - updates a tenant ConnectorConfig
+func (tsh *TenantServiceRESTHandler) UpdateTenantConnectorConfig(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Unmarshal the request
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	data := tenmod.ConnectorConfig{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	err = data.Validate(true)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.UpdateTenantConnectorConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantConnectorConfigStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.UpdateTenantConnectorConfig(&data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantConnectorConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.UpdateTenantConnectorConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.UpdateTenantConnectorConfigStr, tenmod.TenantConnectorConfigStr, "Updated")
+}
+
+// GetTenantConnectorConfig - fetches a tenant ConnectorConfig
+func (tsh *TenantServiceRESTHandler) GetTenantConnectorConfig(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantConnectorConfigStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.GetTenantConnectorConfig(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantConnectorConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.GetTenantConnectorConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetTenantConnectorConfigStr, tenmod.TenantConnectorConfigStr, "Retrieved")
+}
+
+// DeleteTenantConnectorConfig - deletes a tenant ConnectorConfig
+func (tsh *TenantServiceRESTHandler) DeleteTenantConnectorConfig(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	userID := getDBFieldFromRequest(r, 6)
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantConnectorConfigStr, userID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.DeleteTenantConnectorConfig(tenantID, userID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantConnectorConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantConnectorConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.DeleteTenantConnectorConfigStr, tenmod.TenantConnectorConfigStr, "Deleted")
+}
+
+// GetAllTenantConnectorConfigs - fetches list of tenant ConnectorConfigs
+func (tsh *TenantServiceRESTHandler) GetAllTenantConnectorConfigs(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+	zones := r.URL.Query()["zone"]
+	zone := ""
+
+	if len(zones) > 0 {
+		zone = zones[0]
+	}
+
+	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantConnectorConfigStr, tenantID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantConnectorConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.GetAllTenantConnectorConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetAllTenantConnectorConfigStr, tenmod.TenantConnectorConfigStr, "Retrieved list of")
 }
 
 // CreateTenantDomain - creates a tenant domain
@@ -512,7 +690,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantDomain(w http.ResponseWriter, r
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantDomain(&data)
+	result, err := tsh.TenantDB.CreateTenantDomain(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantDomainStr, msg, http.StatusInternalServerError)
@@ -553,7 +731,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantDomain(w http.ResponseWriter, r
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantDomainStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantDomain(&data)
+	result, err := tsh.TenantDB.UpdateTenantDomain(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantDomainStr, msg, http.StatusInternalServerError)
@@ -612,7 +790,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantDomainStr, domainID)
 
 	// Issue request to DAO Layer
-	oldDomain, err := tsh.tenantDB.GetTenantDomain(tenantID, domainID)
+	oldDomain, err := tsh.TenantDB.GetTenantDomain(tenantID, domainID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
@@ -637,7 +815,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 	logger.Log.Infof("Patching %s: %s", opStr, oldDomain)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantDomain(oldDomain)
+	result, err := tsh.TenantDB.UpdateTenantDomain(oldDomain)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -659,7 +837,7 @@ func (tsh *TenantServiceRESTHandler) GetTenantDomain(w http.ResponseWriter, r *h
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantDomainStr, userID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetTenantDomain(tenantID, userID)
+	result, err := tsh.TenantDB.GetTenantDomain(tenantID, userID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.GetTenantDomainStr, msg, http.StatusInternalServerError)
@@ -680,7 +858,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, userID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteTenantDomain(tenantID, userID)
+	result, err := tsh.TenantDB.DeleteTenantDomain(tenantID, userID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
@@ -700,7 +878,7 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantDomains(w http.ResponseWriter, 
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantDomainStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetAllTenantDomains(tenantID)
+	result, err := tsh.TenantDB.GetAllTenantDomains(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllTenantDomainStr, msg, http.StatusInternalServerError)
@@ -740,7 +918,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantIngestionProfile(w http.Respons
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantIngestionProfile(&data)
+	result, err := tsh.TenantDB.CreateTenantIngestionProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateIngPrfStr, msg, http.StatusInternalServerError)
@@ -778,7 +956,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 		return
 	}
 
-	origData, err2 := tsh.tenantDB.GetTenantIngestionProfile(data.TenantID, data.ID)
+	origData, err2 := tsh.TenantDB.GetTenantIngestionProfile(data.TenantID, data.ID)
 	if err2 != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
@@ -795,7 +973,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 	logger.Log.Infof("Patching%s: %s", tenmod.TenantIngestionProfileStr, origData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(origData)
+	result, err := tsh.TenantDB.UpdateTenantIngestionProfile(origData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -835,7 +1013,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantIngestionProfile(w http.Respons
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantIngestionProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantIngestionProfile(&data)
+	result, err := tsh.TenantDB.UpdateTenantIngestionProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateIngPrfStr, msg, http.StatusInternalServerError)
@@ -856,7 +1034,7 @@ func (tsh *TenantServiceRESTHandler) GetTenantIngestionProfile(w http.ResponseWr
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantIngestionProfileStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetTenantIngestionProfile(tenantID, dataID)
+	result, err := tsh.TenantDB.GetTenantIngestionProfile(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.GetIngPrfStr, msg, http.StatusInternalServerError)
@@ -877,7 +1055,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantIngestionProfile(w http.Respons
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantIngestionProfileStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteTenantIngestionProfile(tenantID, dataID)
+	result, err := tsh.TenantDB.DeleteTenantIngestionProfile(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteIngPrfStr, msg, http.StatusInternalServerError)
@@ -897,7 +1075,7 @@ func (tsh *TenantServiceRESTHandler) GetActiveTenantIngestionProfile(w http.Resp
 	logger.Log.Infof("Fetching active %s for Tenant %s", tenmod.TenantIngestionProfileStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetActiveTenantIngestionProfile(tenantID)
+	result, err := tsh.TenantDB.GetActiveTenantIngestionProfile(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.GetActiveIngPrfStr, msg, http.StatusInternalServerError)
@@ -937,7 +1115,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantThresholdProfile(w http.Respons
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantThresholdProfile(&data)
+	result, err := tsh.TenantDB.CreateTenantThresholdProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateThrPrfStr, msg, http.StatusInternalServerError)
@@ -975,7 +1153,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 		return
 	}
 
-	origData, err2 := tsh.tenantDB.GetTenantThresholdProfile(data.TenantID, data.ID)
+	origData, err2 := tsh.TenantDB.GetTenantThresholdProfile(data.TenantID, data.ID)
 	if err2 != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
@@ -992,7 +1170,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, origData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(origData)
+	result, err := tsh.TenantDB.UpdateTenantThresholdProfile(origData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1032,7 +1210,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantThresholdProfile(w http.Respons
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantThresholdProfile(&data)
+	result, err := tsh.TenantDB.UpdateTenantThresholdProfile(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateThrPrfStr, msg, http.StatusInternalServerError)
@@ -1053,7 +1231,7 @@ func (tsh *TenantServiceRESTHandler) GetTenantThresholdProfile(w http.ResponseWr
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantThresholdProfileStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetTenantThresholdProfile(tenantID, dataID)
+	result, err := tsh.TenantDB.GetTenantThresholdProfile(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.GetThrPrfStr, msg, http.StatusInternalServerError)
@@ -1074,7 +1252,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantThresholdProfile(w http.Respons
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantThresholdProfileStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteTenantThresholdProfile(tenantID, dataID)
+	result, err := tsh.TenantDB.DeleteTenantThresholdProfile(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteThrPrfStr, msg, http.StatusInternalServerError)
@@ -1093,7 +1271,7 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantThresholdProfiles(w http.Respon
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantThresholdProfileStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetAllTenantThresholdProfile(tenantID)
+	result, err := tsh.TenantDB.GetAllTenantThresholdProfile(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllThrPrfStr, msg, http.StatusInternalServerError)
@@ -1133,7 +1311,7 @@ func (tsh *TenantServiceRESTHandler) CreateMonitoredObject(w http.ResponseWriter
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateMonitoredObject(&data)
+	result, err := tsh.TenantDB.CreateMonitoredObject(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateMonObjStr, msg, http.StatusInternalServerError)
@@ -1173,7 +1351,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	}
 
 	// Issue request to DAO Layer
-	oldData, err := tsh.tenantDB.GetMonitoredObject(data.TenantID, data.ID)
+	oldData, err := tsh.TenantDB.GetMonitoredObject(data.TenantID, data.ID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1198,7 +1376,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateMonitoredObject(oldData)
+	result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1239,7 +1417,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateMonitoredObject(&data)
+	result, err := tsh.TenantDB.UpdateMonitoredObject(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
@@ -1261,7 +1439,7 @@ func (tsh *TenantServiceRESTHandler) GetMonitoredObject(w http.ResponseWriter, r
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetMonitoredObject(tenantID, dataID)
+	result, err := tsh.TenantDB.GetMonitoredObject(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
@@ -1282,7 +1460,7 @@ func (tsh *TenantServiceRESTHandler) DeleteMonitoredObject(w http.ResponseWriter
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteMonitoredObject(tenantID, dataID)
+	result, err := tsh.TenantDB.DeleteMonitoredObject(tenantID, dataID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteMonObjStr, msg, http.StatusInternalServerError)
@@ -1301,7 +1479,7 @@ func (tsh *TenantServiceRESTHandler) GetAllMonitoredObjects(w http.ResponseWrite
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetAllMonitoredObjects(tenantID)
+	result, err := tsh.TenantDB.GetAllMonitoredObjects(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllMonObjStr, msg, http.StatusInternalServerError)
@@ -1330,7 +1508,7 @@ func (tsh *TenantServiceRESTHandler) GetMonitoredObjectToDomainMap(w http.Respon
 	logger.Log.Infof("Fetching %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, data.TenantID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetMonitoredObjectToDomainMap(&data)
+	result, err := tsh.TenantDB.GetMonitoredObjectToDomainMap(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s : %s", tenmod.MonitoredObjectToDomainMapStr, err.Error())
 		reportError(w, startTime, "500", mon.GetMonObjToDomMapStr, msg, http.StatusInternalServerError)
@@ -1379,7 +1557,7 @@ func (tsh *TenantServiceRESTHandler) CreateTenantMeta(w http.ResponseWriter, r *
 	logger.Log.Infof("Creating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.CreateTenantMeta(&data)
+	result, err := tsh.TenantDB.CreateTenantMeta(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.CreateTenantMetaStr, msg, http.StatusInternalServerError)
@@ -1418,7 +1596,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 	}
 
 	// Issue request to DAO Layer
-	oldData, err := tsh.tenantDB.GetTenantMeta(data.TenantID)
+	oldData, err := tsh.TenantDB.GetTenantMeta(data.TenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1442,7 +1620,7 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 	logger.Log.Infof("Patching %s: %s", tenmod.TenantMetaStr, oldData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantMeta(oldData)
+	result, err := tsh.TenantDB.UpdateTenantMeta(oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1482,7 +1660,7 @@ func (tsh *TenantServiceRESTHandler) UpdateTenantMeta(w http.ResponseWriter, r *
 	logger.Log.Infof("Updating %s: %s", tenmod.TenantMetaStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.UpdateTenantMeta(&data)
+	result, err := tsh.TenantDB.UpdateTenantMeta(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantMetaStr, msg, http.StatusInternalServerError)
@@ -1502,7 +1680,7 @@ func (tsh *TenantServiceRESTHandler) GetTenantMeta(w http.ResponseWriter, r *htt
 	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMetaStr)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.GetTenantMeta(tenantID)
+	result, err := tsh.TenantDB.GetTenantMeta(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.GetTenantMetaStr, msg, http.StatusInternalServerError)
@@ -1522,7 +1700,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantMeta(w http.ResponseWriter, r *
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantMetaStr)
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.DeleteTenantMeta(tenantID)
+	result, err := tsh.TenantDB.DeleteTenantMeta(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteTenantMetaStr, msg, http.StatusInternalServerError)
@@ -1563,7 +1741,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	logger.Log.Infof("Bulk instering %ss: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
-	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(tenantID, data)
+	result, err := tsh.TenantDB.BulkInsertMonitoredObjects(tenantID, data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.BulkUpdateMonObjStr, msg, http.StatusInternalServerError)

@@ -20,6 +20,21 @@ type TenantServiceDatastore interface {
 	GetTenantDomain(tenantID string, dataID string) (*tenmod.Domain, error)
 	GetAllTenantDomains(string) ([]*tenmod.Domain, error)
 
+	CreateTenantConnectorConfig(*tenmod.ConnectorConfig) (*tenmod.ConnectorConfig, error)
+	UpdateTenantConnectorConfig(*tenmod.ConnectorConfig) (*tenmod.ConnectorConfig, error)
+	DeleteTenantConnectorConfig(tenantID string, dataID string) (*tenmod.ConnectorConfig, error)
+	GetTenantConnectorConfig(tenantID string, dataID string) (*tenmod.ConnectorConfig, error)
+	GetAllTenantConnectorConfigs(tenantID, zone string) ([]*tenmod.ConnectorConfig, error)
+	GetAllAvailableTenantConnectorConfigs(tenantID, zone string) ([]*tenmod.ConnectorConfig, error)
+	GetAllTenantConnectorConfigsByInstanceID(tenantID, instanceID string) ([]*tenmod.ConnectorConfig, error)
+	GetConnectorConfigUpdateChan() chan *tenmod.ConnectorConfig
+
+	CreateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)
+	UpdateTenantConnectorInstance(*tenmod.ConnectorInstance) (*tenmod.ConnectorInstance, error)
+	DeleteTenantConnectorInstance(tenantID string, dataID string) (*tenmod.ConnectorInstance, error)
+	GetTenantConnectorInstance(tenantID string, dataID string) (*tenmod.ConnectorInstance, error)
+	GetAllTenantConnectorInstances(tenantID string) ([]*tenmod.ConnectorInstance, error)
+
 	CreateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
 	UpdateTenantIngestionProfile(*tenmod.IngestionProfile) (*tenmod.IngestionProfile, error)
 	GetTenantIngestionProfile(tenantID string, dataID string) (*tenmod.IngestionProfile, error)

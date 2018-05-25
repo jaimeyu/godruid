@@ -596,6 +596,134 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-configs:
+    post:
+      summary: Create a ConnectorConfig for a Tenant.
+      operationId: CreateTenantConnectorConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant ConnectorConfig
+      operationId: UpdateTenantConnectorConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/connector-configs/{connectorId}':
+    get:
+      summary: Retrieve a Tenant ConnectorConfig by Id.
+      operationId: GetTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: DeleteTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-config-list:
+    get:
+      summary: Retrieve all ConnectorConfigs for the specified Tenant.
+      operationId: GetAllTenantConnectorConfigs
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfigList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningService
   /v1/tenants/{tenantId}/domains:
     post:
       summary: Create a Domain for a Tenant.
@@ -2107,6 +2235,70 @@ definitions:
       id:
         type: "string"
 
+  JsonApiTenantConnectorConfig:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantConnectorConfig'
+  TenantConnectorConfig:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [domains]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantConnectorConfigAttr'
+      relationships:
+        $ref: '#/definitions/TenantConnectorConfigRelationships'
+  TenantConnectorConfigAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      url: 
+        type: "string"
+      port:
+        type: "integer"
+      pollingFrequency:
+        type: "integer"
+      username:
+        type: "string"
+      password:
+        type: "string"
+      exportGroup:
+        type: "string"
+      datahubHeartbeatFrequency:
+        type: "integer"
+      datahubConnectionRetryFrequency:
+        type: "integer"
+      type:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantConnectorConfigRelationships:
+    type: "object"
+    properties:
+      thresholdProfiles:
+        $ref: '#/definitions/JsonApiRelationship'
   JsonApiTenantDomain:
     type: "object"
     properties:

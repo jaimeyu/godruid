@@ -139,6 +139,34 @@ func getByDocIDWithQueryParams(docID string, dataTypeStrForLogging string, db *c
 	return fetchedData, nil
 }
 
+// getAvailableConfigs - Returns all tenant connectors matching tenantID, zone, that aren't already being used
+func getAvailableConfigs(dataType, attr, value, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
+	logger.Log.Debugf("Attempting to retrieve all available %ss in %s %s\n", dataTypeStrForLogging, attr, value)
+
+	selector := fmt.Sprintf(`data.%s == "%s" && data.datatype == "%s" && data.connectorInstanceId == ""`, attr, value, dataType)
+	fetchedData, err := db.Query(nil, selector, nil, defaultQueryResultsLimit, nil, nil)
+	if err != nil {
+		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		return nil, err
+	}
+
+	return fetchedData, nil
+}
+
+// GetAllOfAny - retrieves a list of data of the specified attribute and value, along with the specified dataType from the couchDB instance.
+func getAllOfAny(dataType, attr, value, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
+	logger.Log.Debugf("Attempting to retrieve all %ss in %s %s\n", dataTypeStrForLogging, attr, value)
+
+	selector := fmt.Sprintf(`data.%s == "%s" && data.datatype == "%s"`, attr, value, dataType)
+	fetchedData, err := db.Query(nil, selector, nil, defaultQueryResultsLimit, nil, nil)
+	if err != nil {
+		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		return nil, err
+	}
+
+	return fetchedData, nil
+}
+
 // GetAllOfType - retrieves a list of data of the specified dataType from the couchDB instance.
 func getAllOfType(dataType string, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
 	logger.Log.Debugf("Attempting to retrieve all %ss\n", dataTypeStrForLogging)

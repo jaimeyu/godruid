@@ -11,28 +11,32 @@ const (
 	// GatherMetricPrefix - prefix used for all metrics emmitted from gather
 	GatherMetricPrefix = "gather"
 
-	TenantStr              = "tenant"
-	AdminUserStr           = "admin_user"
-	IngestionDictionaryStr = "ing_dict"
-	IngestionProfileStr    = "ing_prf"
-	TenantUserStr          = "tenant_user"
-	TenantDomainStr        = "domain"
-	ThresholdProfileStr    = "thr_prf"
-	MonitoredObjectStr     = "mon_obj"
-	ThrCrossStr            = "thr_cross"
-	ThrCrossStrTopN        = "thr_cross_topn"
-	HistogramStr           = "histogram"
-	RawMetricStr           = "raw_metric"
-	SLAReportStr           = "sla_report"
-	TenantMetaStr          = "tenant_meta"
-	ReportSchedConfigStr   = "report_sched_conf"
-	AdminViewsStr          = "admin_views"
-	ValidTypesStr          = "valid_types"
+	TenantStr                = "tenant"
+	AdminUserStr             = "admin_user"
+	IngestionDictionaryStr   = "ing_dict"
+	IngestionProfileStr      = "ing_prf"
+	TenantUserStr            = "tenant_user"
+	TenantDomainStr          = "domain"
+	ThresholdProfileStr      = "thr_prf"
+	MonitoredObjectStr       = "mon_obj"
+	ThrCrossStr              = "thr_cross"
+	ThrCrossStrTopN          = "thr_cross_topn"
+	HistogramStr             = "histogram"
+	RawMetricStr             = "raw_metric"
+	SLAReportStr             = "sla_report"
+	TenantMetaStr            = "tenant_meta"
+	ReportSchedConfigStr     = "report_sched_conf"
+	AdminViewsStr            = "admin_views"
+	ValidTypesStr            = "valid_types"
+	AggMetricsStr            = "aggr_metrics"
+	TenantConnectorConfigStr = "connector_config"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
 	// OPUpdateStr - metric constant for an update operation
 	OPUpdateStr = "update"
+	// OPPatchStr - metric constant for a patch operation
+	OPPatchStr = "patch"
 	// OPGetStr - metric constant for a get operation
 	OPGetStr = "get"
 	// OPDeleteStr - metric constant for a delete operation
@@ -58,6 +62,7 @@ const (
 	CreateTenantStr = TenantStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantStr = TenantStr + metricNameDelimiter + OPUpdateStr
 	GetTenantStr    = TenantStr + metricNameDelimiter + OPGetStr
+	PatchTenantStr  = TenantStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantStr = TenantStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantStr = TenantStr + metricNameDelimiter + OPGetAllStr
 
@@ -75,30 +80,41 @@ const (
 	CreateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPUpdateStr
 	GetIngPrfStr       = IngestionProfileStr + metricNameDelimiter + OPGetStr
+	PatchIngPrfStr     = IngestionProfileStr + metricNameDelimiter + OPPatchStr
 	GetActiveIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPGetActiveStr
 	DeleteIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPDeleteStr
 
 	CreateTenantUserStr = TenantUserStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantUserStr = TenantUserStr + metricNameDelimiter + OPUpdateStr
 	GetTenantUserStr    = TenantUserStr + metricNameDelimiter + OPGetStr
+	PatchTenantUserStr  = TenantUserStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantUserStr = TenantUserStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantUserStr = TenantUserStr + metricNameDelimiter + OPGetAllStr
 
 	CreateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPUpdateStr
 	GetTenantDomainStr    = TenantDomainStr + metricNameDelimiter + OPGetStr
+	PatchTenantDomainStr  = TenantDomainStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantDomainStr = TenantDomainStr + metricNameDelimiter + OPGetAllStr
+
+	CreateTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPUpdateStr
+	GetTenantConnectorConfigStr    = TenantConnectorConfigStr + metricNameDelimiter + OPGetStr
+	DeleteTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPDeleteStr
+	GetAllTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPGetAllStr
 
 	CreateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPUpdateStr
 	GetThrPrfStr    = ThresholdProfileStr + metricNameDelimiter + OPGetStr
+	PatchThrPrfStr  = ThresholdProfileStr + metricNameDelimiter + OPPatchStr
 	GetAllThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPGetAllStr
 	DeleteThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPDeleteStr
 
 	CreateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPCreateStr
 	UpdateMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPUpdateStr
 	GetMonObjStr         = MonitoredObjectStr + metricNameDelimiter + OPGetStr
+	PatchMonObjStr       = MonitoredObjectStr + metricNameDelimiter + OPPatchStr
 	GetAllMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPGetAllStr
 	DeleteMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPDeleteStr
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
@@ -109,10 +125,12 @@ const (
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
 	GetSLAReportStr            = SLAReportStr + metricNameDelimiter + OPGetStr
+	QueryAggregatedMetricsStr  = AggMetricsStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
 	GetTenantMetaStr    = TenantMetaStr + metricNameDelimiter + OPGetStr
+	PatchTenantMetaStr  = TenantMetaStr + metricNameDelimiter + OPPatchStr
 	DeleteTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPDeleteStr
 
 	CreateReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPCreateStr

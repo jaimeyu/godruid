@@ -42,14 +42,32 @@ func trimAndLowercase(s string) string {
 }
 
 // GetDataIDFromFullID - returns just the hash portion of an ID from the full ID.
+// Note that for monitoredObjects, a hash is not stored in the ID field.
+// The datatype is appended by a name passed in through ingestion and may have
+// underscores in its name. There was a bug in the previous logic that incorrectly
+// stripped all substrings prepended with _.
+// The fix here is to find the index of the _FIRST TWO_ underscores in the fullID string.
+// Then only providing the slice AFTER the second underscore.
+// The behaviour here is based on the fact we prepend the unique ID with the
+// document's data type, eg: 'monitoredObject_2_'. See #GenerateID() on the actual behavior.
 func GetDataIDFromFullID(fullID string) string {
-	parts := strings.Split(fullID, "_")
-
-	if len(parts) == 0 {
+	const OFFSET int = 2
+	const UNDERSCORE string = "_"
+	if len(fullID) == 0 {
 		return ""
 	}
+	loc1 := strings.Index(fullID, UNDERSCORE)
+	if loc1 < 0 {
+		return fullID
+	}
+	loc2 := strings.Index(fullID[loc1+1:], UNDERSCORE)
+	if loc2 < 0 {
+		return fullID
+	}
 
-	return parts[len(parts)-1]
+	stripIdx := loc1 + loc2 + OFFSET
+	stripped := fullID[stripIdx:]
+	return stripped
 }
 
 // PrependToDataID - generates a full ID from the dataID and the dataType

@@ -222,6 +222,34 @@ paths:
           type: string
       tags:
         - AdminProvisioningService
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+      tags:
+        - AdminProvisioningService
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.
@@ -445,6 +473,34 @@ paths:
             $ref: '#/definitions/JsonApiTenantUser'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Update a Tenant User
+      operationId: PatchTenantUser
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantUser'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantUser'
+      tags:
+        - TenantProvisioningService
     put:
       summary: Update a Tenant User
       operationId: UpdateTenantUser
@@ -540,10 +596,10 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  /v1/tenants/{tenantId}/domains:
+  /v1/tenants/{tenantId}/connector-configs:
     post:
-      summary: Create a Domain for a Tenant.
-      operationId: CreateTenantDomain
+      summary: Create a ConnectorConfig for a Tenant.
+      operationId: CreateTenantConnectorConfig
       consumes:
         - application/vnd.api+json
       produces:
@@ -552,7 +608,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '400':
           description: "Request data does not pass validation"
         '500':
@@ -566,12 +622,112 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
       tags:
         - TenantProvisioningService
     put:
-      summary: Update a Tenant Domain
-      operationId: UpdateTenantDomain
+      summary: Update a Tenant ConnectorConfig
+      operationId: UpdateTenantConnectorConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/connector-configs/{connectorId}':
+    get:
+      summary: Retrieve a Tenant ConnectorConfig by Id.
+      operationId: GetTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: DeleteTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-config-list:
+    get:
+      summary: Retrieve all ConnectorConfigs for the specified Tenant.
+      operationId: GetAllTenantConnectorConfigs
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfigList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/domains:
+    post:
+      summary: Create a Domain for a Tenant.
+      operationId: CreateTenantDomain
       consumes:
         - application/vnd.api+json
       produces:
@@ -765,6 +921,70 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+    put:
+      summary: Update a Tenant Domain
+      operationId: UpdateTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch update a Tenant Domain
+      operationId: PatchTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'Successfully patched tenant domain.'
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
     delete:
       summary: Delete a Tenant Domain specified by the provided Domain Id.
       operationId: DeleteTenantDomain
@@ -792,6 +1012,34 @@ paths:
     post:
       summary: Create an Ingestion Profile for a Tenant.
       operationId: CreateIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Ingestion Profile
+      operationId: PatchTenantIngestionProfile
       consumes:
         - application/vnd.api+json
       produces:
@@ -941,6 +1189,34 @@ paths:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Threshold Profile
+      operationId: PatchTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
     put:
       summary: Update a Tenant Threshold Profile
       operationId: UpdateTenantThresholdProfile
@@ -1040,6 +1316,34 @@ paths:
     post:
       summary: Create a Monitored Object for a Tenant.
       operationId: CreateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Monitored Object
+      operationId: PatchTenantMonitoredObject
       consumes:
         - application/vnd.api+json
       produces:
@@ -1245,6 +1549,35 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
       tags:
         - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Metadata record
+      operationId: Patch TenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+
     put:
       summary: Update a Tenant Metadata record
       operationId: UpdateTenantMetadata
@@ -1655,6 +1988,32 @@ paths:
           format: int32
       tags:
         - MetricsService
+  '/v1/aggregated-metrics':
+    post:
+      summary: Query metrics and perform aggregations
+      operationId: QueryAggregatedMetrics
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricResultsResponseObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AggregateMetricsAPIRequestObject'
+      tags:
+        - MetricsService
+
   /v1/sla-report:
     get:
       summary: Generate an SLA Report.
@@ -2000,6 +2359,70 @@ definitions:
       id:
         type: "string"
 
+  JsonApiTenantConnectorConfig:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantConnectorConfig'
+  TenantConnectorConfig:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [domains]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantConnectorConfigAttr'
+      relationships:
+        $ref: '#/definitions/TenantConnectorConfigRelationships'
+  TenantConnectorConfigAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      url: 
+        type: "string"
+      port:
+        type: "integer"
+      pollingFrequency:
+        type: "integer"
+      username:
+        type: "string"
+      password:
+        type: "string"
+      exportGroup:
+        type: "string"
+      datahubHeartbeatFrequency:
+        type: "integer"
+      datahubConnectionRetryFrequency:
+        type: "integer"
+      type:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantConnectorConfigRelationships:
+    type: "object"
+    properties:
+      thresholdProfiles:
+        $ref: '#/definitions/JsonApiRelationship'
   JsonApiTenantDomain:
     type: "object"
     properties:
@@ -2039,10 +2462,6 @@ definitions:
         type: "string"
       color: 
         type: "string"
-      # thresholdProfileSet:
-      #   type: "array"
-      #   items: 
-      #     type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:
@@ -2430,6 +2849,79 @@ definitions:
     properties:
       defaultThresholdProfile:
         $ref: '#/definitions/JsonApiRelationship'
+
+  AggregateMetricsAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - aggregation
+      - metrics
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domainIds:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      aggregation:
+        type: object
+        description: the aggregation function
+        properties:
+          name:
+            type: string
+            example: avg
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+
+  MetricIdentifierObject:
+    type: object
+    required:
+      - vendor
+      - objectType
+      - name
+    properties:
+      vendor:
+        type: string
+        example: accedian-twamp
+      objectType:
+        type: string
+        example: twamp-pe
+      name:
+        type: string
+        example: delayP95
+      direction:
+        type: integer
+        example: 0
+        default: 0
+
+  MetricResultsResponseObject:
+    type: object
+    properties:
+      results:
+        type: array
+        items: 
+          type: object
 
   # Here down are Metrics Service object definitions that are currently carried over from the 
   # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation

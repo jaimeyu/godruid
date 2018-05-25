@@ -327,7 +327,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 				lastError = err
 				continue
 			} else {
-				logger.Log.Infof("Updated metadata in metrid DB for tenant %s", t.ID)
+				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
 			}
 		}
 

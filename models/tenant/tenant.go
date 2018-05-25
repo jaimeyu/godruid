@@ -13,6 +13,12 @@ const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
 	TenantUserType TenantDataType = "user"
 
+	// TenantConnectorConfigType - datatype string used to identify a Tenant ConnectorConfig in the datastore record
+	TenantConnectorConfigType TenantDataType = "connectorConfig"
+
+	// TenantConnectorInstanceType - datatype string used to identify a Tenant ConnectorInstance in the datastore record
+	TenantConnectorInstanceType TenantDataType = "connectorInstance"
+
 	// TenantDomainType - datatype string used to identify a Tenant Domain in the datastore record
 	TenantDomainType TenantDataType = "domain"
 
@@ -85,6 +91,12 @@ const (
 	// TenantUserStr - common name of the TenantUser data type for use in logs.
 	TenantUserStr = "Tenant User"
 
+	// TenantConnectorConfigStr - common name of the Tenant Connector data type for use in logs.
+	TenantConnectorConfigStr = "Tenant Connector"
+
+	// TenantConnectorInstanceStr - common name of the Tenant ConnectorInstance data type for use in logs.
+	TenantConnectorInstanceStr = "Tenant ConnectorInstance"
+
 	// TenantDomainStr - common name of the Tenant Domain data type for use in logs.
 	TenantDomainStr = "Tenant Domain"
 
@@ -146,8 +158,94 @@ func (u *User) Validate(isUpdate bool) error {
 	if !isUpdate && len(u.REV) != 0 {
 		return errors.New("Invalid Tenant User request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
+	if isUpdate && (len(u.REV) == 0) {
 		return errors.New("Invalid Tenant User request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
+// ConnectorInstance - defines a Tenant ConnectorInstnace
+type ConnectorInstance struct {
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Status                string `json:"Status"`
+	Hostname              string `json:"hostname"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (d *ConnectorInstance) GetID() string {
+	return d.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (d *ConnectorInstance) SetID(s string) error {
+	d.ID = s
+	return nil
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (d *ConnectorInstance) Validate(isUpdate bool) error {
+	if len(d.TenantID) == 0 {
+		return errors.New("Invalid Tenant ConnectorInstance request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(d.REV) != 0 {
+		return errors.New("Invalid Tenant ConnectorInstance request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant ConnectorInstance request: must provide a createdTimestamp and revision for an update")
+	}
+
+	return nil
+}
+
+// ConnectorConfig - defines a Tenant ConnectorConfig
+type ConnectorConfig struct {
+	ID                              string `json:"_id"`
+	REV                             string `json:"_rev"`
+	Datatype                        string `json:"datatype"`
+	URL                             string `json:"url"`
+	Port                            int    `json:"port"`
+	PollingFrequency                int    `json:"pollingFrequency"`
+	Username                        string `json:"username"`
+	Password                        string `json:"password"`
+	ExportGroup                     string `json:"exportGroup"`
+	DatahubHearbeatFrequency        int    `json:"datahubHeartbeatFrequency"`
+	DatahubConnectionRetryFrequency int    `json:"datahubConnectionRetryFrequency"`
+	ConnectorInstanceID             string `json:"connectorInstanceId"`
+	TenantID                        string `json:"tenantId"`
+	Name                            string `json:"name"`
+	Zone                            string `json:"zone"`
+	Type                            string `json:"type"`
+	CreatedTimestamp                int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp           int64  `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (d *ConnectorConfig) GetID() string {
+	return d.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (d *ConnectorConfig) SetID(s string) error {
+	d.ID = s
+	return nil
+}
+
+// Validate - used during validation of incoming REST requests for this object
+func (d *ConnectorConfig) Validate(isUpdate bool) error {
+	if len(d.TenantID) == 0 {
+		return errors.New("Invalid Tenant ConnectorConfig request: must provide a Tenant ID")
+	}
+	if !isUpdate && len(d.REV) != 0 {
+		return errors.New("Invalid Tenant ConnectorConfig request: must not provide a revision value in a creation request")
+	}
+	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+		return errors.New("Invalid Tenant ConnectorConfig request: must provide a createdTimestamp and revision for an update")
 	}
 
 	return nil
@@ -155,15 +253,14 @@ func (u *User) Validate(isUpdate bool) error {
 
 // Domain - defines a Tenant Domain.
 type Domain struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	Name                  string   `json:"name"`
-	Color                 string   `json:"color"`
-	ThresholdProfileSet   []string `json:"thresholdProfileSet"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Name                  string `json:"name"`
+	Color                 string `json:"color"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -187,56 +284,6 @@ func (d *Domain) GetReferences() []jsonapi.Reference {
 	}
 }
 
-// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
-func (d *Domain) GetReferencedIDs() []jsonapi.ReferenceID {
-	result := []jsonapi.ReferenceID{}
-	for _, tpID := range d.ThresholdProfileSet {
-		result = append(result, jsonapi.ReferenceID{
-			ID:   tpID,
-			Type: "thresholdProfiles",
-			Name: "thresholdProfiles",
-		})
-	}
-
-	return result
-}
-
-// SetToManyReferenceIDs sets the threshold profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (d *Domain) SetToManyReferenceIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = IDs
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// AddToManyIDs adds new threshold profiles tot he reference list
-func (d *Domain) AddToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		d.ThresholdProfileSet = append(d.ThresholdProfileSet, IDs...)
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
-// DeleteToManyIDs removes threshold profiles from the reference list
-func (d *Domain) DeleteToManyIDs(name string, IDs []string) error {
-	if name == "thresholdProfiles" {
-		for _, ID := range IDs {
-			for pos, oldID := range d.ThresholdProfileSet {
-				if ID == oldID {
-					// match, this ID must be removed
-					d.ThresholdProfileSet = append(d.ThresholdProfileSet[:pos], d.ThresholdProfileSet[pos+1:]...)
-				}
-			}
-		}
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
-}
-
 // Validate - used during validation of incoming REST requests for this object
 func (d *Domain) Validate(isUpdate bool) error {
 	if len(d.TenantID) == 0 {
@@ -245,7 +292,7 @@ func (d *Domain) Validate(isUpdate bool) error {
 	if !isUpdate && len(d.REV) != 0 {
 		return errors.New("Invalid Tenant Domain request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
+	if isUpdate && (len(d.REV) == 0) {
 		return errors.New("Invalid Tenant Domain request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -282,7 +329,7 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 	if !isUpdate && len(prf.REV) != 0 {
 		return errors.New("Invalid Tenant Ingestion Profile request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+	if isUpdate && (len(prf.REV) == 0) {
 		return errors.New("Invalid Tenant Ingestion Profile request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -361,7 +408,7 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 	if !isUpdate && len(prf.REV) != 0 {
 		return errors.New("Invalid Tenant Threshold Profile request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(prf.REV) == 0 || prf.CreatedTimestamp == 0) {
+	if isUpdate && (len(prf.REV) == 0) {
 		return errors.New("Invalid Tenant Threshold Profile request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -475,7 +522,7 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 
 	}
 
-	if isUpdate && (len(mo.REV) == 0 || mo.CreatedTimestamp == 0) {
+	if isUpdate && (len(mo.REV) == 0) {
 		return errors.New("Invalid Tenant Monitored object request: must provide a createdTimestamp and revision for an update")
 	}
 
@@ -550,7 +597,7 @@ func (meta *Metadata) Validate(isUpdate bool) error {
 	if !isUpdate && len(meta.REV) != 0 {
 		return errors.New("Invalid Tenant Metadata request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(meta.REV) == 0 || meta.CreatedTimestamp == 0) {
+	if isUpdate && (len(meta.REV) == 0) {
 		return errors.New("Invalid Tenant Metadata request: must provide a createdTimestamp and revision for an update")
 	}
 

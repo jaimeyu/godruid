@@ -65,7 +65,7 @@ func (t *Tenant) Validate(isUpdate bool) error {
 	if !isUpdate && len(t.REV) != 0 {
 		return errors.New("Invalid Tenant request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(t.REV) == 0 || t.CreatedTimestamp == 0) {
+	if isUpdate && (len(t.REV) == 0) {
 		return errors.New("Invalid Tenant request: must provide a createdTimestamp and revision for an update")
 	}
 

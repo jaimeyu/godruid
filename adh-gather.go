@@ -21,6 +21,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/profile"
+	"github.com/accedian/adh-gather/websocket"
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/spf13/pflag"
@@ -77,8 +78,15 @@ func init() {
 
 	pflag.BoolVar(&enableChangeNotifications, "changeNotifications", true, "Specify if Change Notifications should be enabled")
 
-	metricServiceEndpoints = []string{"/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/threshold-crossing-by-monitored-object",
-		"/api/v1/threshold-crossing", "/api/v1/sla-report", "/api/v1/threshold-crossing-by-monitored-object-top-n"}
+	metricServiceEndpoints = []string{
+		"/api/v1/histogram",
+		"/api/v1/raw-metrics",
+		"/api/v1/threshold-crossing-by-monitored-object",
+		"/api/v1/threshold-crossing",
+		"/api/v1/sla-report",
+		"/api/v1/threshold-crossing-by-monitored-object-top-n",
+		"/api/v1/aggregated-metrics",
+	}
 }
 
 // GatherServer - Server which will implement the gRPC Services.
@@ -147,7 +155,7 @@ func restHandlerStart(gatherServer *GatherServer, cfg config.Provider) {
 	allowedOrigins := cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 	logger.Log.Debugf("Allowed Origins: %v", allowedOrigins)
 	originsOption := gh.AllowedOrigins(allowedOrigins)
-	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
+	methodsOption := gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 	headersOption := gh.AllowedHeaders([]string{"accept", "authorization", "content-type", "origin", "referer", "x-csrf-token"})
 	logger.Log.Infof("REST service intiated on: %s:%d", restBindIP, restBindPort)
 
@@ -712,6 +720,9 @@ func main() {
 
 	// Start pprof profiler
 	go startProfile(gatherServer, cfg)
+
+	// Start websocket server
+	websocket.Server(gatherServer.tenantAPISH.TenantDB)
 
 	// modify the swagger for this deployment
 	modifySwagger(cfg)

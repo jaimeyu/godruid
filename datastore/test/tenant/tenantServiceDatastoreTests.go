@@ -435,6 +435,145 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantUserCRUD(t *testing.T) 
 	assert.NotNil(t, tenantUserList)
 }
 
+func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorConfigCRUD(t *testing.T) {
+
+	const COMPANY1 = "ConnectorCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const CONN1 = "connector1"
+	const CONN2 = "connector2"
+	const EXPORTGROUP1 = "group1"
+	const EXPORTGROUP2 = "group2"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	recList, err := runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+
+	// Try to fetch a record even though none exist:
+	fail, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, "someID")
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Try to Update a record that does not exist:
+	fail, err = runner.tenantDB.UpdateTenantConnectorConfig(&tenmod.ConnectorConfig{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	TenantConnectorConfig := tenmod.ConnectorConfig{
+		Name:        CONN1,
+		TenantID:    TENANT,
+		ExportGroup: EXPORTGROUP1,
+	}
+
+	created, err := runner.tenantDB.CreateTenantConnectorConfig(&TenantConnectorConfig)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantConnectorConfigType), created.Datatype)
+	assert.Equal(t, created.Name, CONN1, "Name not the same")
+	assert.Equal(t, created.ExportGroup, EXPORTGROUP1, "Export group not the same")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.ConnectorConfig{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.ExportGroup = EXPORTGROUP2
+	updated, err := runner.tenantDB.UpdateTenantConnectorConfig(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantDomainType), updated.Datatype)
+	assert.Equal(t, updated.Name, CONN1, "Name not the same")
+	assert.Equal(t, updated.ExportGroup, EXPORTGROUP2, "Export Group was not updated")
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	TenantConnectorConfig2 := tenmod.ConnectorConfig{
+		Name:        CONN2,
+		TenantID:    TENANT,
+		ExportGroup: EXPORTGROUP1}
+	created2, err := runner.tenantDB.CreateTenantConnectorConfig(&TenantConnectorConfig2)
+	assert.Nil(t, err)
+	assert.NotNil(t, created2)
+	assert.NotEmpty(t, created2.ID)
+	assert.NotEmpty(t, created2.REV)
+	assert.Equal(t, string(tenmod.TenantDomainType), created2.Datatype)
+	assert.Equal(t, created2.Name, CONN2, "Name not the same")
+	assert.Equal(t, created2.ExportGroup, EXPORTGROUP1, "Export group not the same")
+	assert.Equal(t, created2.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created2.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get all records
+	fetchedList, err := runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchedList)
+	assert.True(t, len(fetchedList) == 2)
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantConnectorConfig(TENANT, fetched.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, deleted.Name, fetched.Name, "Deleted name not the same")
+
+	// Get all records - should be 1
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchedList)
+	assert.True(t, len(fetchedList) == 1)
+
+	// Get a record that does not exist
+	dne, err := runner.tenantDB.GetTenantConnectorConfig(TENANT, deleted.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, dne)
+
+	// Delete a record that oes not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantConnectorConfig(TENANT, deleted.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+
+	// Delete the last record
+	deleted, err = runner.tenantDB.DeleteTenantConnectorConfig(TENANT, created2.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.NotEmpty(t, deleted.ID)
+	assert.NotEmpty(t, deleted.REV)
+	assert.Equal(t, deleted.Name, created2.Name, "Deleted name not the same")
+
+	// Get all records - should be empty
+	fetchedList, err = runner.tenantDB.GetAllTenantConnectorConfigs(TENANT, "")
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+}
+
 func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T) {
 
 	const COMPANY1 = "DomainCompany"
@@ -475,10 +614,10 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 
 	// Create a record
 	tenantDomain := tenmod.Domain{
-		Name:                DOM1,
-		TenantID:            TENANT,
-		Color:               COLOR1,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
+
 	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
@@ -487,7 +626,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, string(tenmod.TenantDomainType), created.Datatype)
 	assert.Equal(t, created.Name, DOM1, "Name not the same")
 	assert.Equal(t, created.Color, COLOR1, "Color not the same")
-	assert.Equal(t, created.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
 	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
 	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
@@ -512,7 +650,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, updated.Name, DOM1, "Name not the same")
 	assert.Equal(t, updated.Color, COLOR2, "Password was not updated")
 	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
-	assert.Equal(t, updated.ThresholdProfileSet[0], THRPRF, "Threshold Profile ID not the same")
 	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
 	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
 
@@ -530,7 +667,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDomainCRUD(t *testing.T
 	assert.Equal(t, created2.Name, DOM2, "Name not the same")
 	assert.Equal(t, created2.Color, COLOR1, "Password not the same")
 	assert.Equal(t, created2.TenantID, TENANT, "Tenant ID not the same")
-	assert.True(t, len(created2.ThresholdProfileSet) == 0, "Should not be a Threshold Profile ID")
 	assert.True(t, created2.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, created2.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
@@ -1173,18 +1309,16 @@ func (runner *TenantServiceDatastoreTestRunner) RunGetMonitoredObjectByDomainMap
 	// Create a couple Domains
 	// Create a record
 	tenantDomain := tenmod.Domain{
-		Name:                DOM1,
-		TenantID:            TENANT,
-		Color:               COLOR1,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
 	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
 	tenantDomain = tenmod.Domain{
-		Name:                DOM2,
-		TenantID:            TENANT,
-		Color:               COLOR2,
-		ThresholdProfileSet: []string{THRPRF}}
+		Name:     DOM2,
+		TenantID: TENANT,
+		Color:    COLOR2}
 	created2, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
 	assert.Nil(t, err)
 	assert.NotNil(t, created2)

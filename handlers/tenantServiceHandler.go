@@ -20,7 +20,7 @@ import (
 // Tenant service. Anytime the Tenant service changes, the logic to handle the
 // API will be modified here.
 type TenantServiceHandler struct {
-	tenantDB db.TenantServiceDatastore
+	TenantDB db.TenantServiceDatastore
 }
 
 // CreateTenantServiceHandler - used to generate a handler for the Admin Service.
@@ -32,7 +32,7 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceHandler: %s", err.Error())
 	}
-	result.tenantDB = db
+	result.TenantDB = db
 
 	return result
 }
@@ -72,7 +72,7 @@ func (tsh *TenantServiceHandler) CreateTenantUser(ctx context.Context, tenantUse
 	}
 
 	// Issue request to DAO Layer to Create the Tenant User
-	result, err := tsh.tenantDB.CreateTenantUser(&converted)
+	result, err := tsh.TenantDB.CreateTenantUser(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		logger.Log.Error(msg)
@@ -207,7 +207,7 @@ func (tsh *TenantServiceHandler) CreateTenantDomain(ctx context.Context, tenantD
 	}
 
 	// Issue request to DAO Layer to Create the Tenant Domain
-	result, err := tsh.tenantDB.CreateTenantDomain(&converted)
+	result, err := tsh.TenantDB.CreateTenantDomain(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		logger.Log.Error(msg)
@@ -309,7 +309,7 @@ func (tsh *TenantServiceHandler) GetAllTenantDomains(ctx context.Context, tenant
 	logger.Log.Infof("Retrieving all %ss for Tenant: %s", tenmod.TenantDomainStr, tenantID.Value)
 
 	// Issue request to DAO Layer to fetch the Tenant Domains
-	result, err := tsh.tenantDB.GetAllTenantDomains(tenantID.Value)
+	result, err := tsh.TenantDB.GetAllTenantDomains(tenantID.Value)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %ss: %s", tenmod.TenantDomainStr, err.Error())
 		logger.Log.Error(msg)
@@ -354,7 +354,7 @@ func (tsh *TenantServiceHandler) CreateTenantIngestionProfile(ctx context.Contex
 	}
 
 	// Issue request to DAO Layer to Create the Tenant Ingestion Profile
-	result, err := tsh.tenantDB.CreateTenantIngestionProfile(&converted)
+	result, err := tsh.TenantDB.CreateTenantIngestionProfile(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		logger.Log.Error(msg)
@@ -469,7 +469,7 @@ func (tsh *TenantServiceHandler) CreateTenantThresholdProfile(ctx context.Contex
 	}
 
 	// Issue request to DAO Layer to Create the Tenant Threshold Profile
-	result, err := tsh.tenantDB.CreateTenantThresholdProfile(&converted)
+	result, err := tsh.TenantDB.CreateTenantThresholdProfile(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		logger.Log.Error(msg)
@@ -526,7 +526,7 @@ func (tsh *TenantServiceHandler) GetTenantThresholdProfile(ctx context.Context, 
 	logger.Log.Infof("Retrieving %s for Tenant %s", tenmod.TenantThresholdProfileStr, tenantThreshPrfIDReq.GetTenantId())
 
 	// Issue request to DAO Layer to fetch the Tenant Threshold Profile
-	result, err := tsh.tenantDB.GetTenantThresholdProfile(tenantThreshPrfIDReq.TenantId, tenantThreshPrfIDReq.ThresholdProfileId)
+	result, err := tsh.TenantDB.GetTenantThresholdProfile(tenantThreshPrfIDReq.TenantId, tenantThreshPrfIDReq.ThresholdProfileId)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		logger.Log.Error(msg)
@@ -591,7 +591,7 @@ func (tsh *TenantServiceHandler) CreateMonitoredObject(ctx context.Context, moni
 	}
 
 	// Issue request to DAO Layer to Create the Tenant Monitored Object
-	result, err := tsh.tenantDB.CreateMonitoredObject(&converted)
+	result, err := tsh.TenantDB.CreateMonitoredObject(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		logger.Log.Error(msg)
@@ -748,7 +748,7 @@ func (tsh *TenantServiceHandler) CreateTenantMeta(ctx context.Context, meta *pb.
 	}
 
 	// Issue request to DAO Layer to Create the record
-	result, err := tsh.tenantDB.CreateTenantMeta(&converted)
+	result, err := tsh.TenantDB.CreateTenantMeta(&converted)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		logger.Log.Error(msg)
@@ -816,7 +816,7 @@ func (tsh *TenantServiceHandler) DeleteTenantMeta(ctx context.Context, tenantID 
 func (tsh *TenantServiceHandler) GetTenantMeta(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantMetadata, error) {
 
 	// Issue request to DAO Layer to fetch the record
-	result, err := tsh.tenantDB.GetTenantMeta(tenantID.GetValue())
+	result, err := tsh.TenantDB.GetTenantMeta(tenantID.GetValue())
 	if err != nil {
 		msg := fmt.Sprintf("Unable to fetch %s: %s", tenmod.TenantMetaStr, err.Error())
 		logger.Log.Error(msg)
@@ -904,7 +904,7 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 	}
 
 	// Issue request to DAO Layer to insert the MOs
-	result, err := tsh.tenantDB.BulkInsertMonitoredObjects(value.TenantId, data)
+	result, err := tsh.TenantDB.BulkInsertMonitoredObjects(value.TenantId, data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		logger.Log.Error(msg)

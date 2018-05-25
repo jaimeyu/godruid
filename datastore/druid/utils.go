@@ -318,3 +318,49 @@ func sendRequest(method string, httpClient *http.Client, endpoint, authToken str
 
 	return
 }
+
+// For postprocessing metrics
+type PostProcessor interface {
+	Apply(input []AggMetricsResponse) []AggMetricsResponse
+}
+
+var (
+	NOOP_POSTPROCESSOR = NoopPostProcessor{}
+)
+
+type NoopPostProcessor struct{}
+
+func (pp NoopPostProcessor) Apply(input []AggMetricsResponse) []AggMetricsResponse {
+	logger.Log.Debugf("NoopPostProcessor.apply called")
+	return input
+}
+
+type DropKeysPostprocessor struct {
+	keysToDrop []string
+	countKeys  map[string][]string
+}
+
+func (pp DropKeysPostprocessor) Apply(input []AggMetricsResponse) []AggMetricsResponse {
+	logger.Log.Debugf("DropKeysPostprocessor.apply called with %v, %v, %v", pp.keysToDrop, pp.countKeys, input)
+	if len(pp.keysToDrop) > 0 {
+		for _, v := range input {
+			for countKey, vals := range pp.countKeys {
+				if countVal, ok := v.Result[countKey]; ok {
+
+					if intVal, ok := countVal.(float64); ok && intVal == 0 {
+						for _, m := range vals {
+							delete(v.Result, m)
+						}
+					}
+				}
+
+			}
+			for _, k := range pp.keysToDrop {
+				delete(v.Result, k)
+			}
+
+		}
+	}
+
+	return input
+}

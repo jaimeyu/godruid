@@ -1,3 +1,4 @@
+* Fix - cleanup swagger file, update dependencies
 ## Current Release 
 ### 0.120.0 
 **Release Date:** Fri May 25 15:03:51 UTC 2018     

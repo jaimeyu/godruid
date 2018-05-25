@@ -2266,9 +2266,9 @@ definitions:
         type: "string"
       tenantId:
         type: "string"
-      datePeriodDays: 
-        type: "string"
-      domain: 
+      timeRangeDuration: 
+        type: "integer"
+      domainIds: 
         type: "array"
         items: 
           type: "string"

@@ -8,6 +8,7 @@ const (
 )
 
 type ReportScheduleConfig struct {
+	// Meta information
 	ID                    string `json:"_id"`
 	REV                   string `json:"_rev"`
 	CreatedTimestamp      int64  `json:"createdTimestamp"`
@@ -15,15 +16,16 @@ type ReportScheduleConfig struct {
 	TenantID              string `json:"tenantId"`
 
 	// Report parameters
-	DatePeriodDays     string   `json:"datePeriodDays,omitempty"`
-	Domain             []string `json:"domain,omitempty"`
+	ReportName         string   `json:"reportName"`
+	TimeRangeDuration  int64    `json:"timeRangeDuration,omitempty"` // In nanoseconds
+	DomainIds          []string `json:"domainIds,omitempty"`
 	ThresholdProfileID string   `json:"thresholdProfileId,omitempty"`
 	Granularity        string   `json:"granularity,omitempty"`
-	Timeout            int32    `json:"timeout,omitempty"`
-	Timezone           string   `json:"timezone,omitempty"`
+	Timeout            int32    `json:"timeout,omitempty"`  // In milliseconds
+	Timezone           string   `json:"timezone,omitempty"` // See timezone strings defined as part of the IANA database https://www.iana.org/time-zones
 
 	// Scheduling Execution timing
-	ReportName string `json:"reportName"`
+	// The values here are specified as strings to align to a crontab-like format
 	Minute     string `json:"minute"`
 	Hour       string `json:"hour"`
 	DayOfMonth string `json:"dayMonth"`

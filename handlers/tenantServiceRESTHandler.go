@@ -1195,16 +1195,21 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	fmt.Fprintf(w, string(res))
 }
 
+// Creates a report scheduling configuration that will ultimately prompt the scheduler to execute a report at the specified time with the specified parameters
+// Refer to the model defined in scheduler.go to check what payload is acceptable to the REST endpoint
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
 func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Ensure that we can unmarshal the provided report schedule payload into the model object
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
-
 	data := metmod.ReportScheduleConfig{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
@@ -1213,6 +1218,7 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Ensure that the passed in data adheres to the model requirements
 	err = data.Validate(false)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -1220,8 +1226,8 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Attempt to create a config entry in the datastore for the scheduler to pick up
 	logger.Log.Infof("Creating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
-
 	result, err := tsh.tenantDB.CreateReportScheduleConfig(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
@@ -1232,16 +1238,21 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 	sendSuccessResponse(result, w, startTime, mon.CreateReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Created")
 }
 
+// Updates a report scheduling configuration that will ultimately prompt the scheduler to execute a report at the specified time with the specified parameters
+// Refer to the model defined in scheduler.go to check what payload is acceptable to the REST endpoint
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
 func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Ensure that we can unmarshal the provided report schedule payload into the model object
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.UpdateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
-
 	data := metmod.ReportScheduleConfig{}
 	err = jsonapi.Unmarshal(requestBytes, &data)
 	if err != nil {
@@ -1250,6 +1261,7 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Ensure that the passed in data adheres to the model requirements
 	err = data.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
@@ -1257,8 +1269,8 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Attempt to update a config entry in the datastore for the scheduler to pick up
 	logger.Log.Infof("Updating %s: %s", metmod.ReportScheduleConfigStr, models.AsJSONString(&data))
-
 	result, err := tsh.tenantDB.UpdateReportScheduleConfig(&data)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
@@ -1269,14 +1281,19 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 	sendSuccessResponse(result, w, startTime, mon.UpdateReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Updated")
 }
 
+// Fetch a report scheduling configuration from the datastore for a particular tenant
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
 func (tsh *TenantServiceRESTHandler) GetReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Retrieve the tenant ID and config ID from the URL
 	tenantID := getDBFieldFromRequest(r, 4)
 	configID := getDBFieldFromRequest(r, 6)
 
+	// Attempt to fetch the config entry from the datastore
 	logger.Log.Infof("Fetching %s: %s", metmod.ReportScheduleConfigStr, configID)
-
 	result, err := tsh.tenantDB.GetReportScheduleConfig(tenantID, configID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
@@ -1287,13 +1304,18 @@ func (tsh *TenantServiceRESTHandler) GetReportScheduleConfig(w http.ResponseWrit
 	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.ReportScheduleConfigStr, "Retrieved")
 }
 
+// Fetch all report scheduling configurations from the datastore for a particular tenant
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
 func (tsh *TenantServiceRESTHandler) GetAllReportScheduleConfigs(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Retrieve the tenant ID and config ID from the URL
 	tenantID := getDBFieldFromRequest(r, 4)
 
+	// Attempt to fetch all the config entries from the datastore
 	logger.Log.Infof("Fetching %s list for Tenant %s", metmod.ReportScheduleConfigStr, tenantID)
-
 	result, err := tsh.tenantDB.GetAllReportScheduleConfigs(tenantID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s list: %s", metmod.ReportScheduleConfigStr, err.Error())
@@ -1304,14 +1326,19 @@ func (tsh *TenantServiceRESTHandler) GetAllReportScheduleConfigs(w http.Response
 	sendSuccessResponse(result, w, startTime, mon.GetAllTenantUserStr, metmod.ReportScheduleConfigStr, "Retrieved list of")
 }
 
+// Delete a report scheduling configuration from the datastore for a particular tenant
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
 func (tsh *TenantServiceRESTHandler) DeleteReportScheduleConfig(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	// Retrieve the tenant ID and config ID from the URL
 	tenantID := getDBFieldFromRequest(r, 4)
 	configID := getDBFieldFromRequest(r, 6)
 
+	// Attempt to delete the specified configuration entry for the tenant
 	logger.Log.Infof("Deleting %s: %s", metmod.ReportScheduleConfigStr, configID)
-
 	result, err := tsh.tenantDB.DeleteReportScheduleConfig(tenantID, configID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())

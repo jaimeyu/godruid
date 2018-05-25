@@ -23,6 +23,7 @@ const (
 	ThrCrossStrTopN          = "thr_cross_topn"
 	HistogramStr             = "histogram"
 	RawMetricStr             = "raw_metric"
+	GenSLAReportStr          = "gen_sla_report"
 	SLAReportStr             = "sla_report"
 	TenantMetaStr            = "tenant_meta"
 	ReportSchedConfigStr     = "report_sched_conf"
@@ -124,8 +125,9 @@ const (
 	GetThrCrossByMonObjTopNStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
-	GetSLAReportStr            = SLAReportStr + metricNameDelimiter + OPGetStr
-	QueryAggregatedMetricsStr  = AggMetricsStr + metricNameDelimiter + OPGetStr
+	GenerateSLAReportStr       = GenSLAReportStr + metricNameDelimiter + OPGetStr
+
+	QueryAggregatedMetricsStr = AggMetricsStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr
@@ -138,6 +140,9 @@ const (
 	GetReportScheduleConfigStr    = ReportSchedConfigStr + metricNameDelimiter + OPGetStr
 	GetAllReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPGetAllStr
 	DeleteReportScheduleConfigStr = ReportSchedConfigStr + metricNameDelimiter + OPDeleteStr
+
+	GetSLAReportStr    = SLAReportStr + metricNameDelimiter + OPGetStr
+	GetAllSLAReportStr = SLAReportStr + metricNameDelimiter + OPGetAllStr
 
 	CreateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPCreateStr
 	UpdateValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPUpdateStr

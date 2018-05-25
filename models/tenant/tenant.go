@@ -153,22 +153,16 @@ func (u *User) Validate(isUpdate bool) error {
 	return nil
 }
 
-// ConnectorStatus - defines a ConnectorStatus
-type ConnectorStatus struct {
-	Status      string `json:"status"`
-	ConnectorID string `json:"connectorID"`
-}
-
 // ConnectorInstance - defines a Tenant ConnectorInstnace
 type ConnectorInstance struct {
-	ID                    string            `json:"_id"`
-	REV                   string            `json:"_rev"`
-	Datatype              string            `json:"datatype"`
-	TenantID              string            `json:"tenantId"`
-	ConnectorStatus       []ConnectorStatus `json:"connectorStatus"`
-	Hostname              string            `json:"hostname"`
-	CreatedTimestamp      int64             `json:"createdTimestamp"`
-	LastModifiedTimestamp int64             `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Status                string `json:"Status"`
+	Hostname              string `json:"hostname"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling

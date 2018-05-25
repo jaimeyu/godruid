@@ -467,12 +467,12 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorConfigCRUD(t *
 	assert.Nil(t, fail)
 
 	// Try to Update a record that does not exist:
-	fail, err = runner.tenantDB.UpdateTenantConnectorConfig(&tenmod.Connector{})
+	fail, err = runner.tenantDB.UpdateTenantConnectorConfig(&tenmod.ConnectorConfig{})
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
 	// Create a record
-	TenantConnectorConfig := tenmod.Connector{
+	TenantConnectorConfig := tenmod.ConnectorConfig{
 		Name:        CONN1,
 		TenantID:    TENANT,
 		ExportGroup: EXPORTGROUP1,
@@ -498,7 +498,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorConfigCRUD(t *
 	time.Sleep(time.Millisecond * 2)
 
 	// Update a record
-	updateRecord := tenmod.Connector{}
+	updateRecord := tenmod.ConnectorConfig{}
 	deepcopy.Copy(&updateRecord, fetched)
 	updateRecord.ExportGroup = EXPORTGROUP2
 	updated, err := runner.tenantDB.UpdateTenantConnectorConfig(&updateRecord)
@@ -514,7 +514,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantConnectorConfigCRUD(t *
 	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
 
 	// Add a second record.
-	TenantConnectorConfig2 := tenmod.Connector{
+	TenantConnectorConfig2 := tenmod.ConnectorConfig{
 		Name:        CONN2,
 		TenantID:    TENANT,
 		ExportGroup: EXPORTGROUP1}

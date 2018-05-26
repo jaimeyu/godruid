@@ -1136,9 +1136,9 @@ func (tsd *TenantServiceDatastoreInMemory) CreateSLAReport(slaReport *metmod.SLA
 
 	recCopy := metmod.SLAReport{}
 	deepcopy.Copy(&recCopy, slaReport)
-	recCopy.ReportInstanceID = uuid.NewV4().String()
+	recCopy.ID = uuid.NewV4().String()
 
-	tsd.tenantToIDtoTenantSLAReportMap[slaReport.TenantID][recCopy.ReportInstanceID] = &recCopy
+	tsd.tenantToIDtoTenantSLAReportMap[slaReport.TenantID][recCopy.ID] = &recCopy
 
 	return &recCopy, nil
 }

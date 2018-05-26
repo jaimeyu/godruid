@@ -978,7 +978,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllReportScheduleConfigs(tenantID s
 
 func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(slaReport))
-	slaReport.ReportInstanceID = ds.GenerateID(slaReport, string(tenmod.TenantSLAReportType))
+	slaReport.ID = ds.GenerateID(slaReport, string(tenmod.TenantSLAReportType))
 	tenantID := ds.PrependToDataID(slaReport.TenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 
@@ -996,7 +996,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaRe
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &metmod.SLAReport{}
-	if err := getDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
+	if err := deleteDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))

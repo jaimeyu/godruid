@@ -1,5 +1,6 @@
 ## Current Release 
 ### 0.120.0 
+* Feature - CRUD functionality for report scheduling config and SLA reports
 **Release Date:** Fri May 25 15:03:51 UTC 2018     
 ## Previous Releases 
 ### 0.119.0 

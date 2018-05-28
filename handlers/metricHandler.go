@@ -191,6 +191,7 @@ func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest 
 		Domain:             toStringSplice(queryParams.Get("domain")),
 		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
 		Granularity:        queryParams.Get("granularity"),
+		Timezone:           queryParams.Get("timezone"),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))

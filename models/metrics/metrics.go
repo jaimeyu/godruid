@@ -9,6 +9,7 @@ type SLAReportRequest struct {
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
+	Timezone           string `json:"timezone,omitempty"`
 }
 
 type SLAReport struct {

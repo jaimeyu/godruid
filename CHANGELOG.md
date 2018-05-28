@@ -1,3 +1,4 @@
+* Feature - CRUD functionality for report scheduling config and SLA report
 ## Current Release 
 ### 0.123.0 
 **Release Date:** Mon May 28 17:40:29 UTC 2018     
@@ -10,7 +11,6 @@ Fix - changed the name of the monitored object datastore
 **Release Date:** Fri May 25 19:24:42 UTC 2018     
 * Fix - cleanup swagger file, update dependencies
 ### 0.120.0 
-* Feature - CRUD functionality for report scheduling config and SLA reports
 **Release Date:** Fri May 25 15:03:51 UTC 2018     
 ### 0.119.0 
 **Release Date:** Thu May 24 23:55:47 UTC 2018     

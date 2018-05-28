@@ -1,8 +1,10 @@
-* Feature - use timezone for SLA bucketing
 ## Current Release 
+### 0.125.0 
+**Release Date:** Mon May 28 23:17:48 UTC 2018     
+## Previous Releases 
+* Feature - use timezone for SLA bucketing
 ### 0.124.0 
 **Release Date:** Mon May 28 19:20:51 UTC 2018     
-## Previous Releases 
 ### 0.123.0 
 **Release Date:** Mon May 28 17:40:29 UTC 2018     
 Fix - changed the name of the monitored object datastore

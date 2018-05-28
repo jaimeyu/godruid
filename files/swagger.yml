@@ -1942,6 +1942,12 @@ paths:
           required: false
           type: integer
           format: int32
+        - name: timezone
+          description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
+          in: query
+          required: false
+          type: string
+
       tags:
         - MetricsService
 definitions:

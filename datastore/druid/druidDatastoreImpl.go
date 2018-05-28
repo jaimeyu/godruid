@@ -458,7 +458,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 	reportID := uuid.NewV4().String()
 
 	slaReport := metrics.SLAReport{
-		ReportInstanceID:     reportID,
+		ID:                   reportID,
 		ReportCompletionTime: time.Now().UTC().Format(time.RFC3339),
 		TenantID:             request.TenantID,
 		ReportTimeRange:      request.Interval,

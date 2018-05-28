@@ -36,6 +36,12 @@ const (
 
 	// TenantMetaType - datatype string used to identify a Tenant Meta in the datastore record
 	TenantMetaType TenantDataType = "tenantMetadata"
+
+	// TenantReportScheduleConfigType - datatype string used to identify a Tenant SLA Report in the datastore record
+	TenantReportScheduleConfigType TenantDataType = "tenantReportScheduleConfig"
+
+	// TenantSLAReportType - datatype string used to identify a Tenant SLA Report in the datastore record
+	TenantSLAReportType TenantDataType = "tenantSLAReport"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -111,6 +117,12 @@ const (
 
 	// TenantMetaStr - common name for the Meta for use in logs.
 	TenantMetaStr = "Tenant Meta"
+
+	// TenantReportScheduleConfigStr - common name for the report schedule configuration for use in logs.
+	TenantReportScheduleConfigStr = "Tenant Report Schedule Configuration"
+
+	// TenantSLAReportStr - common name for the sla report for use in logs.
+	TenantSLAReportStr = "Tenant SLA Report"
 )
 
 // User - defines a Tenant user.

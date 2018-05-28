@@ -66,9 +66,9 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 		},
 
 		server.Route{
-			Name:        "GetSLAReport",
+			Name:        "GenSLAReport",
 			Method:      "GET",
-			Pattern:     "/api/v1/sla-report",
+			Pattern:     "/api/v1/generate-sla-report",
 			HandlerFunc: result.GetSLAReport,
 		},
 
@@ -341,13 +341,13 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportError(w, startTime, "404", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
 
 	if err = msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
 		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportError(w, startTime, "404", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
 
@@ -355,14 +355,14 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
 		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.SLAReportStr, err.Error())
-		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusNotFound)
+		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
 
 	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -370,13 +370,13 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	res, err := json.Marshal(result)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
-	trackAPIMetrics(startTime, "200", mon.GetSLAReportStr)
+	trackAPIMetrics(startTime, "200", mon.GenerateSLAReportStr)
 	fmt.Fprintf(w, string(res))
 }
 

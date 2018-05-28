@@ -753,6 +753,130 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
       tags:
         - TenantProvisioningService
+  /v1/tenants/{tenantId}/report-schedule-configs:
+    post:
+      summary: Create a report schedule configuration for a Tenant.
+      operationId: CreateReportScheduleConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a report schedule configuration for a Tenant.
+      operationId: UpdateReportScheduleConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/report-schedule-configs/{configId}':
+    get:
+      summary: Retrieve a report schedule configuration for a Tenant by configuration Id.
+      operationId: GetReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a report schedule configuration for a Tenant by configuration Id.
+      operationId: DeleteReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/report-schedule-config-list':
+    get:
+      summary: Retrieve all report schedule configs for the specified Tenant.
+      operationId: GetAllReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfigList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
   /v1/tenants/{tenantId}/domain-list:
     get:
       summary: Retrieve all Domains for the specified Tenant.
@@ -1520,7 +1644,50 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-
+  '/v1/tenants/{tenantId}/sla-report/{reportID}':
+    get:
+      summary: Retrieve a Tenant SLA report by id.
+      operationId: GetSLAReport
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/sla-report-list:
+    get:
+      summary: Retrieve all SLA reports for the specified Tenant.
+      operationId: GetAllSLAReports
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObjectList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
 
 # All API definitions below here are for the MetricsService and will need to be modified
 # when the MetricsService is altered to use the jsonapi implementation.
@@ -1890,10 +2057,10 @@ paths:
       tags:
         - MetricsService
 
-  /v1/sla-report:
+  /v1/generate-sla-report:
     get:
       summary: Generate an SLA Report.
-      operationId: GetSLAReport
+      operationId: GenSLAReport
       produces:
         - application/vnd.api+json
       responses:
@@ -2521,7 +2688,69 @@ definitions:
     type: "object"
     additionalProperties:
       type: "boolean"
-
+  JsonApiTenantReportScheduleConfig:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantReportScheduleConfig'
+  JsonApiTenantReportScheduleConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
+  TenantReportScheduleConfig:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [reportScheduleConfigs]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantReportScheduleConfigAttr'
+  TenantReportScheduleConfigAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      timeRangeDuration: 
+        type: "integer"
+      domainIds: 
+        type: "array"
+        items: 
+          type: "string"
+      thresholdProfileId: 
+        type: "string"
+      granularity: 
+        type: "string"
+      timeout: 
+        type: "integer"
+      timezone: 
+        type: "string"
+      reportName: 
+        type: "string"
+      minute: 
+        type: "string"
+      hour: 
+        type: "string"
+      dayMonth: 
+        type: "string"
+      month: 
+        type: "string"
+      dayWeek: 
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
   JsonApiTenantThresholdProfile:
     type: "object"
     properties:
@@ -2962,3 +3191,10 @@ definitions:
         type: object
         additionalProperties:
           type: string
+  gathergrpcJSONAPIObjectList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/gathergrpcJSONAPIObject'

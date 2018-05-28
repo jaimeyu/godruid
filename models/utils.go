@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/getlantern/deepcopy"
 	"github.com/peterbourgon/mergemap"
@@ -54,6 +55,15 @@ func AsJSONString(obj interface{}) string {
 		userCopy := pb.TenantUser{}
 		deepcopy.Copy(&userCopy, user)
 		userCopy.Data.Password = LogRedactStr
+		res, err := json.Marshal(userCopy)
+		if err != nil {
+			return ""
+		}
+		return string(res)
+	case *metmod.ReportScheduleConfig:
+		user := obj.(*metmod.ReportScheduleConfig)
+		userCopy := metmod.ReportScheduleConfig{}
+		deepcopy.Copy(&userCopy, user)
 		res, err := json.Marshal(userCopy)
 		if err != nil {
 			return ""

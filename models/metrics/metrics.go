@@ -12,8 +12,20 @@ type SLAReportRequest struct {
 	Timezone           string `json:"timezone,omitempty"`
 }
 
+// GetID - required implementation for jsonapi marshalling
+func (sr *SLAReport) GetID() string {
+	return sr.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (sr *SLAReport) SetID(s string) error {
+	sr.ID = s
+	return nil
+}
+
 type SLAReport struct {
-	ReportInstanceID     string            `json:"reportInstanceId"`
+	ID                   string            `json:"_id"`
+	REV                  string            `json:"_rev"`
 	ReportCompletionTime string            `json:"reportCompletionTime"`
 	TenantID             string            `json:"tenantId"`
 	ReportTimeRange      string            `json:"reportTimeRange"`

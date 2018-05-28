@@ -1,8 +1,10 @@
-* Feature - CRUD functionality for report scheduling config and SLA report
 ## Current Release 
+### 0.126.0 
+**Release Date:** Mon May 28 23:58:41 UTC 2018     
+## Previous Releases 
+* Feature - CRUD functionality for report scheduling config and SLA report
 ### 0.125.0 
 **Release Date:** Mon May 28 23:17:48 UTC 2018     
-## Previous Releases 
 * Feature - use timezone for SLA bucketing
 ### 0.124.0 
 **Release Date:** Mon May 28 19:20:51 UTC 2018     

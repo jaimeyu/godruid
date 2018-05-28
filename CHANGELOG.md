@@ -1,7 +1,18 @@
 ## Current Release 
+### 0.123.0 
+**Release Date:** Mon May 28 17:40:29 UTC 2018     
+## Previous Releases 
+Fix - changed the name of the monitored object datastore
+### 0.122.0 
+**Release Date:** Mon May 28 15:49:27 UTC 2018     
+### 0.121.0 
+* Feature - move reports and monitored objects to separate datastore
+**Release Date:** Fri May 25 19:24:42 UTC 2018     
+* Fix - cleanup swagger file, update dependencies
+### 0.120.0 
+**Release Date:** Fri May 25 15:03:51 UTC 2018     
 ### 0.119.0 
 **Release Date:** Thu May 24 23:55:47 UTC 2018     
-## Previous Releases 
 ### 0.118.0 
 **Release Date:** Thu May 24 21:26:46 UTC 2018     
 * Feature - aggregated metrics query

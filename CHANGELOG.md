@@ -1,5 +1,6 @@
 ## Current Release 
 ### 0.121.0 
+* Feature - move reports and monitored objects to separate datastore
 **Release Date:** Fri May 25 19:24:42 UTC 2018     
 ## Previous Releases 
 * Fix - cleanup swagger file, update dependencies

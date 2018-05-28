@@ -28,6 +28,9 @@ const (
 	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
+	// ReportType - datatype string used to identify a Tenant Report in the datastore record
+	TenantReportType TenantDataType = "report"
+
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 
@@ -103,8 +106,8 @@ const (
 	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantThresholdProfileStr = "Tenant Threshold Profile"
 
-	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Doamin Map for use in logs.
-	MonitoredObjectToDomainMapStr = "Monitored Object to Doamin Map"
+	// MonitoredObjectToDomainMapStr - common name for the Monitored Object to Domain Map for use in logs.
+	MonitoredObjectToDomainMapStr = "Monitored Object to Domain Map"
 
 	// TenantMetaStr - common name for the Meta for use in logs.
 	TenantMetaStr = "Tenant Meta"

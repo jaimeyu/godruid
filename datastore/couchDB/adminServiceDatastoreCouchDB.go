@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/getlantern/deepcopy"
 	"github.com/leesper/couchdb-golang"
 
 	"github.com/accedian/adh-gather/config"
+	"github.com/accedian/adh-gather/datastore"
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
@@ -18,7 +20,8 @@ import (
 )
 
 const (
-	tenantIDByNameIndex = "_design/tenant/_view/byAlias"
+	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
+	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
 )
 
 // AdminServiceDatastoreCouchDB - struct responsible for handling
@@ -136,8 +139,24 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
+	baseID := datastore.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Create a CouchDB database to isolate monitored object data for the tenant
+	_, err = asd.CreateDatabase(datastore.PrependToDataID(baseID, strings.ToLower(string(tenmod.TenantMonitoredObjectType))))
+	if err != nil {
+		logger.Log.Debugf("Unable to create monitored object database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
+		return nil, err
+	}
+
+	// Create a CouchDB database to isolate reports for the tenant
+	_, err = asd.CreateDatabase(datastore.PrependToDataID(baseID, strings.ToLower(string(tenmod.TenantReportType))))
+	if err != nil {
+		logger.Log.Debugf("Unable to create report database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
+		return nil, err
+	}
+
 	// Add in the views/indicies necessary for the db:
-	if err = asd.addTenantViewsToDB(tenantDescriptor.ID); err != nil {
+	if err = asd.addTenantViewsToDB(baseID, tenantDescriptor.ID); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
@@ -170,6 +189,30 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	existingTenant, err := asd.GetTenantDescriptor(tenantID)
 	if err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", admmod.TenantStr, err.Error())
+		return nil, err
+	}
+
+	// Setup deletion of the report datastore
+	reportDBID := ds.PrependToDataID(tenantID, strings.ToLower(string(tenmod.TenantReportType)))
+	if err = purgeDB(createDBPathStr(asd.couchHost, reportDBID)); err != nil {
+		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "reports", err.Error())
+		return nil, err
+	}
+	err = asd.deleteDatabase(reportDBID)
+	if err != nil {
+		logger.Log.Debugf("Unable to delete report database for Tenant %s: %s", tenantID, err.Error())
+		return nil, err
+	}
+
+	// Setup deletion of the monitored object datastore
+	moDBID := ds.PrependToDataID(tenantID, strings.ToLower(string(tenmod.TenantMonitoredObjectType)))
+	if err = purgeDB(createDBPathStr(asd.couchHost, moDBID)); err != nil {
+		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "monitored objects", err.Error())
+		return nil, err
+	}
+	err = asd.deleteDatabase(moDBID)
+	if err != nil {
+		logger.Log.Debugf("Unable to delete monitored object database for Tenant %s: %s", tenantID, err.Error())
 		return nil, err
 	}
 
@@ -241,7 +284,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 	return db, nil
 }
 
-func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error {
+func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(tenantId string, dbName string) error {
 	if len(dbName) == 0 {
 		return errors.New("Unable to add views to a database if no database name is provided")
 	}
@@ -256,9 +299,20 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 		return err
 	}
 
+	moDB, err := getDatabase(createDBPathStr(asd.couchHost, datastore.PrependToDataID(tenantId, strings.ToLower(string(tenmod.TenantMonitoredObjectType)))))
+	if err != nil {
+		return err
+	}
+
 	// Store the sync checkpoint in CouchDB
 	for _, viewPayload := range generateTenantViews() {
-		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", db, nil)
+
+		viewDB := db
+
+		if viewPayload["_id"] == monitoredObjectCountByDomainIndex {
+			viewDB = moDB
+		}
+		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", viewDB, nil)
 		if err != nil {
 			return err
 		}
@@ -529,7 +583,7 @@ func generateTenantViews() []map[string]interface{} {
 	result := make([]map[string]interface{}, 0)
 
 	monitoredObjectCountByDomain := map[string]interface{}{}
-	monitoredObjectCountByDomain["_id"] = "_design/monitoredObjectCount"
+	monitoredObjectCountByDomain["_id"] = monitoredObjectCountByDomainIndex
 	monitoredObjectCountByDomain["language"] = "javascript"
 	byDomain := map[string]interface{}{}
 	byDomain["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject' && doc.data.domainSet) {\n      for (var i in doc.data.domainSet) {\n        emit(doc.data.domainSet[i], doc._id);\n      }\n    }\n}"

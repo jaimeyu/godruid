@@ -247,7 +247,9 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					monObjID := m.CID + "-" + m.SID
 					monObj, err := wsServer.TenantDB.GetMonitoredObject(tenantID, monObjID)
 					if err != nil {
-						logger.Log.Errorf("Unable to find MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
+						// Normally we'd want to log and error here, but since we're doing a small subset of monitored object, it polutes the logs because many
+						// of them are not in the system.
+						// logger.Log.Errorf("Unable to find MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
 					} else if m.Name == "" {
 						logger.Log.Errorf("Unable to find name for MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
 					} else {

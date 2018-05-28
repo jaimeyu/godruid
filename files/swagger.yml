@@ -1644,7 +1644,50 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-
+  '/v1/tenants/{tenantId}/sla-report/{reportID}':
+    get:
+      summary: Retrieve a Tenant SLA report by id.
+      operationId: GetSLAReport
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/sla-report-list:
+    get:
+      summary: Retrieve all SLA reports for the specified Tenant.
+      operationId: GetAllSLAReports
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObjectList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
 
 # All API definitions below here are for the MetricsService and will need to be modified
 # when the MetricsService is altered to use the jsonapi implementation.
@@ -2014,10 +2057,10 @@ paths:
       tags:
         - MetricsService
 
-  /v1/sla-report:
+  /v1/generate-sla-report:
     get:
       summary: Generate an SLA Report.
-      operationId: GetSLAReport
+      operationId: GenSLAReport
       produces:
         - application/vnd.api+json
       responses:
@@ -3149,3 +3192,10 @@ definitions:
         type: object
         additionalProperties:
           type: string
+  gathergrpcJSONAPIObjectList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/gathergrpcJSONAPIObject'

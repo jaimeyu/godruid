@@ -66,7 +66,7 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 		},
 
 		server.Route{
-			Name:        "GetSLAReport",
+			Name:        "GenSLAReport",
 			Method:      "GET",
 			Pattern:     "/api/v1/generate-sla-report",
 			HandlerFunc: result.GetSLAReport,

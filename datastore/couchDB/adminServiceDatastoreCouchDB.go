@@ -10,7 +10,6 @@ import (
 	"github.com/leesper/couchdb-golang"
 
 	"github.com/accedian/adh-gather/config"
-	"github.com/accedian/adh-gather/datastore"
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
@@ -22,6 +21,8 @@ import (
 const (
 	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
 	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
+
+	monitoredObjectDBSuffix = "_monitored-objects"
 )
 
 // AdminServiceDatastoreCouchDB - struct responsible for handling
@@ -139,24 +140,22 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
-	baseID := datastore.GetDataIDFromFullID(tenantDescriptor.ID)
-
 	// Create a CouchDB database to isolate monitored object data for the tenant
-	_, err = asd.CreateDatabase(datastore.PrependToDataID(baseID, strings.ToLower(string(tenmod.TenantMonitoredObjectType))))
+	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, monitoredObjectDBSuffix))
 	if err != nil {
 		logger.Log.Debugf("Unable to create monitored object database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
 
 	// Create a CouchDB database to isolate reports for the tenant
-	_, err = asd.CreateDatabase(datastore.PrependToDataID(baseID, strings.ToLower(string(tenmod.TenantReportType))))
+	_, err = asd.CreateDatabase(fmt.Sprintf("%s_%s", tenantDescriptor.ID, strings.ToLower(string(tenmod.TenantReportType))))
 	if err != nil {
 		logger.Log.Debugf("Unable to create report database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
 
 	// Add in the views/indicies necessary for the db:
-	if err = asd.addTenantViewsToDB(baseID, tenantDescriptor.ID); err != nil {
+	if err = asd.addTenantViewsToDB(tenantDescriptor.ID); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
@@ -193,7 +192,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	}
 
 	// Setup deletion of the report datastore
-	reportDBID := ds.PrependToDataID(tenantID, strings.ToLower(string(tenmod.TenantReportType)))
+	reportDBID := fmt.Sprintf("%s_%s", tenantIDWithPrefix, strings.ToLower(string(tenmod.TenantReportType)))
 	if err = purgeDB(createDBPathStr(asd.couchHost, reportDBID)); err != nil {
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "reports", err.Error())
 		return nil, err
@@ -205,7 +204,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	}
 
 	// Setup deletion of the monitored object datastore
-	moDBID := ds.PrependToDataID(tenantID, strings.ToLower(string(tenmod.TenantMonitoredObjectType)))
+	moDBID := fmt.Sprintf("%s%s", tenantIDWithPrefix, monitoredObjectDBSuffix)
 	if err = purgeDB(createDBPathStr(asd.couchHost, moDBID)); err != nil {
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "monitored objects", err.Error())
 		return nil, err
@@ -284,7 +283,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 	return db, nil
 }
 
-func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(tenantId string, dbName string) error {
+func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error {
 	if len(dbName) == 0 {
 		return errors.New("Unable to add views to a database if no database name is provided")
 	}
@@ -299,7 +298,7 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(tenantId string, dbN
 		return err
 	}
 
-	moDB, err := getDatabase(createDBPathStr(asd.couchHost, datastore.PrependToDataID(tenantId, strings.ToLower(string(tenmod.TenantMonitoredObjectType)))))
+	moDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, monitoredObjectDBSuffix)))
 	if err != nil {
 		return err
 	}

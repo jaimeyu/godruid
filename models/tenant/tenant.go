@@ -29,7 +29,7 @@ const (
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
 	// ReportType - datatype string used to identify a Tenant Report in the datastore record
-	TenantReportType TenantDataType = "report"
+	TenantReportType TenantDataType = "reports"
 
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"

@@ -320,7 +320,7 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, gran
 		Intervals:        []string{interval}}, nil
 }
 
-func SLATimeBucketQuery(tenant string, dataSource string, domains []string, timeBucket TimeBucket, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, error) {
+func SLATimeBucketQuery(tenant string, dataSource string, domains []string, timeBucket TimeBucket, timeZone string, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, error) {
 	var aggregations []godruid.Aggregation
 	var dimension godruid.DimSpec
 	threshold := 0
@@ -331,8 +331,10 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, time
 			Dimension:  "__time",
 			OutputName: "dayOfWeek",
 			ExtractionFunction: godruid.TimeExtractionFn{
-				Type:   "timeFormat",
-				Format: "e",
+				Type:     "timeFormat",
+				Format:   "e",
+				TimeZone: timeZone,
+				Locale:   "en",
 			},
 		}
 	} else if timeBucket == HourOfDay {
@@ -342,8 +344,10 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, time
 			Dimension:  "__time",
 			OutputName: "hourOfDay",
 			ExtractionFunction: godruid.TimeExtractionFn{
-				Type:   "timeFormat",
-				Format: "HH",
+				Type:     "timeFormat",
+				Format:   "HH",
+				TimeZone: timeZone,
+				Locale:   "en",
 			},
 		}
 	} else {

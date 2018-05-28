@@ -2109,6 +2109,12 @@ paths:
           required: false
           type: integer
           format: int32
+        - name: timezone
+          description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
+          in: query
+          required: false
+          type: string
+
       tags:
         - MetricsService
 definitions:
@@ -2424,8 +2430,6 @@ definitions:
         type: "string"
       attributes:
         $ref: '#/definitions/TenantConnectorConfigAttr'
-      relationships:
-        $ref: '#/definitions/TenantConnectorConfigRelationships'
   TenantConnectorConfigAttr:
     type: "object"
     properties:
@@ -2461,11 +2465,6 @@ definitions:
         type: "integer"
       lastModifiedTimestamp:
         type: "integer"
-  TenantConnectorConfigRelationships:
-    type: "object"
-    properties:
-      thresholdProfiles:
-        $ref: '#/definitions/JsonApiRelationship'
   JsonApiTenantDomain:
     type: "object"
     properties:

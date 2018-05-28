@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"sync"
 	"time"
 
@@ -46,6 +47,24 @@ type ConnectorMessage struct {
 	ErrorCode   int
 	Data        []byte
 	Zone        string
+}
+
+type PtExport struct {
+	XMLName  xml.Name `xml:"Ptexport"`
+	Version  string   `xml:"version,attr"`
+	Response Response
+}
+
+type Response struct {
+	XMLName xml.Name `xml:"Response"`
+	Sess    []Sess   `xml:"Sess"`
+}
+type Sess struct {
+	XMLName xml.Name `xml:"Sess"`
+	CID     string   `xml:"cid,attr"`
+	SID     string   `xml:"sid,attr"`
+	Name    string   `xml:"name,attr"`
+	Type    string   `xml:"type,attr"`
 }
 
 // Reader - Function which reads websocket messages coming through the websocket connection
@@ -212,6 +231,36 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
 				wsServer.Lock.Unlock()
 
+			}
+
+		case "SessionUpdate":
+			{
+				logger.Log.Infof("Received Session Update from Connector with ID: %s", connectorID)
+				monitoredObjectNames := PtExport{}
+
+				if err := xml.Unmarshal(msg.Data, &monitoredObjectNames); err != nil {
+					logger.Log.Errorf("Error unmarshalling session names from connector: %v. Error: %v. Message: %s", connectorID, msg.ErrorCode, msg.ErrorMsg)
+				}
+
+				for _, m := range monitoredObjectNames.Response.Sess {
+					tenantID := msg.Tenant
+					monObjID := m.CID + "-" + m.SID
+					monObj, err := wsServer.TenantDB.GetMonitoredObject(tenantID, monObjID)
+					if err != nil {
+						// Normally we'd want to log and error here, but since we're doing a small subset of monitored object, it polutes the logs because many
+						// of them are not in the system.
+						// logger.Log.Errorf("Unable to find MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
+					} else if m.Name == "" {
+						logger.Log.Errorf("Unable to find name for MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
+					} else {
+						// Update monitored object name
+						monObj.ObjectName = m.Name
+						_, err = wsServer.TenantDB.UpdateMonitoredObject(monObj)
+						if err != nil {
+							logger.Log.Errorf("Unable to update name of MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
+						}
+					}
+				}
 			}
 		default:
 			{

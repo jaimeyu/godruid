@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.124.0 
+**Release Date:** Mon May 28 19:20:51 UTC 2018     
+## Previous Releases 
 ### 0.123.0 
 **Release Date:** Mon May 28 17:40:29 UTC 2018     
-## Previous Releases 
 Fix - changed the name of the monitored object datastore
 ### 0.122.0 
 **Release Date:** Mon May 28 15:49:27 UTC 2018     

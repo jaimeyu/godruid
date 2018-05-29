@@ -1,9 +1,11 @@
+## Current Release 
+### 0.127.0 
+**Release Date:** Tue May 29 14:41:51 UTC 2018     
+## Previous Releases 
 * Fix - Removed 'createdTimestamp' requirement for model validation and updated validation messages to remove the requirement in the response
 
-## Current Release 
 ### 0.126.0 
 **Release Date:** Mon May 28 23:58:41 UTC 2018     
-## Previous Releases 
 * Feature - CRUD functionality for report scheduling config and SLA report
 ### 0.125.0 
 **Release Date:** Mon May 28 23:17:48 UTC 2018     

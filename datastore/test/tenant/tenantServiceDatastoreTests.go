@@ -1424,3 +1424,120 @@ func (runner *TenantServiceDatastoreTestRunner) RunGetMonitoredObjectByDomainMap
 	assert.Nil(t, err)
 	assert.Empty(t, moList)
 }
+
+func (runner *TenantServiceDatastoreTestRunner) RunHasDashboardWithDomainTest(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const NAME1 = "name1"
+	const NAME2 = "name2"
+	const DOM1 = "domain1"
+	const DOM2 = "domain2"
+	const DOM3 = "domain3"
+	const COLOR1 = "color1"
+	const COLOR2 = "color2"
+	const THRPRF = "ThresholdPrf"
+	const DASHBOARD_NODOMAINS = "dash1"
+	const DASHBOARD_DOM1 = "dash2"
+	const DASHBOARD_DOM1_DOM2 = "dash3"
+
+	const OBJNAME1 = "obj1"
+	const OBJID1 = "object1"
+	const OBJNAME2 = "obj2"
+	const OBJID2 = "object2"
+	const OBJNAME3 = "obj3"
+	const OBJID3 = "object3"
+	const ACTNAME1 = "actName1"
+	const ACTTYPE1 = string(tenmod.AccedianVNID)
+	const ACTNAME2 = "actName2"
+	const ACTTYPE2 = string(tenmod.AccedianNID)
+	const REFNAME1 = "refname1"
+	const REFTYPE1 = string(tenmod.AccedianNID)
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Create a couple Domains
+	// Create a record
+	tenantDomain := tenmod.Domain{
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
+	res, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	tenantDomain = tenmod.Domain{
+		Name:     DOM2,
+		TenantID: TENANT,
+		Color:    COLOR2}
+	res, err = runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	tenantDomain = tenmod.Domain{
+		Name:     DOM3,
+		TenantID: TENANT,
+		Color:    COLOR2}
+	res, err = runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+
+	// Validate they were created
+	recList, err := runner.tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, recList)
+	assert.Equal(t, 3, len(recList))
+
+	res2, err := runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_NODOMAINS, TenantID: TENANT})
+	assert.Nil(t, err)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
+	assert.Nil(t, err)
+
+	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_DOM1, TenantID: TENANT, DomainSet: []string{DOM1}})
+	assert.Nil(t, err)
+
+	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_DOM1_DOM2, TenantID: TENANT, DomainSet: []string{DOM2, DOM1}})
+	assert.Nil(t, err)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
+	assert.Nil(t, err)
+	assert.True(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
+	assert.Nil(t, err)
+	assert.True(t, res2)
+
+	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
+	assert.Nil(t, err)
+	assert.False(t, res2)
+
+}

@@ -103,4 +103,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunTenantIngestionProfileCRUD(t)
 	tester.RunTenantThresholdProfileCRUD(t)
 	tester.RunGetMonitoredObjectByDomainMapTest(t)
+	tester.RunHasDashboardWithDomainTest(t)
 }

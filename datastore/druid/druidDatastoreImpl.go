@@ -52,8 +52,8 @@ type TopNThresholdCrossingByMonitoredObjectResponse struct {
 }
 
 type RawMetricsResponse struct {
-	Timestamp string
-	Result    map[string]interface{}
+	Timestamp string                 `json:"timestamp"`
+	Result    map[string]interface{} `json:"result"`
 }
 
 type AggMetricsResponse struct {

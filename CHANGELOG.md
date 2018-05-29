@@ -1,4 +1,4 @@
-* Fix - Removed 'createdTimestamp' requirement for model validation and updated validation messages to remove the requirement in the response.
+* Fix - Removed 'createdTimestamp' requirement for model validation and updated validation messages to remove the requirement in the response
 
 ## Current Release 
 ### 0.126.0 

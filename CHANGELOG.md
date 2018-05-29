@@ -1,8 +1,10 @@
-* Feature - block deletion of domain and threshold profile if used by other resources
 ## Current Release 
+### 0.128.0 
+**Release Date:** Tue May 29 15:40:01 UTC 2018     
+## Previous Releases 
+* Feature - block deletion of domain and threshold profile if used by other resources
 ### 0.127.0 
 **Release Date:** Tue May 29 14:41:51 UTC 2018     
-## Previous Releases 
 * Fix - Removed 'createdTimestamp' requirement for model validation and updated validation messages to remove the requirement in the response
 
 ### 0.126.0 

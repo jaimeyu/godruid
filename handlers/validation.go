@@ -14,8 +14,8 @@ func validateAdminUserRequest(request *pb.AdminUser, isUpdate bool) error {
 		return errors.New("Invalid AdminUserRequest: no Admin User data provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantUserRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantUserRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -26,8 +26,8 @@ func validateTenantDescriptorRequest(request *pb.TenantDescriptor, isUpdate bool
 		return errors.New("Invalid TenantDescriptorRequest: no Tenant Descriptor data provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantUserRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantUserRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -42,8 +42,8 @@ func validateTenantUserRequest(request *pb.TenantUser, isUpdate bool) error {
 		return errors.New("Invalid TenantUserRequest: no Tenant ID provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantUserRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantUserRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -70,8 +70,8 @@ func validateTenantDomainRequest(request *pb.TenantDomain, isUpdate bool) error 
 		return errors.New("Invalid TenantDomainRequest: no Tenant Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantDomainRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantDomainRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -98,8 +98,8 @@ func validateTenantIngPrfRequest(request *pb.TenantIngestionProfile, isUpdate bo
 		return errors.New("Invalid TenantIngestionProfileRequest: no Tenant Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantIngestionProfileRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantIngestionProfileRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -126,8 +126,8 @@ func validateTenantThreshPrfRequest(request *pb.TenantThresholdProfile, isUpdate
 		return errors.New("Invalid TenantThresholdProfileRequest: no Tenant Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantThresholdProfileRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantThresholdProfileRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -158,8 +158,8 @@ func validateMonitoredObjectRequest(request *pb.MonitoredObject, isUpdate bool) 
 		return errors.New("Invalid MonitoredObjectRequest: no Monitored Object Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid MonitoredObjectRequest: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid MonitoredObjectRequest: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -194,8 +194,8 @@ func validateIngestionDictionary(request *pb.IngestionDictionary, isUpdate bool)
 		return errors.New("Invalid IngestionDictionary: no IngestionDictionary data provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid IngestionDictionary: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid IngestionDictionary: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -210,8 +210,8 @@ func validateTenantMetaRequest(request *pb.TenantMetadata, isUpdate bool) error 
 		return errors.New("Invalid TenantMeta: no Tenant Id provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid TenantMeta: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid TenantMeta: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -222,8 +222,8 @@ func validateValidTypes(request *pb.ValidTypes, isUpdate bool) error {
 		return errors.New("Invalid ValidTypes: no ValidTypes data provided")
 	}
 
-	if isUpdate && (len(request.GetXRev()) == 0 || request.GetData().GetCreatedTimestamp() == 0) {
-		return errors.New("Invalid ValidTypes: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(request.GetXRev()) == 0) {
+		return errors.New("Invalid ValidTypes: must provide a revision (_rev) for an update")
 	}
 
 	return nil

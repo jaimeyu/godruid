@@ -66,7 +66,7 @@ func (t *Tenant) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(t.REV) == 0) {
-		return errors.New("Invalid Tenant request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -108,8 +108,8 @@ func (u *User) Validate(isUpdate bool) error {
 	if !isUpdate && len(u.REV) != 0 {
 		return errors.New("Invalid Admin User request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(u.REV) == 0 || u.CreatedTimestamp == 0) {
-		return errors.New("Invalid Admin User request: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(u.REV) == 0) {
+		return errors.New("Invalid Admin User request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -141,8 +141,8 @@ func (dict *IngestionDictionary) Validate(isUpdate bool) error {
 	if !isUpdate && len(dict.REV) != 0 {
 		return errors.New("Invalid Ingestion Dictionaryrequest: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(dict.REV) == 0 || dict.CreatedTimestamp == 0) {
-		return errors.New("Invalid Ingestion Dictionary request: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(dict.REV) == 0) {
+		return errors.New("Invalid Ingestion Dictionary request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -201,8 +201,8 @@ func (vt *ValidTypes) Validate(isUpdate bool) error {
 	if !isUpdate && len(vt.REV) != 0 {
 		return errors.New("Invalid Valid Types request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(vt.REV) == 0 || vt.CreatedTimestamp == 0) {
-		return errors.New("Invalid Valid Types request: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(vt.REV) == 0) {
+		return errors.New("Invalid Valid Types request: must provide a revision (_rev) for an update")
 	}
 
 	return nil

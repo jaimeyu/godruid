@@ -162,7 +162,7 @@ func (u *User) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant User request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(u.REV) == 0) {
-		return errors.New("Invalid Tenant User request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant User request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -200,7 +200,7 @@ func (d *ConnectorInstance) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant ConnectorInstance request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
-		return errors.New("Invalid Tenant ConnectorInstance request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant ConnectorInstance request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -247,8 +247,8 @@ func (d *ConnectorConfig) Validate(isUpdate bool) error {
 	if !isUpdate && len(d.REV) != 0 {
 		return errors.New("Invalid Tenant ConnectorConfig request: must not provide a revision value in a creation request")
 	}
-	if isUpdate && (len(d.REV) == 0 || d.CreatedTimestamp == 0) {
-		return errors.New("Invalid Tenant ConnectorConfig request: must provide a createdTimestamp and revision for an update")
+	if isUpdate && (len(d.REV) == 0) {
+		return errors.New("Invalid Tenant ConnectorConfig request: must provide a revision for an update")
 	}
 
 	return nil
@@ -296,7 +296,7 @@ func (d *Domain) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant Domain request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(d.REV) == 0) {
-		return errors.New("Invalid Tenant Domain request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant Domain request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -333,7 +333,7 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant Ingestion Profile request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(prf.REV) == 0) {
-		return errors.New("Invalid Tenant Ingestion Profile request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant Ingestion Profile request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -412,7 +412,7 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant Threshold Profile request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(prf.REV) == 0) {
-		return errors.New("Invalid Tenant Threshold Profile request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant Threshold Profile request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -526,7 +526,7 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	}
 
 	if isUpdate && (len(mo.REV) == 0) {
-		return errors.New("Invalid Tenant Monitored object request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant Monitored object request: must provide a revision (_rev) for an update")
 	}
 
 	return nil
@@ -601,7 +601,7 @@ func (meta *Metadata) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant Metadata request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(meta.REV) == 0) {
-		return errors.New("Invalid Tenant Metadata request: must provide a createdTimestamp and revision for an update")
+		return errors.New("Invalid Tenant Metadata request: must provide a revision (_rev) for an update")
 	}
 
 	return nil

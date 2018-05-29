@@ -896,12 +896,66 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r
 
 	// Get the IDs from the URL
 	tenantID := getDBFieldFromRequest(r, 4)
-	userID := getDBFieldFromRequest(r, 6)
+	domainID := getDBFieldFromRequest(r, 6)
 
-	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, userID)
+	// Integrity Check - Monitored Objects
+	moByDomainReq := tenmod.MonitoredObjectCountByDomainRequest{
+		TenantID:  tenantID,
+		ByCount:   true,
+		DomainSet: []string{domainID},
+	}
+	moByDomainResp, err := tsh.TenantDB.GetMonitoredObjectToDomainMap(&moByDomainReq)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("%s got %s", models.AsJSONString(moByDomainReq), models.AsJSONString(moByDomainResp))
+	if moByDomainResp.DomainToMonitoredObjectCountMap != nil {
+		if count, exists := moByDomainResp.DomainToMonitoredObjectCountMap[domainID]; exists && count > 0 {
+			msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantMonitoredObjectStr)
+			reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Integrity Check - Dashboards
+	dashboardUsesDomain, err := tsh.TenantDB.HasDashboardsWithDomain(tenantID, domainID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+	if dashboardUsesDomain {
+		msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantDashboardStr)
+		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	configs, err := tsh.TenantDB.GetAllReportScheduleConfigs(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+		return
+	}
+	for _, rep := range configs {
+		if len(rep.DomainIds) == 0 {
+			continue
+		}
+		for _, dom := range rep.DomainIds {
+			if dom == domainID {
+				msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantReportScheduleConfigStr)
+				reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, domainID)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.DeleteTenantDomain(tenantID, userID)
+	result, err := tsh.TenantDB.DeleteTenantDomain(tenantID, domainID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
@@ -1293,6 +1347,21 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantThresholdProfile(w http.Respons
 	dataID := getDBFieldFromRequest(r, 6)
 
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantThresholdProfileStr, dataID)
+
+	// Integrity Check - SLA Reports
+	configs, err := tsh.TenantDB.GetAllReportScheduleConfigs(tenantID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantThresholdProfileStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteThrPrfStr, msg, http.StatusInternalServerError)
+		return
+	}
+	for _, rep := range configs {
+		if rep.ThresholdProfileID == dataID {
+			msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantThresholdProfileStr, tenmod.TenantReportScheduleConfigStr)
+			reportError(w, startTime, "500", mon.DeleteThrPrfStr, msg, http.StatusInternalServerError)
+			return
+		}
+	}
 
 	// Issue request to DAO Layer
 	result, err := tsh.TenantDB.DeleteTenantThresholdProfile(tenantID, dataID)

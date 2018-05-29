@@ -71,4 +71,10 @@ type TenantServiceDatastore interface {
 	DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
+
+	// For testing
+	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
+	// For testing
+	DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error)
+	HasDashboardsWithDomain(tenantID string, domainID string) (bool, error)
 }

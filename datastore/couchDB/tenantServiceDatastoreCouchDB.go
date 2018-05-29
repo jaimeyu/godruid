@@ -377,6 +377,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest
 	if err := createDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
+
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
@@ -1028,4 +1029,88 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*
 
 	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantSLAReportStr)
 	return res, nil
+}
+func (tsd *TenantServiceDatastoreCouchDB) CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
+	dashboard.ID = ds.GenerateID(dashboard, string(tenmod.TenantDashboardType))
+	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to generic object
+	storeFormat, err := convertDataToCouchDbSupportedModel(dashboard)
+	if err != nil {
+		return nil, err
+	}
+
+	_, _, err = storeDataInCouchDB(storeFormat, tenmod.TenantDashboardStr, db)
+	if err != nil {
+		return nil, err
+	}
+
+	stripPrefixFromID(storeFormat)
+
+	// Populate the response
+	dataContainer := &tenmod.Dashboard{}
+	if err = convertGenericCouchDataToObject(storeFormat, dataContainer, tenmod.TenantDashboardStr); err != nil {
+		return nil, err
+	}
+
+	return dataContainer, nil
+
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDashboardStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDashboardType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Dashboard{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDashboardStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) HasDashboardsWithDomain(tenantID string, domainID string) (bool, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantMetaStr, tenantID)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	db, err := getDatabase(tenantDBName)
+	if err != nil {
+		return false, err
+	}
+
+	fetchedData, err := getAllOfTypeByIDPrefix(string(tenmod.TenantDashboardType), tenmod.TenantDashboardStr, db)
+	if err != nil {
+		return false, err
+	}
+
+	logger.Log.Debugf("fetched %s", models.AsJSONString(fetchedData))
+	for _, d := range fetchedData {
+		data, ok := d["data"]
+		if !ok {
+			continue
+		}
+		if _, hasDomainIDs := data.(map[string]interface{})["domainSet"]; hasDomainIDs {
+			dataContainer := tenmod.Dashboard{}
+			if err = convertGenericCouchDataToObject(d, &dataContainer, tenmod.TenantDashboardStr); err != nil {
+				return false, err
+			}
+
+			for _, v := range dataContainer.DomainSet {
+				if v == domainID {
+					return true, nil
+				}
+			}
+
+		}
+	}
+	return false, nil
 }

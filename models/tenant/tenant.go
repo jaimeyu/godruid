@@ -42,6 +42,9 @@ const (
 
 	// TenantSLAReportType - datatype string used to identify a Tenant SLA Report in the datastore record
 	TenantSLAReportType TenantDataType = "tenantSLAReport"
+
+	// DashboardType - datatype string used to identify a Tenant Meta in the datastore record
+	TenantDashboardType TenantDataType = "dashboard"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -123,6 +126,9 @@ const (
 
 	// TenantSLAReportStr - common name for the sla report for use in logs.
 	TenantSLAReportStr = "Tenant SLA Report"
+
+	// TenantDashboardStr - common name for the Dashboard for use in logs.
+	TenantDashboardStr = "Tenant Dashboard"
 )
 
 // User - defines a Tenant user.
@@ -632,4 +638,12 @@ type MonitoredObjectCountByDomainResponse struct {
 // BulkMonitoredObjectRequest - used for requests that pass in a set of Monitored Objects
 type BulkMonitoredObjectRequest struct {
 	MonitoredObjectSet []*MonitoredObject `json:"monitoredObjectSet"`
+}
+
+type Dashboard struct {
+	ID        string   `json:"_id"`
+	REV       string   `json:"_rev"`
+	TenantID  string   `json:"-"` // UI does not write this property
+	Name      string   `json:"name"`
+	DomainSet []string `json:"domainSet"`
 }

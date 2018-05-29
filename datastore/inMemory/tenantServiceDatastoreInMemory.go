@@ -26,6 +26,7 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantThrPrfMap               map[string]map[string]*tenmod.ThresholdProfile
 	tenantToIDtoTenantReportScheduleConfigMap map[string]map[string]*metmod.ReportScheduleConfig
 	tenantToIDtoTenantSLAReportMap            map[string]map[string]*metmod.SLAReport
+	tenantToIDtoDashboardMap                  map[string]map[string]*tenmod.Dashboard
 
 	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
@@ -42,6 +43,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantMonitoredObjectMap = map[string]map[string]*tenmod.MonitoredObject{}
 	res.tenantToIDtoTenantThrPrfMap = map[string]map[string]*tenmod.ThresholdProfile{}
 	res.tenantToIDtoTenantSLAReportMap = map[string]map[string]*metmod.SLAReport{}
+	res.tenantToIDtoDashboardMap = map[string]map[string]*tenmod.Dashboard{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
@@ -95,6 +97,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantSLAReportStr:
 		if tsd.tenantToIDtoTenantSLAReportMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantDashboardType:
+		if tsd.tenantToIDtoDashboardMap[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -1200,4 +1206,66 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllSLAReports(tenantID string) ([]
 	}
 
 	return recList, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
+	if err := tsd.DoesTenantExist(dashboard.TenantID, tenmod.TenantDashboardType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoDashboardMap[dashboard.TenantID] = map[string]*tenmod.Dashboard{}
+	}
+
+	recCopy := tenmod.Dashboard{}
+	deepcopy.Copy(&recCopy, dashboard)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+
+	tsd.tenantToIDtoDashboardMap[dashboard.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Dashboard ID", tenmod.TenantDashboardStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDashboardStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDashboardType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDomainStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoDashboardMap[tenantID][dataID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoDashboardMap))
+	if ok {
+		delete(tsd.tenantToIDtoDashboardMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoDashboardMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoDashboardMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf("%s not found", tenmod.TenantReportScheduleConfigStr)
+}
+
+func (tsd *TenantServiceDatastoreInMemory) HasDashboardsWithDomain(tenantID string, domainID string) (bool, error) {
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDashboardType); err != nil {
+		return false, nil
+	}
+
+	for _, dashboard := range tsd.tenantToIDtoDashboardMap[tenantID] {
+		if dashboard == nil {
+			continue
+		}
+		logger.Log.Debugf("Processing tenantID %s dashboard %s", tenantID, models.AsJSONString(dashboard))
+		for _, v := range dashboard.DomainSet {
+			if v == domainID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+
 }

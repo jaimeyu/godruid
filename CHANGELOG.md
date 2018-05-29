@@ -1,3 +1,4 @@
+* Feature - block deletion of domain and threshold profile if used by other resources
 ## Current Release 
 ### 0.127.0 
 **Release Date:** Tue May 29 14:41:51 UTC 2018     

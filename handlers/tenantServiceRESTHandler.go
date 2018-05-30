@@ -225,6 +225,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.BulkInsertMonitoredObject,
 		},
 		server.Route{
+			Name:        "BulkUpdateMonitoredObject",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "bulk/insert/monitored-objects",
+			HandlerFunc: result.BulkUpdateMonitoredObject,
+		},
+		server.Route{
 			Name:        "UpdateMonitoredObject",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects",
@@ -1850,7 +1856,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 		}
 	}
 
-	logger.Log.Infof("Bulk instering %ss: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
+	logger.Log.Infof("Bulk inserting %ss: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
 
 	// Issue request to DAO Layer
 	result, err := tsh.TenantDB.BulkInsertMonitoredObjects(tenantID, data)
@@ -1861,6 +1867,62 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	}
 
 	NotifyMonitoredObjectCreated(tenantID, data...)
+	response := map[string]interface{}{}
+	response["results"] = result
+
+	res, err := json.Marshal(response)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal response for  %s : %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.BulkUpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Completed bulk insert of %ss for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
+	trackAPIMetrics(startTime, "200", mon.BulkUpdateMonObjStr)
+	fmt.Fprintf(w, string(res))
+}
+
+// BulkUpdateMonitoredObject - updates 1 or many monitored objects in one request
+func (tsh *TenantServiceRESTHandler) BulkUpdateMonitoredObject(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	// Unmarshal the request
+	data := []*tenmod.MonitoredObject{}
+	err := unmarshalData(r, &data)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Validate the request data
+	for _, obj := range data {
+		if err = obj.Validate(true); err != nil || obj.TenantID != tenantID {
+			msg := fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have ID and revision")
+			reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+			return
+		}
+		if obj.TenantID != tenantID {
+			msg := fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID "+tenantID)
+			reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+			return
+		}
+
+	}
+
+	logger.Log.Infof("Bulk updating %ss: %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(&data))
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.BulkUpdateMonitoredObjects(tenantID, data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.BulkUpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	NotifyMonitoredObjectUpdated(tenantID, data...)
 	response := map[string]interface{}{}
 	response["results"] = result
 

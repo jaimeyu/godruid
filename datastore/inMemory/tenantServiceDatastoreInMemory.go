@@ -1042,6 +1042,30 @@ func (tsd *TenantServiceDatastoreInMemory) BulkInsertMonitoredObjects(tenantID s
 	return result, nil
 }
 
+// BulkUpdatetMonitoredObjects - InMemory implementation of BulkUpdatetMonitoredObjects
+func (tsd *TenantServiceDatastoreInMemory) BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
+
+	result := make([]*common.BulkOperationResult, 0)
+	for _, val := range value {
+		created, err := tsd.UpdateMonitoredObject(val)
+		if err != nil {
+			entry := common.BulkOperationResult{
+				OK:     false,
+				REASON: err.Error(),
+			}
+			result = append(result, &entry)
+		} else {
+			entry := common.BulkOperationResult{
+				OK: true,
+				ID: created.ID,
+			}
+			result = append(result, &entry)
+		}
+	}
+
+	return result, nil
+}
+
 func (tsd *TenantServiceDatastoreInMemory) CreateReportScheduleConfig(config *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
 	if err := tsd.DoesTenantExist(config.TenantID, tenmod.TenantReportScheduleConfigType); err != nil {
 		tsd.tenantToIDtoTenantReportScheduleConfigMap[config.TenantID] = map[string]*metmod.ReportScheduleConfig{}

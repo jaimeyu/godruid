@@ -1494,7 +1494,7 @@ paths:
   '/v1/tenants/{tenantId}/bulk/insert/monitored-objects':
     post:
       summary: Create one or more Monitored Objects in a single API request.
-      operationId: BulkInsertMonitoredObjects
+      operationId: BulkInsertMonitoredObject
       produces:
         - application/json        
       responses:
@@ -1520,6 +1520,35 @@ paths:
               - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
+    put:
+      summary: Update one or more Monitored Objects in a single API request.
+      operationId: BulkUpdateMonitoredObject
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResult'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: "array"
+            items: 
+              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+
   /v1/tenants/{tenantId}/meta:
     post:
       summary: Create a Metadata record for a Tenant.

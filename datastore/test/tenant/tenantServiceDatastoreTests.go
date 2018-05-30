@@ -722,6 +722,8 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	const OBJID1 = "object1"
 	const OBJNAME2 = "obj2"
 	const OBJID2 = "object2"
+	const OBJNAME3 = "obj3"
+	const OBJID3 = "object3"
 	const ACTNAME1 = "actName1"
 	const ACTTYPE1 = string(tenmod.AccedianVNID)
 	const ACTNAME2 = "actName2"
@@ -887,16 +889,27 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	assert.NotNil(t, recList)
 
 	// Create some records in Bulk:
-	bulkReq := []*tenmod.MonitoredObject{&tenmod.MonitoredObject{
-		MonitoredObjectID: OBJID2,
-		ObjectName:        OBJNAME2,
-		TenantID:          TENANT,
-		ActuatorName:      ACTNAME2,
-		ActuatorType:      ACTTYPE2,
-		DomainSet:         DOMAINSET1},
+	bulkReq := []*tenmod.MonitoredObject{
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID2,
+			ObjectName:        OBJNAME2,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME2,
+			ActuatorType:      ACTTYPE2,
+			DomainSet:         DOMAINSET1},
 		&tenmod.MonitoredObject{
 			MonitoredObjectID: OBJID1,
 			ObjectName:        OBJNAME1,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME1,
+			ActuatorType:      ACTTYPE1,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET1,
+		},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID3,
+			ObjectName:        OBJNAME3,
 			TenantID:          TENANT,
 			ActuatorName:      ACTNAME1,
 			ActuatorType:      ACTTYPE1,
@@ -907,13 +920,68 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	bulkResult, err := runner.tenantDB.BulkInsertMonitoredObjects(TENANT, bulkReq)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, bulkResult)
+	assert.Equal(t, 3, len(bulkResult))
+
+	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, recList)
+	assert.Equal(t, 3, len(fetchedList))
+	// Make sure everything has an ID and revision
+	for _, v := range fetchedList {
+		assert.NotNil(t, v)
+		assert.NotEmpty(t, v.ID)
+		assert.NotEmpty(t, v.REV)
+	}
+
+	// Modify only 2 of the monitored objects
+	bulkUpdateRequest := make([]*tenmod.MonitoredObject, 2)
+	var objId1, objId2, objId3 string
+	for i, v := range fetchedList {
+		if fetchedList[i].MonitoredObjectID == OBJID1 {
+			objId1 = fetchedList[i].ID
+			// change the domain set
+			obj := &tenmod.MonitoredObject{}
+			deepcopy.Copy(obj, v)
+			obj.DomainSet = DOMAINSET2
+			bulkUpdateRequest[0] = obj
+		} else if fetchedList[i].MonitoredObjectID == OBJID2 {
+			objId2 = fetchedList[i].ID
+			// clear the domains
+			obj := &tenmod.MonitoredObject{}
+			deepcopy.Copy(obj, v)
+			obj.DomainSet = nil
+			bulkUpdateRequest[1] = obj
+		} else if fetchedList[i].MonitoredObjectID == OBJID3 {
+			objId3 = fetchedList[i].ID
+		}
+		assert.ElementsMatch(t, DOMAINSET1, fetchedList[i].DomainSet)
+	}
+
+	bulkResult, err = runner.tenantDB.BulkUpdateMonitoredObjects(TENANT, bulkUpdateRequest)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, bulkResult)
 	assert.Equal(t, 2, len(bulkResult))
+
+	fetched, err = runner.tenantDB.GetMonitoredObject(TENANT, objId1)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetched)
+	assert.ElementsMatch(t, DOMAINSET2, fetched.DomainSet)
+
+	fetched, err = runner.tenantDB.GetMonitoredObject(TENANT, objId2)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetched)
+	assert.Nil(t, fetched.DomainSet)
+
+	fetched, err = runner.tenantDB.GetMonitoredObject(TENANT, objId3)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetched)
+	assert.ElementsMatch(t, DOMAINSET1, fetched.DomainSet)
 
 	// Delete the remaining records
 	fetchedList, err = runner.tenantDB.GetAllMonitoredObjects(TENANT)
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
-	assert.Equal(t, 2, len(fetchedList))
+	assert.Equal(t, 3, len(fetchedList))
 
 	for _, val := range fetchedList {
 		del, err := runner.tenantDB.DeleteMonitoredObject(TENANT, val.ID)
@@ -928,6 +996,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMonitoredObjectCRUD(t *
 	assert.Nil(t, err)
 	assert.NotNil(t, recList)
 	assert.Empty(t, fetchedList)
+
 }
 
 func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing.T) {

@@ -911,6 +911,69 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 	return res, nil
 }
 
+// BulkUpdateMonitoredObjects - CouchDB implementation of BulkUpdateMonitoredObjects
+func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
+	logger.Log.Debugf("Bulk updating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Iterate over the collection and populate necessary fields
+	data := make([]map[string]interface{}, 0)
+	for _, mo := range value {
+		mo.ID = ds.PrependToDataID(mo.ID, string(tenmod.TenantMonitoredObjectType))
+		genericMO, err := convertDataToCouchDbSupportedModel(mo)
+		if err != nil {
+			return nil, err
+		}
+
+		dataType := string(tenmod.TenantMonitoredObjectType)
+		dataProp := genericMO["data"].(map[string]interface{})
+		dataProp["datatype"] = dataType
+		dataProp["createdTimestamp"] = ds.MakeTimestamp()
+		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
+
+		data = append(data, genericMO)
+	}
+	body := map[string]interface{}{
+		"docs": data}
+
+	fetchedData, err := performBulkUpdate(body, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := make([]*common.BulkOperationResult, 0)
+	for _, fetched := range fetchedData {
+		newObj := common.BulkOperationResult{}
+		if fetched["id"] != nil {
+			newObj.ID = fetched["id"].(string)
+		}
+		if fetched["rev"] != nil {
+			newObj.REV = fetched["rev"].(string)
+		}
+		if fetched["reason"] != nil {
+			newObj.REASON = fetched["reason"].(string)
+		}
+		if fetched["error"] != nil {
+			newObj.ERROR = fetched["error"].(string)
+		}
+		if fetched["ok"] != nil {
+			newObj.OK = fetched["ok"].(bool)
+		}
+
+		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
+		res = append(res, &newObj)
+	}
+
+	logger.Log.Debugf("Bulk update of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
+	return res, nil
+}
+
 func (tsd *TenantServiceDatastoreCouchDB) CreateReportScheduleConfig(slaConfig *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Creating %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	slaConfig.ID = ds.GenerateID(slaConfig, string(metmod.ReportScheduleConfigType))

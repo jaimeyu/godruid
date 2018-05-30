@@ -1,8 +1,10 @@
-* Feat - new api to bulk update monitored objects
 ## Current Release 
+### 0.129.0 
+**Release Date:** Wed May 30 20:43:20 UTC 2018     
+## Previous Releases 
+* Feat - new api to bulk update monitored objects
 ### 0.128.0 
 **Release Date:** Tue May 29 15:40:01 UTC 2018     
-## Previous Releases 
 * Feature - block deletion of domain and threshold profile if used by other resources
 ### 0.127.0 
 **Release Date:** Tue May 29 14:41:51 UTC 2018     

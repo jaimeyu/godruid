@@ -1839,7 +1839,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 	err := unmarshalData(r, &data)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.BulkInsertMonObjStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -1851,7 +1851,7 @@ func (tsh *TenantServiceRESTHandler) BulkInsertMonitoredObject(w http.ResponseWr
 
 		if obj.TenantID != tenantID {
 			msg := fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID "+tenantID)
-			reportError(w, startTime, "400", mon.BulkUpdateMonObjStr, msg, http.StatusBadRequest)
+			reportError(w, startTime, "400", mon.BulkInsertMonObjStr, msg, http.StatusBadRequest)
 			return
 		}
 	}

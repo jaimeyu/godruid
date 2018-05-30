@@ -1,3 +1,4 @@
+* Feat - new api to bulk update monitored objects
 ## Current Release 
 ### 0.128.0 
 **Release Date:** Tue May 29 15:40:01 UTC 2018     

@@ -79,21 +79,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 			tenantID := wsServer.ConnectionMeta[connectorID].TenantID
 			connectorConfigs, _ := wsServer.TenantDB.GetAllTenantConnectorConfigsByInstanceID(tenantID, connectorID)
 
-			ci, err := wsServer.TenantDB.GetTenantConnectorInstance(tenantID, connectorID)
-
-			if err != nil {
-				logger.Log.Errorf("Unable to retrieve connectorInstance for ID: %v, for tenant: %v. Error: %v", connectorID, tenantID, err)
-				break
-			}
-			ci.Status = "disconnected"
-
-			_, err = wsServer.TenantDB.UpdateTenantConnectorInstance(ci)
-
-			if err != nil {
-				logger.Log.Errorf("Unable to update connectorInstance status for ID: %v, for tenant: %v. Error: %v", connectorID, tenantID, err)
-				break
-			}
-
 			// Lost connection to the connector, so we need to remove connectorInstanceID from any configs that have it
 			for _, c := range connectorConfigs {
 				c.ID = datastore.GetDataIDFromFullID(c.ID)
@@ -104,6 +89,13 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					logger.Log.Errorf("Unable to remove connectorInstanceID from ConnectorConfig: %v, for tenant: %v. Error: %v", c.ID, tenantID, err)
 					break
 				}
+			}
+
+			// Remove ConnectorInstance
+			_, err = wsServer.TenantDB.DeleteTenantConnectorInstance(tenantID, connectorID)
+			if err != nil {
+				logger.Log.Errorf("Unable to delete connectorInstance with ID: %v, for tenant: %v. Error: %v", connectorID, tenantID, err)
+				break
 			}
 			break
 		}

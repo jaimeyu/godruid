@@ -1,3 +1,4 @@
+* Fix - for Druid lookups, use ID attribute if MonitoredObjectID attribute is missing
 ## Current Release 
 ### 0.130.0 
 **Release Date:** Thu May 31 11:56:22 UTC 2018     

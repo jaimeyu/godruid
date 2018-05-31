@@ -624,7 +624,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 			lookupName := buildLookupName("dom", tenantID, domain)
 			domLookup, ok := lookups[lookupName]
 			if ok {
-				domLookup.LookupExtractorFactory.Data[mo.ObjectName] = domain
+				domLookup.LookupExtractorFactory.Data[mo.MonitoredObjectID] = domain
 			}
 		}
 	}

@@ -290,10 +290,18 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 
 		logger.Log.Debugf("Fetching Monitored Objects for tenant %s", t.ID)
 
+		// Note, ideally we'd use the view but currently the UI is dropping mandatory attributes (like datatype) so the
+		// view returns nothing
 		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
 		if err != nil {
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue
+		}
+		// Hack because the UI is dropping the monitored object ID when
+		for _, mo := range monitoredObjects {
+			if len(mo.MonitoredObjectID) == 0 {
+				mo.MonitoredObjectID = mo.ID
+			}
 		}
 
 		domains, err := (*c.tenantDB).GetAllTenantDomains(t.ID)

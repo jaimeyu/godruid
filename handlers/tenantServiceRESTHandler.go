@@ -837,12 +837,6 @@ func (tsh *TenantServiceRESTHandler) GetAllTenantConnectorInstances(w http.Respo
 	startTime := time.Now()
 
 	tenantID := getDBFieldFromRequest(r, 4)
-	zones := r.URL.Query()["zone"]
-	zone := ""
-
-	if len(zones) > 0 {
-		zone = zones[0]
-	}
 
 	logger.Log.Infof("Fetching %s list for Tenant %s", tenmod.TenantConnectorInstanceStr, tenantID)
 

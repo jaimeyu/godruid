@@ -724,6 +724,130 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-instances:
+    post:
+      summary: Create a ConnectorInstance for a Tenant.
+      operationId: CreateTenantConnectorInstance
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant ConnectorInstance
+      operationId: UpdateTenantConnectorInstance
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/connector-instances/{connectorId}':
+    get:
+      summary: Retrieve a Tenant ConnectorInstance by Id.
+      operationId: GetTenantConnectorInstance
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant ConnectorInstance specified by the provided Connector Instance Id.
+      operationId: DeleteTenantConnectorInstance
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-instance-list:
+    get:
+      summary: Retrieve all ConnectorInstances for the specified Tenant.
+      operationId: GetAllTenantConnectorInstances
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstanceList'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
   /v1/tenants/{tenantId}/domains:
     post:
       summary: Create a Domain for a Tenant.
@@ -2442,6 +2566,11 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorInstance:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantConnectorInstance'
   JsonApiTenantConnectorConfigList:
     type: "object"
     properties:
@@ -2449,12 +2578,19 @@ definitions:
         type: "array"
         items:
            $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorInstanceList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantConnectorInstance'
   TenantConnectorConfig:
     type: "object"
     properties:
       type: 
         type: "string"
-        enum: [domains]
+        enum: [connectorConfigs]
       id:
         type: "string"
       attributes:
@@ -2489,6 +2625,35 @@ definitions:
       datahubConnectionRetryFrequency:
         type: "integer"
       type:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantConnectorInstance:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorInstances]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantConnectorInstanceAttr'
+  TenantConnectorInstanceAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      status:
+        type: "string"
+      hostname: 
         type: "string"
       createdTimestamp:
         type: "integer"

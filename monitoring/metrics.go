@@ -11,26 +11,27 @@ const (
 	// GatherMetricPrefix - prefix used for all metrics emmitted from gather
 	GatherMetricPrefix = "gather"
 
-	TenantStr                = "tenant"
-	AdminUserStr             = "admin_user"
-	IngestionDictionaryStr   = "ing_dict"
-	IngestionProfileStr      = "ing_prf"
-	TenantUserStr            = "tenant_user"
-	TenantDomainStr          = "domain"
-	ThresholdProfileStr      = "thr_prf"
-	MonitoredObjectStr       = "mon_obj"
-	ThrCrossStr              = "thr_cross"
-	ThrCrossStrTopN          = "thr_cross_topn"
-	HistogramStr             = "histogram"
-	RawMetricStr             = "raw_metric"
-	GenSLAReportStr          = "gen_sla_report"
-	SLAReportStr             = "sla_report"
-	TenantMetaStr            = "tenant_meta"
-	ReportSchedConfigStr     = "report_sched_conf"
-	AdminViewsStr            = "admin_views"
-	ValidTypesStr            = "valid_types"
-	AggMetricsStr            = "aggr_metrics"
-	TenantConnectorConfigStr = "connector_config"
+	TenantStr                  = "tenant"
+	AdminUserStr               = "admin_user"
+	IngestionDictionaryStr     = "ing_dict"
+	IngestionProfileStr        = "ing_prf"
+	TenantUserStr              = "tenant_user"
+	TenantDomainStr            = "domain"
+	ThresholdProfileStr        = "thr_prf"
+	MonitoredObjectStr         = "mon_obj"
+	ThrCrossStr                = "thr_cross"
+	ThrCrossStrTopN            = "thr_cross_topn"
+	HistogramStr               = "histogram"
+	RawMetricStr               = "raw_metric"
+	GenSLAReportStr            = "gen_sla_report"
+	SLAReportStr               = "sla_report"
+	TenantMetaStr              = "tenant_meta"
+	ReportSchedConfigStr       = "report_sched_conf"
+	AdminViewsStr              = "admin_views"
+	ValidTypesStr              = "valid_types"
+	AggMetricsStr              = "aggr_metrics"
+	TenantConnectorConfigStr   = "connector_config"
+	TenantConnectorInstanceStr = "connector_instance"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -105,6 +106,12 @@ const (
 	GetTenantConnectorConfigStr    = TenantConnectorConfigStr + metricNameDelimiter + OPGetStr
 	DeleteTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPDeleteStr
 	GetAllTenantConnectorConfigStr = TenantConnectorConfigStr + metricNameDelimiter + OPGetAllStr
+
+	CreateTenantConnectorInstanceStr = TenantConnectorInstanceStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantConnectorInstanceStr = TenantConnectorInstanceStr + metricNameDelimiter + OPUpdateStr
+	GetTenantConnectorInstanceStr    = TenantConnectorInstanceStr + metricNameDelimiter + OPGetStr
+	DeleteTenantConnectorInstanceStr = TenantConnectorInstanceStr + metricNameDelimiter + OPDeleteStr
+	GetAllTenantConnectorInstanceStr = TenantConnectorInstanceStr + metricNameDelimiter + OPGetAllStr
 
 	CreateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateThrPrfStr = ThresholdProfileStr + metricNameDelimiter + OPUpdateStr

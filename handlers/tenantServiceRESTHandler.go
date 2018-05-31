@@ -141,6 +141,36 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetAllTenantConnectorConfigs,
 		},
 		server.Route{
+			Name:        "CreateTenantConnectorInstance",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-instances",
+			HandlerFunc: result.CreateTenantConnectorInstance,
+		},
+		server.Route{
+			Name:        "UpdateTenantConnectorInstance",
+			Method:      "PUT",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-instances",
+			HandlerFunc: result.UpdateTenantConnectorInstance,
+		},
+		server.Route{
+			Name:        "GetTenantConnectorInstance",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-instances/{connectorID}",
+			HandlerFunc: result.GetTenantConnectorInstance,
+		},
+		server.Route{
+			Name:        "DeleteTenantConnectorInstance",
+			Method:      "DELETE",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-instances/{connectorID}",
+			HandlerFunc: result.DeleteTenantConnectorInstance,
+		},
+		server.Route{
+			Name:        "GetAllTenantConnectorInstances",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "connector-instance-list",
+			HandlerFunc: result.GetAllTenantConnectorInstances,
+		},
+		server.Route{
 			Name:        "CreateTenantIngestionProfile",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "ingestion-profiles",

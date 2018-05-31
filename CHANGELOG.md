@@ -1,8 +1,10 @@
-* Fix - for Druid lookups, use ID attribute if MonitoredObjectID attribute is missing
 ## Current Release 
+### 0.131.0 
+**Release Date:** Thu May 31 14:46:02 UTC 2018     
+## Previous Releases 
+* Fix - for Druid lookups, use ID attribute if MonitoredObjectID attribute is missing
 ### 0.130.0 
 **Release Date:** Thu May 31 11:56:22 UTC 2018     
-## Previous Releases 
 ### 0.129.0 
 **Release Date:** Wed May 30 20:43:20 UTC 2018     
 * Feat - new api to bulk update monitored objects

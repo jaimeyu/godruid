@@ -528,8 +528,13 @@ func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
 func BuildRouteHandler(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 
 	functor := func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+		user, _ := ConvertHeaderToUserAuthRequest(r.Header)
 		if CheckRoleAccess(r.Header, allow) == false {
 			logger.Log.Errorf("User role is not allowed to access endpoint")
+			msg := fmt.Sprintf("%s (role:%s) is not allowed to access this endpoint %s.", user.UserName, user.UserRoles, r.URL.Path)
+			reportError(w, startTime, "401", "Build Route Handler", msg, http.StatusUnauthorized)
+
 			return
 		}
 		fn(w, r)

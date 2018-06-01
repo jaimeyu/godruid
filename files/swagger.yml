@@ -1797,7 +1797,7 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  '/v1/tenants/{tenantId}/sla-report/{reportID}':
+  '/v1/tenants/{tenantId}/sla-reports/{reportID}':
     get:
       summary: Retrieve a Tenant SLA report by id.
       operationId: GetSLAReport
@@ -2916,12 +2916,12 @@ definitions:
       tenantId:
         type: "string"
       timeRangeDuration: 
-        type: "integer"
-      domainIds: 
+        type: "string"
+      domains: 
         type: "array"
         items: 
           type: "string"
-      thresholdProfileId: 
+      thresholdProfile: 
         type: "string"
       granularity: 
         type: "string"
@@ -2929,7 +2929,9 @@ definitions:
         type: "integer"
       timezone: 
         type: "string"
-      reportName: 
+      name: 
+        type: "string"
+      reportType:
         type: "string"
       minute: 
         type: "string"
@@ -2941,6 +2943,8 @@ definitions:
         type: "string"
       dayWeek: 
         type: "string"
+      active:
+        type: "boolean"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:

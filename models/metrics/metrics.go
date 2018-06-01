@@ -1,15 +1,17 @@
 package metrics
 
 type SLAReportRequest struct {
-	TenantID string `json:"tenantId"`
+	SlaScheduleConfig string `json:"slaScheduleConfigId"`
+	TenantID          string `json:"tenantId"`
 	// ISO-8601 Intervals
 	Interval string   `json:"interval,omitempty"`
 	Domain   []string `json:"domain,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
-	Timeout            int32  `json:"timeout,omitempty"`
-	Timezone           string `json:"timezone,omitempty"`
+	// in Milliseconds
+	Timeout  int32  `json:"timeout,omitempty"`
+	Timezone string `json:"timezone,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -33,6 +35,13 @@ type SLAReport struct {
 	TimeSeriesResult     []TimeSeriesEntry `json:"timeSeriesResult"`
 	ByHourOfDayResult    interface{}       `json:"byHourOfDayResult"`
 	ByDayOfWeekResult    interface{}       `json:"byDayOfWeekResult"`
+	SLAReportRequest     SLAReportRequest  `json:"slaReportRequest"`
+
+	// Note that SLAReportRequest only holds the reference to the ThresholdProfile,
+	// which could change AFTER the SLAReport was generated. But the thresholdProfile
+	// structure is massive so we will have to revisit this and determine how to include
+	// the thresholdProfile parameters into the SLAReport in a concise manner.
+	//ThresholdProfile     pb.TenantThresholdProfile `json:"thresholdProfile"`
 }
 
 type SLASummary struct {

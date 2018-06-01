@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/getlantern/deepcopy"
 	"github.com/leesper/couchdb-golang"
 
@@ -23,6 +22,7 @@ const (
 	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
 
 	monitoredObjectDBSuffix = "_monitored-objects"
+	reportObjectDBSuffix    = "_reports"
 )
 
 // AdminServiceDatastoreCouchDB - struct responsible for handling
@@ -148,7 +148,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 	}
 
 	// Create a CouchDB database to isolate reports for the tenant
-	_, err = asd.CreateDatabase(fmt.Sprintf("%s_%s", tenantDescriptor.ID, strings.ToLower(string(tenmod.TenantReportType))))
+	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, reportObjectDBSuffix))
 	if err != nil {
 		logger.Log.Debugf("Unable to create report database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
@@ -192,7 +192,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	}
 
 	// Setup deletion of the report datastore
-	reportDBID := fmt.Sprintf("%s_%s", tenantIDWithPrefix, strings.ToLower(string(tenmod.TenantReportType)))
+	reportDBID := fmt.Sprintf("%s%s", tenantIDWithPrefix, reportObjectDBSuffix)
 	if err = purgeDB(createDBPathStr(asd.couchHost, reportDBID)); err != nil {
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "reports", err.Error())
 		return nil, err

@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -1045,7 +1044,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAR
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(slaReport))
 	slaReport.ID = ds.GenerateID(slaReport, string(tenmod.TenantSLAReportType))
 	tenantID := ds.PrependToDataID(slaReport.TenantID, string(admmod.TenantType))
-	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s_%s", tenantID, strings.ToLower(string(tenmod.TenantReportType))))
+	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
 	dataContainer := &metmod.SLAReport{}
 	if err := createDataInCouch(tenantDBName, slaReport, dataContainer, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr); err != nil {
@@ -1058,8 +1057,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaRe
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
 	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
-	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s_%s", tenantID, strings.ToLower(string(tenmod.TenantReportType))))
 	dataContainer := &metmod.SLAReport{}
 	if err := deleteDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
 		return nil, err
@@ -1071,8 +1070,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaRepor
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
 	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
-	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s_%s", tenantID, strings.ToLower(string(tenmod.TenantReportType))))
 	dataContainer := &metmod.SLAReport{}
 	if err := getDataFromCouch(tenantDBName, slaReportID, &dataContainer, tenmod.TenantSLAReportStr); err != nil {
 		return nil, err
@@ -1083,8 +1082,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaRepor
 func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantSLAReportStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
-	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s_%s", tenantID, strings.ToLower(string(tenmod.TenantReportType))))
 	res := make([]*metmod.SLAReport, 0)
 	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr, &res); err != nil {
 		return nil, err

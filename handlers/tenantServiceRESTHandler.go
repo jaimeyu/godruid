@@ -12,6 +12,7 @@ import (
 	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
+	"github.com/accedian/adh-gather/scheduler"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
 	"github.com/manyminds/api2go/jsonapi"
@@ -359,13 +360,13 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 		server.Route{
 			Name:        "GetSLAReport",
 			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-report/{reportID}",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-reports/{reportID}",
 			HandlerFunc: result.GetSLAReport,
 		},
 		server.Route{
 			Name:        "GetAllSLAReports",
 			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-reports-list",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-report-list",
 			HandlerFunc: result.GetAllSLAReports,
 		},
 	}
@@ -1118,10 +1119,10 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r
 		return
 	}
 	for _, rep := range configs {
-		if len(rep.DomainIds) == 0 {
+		if len(rep.Domains) == 0 {
 			continue
 		}
-		for _, dom := range rep.DomainIds {
+		for _, dom := range rep.Domains {
 			if dom == domainID {
 				msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantReportScheduleConfigStr)
 				reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
@@ -1534,7 +1535,7 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantThresholdProfile(w http.Respons
 		return
 	}
 	for _, rep := range configs {
-		if rep.ThresholdProfileID == dataID {
+		if rep.ThresholdProfile == dataID {
 			msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantThresholdProfileStr, tenmod.TenantReportScheduleConfigStr)
 			reportError(w, startTime, "500", mon.DeleteThrPrfStr, msg, http.StatusInternalServerError)
 			return
@@ -2132,6 +2133,8 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
 		return
 	}
+	// Seconds is not really used except for testing.
+	data.Second = "0"
 
 	// Ensure that the passed in data adheres to the model requirements
 	err = data.Validate(false)
@@ -2150,6 +2153,13 @@ func (tsh *TenantServiceRESTHandler) CreateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Tell the scheduler to go and update based on the updated database
+	err = scheduler.RebuildCronJobs()
+	if err != nil {
+		msg := fmt.Sprintf("Unable to start scheduled job%s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.CreateReportScheduleConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
 	sendSuccessResponse(result, w, startTime, mon.CreateReportScheduleConfigStr, metmod.ReportScheduleConfigStr, "Created")
 }
 
@@ -2176,6 +2186,9 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 		return
 	}
 
+	// Seconds is not really used except for testing.
+	data.Second = "0"
+
 	// Ensure that the passed in data adheres to the model requirements
 	err = data.Validate(true)
 	if err != nil {
@@ -2190,6 +2203,14 @@ func (tsh *TenantServiceRESTHandler) UpdateReportScheduleConfig(w http.ResponseW
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateReportScheduleConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Tell the scheduler to go and update based on the updated database
+	err = scheduler.RebuildCronJobs()
+	if err != nil {
+		msg := fmt.Sprintf("Unable to start scheduler %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteReportScheduleConfigStr, msg, http.StatusInternalServerError)
 		return
 	}
 
@@ -2257,6 +2278,14 @@ func (tsh *TenantServiceRESTHandler) DeleteReportScheduleConfig(w http.ResponseW
 	result, err := tsh.TenantDB.DeleteReportScheduleConfig(tenantID, configID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		reportError(w, startTime, "500", mon.DeleteReportScheduleConfigStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Tell the scheduler to go and update based on the updated database
+	err = scheduler.RebuildCronJobs()
+	if err != nil {
+		msg := fmt.Sprintf("Unable to start scheduler %s: %s", metmod.ReportScheduleConfigStr, err.Error())
 		reportError(w, startTime, "500", mon.DeleteReportScheduleConfigStr, msg, http.StatusInternalServerError)
 		return
 	}

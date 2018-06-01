@@ -13,6 +13,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
@@ -1608,5 +1609,110 @@ func (runner *TenantServiceDatastoreTestRunner) RunHasDashboardWithDomainTest(t 
 	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
 	assert.Nil(t, err)
 	assert.False(t, res2)
+
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *testing.T) {
+	const COMPANY1 = "UserCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const USER1 = "test1"
+	const USER2 = "test2"
+	const PASS1 = "pass1"
+	const PASS2 = "pass2"
+	const PASS3 = "pass3"
+	const TOKEN1 = "token1"
+	const TOKEN2 = "token2"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	reports, err := runner.tenantDB.GetAllSLAReports(TENANT)
+	// Should be 0 reports in db
+	assert.Equal(t, len(reports), 0)
+	assert.Nil(t, err)
+
+	request := metmod.SLAReportRequest{
+		TenantID: TENANT,
+	}
+
+	report := metmod.SLAReport{
+		SLAReportRequest: request,
+		TenantID:         TENANT,
+		SLASummary:       metmod.SLASummary{},
+	}
+	tdb := runner.tenantDB
+
+	res, err := tdb.CreateSLAReport(&report)
+	assert.Nil(t, err)
+	report.ID = res.ID
+	report.REV = res.REV
+	assert.Equal(t, *res, report)
+
+	res, err = tdb.GetSLAReport(TENANT, res.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, *res, report)
+
+	reports, err = runner.tenantDB.GetAllSLAReports(TENANT)
+	// Should be 1 reports in db
+	assert.Equal(t, len(reports), 1)
+	assert.Nil(t, err)
+
+	res, err = tdb.DeleteSLAReport(TENANT, res.ID)
+	assert.Nil(t, err)
+
+	reports, err = runner.tenantDB.GetAllSLAReports(TENANT)
+	// Should be 0 reports in db
+	assert.Equal(t, len(reports), 0)
+	assert.Nil(t, err)
+
+	ReportConfig := metmod.ReportScheduleConfig{
+		TenantID:          TENANT,
+		Name:              "Test",
+		Timeout:           5000,
+		Hour:              "0",
+		Minute:            "0",
+		DayOfWeek:         "*",
+		Month:             "*",
+		DayOfMonth:        "*",
+		Active:            true,
+		TimeRangeDuration: "P1Y",
+	}
+
+	configs, err := tdb.GetAllReportScheduleConfigs(TENANT)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(configs))
+
+	cfg, err := tdb.CreateReportScheduleConfig(&ReportConfig)
+	assert.Nil(t, err)
+	ReportConfig.ID = cfg.ID
+	ReportConfig.REV = cfg.REV
+	ReportConfig.CreatedTimestamp = cfg.CreatedTimestamp
+	ReportConfig.LastModifiedTimestamp = cfg.LastModifiedTimestamp
+	assert.Equal(t, *cfg, ReportConfig)
+
+	configs, err = tdb.GetAllReportScheduleConfigs(TENANT)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(configs))
+
+	c, err := tdb.GetReportScheduleConfig(TENANT, cfg.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, *c, ReportConfig)
+
+	c, err = tdb.DeleteReportScheduleConfig(TENANT, cfg.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, *c, ReportConfig)
+
+	configs, err = tdb.GetAllReportScheduleConfigs(TENANT)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(configs))
 
 }

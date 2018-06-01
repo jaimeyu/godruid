@@ -1,3 +1,5 @@
+* Feature - CRUD functionality for report scheduling config and SLA report
+* Feature - Adding scheduler to schedule SLA Reports
 ## Current Release 
 ### 0.131.0 
 **Release Date:** Thu May 31 14:46:02 UTC 2018     

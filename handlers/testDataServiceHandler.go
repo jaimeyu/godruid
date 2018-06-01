@@ -83,35 +83,35 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Name:        "PopulateTestData",
 			Method:      "POST",
 			Pattern:     "/test-data",
-			HandlerFunc: result.PopulateTestData,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.PopulateTestData),
 		},
 
 		server.Route{
 			Name:        "PopulateTestDataBulkRandomizedMO",
 			Method:      "POST",
 			Pattern:     "/test-data/bulkRandomizedMO",
-			HandlerFunc: result.PopulateTestDataBulkRandomizedMO,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.PopulateTestDataBulkRandomizedMO),
 		},
 
 		server.Route{
 			Name:        "PurgeDB",
 			Method:      "DELETE",
 			Pattern:     "/test-data/{dbname}",
-			HandlerFunc: result.PurgeDB,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.PurgeDB),
 		},
 
 		server.Route{
 			Name:        "GenerateHistoricalDomainSLAReports",
 			Method:      "POST",
 			Pattern:     "/test-data/domain-sla-reports",
-			HandlerFunc: result.GenerateHistoricalDomainSLAReports,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GenerateHistoricalDomainSLAReports),
 		},
 
 		server.Route{
 			Name:        "GetAllDocsByType",
 			Method:      "GET",
 			Pattern:     "/test-data/{dbname}/{datatype}",
-			HandlerFunc: result.GetAllDocsByType,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAllDocsByType),
 		},
 	}
 

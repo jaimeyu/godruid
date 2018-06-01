@@ -1,3 +1,4 @@
+Feature - Add Authorization Functionality to Gather Endpoints using the new headers from Skylight-AAA
 ## Current Release 
 ### 0.132.0 
 **Release Date:** Fri Jun  1 13:34:36 UTC 2018     

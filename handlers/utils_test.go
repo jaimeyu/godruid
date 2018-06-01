@@ -4,6 +4,7 @@ import (
 	//"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/accedian/adh-gather/gather"

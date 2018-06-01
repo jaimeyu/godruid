@@ -464,6 +464,7 @@ const (
 	xFwdTenantId  = "X-Forwarded-Tenant-Id"
 )
 
+// AAA will forward us information about the requester and this struct will hold the info
 type requestUserAuth struct {
 	UserID   string
 	UserName string
@@ -472,6 +473,7 @@ type requestUserAuth struct {
 	TenantID  string
 }
 
+// Converts a header into a requestUserAuth struct
 func ConvertHeaderToUserAuthRequest(h http.Header) (*requestUserAuth, error) {
 	roles := h.Get(xFwdUserRoles)
 	lRoles := strings.Split(roles, ",")
@@ -485,6 +487,7 @@ func ConvertHeaderToUserAuthRequest(h http.Header) (*requestUserAuth, error) {
 	return &req, nil
 }
 
+// Check if we need to check the header for authorizations
 func GetAuthorizationToggle() bool {
 	cfg := gather.GetConfig()
 	authAAA := cfg.GetBool(gather.CK_args_authorizationAAA.String())
@@ -493,6 +496,7 @@ func GetAuthorizationToggle() bool {
 	return authAAA
 }
 
+// RoleAccessControl - Checks if the user-role from AAA is allowed to access this endpoint
 func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
 	// if auth is disabled, let the calls go through
 	if GetAuthorizationToggle() == false {
@@ -529,6 +533,7 @@ func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
 	return false
 }
 
+// BuildRouteHandler - To simplify maintainance, this function adds Role Access Control to existing http.serve functions
 func BuildRouteHandler(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 
 	functor := func(w http.ResponseWriter, r *http.Request) {

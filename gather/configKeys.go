@@ -33,6 +33,7 @@ const (
 	CK_druid_coordinator_server              ConfigKey = "druid.coordinator.server"
 	CK_druid_coordinator_port                ConfigKey = "druid.coordinator.port"
 	CK_kafka_broker                          ConfigKey = "kafka.broker"
+	CK_args_authorizationAAA                 ConfigKey = "args.AuthorizationAAA"
 )
 
 func (key ConfigKey) String() string {

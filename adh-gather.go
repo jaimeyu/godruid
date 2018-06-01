@@ -66,6 +66,7 @@ var (
 
 	metricServiceEndpoints    []string
 	enableChangeNotifications bool
+	enableAuthorizationAAA    bool
 )
 
 func init() {
@@ -77,6 +78,8 @@ func init() {
 	pflag.StringVar(&swaggerFilePath, "swag", defaultSwaggerFile, "Specify file path of the Swagger documentation")
 
 	pflag.BoolVar(&enableChangeNotifications, "changeNotifications", true, "Specify if Change Notifications should be enabled")
+
+	pflag.BoolVar(&enableAuthorizationAAA, "enableAuthorizationAAA", true, "Specify if checking for Skylight AAA authorization is enabled")
 
 	metricServiceEndpoints = []string{
 		"/api/v1/histogram",
@@ -692,6 +695,8 @@ func main() {
 
 	// Load Configuration
 	cfg := gather.LoadConfig(configFilePath, v)
+	enableAuthorizationAAA = v.GetBool("enableAuthorizationAAA")
+	cfg.Set(gather.CK_args_authorizationAAA.String(), enableAuthorizationAAA)
 
 	debug := cfg.GetBool(gather.CK_args_debug.String())
 	if debug {

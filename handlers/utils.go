@@ -9,6 +9,7 @@ import (
 	"time"
 
 	db "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
@@ -429,5 +430,84 @@ func generateErrorMessage(errCode int, errMsg string) string {
 	default:
 		return errMsg
 	}
+}
 
+/*
+User roles as defined by Skylight AAA
+    SkylightAdmin UserRole = "skylight-admin"
+    TenantAdmin   UserRole = "tenant-admin"
+    TenantUser    UserRole = "tenant-user"
+    UnknownRole   UserRole = "unknown"
+*/
+const (
+	userRoleSkylight    = "skylight-admin"
+	userRoleTenantAdmin = "tenant-admin"
+	userRoleTenantUser  = "tenant-user"
+	userRoleUnknown     = "unknown"
+)
+
+// X-Forward strings that will come from skylight AAA
+/*
+X-Forwarded-User-Id   (format string)
+X-Forwarded-User-Username  (format string)
+X-Forwarded-User-Roles   (format string)
+X-Forwarded-Tenant-Id   (format string)
+*/
+const (
+	xFwdUserId    = "X-Forwarded-User-Id"
+	xFwdUserName  = "X-Forwarded-Username"
+	xFwdUserRoles = "X-Forwarded-User-Roles"
+	xFwdTenantId  = "X-Forwarded-Tenant-Id"
+)
+
+type requestUserAuth struct {
+	UserID   string
+	UserName string
+	// Roles are CSV
+	UserRoles []string
+	TenantID  string
+}
+
+func ConvertHeaderToUserAuthRequest(h http.Header) (*requestUserAuth, error) {
+	roles := h.Get(xFwdUserRoles)
+	lRoles := strings.Split(roles, ",")
+	req := requestUserAuth{
+		UserID:    h.Get(xFwdUserId),
+		UserRoles: lRoles,
+		UserName:  h.Get(xFwdUserName),
+		TenantID:  h.Get(xFwdTenantId),
+	}
+
+	return &req, nil
+}
+
+func GetAuthorizationToggle() bool {
+	cfg := gather.GetConfig()
+	authAAA := cfg.GetBool(gather.CK_args_authorizationAAA.String())
+	logger.Log.Debugf("AAA Auth is enabled? %t", authAAA)
+
+	return authAAA
+}
+
+func CheckRoleAccess(header http.Header, allowedRole string) bool {
+	// if auth is disabled, let the calls go through
+	if GetAuthorizationToggle() == false {
+		return true
+	}
+
+	user, err := ConvertHeaderToUserAuthRequest(header)
+	if err != nil {
+		logger.Log.Error("Error parsing header's x-forwards")
+		return false
+	}
+
+	// Otherwise, handle the roles
+	for _, role := range user.UserRoles {
+		if role == allowedRole {
+			logger.Log.Debugf("Request from %s matches allowed access: %s", role, allowedRole)
+			return true
+		}
+	}
+
+	return false
 }

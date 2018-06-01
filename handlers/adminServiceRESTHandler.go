@@ -30,7 +30,7 @@ type AdminServiceRESTHandler struct {
 func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 	result := new(AdminServiceRESTHandler)
 
-	// Seteup the DB implementation based on configuration
+	// Setup the DB implementation based on configuration
 	db, err := getAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
@@ -205,6 +205,12 @@ func (ash *AdminServiceRESTHandler) AddAdminViews() error {
 // CreateAdminUser - creates an admin user
 func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+
+	if CheckRoleAccess(r.Header, userRoleSkylight) == false {
+		msg := "User is not allowed to create Admin User"
+		reportError(w, startTime, "403", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
+		return
+	}
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)

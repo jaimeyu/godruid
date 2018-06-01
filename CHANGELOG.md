@@ -1,8 +1,10 @@
-Feature - Add Authorization Functionality to Gather Endpoints using the new headers from Skylight-AAA
 ## Current Release 
+### 0.133.0 
+**Release Date:** Fri Jun  1 18:02:13 UTC 2018     
+## Previous Releases 
+Feature - Add Authorization Functionality to Gather Endpoints using the new headers from Skylight-AAA
 ### 0.132.0 
 **Release Date:** Fri Jun  1 13:34:36 UTC 2018     
-## Previous Releases 
 * Feature - CRUD functionality for report scheduling config and SLA report
 * Feature - Adding scheduler to schedule SLA Reports
 ### 0.131.0 

@@ -22,7 +22,7 @@ import (
 type AdminServiceRESTHandler struct {
 	adminDB  db.AdminServiceDatastore
 	tenantDB db.TenantServiceDatastore
-	Routes   []server.Route
+	routes   []server.Route
 }
 
 // CreateAdminServiceRESTHandler - used to create a Admin Service REST handler which provides
@@ -43,7 +43,7 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 	}
 	result.tenantDB = tdb
 
-	result.Routes = []server.Route{
+	result.routes = []server.Route{
 		server.Route{
 			Name:        "CreateAdminUser",
 			Method:      "POST",
@@ -184,7 +184,7 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 // RegisterAPIHandlers - will bind any REST API routes defined in this service
 // to the passed in request multiplexor.
 func (ash *AdminServiceRESTHandler) RegisterAPIHandlers(router *mux.Router) {
-	for _, route := range ash.Routes {
+	for _, route := range ash.routes {
 		logger.Log.Debugf("Registering endpoint: %v", route)
 		router.
 			Methods(route.Method).

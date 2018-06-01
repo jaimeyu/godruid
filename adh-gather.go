@@ -30,6 +30,7 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	mon "github.com/accedian/adh-gather/monitoring"
+	slasched "github.com/accedian/adh-gather/scheduler"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -86,7 +87,7 @@ func init() {
 		"/api/v1/raw-metrics",
 		"/api/v1/threshold-crossing-by-monitored-object",
 		"/api/v1/threshold-crossing",
-		"/api/v1/sla-report",
+		"/api/v1/generate-sla-report",
 		"/api/v1/threshold-crossing-by-monitored-object-top-n",
 		"/api/v1/aggregated-metrics",
 	}
@@ -734,6 +735,8 @@ func main() {
 
 	adminDB := cfg.GetString(gather.CK_args_admindb_name.String())
 	provisionCouchData(gatherServer, adminDB)
+
+	slasched.Initialize(gatherServer.msh, nil, nil, 5)
 
 	go restHandlerStart(gatherServer, cfg)
 	gRPCHandlerStart(gatherServer, cfg)

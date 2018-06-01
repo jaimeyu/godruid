@@ -328,6 +328,66 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 	fmt.Fprintf(w, string(res))
 }
 
+func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
+	startTime := time.Now()
+
+	// Turn the query Params into the request object:
+	logger.Log.Debugf("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
+
+	tenantID := slaReportRequest.TenantID
+
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
+		reportInternalError(startTime, "404", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	if err := msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
+		reportInternalError(startTime, "404", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.SLAReportStr, err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	report := &metrics.SLAReport{}
+	err = json.Unmarshal(res, report)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	report.SLAReportRequest = *slaReportRequest
+	report.TenantID = slaReportRequest.TenantID
+	logger.Log.Debugf("Completed %s fetch for: %+v, report %+v", db.SLAReportStr, models.AsJSONString(slaReportRequest), report)
+
+	// STORE into DB the generated SLA report
+	trackAPIMetrics(startTime, "200", mon.GetSLAReportStr)
+	return report, nil
+}
 func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 

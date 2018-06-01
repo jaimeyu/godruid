@@ -368,6 +368,10 @@ func getDBFieldFromRequest(r *http.Request, urlPart int32) string {
 	return urlParts[urlPart]
 }
 
+func reportInternalError(startTime time.Time, code string, objType string, msg string) {
+	trackAPIMetrics(startTime, code, objType)
+	logger.Log.Error(msg)
+}
 func reportError(w http.ResponseWriter, startTime time.Time, code string, objType string, msg string, responseCode int) {
 	trackAPIMetrics(startTime, code, objType)
 	logger.Log.Error(msg)

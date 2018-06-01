@@ -78,7 +78,7 @@ func AsJSONString(obj interface{}) string {
 	}
 }
 
-/* MergeMaps - Merges two maps
+/*MergeMaps - Merges two maps
  * It takes two maps and the dst map is the one getting modified.
  * If the dst map is empty, then the function should just copy the src to dst.
  * Otherwise, you can pre-populate the dst map with some data and the function will

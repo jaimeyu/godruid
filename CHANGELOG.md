@@ -1,7 +1,11 @@
 ## Current Release 
+### 0.132.0 
+**Release Date:** Fri Jun  1 13:34:36 UTC 2018     
+## Previous Releases 
+* Feature - CRUD functionality for report scheduling config and SLA report
+* Feature - Adding scheduler to schedule SLA Reports
 ### 0.131.0 
 **Release Date:** Thu May 31 14:46:02 UTC 2018     
-## Previous Releases 
 * Fix - for Druid lookups, use ID attribute if MonitoredObjectID attribute is missing
 ### 0.130.0 
 **Release Date:** Thu May 31 11:56:22 UTC 2018     

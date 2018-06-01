@@ -22,7 +22,7 @@ import (
 type AdminServiceRESTHandler struct {
 	adminDB  db.AdminServiceDatastore
 	tenantDB db.TenantServiceDatastore
-	routes   []server.Route
+	Routes   []server.Route
 }
 
 // CreateAdminServiceRESTHandler - used to create a Admin Service REST handler which provides
@@ -43,138 +43,138 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 	}
 	result.tenantDB = tdb
 
-	result.routes = []server.Route{
+	result.Routes = []server.Route{
 		server.Route{
 			Name:        "CreateAdminUser",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "admin",
-			HandlerFunc: result.CreateAdminUser,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateAdminUser),
 		},
 		server.Route{
 			Name:        "UpdateAdminUser",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "admin",
-			HandlerFunc: result.UpdateAdminUser,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateAdminUser),
 		},
 		server.Route{
 			Name:        "GetAdminUser",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "admin/{userID}",
-			HandlerFunc: result.GetAdminUser,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAdminUser),
 		},
 		server.Route{
 			Name:        "DeleteAdminUser",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "admin/{userID}",
-			HandlerFunc: result.DeleteAdminUser,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteAdminUser),
 		},
 		server.Route{
 			Name:        "GetAllAdminUsers",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "admin-user-list",
-			HandlerFunc: result.GetAllAdminUsers,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAllAdminUsers),
 		},
 		server.Route{
 			Name:        "CreateTenant",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "tenants",
-			HandlerFunc: result.CreateTenant,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateTenant),
 		},
 		server.Route{
 			Name:        "UpdateTenant",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "tenants",
-			HandlerFunc: result.UpdateTenant,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateTenant),
 		},
 		server.Route{
 			Name:        "PatchTenant",
 			Method:      "PATCH",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: result.PatchTenant,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.PatchTenant),
 		},
 		server.Route{
 			Name:        "GetTenant",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: result.GetTenant,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenant),
 		},
 		server.Route{
 			Name:        "DeleteTenant",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: result.DeleteTenant,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteTenant),
 		},
 		server.Route{
 			Name:        "GetAllTenants",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-list",
-			HandlerFunc: result.GetAllTenants,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAllTenants),
 		},
 		server.Route{
 			Name:        "GetTenantIDByAlias",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-by-alias/{value}",
-			HandlerFunc: result.GetTenantIDByAlias,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenantIDByAlias),
 		},
 		server.Route{
 			Name:        "GetTenantSummaryByAlias",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-summary-by-alias/{value}",
-			HandlerFunc: result.GetTenantSummaryByAlias,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenantSummaryByAlias),
 		},
 		server.Route{
 			Name:        "CreateIngestionDictionary",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: result.CreateIngestionDictionary,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateIngestionDictionary),
 		},
 		server.Route{
 			Name:        "UpdateIngestionDictionary",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: result.UpdateIngestionDictionary,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateIngestionDictionary),
 		},
 		server.Route{
 			Name:        "GetIngestionDictionary",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: result.GetIngestionDictionary,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetIngestionDictionary),
 		},
 		server.Route{
 			Name:        "DeleteIngestionDictionary",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: result.DeleteIngestionDictionary,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteIngestionDictionary),
 		},
 		server.Route{
 			Name:        "CreateValidTypes",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: result.CreateValidTypes,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateValidTypes),
 		},
 		server.Route{
 			Name:        "UpdateValidTypes",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: result.UpdateValidTypes,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateValidTypes),
 		},
 		server.Route{
 			Name:        "GetValidTypes",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: result.GetValidTypes,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetValidTypes),
 		},
 		server.Route{
 			Name:        "DeleteValidTypes",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: result.DeleteValidTypes,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteValidTypes),
 		},
 		server.Route{
 			Name:        "GetSpecificValidTypes",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "specific-valid-types",
-			HandlerFunc: result.GetSpecificValidTypes,
+			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetSpecificValidTypes),
 		},
 	}
 
@@ -184,7 +184,7 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 // RegisterAPIHandlers - will bind any REST API routes defined in this service
 // to the passed in request multiplexor.
 func (ash *AdminServiceRESTHandler) RegisterAPIHandlers(router *mux.Router) {
-	for _, route := range ash.routes {
+	for _, route := range ash.Routes {
 		logger.Log.Debugf("Registering endpoint: %v", route)
 		router.
 			Methods(route.Method).
@@ -205,12 +205,6 @@ func (ash *AdminServiceRESTHandler) AddAdminViews() error {
 // CreateAdminUser - creates an admin user
 func (ash *AdminServiceRESTHandler) CreateAdminUser(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
-
-	if CheckRoleAccess(r.Header, userRoleSkylight) == false {
-		msg := "User is not allowed to create Admin User"
-		reportError(w, startTime, "403", mon.CreateAdminUserStr, msg, http.StatusBadRequest)
-		return
-	}
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)

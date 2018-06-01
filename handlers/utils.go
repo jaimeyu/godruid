@@ -489,7 +489,7 @@ func GetAuthorizationToggle() bool {
 	return authAAA
 }
 
-func CheckRoleAccess(header http.Header, allowedRole string) bool {
+func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
 	// if auth is disabled, let the calls go through
 	if GetAuthorizationToggle() == false {
 		return true
@@ -501,6 +501,19 @@ func CheckRoleAccess(header http.Header, allowedRole string) bool {
 		return false
 	}
 
+	if allowedRoles == nil {
+		logger.Log.Error("Allowed roles is nil, this cannot be.")
+		return false
+	}
+
+	if len(allowedRoles) == 0 {
+		logger.Log.Error("No allowed roles for this endpoint, contact admin for more info")
+		return false
+	}
+
+	// We currenly only support 1 allowed role, this may change in the future
+	allowedRole := allowedRoles[0]
+
 	// Otherwise, handle the roles
 	for _, role := range user.UserRoles {
 		if role == allowedRole {
@@ -510,4 +523,18 @@ func CheckRoleAccess(header http.Header, allowedRole string) bool {
 	}
 
 	return false
+}
+
+func BuildRouteHandler(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+
+	functor := func(w http.ResponseWriter, r *http.Request) {
+		if CheckRoleAccess(r.Header, allow) == false {
+			logger.Log.Errorf("User role is not allowed to access endpoint")
+			return
+		}
+		fn(w, r)
+
+	}
+
+	return functor
 }

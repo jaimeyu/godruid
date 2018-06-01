@@ -512,7 +512,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %+v. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
 		return
 	}
@@ -531,7 +531,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 	}
 
 	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
 		return
 	}

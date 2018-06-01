@@ -48,133 +48,133 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 			Name:        "CreateAdminUser",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "admin",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateAdminUser),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.CreateAdminUser),
 		},
 		server.Route{
 			Name:        "UpdateAdminUser",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "admin",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateAdminUser),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.UpdateAdminUser),
 		},
 		server.Route{
 			Name:        "GetAdminUser",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "admin/{userID}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAdminUser),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAdminUser),
 		},
 		server.Route{
 			Name:        "DeleteAdminUser",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "admin/{userID}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteAdminUser),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.DeleteAdminUser),
 		},
 		server.Route{
 			Name:        "GetAllAdminUsers",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "admin-user-list",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAllAdminUsers),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllAdminUsers),
 		},
 		server.Route{
 			Name:        "CreateTenant",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "tenants",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateTenant),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.CreateTenant),
 		},
 		server.Route{
 			Name:        "UpdateTenant",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "tenants",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateTenant),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.UpdateTenant),
 		},
 		server.Route{
 			Name:        "PatchTenant",
 			Method:      "PATCH",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.PatchTenant),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PatchTenant),
 		},
 		server.Route{
 			Name:        "GetTenant",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenant),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenant),
 		},
 		server.Route{
 			Name:        "DeleteTenant",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "tenants/{tenantID}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteTenant),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.DeleteTenant),
 		},
 		server.Route{
 			Name:        "GetAllTenants",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-list",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetAllTenants),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllTenants),
 		},
 		server.Route{
 			Name:        "GetTenantIDByAlias",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-by-alias/{value}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenantIDByAlias),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantIDByAlias),
 		},
 		server.Route{
 			Name:        "GetTenantSummaryByAlias",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "tenant-summary-by-alias/{value}",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetTenantSummaryByAlias),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantSummaryByAlias),
 		},
 		server.Route{
 			Name:        "CreateIngestionDictionary",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateIngestionDictionary),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.CreateIngestionDictionary),
 		},
 		server.Route{
 			Name:        "UpdateIngestionDictionary",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateIngestionDictionary),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.UpdateIngestionDictionary),
 		},
 		server.Route{
 			Name:        "GetIngestionDictionary",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetIngestionDictionary),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetIngestionDictionary),
 		},
 		server.Route{
 			Name:        "DeleteIngestionDictionary",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "ingestion-dictionaries",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteIngestionDictionary),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.DeleteIngestionDictionary),
 		},
 		server.Route{
 			Name:        "CreateValidTypes",
 			Method:      "POST",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.CreateValidTypes),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.CreateValidTypes),
 		},
 		server.Route{
 			Name:        "UpdateValidTypes",
 			Method:      "PUT",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.UpdateValidTypes),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.UpdateValidTypes),
 		},
 		server.Route{
 			Name:        "GetValidTypes",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetValidTypes),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetValidTypes),
 		},
 		server.Route{
 			Name:        "DeleteValidTypes",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + "valid-types",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.DeleteValidTypes),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.DeleteValidTypes),
 		},
 		server.Route{
 			Name:        "GetSpecificValidTypes",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + "specific-valid-types",
-			HandlerFunc: BuildRouteHandler([]string{userRoleSkylight}, result.GetSpecificValidTypes),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetSpecificValidTypes),
 		},
 	}
 
@@ -460,7 +460,7 @@ func (ash *AdminServiceRESTHandler) UpdateTenant(w http.ResponseWriter, r *http.
 	sendSuccessResponse(result, w, startTime, mon.UpdateTenantStr, admmod.TenantStr, "Updated")
 }
 
-// Logic to update a tenant based on a potential subset of Tenant attribute value pairs from an HTTP request.
+//PatchTenant - Logic to update a tenant based on a potential subset of Tenant attribute value pairs from an HTTP request.
 // Reports HTTP error responses for the following conditions:
 // 	400 - if the request could not be parsed or if it failed Tenant validation logic
 //  500 - if the tenant could not be retrieved from the datastore, if the merge failed, or if the merged data could not be pushed into the datastore
@@ -498,9 +498,8 @@ func (ash *AdminServiceRESTHandler) PatchTenant(w http.ResponseWriter, r *http.R
 		msg := fmt.Sprintf("Unable to patch tenant with id %s: %s", tenantID, err.Error())
 		reportError(w, startTime, "500", mon.PatchTenantStr, msg, http.StatusInternalServerError)
 		return
-	} else {
-		patchedTenant = fetchedTenant
 	}
+	patchedTenant = fetchedTenant
 
 	// Ensure that the tenant is properly constructed following the merge prior to updating the record in the datastore
 	err = patchedTenant.Validate(true)

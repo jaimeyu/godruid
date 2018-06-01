@@ -464,8 +464,8 @@ const (
 	xFwdTenantId  = "X-Forwarded-Tenant-Id"
 )
 
-// AAA will forward us information about the requester and this struct will hold the info
-type requestUserAuth struct {
+// RequestUserAuth - AAA will forward us information about the requester and this struct will hold the info
+type RequestUserAuth struct {
 	UserID   string
 	UserName string
 	// Roles are CSV
@@ -473,11 +473,11 @@ type requestUserAuth struct {
 	TenantID  string
 }
 
-// Converts a header into a requestUserAuth struct
-func ConvertHeaderToUserAuthRequest(h http.Header) (*requestUserAuth, error) {
+// ExtractHeaderToUserAuthRequest - Converts a header into a requestUserAuth struct
+func ExtractHeaderToUserAuthRequest(h http.Header) (*RequestUserAuth, error) {
 	roles := h.Get(xFwdUserRoles)
 	lRoles := strings.Split(roles, ",")
-	req := requestUserAuth{
+	req := RequestUserAuth{
 		UserID:    h.Get(xFwdUserId),
 		UserRoles: lRoles,
 		UserName:  h.Get(xFwdUserName),
@@ -487,7 +487,7 @@ func ConvertHeaderToUserAuthRequest(h http.Header) (*requestUserAuth, error) {
 	return &req, nil
 }
 
-// Check if we need to check the header for authorizations
+// GetAuthorizationToggle - Check if we need to check the header for authorizations
 func GetAuthorizationToggle() bool {
 	cfg := gather.GetConfig()
 	authAAA := cfg.GetBool(gather.CK_args_authorizationAAA.String())
@@ -497,13 +497,13 @@ func GetAuthorizationToggle() bool {
 }
 
 // RoleAccessControl - Checks if the user-role from AAA is allowed to access this endpoint
-func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
+func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 	// if auth is disabled, let the calls go through
 	if GetAuthorizationToggle() == false {
 		return true
 	}
 
-	user, err := ConvertHeaderToUserAuthRequest(header)
+	user, err := ExtractHeaderToUserAuthRequest(header)
 	if err != nil {
 		logger.Log.Error("Error parsing header's x-forwards")
 		return false
@@ -533,13 +533,13 @@ func CheckRoleAccess(header http.Header, allowedRoles []string) bool {
 	return false
 }
 
-// BuildRouteHandler - To simplify maintainance, this function adds Role Access Control to existing http.serve functions
-func BuildRouteHandler(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+// BuildRouteHandlerWithRAC - To simplify maintainance, this function adds Role Access Control to existing http.serve functions
+func BuildRouteHandlerWithRAC(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 
 	functor := func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
-		user, _ := ConvertHeaderToUserAuthRequest(r.Header)
-		if CheckRoleAccess(r.Header, allow) == false {
+		user, _ := ExtractHeaderToUserAuthRequest(r.Header)
+		if RoleAccessControl(r.Header, allow) == false {
 			logger.Log.Errorf("User role is not allowed to access endpoint")
 			msg := fmt.Sprintf("%s (role:%s) is not allowed to access this endpoint %s.", user.UserName, user.UserRoles, r.URL.Path)
 			reportError(w, startTime, "401", "Build Route Handler", msg, http.StatusUnauthorized)

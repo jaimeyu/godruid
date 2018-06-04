@@ -357,25 +357,9 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	report, _, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
-		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
-		return nil, err
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
-		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
-		return nil, err
-	}
-
-	report := &metrics.SLAReport{}
-	err = json.Unmarshal(res, report)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
 		return nil, err
 	}
@@ -419,7 +403,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	_, result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)

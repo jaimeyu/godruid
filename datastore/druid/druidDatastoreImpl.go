@@ -363,7 +363,7 @@ type Debug struct {
 	Data map[string]interface{} `json:"data"`
 }
 
-func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, map[string]interface{}, error) {
 	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 	var query godruid.Query
@@ -376,35 +376,35 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, Granularity_All, request.Interval, thresholdProfile.Data, timeout)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	slaSummary, err := reformatSLASummary(response)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(slaSummary))
 
 	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
 	response, err = dc.executeQuery(query)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	slaTimeSeries, err := reformatSLATimeSeries(response)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var hourOfDayBucketMap map[string]interface{}
@@ -420,34 +420,34 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 						}
 						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 
 						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
 						response, err = dc.executeQuery(query)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 
 						dayOfWeekBucketMap, err = reformatSLABucketResponse(response, dayOfWeekBucketMap)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 
 						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 
 						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
 						response, err = dc.executeQuery(query)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 
 						hourOfDayBucketMap, err = reformatSLABucketResponse(response, hourOfDayBucketMap)
 						if err != nil {
-							return nil, err
+							return nil, nil, err
 						}
 					}
 				}
@@ -480,7 +480,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		"data": data,
 	}
 
-	return rr, nil
+	return &slaReport, rr, nil
 }
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {

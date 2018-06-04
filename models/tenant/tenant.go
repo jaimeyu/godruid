@@ -28,9 +28,6 @@ const (
 	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
-	// ReportType - datatype string used to identify a Tenant Report in the datastore record
-	TenantReportType TenantDataType = "report"
-
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 
@@ -40,8 +37,8 @@ const (
 	// TenantReportScheduleConfigType - datatype string used to identify a Tenant SLA Report in the datastore record
 	TenantReportScheduleConfigType TenantDataType = "tenantReportScheduleConfig"
 
-	// TenantSLAReportType - datatype string used to identify a Tenant SLA Report in the datastore record
-	TenantSLAReportType TenantDataType = "tenantSLAReport"
+	// TenantReportType - datatype string used to identify a Tenant Report in the datastore record
+	TenantReportType TenantDataType = "tenantReport"
 
 	// DashboardType - datatype string used to identify a Tenant Meta in the datastore record
 	TenantDashboardType TenantDataType = "dashboard"

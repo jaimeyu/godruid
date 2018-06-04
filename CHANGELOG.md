@@ -1,3 +1,4 @@
+* Fix - Changing the name of SLAReport and SLASummary to Report and ReportSummary
 ## Current Release 
 ### 0.133.0 
 **Release Date:** Fri Jun  1 18:02:13 UTC 2018     

@@ -1160,7 +1160,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllReportScheduleConfigs(tenantID 
 }
 
 func (tsd *TenantServiceDatastoreInMemory) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
-	if err := tsd.DoesTenantExist(slaReport.TenantID, tenmod.TenantSLAReportType); err != nil {
+	if err := tsd.DoesTenantExist(slaReport.TenantID, tenmod.TenantReportType); err != nil {
 		tsd.tenantToIDtoTenantSLAReportMap[slaReport.TenantID] = map[string]*metmod.SLAReport{}
 	}
 
@@ -1180,7 +1180,7 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteSLAReport(tenantID string, slaR
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantSLAReportStr)
 	}
-	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType); err != nil {
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportType); err != nil {
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantSLAReportStr)
 	}
 
@@ -1205,7 +1205,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetSLAReport(tenantID string, slaRepo
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantSLAReportStr)
 	}
-	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType); err != nil {
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportType); err != nil {
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantSLAReportStr)
 	}
 
@@ -1218,7 +1218,7 @@ func (tsd *TenantServiceDatastoreInMemory) GetSLAReport(tenantID string, slaRepo
 }
 
 func (tsd *TenantServiceDatastoreInMemory) GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error) {
-	err := tsd.DoesTenantExist(tenantID, tenmod.TenantSLAReportType)
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantReportType)
 	if err != nil {
 		return []*metmod.SLAReport{}, nil
 	}

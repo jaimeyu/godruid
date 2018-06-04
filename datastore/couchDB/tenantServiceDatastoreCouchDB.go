@@ -1042,12 +1042,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllReportScheduleConfigs(tenantID s
 
 func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(slaReport))
-	slaReport.ID = ds.GenerateID(slaReport, string(tenmod.TenantSLAReportType))
+	slaReport.ID = ds.GenerateID(slaReport, string(tenmod.TenantReportType))
 	tenantID := ds.PrependToDataID(slaReport.TenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
 	dataContainer := &metmod.SLAReport{}
-	if err := createDataInCouch(tenantDBName, slaReport, dataContainer, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr); err != nil {
+	if err := createDataInCouch(tenantDBName, slaReport, dataContainer, string(tenmod.TenantReportType), tenmod.TenantSLAReportStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
@@ -1055,7 +1055,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAR
 }
 func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
-	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
+	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantReportType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
@@ -1068,7 +1068,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaRe
 }
 func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
-	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantSLAReportType))
+	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantReportType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
@@ -1085,7 +1085,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*
 	tenantDBName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, reportObjectDBSuffix))
 
 	res := make([]*metmod.SLAReport, 0)
-	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantSLAReportType), tenmod.TenantSLAReportStr, &res); err != nil {
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantReportType), tenmod.TenantSLAReportStr, &res); err != nil {
 		return nil, err
 	}
 

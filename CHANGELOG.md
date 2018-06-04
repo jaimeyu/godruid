@@ -1,8 +1,10 @@
-* Fix - Changing the name of SLAReport and SLASummary to Report and ReportSummary
 ## Current Release 
+### 0.134.0 
+**Release Date:** Mon Jun  4 20:05:36 UTC 2018     
+## Previous Releases 
+* Fix - Changing the name of SLAReport and SLASummary to Report and ReportSummary
 ### 0.133.0 
 **Release Date:** Fri Jun  1 18:02:13 UTC 2018     
-## Previous Releases 
 Feature - Add Authorization Functionality to Gather Endpoints using the new headers from Skylight-AAA
 ### 0.132.0 
 **Release Date:** Fri Jun  1 13:34:36 UTC 2018     

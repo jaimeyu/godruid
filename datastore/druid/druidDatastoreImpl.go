@@ -385,11 +385,11 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		return nil, err
 	}
 
-	slaSummary, err := reformatSLASummary(response)
+	reportSummary, err := reformatReportSummary(response)
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(slaSummary))
+	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 
 	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
 	if err != nil {
@@ -462,7 +462,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		ReportCompletionTime: time.Now().UTC().Format(time.RFC3339),
 		TenantID:             request.TenantID,
 		ReportTimeRange:      request.Interval,
-		SLASummary:           *slaSummary,
+		ReportSummary:        *reportSummary,
 		TimeSeriesResult:     slaTimeSeries,
 		ByHourOfDayResult:    hourOfDayBucketMap,
 		ByDayOfWeekResult:    dayOfWeekBucketMap,

@@ -2,13 +2,14 @@ package scheduler_test
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	metrics "github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/adh-gather/scheduler"
 	"github.com/robfig/cron"
-	"testing"
-	"time"
 )
 
 type mockDB struct {
@@ -82,7 +83,7 @@ func TestSchedulerBasics(t *testing.T) {
 		ReportCompletionTime: "000010",
 		TenantID:             "123456",
 		ReportTimeRange:      "asdkj?",
-		SLASummary:           metrics.SLASummary{},
+		ReportSummary:        metrics.ReportSummary{},
 		TimeSeriesResult:     nil,
 		ByHourOfDayResult:    nil,
 		ByDayOfWeekResult:    nil,
@@ -427,12 +428,13 @@ func TestSchedulerMultiples(t *testing.T) {
 func TestSpec(t *testing.T) {
 
 	job := metrics.ReportScheduleConfig{
-		Minute:     "0",
-		Hour:       "0",
-		DayOfWeek:  "22",
-		DayOfMonth: "44",
-		Month:      "*",
-		TenantID:   "0",
+		Minute:           "0",
+		Hour:             "0",
+		DayOfWeek:        "22",
+		DayOfMonth:       "44",
+		Month:            "*",
+		TenantID:         "0",
+		ThresholdProfile: "1234",
 	}
 	err := job.Validate(false)
 	if err == nil {
@@ -441,12 +443,13 @@ func TestSpec(t *testing.T) {
 	}
 
 	job = metrics.ReportScheduleConfig{
-		Minute:     "0",
-		Hour:       "0",
-		DayOfWeek:  "22",
-		DayOfMonth: "0",
-		Month:      "*",
-		TenantID:   "0",
+		Minute:           "0",
+		Hour:             "0",
+		DayOfWeek:        "22",
+		DayOfMonth:       "0",
+		Month:            "*",
+		TenantID:         "0",
+		ThresholdProfile: "1234",
 	}
 	err = job.Validate(false)
 	if err == nil {
@@ -454,12 +457,13 @@ func TestSpec(t *testing.T) {
 		t.Fail()
 	}
 	job = metrics.ReportScheduleConfig{
-		Minute:     "*",
-		Hour:       "*",
-		DayOfWeek:  "*",
-		DayOfMonth: "*",
-		Month:      "*",
-		TenantID:   "0",
+		Minute:           "*",
+		Hour:             "*",
+		DayOfWeek:        "*",
+		DayOfMonth:       "*",
+		Month:            "*",
+		TenantID:         "0",
+		ThresholdProfile: "1234",
 	}
 	err = job.Validate(false)
 	if err == nil {
@@ -468,12 +472,13 @@ func TestSpec(t *testing.T) {
 	}
 
 	job = metrics.ReportScheduleConfig{
-		Minute:     "4",
-		Hour:       "*",
-		DayOfWeek:  "*",
-		DayOfMonth: "*",
-		Month:      "*",
-		TenantID:   "0",
+		Minute:           "4",
+		Hour:             "*",
+		DayOfWeek:        "*",
+		DayOfMonth:       "*",
+		Month:            "*",
+		TenantID:         "0",
+		ThresholdProfile: "1234",
 	}
 	err = job.Validate(false)
 	if err != nil {
@@ -482,12 +487,13 @@ func TestSpec(t *testing.T) {
 	}
 
 	job = metrics.ReportScheduleConfig{
-		Minute:     "0",
-		Hour:       "0",
-		DayOfWeek:  "2",
-		DayOfMonth: "1",
-		Month:      "*",
-		TenantID:   "0",
+		Minute:           "0",
+		Hour:             "0",
+		DayOfWeek:        "2",
+		DayOfMonth:       "1",
+		Month:            "*",
+		TenantID:         "0",
+		ThresholdProfile: "1234",
 	}
 	err = job.Validate(false)
 	if err != nil {

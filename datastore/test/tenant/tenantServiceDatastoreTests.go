@@ -1647,7 +1647,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	report := metmod.SLAReport{
 		SLAReportRequest: request,
 		TenantID:         TENANT,
-		SLASummary:       metmod.SLASummary{},
+		ReportSummary:    metmod.ReportSummary{},
 	}
 	tdb := runner.tenantDB
 

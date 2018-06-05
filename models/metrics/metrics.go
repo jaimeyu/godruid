@@ -1,5 +1,10 @@
 package metrics
 
+const (
+	ReportType = "reports"
+	ReportStr  = "Report"
+)
+
 type SLAReportRequest struct {
 	SlaScheduleConfig string `json:"slaScheduleConfigId"`
 	TenantID          string `json:"tenantId"`
@@ -25,13 +30,17 @@ func (sr *SLAReport) SetID(s string) error {
 	return nil
 }
 
+func (sr *SLAReport) GetName() string {
+	return ReportType
+}
+
 type SLAReport struct {
 	ID                   string            `json:"_id"`
 	REV                  string            `json:"_rev"`
 	ReportCompletionTime string            `json:"reportCompletionTime"`
 	TenantID             string            `json:"tenantId"`
 	ReportTimeRange      string            `json:"reportTimeRange"`
-	SLASummary           SLASummary        `json:"slaSummary"`
+	ReportSummary        ReportSummary     `json:"reportSummary"`
 	TimeSeriesResult     []TimeSeriesEntry `json:"timeSeriesResult"`
 	ByHourOfDayResult    interface{}       `json:"byHourOfDayResult"`
 	ByDayOfWeekResult    interface{}       `json:"byDayOfWeekResult"`
@@ -44,7 +53,7 @@ type SLAReport struct {
 	//ThresholdProfile     pb.TenantThresholdProfile `json:"thresholdProfile"`
 }
 
-type SLASummary struct {
+type ReportSummary struct {
 	TotalDuration          int64       `json:"totalDuration"`
 	TotalViolationCount    int32       `json:"totalViolationCount"`
 	TotalViolationDuration int64       `json:"totalViolationDuration"`

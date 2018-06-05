@@ -30,7 +30,7 @@ func (sr *SLAReport) SetID(s string) error {
 	return nil
 }
 
-func (sr *SLAReport) getName() string {
+func (sr *SLAReport) GetName() string {
 	return ReportType
 }
 

@@ -1,3 +1,4 @@
+* Fix - Exporting GetName to return the proper report type
 ## Current Release 
 ### 0.134.0 
 **Release Date:** Mon Jun  4 20:05:36 UTC 2018     

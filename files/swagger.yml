@@ -1797,7 +1797,7 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  '/v1/tenants/{tenantId}/sla-reports/{reportID}':
+  '/v1/tenants/{tenantId}/reports/{reportID}':
     get:
       summary: Retrieve a Tenant SLA report by id.
       operationId: GetSLAReport
@@ -1821,7 +1821,7 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-  /v1/tenants/{tenantId}/sla-report-list:
+  /v1/tenants/{tenantId}/report-list:
     get:
       summary: Retrieve all SLA reports for the specified Tenant.
       operationId: GetAllSLAReports

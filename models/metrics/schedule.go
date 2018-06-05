@@ -59,6 +59,10 @@ func (ssc *ReportScheduleConfig) Validate(isUpdate bool) error {
 		return errors.New("Invalid Report Schedule Config request: must provide a Tenant ID")
 	}
 
+	if len(ssc.ThresholdProfile) == 0 {
+		return errors.New("Invalid Report Schedule Config request: must provide a threshold profile")
+	}
+
 	if ssc.Second != "0" {
 		ssc.Second = "0"
 	}

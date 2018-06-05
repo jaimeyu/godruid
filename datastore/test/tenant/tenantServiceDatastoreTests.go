@@ -1647,7 +1647,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	report := metmod.SLAReport{
 		SLAReportRequest: request,
 		TenantID:         TENANT,
-		SLASummary:       metmod.SLASummary{},
+		ReportSummary:    metmod.ReportSummary{},
 		TimeSeriesResult: []metmod.TimeSeriesEntry{
 			metmod.TimeSeriesEntry{
 				Timestamp: "1000",
@@ -1752,7 +1752,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 		      "timeout": 5000,
 		      "timezone": "UTC"
 		    },
-		    "slaSummary": {
+		    "reportSummary": {
 		      "objectCount": 0,
 		      "perMetricSummary": null,
 		      "slaCompliancePercent": 0,
@@ -1781,7 +1781,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
                 "reportCompletionTime": "2018-06-04T19:17:32Z",
                 "tenantId": "ade3010a-a70a-4444-8cc7-c12c57a9ada5",
                 "reportTimeRange": "P90Y/2018-06-04T00:23:00Z",
-                "slaSummary": {
+                "reportSummary": {
                     "totalDuration": 114030012,
                     "totalViolationCount": 9402,
                     "totalViolationDuration": 114030012,
@@ -2814,10 +2814,10 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	jsReport.REV = ""
 	assert.Equal(t, "ade3010a-a70a-4444-8cc7-c12c57a9ada5", jsReport.TenantID)
 	assert.Equal(t, "P90Y/2018-06-04T00:23:00Z", jsReport.ReportTimeRange)
-	assert.Equal(t, int64(114030012), jsReport.SLASummary.TotalDuration)
-	assert.Equal(t, int32(9402), jsReport.SLASummary.TotalViolationCount)
-	assert.Equal(t, int64(114030012), jsReport.SLASummary.TotalViolationDuration)
-	assert.Equal(t, float32(0), jsReport.SLASummary.SLACompliancePercent)
+	assert.Equal(t, int64(114030012), jsReport.ReportSummary.TotalDuration)
+	assert.Equal(t, int32(9402), jsReport.ReportSummary.TotalViolationCount)
+	assert.Equal(t, int64(114030012), jsReport.ReportSummary.TotalViolationDuration)
+	assert.Equal(t, float32(0), jsReport.ReportSummary.SLACompliancePercent)
 	jsReport.TenantID = TENANT
 
 	stored, err = tdb.CreateSLAReport(&jsReport)
@@ -2833,9 +2833,9 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	assert.Equal(t, jsReport, *sRep)
 	assert.Equal(t, TENANT, sRep.TenantID)
 	assert.Equal(t, "P90Y/2018-06-04T00:23:00Z", sRep.ReportTimeRange)
-	assert.Equal(t, int64(114030012), sRep.SLASummary.TotalDuration)
-	assert.Equal(t, int32(9402), sRep.SLASummary.TotalViolationCount)
-	assert.Equal(t, int64(114030012), sRep.SLASummary.TotalViolationDuration)
-	assert.Equal(t, float32(0), sRep.SLASummary.SLACompliancePercent)
+	assert.Equal(t, int64(114030012), sRep.ReportSummary.TotalDuration)
+	assert.Equal(t, int32(9402), sRep.ReportSummary.TotalViolationCount)
+	assert.Equal(t, int64(114030012), sRep.ReportSummary.TotalViolationDuration)
+	assert.Equal(t, float32(0), sRep.ReportSummary.SLACompliancePercent)
 
 }

@@ -360,13 +360,13 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 		server.Route{
 			Name:        "GetSLAReport",
 			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-reports/{reportID}",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/reports/{reportID}",
 			HandlerFunc: result.GetSLAReport,
 		},
 		server.Route{
 			Name:        "GetAllSLAReports",
 			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenants/{tenantID}/sla-report-list",
+			Pattern:     apiV1Prefix + "tenants/{tenantID}/report-list",
 			HandlerFunc: result.GetAllSLAReports,
 		},
 	}
@@ -2305,15 +2305,15 @@ func (tsh *TenantServiceRESTHandler) GetSLAReport(w http.ResponseWriter, r *http
 	configID := getDBFieldFromRequest(r, 6)
 
 	// Attempt to fetch the config entry from the datastore
-	logger.Log.Infof("Fetching %s: %s", metmod.ReportScheduleConfigStr, configID)
+	logger.Log.Infof("Fetching %s: %s", metmod.ReportStr, configID)
 	result, err := tsh.TenantDB.GetSLAReport(tenantID, configID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportScheduleConfigStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", metmod.ReportStr, err.Error())
 		reportError(w, startTime, "500", mon.GetSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.ReportScheduleConfigStr, "Retrieved")
+	sendSuccessResponse(result, w, startTime, mon.GetSLAReportStr, metmod.ReportStr, "Retrieved")
 }
 
 // Fetch all SLA reports from the datastore for a particular tenant
@@ -2327,13 +2327,13 @@ func (tsh *TenantServiceRESTHandler) GetAllSLAReports(w http.ResponseWriter, r *
 	tenantID := getDBFieldFromRequest(r, 4)
 
 	// Attempt to fetch all the config entries from the datastore
-	logger.Log.Infof("Fetching %s list for Tenant %s", metmod.ReportScheduleConfigStr, tenantID)
+	logger.Log.Infof("Fetching %s list for Tenant %s", metmod.ReportStr, tenantID)
 	result, err := tsh.TenantDB.GetAllSLAReports(tenantID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s list: %s", metmod.ReportScheduleConfigStr, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve %s list: %s", metmod.ReportStr, err.Error())
 		reportError(w, startTime, "500", mon.GetAllSLAReportStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	sendSuccessResponse(result, w, startTime, mon.GetAllSLAReportStr, metmod.ReportScheduleConfigStr, "Retrieved list of")
+	sendSuccessResponse(result, w, startTime, mon.GetAllSLAReportStr, metmod.ReportStr, "Retrieved list of")
 }

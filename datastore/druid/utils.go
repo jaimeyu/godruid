@@ -157,7 +157,7 @@ type druidTimeSeriesEntry struct {
 	Result    map[string]interface{}
 }
 
-func reformatSLASummary(druidResponse []byte) (*metrics.SLASummary, error) {
+func reformatReportSummary(druidResponse []byte) (*metrics.ReportSummary, error) {
 	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
 	entries := []*druidTimeSeriesEntry{}
 	if err := json.Unmarshal(druidResponse, &entries); err != nil {
@@ -165,7 +165,7 @@ func reformatSLASummary(druidResponse []byte) (*metrics.SLASummary, error) {
 	}
 
 	if len(entries) < 1 {
-		return &metrics.SLASummary{}, nil
+		return &metrics.ReportSummary{}, nil
 	}
 
 	// For a summary, we expect only 1 entry in the druid results so just use the first entry.
@@ -178,7 +178,7 @@ func reformatSLASummary(druidResponse []byte) (*metrics.SLASummary, error) {
 		}
 	}
 
-	summary := metrics.SLASummary{}
+	summary := metrics.ReportSummary{}
 	if err := json.Unmarshal(obj.Bytes(), &summary); err != nil {
 		return nil, err
 	}

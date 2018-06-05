@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReformatSLASummary(t *testing.T) {
+func TestReformatReportSummary(t *testing.T) {
 	responseStr := []byte(` [ {
 		   "timestamp" : "2018-04-18T00:00:00.000Z",
 		   "result" : {
@@ -23,7 +23,7 @@ func TestReformatSLASummary(t *testing.T) {
 		   }
 		 } ]`)
 
-	formattedResponse, err := reformatSLASummary(responseStr)
+	formattedResponse, err := reformatReportSummary(responseStr)
 	assert.Nil(t, err)
 	fmt.Printf("%v\n", models.AsJSONString(formattedResponse))
 	assert.Equal(t, int64(58140000), formattedResponse.TotalViolationDuration)

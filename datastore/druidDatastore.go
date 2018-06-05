@@ -35,7 +35,7 @@ type DruidDatastore interface {
 	// minor,major,critical thresholds of a given threshold object
 	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
-	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, map[string]interface{}, error)
+	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object

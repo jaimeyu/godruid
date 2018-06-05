@@ -18,6 +18,7 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
+	"github.com/manyminds/api2go/jsonapi"
 )
 
 const (
@@ -357,7 +358,7 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report, _, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
@@ -403,7 +404,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	_, result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
@@ -411,7 +412,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	}
 
 	// Convert the res to byte[]
-	res, err := json.Marshal(result)
+	res, err := jsonapi.Marshal(result)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)

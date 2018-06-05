@@ -99,3 +99,7 @@
 [[constraint]]
   branch = "fix/kafka_0_10_1"
   name = "github.com/segmentio/kafka-go"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/robfig/cron"

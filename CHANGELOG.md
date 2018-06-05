@@ -1,8 +1,10 @@
-* Fix - Exporting GetName to return the proper report type
 ## Current Release 
+### 0.135.0 
+**Release Date:** Tue Jun  5 02:48:22 UTC 2018     
+## Previous Releases 
+* Fix - Exporting GetName to return the proper report type
 ### 0.134.0 
 **Release Date:** Mon Jun  4 20:05:36 UTC 2018     
-## Previous Releases 
 * Fix - Changing the name of SLAReport and SLASummary to Report and ReportSummary
 ### 0.133.0 
 **Release Date:** Fri Jun  1 18:02:13 UTC 2018     

@@ -380,7 +380,7 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report.SLAReportRequest = *slaReportRequest
+	report.ReportScheduleConfig = slaReportRequest.SlaScheduleConfig
 	report.TenantID = slaReportRequest.TenantID
 	logger.Log.Debugf("Completed %s fetch for: %+v, report %+v", db.SLAReportStr, models.AsJSONString(slaReportRequest), report)
 

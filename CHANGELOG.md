@@ -1,3 +1,4 @@
+Fix - Aligning report scheduler config attribute name with UI model
 ## Current Release 
 ### 0.136.0 
 **Release Date:** Tue Jun  5 19:04:55 UTC 2018     

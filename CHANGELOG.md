@@ -1,7 +1,10 @@
 ## Current Release 
+### 0.136.0 
+**Release Date:** Tue Jun  5 19:04:55 UTC 2018     
+## Previous Releases 
+* fix - correcting issue with auth being called by internal services for APIs that  do not require auth.
 ### 0.135.0 
 **Release Date:** Tue Jun  5 02:48:22 UTC 2018     
-## Previous Releases 
 * Fix - Exporting GetName to return the proper report type
 ### 0.134.0 
 **Release Date:** Mon Jun  4 20:05:36 UTC 2018     

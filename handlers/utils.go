@@ -552,3 +552,23 @@ func BuildRouteHandlerWithRAC(allow []string, fn func(w http.ResponseWriter, r *
 
 	return functor
 }
+
+// BuildRouteHandlerWithRAC - To simplify maintainance, this function adds Role Access Control to existing http.serve functions
+func BuildRouteHandlerWithRACSystemCall(allow []string, fn func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+
+	functor := func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+		user, _ := ExtractHeaderToUserAuthRequest(r.Header)
+		if RoleAccessControl(r.Header, allow) == false {
+			logger.Log.Errorf("User role is not allowed to access endpoint")
+			msg := fmt.Sprintf("%s (role:%s) is not allowed to access this endpoint %s.", user.UserName, user.UserRoles, r.URL.Path)
+			reportError(w, startTime, "401", "Build Route Handler", msg, http.StatusUnauthorized)
+
+			return
+		}
+		fn(w, r)
+
+	}
+
+	return functor
+}

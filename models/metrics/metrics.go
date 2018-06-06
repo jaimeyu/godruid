@@ -44,13 +44,7 @@ type SLAReport struct {
 	TimeSeriesResult     []TimeSeriesEntry `json:"timeSeriesResult"`
 	ByHourOfDayResult    interface{}       `json:"byHourOfDayResult"`
 	ByDayOfWeekResult    interface{}       `json:"byDayOfWeekResult"`
-	SLAReportRequest     SLAReportRequest  `json:"slaReportRequest"`
-
-	// Note that SLAReportRequest only holds the reference to the ThresholdProfile,
-	// which could change AFTER the SLAReport was generated. But the thresholdProfile
-	// structure is massive so we will have to revisit this and determine how to include
-	// the thresholdProfile parameters into the SLAReport in a concise manner.
-	//ThresholdProfile     pb.TenantThresholdProfile `json:"thresholdProfile"`
+	ReportScheduleConfig string            `json:"reportScheduleConfig"`
 }
 
 type ReportSummary struct {

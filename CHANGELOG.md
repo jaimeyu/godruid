@@ -1,8 +1,10 @@
-* Fix - SLA Report generation was not consistent between the immediate generate and the scheduled generation.
 ## Current Release 
+### 0.138.0 
+**Release Date:** Thu Jun  7 17:01:26 UTC 2018     
+## Previous Releases 
+* Fix - SLA Report generation was not consistent between the immediate generate and the scheduled generation.
 ### 0.137.0 
 **Release Date:** Wed Jun  6 18:49:43 UTC 2018     
-## Previous Releases 
 Fix - Aligning report scheduler config attribute names with UI model
 ### 0.136.0 
 **Release Date:** Tue Jun  5 19:04:55 UTC 2018     

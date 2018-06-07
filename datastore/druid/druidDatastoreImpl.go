@@ -466,7 +466,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		TimeSeriesResult:     slaTimeSeries,
 		ByHourOfDayResult:    hourOfDayBucketMap,
 		ByDayOfWeekResult:    dayOfWeekBucketMap,
-		SLAReportRequest:     *request,
+		ReportScheduleConfig: request.SlaScheduleConfig,
 	}
 
 	/*

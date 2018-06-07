@@ -38,7 +38,7 @@ const (
 	TenantReportScheduleConfigType TenantDataType = "tenantReportScheduleConfig"
 
 	// TenantReportType - datatype string used to identify a Tenant Report in the datastore record
-	TenantReportType TenantDataType = "tenantReport"
+	TenantReportType TenantDataType = "report"
 
 	// DashboardType - datatype string used to identify a Tenant Meta in the datastore record
 	TenantDashboardType TenantDataType = "dashboard"

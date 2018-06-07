@@ -1641,13 +1641,13 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	assert.Nil(t, err)
 
 	request := metmod.SLAReportRequest{
-		TenantID: TENANT,
+		TenantID:          TENANT,
+		SlaScheduleConfig: "1000",
 	}
 
 	report := metmod.SLAReport{
-		SLAReportRequest: request,
-		TenantID:         TENANT,
-		ReportSummary:    metmod.ReportSummary{},
+		TenantID:      TENANT,
+		ReportSummary: metmod.ReportSummary{},
 		TimeSeriesResult: []metmod.TimeSeriesEntry{
 			metmod.TimeSeriesEntry{
 				Timestamp: "1000",
@@ -1658,6 +1658,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 				},
 			},
 		},
+		ReportScheduleConfig: request.SlaScheduleConfig,
 	}
 	tdb := runner.tenantDB
 
@@ -2794,19 +2795,8 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
                         }
                     }
                 },
-                "slaReportRequest": {
-                    "slaScheduleConfigId": "",
-                    "tenantId": "ade3010a-a70a-4444-8cc7-c12c57a9ada5",
-                    "interval": "P90Y/2018-06-04T00:23:00Z",
-                    "domain": [
-                        "f1f0aa6c-294c-4f50-96e6-3b6fbb7fd5f1"
-                    ],
-                    "thresholdProfileId": "30eec8cd-d742-4af9-9431-c944db1ce6a5",
-                    "granularity": "PT1H",
-                    "timeout": 5000,
-                    "timezone": "UTC"
-                }
-            }`
+                "reportScheduleConfig": "1000"
+			}`
 
 	err = json.Unmarshal([]byte(validTestString), &jsReport)
 	assert.Nil(t, err)

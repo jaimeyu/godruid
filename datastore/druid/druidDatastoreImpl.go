@@ -363,7 +363,7 @@ type Debug struct {
 	Data map[string]interface{} `json:"data"`
 }
 
-func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error) {
 	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 	var query godruid.Query
@@ -469,18 +469,19 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		ReportScheduleConfig: request.SlaScheduleConfig,
 	}
 
-	data := []map[string]interface{}{}
-	data = append(data, map[string]interface{}{
-		"id":         reportID,
-		"type":       SLAReport,
-		"attributes": slaReport,
-	})
+	/*
+		data := []map[string]interface{}{}
+		data = append(data, map[string]interface{}{
+			"id":         reportID,
+			"type":       SLAReport,
+			"attributes": slaReport,
+		})
 
-	rr := map[string]interface{}{
-		"data": data,
-	}
-
-	return rr, nil
+		rr := map[string]interface{}{
+			"data": data,
+		}
+	*/
+	return &slaReport, nil
 }
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {

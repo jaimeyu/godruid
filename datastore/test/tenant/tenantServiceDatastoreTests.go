@@ -1641,13 +1641,24 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	assert.Nil(t, err)
 
 	request := metmod.SLAReportRequest{
-		TenantID: TENANT,
+		TenantID:          TENANT,
+		SlaScheduleConfig: "1000",
 	}
 
 	report := metmod.SLAReport{
+		TenantID:      TENANT,
+		ReportSummary: metmod.ReportSummary{},
+		TimeSeriesResult: []metmod.TimeSeriesEntry{
+			metmod.TimeSeriesEntry{
+				Timestamp: "1000",
+				Result: metmod.TimeSeriesResult{
+					TotalDuration:          1000,
+					TotalViolationCount:    42,
+					TotalViolationDuration: 9001,
+				},
+			},
+		},
 		ReportScheduleConfig: request.SlaScheduleConfig,
-		TenantID:             TENANT,
-		ReportSummary:        metmod.ReportSummary{},
 	}
 	tdb := runner.tenantDB
 
@@ -1685,6 +1696,8 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 		DayOfMonth:        "*",
 		Active:            true,
 		TimeRangeDuration: "P1Y",
+		Granularity:       "PT1H",
+		Domains:           []string{"hello", "World"},
 	}
 
 	configs, err := tdb.GetAllReportScheduleConfigs(TENANT)
@@ -1706,6 +1719,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	c, err := tdb.GetReportScheduleConfig(TENANT, cfg.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, *c, ReportConfig)
+	logger.Log.Debugf("ReportConfig from couch: %+v vs real %+v", c, ReportConfig)
 
 	c, err = tdb.DeleteReportScheduleConfig(TENANT, cfg.ID)
 	assert.Nil(t, err)
@@ -1714,5 +1728,1104 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	configs, err = tdb.GetAllReportScheduleConfigs(TENANT)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(configs))
+
+	// The following test string should pass the json unmarshaller but
+	// when we check for validity, it should fail. POC not to trust the
+	// json.Unmarshal error code
+	invalidTestString := `{
+		  "data": {
+		    "byDayOfWeekResult": null,
+		    "byHourOfDayResult": null,
+		    "createdTimestamp": 1528132980052,
+		    "datatype": "tenantSLAReport",
+		    "lastModifiedTimestamp": 1528132980052,
+		    "reportCompletionTime": "",
+		    "reportTimeRange": "",
+		    "slaReportRequest": {
+		      "domain": [
+		        "f1f0aa6c-294c-4f50-96e6-3b6fbb7fd5f1"
+		      ],
+		      "granularity": "PT1H",
+		      "interval": "P1D/2018-06-04T00:23:00Z",
+		      "slaScheduleConfigId": "d0281f08-d64d-4425-93b5-3aa1bbd2b36f",
+		      "tenantId": "ade3010a-a70a-4444-8cc7-c12c57a9ada5",
+		      "thresholdProfileId": "30eec8cd-d742-4af9-9431-c944db1ce6a5",
+		      "timeout": 5000,
+		      "timezone": "UTC"
+		    },
+		    "reportSummary": {
+		      "objectCount": 0,
+		      "perMetricSummary": null,
+		      "slaCompliancePercent": 0,
+		      "totalDuration": 0,
+		      "totalViolationCount": 0,
+		      "totalViolationDuration": 0
+		    },
+		    "tenantId": "ade3010a-a70a-4444-8cc7-c12c57a9ada5",
+		    "timeSeriesResult": null
+		  }
+		}`
+
+	var jsReport metmod.SLAReport
+	err = json.Unmarshal([]byte(invalidTestString), &jsReport)
+	assert.Nil(t, err)
+
+	stored, err := tdb.CreateSLAReport(&jsReport)
+	assert.NotNil(t, err)
+
+	assert.NotEqual(t, "ade3010a-a70a-4444-8cc7-c12c5", jsReport.TenantID)
+
+	// The following string is a valid response after generating a new SLA Report.
+	validTestString := `{
+                "_id": "e29e0871-1f40-4ddb-94c8-0df9a1bdbbd2",
+                "_rev": "",
+                "reportCompletionTime": "2018-06-04T19:17:32Z",
+                "tenantId": "ade3010a-a70a-4444-8cc7-c12c57a9ada5",
+                "reportTimeRange": "P90Y/2018-06-04T00:23:00Z",
+                "reportSummary": {
+                    "totalDuration": 114030012,
+                    "totalViolationCount": 9402,
+                    "totalViolationDuration": 114030012,
+                    "slaCompliancePercent": 0,
+                    "objectCount": 4,
+                    "perMetricSummary": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "totalDuration": 114030012,
+                                            "violationCount": 4701,
+                                            "violationDuration": 114030012
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "totalDuration": 114030012,
+                                            "violationCount": 4701,
+                                            "violationDuration": 114030012
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "timeSeriesResult": [
+                    {
+                        "timestamp": "2018-05-31T17:00:00.000Z",
+                        "result": {
+                            "totalDuration": 2280008,
+                            "totalViolationCount": 144,
+                            "totalViolationDuration": 2280008,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 2280008,
+                                                    "violationCount": 72,
+                                                    "violationDuration": 2280008
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 2280008,
+                                                    "violationCount": 72,
+                                                    "violationDuration": 2280008
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T18:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T19:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T20:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T21:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T22:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-05-31T23:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T00:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T01:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T02:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T03:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T04:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T05:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T06:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T07:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T08:00:00.000Z",
+                        "result": {
+                            "totalDuration": 7200000,
+                            "totalViolationCount": 600,
+                            "totalViolationDuration": 7200000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 7200000,
+                                                    "violationCount": 300,
+                                                    "violationDuration": 7200000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T09:00:00.000Z",
+                        "result": {
+                            "totalDuration": 3150000,
+                            "totalViolationCount": 254,
+                            "totalViolationDuration": 3150000,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 3150000,
+                                                    "violationCount": 127,
+                                                    "violationDuration": 3150000
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 3150000,
+                                                    "violationCount": 127,
+                                                    "violationDuration": 3150000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "timestamp": "2018-06-01T14:00:00.000Z",
+                        "result": {
+                            "totalDuration": 600004,
+                            "totalViolationCount": 4,
+                            "totalViolationDuration": 600004,
+                            "perMetricResult": {
+                                "accedian-twamp": {
+                                    "twamp-pe": {
+                                        "delayP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 600004,
+                                                    "violationCount": 2,
+                                                    "violationDuration": 600004
+                                                }
+                                            }
+                                        },
+                                        "jitterP95": {
+                                            "sla": {
+                                                "0": {
+                                                    "totalDuration": 600004,
+                                                    "violationCount": 2,
+                                                    "violationDuration": 600004
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "byHourOfDayResult": {
+                    "14": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 2
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 2
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "17": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 72
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 72
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "18": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "19": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "20": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "21": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "22": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "23": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "00": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "01": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "02": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "03": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "04": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "05": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "06": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "07": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "08": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 300
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "09": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 127
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 127
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "byDayOfWeekResult": {
+                    "4": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 1872
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 1872
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "5": {
+                        "accedian-twamp": {
+                            "twamp-pe": {
+                                "delayP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 2829
+                                        }
+                                    }
+                                },
+                                "jitterP95": {
+                                    "sla": {
+                                        "0": {
+                                            "violationCount": 2829
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "reportScheduleConfig": "1000"
+			}`
+
+	err = json.Unmarshal([]byte(validTestString), &jsReport)
+	assert.Nil(t, err)
+	jsReport.ID = ""
+	jsReport.REV = ""
+	assert.Equal(t, "ade3010a-a70a-4444-8cc7-c12c57a9ada5", jsReport.TenantID)
+	assert.Equal(t, "P90Y/2018-06-04T00:23:00Z", jsReport.ReportTimeRange)
+	assert.Equal(t, int64(114030012), jsReport.ReportSummary.TotalDuration)
+	assert.Equal(t, int32(9402), jsReport.ReportSummary.TotalViolationCount)
+	assert.Equal(t, int64(114030012), jsReport.ReportSummary.TotalViolationDuration)
+	assert.Equal(t, float32(0), jsReport.ReportSummary.SLACompliancePercent)
+	jsReport.TenantID = TENANT
+
+	stored, err = tdb.CreateSLAReport(&jsReport)
+	assert.Nil(t, err)
+	logger.Log.Debugf("Stored: %+v", stored)
+
+	sRep, err := tdb.GetSLAReport(stored.TenantID, stored.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, sRep)
+	jsReport.ID = stored.ID
+	jsReport.REV = stored.REV
+
+	assert.Equal(t, jsReport, *sRep)
+	assert.Equal(t, TENANT, sRep.TenantID)
+	assert.Equal(t, "P90Y/2018-06-04T00:23:00Z", sRep.ReportTimeRange)
+	assert.Equal(t, int64(114030012), sRep.ReportSummary.TotalDuration)
+	assert.Equal(t, int32(9402), sRep.ReportSummary.TotalViolationCount)
+	assert.Equal(t, int64(114030012), sRep.ReportSummary.TotalViolationDuration)
+	assert.Equal(t, float32(0), sRep.ReportSummary.SLACompliancePercent)
 
 }

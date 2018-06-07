@@ -1,3 +1,4 @@
+* Fix - SLA Report generation was not consistent between the immediate generate and the scheduled generation.
 ## Current Release 
 ### 0.137.0 
 **Release Date:** Wed Jun  6 18:49:43 UTC 2018     

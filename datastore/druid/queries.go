@@ -645,7 +645,7 @@ func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
 
 		lookupName, exists := getLookupName("dom", tenantID, domID)
 		if !exists {
-			logger.Log.Warningf("No lookup found for domain ID %s. It will be excluded from the domain filter", domID)
+			logger.Log.Warningf("No lookup (%s) found for domain ID %s. It will be excluded from the domain filter", lookupName, domID)
 			continue
 		}
 

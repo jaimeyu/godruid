@@ -3,6 +3,8 @@ package druid
 import (
 	"strings"
 	"time"
+
+	"github.com/accedian/adh-gather/logger"
 )
 
 // A simple cache to mirror what is stored on Druid.
@@ -42,9 +44,10 @@ func getLookupName(dimType, tenantID, dimValue string) (string, bool) {
 			// Enough time has passed to commit the lookup
 			return lookup, true
 		}
+		logger.Log.Errorf("Not enough time has passed to commit the lookup:%s", lookup)
 	}
 
-	return "", false
+	return lookup, false
 }
 
 // Construct a lookup name
@@ -60,12 +63,36 @@ func getLookupNamePrefix(dimType, tenantID string) string {
 	return strings.ToLower(dimType + "|" + tenantID)
 }
 
+/* Heads up. The following is so when a getLookup is executed, it only allows it
+ * after about 15 seconds since the monitored object was updated.
+ * This is so Druid has some time to process and update the LookUp view.
+ * The logic has changed a bit, I found a condition where a caller was sending empty
+ * lookup maps which wrecks havok to the lookups global and nulls it out, hence the new
+ * length checks and lazy memory assignment.
+ * The added debugging is important because it will tell you what the logic thinks its doing
+ * when getLookUpNames is called and returns an error and you need to work backwards.
+ */
 func updateLookupCache(lookupMap map[string]*lookup) {
+
+	// Don't work on map if its empty
+	if lookupMap == nil {
+		logger.Log.Infof("Lookup map is empty, skipping cache update")
+		return
+	}
+
+	if len(lookupMap) == 0 {
+		logger.Log.Infof("Lookup map is empty, skipping cache update")
+		return
+	}
+
 	// Update the lookup cache.  Map each lookup name to the earliest timestamp it was created.
 	curTs := time.Now()
 	epoch := time.Unix(0, 0)
 	var earliestTs *time.Time
-	newLookupNames := make(map[string]*time.Time, len(lookupMap))
+	// Lazy build the look up cache
+	if lookups.lookupNames == nil {
+		lookups.lookupNames = make(map[string]*time.Time)
+	}
 	for k, v := range lookupMap {
 		earliestTs = &curTs
 		if lookups.lookupNames == nil {
@@ -77,9 +104,10 @@ func updateLookupCache(lookupMap map[string]*lookup) {
 			// The lookup already exists so use its existing timestamp.
 			earliestTs = prevTs
 		}
-		newLookupNames[k] = earliestTs
+		lookups.lookupNames[k] = earliestTs
+		logger.Log.Debugf("Updated lookup [%s] -> %+v", k, earliestTs)
 	}
 
-	lookups.lookupNames = newLookupNames
+	logger.Log.Debugf("Overwrote lookup: %+v", lookups.lookupNames)
 
 }

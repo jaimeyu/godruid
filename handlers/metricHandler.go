@@ -189,7 +189,7 @@ func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest 
 	request := metrics.SLAReportRequest{
 		TenantID:           queryParams.Get("tenant"),
 		Interval:           queryParams.Get("interval"),
-		Domain:             toStringSplice(queryParams.Get("domain")),
+		Domain:             toStringSplice(queryParams.Get("domains")),
 		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
 		Granularity:        queryParams.Get("granularity"),
 		Timezone:           queryParams.Get("timezone"),

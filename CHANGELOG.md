@@ -1,8 +1,10 @@
-Feature - Adding Tests for Skylight-AAA authorizations utilities.
 ## Current Release 
+### 0.139.0 
+**Release Date:** Fri Jun  8 15:16:39 UTC 2018     
+## Previous Releases 
+Feature - Adding Tests for Skylight-AAA authorizations utilities.
 ### 0.138.0 
 **Release Date:** Thu Jun  7 17:01:26 UTC 2018     
-## Previous Releases 
 * Fix - SLA Report generation was not consistent between the immediate generate and the scheduled generation.
 ### 0.137.0 
 **Release Date:** Wed Jun  6 18:49:43 UTC 2018     

@@ -207,6 +207,7 @@ func NotifyEvent(event *ChangeEvent) {
 func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {
 	processedTenantIds := make(map[string]bool)
 	for _, e := range events {
+
 		metadataChange := false
 		switch e.eventType {
 		case MonitoredObjectCreated, MonitoredObjectUpdated:
@@ -328,7 +329,6 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			}
 
 		}
-
 		if fullRefresh || changeDetected {
 			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())

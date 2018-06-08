@@ -1,7 +1,11 @@
 ## Current Release 
+### 0.140.0 
+**Release Date:** Fri Jun  8 16:58:11 UTC 2018     
+## Previous Releases 
+* feat - adding a system level auth role for API calls made by internal services to datahub
+* fix - correcting issue with auth being called by internal services for APIs that  o not require auth.
 ### 0.139.0 
 **Release Date:** Fri Jun  8 15:16:39 UTC 2018     
-## Previous Releases 
 Feature - Adding Tests for Skylight-AAA authorizations utilities.
 ### 0.138.0 
 **Release Date:** Thu Jun  7 17:01:26 UTC 2018     

@@ -110,17 +110,21 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 			Pattern:     apiV1Prefix + "tenant-list",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllTenants),
 		},
+		// TODO: Make a "system" role for internal callers to be able to use to bypass auth checks. For
+		// now, just commenting out auth for these calls.
 		server.Route{
-			Name:        "GetTenantIDByAlias",
-			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenant-by-alias/{value}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantIDByAlias),
+			Name:    "GetTenantIDByAlias",
+			Method:  "GET",
+			Pattern: apiV1Prefix + "tenant-by-alias/{value}",
+			// HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantIDByAlias),
+			HandlerFunc: result.GetTenantIDByAlias,
 		},
 		server.Route{
-			Name:        "GetTenantSummaryByAlias",
-			Method:      "GET",
-			Pattern:     apiV1Prefix + "tenant-summary-by-alias/{value}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantSummaryByAlias),
+			Name:    "GetTenantSummaryByAlias",
+			Method:  "GET",
+			Pattern: apiV1Prefix + "tenant-summary-by-alias/{value}",
+			// HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetTenantSummaryByAlias),
+			HandlerFunc: result.GetTenantSummaryByAlias,
 		},
 		server.Route{
 			Name:        "CreateIngestionDictionary",

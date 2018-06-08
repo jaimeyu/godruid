@@ -1,4 +1,5 @@
-* fix - correcting issue with auth being called by internal services for APIs that  do not require auth.
+* feat - adding a system level auth role for API calls made by internal services to datahub
+* fix - correcting issue with auth being called by internal services for APIs that  o not require auth.
 ## Current Release 
 ### 0.135.0 
 **Release Date:** Tue Jun  5 02:48:22 UTC 2018     

@@ -1,6 +1,7 @@
 package couchDB
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/accedian/adh-gather/config"
@@ -544,12 +545,38 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantID str
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	dataContainer := tenmod.ThresholdProfile{}
+
+	// dataContainer := tenmod.ThresholdProfile{}
+	// TODO: TEMPORARY FIX until the UI portion of a threshold profile is removed or the UI conforms to the data model.
+	dataContainer := map[string]interface{}{}
 	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
+	thresholds := dataContainer["thresholds"].(map[string]interface{})
+	vendorMap := thresholds["vendorMap"].(map[string]interface{})
+	for _, val := range vendorMap {
+		valAsMap := val.(map[string]interface{})
+		if valAsMap["metricMap"] != nil {
+			delete(valAsMap, "metricMap")
+		}
+	}
+
+	// Convert the generic object to a thresholdProfile
+	finalDataContainer := tenmod.ThresholdProfile{}
+	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(dataContainer)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(genericDataInBytes, &finalDataContainer)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to %s type: %s", tenmod.TenantThresholdProfileStr, err.Error())
+		return nil, err
+	}
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
-	return &dataContainer, nil
+	// return &dataContainer, nil
+	return &finalDataContainer, nil
 }
 
 // DeleteTenantThresholdProfile - CouchDB implementation of DeleteTenantThresholdProfile

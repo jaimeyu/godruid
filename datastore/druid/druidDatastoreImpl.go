@@ -88,12 +88,14 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 		if strings.Contains(err.Error(), "401") {
 			logger.Log.Info("Auth token expired, refreshing token")
 			dc.AuthToken = GetAuthCode(dc.cfg)
-			err := client.Query(query, dc.AuthToken)
-			if err != nil {
-				return nil, err
+			err_retry := client.Query(query, dc.AuthToken)
+			if err_retry != nil {
+				logger.Log.Errorf("Druid Query RETRY failed due to: %s", err)
+				return nil, err_retry
 			}
 			return query.GetRawJSON(), nil
 		}
+		logger.Log.Errorf("Druid Query failed due to: %s", err)
 		return nil, err
 	}
 
@@ -363,7 +365,7 @@ type Debug struct {
 	Data map[string]interface{} `json:"data"`
 }
 
-func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error) {
 	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 	var query godruid.Query
@@ -469,18 +471,19 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		ReportScheduleConfig: request.SlaScheduleConfig,
 	}
 
-	data := []map[string]interface{}{}
-	data = append(data, map[string]interface{}{
-		"id":         reportID,
-		"type":       SLAReport,
-		"attributes": slaReport,
-	})
+	/*
+		data := []map[string]interface{}{}
+		data = append(data, map[string]interface{}{
+			"id":         reportID,
+			"type":       SLAReport,
+			"attributes": slaReport,
+		})
 
-	rr := map[string]interface{}{
-		"data": data,
-	}
-
-	return rr, nil
+		rr := map[string]interface{}{
+			"data": data,
+		}
+	*/
+	return &slaReport, nil
 }
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {
@@ -506,7 +509,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.RawMetricStr, models.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: '' %s ''", db.RawMetricStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -563,7 +566,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
 	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
 	// Every domain should have a map even if it has no monitored objects.
-	lookups := make(map[string]*lookup, len(domains))
+	lookups := make(map[string]*lookup)
 	for _, domain := range domains {
 		lookupName := buildLookupName("dom", tenantID, domain.ID)
 		domLookup := lookup{

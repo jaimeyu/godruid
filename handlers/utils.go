@@ -447,6 +447,7 @@ const (
 	userRoleSkylight    = "skylight-admin"
 	userRoleTenantAdmin = "tenant-admin"
 	userRoleTenantUser  = "tenant-user"
+	userRoleSystem      = "system"
 	userRoleUnknown     = "unknown"
 )
 
@@ -475,6 +476,7 @@ type RequestUserAuth struct {
 
 // ExtractHeaderToUserAuthRequest - Converts a header into a requestUserAuth struct
 func ExtractHeaderToUserAuthRequest(h http.Header) (*RequestUserAuth, error) {
+	logger.Log.Debugf("Received Headers: %s", models.AsJSONString(h))
 	roles := h.Get(xFwdUserRoles)
 	lRoles := strings.Split(roles, ",")
 	req := RequestUserAuth{
@@ -521,6 +523,11 @@ func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 
 	// We currenly only support 1 allowed role, this may change in the future
 	allowedRole := allowedRoles[0]
+	if allowedRole == userRoleSystem {
+		// Always allow the "system" level auth access to the APIs
+		logger.Log.Debugf("Access role %s provided. Access Granted", allowedRole)
+		return true
+	}
 
 	// Otherwise, handle the roles
 	for _, role := range user.UserRoles {

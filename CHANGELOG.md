@@ -1,3 +1,4 @@
+* Fix - temporarily removing UI section of threshold profiles that is not formatted according to the backend model on UI created threshold profiles. Test commented out as well.
 ## Current Release 
 ### 0.141.0 
 **Release Date:** Fri Jun  8 20:58:19 UTC 2018     

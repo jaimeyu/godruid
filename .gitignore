@@ -18,3 +18,4 @@ adh-gather
 server/debug
 debug
 .vscode/launch.json
+bin/alpine-adh-gather

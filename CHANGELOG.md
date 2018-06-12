@@ -1,8 +1,10 @@
-* Fix - changing the ingestion dictionary based on twamp needs
 ## Current Release 
+### 0.143.0 
+**Release Date:** Tue Jun 12 01:28:22 UTC 2018     
+## Previous Releases 
+* Fix - changing the ingestion dictionary based on twamp needs
 ### 0.142.0 
 **Release Date:** Mon Jun 11 15:32:29 UTC 2018     
-## Previous Releases 
 * Fix - temporarily removing UI section of threshold profiles that is not formatted according to the backend model on UI created threshold profiles. Test commented out as well.
 ### 0.141.0 
 **Release Date:** Fri Jun  8 20:58:19 UTC 2018     

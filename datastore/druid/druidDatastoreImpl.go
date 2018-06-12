@@ -3,6 +3,7 @@ package druid
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -108,9 +109,9 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
 	server := cfg.GetString(gather.CK_druid_broker_server.String())
-	port := cfg.GetString(gather.CK_druid_broker_port.String())
+	//port := cfg.GetString(gather.CK_druid_broker_port.String())
 	client := godruid.Client{
-		Url:        server + ":" + port,
+		Url:        server, // + ":" + port,
 		Debug:      true,
 		HttpClient: makeHttpClient(),
 	}
@@ -145,6 +146,70 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 
 	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	histogram := []*pb.Histogram{}
+
+	err = json.Unmarshal(response, &histogram)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
+
+	resp := &pb.HistogramResponse{
+		Data: histogram,
+	}
+
+	// peyo TODO: need to figure out where to get this ID and Type from.
+	uuid := uuid.NewV4()
+	data := make([]*pb.HistogramResponse, 0)
+	data = append(data, resp)
+	rr := map[string]interface{}{
+		"data": map[string]interface{}{
+			"id":         uuid.String(),
+			"type":       ThresholdCrossingReport,
+			"attributes": data,
+		},
+	}
+
+	return rr, nil
+}
+
+func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	buckets := make([]map[string]interface{}, len(request.MetricBuckets))
+
+	for i, mb := range request.MetricBuckets {
+		bucketMap, err := models.ConvertObj2Map(mb)
+		if err != nil {
+			return nil, err
+		}
+		buckets[i] = bucketMap
+	}
+
+	query, err := HistogramCustomQuery(request.TenantID, table, request.Interval, request.Vendor, request.ObjectType, request.Domains, request.Direction, request.Granularity, buckets, timeout)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
+
+	response, err := dc.executeQuery(query)
+
+	fmt.Println(dc.dClient.LastResponse)
 
 	if err != nil {
 		return nil, err

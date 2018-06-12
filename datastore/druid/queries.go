@@ -84,6 +84,51 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 	return nil, fmt.Errorf("Unable to consume threshold profile for: %v", metric)
 }
 
+func HistogramCustomQuery(tenant string, dataSource string, interval string, vendor string, objectType string, domains []string, direction string, granularity string, metricBuckets []map[string]interface{}, timeout int32) (*godruid.QueryTimeseries, error) {
+
+	var aggregations []godruid.Aggregation
+
+	for _, met := range metricBuckets {
+
+		metName := met["metric"].(string)
+		metUpper := met["upper"].(float64)
+		metLower := met["lower"].(float64)
+
+		//nLower := strconv.FormatFloat(metLower, 'f', 6, 64)
+		//nUpper := strconv.FormatFloat(metUpper, 'f', 6, 64)
+
+		name := fmt.Sprintf("%s.%s.%s.%s.%.6f-%.6f", vendor, objectType, metName, direction, metLower, metUpper)
+		//name := vendor + "." + objectType + "." + metName + "." + direction + "." + nLower + "-" + nUpper
+
+		// Should these be configurable?
+		filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), true, float32(metUpper), true)
+
+		aggregation := godruid.AggFiltered(
+			godruid.FilterAnd(
+				filter,
+				godruid.FilterSelector("objectType", objectType),
+				godruid.FilterSelector("direction", direction),
+			),
+			&godruid.Aggregation{
+				Type: "count",
+				Name: name,
+			},
+		)
+		aggregations = append(aggregations, aggregation)
+
+	}
+
+	return &godruid.QueryTimeseries{
+		DataSource:  dataSource,
+		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+		),
+		Aggregations: aggregations,
+		Intervals:    []string{interval}}, nil
+}
+
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
 func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryTimeseries, error) {

@@ -49,6 +49,8 @@ type DruidDatastore interface {
 	// Returns the min,max,avg,median for a given metric
 	GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error)
 
+	GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error)
+
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
 

@@ -19,6 +19,27 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
+type HistogramCustomRequest struct {
+	TenantID string `json:"tenantId"`
+	// ISO-8601 Intervals
+	Vendor     string   `json:"vendor,omitempty"`
+	ObjectType string   `json:"objecttype,omitempty"`
+	Interval   string   `json:"interval,omitempty"`
+	Domains    []string `json:"domains,omitempty"`
+	Direction  string   `json:"direction"`
+	// ISO-8601 period combination
+	Granularity   string         `json:"granularity,omitempty"`
+	MetricBuckets []MetricBucket `json:"buckets,omitempty"`
+	// in Milliseconds
+	Timeout int32 `json:"timeout,omitempty"`
+}
+
+type MetricBucket struct {
+	Metric     string `json:"metric"`
+	LowerBound int32  `json:"lower"`
+	UpperBound int32  `json:"upper"`
+}
+
 // GetID - required implementation for jsonapi marshalling
 func (sr *SLAReport) GetID() string {
 	return sr.ID

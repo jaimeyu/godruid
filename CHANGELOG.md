@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.144.0 
+**Release Date:** Tue Jun 12 02:13:32 UTC 2018     
+## Previous Releases 
 ### 0.143.0 
 **Release Date:** Tue Jun 12 01:28:22 UTC 2018     
-## Previous Releases 
 * Fix - changing the ingestion dictionary based on twamp needs
 ### 0.142.0 
 **Release Date:** Mon Jun 11 15:32:29 UTC 2018     

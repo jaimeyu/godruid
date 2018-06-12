@@ -14,10 +14,10 @@ import (
 type TimeBucket int
 
 const (
-	TimeZoneUTC                = "UTC"
-	Granularity_All            = "all"
-	HourOfDay       TimeBucket = 0
-	DayOfWeek       TimeBucket = 1
+	TimeZoneUTC               = "UTC"
+	GranularityAll            = "all"
+	HourOfDay      TimeBucket = 0
+	DayOfWeek      TimeBucket = 1
 )
 
 // HistogramQuery - Count of metrics per bucket for given interval.
@@ -28,7 +28,7 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
-		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity: toGranularity(granularity),
 		Context:     map[string]interface{}{"timeout": timeout},
 		Aggregations: []godruid.Aggregation{
 			godruid.AggFiltered(
@@ -138,7 +138,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
-		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity: toGranularity(granularity),
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
@@ -434,7 +434,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 
 	return &godruid.QueryGroupBy{
 		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity:  toGranularity(granularity),
 		Context:      map[string]interface{}{"timeout": timeout},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
@@ -541,7 +541,7 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity:  toGranularity(granularity),
 		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
@@ -703,7 +703,7 @@ func buildPostAggregationFields(fieldNames []string) []godruid.PostAggregation {
 }
 
 func toGranularity(granularityStr string) godruid.Granlarity {
-	if granularityStr == Granularity_All {
+	if strings.ToLower(granularityStr) == GranularityAll {
 		return godruid.GranAll
 	}
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")

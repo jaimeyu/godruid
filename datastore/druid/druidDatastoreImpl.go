@@ -3,6 +3,7 @@ package druid
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ const (
 	EventDistribution       = "event-distribution"
 	RawMetrics              = "raw-metrics"
 	SLAReport               = "sla-report"
+	TopNForMetric           = "top-n"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -288,47 +290,42 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 func (dc *DruidDatastoreClient) GetTopNForMetricAvg(request *metrics.TopNForMetric) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
-	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
-	query, err := GetTopNForMetricAvg(request.TenantID, table, request.Domains, request.MonitoredObjects, request.Metric, request.Granularity, request.Interval, request.NumResult, request.Timeout)
+	query, err := GetTopNForMetricAvg(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Log.Errorf("Querying Druid for %s with query: %+v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	logger.Log.Errorf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
 	}
 
-	thresholdCrossing := make([]ThresholdCrossingByMonitoredObjectResponse, 0)
-	err = json.Unmarshal(response, &thresholdCrossing)
-	if err != nil {
+	construct := fmt.Sprintf("{\"results\":%s}", string(response))
+
+	responseMap := make(map[string]interface{})
+	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
+		logger.Log.Errorf("Could not Unmarshal, %s", err.Error())
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
-
-	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
-	if err != nil {
-		return nil, err
-	}
+	logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
 	data := []map[string]interface{}{}
 	data = append(data, map[string]interface{}{
 		"id":         uuid.String(),
-		"type":       ThresholdCrossingReport,
-		"attributes": formattedJSON,
+		"type":       TopNForMetric,
+		"attributes": responseMap,
 	})
 	rr := map[string]interface{}{
 		"data": data,
 	}
+	logger.Log.Debugf("Response to caller %+v", rr)
 
 	return rr, nil
-
-	return nil, nil
 }
 
 // GetThresholdCrossingByMonitoredObjectTopN - Executes a TopN 'threshold crossing' query against druid. Wraps the

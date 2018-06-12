@@ -774,32 +774,63 @@ func toGranularity(granularityStr string) godruid.Granlarity {
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")
 }
 
+const (
+	OP_SUM   = "sum"
+	OP_MAX   = "max"
+	OP_MIN   = "min"
+	OP_COUNT = "count"
+)
+
+func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Aggregation {
+
+	var aggregations []godruid.Aggregation
+
+	if metricsView == nil {
+		return nil
+	}
+	for _, input := range metricsView {
+
+		switch input.Aggregator {
+		case OP_SUM:
+			aggregations = append(aggregations, godruid.AggDoubleSum(input.Name, input.Metric))
+		case OP_MAX:
+			aggregations = append(aggregations, godruid.AggDoubleMax(input.Name, input.Metric))
+		case OP_MIN:
+			aggregations = append(aggregations, godruid.AggDoubleMin(input.Name, input.Metric))
+		case OP_COUNT:
+			aggregations = append(aggregations, godruid.AggCount(input.Name))
+		}
+	}
+
+	return aggregations
+}
+
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func GetTopNForMetricAvg(tenant string, dataSource string, domains []string, monitoredObjects []string, metric metrics.MetricIdentifier, granularity string, interval string, numResults int32, timeout int32) (*godruid.QueryTopN, error) {
+func GetTopNForMetricAvg(dataSource string, request *metrics.TopNForMetric) (*godruid.QueryTopN, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations godruid.PostAggregation
 
-	monObjFilter := buildMonitoredObjectFilter(tenant, monitoredObjects)
+	sumLbl := "__sum_op"
+	countLbl := "__count_op"
+	countFilterLbl := "__count_op_filter"
+	opLbl := request.Aggregation
 
-	sumLbl := "___sum_553"
-	countLbl := "___count_552"
-	minLbl := "min"
-	maxLbl := "max"
+	monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+	aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
 
-	aggregations = append(aggregations, godruid.AggCount("count"))
+	listOfMetricViewAgg := buildMetricAggregator(request.MetricsView)
+	if listOfMetricViewAgg != nil {
+		aggregations = append(aggregations, listOfMetricViewAgg...)
+	}
+
+	metric := request.Metric
 	aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
-	aggregations = append(aggregations, godruid.AggDoubleMin(minLbl, metric.Name))
-	aggregations = append(aggregations, godruid.AggDoubleMax(maxLbl, metric.Name))
 
 	aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
-
-	aggroFunc := godruid.AggFiltered(aggroFilter,
-		&godruid.Aggregation{
-			Type: "count",
-			Name: countLbl,
-		})
+	aggroCount := godruid.AggCount(countLbl)
+	aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
 	aggregations = append(aggregations, aggroFunc)
 
 	// post aggro
@@ -807,7 +838,7 @@ func GetTopNForMetricAvg(tenant string, dataSource string, domains []string, mon
 	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
 	var scoredPostAggregation []godruid.PostAggregation
 	scoredPostAggregation = []godruid.PostAggregation{
-		godruid.PostAggArithmetic("avg", "/", postAggregations.Fields),
+		godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
 	}
 
 	if monObjFilter == nil {
@@ -815,17 +846,17 @@ func GetTopNForMetricAvg(tenant string, dataSource string, domains []string, mon
 			QueryType:    godruid.TOPN,
 			DataSource:   dataSource,
 			Granularity:  godruid.GranAll,
-			Context:      map[string]interface{}{"timeout": timeout, "queryId": uuid.NewV4().String()},
+			Context:      map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
 			Aggregations: aggregations,
 			Filter: godruid.FilterAnd(
-				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-				buildDomainFilter(tenant, domains),
+				godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+				buildDomainFilter(request.TenantID, request.Domains),
 				godruid.FilterSelector("objectType", metric.ObjectType),
 			),
 			PostAggregations: scoredPostAggregation,
-			Intervals:        []string{interval},
-			Metric:           map[string]interface{}{"metric": "avg"},
-			Threshold:        int(numResults),
+			Intervals:        []string{request.Interval},
+			Metric:           map[string]interface{}{"metric": opLbl},
+			Threshold:        int(request.NumResult),
 			Dimension:        "monitoredObjectId",
 		}, nil
 	}

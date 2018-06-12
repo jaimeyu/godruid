@@ -693,60 +693,6 @@ func validateMetricForThresholdProfile(vendor, objectType, metric string, thresh
 	return nil
 }
 
-/*
-func populateTopNReq(queryParams url.Values) (*metrics.TopNForMetric, error) {
-	req := metrics.TopNForMetric{
-		Direction:        queryParams.Get("direction"),
-		Interval:         queryParams.Get("interval"),
-		Metric:           queryParams.Get("metric"),
-		TenantID:         queryParams.Get("tenant"),
-		ObjectType:       queryParams.Get("objectType"),
-		MonitoredObjects: toStringSplice(queryParams.Get("monitoredObjectId")),
-		Domains:          toStringSplice(queryParams.Get("domains")),
-		Granularity:      queryParams.Get("granularity"),
-		Vendor:           queryParams.Get("vendor"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		req.Timeout = int32(timeout)
-	} else {
-		req.Timeout = 5000
-	}
-
-	if req.Timeout == 0 {
-		req.Timeout = 5000
-	}
-
-	if len(req.Domains) == len(req.MonitoredObjects) && len(req.Domains) == 0 {
-		return nil, errors.New("Either Domain or/and Monitored Objects list must not be empty.")
-	}
-
-	if len(req.Vendor) == 0 {
-		return nil, errors.New("Vendor cannot be empty.")
-	}
-
-	if len(req.TenantID) == 0 {
-		return nil, errors.New("Tenant must not be empty.")
-	}
-
-	if len(req.Granularity) == 0 {
-		// Default for now
-		req.Granularity = "PT1H"
-	}
-
-	if len(req.Interval) == 0 {
-		return nil, errors.New("Interval must not be empty")
-	}
-
-	if len(req.Metric) == 0 {
-		return nil, errors.New("Metric must not be empty")
-	}
-
-	return &req, nil
-}
-*/
-
 func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Request) {
 
 	startTime := time.Now()
@@ -782,7 +728,7 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 
 	result, err := msh.druidDB.GetTopNForMetricAvg(&topNreq)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
+		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
@@ -790,10 +736,11 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
+		msg := fmt.Sprintf("Unable to marshal TOP N. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
+	logger.Log.Errorf("RESPONSE: %+v", string(res))
 
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, topNreq)

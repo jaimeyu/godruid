@@ -27,6 +27,9 @@ const (
 
 	// SLAReport - common name for use in logs.
 	SLAReportStr = "SLA Report"
+
+	// TopNForMetricString - common name for use in logs
+	TopNForMetricString = "Top-N report"
 )
 
 type DruidDatastore interface {

@@ -106,10 +106,22 @@ type TopNForMetric struct {
 	// Number of Results (default is 10)
 	NumResult int32 `json:"NumResults"`
 
-	Aggregation string             `json:"aggregation"`
-	Metrics     []MetricIdentifier `json:"metrics,omitempty"`
-
+	// Operation - 'avg', 'count', 'min', 'max'
+	Aggregation string `json:"aggregation"`
+	// Metric that we are apply Aggregation to
 	Metric MetricIdentifier `json:"metric,omitempty"`
+
+	// Metrics that are related and interesting BUT are NOT part of the post aggregation
+	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
+}
+
+type MetricAggregation struct {
+	// Metric name eg jitterP95
+	Metric string `json:"metric"`
+	// Operation - 'sum', 'count', 'min', 'max'
+	Aggregator string `json:"aggregator"`
+	// Name for this Aggregation (must be unique)
+	Name string `json:"name"`
 }
 
 func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {

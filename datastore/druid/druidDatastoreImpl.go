@@ -284,6 +284,53 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	return rr, nil
 }
 
+// GetTopNFor
+func (dc *DruidDatastoreClient) GetTopNForMetricAvg(request *metrics.TopNForMetric) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	query, err := GetTopNForMetricAvg(request.TenantID, table, request.Domains, request.MonitoredObjects, request.Metric, request.Granularity, request.Interval, request.NumResult, request.Timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Errorf("Querying Druid for %s with query: %+v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	thresholdCrossing := make([]ThresholdCrossingByMonitoredObjectResponse, 0)
+	err = json.Unmarshal(response, &thresholdCrossing)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+
+	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
+	if err != nil {
+		return nil, err
+	}
+
+	// peyo TODO: need to figure out where to get this ID and Type from.
+	uuid := uuid.NewV4()
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       ThresholdCrossingReport,
+		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	return rr, nil
+
+	return nil, nil
+}
+
 // GetThresholdCrossingByMonitoredObjectTopN - Executes a TopN 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere

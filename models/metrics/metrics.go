@@ -1,5 +1,7 @@
 package metrics
 
+import "errors"
+
 const (
 	ReportType = "reports"
 	ReportStr  = "Report"
@@ -82,6 +84,58 @@ type ThresholdCrossingTopNRequest struct {
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
+}
+
+type TopNForMetric struct {
+	// One of the two must be populated for the request to be valid, domains or monitoredObjects.
+	// But if both are given, then the behaviour will be the query will be based on a subset of monitoredObjects that belong to the domains.
+	// List of domains (optional)
+	Domains []string `json:"domains,omitempty"`
+	// List of monitored objects (optional)
+	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
+
+	// Required Time range for the requestin ISO 8601 format for intervals
+	Interval string `json:"interval"`
+	// Rquired Vendor (to avoid overlaps, eg: flowmeter does not have Jitter values
+	// so if you do a min TopN then you'll just get a list of 0s)
+	TenantID string `json:"tenant"`
+	// Granularity in ISO 8601 format
+	Granularity string `json:"granularity"`
+	// Timeout for the request
+	Timeout int32 `json:"timeout"`
+	// Number of Results (default is 10)
+	NumResult int32 `json:"NumResults"`
+
+	Aggregation string             `json:"aggregation"`
+	Metrics     []MetricIdentifier `json:"metrics,omitempty"`
+
+	Metric MetricIdentifier `json:"metric,omitempty"`
+}
+
+func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
+	req := tpn
+	if req.Timeout == 0 {
+		req.Timeout = 5000
+	}
+
+	if len(req.Domains) == len(req.MonitoredObjects) && len(req.Domains) == 0 {
+		return nil, errors.New("Either Domain or/and Monitored Objects list must not be empty.")
+	}
+
+	if len(req.TenantID) == 0 {
+		return nil, errors.New("Tenant must not be empty.")
+	}
+
+	if len(req.Granularity) == 0 {
+		// Default for now
+		req.Granularity = "PT1H"
+	}
+
+	if len(req.Interval) == 0 {
+		return nil, errors.New("Interval must not be empty")
+	}
+
+	return req, nil
 }
 
 type AggregateMetricsAPIRequest struct {

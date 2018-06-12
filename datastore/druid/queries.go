@@ -1,6 +1,7 @@
 package druid
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
+	"github.com/satori/go.uuid"
 )
 
 type TimeBucket int
@@ -553,6 +555,44 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 	}, nil
 }
 
+/*
+func buildMetricAggregationList(metric metrics.MetricIdentifier) ([]godruid.Aggregation, error) {
+	var aggregations []godruid.Aggregation
+	var pp PostProcessor
+	postAggs := []godruid.PostAggregation{}
+
+	keyToDrop := []string{}
+	countKeys := map[string][]string{}
+
+	countName := metric.Name + "Count"
+	keyToDrop = append(keyToDrop, countName)
+	countKeys[countName] = []string{metric.Name}
+	aggregations = append(aggregations, buildMetricAggregation("count", &metric, countName))
+	if aggregationFunc.Name == "max" {
+		aggregations = append(aggregations, buildMetricAggregation("doubleMax", &metric))
+
+	} else if aggregationFunc.Name == "min" {
+		aggregations = append(aggregations, buildMetricAggregation("doubleMin", &metric))
+
+	} else if aggregationFunc.Name == "avg" {
+
+		aggregations = append(aggregations, buildMetricAggregation("doubleSum", &metric, metric.Name+"Sum"))
+
+		keyToDrop = append(keyToDrop, metric.Name+"Sum")
+
+		postAgg := godruid.PostAggArithmetic(
+			metric.Name,
+			"/",
+			[]godruid.PostAggregation{godruid.PostAggFieldAccessor(metric.Name + "Sum"), godruid.PostAggFieldAccessor(metric.Name + "Count")},
+		)
+		postAggs = append(postAggs, postAgg)
+	} else {
+		return nil, nil, fmt.Errorf("Invalid value for 'aggregation' : %v", aggregationFunc)
+	}
+
+}
+*/
+
 //AggMetricsQuery  - Query that returns a aggregated metric values
 func AggMetricsQuery(tenant string, dataSource string, interval string, domains []string, aggregationFunc metrics.AggregationSpec, metrics []metrics.MetricIdentifier, timeout int32, granularity string) (*godruid.QueryTimeseries, *PostProcessor, error) {
 
@@ -633,6 +673,31 @@ func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, na
 
 }
 
+func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *godruid.Filter {
+	if len(monitoredObjects) < 1 {
+		return nil
+	}
+
+	filters := make([]*godruid.Filter, len(monitoredObjects))
+	atLeastOneDomainFilter := false
+	for i, monobj := range monitoredObjects {
+		atLeastOneDomainFilter = true
+		filters[i] = &godruid.Filter{
+			Type:      "selector",
+			Dimension: "monitoredObjectId",
+			Value:     monobj,
+		}
+	}
+
+	if !atLeastOneDomainFilter {
+		// If there are no monitored objects, don't both with the filter, return a nil.
+		logger.Log.Debugf("No monitored objects found")
+		return nil
+	}
+
+	return godruid.FilterOr(filters...)
+}
+
 func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
 	if len(domains) < 1 {
 		return nil
@@ -707,4 +772,160 @@ func toGranularity(granularityStr string) godruid.Granlarity {
 		return godruid.GranAll
 	}
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")
+}
+
+// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// defined by the supplied threshold profile. Groups results my monitored object ID.
+func GetTopNForMetricAvg(tenant string, dataSource string, domains []string, monitoredObjects []string, metric metrics.MetricIdentifier, granularity string, interval string, numResults int32, timeout int32) (*godruid.QueryTopN, error) {
+
+	var aggregations []godruid.Aggregation
+	var postAggregations godruid.PostAggregation
+
+	monObjFilter := buildMonitoredObjectFilter(tenant, monitoredObjects)
+
+	sumLbl := "___sum_553"
+	countLbl := "___count_552"
+	minLbl := "min"
+	maxLbl := "max"
+
+	aggregations = append(aggregations, godruid.AggCount("count"))
+	aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
+	aggregations = append(aggregations, godruid.AggDoubleMin(minLbl, metric.Name))
+	aggregations = append(aggregations, godruid.AggDoubleMax(maxLbl, metric.Name))
+
+	aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
+
+	aggroFunc := godruid.AggFiltered(aggroFilter,
+		&godruid.Aggregation{
+			Type: "count",
+			Name: countLbl,
+		})
+	aggregations = append(aggregations, aggroFunc)
+
+	// post aggro
+	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
+	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
+	var scoredPostAggregation []godruid.PostAggregation
+	scoredPostAggregation = []godruid.PostAggregation{
+		godruid.PostAggArithmetic("avg", "/", postAggregations.Fields),
+	}
+
+	if monObjFilter == nil {
+		return &godruid.QueryTopN{
+			QueryType:    godruid.TOPN,
+			DataSource:   dataSource,
+			Granularity:  godruid.GranAll,
+			Context:      map[string]interface{}{"timeout": timeout, "queryId": uuid.NewV4().String()},
+			Aggregations: aggregations,
+			Filter: godruid.FilterAnd(
+				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+				buildDomainFilter(tenant, domains),
+				godruid.FilterSelector("objectType", metric.ObjectType),
+			),
+			PostAggregations: scoredPostAggregation,
+			Intervals:        []string{interval},
+			Metric:           map[string]interface{}{"metric": "avg"},
+			Threshold:        int(numResults),
+			Dimension:        "monitoredObjectId",
+		}, nil
+	}
+	return nil, nil
+}
+
+// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
+// defined by the supplied threshold profile. Groups results my monitored object ID.
+func oldTopN(tenant string, dataSource string, domains []string, monitoredObjects []string, metric string, granularity string, interval string, objectType string, direction string, vendors string, numResults int32, timeout int32) (*godruid.QueryTopN, error) {
+
+	var aggregations []godruid.Aggregation
+	var postAggregations godruid.PostAggregation
+
+	//	aggregations = append(aggregations, godruid.AggCount("total"))
+	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor("___sum_645"))
+	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor("___count_644"))
+	var scoredPostAggregation []godruid.PostAggregation
+	scoredPostAggregation = []godruid.PostAggregation{
+		godruid.PostAggArithmetic("avg", "/", postAggregations.Fields),
+	}
+
+	monObjFilter := buildMonitoredObjectFilter(tenant, monitoredObjects)
+
+	aggroMax := godruid.Aggregation{
+		Type:      "doubleMax",
+		Name:      "max",
+		FieldName: metric,
+	}
+	aggroMin := godruid.Aggregation{
+		Type:      "doubleMin",
+		Name:      "min",
+		FieldName: metric,
+	}
+
+	aggroCount := godruid.Aggregation{
+		Type: "count",
+		Name: "count",
+	}
+
+	aggroSum := godruid.Aggregation{
+		Type:      "doubleSum",
+		Name:      "___sum_645",
+		FieldName: metric,
+	}
+
+	//aFilteredAggro := godruid.Aggregation{
+	//	Type: "count",
+	//	Name: "___count_662",
+	//}
+
+	//aggroFilters := godruid.AggFiltered
+
+	aggregations = append(aggregations, aggroMax)
+	aggregations = append(aggregations, aggroMin)
+	aggregations = append(aggregations, aggroCount)
+	aggregations = append(aggregations, aggroSum)
+
+	if monObjFilter == nil {
+		return &godruid.QueryTopN{
+			QueryType:    godruid.TOPN,
+			DataSource:   dataSource,
+			Granularity:  godruid.GranAll,
+			Context:      map[string]interface{}{"timeout": timeout},
+			Aggregations: aggregations,
+			Filter: godruid.FilterAnd(
+				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+				buildDomainFilter(tenant, domains),
+				godruid.FilterSelector("objectType", objectType),
+				godruid.FilterSelector("direction", direction),
+			),
+			PostAggregations: scoredPostAggregation,
+			Intervals:        []string{interval},
+			// Assume always max but
+			//Metric:           "max",
+			Metric:    map[string]interface{}{"metric": "max", "type": "dimension"},
+			Threshold: int(numResults),
+			Dimension: "monitoredObjectId",
+		}, nil
+	} else {
+		logger.Log.Error("SKIPPING MONOBJ")
+		return nil, errors.New("Skipping")
+
+		return &godruid.QueryTopN{
+			DataSource:   dataSource,
+			Granularity:  godruid.GranAll,
+			Context:      map[string]interface{}{"timeout": timeout},
+			Aggregations: aggregations,
+			Filter: godruid.FilterAnd(
+				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+				buildDomainFilter(tenant, domains),
+				monObjFilter,
+				godruid.FilterSelector("objectType", objectType),
+				godruid.FilterSelector("direction", direction),
+			),
+			PostAggregations: scoredPostAggregation,
+			Intervals:        []string{interval},
+			Metric:           map[string]interface{}{"metric": "max", "type": "dimension"},
+			Threshold:        int(numResults),
+			Dimension:        "monitoredObjectId",
+		}, nil
+	}
+
 }

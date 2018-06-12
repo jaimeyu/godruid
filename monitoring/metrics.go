@@ -20,6 +20,7 @@ const (
 	ThresholdProfileStr        = "thr_prf"
 	MonitoredObjectStr         = "mon_obj"
 	ThrCrossStr                = "thr_cross"
+	TopNReqStr                 = "top_n"
 	ThrCrossStrTopN            = "thr_cross_topn"
 	HistogramStr               = "histogram"
 	RawMetricStr               = "raw_metric"
@@ -134,6 +135,8 @@ const (
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
 	GenerateSLAReportStr       = GenSLAReportStr + metricNameDelimiter + OPGetStr
+
+	GetTopNReqStr = TopNReqStr + metricNameDelimiter + OPGetStr
 
 	QueryAggregatedMetricsStr = AggMetricsStr + metricNameDelimiter + OPGetStr
 

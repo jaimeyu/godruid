@@ -93,6 +93,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			Pattern:     "/api/v1/aggregated-metrics",
 			HandlerFunc: result.QueryAggregatedMetrics,
 		},
+
+		server.Route{
+			Name:        "GetTopNFor",
+			Method:      "POST",
+			Pattern:     "/api/v1/get-top-n-for-metric",
+			HandlerFunc: result.GetTopNFor,
+		},
 	}
 
 	return result
@@ -685,3 +692,154 @@ func validateMetricForThresholdProfile(vendor, objectType, metric string, thresh
 
 	return nil
 }
+
+/*
+func populateTopNReq(queryParams url.Values) (*metrics.TopNForMetric, error) {
+	req := metrics.TopNForMetric{
+		Direction:        queryParams.Get("direction"),
+		Interval:         queryParams.Get("interval"),
+		Metric:           queryParams.Get("metric"),
+		TenantID:         queryParams.Get("tenant"),
+		ObjectType:       queryParams.Get("objectType"),
+		MonitoredObjects: toStringSplice(queryParams.Get("monitoredObjectId")),
+		Domains:          toStringSplice(queryParams.Get("domains")),
+		Granularity:      queryParams.Get("granularity"),
+		Vendor:           queryParams.Get("vendor"),
+	}
+
+	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
+	if err == nil {
+		req.Timeout = int32(timeout)
+	} else {
+		req.Timeout = 5000
+	}
+
+	if req.Timeout == 0 {
+		req.Timeout = 5000
+	}
+
+	if len(req.Domains) == len(req.MonitoredObjects) && len(req.Domains) == 0 {
+		return nil, errors.New("Either Domain or/and Monitored Objects list must not be empty.")
+	}
+
+	if len(req.Vendor) == 0 {
+		return nil, errors.New("Vendor cannot be empty.")
+	}
+
+	if len(req.TenantID) == 0 {
+		return nil, errors.New("Tenant must not be empty.")
+	}
+
+	if len(req.Granularity) == 0 {
+		// Default for now
+		req.Granularity = "PT1H"
+	}
+
+	if len(req.Interval) == 0 {
+		return nil, errors.New("Interval must not be empty")
+	}
+
+	if len(req.Metric) == 0 {
+		return nil, errors.New("Metric must not be empty")
+	}
+
+	return &req, nil
+}
+*/
+
+func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Request) {
+
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	request := metrics.TopNForMetric{}
+	if err := json.Unmarshal(requestBytes, &request); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	logger.Log.Infof("Retrieving %s for: %v", "top n req", request)
+
+	if _, err = request.Validate(); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetTopNReqStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	topNreq := request
+	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+
+	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
+		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetTopNForMetricAvg(&topNreq)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, topNreq)
+	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
+	fmt.Fprintf(w, string(res))
+
+}
+
+// GetTopNFor - Retrieve raw metric data from druid
+//func (msh *MetricServiceHandler) oldGetTopNFor(w http.ResponseWriter, r *http.Request) {
+//	// GetThresholdCrossingByMonitoredObjectTopN - Retrieves the TopN Threshold crossings for a given threshold profile,
+//	// interval, tenant, domain, and groups by monitoredObjectID
+//	startTime := time.Now()
+//
+//	// Turn the query Params into the request object:
+//	queryParams := r.URL.Query()
+//	topNreq, err := populateTopNReq(queryParams)
+//	if err != nil {
+//		reportError(w, startTime, "602", mon.GetTopNReqStr, err.Error(), 602)
+//		return
+//	}
+//	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+//
+//	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
+//		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
+//		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
+//		return
+//	}
+//
+//	result, err := msh.druidDB.GetTopNFor(topNreq)
+//	if err != nil {
+//		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
+//		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+//		return
+//	}
+//
+//	// Convert the res to byte[]
+//	res, err := json.Marshal(result)
+//	if err != nil {
+//		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
+//		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+//		return
+//	}
+//
+//	w.Header().Set(contentType, jsonAPIContentType)
+//	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, topNreq)
+//	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
+//	fmt.Fprintf(w, string(res))
+//}

@@ -90,6 +90,7 @@ func init() {
 		"/api/v1/generate-sla-report",
 		"/api/v1/threshold-crossing-by-monitored-object-top-n",
 		"/api/v1/aggregated-metrics",
+		"/api/v1/get-top-n-for-metric",
 	}
 }
 

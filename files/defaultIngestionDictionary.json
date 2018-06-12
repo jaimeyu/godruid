@@ -444,7 +444,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -465,7 +465,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -486,7 +486,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -507,7 +507,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "dvpHi",
               "units": [
                 "μs",
@@ -528,7 +528,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "dvpLo",
               "units": [
                 "μs",
@@ -549,7 +549,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "dvpMi",
               "units": [
                 "μs",
@@ -610,7 +610,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "jmean",
               "units": [
                 "μs",
@@ -631,7 +631,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
+              "key": "twamp-pe",
               "rawMetricId": "jmax",
               "units": [
                 "μs",
@@ -652,20 +652,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "jmin",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "jmin",
               "units": [
                 "μs",
@@ -686,20 +673,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -720,20 +694,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -754,20 +715,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
                 "μs",
@@ -809,20 +757,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "jpHi",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "jpHi",
               "units": [
                 "μs",
@@ -843,20 +778,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "jpLo",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "jpLo",
               "units": [
                 "μs",
@@ -877,20 +799,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "jpMi",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "jpMi",
               "units": [
                 "μs",
@@ -911,20 +820,7 @@
                 "1",
                 "2"
               ],
-              "key": "twamp-sl",
-              "rawMetricId": "jpStdDev",
-              "units": [
-                "μs",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
+              "key": "twamp-pe",
               "rawMetricId": "jpStdDev",
               "units": [
                 "μs",
@@ -950,30 +846,6 @@
               "units": [
                 "value"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "lostburstmax",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "lostburstmax",
-              "units": [
-                "value"
-              ]
             }
           ],
           "ui": {
@@ -991,30 +863,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "lostburstmin",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "lostburstmin",
               "units": [
                 "value"
               ]
@@ -1038,30 +886,6 @@
               "units": [
                 "value"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "mos",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "mos",
-              "units": [
-                "value"
-              ]
             }
           ],
           "ui": {
@@ -1079,32 +903,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "duplicatepkts",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "duplicatepkts",
               "units": [
                 "value",
                 "pct"
@@ -1130,32 +928,6 @@
                 "value",
                 "pct"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "lostpkts",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "lostpkts",
-              "units": [
-                "value",
-                "pct"
-              ]
             }
           ],
           "ui": {
@@ -1173,30 +945,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "lostperc",
-              "units": [
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "lostperc",
               "units": [
                 "pct"
               ]
@@ -1221,32 +969,6 @@
                 "value",
                 "pct"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "misorderpkts",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "misorderpkts",
-              "units": [
-                "value",
-                "pct"
-              ]
             }
           ],
           "ui": {
@@ -1267,30 +989,6 @@
               "units": [
                 "value"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "receivedpkts",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "receivedpkts",
-              "units": [
-                "value"
-              ]
             }
           ],
           "ui": {
@@ -1308,32 +1006,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "toolatepkts",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "toolatepkts",
               "units": [
                 "value",
                 "pct"
@@ -1359,32 +1031,6 @@
                 "value",
                 "pct"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "lostperiods",
-              "units": [
-                "value",
-                "pct"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "lostperiods",
-              "units": [
-                "value",
-                "pct"
-              ]
             }
           ],
           "ui": {
@@ -1401,30 +1047,6 @@
                 "2"
               ],
               "key": "twamp-pe",
-              "rawMetricId": "",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
                 "value"
@@ -1449,30 +1071,6 @@
               "units": [
                 "value"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "ttlmax",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "ttlmax",
-              "units": [
-                "value"
-              ]
             }
           ],
           "ui": {
@@ -1490,30 +1088,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "ttlmin",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "ttlmin",
               "units": [
                 "value"
               ]
@@ -1537,30 +1111,6 @@
               "units": [
                 "value"
               ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "vpriomax",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "vpriomax",
-              "units": [
-                "value"
-              ]
             }
           ],
           "ui": {
@@ -1578,30 +1128,6 @@
               ],
               "key": "twamp-pe",
               "rawMetricId": "",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sl",
-              "rawMetricId": "vpriomin",
-              "units": [
-                "value"
-              ]
-            },
-            {
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ],
-              "key": "twamp-sf",
-              "rawMetricId": "vpriomin",
               "units": [
                 "value"
               ]

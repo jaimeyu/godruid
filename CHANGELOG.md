@@ -1,3 +1,4 @@
+* Fix - support 'All' granularity for metric queries
 ## Current Release 
 ### 0.144.0 
 **Release Date:** Tue Jun 12 02:13:32 UTC 2018     

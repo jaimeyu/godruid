@@ -1,3 +1,4 @@
+* feat - adding support for custom bucket histogram queries
 ## Current Release 
 ### 0.142.0 
 **Release Date:** Mon Jun 11 15:32:29 UTC 2018     

@@ -10,6 +10,8 @@ const (
 	// ThresholdCrossingStr - common name of the ThresholdCrossingStr data type for use in logs.
 	ThresholdCrossingStr = "Threshold Crossing"
 
+	QueryThresholdCrossingStr = "Threshold Crossing Query"
+
 	// ThresholdCrossingByMonitoredObjectStr - common name for use in logs.
 	ThresholdCrossingByMonitoredObjectStr = "Threshold Crossing by Monitored Object"
 
@@ -34,6 +36,10 @@ type DruidDatastore interface {
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+
+	// Returns the the number of times a given metric crossed the
+	// minor,major,critical thresholds of a given threshold object
+	QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
 	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error)
 

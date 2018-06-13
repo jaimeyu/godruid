@@ -61,6 +61,11 @@ type AggMetricsResponse struct {
 	Result    map[string]interface{}
 }
 
+type BaseDruidResponse struct {
+	Timestamp string                 `json:"timestamp"`
+	Result    map[string]interface{} `json:"result"`
+}
+
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
@@ -227,6 +232,47 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	rr := map[string]interface{}{
 		"data": data,
 	}
+
+	return rr, nil
+}
+
+// New version of threshold-crossing
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdViolationsQuery(request.TenantID, table, request.DomainIDs, request.Granularity, request.Interval, request.MetricWhitelist, thresholdProfile.Data, timeout)
+
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
+	druidResponse, err := dc.executeQuery(query)
+
+	response := make([]BaseDruidResponse, 0)
+	err = json.Unmarshal(druidResponse, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(response))
+
+	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	rr := map[string]interface{}{
+		"results": reformatted,
+	}
+
+	logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
 
 	return rr, nil
 }

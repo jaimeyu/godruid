@@ -100,11 +100,11 @@ func FilterLimitSelectorHelper(metric string, lowerLimit float64, lowerStrict bo
 	return nil
 }
 
-func HistogramCustomQuery(tenant string, domains []string, dataSource string, interval string, granularity string, timeout int32, metricsOne []map[string]interface{}) (*godruid.QueryTimeseries, error) {
+func HistogramCustomQuery(tenant string, domains []string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
-	for _, met := range metricsOne {
+	for _, met := range metrics {
 
 		metName := met["name"].(string)
 		metVendor := met["vendor"].(string)
@@ -142,7 +142,7 @@ func HistogramCustomQuery(tenant string, domains []string, dataSource string, in
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			//buildDomainFilter(tenant, domains), //TODO PUT THIS BACK IN!!!!
+			buildDomainFilter(tenant, domains),
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil

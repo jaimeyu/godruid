@@ -178,6 +178,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 	return rr, nil
 }
 
+// Retrieves a histogram for specified metrics based on custom defined buckets
 func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
@@ -188,8 +189,8 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 		timeout = 5000
 	}
 
+	// Split out the request into a set of request metrics keyed off of the metric vendor, objectType, name, and direction
 	metrics := make([]map[string]interface{}, len(request.MetricBucketRequests))
-
 	for i, mb := range request.MetricBucketRequests {
 		metricsMap, err := models.ConvertObj2Map(mb)
 		if err != nil {
@@ -198,23 +199,24 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 		metrics[i] = metricsMap
 	}
 
+	// Build out the actual druid query to send
 	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metrics)
 
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
-
+	// Execute the druid query
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, string(response))
-
-	rr, err := reformatHistogramCustomResponse(string(response))
+	// Reformat the druid response from a flat structure to a json api structure
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	rr, err := convertHistogramCustomResponse(request.TenantID, request.DomainIds, request.Interval, string(response))
 
 	if err != nil {
 		return nil, err

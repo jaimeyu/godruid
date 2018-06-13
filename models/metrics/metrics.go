@@ -63,6 +63,7 @@ func (sr *SLAReport) GetName() string {
 type HistogramCustomReport struct {
 	ReportCompletionTime string                           `json:"reportCompletionTime"`
 	TenantID             string                           `json:"tenantId"`
+	DomainIds            []string                         `json:"domainIds"`
 	ReportTimeRange      string                           `json:"reportTimeRange"`
 	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
 }

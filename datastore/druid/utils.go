@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Jeffail/gabs"
 	db "github.com/accedian/adh-gather/datastore"
@@ -46,7 +47,21 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return dataContainer, nil
 }
 
-func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}, error) {
+func convertHistogramCustomResponse(tenantId string, domainIds []string, interval string, rawResponse string) (map[string]interface{}, error) {
+
+	const (
+		HistogramCustomReport = "customHistogramReports"
+		AttrData              = "data"
+		AttrTimestamp         = "timestamp"
+		AttrResult            = "result"
+		KeyDelim              = "."
+
+		IndexVendor      = 1
+		IndexObjectType  = 2
+		IndexMetricName  = 3
+		IndexDirection   = 4
+		IndexBucketIndex = 5
+	)
 
 	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Index>.+)`)
 	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+)`)
@@ -61,19 +76,19 @@ func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}
 	timeSlices := make([]metrics.HistogramCustomTimeSeriesEntry, 0)
 
 	// Process each time slice in the raw druid response
-	rawTimeslices, _ := jsonResponse.S("data").Children()
+	rawTimeslices, _ := jsonResponse.S(AttrData).Children()
 	for _, rawTimeslice := range rawTimeslices {
-		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S("timestamp").Data().(string)}
+		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
 
 		// Process each bucket response for each metric in the time slice
-		rawResultMap, _ := rawTimeslice.S("result").ChildrenMap()
+		rawResultMap, _ := rawTimeslice.S(AttrResult).ChildrenMap()
 		resultMap := make(map[string][]metrics.BucketResult)
 		for rawkey, value := range rawResultMap {
 
 			fields := fieldsRegex.FindStringSubmatch(rawkey)
-			mapkey := fields[1] + "." + fields[2] + "." + fields[3] + "." + fields[4]
+			mapkey := fields[IndexVendor] + KeyDelim + fields[IndexObjectType] + KeyDelim + fields[IndexMetricName] + KeyDelim + fields[IndexDirection]
 
-			bucketResult := metrics.BucketResult{Index: fields[5], Count: int(value.Data().(float64))}
+			bucketResult := metrics.BucketResult{Index: fields[IndexBucketIndex], Count: int(value.Data().(float64))}
 
 			metricBucket, found := resultMap[mapkey]
 			if !found {
@@ -86,10 +101,10 @@ func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}
 		metricResults := make([]metrics.MetricResult, 0)
 		for k, m := range resultMap {
 			keyfields := metrickeyRegex.FindStringSubmatch(k)
-			metricResults = append(metricResults, metrics.MetricResult{Vendor: keyfields[1],
-				ObjectType: keyfields[2],
-				Name:       keyfields[3],
-				Direction:  keyfields[4],
+			metricResults = append(metricResults, metrics.MetricResult{Vendor: keyfields[IndexVendor],
+				ObjectType: keyfields[IndexObjectType],
+				Name:       keyfields[IndexMetricName],
+				Direction:  keyfields[IndexDirection],
 				Results:    m})
 		}
 		timeslice.Result = metricResults
@@ -97,12 +112,16 @@ func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}
 	}
 
 	hcReport.TimeSeriesResult = timeSlices
+	hcReport.TenantID = tenantId
+	hcReport.DomainIds = domainIds
+	hcReport.ReportTimeRange = interval
+	hcReport.ReportCompletionTime = time.Now().UTC().String()
 
 	uuid := uuid.NewV4()
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
-			"type":       "customHistogramReports", //TODO don't hardcode this
+			"type":       HistogramCustomReport,
 			"attributes": hcReport,
 		},
 	}

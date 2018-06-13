@@ -99,11 +99,11 @@ func HistogramCustomQuery(tenant string, domains []string, dataSource string, in
 			bucketMap := bucket.(map[string]interface{})
 			metUpper := bucketMap["upper"].(float64)
 			metLower := bucketMap["lower"].(float64)
+			metIndex := bucketMap["index"]
 
-			name := fmt.Sprintf("%s.%s.%s.%s.%.6f-%.6f", metVendor, metObjectType, metName, metDirection, metLower, metUpper)
+			name := fmt.Sprintf("%s.%s.%s.%s.%s", metVendor, metObjectType, metName, metDirection, metIndex)
 
-			// Should these be configurable?
-			filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), true, float32(metUpper), true)
+			filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), false, float32(metUpper), true)
 
 			aggregation := godruid.AggFiltered(
 				godruid.FilterAnd(
@@ -122,7 +122,7 @@ func HistogramCustomQuery(tenant string, domains []string, dataSource string, in
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
-		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity: toGranularity(granularity),
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),

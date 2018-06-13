@@ -40,6 +40,7 @@ type MetricBucketRequest struct {
 }
 
 type MetricBucket struct {
+	Index      string  `json:"index"`
 	LowerBound float64 `json:"lower"`
 	UpperBound float64 `json:"upper"`
 }
@@ -80,9 +81,8 @@ type MetricResult struct {
 }
 
 type BucketResult struct {
-	LowerBound float64 `json:"lower"`
-	UpperBound float64 `json:"upper"`
-	Count      int     `json:"count"`
+	Index string `json:"index"`
+	Count int    `json:"count"`
 }
 
 type SLAReport struct {

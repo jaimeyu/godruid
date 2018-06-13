@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/Jeffail/gabs"
@@ -49,8 +48,8 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 
 func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}, error) {
 
-	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Lower>.+?)-(?P<Upper>.+)`)
-	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?)`)
+	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Index>.+)`)
+	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+)`)
 
 	// Temporary hack to put the payload in a format understandable by the json library
 	jsonResponse, err := gabs.ParseJSON([]byte(fmt.Sprintf(`{"data":%s}`, rawResponse)))
@@ -73,15 +72,8 @@ func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}
 
 			fields := fieldsRegex.FindStringSubmatch(rawkey)
 			mapkey := fields[1] + "." + fields[2] + "." + fields[3] + "." + fields[4]
-			fLower, err := strconv.ParseFloat(fields[5], 64)
-			if err != nil {
-				return nil, err
-			}
-			fUpper, err := strconv.ParseFloat(fields[6], 64)
-			if err != nil {
-				return nil, err
-			}
-			bucketResult := metrics.BucketResult{LowerBound: fLower, UpperBound: fUpper, Count: int(value.Data().(float64))}
+
+			bucketResult := metrics.BucketResult{Index: fields[5], Count: int(value.Data().(float64))}
 
 			metricBucket, found := resultMap[mapkey]
 			if !found {

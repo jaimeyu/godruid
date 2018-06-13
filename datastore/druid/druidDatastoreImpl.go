@@ -188,17 +188,17 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 		timeout = 5000
 	}
 
-	metricsOne := make([]map[string]interface{}, len(request.MetricBucketRequests))
+	metrics := make([]map[string]interface{}, len(request.MetricBucketRequests))
 
 	for i, mb := range request.MetricBucketRequests {
 		metricsMap, err := models.ConvertObj2Map(mb)
 		if err != nil {
 			return nil, err
 		}
-		metricsOne[i] = metricsMap
+		metrics[i] = metricsMap
 	}
 
-	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metricsOne)
+	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metrics)
 
 	if err != nil {
 		return nil, err

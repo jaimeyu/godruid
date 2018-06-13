@@ -296,7 +296,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 		return nil, err
 	}
 
-	logger.Log.Errorf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
+	logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err

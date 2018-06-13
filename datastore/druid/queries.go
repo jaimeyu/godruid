@@ -812,10 +812,10 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 
 	// Create the labels for the average operation (for some reason,
 	// druid has no native idea of average but it does for SUM)
-	sumLbl := "__sum_op"
-	countLbl := "__count_op"
-	countFilterLbl := "__count_op_filter"
-	opLbl := request.Aggregation
+	sumLbl := "topn_sum"
+	countLbl := "topn_count"
+	//countFilterLbl := "topn_filter"
+	opLbl := "result"
 
 	// Create the Filters
 	// TODO: I think we may need to specify DIRECTION for monitored objects.
@@ -832,7 +832,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 	// Create the aggregations
 
 	// We need the total COUNT for the average op
-	aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
+	//aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
 
 	// Build the metricView. This isn't part of the average operation but it
 	// helps the caller have more information about the object druid finds.

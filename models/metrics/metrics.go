@@ -106,8 +106,6 @@ type TopNForMetric struct {
 
 	// Operation - 'avg', 'min', 'max'
 	Aggregator string `json:"aggregator,omitempty"`
-	// Name of the metric for the aggregation
-	Aggregation string `json:"aggregation,omitempty"`
 	// Metric that we are apply Aggregation to
 	Metric MetricIdentifier `json:"metric,omitempty"`
 

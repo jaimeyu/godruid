@@ -1,0 +1,2098 @@
+{
+  "metrics": {
+    "accedian-twamp": {
+      "metricMap": {
+        "delayMin": {
+          "ui": {
+            "group": "delay",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayMax": {
+          "ui": {
+            "group": "delay",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayAvg": {
+          "ui": {
+            "group": "delay",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayStdDevAvg": {
+          "ui": {
+            "group": "delay",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dStdDev",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dStdDev",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayP25": {
+          "ui": {
+            "group": "delay",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayP50": {
+          "ui": {
+            "group": "delay",
+            "position": "6"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayP75": {
+          "ui": {
+            "group": "delay",
+            "position": "7"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayP95": {
+          "ui": {
+            "group": "delay",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayPLo": {
+          "ui": {
+            "group": "delay",
+            "position": "9"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayPMi": {
+          "ui": {
+            "group": "delay",
+            "position": "10"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayPHi": {
+          "ui": {
+            "group": "delay",
+            "position": "11"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarMin": {
+          "ui": {
+            "group": "delayVar",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarMax": {
+          "ui": {
+            "group": "delayVar",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dvmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dvmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarAvg": {
+          "ui": {
+            "group": "delayVar",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dvmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dvmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarP25": {
+          "ui": {
+            "group": "delayVar",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarP50": {
+          "ui": {
+            "group": "delayVar",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarP75": {
+          "ui": {
+            "group": "delayVar",
+            "position": "6"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarP95": {
+          "ui": {
+            "group": "delayVar",
+            "position": "7"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarPLo": {
+          "ui": {
+            "group": "delayVar",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dvpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dvpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarPMi": {
+          "ui": {
+            "group": "delayVar",
+            "position": "9"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dvpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dvpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarPHi": {
+          "ui": {
+            "group": "delayVar",
+            "position": "10"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "dvpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "dvpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterMin": {
+          "ui": {
+            "group": "jitter",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jmin",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterMax": {
+          "ui": {
+            "group": "jitter",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jmax",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterAvg": {
+          "ui": {
+            "group": "jitter",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jmean",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterStdDev": {
+          "ui": {
+            "group": "jitter",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jpStdDev",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jpStdDev",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterP25": {
+          "ui": {
+            "group": "jitter",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterP50": {
+          "ui": {
+            "group": "jitter",
+            "position": "6"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterP75": {
+          "ui": {
+            "group": "jitter",
+            "position": "7"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterP95": {
+          "ui": {
+            "group": "jitter",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterPLo": {
+          "ui": {
+            "group": "jitter",
+            "position": "9"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jpLo",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterPMi": {
+          "ui": {
+            "group": "jitter",
+            "position": "10"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jpMi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "jitterPHi": {
+          "ui": {
+            "group": "jitter",
+            "position": "11"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "jpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "jpHi",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsLost": {
+          "ui": {
+            "group": "packets",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostpkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostpkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsLostPct": {
+          "ui": {
+            "group": "packets",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostperc",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostperc",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsMisordered": {
+          "ui": {
+            "group": "packets",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "misorderpkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "misorderpkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsDuplicated": {
+          "ui": {
+            "group": "packets",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "duplicatepkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "duplicatepkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsTooLate": {
+          "ui": {
+            "group": "packets",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "toolatepkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "toolatepkts",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsReceived": {
+          "ui": {
+            "group": "packets",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "receivedpkts",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "receivedpkts",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "periodsLost": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostperiods",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostperiods",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "lostBurstMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostburstmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostburstmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "lostBurstMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostburstmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostburstmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "bytesReceived": {
+          "ui": {
+            "group": "unknown",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "rxbytes",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "rxbytes",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "ipTOSMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "tosmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "tosmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "ipTOSMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "6"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "tosmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "tosmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "ttlMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "7"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "ttlmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "ttlmin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "ttlMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "ttlmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "ttlmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "vlanPBitMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "9"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "vpriomin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "vpriomin",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "vlanPBitMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "10"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "vpriomax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "vpriomax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "mos": {
+          "ui": {
+            "group": "unknown",
+            "position": "11"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "mos",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "mos",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "rValue": {
+          "ui": {
+            "group": "unknown",
+            "position": "12"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+          "delay", "delayVar", "jitter", "packets", "unknown"
+        ]
+      }
+    },
+    "accedian-flowmeter": {
+      "metricMap": {
+        "throughputAvg": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputAvg",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "throughputMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputMax",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "throughputMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "throughputMin",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "bytesReceived": {
+          "ui": {
+            "group": "unknown",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "bytesReceived",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "packetsReceived": {
+          "ui": {
+            "group": "unknown",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "flowmeter",
+              "rawMetricId": "packetsReceived",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups":[
+          "unknown"
+        ]
+      }
+    }
+  }
+}

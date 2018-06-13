@@ -108,9 +108,9 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
 	server := cfg.GetString(gather.CK_druid_broker_server.String())
-	//port := cfg.GetString(gather.CK_druid_broker_port.String())
+	port := cfg.GetString(gather.CK_druid_broker_port.String())
 	client := godruid.Client{
-		Url:        server, // + ":" + port,
+		Url:        server + ":" + port,
 		Debug:      true,
 		HttpClient: makeHttpClient(),
 	}

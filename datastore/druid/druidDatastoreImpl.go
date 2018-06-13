@@ -3,7 +3,6 @@ package druid
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -189,17 +188,17 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 		timeout = 5000
 	}
 
-	buckets := make([]map[string]interface{}, len(request.MetricBuckets))
+	metricsOne := make([]map[string]interface{}, len(request.MetricBucketRequests))
 
-	for i, mb := range request.MetricBuckets {
-		bucketMap, err := models.ConvertObj2Map(mb)
+	for i, mb := range request.MetricBucketRequests {
+		metricsMap, err := models.ConvertObj2Map(mb)
 		if err != nil {
 			return nil, err
 		}
-		buckets[i] = bucketMap
+		metricsOne[i] = metricsMap
 	}
 
-	query, err := HistogramCustomQuery(request.TenantID, table, request.Interval, request.Vendor, request.ObjectType, request.Domains, request.Direction, request.Granularity, buckets, timeout)
+	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metricsOne)
 
 	if err != nil {
 		return nil, err
@@ -209,35 +208,16 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 
 	response, err := dc.executeQuery(query)
 
-	fmt.Println(dc.dClient.LastResponse)
-
 	if err != nil {
 		return nil, err
 	}
 
-	histogram := []*pb.Histogram{}
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, string(response))
 
-	err = json.Unmarshal(response, &histogram)
+	rr, err := reformatHistogramCustomResponse(string(response))
+
 	if err != nil {
 		return nil, err
-	}
-
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
-
-	resp := &pb.HistogramResponse{
-		Data: histogram,
-	}
-
-	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid := uuid.NewV4()
-	data := make([]*pb.HistogramResponse, 0)
-	data = append(data, resp)
-	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       ThresholdCrossingReport,
-			"attributes": data,
-		},
 	}
 
 	return rr, nil

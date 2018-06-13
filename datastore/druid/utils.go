@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Jeffail/gabs"
@@ -16,6 +18,7 @@ import (
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Format a ThresholdCrossing object into something the UI can consume
@@ -42,6 +45,77 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	}
 	logger.Log.Debugf("Reformatted threshold crossing data: %v", dataContainer)
 	return dataContainer, nil
+}
+
+func reformatHistogramCustomResponse(rawResponse string) (map[string]interface{}, error) {
+
+	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Lower>.+?)-(?P<Upper>.+)`)
+	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?)`)
+
+	// Temporary hack to put the payload in a format understandable by the json library
+	jsonResponse, err := gabs.ParseJSON([]byte(fmt.Sprintf(`{"data":%s}`, rawResponse)))
+	if err != nil {
+		return nil, err
+	}
+
+	hcReport := metrics.HistogramCustomReport{}
+	timeSlices := make([]metrics.HistogramCustomTimeSeriesEntry, 0)
+
+	// Process each time slice in the raw druid response
+	rawTimeslices, _ := jsonResponse.S("data").Children()
+	for _, rawTimeslice := range rawTimeslices {
+		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S("timestamp").Data().(string)}
+
+		// Process each bucket response for each metric in the time slice
+		rawResultMap, _ := rawTimeslice.S("result").ChildrenMap()
+		resultMap := make(map[string][]metrics.BucketResult)
+		for rawkey, value := range rawResultMap {
+
+			fields := fieldsRegex.FindStringSubmatch(rawkey)
+			mapkey := fields[1] + "." + fields[2] + "." + fields[3] + "." + fields[4]
+			fLower, err := strconv.ParseFloat(fields[5], 64)
+			if err != nil {
+				return nil, err
+			}
+			fUpper, err := strconv.ParseFloat(fields[6], 64)
+			if err != nil {
+				return nil, err
+			}
+			bucketResult := metrics.BucketResult{LowerBound: fLower, UpperBound: fUpper, Count: int(value.Data().(float64))}
+
+			metricBucket, found := resultMap[mapkey]
+			if !found {
+				metricBucket = make([]metrics.BucketResult, 0)
+			}
+			metricBucket = append(metricBucket, bucketResult)
+			resultMap[mapkey] = metricBucket
+		}
+
+		metricResults := make([]metrics.MetricResult, 0)
+		for k, m := range resultMap {
+			keyfields := metrickeyRegex.FindStringSubmatch(k)
+			metricResults = append(metricResults, metrics.MetricResult{Vendor: keyfields[1],
+				ObjectType: keyfields[2],
+				Name:       keyfields[3],
+				Direction:  keyfields[4],
+				Results:    m})
+		}
+		timeslice.Result = metricResults
+		timeSlices = append(timeSlices, timeslice)
+	}
+
+	hcReport.TimeSeriesResult = timeSlices
+
+	uuid := uuid.NewV4()
+	rr := map[string]interface{}{
+		"data": map[string]interface{}{
+			"id":         uuid.String(),
+			"type":       "customHistogramReports", //TODO don't hardcode this
+			"attributes": hcReport,
+		},
+	}
+
+	return rr, nil
 }
 
 func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) (map[string]interface{}, error) {

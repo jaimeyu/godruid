@@ -20,24 +20,28 @@ type SLAReportRequest struct {
 }
 
 type HistogramCustomRequest struct {
-	TenantID string `json:"tenantId"`
+	TenantID  string   `json:"tenantId"`
+	DomainIds []string `json:"domainIds"`
 	// ISO-8601 Intervals
-	Vendor     string   `json:"vendor,omitempty"`
-	ObjectType string   `json:"objecttype,omitempty"`
-	Interval   string   `json:"interval,omitempty"`
-	Domains    []string `json:"domains,omitempty"`
-	Direction  string   `json:"direction"`
+	Interval string `json:"interval,omitempty"`
 	// ISO-8601 period combination
-	Granularity   string         `json:"granularity,omitempty"`
-	MetricBuckets []MetricBucket `json:"buckets,omitempty"`
+	Granularity          string                `json:"granularity,omitempty"`
+	MetricBucketRequests []MetricBucketRequest `json:"metrics,omitempty"`
 	// in Milliseconds
 	Timeout int32 `json:"timeout,omitempty"`
 }
 
+type MetricBucketRequest struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Buckets    []MetricBucket `json:"buckets"`
+}
+
 type MetricBucket struct {
-	Metric     string `json:"metric"`
-	LowerBound int32  `json:"lower"`
-	UpperBound int32  `json:"upper"`
+	LowerBound float64 `json:"lower"`
+	UpperBound float64 `json:"upper"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -53,6 +57,32 @@ func (sr *SLAReport) SetID(s string) error {
 
 func (sr *SLAReport) GetName() string {
 	return ReportType
+}
+
+type HistogramCustomReport struct {
+	ReportCompletionTime string                           `json:"reportCompletionTime"`
+	TenantID             string                           `json:"tenantId"`
+	ReportTimeRange      string                           `json:"reportTimeRange"`
+	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
+}
+
+type HistogramCustomTimeSeriesEntry struct {
+	Timestamp string         `json:"timestamp"`
+	Result    []MetricResult `json:"result"`
+}
+
+type MetricResult struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Results    []BucketResult `json:"result"`
+}
+
+type BucketResult struct {
+	LowerBound float64 `json:"lower"`
+	UpperBound float64 `json:"upper"`
+	Count      int     `json:"count"`
 }
 
 type SLAReport struct {

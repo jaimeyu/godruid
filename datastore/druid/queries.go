@@ -84,38 +84,40 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 	return nil, fmt.Errorf("Unable to consume threshold profile for: %v", metric)
 }
 
-func HistogramCustomQuery(tenant string, dataSource string, interval string, vendor string, objectType string, domains []string, direction string, granularity string, metricBuckets []map[string]interface{}, timeout int32) (*godruid.QueryTimeseries, error) {
+func HistogramCustomQuery(tenant string, domains []string, dataSource string, interval string, granularity string, timeout int32, metricsOne []map[string]interface{}) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
-	for _, met := range metricBuckets {
+	for _, met := range metricsOne {
 
-		metName := met["metric"].(string)
-		metUpper := met["upper"].(float64)
-		metLower := met["lower"].(float64)
+		metName := met["name"].(string)
+		metVendor := met["vendor"].(string)
+		metDirection := met["direction"].(string)
+		metObjectType := met["objectType"].(string)
 
-		//nLower := strconv.FormatFloat(metLower, 'f', 6, 64)
-		//nUpper := strconv.FormatFloat(metUpper, 'f', 6, 64)
+		for _, bucket := range met["buckets"].([]interface{}) {
+			bucketMap := bucket.(map[string]interface{})
+			metUpper := bucketMap["upper"].(float64)
+			metLower := bucketMap["lower"].(float64)
 
-		name := fmt.Sprintf("%s.%s.%s.%s.%.6f-%.6f", vendor, objectType, metName, direction, metLower, metUpper)
-		//name := vendor + "." + objectType + "." + metName + "." + direction + "." + nLower + "-" + nUpper
+			name := fmt.Sprintf("%s.%s.%s.%s.%.6f-%.6f", metVendor, metObjectType, metName, metDirection, metLower, metUpper)
 
-		// Should these be configurable?
-		filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), true, float32(metUpper), true)
+			// Should these be configurable?
+			filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), true, float32(metUpper), true)
 
-		aggregation := godruid.AggFiltered(
-			godruid.FilterAnd(
-				filter,
-				godruid.FilterSelector("objectType", objectType),
-				godruid.FilterSelector("direction", direction),
-			),
-			&godruid.Aggregation{
-				Type: "count",
-				Name: name,
-			},
-		)
-		aggregations = append(aggregations, aggregation)
-
+			aggregation := godruid.AggFiltered(
+				godruid.FilterAnd(
+					filter,
+					godruid.FilterSelector("objectType", metObjectType),
+					godruid.FilterSelector("direction", metDirection),
+				),
+				&godruid.Aggregation{
+					Type: "count",
+					Name: name,
+				},
+			)
+			aggregations = append(aggregations, aggregation)
+		}
 	}
 
 	return &godruid.QueryTimeseries{
@@ -124,6 +126,7 @@ func HistogramCustomQuery(tenant string, dataSource string, interval string, ven
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			//buildDomainFilter(tenant, domains), //TODO PUT THIS BACK IN!!!!
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil

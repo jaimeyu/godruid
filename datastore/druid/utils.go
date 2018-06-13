@@ -223,6 +223,77 @@ func reformatSLATimeSeries(druidResponse []byte) ([]metrics.TimeSeriesEntry, err
 	return res, nil
 }
 
+func reformatThresholdCrossingTimeSeries(druidResponse []byte) ([]metrics.ThresholdCrossingTimeSeriesEntry, error) {
+	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
+	entries := []*druidTimeSeriesEntry{}
+	if err := json.Unmarshal(druidResponse, &entries); err != nil {
+		return nil, err
+	}
+
+	res := make([]metrics.ThresholdCrossingTimeSeriesEntry, len(entries))
+	for i, tc := range entries {
+
+		perMetricResultsMap := map[string]*metrics.ThresholdCrossingMetricResult{}
+		perMetricResultsList := []*metrics.ThresholdCrossingMetricResult{}
+		byEventMap := make(map[string]map[string]interface{})
+
+		obj := gabs.New()
+		for k, v := range tc.Result {
+			if isMetricAggName(k) {
+				aggrName := parseMetricName(k)
+				metricResult, ok := perMetricResultsMap[aggrName.fqMetricName]
+				if !ok {
+					metricResult = &metrics.ThresholdCrossingMetricResult{
+						Vendor:     aggrName.vendor,
+						ObjectType: aggrName.objectType,
+						Metric:     aggrName.metricName,
+						Direction:  aggrName.direction,
+						BySeverity: make(map[string]map[string]interface{}),
+					}
+					perMetricResultsMap[aggrName.fqMetricName] = metricResult
+					perMetricResultsList = append(perMetricResultsList, metricResult)
+				}
+
+				if len(aggrName.severity) > 0 {
+					sevEntry, ok := metricResult.BySeverity[aggrName.severity]
+					if !ok {
+						sevEntry = make(map[string]interface{})
+						metricResult.BySeverity[aggrName.severity] = sevEntry
+					}
+					sevEntry[aggrName.agg] = v
+				} else if aggrName.agg == "totalDuration" {
+					metricResult.TotalDuration = v.(float64)
+				}
+
+			} else if isTopLevelEventAgg(k) {
+				aggrName := parseTopLevelEventAgg(k)
+				sevEntry, ok := byEventMap[aggrName.severity]
+				if !ok {
+					sevEntry = make(map[string]interface{})
+					byEventMap[aggrName.severity] = sevEntry
+				}
+				sevEntry[aggrName.agg] = v
+			} else {
+				obj.SetP(v, k)
+			}
+		}
+		timeseriesEntryResult := metrics.ThresholdCrossingTimeSeriesResult{}
+		if err := json.Unmarshal(obj.Bytes(), &timeseriesEntryResult); err != nil {
+			return nil, err
+		}
+		timeseriesEntryResult.ByMetric = perMetricResultsList
+		timeseriesEntryResult.BySeverity = byEventMap
+
+		res[i] = metrics.ThresholdCrossingTimeSeriesEntry{
+			Timestamp: tc.Timestamp,
+			Result:    timeseriesEntryResult,
+		}
+	}
+
+	logger.Log.Debugf("Formatted result for %s: %v", db.SLAReportStr, models.AsJSONString(res))
+	return res, nil
+}
+
 type druidTopNEntry struct {
 	Timestamp string
 	Result    []map[string]interface{}
@@ -363,4 +434,67 @@ func (pp DropKeysPostprocessor) Apply(input []AggMetricsResponse) []AggMetricsRe
 	}
 
 	return input
+}
+
+// The following functions and structs are to ensure proper building and parsing of aggregation names
+type parsedMetricName struct {
+	fqMetricName string
+	vendor       string
+	objectType   string
+	metricName   string
+	direction    string
+	severity     string
+	agg          string
+}
+
+func parseMetricName(name string) parsedMetricName {
+	// The aggregation name is __met.<vendor>|<objectType>|<metricName>|<direction>.<severity>.<aggregation>
+	// or  __met.<vendor>|<objectType>|<metricName>|<direction>.<aggregation>
+
+	tokens := strings.Split(name, ".")
+	tokens2 := strings.Split(tokens[1], "|")
+	res := parsedMetricName{
+		fqMetricName: tokens[1],
+		vendor:       tokens2[0],
+		objectType:   tokens2[1],
+		metricName:   tokens2[2],
+		direction:    tokens2[3],
+	}
+	if len(tokens) > 3 {
+		res.severity = tokens[2]
+		res.agg = tokens[3]
+	} else if len(tokens) > 2 {
+		res.agg = tokens[2]
+	}
+	return res
+
+}
+
+func buildMetricAggPrefix(vendor, objectType, metricName, direction string) string {
+	return "__met." + vendor + "|" + objectType + "|" + metricName + "|" + direction
+}
+
+func isMetricAggName(name string) bool {
+	return strings.HasPrefix(name, "__met.")
+}
+
+type topLevelEventAgg struct {
+	severity string
+	agg      string
+}
+
+func parseTopLevelEventAgg(name string) topLevelEventAgg {
+	// __eventtop.<severity>.<aggName>
+	tokens := strings.Split(name, ".")
+	return topLevelEventAgg{
+		severity: tokens[1],
+		agg:      tokens[2],
+	}
+
+}
+func buildTopLevelEventAgg(severity, agg string) string {
+	return "__eventtop." + severity + "." + agg
+}
+func isTopLevelEventAgg(name string) bool {
+	return strings.HasPrefix(name, "__eventtop")
 }

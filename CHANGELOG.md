@@ -1,3 +1,4 @@
+* Feature - a new query endpoint for threshold crossing that includes violation time
 ## Current Release 
 ### 0.145.0 
 **Release Date:** Wed Jun 13 14:57:43 UTC 2018     

@@ -69,19 +69,35 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 		return nil, fmt.Errorf("Invalid value for 'upperLimit' : %v. Must be a number", upperLimit)
 	}
 
+	return FilterLimitSelectorHelper(metric, lowerLimit, lowerStrict, upperLimit, upperStrict), nil
+}
+
+// Retrieves the appropriate druid bounded filter based on the defined lower and upper bounds for a given metric.
+// NOTE: This should not be used for metrics that need to take negative numbers into account since lower/upper
+// bound values of 0 are considered to be infinite lower or infinite upper respectively
+// Arguments:
+//   metric - the name of the metric we want to apply the filter to
+//   lowerLimit - the lower limit of the bounded filter that we want to build. A value of 0 assumes no lower bound
+//   lowerStrict - a value of false assumes the comparison <=. A value of true assumes the comparison <
+//   upperLimit - the upper limit of the bounded filter that we want to build. A value of 0 assumes no upper bound
+//   upperStrict - a value of false assumes the comparison >=. A value of true assumes the comparison >
+func FilterLimitSelectorHelper(metric string, lowerLimit float64, lowerStrict bool, upperLimit float64, upperStrict bool) *godruid.Filter {
+	// Builds a filter that behaves as lowerLimit <[=] val <[=] upperLimit
 	if upperLimit != 0 && lowerLimit != 0 {
-		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict, float32(upperLimit), upperStrict), nil
+		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict, float32(upperLimit), upperStrict)
 	}
 
+	// Builds a filter that behaves as lowerLimit <[=] val
 	if upperLimit != 0 {
-		return godruid.FilterUpperBound(metric, godruid.NUMERIC, float32(upperLimit), upperStrict), nil
+		return godruid.FilterUpperBound(metric, godruid.NUMERIC, float32(upperLimit), upperStrict)
 	}
 
+	// Builds a filter that behaves as val <[=] upperLimit
 	if lowerLimit != 0 {
-		return godruid.FilterLowerBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict), nil
+		return godruid.FilterLowerBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict)
 	}
 
-	return nil, fmt.Errorf("Unable to consume threshold profile for: %v", metric)
+	return nil
 }
 
 func HistogramCustomQuery(tenant string, domains []string, dataSource string, interval string, granularity string, timeout int32, metricsOne []map[string]interface{}) (*godruid.QueryTimeseries, error) {
@@ -103,7 +119,7 @@ func HistogramCustomQuery(tenant string, domains []string, dataSource string, in
 
 			name := fmt.Sprintf("%s.%s.%s.%s.%s", metVendor, metObjectType, metName, metDirection, metIndex)
 
-			filter := godruid.FilterLowerUpperBound(metName, godruid.NUMERIC, float32(metLower), false, float32(metUpper), true)
+			filter := FilterLimitSelectorHelper(metName, metLower, false, metUpper, true)
 
 			aggregation := godruid.AggFiltered(
 				godruid.FilterAnd(

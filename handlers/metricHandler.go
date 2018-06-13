@@ -337,7 +337,6 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 }
 
 func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Infof("-------> QueryThresholdCrossing")
 	startTime := time.Now()
 
 	requestBytes, err := getRequestBytes(r)
@@ -362,7 +361,7 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 	// Convert to PB type...will remove this when we remove the PB handling
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.QueryThresholdCrossingStr, err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
 	}
@@ -372,7 +371,7 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 		reportError(w, startTime, "404", mon.QueryThresholdCrossingStr, msg, http.StatusNotFound)
 		return
 	}
-	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, request)
+	logger.Log.Infof("Retrieving %s for: %v", db.QueryThresholdCrossingStr, request)
 
 	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP)
 	if err != nil {
@@ -390,7 +389,7 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, request)
+	logger.Log.Infof("Completed %s fetch for: %v", db.QueryThresholdCrossingStr, request)
 	trackAPIMetrics(startTime, "200", mon.QueryThresholdCrossingStr)
 	fmt.Fprintf(w, string(res))
 }

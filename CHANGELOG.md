@@ -1,8 +1,10 @@
-* Fix - support 'All' granularity for metric queries
 ## Current Release 
+### 0.145.0 
+**Release Date:** Wed Jun 13 14:57:43 UTC 2018     
+## Previous Releases 
+* Fix - support 'All' granularity for metric queries
 ### 0.144.0 
 **Release Date:** Tue Jun 12 02:13:32 UTC 2018     
-## Previous Releases 
 ### 0.143.0 
 **Release Date:** Tue Jun 12 01:28:22 UTC 2018     
 * Fix - changing the ingestion dictionary based on twamp needs

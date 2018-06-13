@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.148.0 
+**Release Date:** Wed Jun 13 21:21:18 UTC 2018     
+## Previous Releases 
 ### 0.147.0 
 **Release Date:** Wed Jun 13 20:41:40 UTC 2018     
-## Previous Releases 
 * feat - adding support for custom bucket histogram queries
 ### 0.146.0 
 **Release Date:** Wed Jun 13 20:35:58 UTC 2018     

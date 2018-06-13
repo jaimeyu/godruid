@@ -1,7 +1,6 @@
 package druid
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -805,158 +804,84 @@ func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Ag
 	return aggregations
 }
 
-// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
-// defined by the supplied threshold profile. Groups results my monitored object ID.
-func GetTopNForMetricAvg(dataSource string, request *metrics.TopNForMetric) (*godruid.QueryTopN, error) {
+// GetTopNForMetricAvg - Provides TopN for certain metrics.
+func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godruid.QueryTopN, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations godruid.PostAggregation
 
+	// Create the labels for the average operation (for some reason,
+	// druid has no native idea of average but it does for SUM)
 	sumLbl := "__sum_op"
 	countLbl := "__count_op"
 	countFilterLbl := "__count_op_filter"
 	opLbl := request.Aggregation
 
+	// Create the Filters
+	// TODO: I think we may need to specify DIRECTION for monitored objects.
 	monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+
+	domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
+	var filterOn *godruid.Filter
+	filterOn = monObjFilter
+	if len(request.MonitoredObjects) == 0 {
+		logger.Log.Debugf("Monitored object list is empty, using domains filter")
+		filterOn = domObjFilter
+	}
+
+	// Create the aggregations
+
+	// We need the total COUNT for the average op
 	aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
 
+	// Build the metricView. This isn't part of the average operation but it
+	// helps the caller have more information about the object druid finds.
+	// Eg: For Top N average for DelayP95, what is its MAX/MIN DelayP95 & Delay & Max dropped Packets and Max Jitter.
+	// We can even show the average for the metricsView but it requires more POST Aggregations. May a future feature.
 	listOfMetricViewAgg := buildMetricAggregator(request.MetricsView)
 	if listOfMetricViewAgg != nil {
 		aggregations = append(aggregations, listOfMetricViewAgg...)
 	}
 
 	metric := request.Metric
+	// We need the SUM to do the average operation
 	aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
 
+	// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
+	// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
 	aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
 	aggroCount := godruid.AggCount(countLbl)
 	aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
 	aggregations = append(aggregations, aggroFunc)
 
-	// post aggro
+	// Post Aggregation is where the Average operation is executed
 	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
 	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
 	var scoredPostAggregation []godruid.PostAggregation
+	// We can actually define more operations here if we really wanted to.
 	scoredPostAggregation = []godruid.PostAggregation{
 		godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
 	}
 
-	if monObjFilter == nil {
-		return &godruid.QueryTopN{
-			QueryType:    godruid.TOPN,
-			DataSource:   dataSource,
-			Granularity:  godruid.GranAll,
-			Context:      map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
-			Aggregations: aggregations,
-			Filter: godruid.FilterAnd(
-				godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
-				buildDomainFilter(request.TenantID, request.Domains),
-				godruid.FilterSelector("objectType", metric.ObjectType),
-			),
-			PostAggregations: scoredPostAggregation,
-			Intervals:        []string{request.Interval},
-			Metric:           map[string]interface{}{"metric": opLbl},
-			Threshold:        int(request.NumResult),
-			Dimension:        "monitoredObjectId",
-		}, nil
-	}
-	return nil, nil
-}
-
-// ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
-// defined by the supplied threshold profile. Groups results my monitored object ID.
-func oldTopN(tenant string, dataSource string, domains []string, monitoredObjects []string, metric string, granularity string, interval string, objectType string, direction string, vendors string, numResults int32, timeout int32) (*godruid.QueryTopN, error) {
-
-	var aggregations []godruid.Aggregation
-	var postAggregations godruid.PostAggregation
-
-	//	aggregations = append(aggregations, godruid.AggCount("total"))
-	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor("___sum_645"))
-	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor("___count_644"))
-	var scoredPostAggregation []godruid.PostAggregation
-	scoredPostAggregation = []godruid.PostAggregation{
-		godruid.PostAggArithmetic("avg", "/", postAggregations.Fields),
-	}
-
-	monObjFilter := buildMonitoredObjectFilter(tenant, monitoredObjects)
-
-	aggroMax := godruid.Aggregation{
-		Type:      "doubleMax",
-		Name:      "max",
-		FieldName: metric,
-	}
-	aggroMin := godruid.Aggregation{
-		Type:      "doubleMin",
-		Name:      "min",
-		FieldName: metric,
-	}
-
-	aggroCount := godruid.Aggregation{
-		Type: "count",
-		Name: "count",
-	}
-
-	aggroSum := godruid.Aggregation{
-		Type:      "doubleSum",
-		Name:      "___sum_645",
-		FieldName: metric,
-	}
-
-	//aFilteredAggro := godruid.Aggregation{
-	//	Type: "count",
-	//	Name: "___count_662",
-	//}
-
-	//aggroFilters := godruid.AggFiltered
-
-	aggregations = append(aggregations, aggroMax)
-	aggregations = append(aggregations, aggroMin)
-	aggregations = append(aggregations, aggroCount)
-	aggregations = append(aggregations, aggroSum)
-
-	if monObjFilter == nil {
-		return &godruid.QueryTopN{
-			QueryType:    godruid.TOPN,
-			DataSource:   dataSource,
-			Granularity:  godruid.GranAll,
-			Context:      map[string]interface{}{"timeout": timeout},
-			Aggregations: aggregations,
-			Filter: godruid.FilterAnd(
-				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-				buildDomainFilter(tenant, domains),
-				godruid.FilterSelector("objectType", objectType),
-				godruid.FilterSelector("direction", direction),
-			),
-			PostAggregations: scoredPostAggregation,
-			Intervals:        []string{interval},
-			// Assume always max but
-			//Metric:           "max",
-			Metric:    map[string]interface{}{"metric": "max", "type": "dimension"},
-			Threshold: int(numResults),
-			Dimension: "monitoredObjectId",
-		}, nil
-	} else {
-		logger.Log.Error("SKIPPING MONOBJ")
-		return nil, errors.New("Skipping")
-
-		return &godruid.QueryTopN{
-			DataSource:   dataSource,
-			Granularity:  godruid.GranAll,
-			Context:      map[string]interface{}{"timeout": timeout},
-			Aggregations: aggregations,
-			Filter: godruid.FilterAnd(
-				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-				buildDomainFilter(tenant, domains),
-				monObjFilter,
-				godruid.FilterSelector("objectType", objectType),
-				godruid.FilterSelector("direction", direction),
-			),
-			PostAggregations: scoredPostAggregation,
-			Intervals:        []string{interval},
-			Metric:           map[string]interface{}{"metric": "max", "type": "dimension"},
-			Threshold:        int(numResults),
-			Dimension:        "monitoredObjectId",
-		}, nil
-	}
-
+	return &godruid.QueryTopN{
+		QueryType:    godruid.TOPN,
+		DataSource:   dataSource,
+		Granularity:  godruid.GranAll,
+		Context:      map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
+		Aggregations: aggregations,
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			filterOn,
+		),
+		PostAggregations: scoredPostAggregation,
+		Intervals:        []string{request.Interval},
+		// !! LOOK HERE. Metric is used to tell Druid which METRIC we want to sort by.
+		// Because the average operation is a POST AGGREGATION and not an existing column,
+		// the metric name here must match the POST AGGREGATION name for it to sort.
+		// Default is to sort in descending order (use `"type":"inverted"` to reverse the order)
+		Metric:    map[string]interface{}{"metric": opLbl},
+		Threshold: int(request.NumResult),
+		Dimension: "monitoredObjectId",
+	}, nil
 }

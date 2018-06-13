@@ -2210,6 +2210,30 @@ paths:
       tags:
         - MetricsService
 
+  /v1/get-top-n-for-metric:
+    post:
+      summary: Retrieve a Top-N for a given Metric
+      operationId: GetTopNForMetric
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TopNMetricsAPIRequestObject'
+    tags:
+        - MetricsService
+ 
   /v1/generate-sla-report:
     get:
       summary: Generate an SLA Report.
@@ -3083,6 +3107,64 @@ definitions:
     properties:
       defaultThresholdProfile:
         $ref: '#/definitions/JsonApiRelationship'
+  TopNMetricsAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - aggregation
+      - metrics
+    properties:
+      tenant:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domains:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      aggregator:
+        type: string
+        description: The type of aggregation (avg/min/max)
+      aggregation:
+        type: string
+        description: the aggregation Name
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+      metricsView:
+        type: array
+        items:
+          $ref: '#/definitions/MetricViewObject'
+  MetricViewObject:
+    type: object
+    required:
+      - metric
+      - aggregator 
+      - name
+    properties:
+      metric:
+        type: string
+        example: delayP95_max
+      aggregator:
+        type: string
+        example: min/max/sum/
+      name:
+        type: string
+        example: delayP95
 
   AggregateMetricsAPIRequestObject:
     type: object

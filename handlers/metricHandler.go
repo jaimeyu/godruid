@@ -726,7 +726,7 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	result, err := msh.druidDB.GetTopNForMetricAvg(&topNreq)
+	result, err := msh.druidDB.GetTopNForMetric(&topNreq)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
@@ -740,53 +740,11 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
-	logger.Log.Errorf("RESPONSE: %+v", string(res))
+	logger.Log.Debugf("RESPONSE: %+v", string(res))
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, topNreq)
+	logger.Log.Infof("Completed %s fetch for: %v", db.TopNForMetricString, topNreq)
 	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
 	fmt.Fprintf(w, string(res))
 
 }
-
-// GetTopNFor - Retrieve raw metric data from druid
-//func (msh *MetricServiceHandler) oldGetTopNFor(w http.ResponseWriter, r *http.Request) {
-//	// GetThresholdCrossingByMonitoredObjectTopN - Retrieves the TopN Threshold crossings for a given threshold profile,
-//	// interval, tenant, domain, and groups by monitoredObjectID
-//	startTime := time.Now()
-//
-//	// Turn the query Params into the request object:
-//	queryParams := r.URL.Query()
-//	topNreq, err := populateTopNReq(queryParams)
-//	if err != nil {
-//		reportError(w, startTime, "602", mon.GetTopNReqStr, err.Error(), 602)
-//		return
-//	}
-//	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
-//
-//	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
-//		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
-//		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
-//		return
-//	}
-//
-//	result, err := msh.druidDB.GetTopNFor(topNreq)
-//	if err != nil {
-//		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
-//		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
-//		return
-//	}
-//
-//	// Convert the res to byte[]
-//	res, err := json.Marshal(result)
-//	if err != nil {
-//		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
-//		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
-//		return
-//	}
-//
-//	w.Header().Set(contentType, jsonAPIContentType)
-//	logger.Log.Infof("Completed %s fetch for: %v", db.TopNThresholdCrossingByMonitoredObjectStr, topNreq)
-//	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
-//	fmt.Fprintf(w, string(res))
-//}

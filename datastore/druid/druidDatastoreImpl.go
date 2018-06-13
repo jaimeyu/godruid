@@ -287,11 +287,11 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 }
 
 // GetTopNFor
-func (dc *DruidDatastoreClient) GetTopNForMetricAvg(request *metrics.TopNForMetric) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
 
 	logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
 
-	query, err := GetTopNForMetricAvg(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
+	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
 	if err != nil {
 		return nil, err
 	}

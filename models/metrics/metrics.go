@@ -95,19 +95,19 @@ type TopNForMetric struct {
 	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
 
 	// Required Time range for the requestin ISO 8601 format for intervals
-	Interval string `json:"interval"`
+	Interval string `json:"interval,,omitempty"`
 	// Rquired Vendor (to avoid overlaps, eg: flowmeter does not have Jitter values
 	// so if you do a min TopN then you'll just get a list of 0s)
-	TenantID string `json:"tenant"`
-	// Granularity in ISO 8601 format
-	Granularity string `json:"granularity"`
+	TenantID string `json:"tenant,omitempty"`
 	// Timeout for the request
-	Timeout int32 `json:"timeout"`
+	Timeout int32 `json:"timeout,omitempty"`
 	// Number of Results (default is 10)
-	NumResult int32 `json:"NumResults"`
+	NumResult int32 `json:"NumResults,omitempty"`
 
-	// Operation - 'avg', 'count', 'min', 'max'
-	Aggregation string `json:"aggregation"`
+	// Operation - 'avg', 'min', 'max'
+	Aggregator string `json:"aggregator,omitempty"`
+	// Name of the metric for the aggregation
+	Aggregation string `json:"aggregation,omitempty"`
 	// Metric that we are apply Aggregation to
 	Metric MetricIdentifier `json:"metric,omitempty"`
 
@@ -117,11 +117,11 @@ type TopNForMetric struct {
 
 type MetricAggregation struct {
 	// Metric name eg jitterP95
-	Metric string `json:"metric"`
+	Metric string `json:"metric,omitempty"`
 	// Operation - 'sum', 'count', 'min', 'max'
-	Aggregator string `json:"aggregator"`
+	Aggregator string `json:"aggregator,omitempty"`
 	// Name for this Aggregation (must be unique)
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 }
 
 func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
@@ -136,11 +136,6 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 
 	if len(req.TenantID) == 0 {
 		return nil, errors.New("Tenant must not be empty.")
-	}
-
-	if len(req.Granularity) == 0 {
-		// Default for now
-		req.Granularity = "PT1H"
 	}
 
 	if len(req.Interval) == 0 {

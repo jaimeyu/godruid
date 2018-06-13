@@ -778,6 +778,7 @@ const (
 	OP_MAX   = "max"
 	OP_MIN   = "min"
 	OP_COUNT = "count"
+	OP_AVG   = "avg"
 )
 
 func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Aggregation {
@@ -809,6 +810,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 
 	var aggregations []godruid.Aggregation
 	var postAggregations godruid.PostAggregation
+	var scoredPostAggregation []godruid.PostAggregation
 
 	// Create the labels for the average operation (for some reason,
 	// druid has no native idea of average but it does for SUM)
@@ -816,9 +818,16 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 	countLbl := "topn_count"
 	//countFilterLbl := "topn_filter"
 	opLbl := "result"
+	metricLbl := "metric"
+	typeLbl := "type"
+	typeInvertedLbl := "inverted"
 
+	// Metric order and sort on
+	selectedMetric := map[string]interface{}{metricLbl: opLbl}
 	// Create the Filters
 	// TODO: I think we may need to specify DIRECTION for monitored objects.
+	// TODO: The existing MetricIdentifier model does not work for directions since
+	// it isn't well defined and we can't use it to specify more than 1 direction.
 	monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
 
 	domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
@@ -844,25 +853,33 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 	}
 
 	metric := request.Metric
-	// We need the SUM to do the average operation
-	aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
 
-	// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
-	// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
-	aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
-	aggroCount := godruid.AggCount(countLbl)
-	aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
-	aggregations = append(aggregations, aggroFunc)
+	switch request.Aggregator {
+	case OP_MAX:
+		aggregations = append(aggregations, godruid.AggDoubleMax(opLbl, metric.Name))
+		break
+	case OP_MIN:
+		aggregations = append(aggregations, godruid.AggDoubleMin(opLbl, metric.Name))
+		selectedMetric[typeLbl] = typeInvertedLbl
+		break
+	default:
+		// We need the SUM to do the average operation
+		aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
+		// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
+		// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
+		aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
+		aggroCount := godruid.AggCount(countLbl)
+		aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
+		aggregations = append(aggregations, aggroFunc)
+		// Post Aggregation is where the Average operation is executed
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
+		// We can actually define more operations here if we really wanted to.
+		scoredPostAggregation = []godruid.PostAggregation{
+			godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
+		}
 
-	// Post Aggregation is where the Average operation is executed
-	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
-	postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
-	var scoredPostAggregation []godruid.PostAggregation
-	// We can actually define more operations here if we really wanted to.
-	scoredPostAggregation = []godruid.PostAggregation{
-		godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
 	}
-
 	return &godruid.QueryTopN{
 		QueryType:    godruid.TOPN,
 		DataSource:   dataSource,
@@ -880,7 +897,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 		// Because the average operation is a POST AGGREGATION and not an existing column,
 		// the metric name here must match the POST AGGREGATION name for it to sort.
 		// Default is to sort in descending order (use `"type":"inverted"` to reverse the order)
-		Metric:    map[string]interface{}{"metric": opLbl},
+		Metric:    selectedMetric,
 		Threshold: int(request.NumResult),
 		Dimension: "monitoredObjectId",
 	}, nil

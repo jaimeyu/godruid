@@ -138,6 +138,7 @@ const (
 	GenerateSLAReportStr       = GenSLAReportStr + metricNameDelimiter + OPGetStr
 
 	QueryAggregatedMetricsStr = AggMetricsStr + metricNameDelimiter + OPGetStr
+	QueryThresholdCrossingStr = ThrCrossStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr

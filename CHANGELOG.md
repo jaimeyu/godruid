@@ -1,8 +1,19 @@
 * feat - adding support for custom bucket histogram queries
 ## Current Release 
+### 0.146.0 
+**Release Date:** Wed Jun 13 20:35:58 UTC 2018     
+## Previous Releases 
+* Feature - a new query endpoint for threshold crossing that includes violation time
+### 0.145.0 
+**Release Date:** Wed Jun 13 14:57:43 UTC 2018     
+* Fix - support 'All' granularity for metric queries
+### 0.144.0 
+**Release Date:** Tue Jun 12 02:13:32 UTC 2018     
+### 0.143.0 
+**Release Date:** Tue Jun 12 01:28:22 UTC 2018     
+* Fix - changing the ingestion dictionary based on twamp needs
 ### 0.142.0 
 **Release Date:** Mon Jun 11 15:32:29 UTC 2018     
-## Previous Releases 
 * Fix - temporarily removing UI section of threshold profiles that is not formatted according to the backend model on UI created threshold profiles. Test commented out as well.
 ### 0.141.0 
 **Release Date:** Fri Jun  8 20:58:19 UTC 2018     

@@ -120,6 +120,28 @@ type TimeSeriesResult struct {
 	PerMetricResult        interface{} `json:"perMetricResult"`
 }
 
+type ThresholdCrossingTimeSeriesEntry struct {
+	Timestamp string                            `json:"timestamp"`
+	Result    ThresholdCrossingTimeSeriesResult `json:"result"`
+}
+
+type ThresholdCrossingTimeSeriesResult struct {
+	TotalDuration          int64                             `json:"totalDuration"`
+	TotalViolationCount    int32                             `json:"totalViolationCount"`
+	TotalViolationDuration int64                             `json:"totalViolationDuration"`
+	ByMetric               []*ThresholdCrossingMetricResult  `json:"byMetric"`
+	BySeverity             map[string]map[string]interface{} `json:"bySeverity"`
+}
+
+type ThresholdCrossingMetricResult struct {
+	ObjectType    string                            `json:"objectType"`
+	Direction     string                            `json:"direction"`
+	Metric        string                            `json:"metric"`
+	Vendor        string                            `json:"vendor"`
+	TotalDuration float64                           `json:"totalDuration"`
+	BySeverity    map[string]map[string]interface{} `json:"bySeverity"`
+}
+
 type ThresholdCrossingTopNRequest struct {
 	ObjectType string `json:"objectType"`
 	Direction  string `json:"direction"`
@@ -134,6 +156,16 @@ type ThresholdCrossingTopNRequest struct {
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
+}
+
+type ThresholdCrossingRequest struct {
+	TenantID           string             `json:"tenantId"`
+	DomainIDs          []string           `json:"domainIds,omitempty"`
+	Interval           string             `json:"interval,omitempty"`
+	Granularity        string             `json:"granularity,omitempty"`
+	ThresholdProfileID string             `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist    []MetricIdentifier `json:"metricWhitelist,omitempty"`
+	Timeout            int32              `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {

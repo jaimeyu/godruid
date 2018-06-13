@@ -586,8 +586,7 @@ func (msh *MetricServiceHandler) GetHistogramCustom(w http.ResponseWriter, r *ht
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		//TODO FIX THE STRIIIIIIIIIIING
-		reportError(w, startTime, "400", mon.CreateTenantStr, msg, http.StatusBadRequest)
+		reportError(w, startTime, "400", mon.GetHistogramCustomObjStr, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -596,30 +595,30 @@ func (msh *MetricServiceHandler) GetHistogramCustom(w http.ResponseWriter, r *ht
 	err = json.Unmarshal(requestBytes, hcRequest)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, hcRequest)
+	logger.Log.Infof("Retrieving %s for: %v", db.HistogramCustomStr, hcRequest)
 
 	result, err := msh.druidDB.GetHistogramCustom(hcRequest)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	// Convert the res to byte[]
 	res, err := json.Marshal(result)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Histogram response. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to marshal Custom Histogram response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, hcRequest)
-	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
+	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramCustomStr, hcRequest)
+	trackAPIMetrics(startTime, "200", mon.GetHistogramCustomObjStr)
 	fmt.Fprintf(w, string(res))
 }
 

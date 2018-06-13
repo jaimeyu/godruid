@@ -78,6 +78,7 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 	// Process each time slice in the raw druid response
 	rawTimeslices, _ := jsonResponse.S(AttrData).Children()
 	for _, rawTimeslice := range rawTimeslices {
+		// Create a new timeslice for the current set of time that we are processing from the druid response
 		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
 
 		// Process each bucket response for each metric in the time slice
@@ -85,11 +86,14 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 		resultMap := make(map[string][]metrics.BucketResult)
 		for rawkey, value := range rawResultMap {
 
+			// Build up the key as vendor.objecttype.metricname.direction. This allows us to figure out which buckets belong to which metric since
+			// there can be multiple in the original request
 			fields := fieldsRegex.FindStringSubmatch(rawkey)
 			mapkey := fields[IndexVendor] + KeyDelim + fields[IndexObjectType] + KeyDelim + fields[IndexMetricName] + KeyDelim + fields[IndexDirection]
 
 			bucketResult := metrics.BucketResult{Index: fields[IndexBucketIndex], Count: int(value.Data().(float64))}
 
+			// If a set of result buckets does not already exist for the metric we need to create one and add it to our current time slice
 			metricBucket, found := resultMap[mapkey]
 			if !found {
 				metricBucket = make([]metrics.BucketResult, 0)

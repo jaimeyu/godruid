@@ -9,6 +9,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
+	"github.com/satori/go.uuid"
 )
 
 type TimeBucket int
@@ -962,6 +963,27 @@ func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, na
 
 }
 
+func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *godruid.Filter {
+	if len(monitoredObjects) < 1 {
+		return nil
+	}
+
+	filters := make([]*godruid.Filter, len(monitoredObjects))
+	if len(filters) == 0 {
+		return nil
+	}
+
+	for i, monobj := range monitoredObjects {
+		filters[i] = &godruid.Filter{
+			Type:      "selector",
+			Dimension: "monitoredObjectId",
+			Value:     monobj,
+		}
+	}
+
+	return godruid.FilterOr(filters...)
+}
+
 func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
 	if len(domains) < 1 {
 		return nil
@@ -1038,6 +1060,148 @@ func toGranularity(granularityStr string) godruid.Granlarity {
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")
 }
 
+const (
+	op_sum   = "sum"
+	op_max   = "max"
+	op_min   = "min"
+	op_count = "count"
+	op_avg   = "avg"
+)
+
+func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Aggregation {
+
+	var aggregations []godruid.Aggregation
+
+	if metricsView == nil {
+		return nil
+	}
+	for _, input := range metricsView {
+
+		switch input.Aggregator {
+		case op_sum:
+			aggregations = append(aggregations, godruid.AggDoubleSum(input.Name, input.Metric))
+		case op_max:
+			aggregations = append(aggregations, godruid.AggDoubleMax(input.Name, input.Metric))
+		case op_min:
+			aggregations = append(aggregations, godruid.AggDoubleMin(input.Name, input.Metric))
+		case op_count:
+			aggregations = append(aggregations, godruid.AggCount(input.Name))
+		}
+	}
+
+	return aggregations
+}
+
+// GetTopNForMetricAvg - Provides TopN for certain metrics.
+func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godruid.QueryTopN, error) {
+
+	var aggregations []godruid.Aggregation
+	var postAggregations godruid.PostAggregation
+	var scoredPostAggregation []godruid.PostAggregation
+
+	// Create the labels for the average operation (for some reason,
+	// druid has no native idea of average but it does for SUM)
+	const (
+		sumLbl    = "topn_sum"
+		countLbl  = "topn_count"
+		opLbl     = "result"
+		metricLbl = "metric"
+		typeLbl   = "type"
+	)
+
+	typeInvertedLbl := "inverted"
+	// Only operate on the first item
+	metric := request.Metric[0]
+
+	// Metric order and sort on
+	selectedMetric := map[string]interface{}{metricLbl: opLbl}
+	// Create the Filters
+	// TODO: I think we may need to specify DIRECTION for monitored objects.
+	// TODO: The existing MetricIdentifier model does not work for directions since
+	// it isn't well defined and we can't use it to specify more than 1 direction.
+
+	var filterOn *godruid.Filter
+
+	filterOn = godruid.FilterAnd(
+		godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+		godruid.FilterSelector("objectType", metric.ObjectType),
+	)
+
+	// Prefer the domains list
+	if len(request.MonitoredObjects) == 0 {
+		domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			domObjFilter,
+		)
+	} else {
+		monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			monObjFilter,
+		)
+	}
+
+	// Create the aggregations
+
+	// We need the total COUNT for the average op
+	//aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
+
+	// Build the metricView. This isn't part of the average operation but it
+	// helps the caller have more information about the object druid finds.
+	// Eg: For Top N average for DelayP95, what is its MAX/MIN DelayP95 & Delay & Max dropped Packets and Max Jitter.
+	// We can even show the average for the metricsView but it requires more POST Aggregations. May a future feature.
+	listOfMetricViewAgg := buildMetricAggregator(request.MetricsView)
+	if listOfMetricViewAgg != nil {
+		aggregations = append(aggregations, listOfMetricViewAgg...)
+	}
+
+	switch request.Aggregator {
+	case op_max:
+		aggregations = append(aggregations, godruid.AggDoubleMax(opLbl, metric.Name))
+		break
+	case op_min:
+		aggregations = append(aggregations, godruid.AggDoubleMin(opLbl, metric.Name))
+		selectedMetric[typeLbl] = typeInvertedLbl
+		break
+	default:
+		// We need the SUM to do the average operation
+		aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
+		// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
+		// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
+		aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
+		aggroCount := godruid.AggCount(countLbl)
+		aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
+		aggregations = append(aggregations, aggroFunc)
+		// Post Aggregation is where the Average operation is executed
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
+		// We can actually define more operations here if we really wanted to.
+		scoredPostAggregation = []godruid.PostAggregation{
+			godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
+		}
+
+	}
+	return &godruid.QueryTopN{
+		QueryType:        godruid.TOPN,
+		DataSource:       dataSource,
+		Granularity:      godruid.GranAll,
+		Context:          map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
+		Aggregations:     aggregations,
+		Filter:           filterOn,
+		PostAggregations: scoredPostAggregation,
+		Intervals:        []string{request.Interval},
+		// !! LOOK HERE. Metric is used to tell Druid which METRIC we want to sort by.
+		// Because the average operation is a POST AGGREGATION and not an existing column,
+		// the metric name here must match the POST AGGREGATION name for it to sort.
+		// Default is to sort in descending order (use `"type":"inverted"` to reverse the order)
+		Metric:    selectedMetric,
+		Threshold: int(request.NumResult),
+		Dimension: "monitoredObjectId",
+	}, nil
+}
 func inWhitelist(whitelist []metrics.MetricIdentifier, vendor, objectType, metricName, direction string) bool {
 	if whitelist == nil || len(whitelist) == 0 {
 		return true

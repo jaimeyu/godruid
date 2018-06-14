@@ -1,3 +1,4 @@
+* Feature - Adding endpoint to a TopN operation for a metric.
 ## Current Release 
 ### 0.148.0 
 **Release Date:** Wed Jun 13 21:21:18 UTC 2018     

@@ -107,6 +107,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			Pattern:     "/api/v1/aggregated-metrics",
 			HandlerFunc: result.QueryAggregatedMetrics,
 		},
+
+		server.Route{
+			Name:        "GetTopNFor",
+			Method:      "POST",
+			Pattern:     "/api/v1/topn-metrics",
+			HandlerFunc: result.GetTopNFor,
+		},
 	}
 
 	return result
@@ -801,4 +808,59 @@ func validateMetricForThresholdProfile(vendor, objectType, metric string, thresh
 	}
 
 	return nil
+}
+
+func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Request) {
+
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	request := metrics.TopNForMetric{}
+	if err := json.Unmarshal(requestBytes, &request); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+		return
+	}
+	logger.Log.Infof("Retrieving %s for: %v", "top n req", request)
+
+	if _, err = request.Validate(); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetTopNReqStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	topNreq := request
+	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+
+	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
+		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
+		return
+	}
+
+	result, err := msh.druidDB.GetTopNForMetric(&topNreq)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal TOP N. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.TopNForMetricString, topNreq)
+	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
+	fmt.Fprintf(w, string(res))
+
 }

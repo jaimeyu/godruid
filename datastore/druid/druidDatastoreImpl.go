@@ -3,6 +3,7 @@ package druid
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ const (
 	EventDistribution       = "event-distribution"
 	RawMetrics              = "raw-metrics"
 	SLAReport               = "sla-report"
+	TopNForMetric           = "top-n"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -369,6 +371,49 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		"id":         uuid.String(),
 		"type":       ThresholdCrossingReport,
 		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	return rr, nil
+}
+
+// GetTopNFor - Executes a TopN on a given metric, based on its min/max/avg.
+func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+	}
+	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate a druid query while processing request: %s: '%s'", models.AsJSONString(request), err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+	}
+	response, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get TopN result from druid for request %s: %s", models.AsJSONString(query), err.Error())
+	}
+
+	construct := fmt.Sprintf("{\"results\":%s}", string(response))
+
+	responseMap := make(map[string]interface{})
+	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal response from druid for request %s: %s", models.AsJSONString(request), err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+	}
+
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         "",
+		"type":       TopNForMetric,
+		"attributes": responseMap,
 	})
 	rr := map[string]interface{}{
 		"data": data,

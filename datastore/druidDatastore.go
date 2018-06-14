@@ -32,6 +32,9 @@ const (
 
 	// SLAReport - common name for use in logs.
 	SLAReportStr = "SLA Report"
+
+	// TopNForMetricString - common name for use in logs
+	TopNForMetricString = "Top-N report"
 )
 
 type DruidDatastore interface {
@@ -66,6 +69,7 @@ type DruidDatastore interface {
 
 	// Get aggregated metrics from druid
 	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest) (map[string]interface{}, error)
+	GetTopNForMetric(metric *metrics.TopNForMetric) (map[string]interface{}, error)
 
 	// Update Monitored Object meta-data
 	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error

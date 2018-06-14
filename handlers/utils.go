@@ -119,7 +119,7 @@ var (
 						}
 					},
 					"monitoredObjectTypeMap": {
-						"twamp-pe": {
+						"twamp-sf": {
 							"metricMap": {
 								"delayP95": {
 									"directionMap": {

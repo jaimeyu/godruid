@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.152.0 
+**Release Date:** Thu Jun 14 20:15:22 UTC 2018     
+## Previous Releases 
 ### 0.151.0 
 **Release Date:** Thu Jun 14 18:25:25 UTC 2018     
-## Previous Releases 
 ### 0.149.0 
 **Release Date:** Thu Jun 14 18:01:18 UTC 2018     
 * Feature - Adding endpoint to a TopN operation for a metric.

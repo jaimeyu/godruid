@@ -97,7 +97,7 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 		server.Route{
 			Name:        "GetTopNFor",
 			Method:      "POST",
-			Pattern:     "/api/v1/get-top-n-for-metric",
+			Pattern:     "/api/v1/topn-metrics",
 			HandlerFunc: result.GetTopNFor,
 		},
 	}
@@ -740,7 +740,6 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
-	logger.Log.Debugf("RESPONSE: %+v", string(res))
 
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.TopNForMetricString, topNreq)

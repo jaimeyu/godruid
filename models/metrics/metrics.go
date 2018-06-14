@@ -107,7 +107,7 @@ type TopNForMetric struct {
 	// Operation - 'avg', 'min', 'max'
 	Aggregator string `json:"aggregator,omitempty"`
 	// Metric that we are apply Aggregation to
-	Metric MetricIdentifier `json:"metric,omitempty"`
+	Metric []MetricIdentifier `json:"metrics,omitempty"`
 
 	// Metrics that are related and interesting BUT are NOT part of the post aggregation
 	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
@@ -128,8 +128,11 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 		req.Timeout = 5000
 	}
 
-	if len(req.Domains) == len(req.MonitoredObjects) && len(req.Domains) == 0 {
-		return nil, errors.New("Either Domain or/and Monitored Objects list must not be empty.")
+	if len(tpn.Metric) == 0 {
+		return nil, errors.New("Metric must not be empty")
+	}
+	if tpn.NumResult == 0 {
+		tpn.NumResult = 10
 	}
 
 	if len(req.TenantID) == 0 {

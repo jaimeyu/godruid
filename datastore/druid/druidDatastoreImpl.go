@@ -286,44 +286,45 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 	return rr, nil
 }
 
-// GetTopNFor
+// GetTopNFor - Executes a TopN on a given metric, based on its min/max/avg.
 func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
-
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+	}
 	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to generate a druid query while processing request: %s: '%s'", models.AsJSONString(request), err.Error())
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+	}
 	response, err := dc.executeQuery(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to get TopN result from druid for request %s: %s", models.AsJSONString(query), err.Error())
 	}
 
 	construct := fmt.Sprintf("{\"results\":%s}", string(response))
 
 	responseMap := make(map[string]interface{})
 	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
-		logger.Log.Errorf("Could not Unmarshal, %s", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("Unable to unmarshal response from druid for request %s: %s", models.AsJSONString(request), err.Error())
 	}
 
-	logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+	}
 
-	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid := uuid.NewV4()
 	data := []map[string]interface{}{}
 	data = append(data, map[string]interface{}{
-		"id":         uuid.String(),
+		"id":         "",
 		"type":       TopNForMetric,
 		"attributes": responseMap,
 	})
 	rr := map[string]interface{}{
 		"data": data,
 	}
-	logger.Log.Debugf("Response to caller %+v", rr)
 
 	return rr, nil
 }

@@ -554,44 +554,6 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 	}, nil
 }
 
-/*
-func buildMetricAggregationList(metric metrics.MetricIdentifier) ([]godruid.Aggregation, error) {
-	var aggregations []godruid.Aggregation
-	var pp PostProcessor
-	postAggs := []godruid.PostAggregation{}
-
-	keyToDrop := []string{}
-	countKeys := map[string][]string{}
-
-	countName := metric.Name + "Count"
-	keyToDrop = append(keyToDrop, countName)
-	countKeys[countName] = []string{metric.Name}
-	aggregations = append(aggregations, buildMetricAggregation("count", &metric, countName))
-	if aggregationFunc.Name == "max" {
-		aggregations = append(aggregations, buildMetricAggregation("doubleMax", &metric))
-
-	} else if aggregationFunc.Name == "min" {
-		aggregations = append(aggregations, buildMetricAggregation("doubleMin", &metric))
-
-	} else if aggregationFunc.Name == "avg" {
-
-		aggregations = append(aggregations, buildMetricAggregation("doubleSum", &metric, metric.Name+"Sum"))
-
-		keyToDrop = append(keyToDrop, metric.Name+"Sum")
-
-		postAgg := godruid.PostAggArithmetic(
-			metric.Name,
-			"/",
-			[]godruid.PostAggregation{godruid.PostAggFieldAccessor(metric.Name + "Sum"), godruid.PostAggFieldAccessor(metric.Name + "Count")},
-		)
-		postAggs = append(postAggs, postAgg)
-	} else {
-		return nil, nil, fmt.Errorf("Invalid value for 'aggregation' : %v", aggregationFunc)
-	}
-
-}
-*/
-
 //AggMetricsQuery  - Query that returns a aggregated metric values
 func AggMetricsQuery(tenant string, dataSource string, interval string, domains []string, aggregationFunc metrics.AggregationSpec, metrics []metrics.MetricIdentifier, timeout int32, granularity string) (*godruid.QueryTimeseries, *PostProcessor, error) {
 
@@ -678,20 +640,16 @@ func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *god
 	}
 
 	filters := make([]*godruid.Filter, len(monitoredObjects))
-	atLeastOneDomainFilter := false
+	if len(filters) == 0 {
+		return nil
+	}
+
 	for i, monobj := range monitoredObjects {
-		atLeastOneDomainFilter = true
 		filters[i] = &godruid.Filter{
 			Type:      "selector",
 			Dimension: "monitoredObjectId",
 			Value:     monobj,
 		}
-	}
-
-	if !atLeastOneDomainFilter {
-		// If there are no monitored objects, don't both with the filter, return a nil.
-		logger.Log.Debugf("No monitored objects found")
-		return nil
 	}
 
 	return godruid.FilterOr(filters...)
@@ -774,11 +732,11 @@ func toGranularity(granularityStr string) godruid.Granlarity {
 }
 
 const (
-	OP_SUM   = "sum"
-	OP_MAX   = "max"
-	OP_MIN   = "min"
-	OP_COUNT = "count"
-	OP_AVG   = "avg"
+	op_sum   = "sum"
+	op_max   = "max"
+	op_min   = "min"
+	op_count = "count"
+	op_avg   = "avg"
 )
 
 func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Aggregation {
@@ -791,13 +749,13 @@ func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Ag
 	for _, input := range metricsView {
 
 		switch input.Aggregator {
-		case OP_SUM:
+		case op_sum:
 			aggregations = append(aggregations, godruid.AggDoubleSum(input.Name, input.Metric))
-		case OP_MAX:
+		case op_max:
 			aggregations = append(aggregations, godruid.AggDoubleMax(input.Name, input.Metric))
-		case OP_MIN:
+		case op_min:
 			aggregations = append(aggregations, godruid.AggDoubleMin(input.Name, input.Metric))
-		case OP_COUNT:
+		case op_count:
 			aggregations = append(aggregations, godruid.AggCount(input.Name))
 		}
 	}
@@ -814,13 +772,17 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 
 	// Create the labels for the average operation (for some reason,
 	// druid has no native idea of average but it does for SUM)
-	sumLbl := "topn_sum"
-	countLbl := "topn_count"
-	//countFilterLbl := "topn_filter"
-	opLbl := "result"
-	metricLbl := "metric"
-	typeLbl := "type"
+	const (
+		sumLbl    = "topn_sum"
+		countLbl  = "topn_count"
+		opLbl     = "result"
+		metricLbl = "metric"
+		typeLbl   = "type"
+	)
+
 	typeInvertedLbl := "inverted"
+	// Only operate on the first item
+	metric := request.Metric[0]
 
 	// Metric order and sort on
 	selectedMetric := map[string]interface{}{metricLbl: opLbl}
@@ -828,14 +790,29 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 	// TODO: I think we may need to specify DIRECTION for monitored objects.
 	// TODO: The existing MetricIdentifier model does not work for directions since
 	// it isn't well defined and we can't use it to specify more than 1 direction.
-	monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
 
-	domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
 	var filterOn *godruid.Filter
-	filterOn = monObjFilter
+
+	filterOn = godruid.FilterAnd(
+		godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+		godruid.FilterSelector("objectType", metric.ObjectType),
+	)
+
+	// Prefer the domains list
 	if len(request.MonitoredObjects) == 0 {
-		logger.Log.Debugf("Monitored object list is empty, using domains filter")
-		filterOn = domObjFilter
+		domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			domObjFilter,
+		)
+	} else {
+		monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			monObjFilter,
+		)
 	}
 
 	// Create the aggregations
@@ -852,13 +829,11 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 		aggregations = append(aggregations, listOfMetricViewAgg...)
 	}
 
-	metric := request.Metric
-
 	switch request.Aggregator {
-	case OP_MAX:
+	case op_max:
 		aggregations = append(aggregations, godruid.AggDoubleMax(opLbl, metric.Name))
 		break
-	case OP_MIN:
+	case op_min:
 		aggregations = append(aggregations, godruid.AggDoubleMin(opLbl, metric.Name))
 		selectedMetric[typeLbl] = typeInvertedLbl
 		break
@@ -881,16 +856,12 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 
 	}
 	return &godruid.QueryTopN{
-		QueryType:    godruid.TOPN,
-		DataSource:   dataSource,
-		Granularity:  godruid.GranAll,
-		Context:      map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
-		Aggregations: aggregations,
-		Filter: godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
-			godruid.FilterSelector("objectType", metric.ObjectType),
-			filterOn,
-		),
+		QueryType:        godruid.TOPN,
+		DataSource:       dataSource,
+		Granularity:      godruid.GranAll,
+		Context:          map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
+		Aggregations:     aggregations,
+		Filter:           filterOn,
 		PostAggregations: scoredPostAggregation,
 		Intervals:        []string{request.Interval},
 		// !! LOOK HERE. Metric is used to tell Druid which METRIC we want to sort by.

@@ -21,6 +21,32 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
+type HistogramCustomRequest struct {
+	TenantID  string   `json:"tenantId"`
+	DomainIds []string `json:"domainIds"`
+	// ISO-8601 Intervals
+	Interval string `json:"interval,omitempty"`
+	// ISO-8601 period combination
+	Granularity          string                `json:"granularity,omitempty"`
+	MetricBucketRequests []MetricBucketRequest `json:"metrics,omitempty"`
+	// in Milliseconds
+	Timeout int32 `json:"timeout,omitempty"`
+}
+
+type MetricBucketRequest struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Buckets    []MetricBucket `json:"buckets"`
+}
+
+type MetricBucket struct {
+	Index      string  `json:"index"`
+	LowerBound float64 `json:"lower"`
+	UpperBound float64 `json:"upper"`
+}
+
 // GetID - required implementation for jsonapi marshalling
 func (sr *SLAReport) GetID() string {
 	return sr.ID
@@ -34,6 +60,32 @@ func (sr *SLAReport) SetID(s string) error {
 
 func (sr *SLAReport) GetName() string {
 	return ReportType
+}
+
+type HistogramCustomReport struct {
+	ReportCompletionTime string                           `json:"reportCompletionTime"`
+	TenantID             string                           `json:"tenantId"`
+	DomainIds            []string                         `json:"domainIds"`
+	ReportTimeRange      string                           `json:"reportTimeRange"`
+	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
+}
+
+type HistogramCustomTimeSeriesEntry struct {
+	Timestamp string         `json:"timestamp"`
+	Result    []MetricResult `json:"result"`
+}
+
+type MetricResult struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Results    []BucketResult `json:"result"`
+}
+
+type BucketResult struct {
+	Index string `json:"index"`
+	Count int    `json:"count"`
 }
 
 type SLAReport struct {
@@ -68,6 +120,28 @@ type TimeSeriesResult struct {
 	TotalViolationCount    int32       `json:"totalViolationCount"`
 	TotalViolationDuration int64       `json:"totalViolationDuration"`
 	PerMetricResult        interface{} `json:"perMetricResult"`
+}
+
+type ThresholdCrossingTimeSeriesEntry struct {
+	Timestamp string                            `json:"timestamp"`
+	Result    ThresholdCrossingTimeSeriesResult `json:"result"`
+}
+
+type ThresholdCrossingTimeSeriesResult struct {
+	TotalDuration          int64                             `json:"totalDuration"`
+	TotalViolationCount    int32                             `json:"totalViolationCount"`
+	TotalViolationDuration int64                             `json:"totalViolationDuration"`
+	ByMetric               []*ThresholdCrossingMetricResult  `json:"byMetric"`
+	BySeverity             map[string]map[string]interface{} `json:"bySeverity"`
+}
+
+type ThresholdCrossingMetricResult struct {
+	ObjectType    string                            `json:"objectType"`
+	Direction     string                            `json:"direction"`
+	Metric        string                            `json:"metric"`
+	Vendor        string                            `json:"vendor"`
+	TotalDuration float64                           `json:"totalDuration"`
+	BySeverity    map[string]map[string]interface{} `json:"bySeverity"`
 }
 
 type ThresholdCrossingTopNRequest struct {
@@ -144,6 +218,16 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 	}
 
 	return req, nil
+}
+
+type ThresholdCrossingRequest struct {
+	TenantID           string             `json:"tenantId"`
+	DomainIDs          []string           `json:"domainIds,omitempty"`
+	Interval           string             `json:"interval,omitempty"`
+	Granularity        string             `json:"granularity,omitempty"`
+	ThresholdProfileID string             `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist    []MetricIdentifier `json:"metricWhitelist,omitempty"`
+	Timeout            int32              `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {

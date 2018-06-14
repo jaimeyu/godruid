@@ -63,6 +63,11 @@ type AggMetricsResponse struct {
 	Result    map[string]interface{}
 }
 
+type BaseDruidResponse struct {
+	Timestamp string                 `json:"timestamp"`
+	Result    map[string]interface{} `json:"result"`
+}
+
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
@@ -180,6 +185,53 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 	return rr, nil
 }
 
+// Retrieves a histogram for specified metrics based on custom defined buckets
+func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	// Split out the request into a set of request metrics keyed off of the metric vendor, objectType, name, and direction
+	metrics := make([]map[string]interface{}, len(request.MetricBucketRequests))
+	for i, mb := range request.MetricBucketRequests {
+		metricsMap, err := models.ConvertObj2Map(mb)
+		if err != nil {
+			return nil, err
+		}
+		metrics[i] = metricsMap
+	}
+
+	// Build out the actual druid query to send
+	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metrics)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Execute the druid query
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Reformat the druid response from a flat structure to a json api structure
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	rr, err := convertHistogramCustomResponse(request.TenantID, request.DomainIds, request.Interval, string(response))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rr, nil
+}
+
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
@@ -229,6 +281,47 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	rr := map[string]interface{}{
 		"data": data,
 	}
+
+	return rr, nil
+}
+
+// New version of threshold-crossing
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdViolationsQuery(request.TenantID, table, request.DomainIDs, request.Granularity, request.Interval, request.MetricWhitelist, thresholdProfile.Data, timeout)
+
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
+	druidResponse, err := dc.executeQuery(query)
+
+	response := make([]BaseDruidResponse, 0)
+	err = json.Unmarshal(druidResponse, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(response))
+
+	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	rr := map[string]interface{}{
+		"results": reformatted,
+	}
+
+	logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
 
 	return rr, nil
 }

@@ -53,6 +53,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 		},
 
 		server.Route{
+			Name:        "QueryThresholdCrossing",
+			Method:      "POST",
+			Pattern:     "/api/v1/threshold-crossing",
+			HandlerFunc: result.QueryThresholdCrossing,
+		},
+
+		server.Route{
 			Name:        "GetThresholdCrossingByMonitoredObject",
 			Method:      "GET",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object",
@@ -78,6 +85,13 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 			Method:      "GET",
 			Pattern:     "/api/v1/histogram",
 			HandlerFunc: result.GetHistogram,
+		},
+
+		server.Route{
+			Name:        "GetHistogramCustom",
+			Method:      "POST",
+			Pattern:     "/api/v1/histogram-custom",
+			HandlerFunc: result.GetHistogramCustom,
 		},
 
 		server.Route{
@@ -336,6 +350,65 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 	fmt.Fprintf(w, string(res))
 }
 
+func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r *http.Request) {
+	logger.Log.Infof("-------> QueryThresholdCrossing")
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryThresholdCrossingStr, msg, http.StatusBadRequest)
+		return
+	}
+	request := metrics.ThresholdCrossingRequest{}
+	if err := json.Unmarshal(requestBytes, &request); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.QueryThresholdCrossingStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(request.TenantID, request.ThresholdProfileID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find threshold profile for given query: %s. Error: %s", models.AsJSONString(request), err.Error())
+		reportError(w, startTime, "404", mon.QueryThresholdCrossingStr, msg, http.StatusNotFound)
+		return
+	}
+	// Convert to PB type...will remove this when we remove the PB handling
+	pbTP := pb.TenantThresholdProfile{}
+	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
+		return
+	}
+
+	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
+		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
+		reportError(w, startTime, "404", mon.QueryThresholdCrossingStr, msg, http.StatusNotFound)
+		return
+	}
+	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, request)
+
+	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve  Threshold Crossing Metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryThresholdCrossingStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Threshold Crossing response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryThresholdCrossingStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, request)
+	trackAPIMetrics(startTime, "200", mon.QueryThresholdCrossingStr)
+	fmt.Fprintf(w, string(res))
+}
+
 func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
 	startTime := time.Now()
 
@@ -380,6 +453,7 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 	trackAPIMetrics(startTime, "200", mon.GetSLAReportStr)
 	return report, nil
 }
+
 func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
@@ -576,6 +650,49 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, histogramReq)
 	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
+	fmt.Fprintf(w, string(res))
+}
+
+// GetHistogram - Retrieve bucket data from druid
+func (msh *MetricServiceHandler) GetHistogramCustom(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetHistogramCustomObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Turn the query Params into the request object:
+	hcRequest := &metrics.HistogramCustomRequest{}
+	err = json.Unmarshal(requestBytes, hcRequest)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Retrieving %s for: %v", db.HistogramCustomStr, hcRequest)
+
+	result, err := msh.druidDB.GetHistogramCustom(hcRequest)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Custom Histogram response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramCustomStr, hcRequest)
+	trackAPIMetrics(startTime, "200", mon.GetHistogramCustomObjStr)
 	fmt.Fprintf(w, string(res))
 }
 

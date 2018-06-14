@@ -23,6 +23,7 @@ const (
 	TopNReqStr                 = "top_n"
 	ThrCrossStrTopN            = "thr_cross_topn"
 	HistogramStr               = "histogram"
+	HistogramCustomStr         = "histogram_custom"
 	RawMetricStr               = "raw_metric"
 	GenSLAReportStr            = "gen_sla_report"
 	SLAReportStr               = "sla_report"
@@ -133,12 +134,14 @@ const (
 	GetThrCrossByMonObjStr     = ThrCrossStrTopN + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetThrCrossByMonObjTopNStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
+	GetHistogramCustomObjStr   = HistogramCustomStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
 	GenerateSLAReportStr       = GenSLAReportStr + metricNameDelimiter + OPGetStr
 
 	GetTopNReqStr = TopNReqStr + metricNameDelimiter + OPGetStr
 
 	QueryAggregatedMetricsStr = AggMetricsStr + metricNameDelimiter + OPGetStr
+	QueryThresholdCrossingStr = ThrCrossStr + metricNameDelimiter + OPGetStr
 
 	CreateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantMetaStr = TenantMetaStr + metricNameDelimiter + OPUpdateStr

@@ -10,6 +10,8 @@ const (
 	// ThresholdCrossingStr - common name of the ThresholdCrossingStr data type for use in logs.
 	ThresholdCrossingStr = "Threshold Crossing"
 
+	QueryThresholdCrossingStr = "Threshold Crossing Query"
+
 	// ThresholdCrossingByMonitoredObjectStr - common name for use in logs.
 	ThresholdCrossingByMonitoredObjectStr = "Threshold Crossing by Monitored Object"
 
@@ -18,6 +20,9 @@ const (
 
 	// HistogramStr - common name for use in logs.
 	HistogramStr = "Histogram"
+
+	// HistogramCustomStr - common name for use in logs.
+	HistogramCustomStr = "HistogramCustom"
 
 	// RawMetricString - common name for use in logs.
 	RawMetricStr = "Raw Metric"
@@ -38,6 +43,10 @@ type DruidDatastore interface {
 	// minor,major,critical thresholds of a given threshold object
 	GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
 
+	// Returns the the number of times a given metric crossed the
+	// minor,major,critical thresholds of a given threshold object
+	QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+
 	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error)
 
 	// Returns the the number of times a given metric crossed the
@@ -51,6 +60,9 @@ type DruidDatastore interface {
 
 	// Returns the min,max,avg,median for a given metric
 	GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error)
+
+	// Returns the count for a set of specified metrics in set of specified buckets
+	GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error)
 
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)

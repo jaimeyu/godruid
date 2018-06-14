@@ -19,3 +19,6 @@ server/debug
 debug
 .vscode/launch.json
 bin/alpine-adh-gather
+
+# System files
+.DS_Store

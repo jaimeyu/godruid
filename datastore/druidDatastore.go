@@ -21,6 +21,9 @@ const (
 	// HistogramStr - common name for use in logs.
 	HistogramStr = "Histogram"
 
+	// HistogramCustomStr - common name for use in logs.
+	HistogramCustomStr = "HistogramCustom"
+
 	// RawMetricString - common name for use in logs.
 	RawMetricStr = "Raw Metric"
 
@@ -54,6 +57,9 @@ type DruidDatastore interface {
 
 	// Returns the min,max,avg,median for a given metric
 	GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error)
+
+	// Returns the count for a set of specified metrics in set of specified buckets
+	GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error)
 
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)

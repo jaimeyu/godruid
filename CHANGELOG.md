@@ -1,8 +1,15 @@
-* Feature - a new query endpoint for threshold crossing that includes violation time
 ## Current Release 
+### 0.148.0 
+**Release Date:** Wed Jun 13 21:21:18 UTC 2018     
+## Previous Releases 
+### 0.147.0 
+**Release Date:** Wed Jun 13 20:41:40 UTC 2018     
+* feat - adding support for custom bucket histogram queries
+### 0.146.0 
+**Release Date:** Wed Jun 13 20:35:58 UTC 2018     
+* Feature - a new query endpoint for threshold crossing that includes violation time
 ### 0.145.0 
 **Release Date:** Wed Jun 13 14:57:43 UTC 2018     
-## Previous Releases 
 * Fix - support 'All' granularity for metric queries
 ### 0.144.0 
 **Release Date:** Tue Jun 12 02:13:32 UTC 2018     

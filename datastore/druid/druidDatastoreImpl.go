@@ -183,6 +183,53 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 	return rr, nil
 }
 
+// Retrieves a histogram for specified metrics based on custom defined buckets
+func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	// Split out the request into a set of request metrics keyed off of the metric vendor, objectType, name, and direction
+	metrics := make([]map[string]interface{}, len(request.MetricBucketRequests))
+	for i, mb := range request.MetricBucketRequests {
+		metricsMap, err := models.ConvertObj2Map(mb)
+		if err != nil {
+			return nil, err
+		}
+		metrics[i] = metricsMap
+	}
+
+	// Build out the actual druid query to send
+	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metrics)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Execute the druid query
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Reformat the druid response from a flat structure to a json api structure
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	rr, err := convertHistogramCustomResponse(request.TenantID, request.DomainIds, request.Interval, string(response))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rr, nil
+}
+
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere

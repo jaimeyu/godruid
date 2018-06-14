@@ -19,6 +19,32 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
+type HistogramCustomRequest struct {
+	TenantID  string   `json:"tenantId"`
+	DomainIds []string `json:"domainIds"`
+	// ISO-8601 Intervals
+	Interval string `json:"interval,omitempty"`
+	// ISO-8601 period combination
+	Granularity          string                `json:"granularity,omitempty"`
+	MetricBucketRequests []MetricBucketRequest `json:"metrics,omitempty"`
+	// in Milliseconds
+	Timeout int32 `json:"timeout,omitempty"`
+}
+
+type MetricBucketRequest struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Buckets    []MetricBucket `json:"buckets"`
+}
+
+type MetricBucket struct {
+	Index      string  `json:"index"`
+	LowerBound float64 `json:"lower"`
+	UpperBound float64 `json:"upper"`
+}
+
 // GetID - required implementation for jsonapi marshalling
 func (sr *SLAReport) GetID() string {
 	return sr.ID
@@ -32,6 +58,32 @@ func (sr *SLAReport) SetID(s string) error {
 
 func (sr *SLAReport) GetName() string {
 	return ReportType
+}
+
+type HistogramCustomReport struct {
+	ReportCompletionTime string                           `json:"reportCompletionTime"`
+	TenantID             string                           `json:"tenantId"`
+	DomainIds            []string                         `json:"domainIds"`
+	ReportTimeRange      string                           `json:"reportTimeRange"`
+	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
+}
+
+type HistogramCustomTimeSeriesEntry struct {
+	Timestamp string         `json:"timestamp"`
+	Result    []MetricResult `json:"result"`
+}
+
+type MetricResult struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Results    []BucketResult `json:"result"`
+}
+
+type BucketResult struct {
+	Index string `json:"index"`
+	Count int    `json:"count"`
 }
 
 type SLAReport struct {

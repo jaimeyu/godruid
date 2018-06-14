@@ -84,6 +84,7 @@ func init() {
 
 	metricServiceEndpoints = []string{
 		"/api/v1/histogram",
+		"/api/v1/histogram-custom",
 		"/api/v1/raw-metrics",
 		"/api/v1/threshold-crossing-by-monitored-object",
 		"/api/v1/threshold-crossing",

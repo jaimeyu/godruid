@@ -7,7 +7,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Jeffail/gabs"
 	db "github.com/accedian/adh-gather/datastore"
@@ -16,6 +18,7 @@ import (
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Format a ThresholdCrossing object into something the UI can consume
@@ -42,6 +45,92 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	}
 	logger.Log.Debugf("Reformatted threshold crossing data: %v", dataContainer)
 	return dataContainer, nil
+}
+
+func convertHistogramCustomResponse(tenantId string, domainIds []string, interval string, rawResponse string) (map[string]interface{}, error) {
+
+	const (
+		HistogramCustomReport = "customHistogramReports"
+		AttrData              = "data"
+		AttrTimestamp         = "timestamp"
+		AttrResult            = "result"
+		KeyDelim              = "."
+
+		IndexVendor      = 1
+		IndexObjectType  = 2
+		IndexMetricName  = 3
+		IndexDirection   = 4
+		IndexBucketIndex = 5
+	)
+
+	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Index>.+)`)
+	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+)`)
+
+	// Temporary hack to put the payload in a format understandable by the json library
+	jsonResponse, err := gabs.ParseJSON([]byte(fmt.Sprintf(`{"data":%s}`, rawResponse)))
+	if err != nil {
+		return nil, err
+	}
+
+	hcReport := metrics.HistogramCustomReport{}
+	timeSlices := make([]metrics.HistogramCustomTimeSeriesEntry, 0)
+
+	// Process each time slice in the raw druid response
+	rawTimeslices, _ := jsonResponse.S(AttrData).Children()
+	for _, rawTimeslice := range rawTimeslices {
+		// Create a new timeslice for the current set of time that we are processing from the druid response
+		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
+
+		// Process each bucket response for each metric in the time slice
+		rawResultMap, _ := rawTimeslice.S(AttrResult).ChildrenMap()
+		resultMap := make(map[string][]metrics.BucketResult)
+		for rawkey, value := range rawResultMap {
+
+			// Build up the key as vendor.objecttype.metricname.direction. This allows us to figure out which buckets belong to which metric since
+			// there can be multiple in the original request
+			fields := fieldsRegex.FindStringSubmatch(rawkey)
+			mapkey := fields[IndexVendor] + KeyDelim + fields[IndexObjectType] + KeyDelim + fields[IndexMetricName] + KeyDelim + fields[IndexDirection]
+
+			bucketResult := metrics.BucketResult{Index: fields[IndexBucketIndex], Count: int(value.Data().(float64))}
+
+			// If a set of result buckets does not already exist for the metric we need to create one and add it to our current time slice
+			metricBucket, found := resultMap[mapkey]
+			if !found {
+				metricBucket = make([]metrics.BucketResult, 0)
+			}
+			metricBucket = append(metricBucket, bucketResult)
+			resultMap[mapkey] = metricBucket
+		}
+
+		metricResults := make([]metrics.MetricResult, 0)
+		for k, m := range resultMap {
+			keyfields := metrickeyRegex.FindStringSubmatch(k)
+			metricResults = append(metricResults, metrics.MetricResult{Vendor: keyfields[IndexVendor],
+				ObjectType: keyfields[IndexObjectType],
+				Name:       keyfields[IndexMetricName],
+				Direction:  keyfields[IndexDirection],
+				Results:    m})
+		}
+		timeslice.Result = metricResults
+		timeSlices = append(timeSlices, timeslice)
+	}
+
+	hcReport.TimeSeriesResult = timeSlices
+	hcReport.TenantID = tenantId
+	hcReport.DomainIds = domainIds
+	hcReport.ReportTimeRange = interval
+	hcReport.ReportCompletionTime = time.Now().UTC().String()
+
+	uuid := uuid.NewV4()
+	rr := map[string]interface{}{
+		"data": map[string]interface{}{
+			"id":         uuid.String(),
+			"type":       HistogramCustomReport,
+			"attributes": hcReport,
+		},
+	}
+
+	return rr, nil
 }
 
 func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) (map[string]interface{}, error) {

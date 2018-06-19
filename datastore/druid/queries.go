@@ -851,21 +851,26 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, direction []string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
+func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, directions []string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
 	for _, monObj := range monitoredObjects {
 		for _, metric := range metrics {
-			aggregationMax := godruid.AggFiltered(
-				godruid.FilterSelector("monitoredObjectId", monObj),
-				&godruid.Aggregation{
-					Type:      "doubleMax",
-					Name:      monObj + "." + metric,
-					FieldName: metric,
-				},
-			)
-			aggregations = append(aggregations, aggregationMax)
+			for _, direction := range directions {
+				aggregationMax := godruid.AggFiltered(
+					godruid.FilterAnd(
+						godruid.FilterSelector("monitoredObjectId", monObj),
+						godruid.FilterSelector("direction", direction),
+					),
+					&godruid.Aggregation{
+						Type:      "doubleMax",
+						Name:      monObj + "." + direction + "." + metric,
+						FieldName: metric,
+					},
+				)
+				aggregations = append(aggregations, aggregationMax)
+			}
 		}
 	}
 
@@ -877,7 +882,6 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			godruid.FilterSelector("objectType", objectType),
-			godruid.FilterSelector("direction", direction),
 		),
 		Intervals: []string{interval},
 	}, nil

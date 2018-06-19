@@ -851,7 +851,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, direction string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
+func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, direction []string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 

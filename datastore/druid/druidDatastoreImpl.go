@@ -92,16 +92,6 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 	err := client.Query(query, dc.AuthToken)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "401") {
-			logger.Log.Info("Auth token expired, refreshing token")
-			dc.AuthToken = GetAuthCode(dc.cfg)
-			err_retry := client.Query(query, dc.AuthToken)
-			if err_retry != nil {
-				logger.Log.Errorf("Druid Query RETRY failed due to: %s", err)
-				return nil, err_retry
-			}
-			return query.GetRawJSON(), nil
-		}
 		logger.Log.Errorf("Druid Query failed due to: %s", err)
 		return nil, err
 	}
@@ -116,8 +106,16 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
 	server := cfg.GetString(gather.CK_druid_broker_server.String())
 	port := cfg.GetString(gather.CK_druid_broker_port.String())
+	var path string
+
+	if port == "" {
+		path = server
+	} else {
+		path = server + ":" + port
+	}
+
 	client := godruid.Client{
-		Url:        server + ":" + port,
+		Url:        path,
 		Debug:      true,
 		HttpClient: makeHttpClient(),
 	}
@@ -126,7 +124,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 		cfg:               cfg,
 		server:            server,
 		dClient:           client,
-		AuthToken:         GetAuthCode(cfg),
+		AuthToken:         cfg.GetString("druid.auth"),
 		coordinatorServer: cfg.GetString(gather.CK_druid_coordinator_server.String()),
 		coordinatorPort:   cfg.GetString(gather.CK_druid_coordinator_port.String()),
 	}

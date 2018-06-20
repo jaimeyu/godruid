@@ -106,4 +106,6 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunGetMonitoredObjectByDomainMapTest(t)
 	tester.RunHasDashboardWithDomainTest(t)
 	tester.RunTenantReportScheduleCRUD(t)
+
+	tester.RunMonitoredObjectGetAllInList(t)
 }

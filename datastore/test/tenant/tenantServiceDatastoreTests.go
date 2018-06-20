@@ -1612,6 +1612,112 @@ func (runner *TenantServiceDatastoreTestRunner) RunHasDashboardWithDomainTest(t 
 
 }
 
+func (runner *TenantServiceDatastoreTestRunner) RunMonitoredObjectGetAllInList(t *testing.T) {
+	const COMPANY1 = "GetAllInListCo"
+	const SUBDOMAIN1 = "adom1"
+	const NAME1 = "aname1"
+	const NAME2 = "aname2"
+	const DOM1 = "adomain1"
+	const DOM2 = "adomain2"
+	const DOM3 = "adomain3"
+	const COLOR1 = "acolor1"
+	const COLOR2 = "acolor2"
+	const THRPRF = "aThresholdPrf"
+
+	const OBJNAME1 = "aobj1"
+	const OBJID1 = "aobject1"
+	const OBJNAME2 = "aobj2"
+	const OBJID2 = "aobject2"
+	const OBJNAME3 = "aobj3"
+	const OBJID3 = "aobject3"
+	const ACTNAME1 = "aactName1"
+	const ACTTYPE1 = string(tenmod.AccedianVNID)
+	const ACTNAME2 = "aactName2"
+	const ACTTYPE2 = string(tenmod.AccedianNID)
+	const REFNAME1 = "arefname1"
+	const REFTYPE1 = string(tenmod.AccedianNID)
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Create a couple Domains
+	// Create a record
+	tenantDomain := tenmod.Domain{
+		Name:     DOM1,
+		TenantID: TENANT,
+		Color:    COLOR1}
+	created, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	tenantDomain = tenmod.Domain{
+		Name:     DOM2,
+		TenantID: TENANT,
+		Color:    COLOR2}
+	created2, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
+	assert.Nil(t, err)
+	assert.NotNil(t, created2)
+
+	// Validate they were created
+	recList, err := runner.tenantDB.GetAllTenantDomains(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, recList)
+	assert.Equal(t, 2, len(recList))
+
+	// Now create some MonitoredObjects
+	DOMAINSET1 := []string{created.ID}
+	DOMAINSET2 := []string{created2.ID}
+	DOMAINSET3 := []string{created2.ID}
+	bulkReq := []*tenmod.MonitoredObject{&tenmod.MonitoredObject{
+		MonitoredObjectID: OBJID2,
+		ObjectName:        OBJNAME2,
+		TenantID:          TENANT,
+		ActuatorName:      ACTNAME2,
+		ActuatorType:      ACTTYPE2,
+		DomainSet:         DOMAINSET1},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID1,
+			ObjectName:        OBJNAME1,
+			TenantID:          TENANT,
+			ActuatorName:      ACTNAME1,
+			ActuatorType:      ACTTYPE1,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET2,
+		},
+		&tenmod.MonitoredObject{
+			MonitoredObjectID: OBJID3,
+			ObjectName:        OBJNAME3,
+			TenantID:          TENANT,
+			ReflectorName:     REFNAME1,
+			ReflectorType:     REFTYPE1,
+			DomainSet:         DOMAINSET3,
+		}}
+	bulkResult, err := runner.tenantDB.BulkInsertMonitoredObjects(TENANT, bulkReq)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, bulkResult)
+	assert.Equal(t, 3, len(bulkResult))
+
+	// Now get a couple of the MOs using their IDs
+	byIDResult, err := runner.tenantDB.GetAllMonitoredObjectsInIDList(TENANT, []string{bulkResult[0].ID, bulkResult[2].ID})
+	assert.Nil(t, err)
+	assert.NotEmpty(t, byIDResult)
+	assert.Equal(t, 2, len(byIDResult))
+
+	byIDResult, err = runner.tenantDB.GetAllMonitoredObjectsInIDList(TENANT, []string{})
+	assert.Nil(t, err)
+	assert.Empty(t, byIDResult)
+
+}
+
 func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *testing.T) {
 	const COMPANY1 = "UserCompany"
 	const SUBDOMAIN1 = "subdom1"

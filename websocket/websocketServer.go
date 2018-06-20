@@ -67,6 +67,18 @@ type Sess struct {
 	Type    string   `xml:"type,attr"`
 }
 
+var (
+	batchSize = -1
+)
+
+func setBatchSize() {
+	if batchSize < 0 {
+		cfg := gather.GetConfig()
+		batchSize = cfg.GetInt(gather.CK_server_datastore_batchsize.String())
+		logger.Log.Debugf("Using BatchSize of %d", batchSize)
+	}
+}
+
 // Reader - Function which reads websocket messages coming through the websocket connection
 func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
@@ -227,6 +239,8 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 		case "SessionUpdate":
 			{
+				setBatchSize()
+
 				logger.Log.Infof("Received Session Update from Connector with ID: %s", connectorID)
 				monitoredObjectNames := PtExport{}
 
@@ -234,24 +248,79 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					logger.Log.Errorf("Error unmarshalling session names from connector: %v. Error: %v. Message: %s", connectorID, msg.ErrorCode, msg.ErrorMsg)
 				}
 
-				for _, m := range monitoredObjectNames.Response.Sess {
-					tenantID := msg.Tenant
+				// Create a mapping of MonitoredObjectID to Session data for fast lookup
+				sessionDataMap := map[string]Sess{}
+				tenantID := msg.Tenant
+
+				// Make sure we only handle the bulk requests in batches of 1000
+				moFetchBuffer := make([]string, 0, batchSize)
+				moUpdateBuffer := make([]*tenant.MonitoredObject, 0)
+				for i, m := range monitoredObjectNames.Response.Sess {
+
 					monObjID := m.CID + "-" + m.SID
-					monObj, err := wsServer.TenantDB.GetMonitoredObject(tenantID, monObjID)
+
+					// Log scenario where Monitored Object name is an empty string, but still make the update.
 					if err != nil {
-						// Normally we'd want to log and error here, but since we're doing a small subset of monitored object, it polutes the logs because many
-						// of them are not in the system.
-						// logger.Log.Errorf("Unable to find MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
-					} else if m.Name == "" {
-						logger.Log.Errorf("Unable to find name for MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
-					} else {
-						// Update monitored object name
-						monObj.ObjectName = m.Name
-						_, err = wsServer.TenantDB.UpdateMonitoredObject(monObj)
-						if err != nil {
-							logger.Log.Errorf("Unable to update name of MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
-						}
+						logger.Log.Errorf("Unable to update name of MonitoredObject with ID: %v, for tenant: %v. Error: %v", monObjID, tenantID, err)
 					}
+
+					// Update the fast lookup mapping:
+					sessionDataMap[monObjID] = m
+
+					currentIndexInRange := i % batchSize
+
+					// Send a fetch request if buffer is full
+					if i != 0 && currentIndexInRange == 0 {
+						logger.Log.Debugf("Retrieving batch of Monitored Objects for Tenant %s from %d IDs", tenantID, batchSize)
+						objectsToUpdate, err := wsServer.TenantDB.GetAllMonitoredObjectsInIDList(tenantID, moFetchBuffer)
+						if err != nil {
+							logger.Log.Errorf("Unable to retrieve batch of Monitored Objects for tenant: %s. Error: %s", tenantID, err.Error())
+						}
+						moUpdateBuffer = append(moUpdateBuffer, objectsToUpdate...)
+						moFetchBuffer = make([]string, 0, batchSize) // Reset the fetch buffer
+					}
+
+					// Add the current object to the fetch request list:
+					moFetchBuffer = append(moFetchBuffer, monObjID)
+				}
+
+				// Issue request to get any remaining items:
+				logger.Log.Debugf("Retrieving last batch of Monitored Objects for Tenant %s from %d IDs", tenantID, len(moFetchBuffer))
+				lastBatchFromFetch, err := wsServer.TenantDB.GetAllMonitoredObjectsInIDList(tenantID, moFetchBuffer)
+				if err != nil {
+					logger.Log.Errorf("Unable to retrieve last batch of Monitored Objects for tenant: %s. Error: %s", tenantID, err.Error())
+				}
+				moUpdateBuffer = append(moUpdateBuffer, lastBatchFromFetch...)
+
+				// Process the update requests in batches
+				moUpdateBatch := make([]*tenant.MonitoredObject, 0, batchSize)
+				for i, m := range moUpdateBuffer {
+
+					currentIndexInRange := i % batchSize
+
+					// Send a batch of Monitored Objects for update if it is time.
+					if i != 0 && currentIndexInRange == 0 {
+						logger.Log.Debugf("Updating batch of %d Monitored Objects for Tenant %s", batchSize, tenantID)
+						_, err = wsServer.TenantDB.BulkUpdateMonitoredObjects(tenantID, moUpdateBatch)
+						if err != nil {
+							logger.Log.Errorf("Unable to update batch of MonitoredObjects for tenant: %s. Error: %s", tenantID, err.Error())
+						}
+						moUpdateBatch = make([]*tenant.MonitoredObject, 0, batchSize)
+					}
+
+					// Otherwise, just add the record to the batch
+					updateProperties := sessionDataMap[m.ID]
+					m.ObjectName = updateProperties.Name
+
+					logger.Log.Debugf("Updating Monitored object %s to have name %s as per properties %v", m.ID, m.ObjectName, updateProperties)
+					moUpdateBatch = append(moUpdateBatch, m)
+				}
+
+				// Issue request to update any remaining items:
+				logger.Log.Debugf("Updating batch of %d Monitored Objects for Tenant %s", len(moUpdateBatch), tenantID)
+				_, err = wsServer.TenantDB.BulkUpdateMonitoredObjects(tenantID, moUpdateBatch)
+				if err != nil {
+					logger.Log.Errorf("Unable to update last batch of MonitoredObjects for tenant: %s. Error: %s", tenantID, err.Error())
 				}
 			}
 		default:

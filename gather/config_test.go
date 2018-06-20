@@ -22,6 +22,7 @@ func TestLoadingConfig(t *testing.T) {
 
 	assert.Equal(t, cfg.GetString(gather.CK_server_rest_ip.String()), "0.0.0.0")
 	assert.Equal(t, cfg.GetString(gather.CK_server_datastore_ip.String()), "http://localhost")
+	assert.Equal(t, cfg.GetInt(gather.CK_server_datastore_batchsize.String()), 1000)
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "adh-admin")
 	assert.Equal(t, cfg.GetInt(gather.CK_server_monitoring_port.String()), 9191)
@@ -43,6 +44,7 @@ func TestLoadingDefaults(t *testing.T) {
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentMetricAPICalls.String()), 500)
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentPouchAPICalls.String()), 1000)
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentProvAPICalls.String()), 1000)
+	assert.Equal(t, cfg.GetInt(gather.CK_server_datastore_batchsize.String()), 1000)
 }
 
 func TestWithEnvironmentVariables(t *testing.T) {
@@ -52,6 +54,9 @@ func TestWithEnvironmentVariables(t *testing.T) {
 
 	os.Setenv("SERVER_REST_IP", "1.1.1.1")
 	assert.Equal(t, cfg.GetString(gather.CK_server_rest_ip.String()), "1.1.1.1")
+
+	os.Setenv("SERVER_DATASTORE_BATCHSIZE", "2000")
+	assert.Equal(t, cfg.GetInt(gather.CK_server_datastore_batchsize.String()), 2000)
 
 	os.Setenv("ARGS_DEBUG", "true")
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)

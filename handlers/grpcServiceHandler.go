@@ -651,6 +651,7 @@ func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateMonObjStr)
 		return nil, err
 	}
@@ -665,6 +666,7 @@ func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateMonObjStr)
 		return nil, err
 	}
@@ -679,6 +681,7 @@ func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitored
 
 	res, err := gsh.Tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not Get Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetMonObjStr)
 		return nil, err
 	}
@@ -693,6 +696,7 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteMonObjStr)
 		return nil, err
 	}

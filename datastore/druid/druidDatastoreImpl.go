@@ -768,7 +768,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 
 	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
 	for _, mo := range monitoredObjects {
-		if len(mo.DomainSet) < 1 {
+		if len(mo.DomainSet) < 1 || len(mo.MonitoredObjectID) < 1 {
 			continue
 		}
 		for _, domain := range mo.DomainSet {

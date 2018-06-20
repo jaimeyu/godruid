@@ -1,3 +1,4 @@
+* Fix - batching Monitored Object name updates to reduce API strain.
 ## Current Release 
 ### 0.154.0 
 **Release Date:** Wed Jun 20 19:15:16 UTC 2018     

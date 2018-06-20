@@ -56,6 +56,7 @@ type TenantServiceDatastore interface {
 	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)
 	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
+	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
 
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)

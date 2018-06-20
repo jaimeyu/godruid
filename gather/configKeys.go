@@ -7,6 +7,7 @@ type ConfigKey string
 const (
 	CK_server_datastore_ip                   ConfigKey = "server.datastore.ip"
 	CK_server_datastore_port                 ConfigKey = "server.datastore.port"
+	CK_server_datastore_batchsize            ConfigKey = "server.datastore.batchsize"
 	CK_server_rest_ip                        ConfigKey = "server.rest.ip"
 	CK_server_rest_port                      ConfigKey = "server.rest.port"
 	CK_server_grpc_ip                        ConfigKey = "server.grpc.ip"

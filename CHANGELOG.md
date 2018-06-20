@@ -1,8 +1,10 @@
-* Fix - don't put empty keys in druid lookup
 ## Current Release 
+### 0.154.0 
+**Release Date:** Wed Jun 20 19:15:16 UTC 2018     
+## Previous Releases 
+* Fix - don't put empty keys in druid lookup
 ### 0.153.0 
 **Release Date:** Wed Jun 20 14:53:20 UTC 2018     
-## Previous Releases 
 * Fix - Changing notification handler to push notification on kafka using Async in fire and forget mode. This fixes issue [Monitored Object Domain doesn't seem to work on the dashboards](https://app.asana.com/0/710429663603017/716274045857257/f)
 ### 0.152.0 
 **Release Date:** Thu Jun 14 20:15:22 UTC 2018     

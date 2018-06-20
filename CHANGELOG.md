@@ -1,3 +1,4 @@
+* Fix - don't put empty keys in druid lookup
 ## Current Release 
 ### 0.153.0 
 **Release Date:** Wed Jun 20 14:53:20 UTC 2018     

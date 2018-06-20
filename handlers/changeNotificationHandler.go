@@ -31,7 +31,7 @@ type ChangeEvent struct {
 	payload   interface{}
 }
 
-const defaultPollingFrequency = 60 * time.Second // How often to poll tenantDB for recent changes
+const defaultPollingFrequency = 15 * time.Second // How often to poll tenantDB for recent changes
 //const refreshFrequencyMillis = int64(gather. * time.Second / time.Millisecond) // How often to push a full refresh of tenantDB
 const defaultKafkaTopic = "monitored-object" // The topic where changes are pushed.
 
@@ -293,21 +293,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	var lastError error
 	for _, t := range tenants {
 
-		logger.Log.Debugf("Fetching Monitored Objects for tenant %s", t.ID)
-
-		// Note, ideally we'd use the view but currently the UI is dropping mandatory attributes (like datatype) so the
-		// view returns nothing
-		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
-		if err != nil {
-			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
-			continue
-		}
-		// Hack because the UI is dropping the monitored object ID when
-		for _, mo := range monitoredObjects {
-			if len(mo.MonitoredObjectID) == 0 {
-				mo.MonitoredObjectID = mo.ID
-			}
-		}
+		changeDetected := false
 
 		domains, err := (*c.tenantDB).GetAllTenantDomains(t.ID)
 		if err != nil {
@@ -315,10 +301,15 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			continue
 		}
 
-		changeDetected := false
+		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
+		if err != nil {
+			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
+			continue
+		}
 		if fullRefresh {
 			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
 		} else {
+			//TODO at a later time we could use change notification mechanism from DB rather than query all
 			for _, mo := range monitoredObjects {
 				if mo.CreatedTimestamp > lastSyncTimestamp || mo.LastModifiedTimestamp > lastSyncTimestamp {
 					changeDetected = true
@@ -331,9 +322,14 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 					changeDetected = true
 				}
 			}
-
 		}
+
 		if fullRefresh || changeDetected {
+			// Update the metrics DB so we can do queries by domain or other metadata
+			// Currently any metadataChange is handled by resynchronizing all metadata for the tenant so we
+			// don't really care what the nature of the change was.
+			// This approach is nice and simple but is also effectively similar to dropping a table
+			// and re-populating it.
 			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err
@@ -348,90 +344,9 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	return lastError
 }
 
-/*
-Not used but could be if we wanted to 'persist' a channel of ChangeEvents and use a kafka reader for processing change
-events rather than right off a non-persistant go channel.
-func (c *ChangeNotificationHandler) readFromKafka(broker, topic string) {
-	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{broker},
-		Topic:    topic,
-		GroupID:  "gather-mo-consumer",
-		MinBytes: 10,
-		MaxBytes: 1e6,
-	})
-
-	defer func() {
-		r.Close()
-	}()
-
-	for {
-
-		ctx := context.Background()
-		messages := []kafka.Message{}
-
-		logger.Log.Debugf("readFromKafka blocking on first message on broker %s, topic %s", broker, topic)
-		// Block until the next message is available
-		m, err := r.FetchMessage(ctx)
-		if err != nil {
-			logger.Log.Warningf("Failed to fetch messages from %s: %v", topic, err.Error())
-			continue
-		}
-		logger.Log.Debugf("message at topic/partition/offset %v/%v/%v: %s = %s\n", m.Topic, m.Partition, m.Offset, string(m.Key), string(m.Value))
-		messages = append(messages, m)
-
-		logger.Log.Debugf("readFromKafka blocking on next messages with timeout")
-		// Keep collecting messages until we timeout; we want to batch operations
-		for {
-			subCtx, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
-
-			m, err := r.FetchMessage(subCtx)
-			if err != nil {
-				if err != context.DeadlineExceeded {
-					logger.Log.Warningf("Failed to fetch messages from %s: %v", topic, err.Error())
-				}
-				break
-			}
-			logger.Log.Debugf("message at topic/partition/offset %v/%v/%v: %s = %s\n", m.Topic, m.Partition, m.Offset, string(m.Key), string(m.Value))
-
-			messages = append(messages, m)
-			cancelFunc()
-		}
-
-		logger.Log.Debugf("processing %d messages", len(messages))
-
-		// Process messages. For each tenant tell the Metrics DB to update metadata.
-		processedTenantIds := make(map[string]bool)
-		for _, m := range messages {
-			mo := tenmod.MonitoredObject{}
-
-			if err = json.Unmarshal(m.Value, &mo); err != nil {
-				logger.Log.Error("Failed to parse message", err.Error())
-			} else if _, ok := processedTenantIds[mo.TenantID]; !ok {
-
-				monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(mo.TenantID)
-				if err != nil {
-					logger.Log.Error("Failed to get objects", err.Error())
-					break
-				}
-				if err = c.metricsDB.UpdateMonitoredObjectMetadata(mo.TenantID, monitoredObjects, nil, true); err != nil {
-					logger.Log.Error("Failed to UpdateMonitoredObjectMetadata", err.Error())
-					break
-				}
-				processedTenantIds[mo.TenantID] = true
-			}
-
-			logger.Log.Debugf("Committing message %v/%v/%v: %s", m.Topic, m.Partition, m.Offset, string(m.Key))
-			if err = r.CommitMessages(ctx, m); err != nil {
-				logger.Log.Error("Failed to commit messages", err.Error())
-			}
-		}
-	}
-}
-*/
-
 func sendMonitoredObjects(writer *kafka.Writer, tenantID string, monitoredObjects []*tenmod.MonitoredObject) {
 
-	logger.Log.Debugf("Got %d monitored objects for tenant %s", len(monitoredObjects), tenantID)
+	logger.Log.Debugf("Sending %d monitored objects to kafka for tenant %s", len(monitoredObjects), tenantID)
 	sentCount := 0
 	for _, mo := range monitoredObjects {
 
@@ -444,7 +359,7 @@ func sendMonitoredObjects(writer *kafka.Writer, tenantID string, monitoredObject
 		sendMonitoredObject(writer, mo)
 		sentCount++
 	}
-	logger.Log.Infof("Sent %d monitored object notifications for tenant %s", sentCount, tenantID)
+	logger.Log.Infof("Sent %d monitored object to kafka for tenant %s ", sentCount, tenantID)
 
 }
 
@@ -458,8 +373,6 @@ func sendMonitoredObject(writer *kafka.Writer, monitoredObject *tenmod.Monitored
 		logger.Log.Error("Failed to marshal monitored object", err.Error())
 		return
 	}
-
-	logger.Log.Debugf("sending %s", monitoredObject.ObjectName)
 
 	writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(monitoredObject.ID),

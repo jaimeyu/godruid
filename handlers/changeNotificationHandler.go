@@ -233,9 +233,11 @@ func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {
 
 func (c *ChangeNotificationHandler) sendToKafka(tenantID string, monitoredObjects []*tenmod.MonitoredObject) {
 	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  c.brokers,
-		Topic:    c.topic,
-		Balancer: &kafka.LeastBytes{},
+		Brokers:      c.brokers,
+		Topic:        c.topic,
+		RequiredAcks: 0,
+		Async:        true,
+		Balancer:     &kafka.LeastBytes{},
 	})
 	defer func() {
 		logger.Log.Info("closing kafka producer")
@@ -276,9 +278,11 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	}
 
 	kafkaProducer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  c.brokers,
-		Topic:    c.topic,
-		Balancer: &kafka.LeastBytes{},
+		Brokers:      c.brokers,
+		Topic:        c.topic,
+		RequiredAcks: 0,
+		Async:        true,
+		Balancer:     &kafka.LeastBytes{},
 	})
 	defer func() {
 		kafkaProducer.Close()

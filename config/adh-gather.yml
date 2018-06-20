@@ -12,7 +12,7 @@ server:
   monitoring:
     port: 9191
   changenotif:
-    refreshFreqSeconds: 15
+    refreshFreqSeconds: 60
   profile:
     port: 6060
   websocket:

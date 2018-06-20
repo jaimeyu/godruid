@@ -911,11 +911,10 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 		return nil, fmt.Errorf(msg)
 	}
 
-	NotifyMonitoredObjectCreated(value.TenantId, data...)
-
 	// Convert the response objects back to PB objects for response
 	response := pb.BulkOperationResponse{}
 	response.Results = make([]*pb.BulkOperationResult, 0)
+	successes := make(map[string]bool)
 	for _, res := range result {
 		toAdd := pb.BulkOperationResult{}
 		toAdd.Id = res.ID
@@ -924,6 +923,20 @@ func (tsh *TenantServiceHandler) BulkInsertMonitoredObjects(ctx context.Context,
 		toAdd.Rev = res.REV
 		toAdd.Reason = res.REASON
 		response.Results = append(response.Results, &toAdd)
+
+		if res.OK {
+			successes[res.ID] = res.OK
+		}
+	}
+
+	if len(successes) > 0 {
+		// Send change notifications only for successes
+		for _, mo := range data {
+			if _, ok := successes[mo.MonitoredObjectID]; ok {
+				NotifyMonitoredObjectCreated(value.TenantId, mo)
+			}
+
+		}
 	}
 
 	// Succesfully inserted the MOs.

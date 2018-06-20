@@ -1,5 +1,7 @@
 package metrics
 
+import "errors"
+
 const (
 	ReportType = "reports"
 	ReportStr  = "Report"
@@ -19,6 +21,32 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
+type HistogramCustomRequest struct {
+	TenantID  string   `json:"tenantId"`
+	DomainIds []string `json:"domainIds"`
+	// ISO-8601 Intervals
+	Interval string `json:"interval,omitempty"`
+	// ISO-8601 period combination
+	Granularity          string                `json:"granularity,omitempty"`
+	MetricBucketRequests []MetricBucketRequest `json:"metrics,omitempty"`
+	// in Milliseconds
+	Timeout int32 `json:"timeout,omitempty"`
+}
+
+type MetricBucketRequest struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Buckets    []MetricBucket `json:"buckets"`
+}
+
+type MetricBucket struct {
+	Index      string  `json:"index"`
+	LowerBound float64 `json:"lower"`
+	UpperBound float64 `json:"upper"`
+}
+
 // GetID - required implementation for jsonapi marshalling
 func (sr *SLAReport) GetID() string {
 	return sr.ID
@@ -32,6 +60,32 @@ func (sr *SLAReport) SetID(s string) error {
 
 func (sr *SLAReport) GetName() string {
 	return ReportType
+}
+
+type HistogramCustomReport struct {
+	ReportCompletionTime string                           `json:"reportCompletionTime"`
+	TenantID             string                           `json:"tenantId"`
+	DomainIds            []string                         `json:"domainIds"`
+	ReportTimeRange      string                           `json:"reportTimeRange"`
+	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
+}
+
+type HistogramCustomTimeSeriesEntry struct {
+	Timestamp string         `json:"timestamp"`
+	Result    []MetricResult `json:"result"`
+}
+
+type MetricResult struct {
+	Vendor     string         `json:"vendor,omitempty"`
+	ObjectType string         `json:"objectType,omitempty"`
+	Direction  string         `json:"direction"`
+	Name       string         `json:"name"`
+	Results    []BucketResult `json:"result"`
+}
+
+type BucketResult struct {
+	Index string `json:"index"`
+	Count int    `json:"count"`
 }
 
 type SLAReport struct {
@@ -68,6 +122,28 @@ type TimeSeriesResult struct {
 	PerMetricResult        interface{} `json:"perMetricResult"`
 }
 
+type ThresholdCrossingTimeSeriesEntry struct {
+	Timestamp string                            `json:"timestamp"`
+	Result    ThresholdCrossingTimeSeriesResult `json:"result"`
+}
+
+type ThresholdCrossingTimeSeriesResult struct {
+	TotalDuration          int64                             `json:"totalDuration"`
+	TotalViolationCount    int32                             `json:"totalViolationCount"`
+	TotalViolationDuration int64                             `json:"totalViolationDuration"`
+	ByMetric               []*ThresholdCrossingMetricResult  `json:"byMetric"`
+	BySeverity             map[string]map[string]interface{} `json:"bySeverity"`
+}
+
+type ThresholdCrossingMetricResult struct {
+	ObjectType    string                            `json:"objectType"`
+	Direction     string                            `json:"direction"`
+	Metric        string                            `json:"metric"`
+	Vendor        string                            `json:"vendor"`
+	TotalDuration float64                           `json:"totalDuration"`
+	BySeverity    map[string]map[string]interface{} `json:"bySeverity"`
+}
+
 type ThresholdCrossingTopNRequest struct {
 	ObjectType string `json:"objectType"`
 	Direction  string `json:"direction"`
@@ -82,6 +158,76 @@ type ThresholdCrossingTopNRequest struct {
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
+}
+
+type TopNForMetric struct {
+	// One of the two must be populated for the request to be valid, domains or monitoredObjects.
+	// But if both are given, then the behaviour will be the query will be based on a subset of monitoredObjects that belong to the domains.
+	// List of domains (optional)
+	Domains []string `json:"domains,omitempty"`
+	// List of monitored objects (optional)
+	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
+
+	// Required Time range for the requestin ISO 8601 format for intervals
+	Interval string `json:"interval,,omitempty"`
+	// Rquired Vendor (to avoid overlaps, eg: flowmeter does not have Jitter values
+	// so if you do a min TopN then you'll just get a list of 0s)
+	TenantID string `json:"tenant,omitempty"`
+	// Timeout for the request
+	Timeout int32 `json:"timeout,omitempty"`
+	// Number of Results (default is 10)
+	NumResult int32 `json:"NumResults,omitempty"`
+
+	// Operation - 'avg', 'min', 'max'
+	Aggregator string `json:"aggregator,omitempty"`
+	// Metric that we are apply Aggregation to
+	Metric []MetricIdentifier `json:"metrics,omitempty"`
+
+	// Metrics that are related and interesting BUT are NOT part of the post aggregation
+	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
+}
+
+type MetricAggregation struct {
+	// Metric name eg jitterP95
+	Metric string `json:"metric,omitempty"`
+	// Operation - 'sum', 'count', 'min', 'max'
+	Aggregator string `json:"aggregator,omitempty"`
+	// Name for this Aggregation (must be unique)
+	Name string `json:"name,omitempty"`
+}
+
+func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
+	req := tpn
+	if req.Timeout == 0 {
+		req.Timeout = 5000
+	}
+
+	if len(tpn.Metric) == 0 {
+		return nil, errors.New("Metric must not be empty")
+	}
+	if tpn.NumResult == 0 {
+		tpn.NumResult = 10
+	}
+
+	if len(req.TenantID) == 0 {
+		return nil, errors.New("Tenant must not be empty.")
+	}
+
+	if len(req.Interval) == 0 {
+		return nil, errors.New("Interval must not be empty")
+	}
+
+	return req, nil
+}
+
+type ThresholdCrossingRequest struct {
+	TenantID           string             `json:"tenantId"`
+	DomainIDs          []string           `json:"domainIds,omitempty"`
+	Interval           string             `json:"interval,omitempty"`
+	Granularity        string             `json:"granularity,omitempty"`
+	ThresholdProfileID string             `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist    []MetricIdentifier `json:"metricWhitelist,omitempty"`
+	Timeout            int32              `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {

@@ -9,16 +9,19 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
+	"github.com/satori/go.uuid"
 )
 
 type TimeBucket int
 
 const (
-	TimeZoneUTC                = "UTC"
-	Granularity_All            = "all"
-	HourOfDay       TimeBucket = 0
-	DayOfWeek       TimeBucket = 1
+	TimeZoneUTC               = "UTC"
+	GranularityAll            = "all"
+	HourOfDay      TimeBucket = 0
+	DayOfWeek      TimeBucket = 1
 )
+
+var knownEventNames = []string{"critical", "major", "minor", "warn", "info"}
 
 // HistogramQuery - Count of metrics per bucket for given interval.
 func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32, vendor string, timeout int32) (*godruid.QueryTimeseries, error) {
@@ -28,7 +31,7 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
-		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity: toGranularity(granularity),
 		Context:     map[string]interface{}{"timeout": timeout},
 		Aggregations: []godruid.Aggregation{
 			godruid.AggFiltered(
@@ -69,19 +72,83 @@ func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) 
 		return nil, fmt.Errorf("Invalid value for 'upperLimit' : %v. Must be a number", upperLimit)
 	}
 
+	return FilterLimitSelectorHelper(metric, lowerLimit, lowerStrict, upperLimit, upperStrict), nil
+}
+
+// Retrieves the appropriate druid bounded filter based on the defined lower and upper bounds for a given metric.
+// NOTE: This should not be used for metrics that need to take negative numbers into account since lower/upper
+// bound values of 0 are considered to be infinite lower or infinite upper respectively
+// Arguments:
+//   metric - the name of the metric we want to apply the filter to
+//   lowerLimit - the lower limit of the bounded filter that we want to build. A value of 0 assumes no lower bound
+//   lowerStrict - a value of false assumes the comparison <=. A value of true assumes the comparison <
+//   upperLimit - the upper limit of the bounded filter that we want to build. A value of 0 assumes no upper bound
+//   upperStrict - a value of false assumes the comparison >=. A value of true assumes the comparison >
+func FilterLimitSelectorHelper(metric string, lowerLimit float64, lowerStrict bool, upperLimit float64, upperStrict bool) *godruid.Filter {
+	// Builds a filter that behaves as lowerLimit <[=] val <[=] upperLimit
 	if upperLimit != 0 && lowerLimit != 0 {
-		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict, float32(upperLimit), upperStrict), nil
+		return godruid.FilterLowerUpperBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict, float32(upperLimit), upperStrict)
 	}
 
+	// Builds a filter that behaves as lowerLimit <[=] val
 	if upperLimit != 0 {
-		return godruid.FilterUpperBound(metric, godruid.NUMERIC, float32(upperLimit), upperStrict), nil
+		return godruid.FilterUpperBound(metric, godruid.NUMERIC, float32(upperLimit), upperStrict)
 	}
 
+	// Builds a filter that behaves as val <[=] upperLimit
 	if lowerLimit != 0 {
-		return godruid.FilterLowerBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict), nil
+		return godruid.FilterLowerBound(metric, godruid.NUMERIC, float32(lowerLimit), lowerStrict)
 	}
 
-	return nil, fmt.Errorf("Unable to consume threshold profile for: %v", metric)
+	return nil
+}
+
+func HistogramCustomQuery(tenant string, domains []string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
+
+	var aggregations []godruid.Aggregation
+
+	for _, met := range metrics {
+
+		metName := met["name"].(string)
+		metVendor := met["vendor"].(string)
+		metDirection := met["direction"].(string)
+		metObjectType := met["objectType"].(string)
+
+		for _, bucket := range met["buckets"].([]interface{}) {
+			bucketMap := bucket.(map[string]interface{})
+			metUpper := bucketMap["upper"].(float64)
+			metLower := bucketMap["lower"].(float64)
+			metIndex := bucketMap["index"]
+
+			name := fmt.Sprintf("%s.%s.%s.%s.%s", metVendor, metObjectType, metName, metDirection, metIndex)
+
+			filter := FilterLimitSelectorHelper(metName, metLower, false, metUpper, true)
+
+			aggregation := godruid.AggFiltered(
+				godruid.FilterAnd(
+					filter,
+					godruid.FilterSelector("objectType", metObjectType),
+					godruid.FilterSelector("direction", metDirection),
+				),
+				&godruid.Aggregation{
+					Type: "count",
+					Name: name,
+				},
+			)
+			aggregations = append(aggregations, aggregation)
+		}
+	}
+
+	return &godruid.QueryTimeseries{
+		DataSource:  dataSource,
+		Granularity: toGranularity(granularity),
+		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(tenant, domains),
+		),
+		Aggregations: aggregations,
+		Intervals:    []string{interval}}, nil
 }
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
@@ -138,7 +205,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
-		Granularity: godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity: toGranularity(granularity),
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
@@ -146,6 +213,269 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
+}
+
+func ThresholdViolationsQuery(tenant string, dataSource string, domains []string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifier, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
+	// all of the aggregations
+	var aggregations []godruid.Aggregation
+	// all of the post aggregations
+	var postAggregations []godruid.PostAggregation
+	// the names of the aggregations that are computing violation counts
+	var violationCountAggs []string
+	// the names of the aggregations that are computing violation counts, grouped by eventName
+	violationCountAggsByEvent := map[string][]string{}
+	// the names of the aggregations that are computing de-duped duration sum
+	var durationAggs []string
+	// the names of the aggregations that are computing de-duped violation duration sum
+	var violationDurationAggs []string
+	// the names of the aggregations that are computing de-duped violation duration sum, grouped by eventName
+	violationDurationAggsByEvent := map[string][]string{}
+
+	type objectTypeDirectionFilters struct {
+		BaseFilter              *godruid.Filter
+		ThresholdFiltersByEvent map[string][]*godruid.Filter
+		ThresholdFilterList     []*godruid.Filter
+	}
+
+	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+		for tk, t := range v.GetMonitoredObjectTypeMap() {
+			// This is for de-duping violation duration for metrics that are violated at the same time for the same object.
+			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
+
+			for mk, m := range t.GetMetricMap() {
+				for dk, d := range m.GetDirectionMap() {
+
+					// skip metrics that are not on the whitelist (if one was provided)
+					if !inWhitelist(metricWhitelist, vk, tk, mk, dk) {
+						continue
+					}
+
+					// create a base filter for this objectType and direction (druid doesn't store vendor)
+					objectTypeAndDirectionFilter := godruid.FilterAnd(
+						godruid.FilterSelector("objectType", tk),
+						godruid.FilterSelector("direction", dk),
+					)
+
+					aggNamePrefix := buildMetricAggPrefix(vk, tk, mk, dk)
+					// create an aggregation to sum the total duration this metric was measured.
+					aggregations = append(aggregations, godruid.AggFiltered(
+						objectTypeAndDirectionFilter,
+						&godruid.Aggregation{
+							Type:      "longSum",
+							FieldName: "duration",
+							Name:      aggNamePrefix + ".totalDuration",
+						},
+					))
+
+					// process the provisioned events (severities) and create aggregations
+					for ek, e := range d.GetEventMap() {
+
+						thresholdFilter, err := FilterHelper(mk, e)
+						if err != nil {
+							return nil, err
+						}
+
+						// store the threshold filter in a map - needed for de-duping later
+						dirFilters, ok := perDirectionFilters[vk+"."+tk+"."+dk]
+						if !ok {
+							perDirectionFilters[vk+"."+tk+"."+dk] = &objectTypeDirectionFilters{
+								BaseFilter:              objectTypeAndDirectionFilter,
+								ThresholdFilterList:     []*godruid.Filter{thresholdFilter},
+								ThresholdFiltersByEvent: map[string][]*godruid.Filter{ek: []*godruid.Filter{thresholdFilter}},
+							}
+						} else {
+							dirFilters.ThresholdFilterList = append(dirFilters.ThresholdFilterList, thresholdFilter)
+							filterList, ok := dirFilters.ThresholdFiltersByEvent[ek]
+							if !ok {
+								dirFilters.ThresholdFiltersByEvent[ek] = []*godruid.Filter{thresholdFilter}
+							} else {
+								dirFilters.ThresholdFiltersByEvent[ek] = append(filterList, thresholdFilter)
+							}
+						}
+
+						aggNameEventPrefix := aggNamePrefix + "." + ek
+
+						// Count number of times the metric was violated
+						violationCountAggName := aggNameEventPrefix + ".violationCount"
+						aggregations = append(aggregations, godruid.AggFiltered(
+							godruid.FilterAnd(
+								thresholdFilter,
+								objectTypeAndDirectionFilter,
+							),
+							&godruid.Aggregation{
+								Type: "count",
+								Name: violationCountAggName,
+							},
+						))
+						violationCountAggs = append(violationCountAggs, violationCountAggName)
+
+						aggs, ok := violationCountAggsByEvent[ek]
+						if !ok {
+							violationCountAggsByEvent[ek] = []string{violationCountAggName}
+						} else {
+							violationCountAggsByEvent[ek] = append(aggs, violationCountAggName)
+						}
+
+						// Sum the duration while this metric was in violation.
+						aggregations = append(aggregations, godruid.AggFiltered(
+							godruid.FilterAnd(
+								thresholdFilter,
+								objectTypeAndDirectionFilter,
+							),
+							&godruid.Aggregation{
+								Type:      "longSum",
+								FieldName: "duration",
+								Name:      aggNameEventPrefix + ".violationDuration",
+							},
+						))
+
+					}
+				}
+			}
+
+			// Duration de-dupping aggregations are created here.
+			if len(perDirectionFilters) > 0 {
+
+				for k, v := range perDirectionFilters {
+
+					// An aggregation to sum the duration for a vendor/objectType/direction
+					aggregations = append(aggregations, godruid.AggFiltered(
+						v.BaseFilter,
+						&godruid.Aggregation{
+							Type:      "longSum",
+							FieldName: "duration",
+							Name:      k + ".totalDuration",
+						},
+					))
+					durationAggs = append(durationAggs, k+".totalDuration")
+
+					if len(v.ThresholdFilterList) > 0 {
+						// Sum the violation duration per vendor/objecttype/direction
+						aggregations = append(aggregations, godruid.AggFiltered(
+							godruid.FilterAnd(
+								v.BaseFilter,
+								godruid.FilterOr(v.ThresholdFilterList...),
+							),
+							&godruid.Aggregation{
+								Type:      "longSum",
+								FieldName: "duration",
+								Name:      k + ".violationDuration",
+							},
+						))
+						violationDurationAggs = append(violationDurationAggs, k+".violationDuration")
+					}
+
+					if len(v.ThresholdFiltersByEvent) > 0 {
+						// Sum the violation duration per vendor/objecttype/direction/event
+
+						// This is done in the fixed order of knownEventNames for additional de-dup.
+						// It is possible to have 2 metrics in the same record that are both violated but
+						// for different events.  If 1 metric violates critical and the other violates
+						// minor we want the duration violation counted against critical only.
+						processed := []*godruid.Filter{}
+						for _, eventName := range knownEventNames {
+							tf, ok := v.ThresholdFiltersByEvent[eventName]
+							if !ok {
+								continue
+							}
+
+							// Here's where we build a filter containing the threshold conditions
+							// In order to de-dup (as describe above), we must exclude any filters
+							// we previous processed.
+							var filter *godruid.Filter
+							if len(processed) == 0 {
+								// i.e. here we'd be building the critical filter
+								filter = godruid.FilterAnd(
+									v.BaseFilter,
+									godruid.FilterOr(tf...),
+								)
+							} else {
+								// here we'd build, for example, the major filter and exclude critical filters
+								filter = godruid.FilterAnd(
+									v.BaseFilter,
+									godruid.FilterOr(tf...),
+									godruid.FilterNot(godruid.FilterOr(processed...)),
+								)
+							}
+							aggregations = append(aggregations, godruid.AggFiltered(
+								filter,
+								&godruid.Aggregation{
+									Type:      "longSum",
+									FieldName: "duration",
+									Name:      "__event." + eventName + "." + k + ".violationDuration",
+								},
+							))
+
+							aggs, ok := violationDurationAggsByEvent[eventName]
+							if !ok {
+								violationDurationAggsByEvent[eventName] = []string{"__event." + eventName + "." + k + ".violationDuration"}
+							} else {
+								violationDurationAggsByEvent[eventName] = append(aggs, "__event."+eventName+"."+k+".violationDuration")
+							}
+							// add the threshold filters to the processed list so we can exclude them for the next event
+							processed = append(processed, tf...)
+
+						}
+
+					}
+
+				}
+
+			}
+		}
+	}
+
+	if len(violationCountAggs) > 0 {
+		// Sum the violation count per metric to get an overall total.
+		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
+			"totalViolationCount",
+			"+",
+			buildPostAggregationFields(violationCountAggs)))
+	}
+	if len(violationCountAggsByEvent) > 0 {
+		for ek, v := range violationCountAggsByEvent {
+			postAggregations = append(postAggregations, godruid.PostAggArithmetic(
+				buildTopLevelEventAgg(ek, "totalViolationCount"),
+				"+",
+				buildPostAggregationFields(v)))
+		}
+	}
+	if len(violationDurationAggs) > 0 {
+		// Sum the violation duration per metric to get an overall violation duration.
+		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
+			"totalViolationDuration",
+			"+",
+			buildPostAggregationFields(violationDurationAggs)))
+	}
+	if len(violationDurationAggsByEvent) > 0 {
+		for ek, v := range violationDurationAggsByEvent {
+			postAggregations = append(postAggregations, godruid.PostAggArithmetic(
+				buildTopLevelEventAgg(ek, "totalViolationDuration"),
+				"+",
+				buildPostAggregationFields(v)))
+		}
+
+	}
+	if len(durationAggs) > 0 {
+		// Sum the total duration per metric to get an overall total duration.
+		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
+			"totalDuration",
+			"+",
+			buildPostAggregationFields(durationAggs)))
+	}
+
+	return &godruid.QueryTimeseries{
+		QueryType:   godruid.TIMESERIES,
+		DataSource:  dataSource,
+		Granularity: toGranularity(granularity),
+		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			buildDomainFilter(tenant, domains),
+		),
+		Aggregations:     aggregations,
+		PostAggregations: postAggregations,
+		Intervals:        []string{interval}}, nil
 }
 
 func SLAViolationsQuery(tenant string, dataSource string, domains []string, granularity string, interval string, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
@@ -434,7 +764,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 
 	return &godruid.QueryGroupBy{
 		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity:  toGranularity(granularity),
 		Context:      map[string]interface{}{"timeout": timeout},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
@@ -541,7 +871,7 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
-		Granularity:  godruid.GranPeriod(granularity, TimeZoneUTC, ""),
+		Granularity:  toGranularity(granularity),
 		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
@@ -633,6 +963,27 @@ func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, na
 
 }
 
+func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *godruid.Filter {
+	if len(monitoredObjects) < 1 {
+		return nil
+	}
+
+	filters := make([]*godruid.Filter, len(monitoredObjects))
+	if len(filters) == 0 {
+		return nil
+	}
+
+	for i, monobj := range monitoredObjects {
+		filters[i] = &godruid.Filter{
+			Type:      "selector",
+			Dimension: "monitoredObjectId",
+			Value:     monobj,
+		}
+	}
+
+	return godruid.FilterOr(filters...)
+}
+
 func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
 	if len(domains) < 1 {
 		return nil
@@ -703,8 +1054,164 @@ func buildPostAggregationFields(fieldNames []string) []godruid.PostAggregation {
 }
 
 func toGranularity(granularityStr string) godruid.Granlarity {
-	if granularityStr == Granularity_All {
+	if strings.ToLower(granularityStr) == GranularityAll {
 		return godruid.GranAll
 	}
 	return godruid.GranPeriod(granularityStr, TimeZoneUTC, "")
+}
+
+const (
+	op_sum   = "sum"
+	op_max   = "max"
+	op_min   = "min"
+	op_count = "count"
+	op_avg   = "avg"
+)
+
+func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Aggregation {
+
+	var aggregations []godruid.Aggregation
+
+	if metricsView == nil {
+		return nil
+	}
+	for _, input := range metricsView {
+
+		switch input.Aggregator {
+		case op_sum:
+			aggregations = append(aggregations, godruid.AggDoubleSum(input.Name, input.Metric))
+		case op_max:
+			aggregations = append(aggregations, godruid.AggDoubleMax(input.Name, input.Metric))
+		case op_min:
+			aggregations = append(aggregations, godruid.AggDoubleMin(input.Name, input.Metric))
+		case op_count:
+			aggregations = append(aggregations, godruid.AggCount(input.Name))
+		}
+	}
+
+	return aggregations
+}
+
+// GetTopNForMetricAvg - Provides TopN for certain metrics.
+func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godruid.QueryTopN, error) {
+
+	var aggregations []godruid.Aggregation
+	var postAggregations godruid.PostAggregation
+	var scoredPostAggregation []godruid.PostAggregation
+
+	// Create the labels for the average operation (for some reason,
+	// druid has no native idea of average but it does for SUM)
+	const (
+		sumLbl    = "topn_sum"
+		countLbl  = "topn_count"
+		opLbl     = "result"
+		metricLbl = "metric"
+		typeLbl   = "type"
+	)
+
+	typeInvertedLbl := "inverted"
+	// Only operate on the first item
+	metric := request.Metric[0]
+
+	// Metric order and sort on
+	selectedMetric := map[string]interface{}{metricLbl: opLbl}
+	// Create the Filters
+	// TODO: I think we may need to specify DIRECTION for monitored objects.
+	// TODO: The existing MetricIdentifier model does not work for directions since
+	// it isn't well defined and we can't use it to specify more than 1 direction.
+
+	var filterOn *godruid.Filter
+
+	filterOn = godruid.FilterAnd(
+		godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+		godruid.FilterSelector("objectType", metric.ObjectType),
+	)
+
+	// Prefer the domains list
+	if len(request.MonitoredObjects) == 0 {
+		domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			domObjFilter,
+		)
+	} else {
+		monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+		filterOn = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			godruid.FilterSelector("objectType", metric.ObjectType),
+			monObjFilter,
+		)
+	}
+
+	// Create the aggregations
+
+	// We need the total COUNT for the average op
+	//aggregations = append(aggregations, godruid.AggCount(countFilterLbl))
+
+	// Build the metricView. This isn't part of the average operation but it
+	// helps the caller have more information about the object druid finds.
+	// Eg: For Top N average for DelayP95, what is its MAX/MIN DelayP95 & Delay & Max dropped Packets and Max Jitter.
+	// We can even show the average for the metricsView but it requires more POST Aggregations. May a future feature.
+	listOfMetricViewAgg := buildMetricAggregator(request.MetricsView)
+	if listOfMetricViewAgg != nil {
+		aggregations = append(aggregations, listOfMetricViewAgg...)
+	}
+
+	switch request.Aggregator {
+	case op_max:
+		aggregations = append(aggregations, godruid.AggDoubleMax(opLbl, metric.Name))
+		break
+	case op_min:
+		aggregations = append(aggregations, godruid.AggDoubleMin(opLbl, metric.Name))
+		selectedMetric[typeLbl] = typeInvertedLbl
+		break
+	default:
+		// We need the SUM to do the average operation
+		aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Name))
+		// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
+		// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
+		aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Name, 0))
+		aggroCount := godruid.AggCount(countLbl)
+		aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
+		aggregations = append(aggregations, aggroFunc)
+		// Post Aggregation is where the Average operation is executed
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
+		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))
+		// We can actually define more operations here if we really wanted to.
+		scoredPostAggregation = []godruid.PostAggregation{
+			godruid.PostAggArithmetic(opLbl, "/", postAggregations.Fields),
+		}
+
+	}
+	return &godruid.QueryTopN{
+		QueryType:        godruid.TOPN,
+		DataSource:       dataSource,
+		Granularity:      godruid.GranAll,
+		Context:          map[string]interface{}{"timeout": request.Timeout, "queryId": uuid.NewV4().String()},
+		Aggregations:     aggregations,
+		Filter:           filterOn,
+		PostAggregations: scoredPostAggregation,
+		Intervals:        []string{request.Interval},
+		// !! LOOK HERE. Metric is used to tell Druid which METRIC we want to sort by.
+		// Because the average operation is a POST AGGREGATION and not an existing column,
+		// the metric name here must match the POST AGGREGATION name for it to sort.
+		// Default is to sort in descending order (use `"type":"inverted"` to reverse the order)
+		Metric:    selectedMetric,
+		Threshold: int(request.NumResult),
+		Dimension: "monitoredObjectId",
+	}, nil
+}
+func inWhitelist(whitelist []metrics.MetricIdentifier, vendor, objectType, metricName, direction string) bool {
+	if whitelist == nil || len(whitelist) == 0 {
+		return true
+	}
+
+	for _, mi := range whitelist {
+		if vendor == mi.Vendor && objectType == mi.ObjectType && metricName == mi.Name && direction == fmt.Sprint(mi.Direction) {
+			return true
+		}
+	}
+	return false
+
 }

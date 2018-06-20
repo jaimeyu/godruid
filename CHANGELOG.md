@@ -1,8 +1,32 @@
 * Fix - batching Monitored Object name updates to reduce API strain.
 ## Current Release 
+### 0.154.0 
+**Release Date:** Wed Jun 20 19:15:16 UTC 2018     
+## Previous Releases 
+* Fix - don't put empty keys in druid lookup
+### 0.153.0 
+**Release Date:** Wed Jun 20 14:53:20 UTC 2018     
+* Fix - Changing notification handler to push notification on kafka using Async in fire and forget mode. This fixes issue [Monitored Object Domain doesn't seem to work on the dashboards](https://app.asana.com/0/710429663603017/716274045857257/f)
+### 0.152.0 
+**Release Date:** Thu Jun 14 20:15:22 UTC 2018     
+### 0.151.0 
+**Release Date:** Thu Jun 14 18:25:25 UTC 2018     
+### 0.149.0 
+**Release Date:** Thu Jun 14 18:01:18 UTC 2018     
+* Feature - Adding endpoint to a TopN operation for a metric.
+### 0.148.0 
+**Release Date:** Wed Jun 13 21:21:18 UTC 2018     
+### 0.147.0 
+**Release Date:** Wed Jun 13 20:41:40 UTC 2018     
+* feat - adding support for custom bucket histogram queries
+### 0.146.0 
+**Release Date:** Wed Jun 13 20:35:58 UTC 2018     
+* Feature - a new query endpoint for threshold crossing that includes violation time
+### 0.145.0 
+**Release Date:** Wed Jun 13 14:57:43 UTC 2018     
+* Fix - support 'All' granularity for metric queries
 ### 0.144.0 
 **Release Date:** Tue Jun 12 02:13:32 UTC 2018     
-## Previous Releases 
 ### 0.143.0 
 **Release Date:** Tue Jun 12 01:28:22 UTC 2018     
 * Fix - changing the ingestion dictionary based on twamp needs

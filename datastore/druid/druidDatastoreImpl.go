@@ -3,6 +3,7 @@ package druid
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ const (
 	EventDistribution       = "event-distribution"
 	RawMetrics              = "raw-metrics"
 	SLAReport               = "sla-report"
+	TopNForMetric           = "top-n"
 )
 
 // DruidDatastoreClient - struct responsible for handling
@@ -59,6 +61,11 @@ type RawMetricsResponse struct {
 type AggMetricsResponse struct {
 	Timestamp string
 	Result    map[string]interface{}
+}
+
+type BaseDruidResponse struct {
+	Timestamp string                 `json:"timestamp"`
+	Result    map[string]interface{} `json:"result"`
 }
 
 func makeHttpClient() *http.Client {
@@ -178,6 +185,53 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 	return rr, nil
 }
 
+// Retrieves a histogram for specified metrics based on custom defined buckets
+func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	// Split out the request into a set of request metrics keyed off of the metric vendor, objectType, name, and direction
+	metrics := make([]map[string]interface{}, len(request.MetricBucketRequests))
+	for i, mb := range request.MetricBucketRequests {
+		metricsMap, err := models.ConvertObj2Map(mb)
+		if err != nil {
+			return nil, err
+		}
+		metrics[i] = metricsMap
+	}
+
+	// Build out the actual druid query to send
+	query, err := HistogramCustomQuery(request.TenantID, request.DomainIds, table, request.Interval, request.Granularity, timeout, metrics)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Execute the druid query
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Reformat the druid response from a flat structure to a json api structure
+	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	rr, err := convertHistogramCustomResponse(request.TenantID, request.DomainIds, request.Interval, string(response))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rr, nil
+}
+
 // GetThresholdCrossing - Executes a 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
@@ -231,6 +285,47 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	return rr, nil
 }
 
+// New version of threshold-crossing
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
+
+	logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 5000
+	}
+
+	query, err := ThresholdViolationsQuery(request.TenantID, table, request.DomainIDs, request.Granularity, request.Interval, request.MetricWhitelist, thresholdProfile.Data, timeout)
+
+	if err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
+	druidResponse, err := dc.executeQuery(query)
+
+	response := make([]BaseDruidResponse, 0)
+	err = json.Unmarshal(druidResponse, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(response))
+
+	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	rr := map[string]interface{}{
+		"results": reformatted,
+	}
+
+	logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
+
+	return rr, nil
+}
+
 // GetThresholdCrossingByMonitoredObject - Executes a GroupBy 'threshold crossing' query against druid. Wraps the
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
@@ -276,6 +371,49 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		"id":         uuid.String(),
 		"type":       ThresholdCrossingReport,
 		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	return rr, nil
+}
+
+// GetTopNFor - Executes a TopN on a given metric, based on its min/max/avg.
+func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+	}
+	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate a druid query while processing request: %s: '%s'", models.AsJSONString(request), err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+	}
+	response, err := dc.executeQuery(query)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get TopN result from druid for request %s: %s", models.AsJSONString(query), err.Error())
+	}
+
+	construct := fmt.Sprintf("{\"results\":%s}", string(response))
+
+	responseMap := make(map[string]interface{})
+	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
+		return nil, fmt.Errorf("Unable to unmarshal response from druid for request %s: %s", models.AsJSONString(request), err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+	}
+
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         "",
+		"type":       TopNForMetric,
+		"attributes": responseMap,
 	})
 	rr := map[string]interface{}{
 		"data": data,
@@ -375,7 +513,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		timeout = 5000
 	}
 
-	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, Granularity_All, request.Interval, thresholdProfile.Data, timeout)
+	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
 
 	if err != nil {
 		return nil, err
@@ -420,7 +558,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 						if ek != "sla" {
 							continue
 						}
-						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							return nil, err
 						}
@@ -436,7 +574,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 							return nil, err
 						}
 
-						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, Granularity_All, request.Interval, timeout)
+						query, err = SLATimeBucketQuery(request.TenantID, table, request.Domain, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							return nil, err
 						}
@@ -621,7 +759,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 
 	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
 	for _, mo := range monitoredObjects {
-		if len(mo.DomainSet) < 1 {
+		if len(mo.DomainSet) < 1 || len(mo.MonitoredObjectID) < 1 {
 			continue
 		}
 		for _, domain := range mo.DomainSet {

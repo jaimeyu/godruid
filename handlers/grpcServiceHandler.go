@@ -576,6 +576,7 @@ func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateThrPrfStr)
 		return nil, err
 	}
@@ -590,6 +591,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateThrPrfStr)
 		return nil, err
 	}
@@ -604,6 +606,7 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 
 	res, err := gsh.Tsh.GetTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetThrPrfStr)
 		return nil, err
 	}
@@ -618,6 +621,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteThrPrfStr)
 		return nil, err
 	}
@@ -632,6 +636,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context
 
 	res, err := gsh.Tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve all Tenant ThresholdProfiles for Tenant %s: %s", tenantID, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetAllThrPrfStr)
 		return nil, err
 	}

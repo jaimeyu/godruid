@@ -1,8 +1,10 @@
-* Fix - batching Monitored Object name updates to reduce API strain.
 ## Current Release 
+### 0.155.0 
+**Release Date:** Wed Jun 20 21:21:57 UTC 2018     
+## Previous Releases 
+* Fix - batching Monitored Object name updates to reduce API strain.
 ### 0.154.0 
 **Release Date:** Wed Jun 20 19:15:16 UTC 2018     
-## Previous Releases 
 * Fix - don't put empty keys in druid lookup
 ### 0.153.0 
 **Release Date:** Wed Jun 20 14:53:20 UTC 2018     

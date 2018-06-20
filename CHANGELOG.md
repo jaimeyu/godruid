@@ -1,3 +1,4 @@
+Feature - Developer feature. Develerper's local gather can now access remote druid with real datasets and avoid setting up GCE instances.
 ## Current Release 
 ### 0.152.0 
 **Release Date:** Thu Jun 14 20:15:22 UTC 2018     

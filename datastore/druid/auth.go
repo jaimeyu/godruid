@@ -1,9 +1,9 @@
 package druid
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	pkgurl "net/url"
+	"strings"
 
 	"github.com/accedian/adh-gather/config"
 )
@@ -15,30 +15,44 @@ type Auth struct {
 	IDToken     string `json:"id_token"`
 }
 
+// These are the dev credentials to log into debug deployment
+const (
+	username   = "admin@datahub.com"
+	password   = "AccedianPass"
+	cookieName = "skylight-aaa"
+)
+
+// GetAuthCode - Only used for dev builds running on local deployment to access a remote druid (because it has real usuable datasets).
 func GetAuthCode(cfg config.Provider) string {
-	// include the URL from this step:
-	// https://www.notion.so/accedian/Accessing-IAP-protected-resources-using-OAUTH2-bf19cf64e46a4fcbac0f49926c82ae39#2e70c2a6017d4c1288b8a447db5756de
-	// inside the yaml config file.
-	// this is only here for dev purposes and should go away once we
-	// implement oauth
 	url := cfg.GetString("druid.auth")
 
+	// If druid auth isn't setup (usually only applicable on dev machines)
 	if url != "" {
-		req, _ := http.NewRequest("POST", url, nil)
+		data := pkgurl.Values{}
+		data.Set("username", username)
+		data.Add("password", password)
 
-		req.Header.Add("cache-control", "no-cache")
-		req.Header.Add("postman-token", "1d5ed9ef-2e83-a103-c4e1-f68ec0e56134")
+		// Send the request to get a oauth cookie
+		req, _ := http.NewRequest("POST", url, strings.NewReader(data.Encode()))
 
+		req.Header.Add("Accept", "application/vnd.api+json")
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		res, _ := http.DefaultClient.Do(req)
 
+		// Make sure to close the body/clean up
+		// Wait, do we need to? The GC should take care of this.
 		defer res.Body.Close()
-		body, _ := ioutil.ReadAll(res.Body)
+		//body, _ := ioutil.ReadAll(res.Body)
 
-		var auth Auth
+		var token string
+		// Find the token, if we can't return empty token
+		for _, cookie := range res.Cookies() {
+			if cookie.Name == cookieName {
+				token = cookie.Value
+			}
+		}
 
-		json.Unmarshal(body, &auth)
-
-		return auth.IDToken
+		return token
 	}
 	return ""
 }

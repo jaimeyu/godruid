@@ -828,6 +828,23 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 	return recList, nil
 }
 
+// GetAllMonitoredObjectsInIDList - InMemory implementation of GetAllMonitoredObjectsInIDList
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error) {
+	if idList == nil || len(idList) == 0 {
+		return []*tenmod.MonitoredObject{}, nil
+	}
+
+	recList := make([]*tenmod.MonitoredObject, 0)
+
+	for _, rec := range tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID] {
+		if doesSliceContainString(idList, rec.ID) {
+			recList = append(recList, rec)
+		}
+	}
+
+	return recList, nil
+}
+
 // GetMonitoredObjectToDomainMap - InMemory implementation of GetMonitoredObjectToDomainMap
 func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
 	err := tsd.DoesTenantExist(moByDomReq.TenantID, tenmod.TenantMonitoredObjectType)
@@ -1292,4 +1309,13 @@ func (tsd *TenantServiceDatastoreInMemory) HasDashboardsWithDomain(tenantID stri
 	}
 	return false, nil
 
+}
+
+func doesSliceContainString(container []string, value string) bool {
+	for _, s := range container {
+		if s == value {
+			return true
+		}
+	}
+	return false
 }

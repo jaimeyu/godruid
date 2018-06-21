@@ -25,8 +25,9 @@ type Config struct {
 			port int
 		}
 		datastore struct {
-			ip   string
-			port int
+			ip        string
+			port      int
+			batchsize int
 		}
 		grpc struct {
 			ip   string
@@ -93,6 +94,7 @@ func LoadConfig(cfgPath string, v *viper.Viper) config.Provider {
 func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_server_datastore_ip.String(), "http://localhost")
 	v.SetDefault(CK_server_datastore_port.String(), 5984)
+	v.SetDefault(CK_server_datastore_batchsize.String(), 1000)
 	v.SetDefault(CK_server_rest_ip.String(), "0.0.0.0")
 	v.SetDefault(CK_server_rest_port.String(), 10001)
 	v.SetDefault(CK_server_monitoring_port.String(), 9191)

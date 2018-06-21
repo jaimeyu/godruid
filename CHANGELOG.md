@@ -1,9 +1,12 @@
 Feature - Developer feature. Develerper's local gather can now access remote druid with real datasets and avoid setting up GCE instances.
 Fix - GRP calls to tenant thresholdprofiles did not log tenant ID which made it difficult to debug, https://app.asana.com/0/682255795640582/716246867279196
 ## Current Release 
+### 0.155.0 
+**Release Date:** Wed Jun 20 21:21:57 UTC 2018     
+## Previous Releases 
+* Fix - batching Monitored Object name updates to reduce API strain.
 ### 0.154.0 
 **Release Date:** Wed Jun 20 19:15:16 UTC 2018     
-## Previous Releases 
 * Fix - don't put empty keys in druid lookup
 ### 0.153.0 
 **Release Date:** Wed Jun 20 14:53:20 UTC 2018     

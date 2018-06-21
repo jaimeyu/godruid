@@ -203,6 +203,39 @@ func getAllOfTypeByIDPrefix(dataType string, dataTypeStrForLogging string, db *c
 	return fetchedData, nil
 }
 
+func getAllInListOfIDs(idList []string, dataType string, dataTypeStrForLogging string, db *couchdb.Database) ([]map[string]interface{}, error) {
+	logger.Log.Debugf("Attempting to retrieve all %ss\n", dataTypeStrForLogging)
+
+	// Get the data from CouchDB
+	selector := fmt.Sprintf(`in(_id, %s)`, printStringSliceInObjectDeclarationFormat(idList, dataType))
+	fetchedData, err := db.Query(nil, selector, nil, defaultQueryResultsLimit, nil, nil)
+	if err != nil {
+		logger.Log.Debugf("Error retrieving all %ss: %s", dataTypeStrForLogging, err.Error())
+		return nil, err
+	}
+
+	// Strip out the prefix on all the IDs
+	for _, data := range fetchedData {
+		stripPrefixFromID(data)
+	}
+
+	return fetchedData, nil
+}
+
+func printStringSliceInObjectDeclarationFormat(stringSlice []string, dataType string) string {
+	if stringSlice == nil || len(stringSlice) == 0 {
+		return "[]string{}"
+	}
+
+	datatypeString := fmt.Sprintf(`%s_2_`, dataType)
+	result := "[]string{"
+	for _, s := range stringSlice {
+		result += fmt.Sprintf(`"%s%s",`, datatypeString, s)
+	}
+	result = strings.TrimRight(result, ",")
+	return strings.Join([]string{result, `}`}, "")
+}
+
 func stripPrefixFromID(data map[string]interface{}) {
 	if data["_id"] != nil {
 		idStr := data["_id"].(string)
@@ -500,6 +533,22 @@ func getAllOfTypeFromCouchAndFlatten(dbName string, dataType string, loggingStr 
 	}
 
 	fetchedList, err := getAllOfTypeByIDPrefix(dataType, loggingStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
+}
+
+func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType string, loggingStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	fetchedList, err := getAllInListOfIDs(idList, dataType, loggingStr, db)
 	if err != nil {
 		return err
 	}

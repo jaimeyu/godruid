@@ -669,6 +669,21 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 	return res, nil
 }
 
+// GetAllMonitoredObjectsInIDList - couchdb implementation of GetAllMonitoredObjectsInIDList
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error) {
+	logger.Log.Debugf("Fetching all %s\n from list of %d IDs", tenmod.TenantMonitoredObjectStr, len(idList))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	res := make([]*tenmod.MonitoredObject, 0)
+	if err := getAllInIDListFromCouchAndFlatten(dbName, idList, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr, &res); err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Retrieved %d %ss for list of %d IDs\n", len(res), tenmod.TenantMonitoredObjectStr, len(idList))
+	return res, nil
+}
+
 // GetMonitoredObjectToDomainMap - CouchDB implementation of GetMonitoredObjectToDomainMap
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error) {
 	logger.Log.Debugf("Fetching %s: %v\n", tenmod.MonitoredObjectToDomainMapStr, models.AsJSONString(moByDomReq))

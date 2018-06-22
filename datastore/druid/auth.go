@@ -15,16 +15,12 @@ type Auth struct {
 	IDToken     string `json:"id_token"`
 }
 
-// These are the dev credentials to log into debug deployment
-const (
-	username   = "admin@datahub.com"
-	password   = "AccedianPass"
-	cookieName = "skylight-aaa"
-)
-
 // GetAuthCode - Only used for dev builds running on local deployment to access a remote druid (because it has real usuable datasets).
 func GetAuthCode(cfg config.Provider) string {
 	url := cfg.GetString("druid.auth")
+	username := cfg.GetString("druid.username")
+	password := cfg.GetString("druid.password")
+	cookieName := cfg.GetString("druid.cookieName")
 
 	// If druid auth isn't setup (usually only applicable on dev machines)
 	if url != "" {
@@ -40,9 +36,7 @@ func GetAuthCode(cfg config.Provider) string {
 		res, _ := http.DefaultClient.Do(req)
 
 		// Make sure to close the body/clean up
-		// Wait, do we need to? The GC should take care of this.
 		defer res.Body.Close()
-		//body, _ := ioutil.ReadAll(res.Body)
 
 		var token string
 		// Find the token, if we can't return empty token

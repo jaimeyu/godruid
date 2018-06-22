@@ -58,6 +58,10 @@ type TenantServiceDatastore interface {
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
 
+	UpdateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error)
+	GetMonitoredObjectKeys(tenantId string) (*tenmod.MonitoredObjectKeys, error)
+	CreateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error)
+
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)

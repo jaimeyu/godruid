@@ -751,6 +751,55 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
+// CreateMonitoredObjectKeys - CouchDB implementation of CreateMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
+	logtype := tenmod.TenantMonitoredObjectKeysStr
+	logger.Log.Debugf("Creating %s: %v\n", logtype, models.AsJSONString(monitoredObjectReq))
+
+	// Use the Tenant's ID for the keys ID
+	monitoredObjectReq.ID = ds.PrependToDataID(monitoredObjectReq.TenantID, string(tenmod.TenantMonitoredObjectKeysType))
+	// ds.GenerateID(monitoredObjectReq, string(tenmod.TenantMonitoredObjectKeysType))
+	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	dataContainer := &tenmod.MonitoredObjectKeys{}
+	if err := createDataInCouch(dbName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectKeysType), tenmod.TenantMonitoredObjectKeysStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// UpdateMonitoredObjectKeys - CouchDB implementation of UpdateMonitoredObjectKeys
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(monitoredObjectReq))
+	monitoredObjectReq.ID = ds.PrependToDataID(monitoredObjectReq.ID, string(tenmod.TenantMonitoredObjectKeysType))
+	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	dataContainer := &tenmod.MonitoredObjectKeys{}
+	if err := updateDataInCouch(dbName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectKeysType), tenmod.TenantMonitoredObjectKeysStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// GetMonitoredObjectKeys - CouchDB implementation of GetMonitoredObjectKeys
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectKeys(tenantID string) (*tenmod.MonitoredObjectKeys, error) {
+	dataID := ds.PrependToDataID(tenantID, string(tenmod.TenantMonitoredObjectKeysType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	logger.Log.Debugf("Fetching %s: tenant %s -> keyID %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, dataID)
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	dataContainer := tenmod.MonitoredObjectKeys{}
+	if err := getDataFromCouch(dbName, dataID, &dataContainer, tenmod.TenantMonitoredObjectKeysStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta
 func (tsd *TenantServiceDatastoreCouchDB) CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))

@@ -1,6 +1,7 @@
 package inMemory
 
 import (
+	"errors"
 	"fmt"
 
 	ds "github.com/accedian/adh-gather/datastore"
@@ -1318,4 +1319,13 @@ func doesSliceContainString(container []string, value string) bool {
 		}
 	}
 	return false
+}
+func (memDB *TenantServiceDatastoreInMemory) UpdateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
+	return nil, errors.New("Unsupported")
+}
+func (memDB *TenantServiceDatastoreInMemory) GetMonitoredObjectKeys(tenantId string) (*tenmod.MonitoredObjectKeys, error) {
+	return nil, errors.New("Unsupported")
+}
+func (memDB *TenantServiceDatastoreInMemory) CreateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
+	return nil, errors.New("Unsupported")
 }

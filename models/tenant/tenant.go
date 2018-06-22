@@ -28,6 +28,9 @@ const (
 	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
+	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
+	TenantMonitoredObjectKeysType TenantDataType = "monitoredObjectKeys"
+
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 
@@ -108,6 +111,9 @@ const (
 
 	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
 	TenantMonitoredObjectStr = "Tenant Monitored Object"
+
+	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object Keys data type for use in logs.
+	TenantMonitoredObjectKeysStr = "Tenant Monitored Object Keys"
 
 	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantThresholdProfileStr = "Tenant Threshold Profile"
@@ -533,6 +539,25 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 		return errors.New("Invalid Tenant Monitored object request: must provide a revision (_rev) for an update")
 	}
 
+	return nil
+}
+
+type MonitoredObjectKeys struct {
+	ID       string            `json:"_id"`
+	REV      string            `json:"_rev"`
+	Datatype string            `json:"datatype"`
+	TenantID string            `json:"tenantId"`
+	Keys     map[string]string `json:"keys"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (mo *MonitoredObjectKeys) GetID() string {
+	return mo.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (mo *MonitoredObjectKeys) SetID(s string) error {
+	mo.ID = s
 	return nil
 }
 

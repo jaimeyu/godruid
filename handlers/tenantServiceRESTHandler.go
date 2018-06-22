@@ -280,6 +280,19 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetMonitoredObject,
 		},
 		server.Route{
+			Name:        "PostMonitoredObjectKeys",
+			Method:      "POST",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects-keys",
+			HandlerFunc: result.CreateMonitoredObjectKeys,
+		},
+
+		server.Route{
+			Name:        "GetMonitoredObjectKeys",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects-keys",
+			HandlerFunc: result.GetMonitoredObjectKeys,
+		},
+		server.Route{
 			Name:        "GetFilteredMonitoredObject",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/",
@@ -1661,8 +1674,14 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
-
 	}
+
+	// The merge operation doesn't do deletions so it the request has a non empty collection for meta,
+	// then we overwrite the meta data completely with the new one.
+	if len(data.Meta) != 0 {
+		oldData.Meta = data.Meta
+	}
+
 	// This only checks if the ID&REV is set.
 	err = oldData.Validate(true)
 	if err != nil {
@@ -1726,6 +1745,67 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
 }
 
+// CreateMonitoredObjectKeys - fetches a tenant monitored object
+func (tsh *TenantServiceRESTHandler) CreateMonitoredObjectKeys(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s for tenant %s", tenmod.TenantMonitoredObjectKeysStr, tenantID)
+
+	request := tenmod.MonitoredObjectKeys{}
+	requestBytes, err := getRequestBytes(r)
+	err = jsonapi.Unmarshal(requestBytes, &request)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.CreateMonitoredObjectKeys(&request)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
+}
+
+// GetMonitoredObjectKeys - fetches a tenant monitored object
+func (tsh *TenantServiceRESTHandler) GetMonitoredObjectKeys(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+
+	logger.Log.Infof("Fetching %s for tenant %s", tenmod.TenantMonitoredObjectKeysStr, tenantID)
+
+	// Issue request to DAO Layer
+	result := &tenmod.MonitoredObjectKeys{}
+	var err error
+
+	result, err = tsh.TenantDB.GetMonitoredObjectKeys(tenantID)
+	if err != nil {
+
+		request := tenmod.MonitoredObjectKeys{
+			ID:       tenantID,
+			Datatype: string(tenmod.TenantMonitoredObjectKeysType),
+			TenantID: tenantID,
+		}
+		result, err = tsh.TenantDB.CreateMonitoredObjectKeys(&request)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+			reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+			return
+		}
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
+}
+
 // GetMonitoredObject - fetches a tenant monitored object
 func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
@@ -1734,7 +1814,7 @@ func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.Response
 	tenantID := getDBFieldFromRequest(r, 4)
 	dataID := getDBFieldFromRequest(r, 6)
 	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
+	//queryParams := r.URL.Query()
 
 	// Populate the params for druid
 

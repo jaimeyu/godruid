@@ -280,6 +280,12 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetMonitoredObject,
 		},
 		server.Route{
+			Name:        "GetFilteredMonitoredObject",
+			Method:      "GET",
+			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/",
+			HandlerFunc: result.GetFilteredMonitoredObjects,
+		},
+		server.Route{
 			Name:        "DeleteMonitoredObject",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
@@ -1618,6 +1624,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	startTime := time.Now()
 	opStr := mon.PatchMonObjStr
 
+	tenantID := getDBFieldFromRequest(r, 4)
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
 	if err != nil {
@@ -1642,7 +1649,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	}
 
 	// Issue request to DAO Layer
-	oldData, err := tsh.TenantDB.GetMonitoredObject(data.TenantID, data.ID)
+	oldData, err := tsh.TenantDB.GetMonitoredObject(tenantID, data.ID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1717,6 +1724,31 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 
 	NotifyMonitoredObjectUpdated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
+}
+
+// GetMonitoredObject - fetches a tenant monitored object
+func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	dataID := getDBFieldFromRequest(r, 6)
+	// Turn the query Params into the request object:
+	queryParams := r.URL.Query()
+
+	// Populate the params for druid
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.GetMonitoredObject(tenantID, dataID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
 }
 
 // GetMonitoredObject - fetches a tenant monitored object

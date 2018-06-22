@@ -428,20 +428,21 @@ type MonitoredObjectGroup struct {
 
 // MonitoredObject - defines a Tenant Monitored Object.
 type MonitoredObject struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	MonitoredObjectID     string   `json:"id"`
-	ActuatorType          string   `json:"actuatorType"`
-	ActuatorName          string   `json:"actuatorName"`
-	ReflectorType         string   `json:"reflectorType"`
-	ReflectorName         string   `json:"reflectorName"`
-	ObjectType            string   `json:"objectType"`
-	ObjectName            string   `json:"objectName"`
-	DomainSet             []string `json:"domainSet"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string            `json:"_id"`
+	REV                   string            `json:"_rev"`
+	Datatype              string            `json:"datatype"`
+	TenantID              string            `json:"tenantId"`
+	MonitoredObjectID     string            `json:"id"`
+	ActuatorType          string            `json:"actuatorType"`
+	ActuatorName          string            `json:"actuatorName"`
+	ReflectorType         string            `json:"reflectorType"`
+	ReflectorName         string            `json:"reflectorName"`
+	ObjectType            string            `json:"objectType"`
+	ObjectName            string            `json:"objectName"`
+	DomainSet             []string          `json:"domainSet"`
+	CreatedTimestamp      int64             `json:"createdTimestamp"`
+	LastModifiedTimestamp int64             `json:"lastModifiedTimestamp"`
+	Meta                  map[string]string `json:"meta"`
 }
 
 // GetID - required implementation for jsonapi marshalling

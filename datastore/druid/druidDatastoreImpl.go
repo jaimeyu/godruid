@@ -116,6 +116,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	cfg := gather.GetConfig()
 	server := cfg.GetString(gather.CK_druid_broker_server.String())
 	port := cfg.GetString(gather.CK_druid_broker_port.String())
+
 	var path string
 
 	if port == "" {
@@ -134,7 +135,7 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 		cfg:               cfg,
 		server:            server,
 		dClient:           client,
-		AuthToken:         cfg.GetString("druid.auth"),
+		AuthToken:         GetAuthCode(cfg),
 		coordinatorServer: cfg.GetString(gather.CK_druid_coordinator_server.String()),
 		coordinatorPort:   cfg.GetString(gather.CK_druid_coordinator_port.String()),
 	}

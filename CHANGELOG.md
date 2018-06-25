@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.157.0 
+**Release Date:** Mon Jun 25 12:52:02 UTC 2018     
+## Previous Releases 
 ### 0.156.0 
 **Release Date:** Mon Jun 25 12:45:42 UTC 2018     
-## Previous Releases 
 Feature - Developer feature. Develerper's local gather can now access remote druid with real datasets and avoid setting up GCE instances.
 Fix - GRP calls to tenant thresholdprofiles did not log tenant ID which made it difficult to debug, https://app.asana.com/0/682255795640582/716246867279196
 ### 0.155.0 

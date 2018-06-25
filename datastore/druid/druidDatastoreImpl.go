@@ -92,7 +92,17 @@ func (dc *DruidDatastoreClient) executeQuery(query godruid.Query) ([]byte, error
 	err := client.Query(query, dc.AuthToken)
 
 	if err != nil {
-		logger.Log.Errorf("Druid Query failed due to: %s", err)
+		if strings.Contains(err.Error(), "405") || strings.Contains(err.Error(), "401") {
+			logger.Log.Info("Auth token expired, refreshing token. error:%s", err.Error())
+			dc.AuthToken = GetAuthCode(dc.cfg)
+			err_retry := client.Query(query, dc.AuthToken)
+			if err_retry != nil {
+				logger.Log.Errorf("Druid Query RETRY failed due to: %s", err)
+				return nil, err_retry
+			}
+			return query.GetRawJSON(), nil
+		}
+		logger.Log.Errorf("Druid Query failed due to: %s", err.Error())
 		return nil, err
 	}
 

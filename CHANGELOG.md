@@ -1,8 +1,10 @@
-* Fix - Changed default log level on gather to turn off debug logs
 ## Current Release 
+### 0.158.0 
+**Release Date:** Mon Jun 25 18:58:20 UTC 2018     
+## Previous Releases 
+* Fix - Changed default log level on gather to turn off debug logs
 ### 0.157.0 
 **Release Date:** Mon Jun 25 12:52:02 UTC 2018     
-## Previous Releases 
 ### 0.156.0 
 **Release Date:** Mon Jun 25 12:45:42 UTC 2018     
 Feature - Developer feature. Develerper's local gather can now access remote druid with real datasets and avoid setting up GCE instances.

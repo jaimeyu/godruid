@@ -1,3 +1,4 @@
+* Fix - Changed default log level on gather to turn off debug logs
 ## Current Release 
 ### 0.157.0 
 **Release Date:** Mon Jun 25 12:52:02 UTC 2018     

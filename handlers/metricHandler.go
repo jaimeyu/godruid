@@ -277,7 +277,7 @@ func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
 
 func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
-		Direction:         queryParams.Get("direction"),
+		Direction:         toStringSplice(queryParams.Get("direction")),
 		Interval:          queryParams.Get("interval"),
 		Metric:            toStringSplice(queryParams.Get("metric")),
 		Tenant:            queryParams.Get("tenant"),

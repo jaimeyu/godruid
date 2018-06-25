@@ -10,7 +10,7 @@
   branch = "master"
   name = "github.com/accedian/godruid"
   packages = ["."]
-  revision = "66559ff2a8ab4c5a976b14db5fea8e8257372a1e"
+  revision = "9e21d6be0420b132c9e594a2cec059350ffd977a"
 
 [[projects]]
   branch = "master"

@@ -432,6 +432,31 @@ type MonitoredObjectGroup struct {
 	MetricMap              map[string]map[string]map[string]string                                                                   `json:"metricMap"`
 }
 
+/*MonitoredObjectMetaDesignDocument - used to get an abstract set of views based on metadata
+Here is a sample document
+`{
+  "_id": "_design/metadataColumns",
+  "_rev": "21-2c06d0a5cf7d42d08ad021b43e42c105",
+  "views": {
+    "regionCount": {
+      "map": "function (doc) {\n  \n if (doc.data.meta[\"region\"]) {  \n    emit(doc.data.meta[\"region\"],1);\n  }\n}",
+      "reduce": "_count"
+    },
+    "regionView": {
+      "map": "function (doc) {\n  if (doc.data.meta[\"region\"]) {\n    emit(doc.data.datatype, doc)\n  }\n}"
+    }
+  },
+  "language": "javascript"
+}`
+*/
+type MonitoredObjectMetaDesignDocument struct {
+	ID       string                       `json:"_id"`
+	REV      string                       `json:"_rev"`
+	Views    map[string]map[string]string `json:"views"`
+	Language string                       `json:"language"`
+}
+type CouchdbDesignDocMetaView map[string]string
+
 // MonitoredObject - defines a Tenant Monitored Object.
 type MonitoredObject struct {
 	ID                    string            `json:"_id"`
@@ -542,35 +567,17 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	return nil
 }
 
-type MonitoredObjectKeys struct {
-	ID       string            `json:"_id"`
-	REV      string            `json:"_rev"`
-	Datatype string            `json:"datatype"`
-	TenantID string            `json:"tenantId"`
-	Keys     map[string]string `json:"keys"`
-}
-
-// GetID - required implementation for jsonapi marshalling
-func (mo *MonitoredObjectKeys) GetID() string {
-	return mo.ID
-}
-
-// SetID - required implementation for jsonapi unmarshalling
-func (mo *MonitoredObjectKeys) SetID(s string) error {
-	mo.ID = s
-	return nil
-}
-
 // Metadata - defines a Tenant Metadata.
 type Metadata struct {
-	ID                      string `json:"_id"`
-	REV                     string `json:"_rev"`
-	Datatype                string `json:"datatype"`
-	TenantID                string `json:"tenantId"`
-	TenantName              string `json:"tenantName"`
-	DefaultThresholdProfile string `json:"defaultThresholdProfile"`
-	CreatedTimestamp        int64  `json:"createdTimestamp"`
-	LastModifiedTimestamp   int64  `json:"lastModifiedTimestamp"`
+	ID                      string            `json:"_id"`
+	REV                     string            `json:"_rev"`
+	Datatype                string            `json:"datatype"`
+	TenantID                string            `json:"tenantId"`
+	TenantName              string            `json:"tenantName"`
+	DefaultThresholdProfile string            `json:"defaultThresholdProfile"`
+	CreatedTimestamp        int64             `json:"createdTimestamp"`
+	LastModifiedTimestamp   int64             `json:"lastModifiedTimestamp"`
+	MonitorObjectMetaKeys   map[string]string `json:"monitoredObjectMetaKeys"`
 }
 
 // GetID - required implementation for jsonapi marshalling

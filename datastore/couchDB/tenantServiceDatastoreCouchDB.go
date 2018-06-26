@@ -751,53 +751,97 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
-// CreateMonitoredObjectKeys - CouchDB implementation of CreateMonitoredObject
-func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
-	logtype := tenmod.TenantMonitoredObjectKeysStr
-	logger.Log.Debugf("Creating %s: %v\n", logtype, models.AsJSONString(monitoredObjectReq))
+// MontitoredObjectKeysUpdate - Updates the Tenant's Metadata's Monitored Object Meta key list
+func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID string, meta map[string]string) error {
 
-	// Use the Tenant's ID for the keys ID
-	monitoredObjectReq.ID = ds.PrependToDataID(monitoredObjectReq.TenantID, string(tenmod.TenantMonitoredObjectKeysType))
-	// ds.GenerateID(monitoredObjectReq, string(tenmod.TenantMonitoredObjectKeysType))
-	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
+	const (
+		keyViewName = "%sView"
+		keyViewFn   = `function (doc) {
+			if (doc.data.meta["%s"]) {
+				emit(doc.data.datatype, doc)
+			}
+		}`
+		keyCountName = "%sCount"
+		keyCountFn   = `function (doc) {
+			if (doc.data.meta["%s"]) {  
+				emit(doc.data.meta["%s"],1);
+			}
+		}`
+		designDocName     = "metadataColumns"
+		reduceFnName      = "reduce"
+		mapFnName         = "map"
+		reduceCountFnName = "_count"
+	)
 
-	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
-	dataContainer := &tenmod.MonitoredObjectKeys{}
-	if err := createDataInCouch(dbName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectKeysType), tenmod.TenantMonitoredObjectKeysStr); err != nil {
-		return nil, err
+	// Get Tenant Meta data
+	tenantMeta, err := tsd.GetTenantMeta(tenantID)
+	logger.Log.Debugf("Got Tenant metadata: %+v", tenantMeta)
+	if err != nil {
+		return err
 	}
-	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
-	return dataContainer, nil
-}
 
-// UpdateMonitoredObjectKeys - CouchDB implementation of UpdateMonitoredObjectKeys
-func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(monitoredObjectReq))
-	monitoredObjectReq.ID = ds.PrependToDataID(monitoredObjectReq.ID, string(tenmod.TenantMonitoredObjectKeysType))
-	tenantID := ds.PrependToDataID(monitoredObjectReq.TenantID, string(admmod.TenantType))
-
-	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
-	dataContainer := &tenmod.MonitoredObjectKeys{}
-	if err := updateDataInCouch(dbName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectKeysType), tenmod.TenantMonitoredObjectKeysStr); err != nil {
-		return nil, err
+	// Get CouchDB Design Documents
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/_design/", tenantID, monitoredObjectDBSuffix))
+	logger.Log.Debugf("db name to access design docs %s", dbName)
+	designDoc := tenmod.MonitoredObjectMetaDesignDocument{}
+	if err = getDataFromCouch(dbName, designDocName, &designDoc, tenmod.TenantMonitoredObjectKeysStr); err != nil {
+		return err
 	}
-	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
-	return dataContainer, nil
-}
+	logger.Log.Debugf("Retrieved %s design doc: %s\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(designDoc))
 
-// GetMonitoredObjectKeys - CouchDB implementation of GetMonitoredObjectKeys
-func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectKeys(tenantID string) (*tenmod.MonitoredObjectKeys, error) {
-	dataID := ds.PrependToDataID(tenantID, string(tenmod.TenantMonitoredObjectKeysType))
-	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
-	logger.Log.Debugf("Fetching %s: tenant %s -> keyID %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, dataID)
-
-	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
-	dataContainer := tenmod.MonitoredObjectKeys{}
-	if err := getDataFromCouch(dbName, dataID, &dataContainer, tenmod.TenantMonitoredObjectKeysStr); err != nil {
-		return nil, err
+	if tenantMeta.MonitorObjectMetaKeys == nil {
+		tenantMeta.MonitorObjectMetaKeys = make(map[string]string)
 	}
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(dataContainer))
-	return &dataContainer, nil
+
+	changeDetected := false
+	// debug dump design doc
+	for key, data := range designDoc.Views {
+		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, data)
+		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
+		logger.Log.Debugf("map val: '%s'", key, data["map"])
+	}
+
+	// Go thru a list of KV pairs and add the keys to the Metadata.
+	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
+	for key, data := range meta {
+		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
+		// Stop being meta, Ahbed
+		tenantMeta.MonitorObjectMetaKeys[key] = key
+
+		// Check if view exist
+		countName := fmt.Sprintf(keyCountName, key)
+		mapName := fmt.Sprintf(keyViewName, key)
+		logger.Log.Debugf("Checking/Adding %s key to couchdb view", countName)
+		if designDoc.Views[countName] == nil {
+			changeDetected = true
+			logger.Log.Debugf("Adding %s key to couchdb view", countName)
+			designDoc.Views[countName] = make(map[string]string)
+			designDoc.Views[countName][mapFnName] = fmt.Sprintf(keyCountFn, key)
+			designDoc.Views[countName][reduceFnName] = reduceCountFnName
+
+			designDoc.Views[mapName] = make(map[string]string)
+			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
+		}
+	}
+
+	if changeDetected {
+		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
+		_, err := tsd.UpdateTenantMeta(tenantMeta)
+		if err != nil {
+			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
+			return err
+		}
+		dbName = createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+		if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
+			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
+			return err
+		}
+		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
+
+	}
+
+	return nil
+
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta

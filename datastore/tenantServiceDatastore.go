@@ -58,10 +58,6 @@ type TenantServiceDatastore interface {
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
 
-	UpdateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error)
-	GetMonitoredObjectKeys(tenantId string) (*tenmod.MonitoredObjectKeys, error)
-	CreateMonitoredObjectKeys(monitoredObjectReq *tenmod.MonitoredObjectKeys) (*tenmod.MonitoredObjectKeys, error)
-
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	DeleteTenantMeta(tenantID string) (*tenmod.Metadata, error)
@@ -77,6 +73,9 @@ type TenantServiceDatastore interface {
 	DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
+
+	// For Monitored Objects Meta fields
+	MonitoredObjectKeysUpdate(tenantID string, meta map[string]string) error
 
 	// For testing
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)

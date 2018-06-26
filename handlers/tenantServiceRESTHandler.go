@@ -280,19 +280,6 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetMonitoredObject,
 		},
 		server.Route{
-			Name:        "PostMonitoredObjectKeys",
-			Method:      "POST",
-			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects-keys",
-			HandlerFunc: result.CreateMonitoredObjectKeys,
-		},
-
-		server.Route{
-			Name:        "GetMonitoredObjectKeys",
-			Method:      "GET",
-			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects-keys",
-			HandlerFunc: result.GetMonitoredObjectKeys,
-		},
-		server.Route{
 			Name:        "GetFilteredMonitoredObject",
 			Method:      "GET",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/",
@@ -1693,13 +1680,29 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
+	result := oldData
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//	result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
+	//	if err != nil {
+	//		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	//		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+	//		return
+	//	}
+
+	err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData.Meta)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
+	logger.Log.Debugf("DEBUG PATCHED GOING TO NOTIFY")
 	NotifyMonitoredObjectUpdated(data.TenantID, oldData)
 	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
@@ -1745,68 +1748,7 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
 }
 
-// CreateMonitoredObjectKeys - fetches a tenant monitored object
-func (tsh *TenantServiceRESTHandler) CreateMonitoredObjectKeys(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	// Get the IDs from the URL
-	tenantID := getDBFieldFromRequest(r, 4)
-
-	logger.Log.Infof("Fetching %s for tenant %s", tenmod.TenantMonitoredObjectKeysStr, tenantID)
-
-	request := tenmod.MonitoredObjectKeys{}
-	requestBytes, err := getRequestBytes(r)
-	err = jsonapi.Unmarshal(requestBytes, &request)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.CreateReportScheduleConfigStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.CreateMonitoredObjectKeys(&request)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
-}
-
-// GetMonitoredObjectKeys - fetches a tenant monitored object
-func (tsh *TenantServiceRESTHandler) GetMonitoredObjectKeys(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	// Get the IDs from the URL
-	tenantID := getDBFieldFromRequest(r, 4)
-
-	logger.Log.Infof("Fetching %s for tenant %s", tenmod.TenantMonitoredObjectKeysStr, tenantID)
-
-	// Issue request to DAO Layer
-	result := &tenmod.MonitoredObjectKeys{}
-	var err error
-
-	result, err = tsh.TenantDB.GetMonitoredObjectKeys(tenantID)
-	if err != nil {
-
-		request := tenmod.MonitoredObjectKeys{
-			ID:       tenantID,
-			Datatype: string(tenmod.TenantMonitoredObjectKeysType),
-			TenantID: tenantID,
-		}
-		result, err = tsh.TenantDB.CreateMonitoredObjectKeys(&request)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-			reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
-			return
-		}
-	}
-
-	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
-}
-
-// GetMonitoredObject - fetches a tenant monitored object
+// GetMonitoredObject - fetches a tenant monitored object. @DEFERRED We're not going to implement this today
 func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 

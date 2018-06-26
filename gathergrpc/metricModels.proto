@@ -74,7 +74,7 @@ message RawMetricsRequest {
   //ISO-8601 Intervals
   string interval = 1;
   string tenant = 2;
-  string direction = 3;
+  repeated string direction = 3;
   repeated string metric = 4;
   string objectType = 5;
   repeated string monitoredObjectId = 6;

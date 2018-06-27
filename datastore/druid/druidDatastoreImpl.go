@@ -147,7 +147,6 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
@@ -214,7 +213,6 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 
 // Retrieves a histogram for specified metrics based on custom defined buckets
 func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
@@ -277,7 +275,6 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
@@ -343,7 +340,6 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 // New version of threshold-crossing
 func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
@@ -402,7 +398,6 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
@@ -469,11 +464,11 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 // GetTopNFor - Executes a TopN on a given metric, based on its min/max/avg.
 func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
 	methodStartTime := time.Now()
+
 	if logger.IsDebugEnabled() {
-		if logger.IsDebugEnabled() {
-			logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
-		}
+		logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
 	}
+
 	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
@@ -527,7 +522,6 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
@@ -794,7 +788,6 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 }
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {
-
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetRawMetrics for request: %v", models.AsJSONString(request))

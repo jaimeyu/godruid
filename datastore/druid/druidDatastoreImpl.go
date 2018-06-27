@@ -476,9 +476,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 	}
 
 	if logger.IsDebugEnabled() {
-		if logger.IsDebugEnabled() {
-			logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
-		}
+		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
 	}
 
 	queryStartTime := time.Now()
@@ -499,9 +497,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 	}
 
 	if logger.IsDebugEnabled() {
-		if logger.IsDebugEnabled() {
-			logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
-		}
+		logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
 	}
 
 	data := []map[string]interface{}{}

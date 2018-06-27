@@ -164,12 +164,15 @@ const (
 	GetSpecificValidTypesStr = ValidTypesStr + metricNameDelimiter + OPGetStr + "_spec"
 	DeleteValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPDeleteStr
 
-	GetTenantIDByAliasStr      = IDStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
-	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "_by_alais" + metricNameDelimiter + OPGetStr
+	GetTenantIDByAliasStr      = IDStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
+	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
 	AddAdminViewsStr           = AdminViewsStr + metricNameDelimiter + OPAddStr
 
 	BulkInsertMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
 	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+
+	SLATimeBucketQueryStr = SLAReportStr + metricNameDelimiter + "time_bucket" + metricNameDelimiter + OPGetStr
+	SLAViolationsQueryStr = SLAReportStr + metricNameDelimiter + "violations" + metricNameDelimiter + OPGetStr
 )
 
 type MetricCounterType string
@@ -187,6 +190,13 @@ const (
 	PouchChangesAPICompleted MetricCounterType = "PouchChangesAPICompleted"
 	MetricAPIRecieved        MetricCounterType = "MetricAPIRecieved"
 	MetricAPICompleted       MetricCounterType = "MetricAPICompleted"
+)
+
+type DruidSummaryType string
+
+const (
+	DruidQueryDurationType     DruidSummaryType = "DruidQueryDuration"
+	DruidAPIMethodDurationType DruidSummaryType = "DruidAPIMethodDuration"
 )
 
 var (
@@ -228,17 +238,32 @@ var (
 
 	// RecievedMetricServiceAPICalls - the number of API calls metric service has recieved since startup
 	RecievedMetricServiceAPICalls prometheus.Counter
+
+	// DruidQueryDuration - Time it takes to complete a query to druid.
+	DruidQueryDuration prometheus.SummaryVec
+
+	// DruidAPIMethodDuration - Time it takes to complete a Druid API metyhod (includes query time, encoding time, etc.)
+	DruidAPIMethodDuration prometheus.SummaryVec
 )
 
 // InitMetrics - registers all metrics to be collected for Gather.
 func InitMetrics() {
 	APICallDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Name: "gather_api_call_duration",
-		Help: "Time taken to execute an API call",
-		Objectives: map[float64]float64{
-			0.5:  0.1,
-			0.9:  0.5,
-			0.99: 1.0},
+		Name:       "gather_api_call_duration",
+		Help:       "Time taken to execute an API call",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	}, []string{"code", "name"})
+
+	DruidQueryDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name:       "gather_druid_query_call_duration",
+		Help:       "Time taken to execute a query to Druid",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	}, []string{"code", "name"})
+
+	DruidAPIMethodDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name:       "gather_druid_method_call_duration",
+		Help:       "Time taken to execute a Driud calling method. Includes query time, encoding time, etc.",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	}, []string{"code", "name"})
 
 	RecievedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
@@ -302,6 +327,8 @@ func InitMetrics() {
 	prometheus.MustRegister(CompletedPouchChangesAPICalls)
 	prometheus.MustRegister(RecievedMetricServiceAPICalls)
 	prometheus.MustRegister(CompletedMetricServiceAPICalls)
+	prometheus.MustRegister(DruidAPIMethodDuration)
+	prometheus.MustRegister(DruidQueryDuration)
 }
 
 // TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.
@@ -310,6 +337,22 @@ func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 
 	logger.Log.Infof("%v: %f", labels, duration)
 	APICallDuration.WithLabelValues(labels...).Observe(duration)
+}
+
+// TrackDruidTimeMetricInSeconds - helper function to track metrics related to Druid call duration.
+func TrackDruidTimeMetricInSeconds(summaryType DruidSummaryType, startTime time.Time, labels ...string) {
+	duration := time.Since(startTime).Seconds()
+
+	logger.Log.Infof("%v: %f", labels, duration)
+	switch summaryType {
+	case DruidQueryDurationType:
+		DruidQueryDuration.WithLabelValues(labels...).Observe(duration)
+	case DruidAPIMethodDurationType:
+		DruidAPIMethodDuration.WithLabelValues(labels...).Observe(duration)
+	default:
+		logger.Log.Debugf("Unable to update Druid Time Metric %v", summaryType)
+	}
+
 }
 
 // IncrementCounter - increments the value of a counter.

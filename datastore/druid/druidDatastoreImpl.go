@@ -144,7 +144,9 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -159,7 +161,9 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -173,7 +177,9 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
+	}
 
 	resp := &pb.HistogramResponse{
 		Data: histogram,
@@ -197,7 +203,9 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 // Retrieves a histogram for specified metrics based on custom defined buckets
 func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	timeout := request.Timeout
@@ -223,7 +231,9 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 	}
 
 	// Execute the druid query
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -231,7 +241,9 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 	}
 
 	// Reformat the druid response from a flat structure to a json api structure
-	logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+	}
 	rr, err := convertHistogramCustomResponse(request.TenantID, request.DomainIds, request.Interval, string(response))
 
 	if err != nil {
@@ -246,7 +258,9 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -260,7 +274,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -272,7 +288,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(thresholdCrossing))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(thresholdCrossing))
+	}
 
 	formattedJSON, err := reformatThresholdCrossingResponse(thresholdCrossing)
 	if err != nil {
@@ -297,7 +315,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 // New version of threshold-crossing
 func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	timeout := request.Timeout
@@ -310,7 +330,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
+	}
 	druidResponse, err := dc.executeQuery(query)
 
 	response := make([]BaseDruidResponse, 0)
@@ -319,7 +341,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(response))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(response))
+	}
 
 	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
 	if err != nil {
@@ -330,7 +354,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		"results": reformatted,
 	}
 
-	logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
+	}
 
 	return rr, nil
 }
@@ -340,7 +366,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -354,7 +382,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -366,7 +396,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+	}
 
 	formattedJSON, err := reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing)
 	if err != nil {
@@ -392,7 +424,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric) (map[string]interface{}, error) {
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Calling GetTopNFor for request: %v", models.AsJSONString(request))
+		}
 	}
 	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request)
 	if err != nil {
@@ -400,7 +434,9 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+		}
 	}
 	response, err := dc.executeQuery(query)
 	if err != nil {
@@ -415,7 +451,9 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Response from druid for query %s ->  %+v", db.TopNForMetricString, models.AsJSONString(responseMap))
+		}
 	}
 
 	data := []map[string]interface{}{}
@@ -436,7 +474,9 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, request.Domain, request.Metric, request.Granularity, request.Interval, request.ObjectType, request.Direction, thresholdProfile.Data, request.Vendor, request.Timeout, request.NumResults)
@@ -445,7 +485,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -457,7 +499,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.TopNThresholdCrossingByMonitoredObjectStr, models.AsJSONString(thresholdCrossing))
+	}
 
 	// peyo TODO: need to figure out where to get this ID and Type from.
 	uuid := uuid.NewV4()
@@ -475,7 +519,9 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 }
 
 func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest) (map[string]interface{}, error) {
-	logger.Log.Debugf("Calling GetAggregatedMetrics for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetAggregatedMetrics for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	query, pp, err := AggMetricsQuery(request.TenantID, table, request.Interval, request.DomainIDs, request.Aggregation, request.Metrics, request.Timeout, request.Granularity)
@@ -483,7 +529,9 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.AggMetricsStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.AggMetricsStr, models.AsJSONString(query))
+	}
 	druidResponse, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -495,7 +543,9 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(response))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(response))
+	}
 
 	response = (*pp).Apply(response)
 
@@ -503,7 +553,9 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 		"results": response,
 	}
 
-	logger.Log.Debugf("Processed response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(rr))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Processed response from druid for %s: %v", db.AggMetricsStr, models.AsJSONString(rr))
+	}
 
 	return rr, nil
 }
@@ -513,7 +565,9 @@ type Debug struct {
 }
 
 func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error) {
-	logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
+	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 	var query godruid.Query
 
@@ -528,7 +582,9 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -538,14 +594,18 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
+	}
 
 	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+	}
 	response, err = dc.executeQuery(query)
 	if err != nil {
 		return nil, err
@@ -572,7 +632,9 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 							return nil, err
 						}
 
-						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						if logger.IsDebugEnabled() {
+							logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						}
 						response, err = dc.executeQuery(query)
 						if err != nil {
 							return nil, err
@@ -588,7 +650,9 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 							return nil, err
 						}
 
-						logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						if logger.IsDebugEnabled() {
+							logger.Log.Debugf("Querying Druid for %s with query: %v", db.SLAReportStr, models.AsJSONString(query))
+						}
 						response, err = dc.executeQuery(query)
 						if err != nil {
 							return nil, err
@@ -635,7 +699,9 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 
 func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error) {
 
-	logger.Log.Debugf("Calling GetRawMetrics for request: %v", models.AsJSONString(request))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetRawMetrics for request: %v", models.AsJSONString(request))
+	}
 
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
@@ -656,7 +722,9 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		return nil, err
 	}
 
-	logger.Log.Debugf("Querying Druid for %s with query: '' %s ''", db.RawMetricStr, models.AsJSONString(query))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: '' %s ''", db.RawMetricStr, models.AsJSONString(query))
+	}
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -670,7 +738,9 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		return nil, err
 	}
 
-	logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, models.AsJSONString(resp))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, models.AsJSONString(resp))
+	}
 
 	formattedJSON := map[string]interface{}{}
 	if len(resp) != 0 {
@@ -757,7 +827,9 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 
 		if lookup, ok := lookups[lookupName]; !ok {
 			url := lookupEndpoint + "/__default/" + lookupName
-			logger.Log.Debugf("Deleting lookup %s, url is %s", lookupName, url)
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("Deleting lookup %s, url is %s", lookupName, url)
+			}
 			if _, err := sendRequest("DELETE", dc.dClient.HttpClient, url, dc.AuthToken, nil); err != nil {
 				logger.Log.Errorf("Failed to delete lookup %s", lookupName, err.Error())
 			}
@@ -787,7 +859,10 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 		return err
 	}
 
-	//logger.Log.Debugf("Sending lookup request %s", string(b))
+	//if logger.IsDebugEnabled(){
+	// 		logger.Log.Debugf("Sending lookup request %s", string(b))
+	//	}
+
 	_, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
 	if err != nil {
 		logger.Log.Errorf("Failed to update lookup", err.Error())

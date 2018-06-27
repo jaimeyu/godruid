@@ -147,15 +147,11 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 
 // peyo TODO: implement this query
 func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
-<<<<<<< HEAD
 
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
 	}
-=======
-	methodStartTime := time.Now()
-	logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
->>>>>>> master
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -171,14 +167,10 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 		return nil, err
 	}
 
-<<<<<<< HEAD
+	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
 	}
-=======
-	queryStartTime := time.Now()
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
->>>>>>> master
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -222,15 +214,11 @@ func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[
 
 // Retrieves a histogram for specified metrics based on custom defined buckets
 func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
-<<<<<<< HEAD
 
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
 	}
-=======
-	methodStartTime := time.Now()
-	logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
->>>>>>> master
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	timeout := request.Timeout
@@ -257,14 +245,10 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 	}
 
 	// Execute the druid query
-<<<<<<< HEAD
+	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
 	}
-=======
-	queryStartTime := time.Now()
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
->>>>>>> master
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -293,15 +277,11 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-<<<<<<< HEAD
 
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
 	}
-=======
-	methodStartTime := time.Now()
-	logger.Log.Debugf("Calling GetThresholdCrossing for request: %v", models.AsJSONString(request))
->>>>>>> master
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -316,14 +296,10 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 		return nil, err
 	}
 
-<<<<<<< HEAD
+	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, models.AsJSONString(query))
 	}
-=======
-	queryStartTime := time.Now()
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingStr, models.AsJSONString(query))
->>>>>>> master
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
@@ -367,15 +343,11 @@ func (dc *DruidDatastoreClient) GetThresholdCrossing(request *pb.ThresholdCrossi
 
 // New version of threshold-crossing
 func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-<<<<<<< HEAD
 
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
 	}
-=======
-	methodStartTime := time.Now()
-	logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
->>>>>>> master
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	timeout := request.Timeout
@@ -389,15 +361,10 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
 		return nil, err
 	}
-<<<<<<< HEAD
+	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
 	}
-=======
-
-	queryStartTime := time.Now()
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.QueryThresholdCrossingStr, models.AsJSONString(query))
->>>>>>> master
 	druidResponse, err := dc.executeQuery(query)
 
 	response := make([]BaseDruidResponse, 0)
@@ -423,14 +390,10 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		"results": reformatted,
 	}
 
-<<<<<<< HEAD
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
 	}
-=======
-	logger.Log.Debugf("Processed response from druid for %s: %v", db.QueryThresholdCrossingStr, models.AsJSONString(rr))
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetThrCrossStr)
->>>>>>> master
 
 	return rr, nil
 }
@@ -439,15 +402,11 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 // result in a JSON API wrapper.
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *pb.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
-<<<<<<< HEAD
 
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
 	}
-=======
-	methodStartTime := time.Now()
-	logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
->>>>>>> master
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
 	// peyo TODO we should have a better way to handle default query params
@@ -462,14 +421,10 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *p
 		return nil, err
 	}
 
-<<<<<<< HEAD
+	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
 	}
-=======
-	queryStartTime := time.Now()
-	logger.Log.Debugf("Querying Druid for %s with query: %v", db.ThresholdCrossingByMonitoredObjectStr, models.AsJSONString(query))
->>>>>>> master
 	response, err := dc.executeQuery(query)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetThrCrossByMonObjStr)
@@ -573,7 +528,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric)
 // peyo TODO: probably don't need to wrap JSON API here...should maybe do it elsewhere
 func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error) {
 
-		methodStartTime := time.Now()
+	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
 	}

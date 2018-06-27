@@ -751,26 +751,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
-// MontitoredObjectKeysUpdate - Updates the Tenant's Metadata's Monitored Object Meta key list
+// MonitoredObjectKeysUpdate - Updates the Tenant's Metadata's Monitored Object Meta key list
 func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID string, meta map[string]string) error {
 
 	const (
-		keyViewName = "%sView"
-		keyViewFn   = `function (doc) {
-			if (doc.data.meta["%s"]) {
-				emit(doc.data.datatype, doc)
-			}
-		}`
-		keyCountName = "%sCount"
-		keyCountFn   = `function (doc) {
-			if (doc.data.meta["%s"]) {  
-				emit(doc.data.meta["%s"],1);
-			}
-		}`
-		designDocName     = "metadataColumns"
-		reduceFnName      = "reduce"
-		mapFnName         = "map"
-		reduceCountFnName = "_count"
+		designDocName = "metadataColumns"
 	)
 
 	// Get Tenant Meta data
@@ -789,18 +774,55 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	}
 	logger.Log.Debugf("Retrieved %s design doc: %s\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(designDoc))
 
+	// Create a map if it doesn't exist
 	if tenantMeta.MonitorObjectMetaKeys == nil {
 		tenantMeta.MonitorObjectMetaKeys = make(map[string]string)
 	}
 
-	changeDetected := false
-	// debug dump design doc
-	for key, data := range designDoc.Views {
-		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, data)
-		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
-		logger.Log.Debugf("map val: '%s'", key, data["map"])
+	changeDetected, err := updateMetaDesignDocAndTenantMetadata(meta, tenantMeta, designDoc)
+	if changeDetected {
+		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
+		_, err := tsd.UpdateTenantMeta(tenantMeta)
+		if err != nil {
+			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
+			return err
+		}
+
+		// There is a bug here whe update design doc adds _design to the dbname.
+		dbName = createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+		if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
+			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
+			return err
+		}
+		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
+
 	}
 
+	return nil
+
+}
+
+func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
+
+	const (
+		keyViewName = "%sView"
+		keyViewFn   = `function (doc) {
+			if (doc.data.meta["%s"]) {
+				emit(doc.data.datatype, doc)
+			}
+		}`
+		keyCountName = "%sCount"
+		keyCountFn   = `function (doc) {
+			if (doc.data.meta["%s"]) {
+				emit(doc.data.meta["%s"],1);
+			}
+		}`
+		reduceFnName      = "reduce"
+		mapFnName         = "map"
+		reduceCountFnName = "_count"
+	)
+
+	changeDetected := false
 	// Go thru a list of KV pairs and add the keys to the Metadata.
 	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
 	for key, data := range meta {
@@ -823,25 +845,14 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
 		}
 	}
-
-	if changeDetected {
-		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
-		_, err := tsd.UpdateTenantMeta(tenantMeta)
-		if err != nil {
-			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
-			return err
-		}
-		dbName = createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-		if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
-			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
-			return err
-		}
-		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
-
+	// debug dump design doc
+	for key, data := range designDoc.Views {
+		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, data)
+		logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
+		logger.Log.Debugf("map val: '%s'", key, data["map"])
 	}
 
-	return nil
-
+	return changeDetected, nil
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta

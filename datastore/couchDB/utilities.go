@@ -378,7 +378,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	return nil
 }
 
-// updateData - encapsulates logic required for basic data updates for objects that follow the basic data format.
+// updateDesignDoc - encapsulates logic required for basic data updates for objects that follow the basic data format.
 func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
 	if err != nil {

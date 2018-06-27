@@ -201,7 +201,12 @@ func NotifyDomainDeleted(tenantID string, obj ...*tenmod.Domain) {
 }
 
 func NotifyEvent(event *ChangeEvent) {
-	changeNotifH.provisioningEvents <- event
+	// Found a potential bug if change notification is disabled
+	// and someone tries to send an event, the goroutine will lock and never exit.
+	// This is problem for dev loads rather than production.
+	if changeNotifH.provisioningEvents != nil {
+		changeNotifH.provisioningEvents <- event
+	}
 }
 
 func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {

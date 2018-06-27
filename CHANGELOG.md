@@ -1,3 +1,4 @@
+* Feature - adding metric instrumentation for Druid queries to track individual time of query from the entire API time.
 ## Current Release 
 ### 0.158.0 
 **Release Date:** Mon Jun 25 18:58:20 UTC 2018     

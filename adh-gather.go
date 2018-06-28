@@ -13,23 +13,26 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/go-openapi/loads"
+	flags "github.com/jessevdk/go-flags"
 	"github.com/spf13/viper"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
 	adhh "github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
-	"github.com/accedian/adh-gather/monitoring"
+	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/profile"
+	"github.com/accedian/adh-gather/restapi"
+	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/websocket"
 	gh "github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	mux "github.com/gorilla/mux"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	admmod "github.com/accedian/adh-gather/models/admin"
-	mon "github.com/accedian/adh-gather/monitoring"
 	slasched "github.com/accedian/adh-gather/scheduler"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -354,15 +357,6 @@ func areValidTypesEquivalent(obj1 *admmod.ValidTypes, obj2 *admmod.ValidTypes) b
 	return true
 }
 
-func doesSliceContainString(container []string, value string) bool {
-	for _, s := range container {
-		if s == value {
-			return true
-		}
-	}
-	return false
-}
-
 func provisionCouchData(gatherServer *GatherServer, adminDB string) {
 	ensureBaseCouchDBsExist(gatherServer)
 	ensureAdminDBExists(gatherServer, adminDB)
@@ -562,7 +556,7 @@ func areStringSlicesEqual(slice1 []string, slice2 []string) bool {
 	}
 
 	for _, value := range slice1 {
-		if !doesSliceContainString(slice2, value) {
+		if !gather.DoesSliceContainString(slice2, value) {
 			return false
 		}
 	}
@@ -598,7 +592,7 @@ func startMonitoring(gatherServer *GatherServer, cfg config.Provider) {
 	restBindIP := cfg.GetString(gather.CK_server_rest_ip.String())
 	monPort := cfg.GetInt(gather.CK_server_monitoring_port.String())
 
-	monitoring.InitMetrics()
+	mon.InitMetrics()
 	gatherServer.promServerMux = http.NewServeMux()
 
 	logger.Log.Infof("Starting Prometheus Server")
@@ -682,6 +676,50 @@ func modifySwagger(cfg config.Provider) {
 	}
 }
 
+func startRESTHandler(cfg config.Provider) {
+	swaggerSpec, err := loads.Spec(swaggerFilePath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	api := operations.NewGatherAPI(swaggerSpec)
+	server := restapi.NewServer(api)
+	defer server.Shutdown()
+
+	logger.Log.Info("Configuring REST Handler")
+	apiHost := cfg.GetString(gather.CK_server_rest_ip.String())
+	apiPort := cfg.GetInt(gather.CK_server_rest_port.String())
+
+	server.Host = apiHost
+	server.Port = apiPort
+
+	if enableTLS {
+		if _, err := os.Stat(tlsCertFile); os.IsNotExist(err) {
+			// No TLS cert file
+			logger.Log.Fatalf("Failed to start REST Handler: TLS cert %s does not exist", tlsCertFile)
+		}
+		if _, err := os.Stat(tlsKeyFile); os.IsNotExist(err) {
+			// No TLS key file
+			logger.Log.Fatalf("Failed to start REST Handler: TLS key %s does not exist", tlsKeyFile)
+		}
+
+		server.TLSCertificate = flags.Filename(tlsCertFile)
+		server.TLSCertificateKey = flags.Filename(tlsKeyFile)
+		server.TLSPort = apiPort
+		server.EnabledListeners = []string{"https"}
+	} else {
+		server.EnabledListeners = []string{"http"}
+	}
+
+	server.ConfigureAPI()
+
+	logger.Log.Info("Starting REST Handler")
+	if err := server.Serve(); err != nil {
+		log.Fatalln(err)
+	}
+
+}
+
 func main() {
 	pflag.Parse()
 	v := viper.New()
@@ -740,7 +778,8 @@ func main() {
 
 	slasched.Initialize(gatherServer.msh, nil, nil, 5)
 
-	go restHandlerStart(gatherServer, cfg)
-	gRPCHandlerStart(gatherServer, cfg)
+	// restHandlerStart(gatherServer, cfg)
+	go gRPCHandlerStart(gatherServer, cfg)
+	startRESTHandler(cfg)
 
 }

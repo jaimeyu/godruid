@@ -183,7 +183,7 @@ paths:
           description: "Unexpected error processing request"
       tags:
         - AdminProvisioningService
-  '/v1/tenants/{value}':
+  '/v1/tenants/{tenantId}':
     get:
       summary: Retrieve a Tenant by id.
       operationId: GetTenant
@@ -194,10 +194,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -213,10 +219,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -236,10 +248,16 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -781,7 +799,7 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
       tags:
         - TenantProvisioningService
-  '/v1/tenants/{tenantId}/connector-instances/{connectorId}':
+  '/v1/tenants/{tenantId}/connector-instances/{connectorInstanceId}':
     get:
       summary: Retrieve a Tenant ConnectorInstance by Id.
       operationId: GetTenantConnectorInstance
@@ -2255,7 +2273,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/TopNMetricsAPIRequestObject'
-    tags:
+      tags:
         - MetricsService
  
   /v1/generate-sla-report:
@@ -2785,7 +2803,7 @@ definitions:
         type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -3139,7 +3157,7 @@ definitions:
       - aggregator
       - metrics
     properties:
-      tenant:
+      tenantId:
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
@@ -3170,7 +3188,7 @@ definitions:
       aggregator:
         type: string
         description: The type of aggregation (avg/min/max)
-        xample: "avg"
+        example: "avg"
       numResults:
         type: integer
         description: Number of results to return
@@ -3248,7 +3266,6 @@ definitions:
     required:
       - tenantId
       - interval
-      - metrics
     properties:
       tenantId:
         type: string

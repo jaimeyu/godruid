@@ -38,7 +38,7 @@ func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricS
 	ddb := druid.NewDruidDatasctoreClient()
 	result.druidDB = ddb
 
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
 	}

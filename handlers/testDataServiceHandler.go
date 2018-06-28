@@ -122,7 +122,7 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 	// }
 	// result.adminDB = admindb
 
-	tenantdb, err := getTenantServiceDatastore()
+	tenantdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TestDataServiceHandler: %s", err.Error())
 	}

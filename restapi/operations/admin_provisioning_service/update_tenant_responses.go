@@ -65,6 +65,11 @@ const UpdateTenantBadRequestCode int = 400
 swagger:response updateTenantBadRequest
 */
 type UpdateTenantBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantBadRequest creates UpdateTenantBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantBadRequest() *UpdateTenantBadRequest {
 	return &UpdateTenantBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant bad request response
+func (o *UpdateTenantBadRequest) WithPayload(payload string) *UpdateTenantBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant bad request response
+func (o *UpdateTenantBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantForbiddenCode is the HTTP code returned for type UpdateTenantForbidden
+const UpdateTenantForbiddenCode int = 403
+
+/*UpdateTenantForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantForbidden
+*/
+type UpdateTenantForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantForbidden creates UpdateTenantForbidden with default headers values
+func NewUpdateTenantForbidden() *UpdateTenantForbidden {
+
+	return &UpdateTenantForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant forbidden response
+func (o *UpdateTenantForbidden) WithPayload(payload string) *UpdateTenantForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant forbidden response
+func (o *UpdateTenantForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantInternalServerErrorCode is the HTTP code returned for type UpdateTenantInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantInternalServerErrorCode int = 500
 swagger:response updateTenantInternalServerError
 */
 type UpdateTenantInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantInternalServerError creates UpdateTenantInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantInternalServerError() *UpdateTenantInternalServerError {
 	return &UpdateTenantInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant internal server error response
+func (o *UpdateTenantInternalServerError) WithPayload(payload string) *UpdateTenantInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant internal server error response
+func (o *UpdateTenantInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

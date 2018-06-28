@@ -132,10 +132,20 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '409':
           description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -158,8 +168,16 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -179,8 +197,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   '/v1/tenants/{tenantId}':
@@ -248,6 +272,8 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:

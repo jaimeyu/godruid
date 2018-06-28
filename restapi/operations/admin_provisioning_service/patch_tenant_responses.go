@@ -65,6 +65,11 @@ const PatchTenantBadRequestCode int = 400
 swagger:response patchTenantBadRequest
 */
 type PatchTenantBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantBadRequest creates PatchTenantBadRequest with default headers values
@@ -73,12 +78,26 @@ func NewPatchTenantBadRequest() *PatchTenantBadRequest {
 	return &PatchTenantBadRequest{}
 }
 
+// WithPayload adds the payload to the patch tenant bad request response
+func (o *PatchTenantBadRequest) WithPayload(payload string) *PatchTenantBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant bad request response
+func (o *PatchTenantBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // PatchTenantForbiddenCode is the HTTP code returned for type PatchTenantForbidden

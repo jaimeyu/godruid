@@ -65,6 +65,11 @@ const CreateTenantBadRequestCode int = 400
 swagger:response createTenantBadRequest
 */
 type CreateTenantBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantBadRequest creates CreateTenantBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateTenantBadRequest() *CreateTenantBadRequest {
 	return &CreateTenantBadRequest{}
 }
 
+// WithPayload adds the payload to the create tenant bad request response
+func (o *CreateTenantBadRequest) WithPayload(payload string) *CreateTenantBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant bad request response
+func (o *CreateTenantBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateTenantForbiddenCode is the HTTP code returned for type CreateTenantForbidden
+const CreateTenantForbiddenCode int = 403
+
+/*CreateTenantForbidden Requestor does not have authorization to perform this action
+
+swagger:response createTenantForbidden
+*/
+type CreateTenantForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateTenantForbidden creates CreateTenantForbidden with default headers values
+func NewCreateTenantForbidden() *CreateTenantForbidden {
+
+	return &CreateTenantForbidden{}
+}
+
+// WithPayload adds the payload to the create tenant forbidden response
+func (o *CreateTenantForbidden) WithPayload(payload string) *CreateTenantForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant forbidden response
+func (o *CreateTenantForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateTenantForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateTenantConflictCode is the HTTP code returned for type CreateTenantConflict
@@ -89,6 +151,11 @@ const CreateTenantConflictCode int = 409
 swagger:response createTenantConflict
 */
 type CreateTenantConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantConflict creates CreateTenantConflict with default headers values
@@ -97,12 +164,26 @@ func NewCreateTenantConflict() *CreateTenantConflict {
 	return &CreateTenantConflict{}
 }
 
+// WithPayload adds the payload to the create tenant conflict response
+func (o *CreateTenantConflict) WithPayload(payload string) *CreateTenantConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant conflict response
+func (o *CreateTenantConflict) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(409)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateTenantInternalServerErrorCode is the HTTP code returned for type CreateTenantInternalServerError
@@ -113,6 +194,11 @@ const CreateTenantInternalServerErrorCode int = 500
 swagger:response createTenantInternalServerError
 */
 type CreateTenantInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantInternalServerError creates CreateTenantInternalServerError with default headers values
@@ -121,10 +207,24 @@ func NewCreateTenantInternalServerError() *CreateTenantInternalServerError {
 	return &CreateTenantInternalServerError{}
 }
 
+// WithPayload adds the payload to the create tenant internal server error response
+func (o *CreateTenantInternalServerError) WithPayload(payload string) *CreateTenantInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant internal server error response
+func (o *CreateTenantInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -57,6 +57,49 @@ func (o *GetAllTenantsOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
+// GetAllTenantsForbiddenCode is the HTTP code returned for type GetAllTenantsForbidden
+const GetAllTenantsForbiddenCode int = 403
+
+/*GetAllTenantsForbidden Requestor does not have authorization to perform this action
+
+swagger:response getAllTenantsForbidden
+*/
+type GetAllTenantsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetAllTenantsForbidden creates GetAllTenantsForbidden with default headers values
+func NewGetAllTenantsForbidden() *GetAllTenantsForbidden {
+
+	return &GetAllTenantsForbidden{}
+}
+
+// WithPayload adds the payload to the get all tenants forbidden response
+func (o *GetAllTenantsForbidden) WithPayload(payload string) *GetAllTenantsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenants forbidden response
+func (o *GetAllTenantsForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAllTenantsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetAllTenantsInternalServerErrorCode is the HTTP code returned for type GetAllTenantsInternalServerError
 const GetAllTenantsInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetAllTenantsInternalServerErrorCode int = 500
 swagger:response getAllTenantsInternalServerError
 */
 type GetAllTenantsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetAllTenantsInternalServerError creates GetAllTenantsInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetAllTenantsInternalServerError() *GetAllTenantsInternalServerError {
 	return &GetAllTenantsInternalServerError{}
 }
 
+// WithPayload adds the payload to the get all tenants internal server error response
+func (o *GetAllTenantsInternalServerError) WithPayload(payload string) *GetAllTenantsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenants internal server error response
+func (o *GetAllTenantsInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetAllTenantsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

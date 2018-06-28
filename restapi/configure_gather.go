@@ -49,10 +49,10 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Admin Service DAO: %s", err.Error())
 	}
 
-	// tenantDB, err := handlers.GetTenantServiceDatastore()
-	// if err != nil {
-	// 	logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
-	// }
+	tenantDB, err := handlers.GetTenantServiceDatastore()
+	if err != nil {
+		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
+	}
 
 	api.TenantProvisioningServiceBulkInsertMonitoredObjectHandler = tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.BulkInsertMonitoredObject has not yet been implemented")
@@ -72,9 +72,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceCreateReportScheduleConfigHandler = tenant_provisioning_service.CreateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.CreateReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateReportScheduleConfig has not yet been implemented")
 	})
-	api.AdminProvisioningServiceCreateTenantHandler = admin_provisioning_service.CreateTenantHandlerFunc(func(params admin_provisioning_service.CreateTenantParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.CreateTenant has not yet been implemented")
-	})
+	api.AdminProvisioningServiceCreateTenantHandler = admin_provisioning_service.CreateTenantHandlerFunc(handlers.HandleCreateTenant(handlers.SkylightAdminRoleOnly, adminDB, tenantDB))
 	api.TenantProvisioningServiceCreateTenantConnectorConfigHandler = tenant_provisioning_service.CreateTenantConnectorConfigHandlerFunc(func(params tenant_provisioning_service.CreateTenantConnectorConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantConnectorConfig has not yet been implemented")
 	})
@@ -108,9 +106,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteReportScheduleConfigHandler = tenant_provisioning_service.DeleteReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.DeleteReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteReportScheduleConfig has not yet been implemented")
 	})
-	api.AdminProvisioningServiceDeleteTenantHandler = admin_provisioning_service.DeleteTenantHandlerFunc(func(params admin_provisioning_service.DeleteTenantParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.DeleteTenant has not yet been implemented")
-	})
+	api.AdminProvisioningServiceDeleteTenantHandler = admin_provisioning_service.DeleteTenantHandlerFunc(handlers.HandleDeleteTenant(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceDeleteTenantConnectorConfigHandler = tenant_provisioning_service.DeleteTenantConnectorConfigHandlerFunc(func(params tenant_provisioning_service.DeleteTenantConnectorConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantConnectorConfig has not yet been implemented")
 	})
@@ -174,9 +170,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceGetAllTenantUsersHandler = tenant_provisioning_service.GetAllTenantUsersHandlerFunc(func(params tenant_provisioning_service.GetAllTenantUsersParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllTenantUsers has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGetAllTenantsHandler = admin_provisioning_service.GetAllTenantsHandlerFunc(func(params admin_provisioning_service.GetAllTenantsParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetAllTenants has not yet been implemented")
-	})
+	api.AdminProvisioningServiceGetAllTenantsHandler = admin_provisioning_service.GetAllTenantsHandlerFunc(handlers.HandleGetAllTenants(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler = tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetDomainToMonitoredObjectMap has not yet been implemented")
 	})
@@ -245,9 +239,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServicePatchTenantMetadataHandler = tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantMetadata has not yet been implemented")
 	})
-	api.AdminProvisioningServicePatchTenantHandler = admin_provisioning_service.PatchTenantHandlerFunc(func(params admin_provisioning_service.PatchTenantParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.PatchTenant has not yet been implemented")
-	})
+	api.AdminProvisioningServicePatchTenantHandler = admin_provisioning_service.PatchTenantHandlerFunc(handlers.HandlePatchTenant(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServicePatchTenantDomainHandler = tenant_provisioning_service.PatchTenantDomainHandlerFunc(func(params tenant_provisioning_service.PatchTenantDomainParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantDomain has not yet been implemented")
 	})

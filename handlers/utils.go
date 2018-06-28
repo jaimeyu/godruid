@@ -500,6 +500,15 @@ func GetAuthorizationToggle() bool {
 	return authAAA
 }
 
+// GetChangeNotificationsToggle - Check if we need to send notifications for certain model changes
+func GetChangeNotificationsToggle() bool {
+	cfg := gather.GetConfig()
+	chgNtf := cfg.GetBool("changeNotifications")
+	logger.Log.Debugf("Change Notifications are enabled? %t", chgNtf)
+
+	return chgNtf
+}
+
 // RoleAccessControl - Checks if the user-role from AAA is allowed to access this endpoint
 func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 	// if auth is disabled, let the calls go through

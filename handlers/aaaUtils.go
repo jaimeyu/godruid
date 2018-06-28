@@ -7,15 +7,18 @@ import (
 )
 
 var (
-	authEnabled = true
+	authEnabled               = true
+	changeNotificationEnabled = true
 
 	SkylightAdminRoleOnly       = []string{userRoleSkylight}
 	SkylightAndTenantAdminRoles = []string{userRoleSkylight, userRoleTenantAdmin}
 	AllRoles                    = []string{userRoleSkylight, userRoleTenantAdmin, userRoleTenantUser}
 )
 
+// TODO: Make this better as I do not like how it is just free-floating vars on the package
 func InitializeAuthHelper() {
 	authEnabled = GetAuthorizationToggle()
+	changeNotificationEnabled = GetChangeNotificationsToggle()
 }
 
 func isRequestAuthorized(request *http.Request, allowedRoles []string) bool {

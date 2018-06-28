@@ -195,6 +195,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetTenantDomainHandler: tenant_provisioning_service.GetTenantDomainHandlerFunc(func(params tenant_provisioning_service.GetTenantDomainParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetTenantDomain has not yet been implemented")
 		}),
+		AdminProvisioningServiceGetTenantIDByAliasHandler: admin_provisioning_service.GetTenantIDByAliasHandlerFunc(func(params admin_provisioning_service.GetTenantIDByAliasParams) middleware.Responder {
+			return middleware.NotImplemented("operation AdminProvisioningServiceGetTenantIDByAlias has not yet been implemented")
+		}),
 		TenantProvisioningServiceGetTenantIngestionProfileHandler: tenant_provisioning_service.GetTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetTenantIngestionProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetTenantIngestionProfile has not yet been implemented")
 		}),
@@ -227,9 +230,6 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		AdminProvisioningServiceGetValidTypesHandler: admin_provisioning_service.GetValidTypesHandlerFunc(func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetValidTypes has not yet been implemented")
-		}),
-		AdminProvisioningServiceGettenantIDByAliasHandler: admin_provisioning_service.GettenantIDByAliasHandlerFunc(func(params admin_provisioning_service.GettenantIDByAliasParams) middleware.Responder {
-			return middleware.NotImplemented("operation AdminProvisioningServiceGettenantIDByAlias has not yet been implemented")
 		}),
 		TenantProvisioningServicePatchTenantMetadataHandler: tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServicePatchTenantMetadata has not yet been implemented")
@@ -322,10 +322,10 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/json" mime type
+	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
+	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -432,6 +432,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceGetTenantConnectorInstanceHandler tenant_provisioning_service.GetTenantConnectorInstanceHandler
 	// TenantProvisioningServiceGetTenantDomainHandler sets the operation handler for the get tenant domain operation
 	TenantProvisioningServiceGetTenantDomainHandler tenant_provisioning_service.GetTenantDomainHandler
+	// AdminProvisioningServiceGetTenantIDByAliasHandler sets the operation handler for the get tenant Id by alias operation
+	AdminProvisioningServiceGetTenantIDByAliasHandler admin_provisioning_service.GetTenantIDByAliasHandler
 	// TenantProvisioningServiceGetTenantIngestionProfileHandler sets the operation handler for the get tenant ingestion profile operation
 	TenantProvisioningServiceGetTenantIngestionProfileHandler tenant_provisioning_service.GetTenantIngestionProfileHandler
 	// TenantProvisioningServiceGetTenantMetadataHandler sets the operation handler for the get tenant metadata operation
@@ -454,8 +456,6 @@ type GatherAPI struct {
 	MetricsServiceGetTopNForMetricHandler metrics_service.GetTopNForMetricHandler
 	// AdminProvisioningServiceGetValidTypesHandler sets the operation handler for the get valid types operation
 	AdminProvisioningServiceGetValidTypesHandler admin_provisioning_service.GetValidTypesHandler
-	// AdminProvisioningServiceGettenantIDByAliasHandler sets the operation handler for the gettenant Id by alias operation
-	AdminProvisioningServiceGettenantIDByAliasHandler admin_provisioning_service.GettenantIDByAliasHandler
 	// TenantProvisioningServicePatchTenantMetadataHandler sets the operation handler for the patch tenant metadata operation
 	TenantProvisioningServicePatchTenantMetadataHandler tenant_provisioning_service.PatchTenantMetadataHandler
 	// AdminProvisioningServicePatchTenantHandler sets the operation handler for the patch tenant operation
@@ -771,6 +771,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetTenantDomainHandler")
 	}
 
+	if o.AdminProvisioningServiceGetTenantIDByAliasHandler == nil {
+		unregistered = append(unregistered, "admin_provisioning_service.GetTenantIDByAliasHandler")
+	}
+
 	if o.TenantProvisioningServiceGetTenantIngestionProfileHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetTenantIngestionProfileHandler")
 	}
@@ -813,10 +817,6 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceGetValidTypesHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.GetValidTypesHandler")
-	}
-
-	if o.AdminProvisioningServiceGettenantIDByAliasHandler == nil {
-		unregistered = append(unregistered, "admin_provisioning_service.GettenantIDByAliasHandler")
 	}
 
 	if o.TenantProvisioningServicePatchTenantMetadataHandler == nil {
@@ -1272,6 +1272,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/v1/tenant-by-alias/{value}"] = admin_provisioning_service.NewGetTenantIDByAlias(o.context, o.AdminProvisioningServiceGetTenantIDByAliasHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}"] = tenant_provisioning_service.NewGetTenantIngestionProfile(o.context, o.TenantProvisioningServiceGetTenantIngestionProfileHandler)
 
 	if o.handlers["GET"] == nil {
@@ -1323,11 +1328,6 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/valid-types"] = admin_provisioning_service.NewGetValidTypes(o.context, o.AdminProvisioningServiceGetValidTypesHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/tenant-by-alias/{value}"] = admin_provisioning_service.NewGettenantIDByAlias(o.context, o.AdminProvisioningServiceGettenantIDByAliasHandler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

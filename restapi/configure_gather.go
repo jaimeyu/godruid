@@ -60,9 +60,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler = tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.BulkUpdateMonitoredObject has not yet been implemented")
 	})
-	api.AdminProvisioningServiceCreateAdminUserHandler = admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.CreateAdminUser has not yet been implemented")
-	})
+
 	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.CreateIngestionDictionary has not yet been implemented")
 	})
@@ -97,9 +95,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.AdminProvisioningServiceCreateValidTypesHandler = admin_provisioning_service.CreateValidTypesHandlerFunc(func(params admin_provisioning_service.CreateValidTypesParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.CreateValidTypes has not yet been implemented")
 	})
-	api.AdminProvisioningServiceDeleteAdminUserHandler = admin_provisioning_service.DeleteAdminUserHandlerFunc(func(params admin_provisioning_service.DeleteAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.DeleteAdminUser has not yet been implemented")
-	})
+
 	api.AdminProvisioningServiceDeleteIngestionDictionaryHandler = admin_provisioning_service.DeleteIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.DeleteIngestionDictionaryParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.DeleteIngestionDictionary has not yet been implemented")
 	})
@@ -140,12 +136,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceGetActiveIngestionProfileHandler = tenant_provisioning_service.GetActiveIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveIngestionProfileParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetActiveIngestionProfile has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGetAdminUserHandler = admin_provisioning_service.GetAdminUserHandlerFunc(func(params admin_provisioning_service.GetAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetAdminUser has not yet been implemented")
-	})
-	api.AdminProvisioningServiceGetAllAdminUsersHandler = admin_provisioning_service.GetAllAdminUsersHandlerFunc(func(params admin_provisioning_service.GetAllAdminUsersParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetAllAdminUsers has not yet been implemented")
-	})
+
 	api.TenantProvisioningServiceGetAllReportScheduleConfigHandler = tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.GetAllReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllReportScheduleConfig has not yet been implemented")
 	})
@@ -209,9 +200,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceGetTenantMonitoredObjectHandler = tenant_provisioning_service.GetTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.GetTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantMonitoredObject has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(func(params admin_provisioning_service.GetTenantSummaryByAliasParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetTenantSummaryByAlias has not yet been implemented")
-	})
+	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(handlers.HandleGetTenantSummaryByAlias(adminDB))
 	api.TenantProvisioningServiceGetTenantThresholdProfileHandler = tenant_provisioning_service.GetTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.GetTenantThresholdProfileParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantThresholdProfile has not yet been implemented")
 	})
@@ -233,9 +222,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.GetValidTypes has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGettenantIDByAliasHandler = admin_provisioning_service.GettenantIDByAliasHandlerFunc(func(params admin_provisioning_service.GettenantIDByAliasParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GettenantIDByAlias has not yet been implemented")
-	})
+	api.AdminProvisioningServiceGetTenantIDByAliasHandler = admin_provisioning_service.GetTenantIDByAliasHandlerFunc(handlers.HandleGetTenantIDByAlias(adminDB))
 	api.TenantProvisioningServicePatchTenantMetadataHandler = tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantMetadata has not yet been implemented")
 	})
@@ -252,32 +239,52 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServicePatchTenantThresholdProfileHandler = tenant_provisioning_service.PatchTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.PatchTenantThresholdProfileParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantThresholdProfile has not yet been implemented")
 	})
-	api.TenantProvisioningServicePatchTenantUserHandler = tenant_provisioning_service.PatchTenantUserHandlerFunc(func(params tenant_provisioning_service.PatchTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantUser has not yet been implemented")
-	})
+
 	api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(func(params metrics_service.QueryAggregatedMetricsParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.QueryAggregatedMetrics has not yet been implemented")
 	})
 	api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.QueryThresholdCrossing has not yet been implemented")
 	})
-	api.AdminProvisioningServiceUpdateAdminUserHandler = admin_provisioning_service.UpdateAdminUserHandlerFunc(func(params admin_provisioning_service.UpdateAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateAdminUser has not yet been implemented")
-	})
+
 	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.UpdateIngestionDictionaryParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.UpdateIngestionDictionary has not yet been implemented")
 	})
 	api.TenantProvisioningServiceUpdateReportScheduleConfigHandler = tenant_provisioning_service.UpdateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.UpdateReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateReportScheduleConfig has not yet been implemented")
 	})
-	api.AdminProvisioningServiceUpdateTenantHandler = admin_provisioning_service.UpdateTenantHandlerFunc(func(params admin_provisioning_service.UpdateTenantParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateTenant has not yet been implemented")
-	})
+
 	api.TenantProvisioningServiceUpdateTenantConnectorConfigHandler = tenant_provisioning_service.UpdateTenantConnectorConfigHandlerFunc(func(params tenant_provisioning_service.UpdateTenantConnectorConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantConnectorConfig has not yet been implemented")
 	})
 	api.TenantProvisioningServiceUpdateTenantConnectorInstanceHandler = tenant_provisioning_service.UpdateTenantConnectorInstanceHandlerFunc(func(params tenant_provisioning_service.UpdateTenantConnectorInstanceParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantConnectorInstance has not yet been implemented")
+	})
+	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(func(params admin_provisioning_service.UpdateValidTypesParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.UpdateValidTypes has not yet been implemented")
+	})
+
+	// TODO: calls that will be removed, but just moving them here for now until it is certain we will not use them
+	api.AdminProvisioningServiceCreateAdminUserHandler = admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.CreateAdminUser has not yet been implemented")
+	})
+	api.AdminProvisioningServiceDeleteAdminUserHandler = admin_provisioning_service.DeleteAdminUserHandlerFunc(func(params admin_provisioning_service.DeleteAdminUserParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.DeleteAdminUser has not yet been implemented")
+	})
+	api.AdminProvisioningServiceGetAdminUserHandler = admin_provisioning_service.GetAdminUserHandlerFunc(func(params admin_provisioning_service.GetAdminUserParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.GetAdminUser has not yet been implemented")
+	})
+	api.AdminProvisioningServiceGetAllAdminUsersHandler = admin_provisioning_service.GetAllAdminUsersHandlerFunc(func(params admin_provisioning_service.GetAllAdminUsersParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.GetAllAdminUsers has not yet been implemented")
+	})
+	api.TenantProvisioningServicePatchTenantUserHandler = tenant_provisioning_service.PatchTenantUserHandlerFunc(func(params tenant_provisioning_service.PatchTenantUserParams) middleware.Responder {
+		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantUser has not yet been implemented")
+	})
+	api.AdminProvisioningServiceUpdateAdminUserHandler = admin_provisioning_service.UpdateAdminUserHandlerFunc(func(params admin_provisioning_service.UpdateAdminUserParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.UpdateAdminUser has not yet been implemented")
+	})
+	api.AdminProvisioningServiceUpdateTenantHandler = admin_provisioning_service.UpdateTenantHandlerFunc(func(params admin_provisioning_service.UpdateTenantParams) middleware.Responder {
+		return middleware.NotImplemented("operation admin_provisioning_service.UpdateTenant has not yet been implemented")
 	})
 	api.TenantProvisioningServiceUpdateTenantDomainHandler = tenant_provisioning_service.UpdateTenantDomainHandlerFunc(func(params tenant_provisioning_service.UpdateTenantDomainParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantDomain has not yet been implemented")
@@ -297,9 +304,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceUpdateTenantUserHandler = tenant_provisioning_service.UpdateTenantUserHandlerFunc(func(params tenant_provisioning_service.UpdateTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantUser has not yet been implemented")
 	})
-	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(func(params admin_provisioning_service.UpdateValidTypesParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateValidTypes has not yet been implemented")
-	})
+	// END OF CALLS TO BE REMOVED
 
 	api.ServerShutdown = func() {}
 

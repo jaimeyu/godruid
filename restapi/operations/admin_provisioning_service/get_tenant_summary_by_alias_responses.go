@@ -65,6 +65,11 @@ const GetTenantSummaryByAliasInternalServerErrorCode int = 500
 swagger:response getTenantSummaryByAliasInternalServerError
 */
 type GetTenantSummaryByAliasInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTenantSummaryByAliasInternalServerError creates GetTenantSummaryByAliasInternalServerError with default headers values
@@ -73,10 +78,24 @@ func NewGetTenantSummaryByAliasInternalServerError() *GetTenantSummaryByAliasInt
 	return &GetTenantSummaryByAliasInternalServerError{}
 }
 
+// WithPayload adds the payload to the get tenant summary by alias internal server error response
+func (o *GetTenantSummaryByAliasInternalServerError) WithPayload(payload string) *GetTenantSummaryByAliasInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant summary by alias internal server error response
+func (o *GetTenantSummaryByAliasInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTenantSummaryByAliasInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -210,7 +210,6 @@ func HandleGetAllTenants(allowedRoles []string, adminDB datastore.AdminServiceDa
 	return func(params admin_provisioning_service.GetAllTenantsParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-
 		logger.Log.Infof("Fetching %s list", admmod.TenantStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -232,5 +231,44 @@ func HandleGetAllTenants(allowedRoles []string, adminDB datastore.AdminServiceDa
 		reportAPICompletionState(startTime, http.StatusOK, mon.GetAllTenantStr, mon.APICompleted, mon.AdminAPICompleted)
 		logger.Log.Infof("Retrieved %d %ss", len(result), admmod.TenantStr)
 		return admin_provisioning_service.NewGetAllTenantsOK().WithPayload(&converted)
+	}
+}
+
+// HandleGetTenantIDByAlias - returns the tenant id as a string
+func HandleGetTenantIDByAlias(adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.GetTenantIDByAliasParams) middleware.Responder {
+	return func(params admin_provisioning_service.GetTenantIDByAliasParams) middleware.Responder {
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
+		logger.Log.Infof("Fetching ID for %s %s", admmod.TenantStr, params.Value)
+
+		// Issue request to DAO Layer
+		result, err := adminDB.GetTenantIDByAlias(params.Value)
+		if err != nil {
+			return admin_provisioning_service.NewGetTenantIDByAliasInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s ID for %s: %s", admmod.TenantStr, params.Value, err.Error()), startTime, http.StatusInternalServerError, mon.GetTenantIDByAliasStr, mon.APICompleted, mon.AdminAPICompleted))
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.GetTenantIDByAliasStr, mon.APICompleted, mon.AdminAPICompleted)
+		logger.Log.Infof("Found ID %s for %s %s", result, admmod.TenantStr, params.Value)
+		return admin_provisioning_service.NewGetTenantIDByAliasOK().WithPayload(result)
+	}
+}
+
+func HandleGetTenantSummaryByAlias(adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.GetTenantSummaryByAliasParams) middleware.Responder {
+	return func(params admin_provisioning_service.GetTenantSummaryByAliasParams) middleware.Responder {
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
+		logger.Log.Infof("Fetching summary for %s %s", admmod.TenantStr, params.Value)
+
+		// Issue request to DAO Layer
+		result, err := adminDB.GetTenantIDByAlias(params.Value)
+		if err != nil {
+			return admin_provisioning_service.NewGetTenantSummaryByAliasInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s summary for %s: %s", admmod.TenantStr, params.Value, err.Error()), startTime, http.StatusInternalServerError, mon.GetTenantSummaryByAliasStr, mon.APICompleted, mon.AdminAPICompleted))
+		}
+
+		summary := swagmodels.TenantSummary{Alias: params.Value, ID: result}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.GetTenantSummaryByAliasStr, mon.APICompleted, mon.AdminAPICompleted)
+		logger.Log.Infof("Successfully retrieved ID %s for alias %s", result, params.Value)
+		return admin_provisioning_service.NewGetTenantSummaryByAliasOK().WithPayload(&summary)
 	}
 }

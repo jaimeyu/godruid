@@ -297,16 +297,18 @@ paths:
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.
-      operationId: GettenantIdByAlias
+      operationId: GetTenantIdByAlias
       produces:
         - text/plain
       responses:
         '200':
           description: ''
           schema:
-                type: "string"
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path
@@ -327,6 +329,8 @@ paths:
             $ref: "#/definitions/TenantSummary"
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path

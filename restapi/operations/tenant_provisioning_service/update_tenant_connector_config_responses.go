@@ -65,6 +65,11 @@ const UpdateTenantConnectorConfigBadRequestCode int = 400
 swagger:response updateTenantConnectorConfigBadRequest
 */
 type UpdateTenantConnectorConfigBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantConnectorConfigBadRequest creates UpdateTenantConnectorConfigBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantConnectorConfigBadRequest() *UpdateTenantConnectorConfigBadR
 	return &UpdateTenantConnectorConfigBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant connector config bad request response
+func (o *UpdateTenantConnectorConfigBadRequest) WithPayload(payload string) *UpdateTenantConnectorConfigBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant connector config bad request response
+func (o *UpdateTenantConnectorConfigBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantConnectorConfigBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantConnectorConfigForbiddenCode is the HTTP code returned for type UpdateTenantConnectorConfigForbidden
+const UpdateTenantConnectorConfigForbiddenCode int = 403
+
+/*UpdateTenantConnectorConfigForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantConnectorConfigForbidden
+*/
+type UpdateTenantConnectorConfigForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantConnectorConfigForbidden creates UpdateTenantConnectorConfigForbidden with default headers values
+func NewUpdateTenantConnectorConfigForbidden() *UpdateTenantConnectorConfigForbidden {
+
+	return &UpdateTenantConnectorConfigForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant connector config forbidden response
+func (o *UpdateTenantConnectorConfigForbidden) WithPayload(payload string) *UpdateTenantConnectorConfigForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant connector config forbidden response
+func (o *UpdateTenantConnectorConfigForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantConnectorConfigForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantConnectorConfigInternalServerErrorCode is the HTTP code returned for type UpdateTenantConnectorConfigInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantConnectorConfigInternalServerErrorCode int = 500
 swagger:response updateTenantConnectorConfigInternalServerError
 */
 type UpdateTenantConnectorConfigInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantConnectorConfigInternalServerError creates UpdateTenantConnectorConfigInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantConnectorConfigInternalServerError() *UpdateTenantConnectorC
 	return &UpdateTenantConnectorConfigInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant connector config internal server error response
+func (o *UpdateTenantConnectorConfigInternalServerError) WithPayload(payload string) *UpdateTenantConnectorConfigInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant connector config internal server error response
+func (o *UpdateTenantConnectorConfigInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantConnectorConfigInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

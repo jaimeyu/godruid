@@ -57,6 +57,49 @@ func (o *GetTenantConnectorInstanceOK) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// GetTenantConnectorInstanceForbiddenCode is the HTTP code returned for type GetTenantConnectorInstanceForbidden
+const GetTenantConnectorInstanceForbiddenCode int = 403
+
+/*GetTenantConnectorInstanceForbidden Requestor does not have authorization to perform this action
+
+swagger:response getTenantConnectorInstanceForbidden
+*/
+type GetTenantConnectorInstanceForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTenantConnectorInstanceForbidden creates GetTenantConnectorInstanceForbidden with default headers values
+func NewGetTenantConnectorInstanceForbidden() *GetTenantConnectorInstanceForbidden {
+
+	return &GetTenantConnectorInstanceForbidden{}
+}
+
+// WithPayload adds the payload to the get tenant connector instance forbidden response
+func (o *GetTenantConnectorInstanceForbidden) WithPayload(payload string) *GetTenantConnectorInstanceForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant connector instance forbidden response
+func (o *GetTenantConnectorInstanceForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTenantConnectorInstanceForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetTenantConnectorInstanceInternalServerErrorCode is the HTTP code returned for type GetTenantConnectorInstanceInternalServerError
 const GetTenantConnectorInstanceInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetTenantConnectorInstanceInternalServerErrorCode int = 500
 swagger:response getTenantConnectorInstanceInternalServerError
 */
 type GetTenantConnectorInstanceInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTenantConnectorInstanceInternalServerError creates GetTenantConnectorInstanceInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetTenantConnectorInstanceInternalServerError() *GetTenantConnectorInsta
 	return &GetTenantConnectorInstanceInternalServerError{}
 }
 
+// WithPayload adds the payload to the get tenant connector instance internal server error response
+func (o *GetTenantConnectorInstanceInternalServerError) WithPayload(payload string) *GetTenantConnectorInstanceInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant connector instance internal server error response
+func (o *GetTenantConnectorInstanceInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTenantConnectorInstanceInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

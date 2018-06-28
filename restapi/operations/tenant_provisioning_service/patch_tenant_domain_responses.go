@@ -65,6 +65,11 @@ const PatchTenantDomainBadRequestCode int = 400
 swagger:response patchTenantDomainBadRequest
 */
 type PatchTenantDomainBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantDomainBadRequest creates PatchTenantDomainBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewPatchTenantDomainBadRequest() *PatchTenantDomainBadRequest {
 	return &PatchTenantDomainBadRequest{}
 }
 
+// WithPayload adds the payload to the patch tenant domain bad request response
+func (o *PatchTenantDomainBadRequest) WithPayload(payload string) *PatchTenantDomainBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant domain bad request response
+func (o *PatchTenantDomainBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantDomainBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// PatchTenantDomainForbiddenCode is the HTTP code returned for type PatchTenantDomainForbidden
+const PatchTenantDomainForbiddenCode int = 403
+
+/*PatchTenantDomainForbidden Requestor does not have authorization to perform this action
+
+swagger:response patchTenantDomainForbidden
+*/
+type PatchTenantDomainForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewPatchTenantDomainForbidden creates PatchTenantDomainForbidden with default headers values
+func NewPatchTenantDomainForbidden() *PatchTenantDomainForbidden {
+
+	return &PatchTenantDomainForbidden{}
+}
+
+// WithPayload adds the payload to the patch tenant domain forbidden response
+func (o *PatchTenantDomainForbidden) WithPayload(payload string) *PatchTenantDomainForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant domain forbidden response
+func (o *PatchTenantDomainForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchTenantDomainForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // PatchTenantDomainInternalServerErrorCode is the HTTP code returned for type PatchTenantDomainInternalServerError
@@ -89,6 +151,11 @@ const PatchTenantDomainInternalServerErrorCode int = 500
 swagger:response patchTenantDomainInternalServerError
 */
 type PatchTenantDomainInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantDomainInternalServerError creates PatchTenantDomainInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewPatchTenantDomainInternalServerError() *PatchTenantDomainInternalServerE
 	return &PatchTenantDomainInternalServerError{}
 }
 
+// WithPayload adds the payload to the patch tenant domain internal server error response
+func (o *PatchTenantDomainInternalServerError) WithPayload(payload string) *PatchTenantDomainInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant domain internal server error response
+func (o *PatchTenantDomainInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantDomainInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -65,6 +65,11 @@ const CreateReportScheduleConfigBadRequestCode int = 400
 swagger:response createReportScheduleConfigBadRequest
 */
 type CreateReportScheduleConfigBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateReportScheduleConfigBadRequest creates CreateReportScheduleConfigBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateReportScheduleConfigBadRequest() *CreateReportScheduleConfigBadReq
 	return &CreateReportScheduleConfigBadRequest{}
 }
 
+// WithPayload adds the payload to the create report schedule config bad request response
+func (o *CreateReportScheduleConfigBadRequest) WithPayload(payload string) *CreateReportScheduleConfigBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create report schedule config bad request response
+func (o *CreateReportScheduleConfigBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateReportScheduleConfigBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateReportScheduleConfigForbiddenCode is the HTTP code returned for type CreateReportScheduleConfigForbidden
+const CreateReportScheduleConfigForbiddenCode int = 403
+
+/*CreateReportScheduleConfigForbidden Requestor does not have authorization to perform this action
+
+swagger:response createReportScheduleConfigForbidden
+*/
+type CreateReportScheduleConfigForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateReportScheduleConfigForbidden creates CreateReportScheduleConfigForbidden with default headers values
+func NewCreateReportScheduleConfigForbidden() *CreateReportScheduleConfigForbidden {
+
+	return &CreateReportScheduleConfigForbidden{}
+}
+
+// WithPayload adds the payload to the create report schedule config forbidden response
+func (o *CreateReportScheduleConfigForbidden) WithPayload(payload string) *CreateReportScheduleConfigForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create report schedule config forbidden response
+func (o *CreateReportScheduleConfigForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateReportScheduleConfigForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateReportScheduleConfigInternalServerErrorCode is the HTTP code returned for type CreateReportScheduleConfigInternalServerError
@@ -89,6 +151,11 @@ const CreateReportScheduleConfigInternalServerErrorCode int = 500
 swagger:response createReportScheduleConfigInternalServerError
 */
 type CreateReportScheduleConfigInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateReportScheduleConfigInternalServerError creates CreateReportScheduleConfigInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewCreateReportScheduleConfigInternalServerError() *CreateReportScheduleCon
 	return &CreateReportScheduleConfigInternalServerError{}
 }
 
+// WithPayload adds the payload to the create report schedule config internal server error response
+func (o *CreateReportScheduleConfigInternalServerError) WithPayload(payload string) *CreateReportScheduleConfigInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create report schedule config internal server error response
+func (o *CreateReportScheduleConfigInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateReportScheduleConfigInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

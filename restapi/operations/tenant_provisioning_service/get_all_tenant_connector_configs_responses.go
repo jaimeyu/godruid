@@ -57,6 +57,49 @@ func (o *GetAllTenantConnectorConfigsOK) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// GetAllTenantConnectorConfigsForbiddenCode is the HTTP code returned for type GetAllTenantConnectorConfigsForbidden
+const GetAllTenantConnectorConfigsForbiddenCode int = 403
+
+/*GetAllTenantConnectorConfigsForbidden Requestor does not have authorization to perform this action
+
+swagger:response getAllTenantConnectorConfigsForbidden
+*/
+type GetAllTenantConnectorConfigsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetAllTenantConnectorConfigsForbidden creates GetAllTenantConnectorConfigsForbidden with default headers values
+func NewGetAllTenantConnectorConfigsForbidden() *GetAllTenantConnectorConfigsForbidden {
+
+	return &GetAllTenantConnectorConfigsForbidden{}
+}
+
+// WithPayload adds the payload to the get all tenant connector configs forbidden response
+func (o *GetAllTenantConnectorConfigsForbidden) WithPayload(payload string) *GetAllTenantConnectorConfigsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant connector configs forbidden response
+func (o *GetAllTenantConnectorConfigsForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAllTenantConnectorConfigsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetAllTenantConnectorConfigsInternalServerErrorCode is the HTTP code returned for type GetAllTenantConnectorConfigsInternalServerError
 const GetAllTenantConnectorConfigsInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetAllTenantConnectorConfigsInternalServerErrorCode int = 500
 swagger:response getAllTenantConnectorConfigsInternalServerError
 */
 type GetAllTenantConnectorConfigsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetAllTenantConnectorConfigsInternalServerError creates GetAllTenantConnectorConfigsInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetAllTenantConnectorConfigsInternalServerError() *GetAllTenantConnector
 	return &GetAllTenantConnectorConfigsInternalServerError{}
 }
 
+// WithPayload adds the payload to the get all tenant connector configs internal server error response
+func (o *GetAllTenantConnectorConfigsInternalServerError) WithPayload(payload string) *GetAllTenantConnectorConfigsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant connector configs internal server error response
+func (o *GetAllTenantConnectorConfigsInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetAllTenantConnectorConfigsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

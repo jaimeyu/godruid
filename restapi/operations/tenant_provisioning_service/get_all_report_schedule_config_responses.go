@@ -57,6 +57,49 @@ func (o *GetAllReportScheduleConfigOK) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// GetAllReportScheduleConfigForbiddenCode is the HTTP code returned for type GetAllReportScheduleConfigForbidden
+const GetAllReportScheduleConfigForbiddenCode int = 403
+
+/*GetAllReportScheduleConfigForbidden Requestor does not have authorization to perform this action
+
+swagger:response getAllReportScheduleConfigForbidden
+*/
+type GetAllReportScheduleConfigForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetAllReportScheduleConfigForbidden creates GetAllReportScheduleConfigForbidden with default headers values
+func NewGetAllReportScheduleConfigForbidden() *GetAllReportScheduleConfigForbidden {
+
+	return &GetAllReportScheduleConfigForbidden{}
+}
+
+// WithPayload adds the payload to the get all report schedule config forbidden response
+func (o *GetAllReportScheduleConfigForbidden) WithPayload(payload string) *GetAllReportScheduleConfigForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all report schedule config forbidden response
+func (o *GetAllReportScheduleConfigForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAllReportScheduleConfigForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetAllReportScheduleConfigInternalServerErrorCode is the HTTP code returned for type GetAllReportScheduleConfigInternalServerError
 const GetAllReportScheduleConfigInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetAllReportScheduleConfigInternalServerErrorCode int = 500
 swagger:response getAllReportScheduleConfigInternalServerError
 */
 type GetAllReportScheduleConfigInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetAllReportScheduleConfigInternalServerError creates GetAllReportScheduleConfigInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetAllReportScheduleConfigInternalServerError() *GetAllReportScheduleCon
 	return &GetAllReportScheduleConfigInternalServerError{}
 }
 
+// WithPayload adds the payload to the get all report schedule config internal server error response
+func (o *GetAllReportScheduleConfigInternalServerError) WithPayload(payload string) *GetAllReportScheduleConfigInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all report schedule config internal server error response
+func (o *GetAllReportScheduleConfigInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetAllReportScheduleConfigInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

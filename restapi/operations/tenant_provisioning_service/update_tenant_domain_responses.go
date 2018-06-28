@@ -65,6 +65,11 @@ const UpdateTenantDomainBadRequestCode int = 400
 swagger:response updateTenantDomainBadRequest
 */
 type UpdateTenantDomainBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantDomainBadRequest creates UpdateTenantDomainBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantDomainBadRequest() *UpdateTenantDomainBadRequest {
 	return &UpdateTenantDomainBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant domain bad request response
+func (o *UpdateTenantDomainBadRequest) WithPayload(payload string) *UpdateTenantDomainBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant domain bad request response
+func (o *UpdateTenantDomainBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantDomainBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantDomainForbiddenCode is the HTTP code returned for type UpdateTenantDomainForbidden
+const UpdateTenantDomainForbiddenCode int = 403
+
+/*UpdateTenantDomainForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantDomainForbidden
+*/
+type UpdateTenantDomainForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantDomainForbidden creates UpdateTenantDomainForbidden with default headers values
+func NewUpdateTenantDomainForbidden() *UpdateTenantDomainForbidden {
+
+	return &UpdateTenantDomainForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant domain forbidden response
+func (o *UpdateTenantDomainForbidden) WithPayload(payload string) *UpdateTenantDomainForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant domain forbidden response
+func (o *UpdateTenantDomainForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantDomainForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantDomainInternalServerErrorCode is the HTTP code returned for type UpdateTenantDomainInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantDomainInternalServerErrorCode int = 500
 swagger:response updateTenantDomainInternalServerError
 */
 type UpdateTenantDomainInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantDomainInternalServerError creates UpdateTenantDomainInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantDomainInternalServerError() *UpdateTenantDomainInternalServe
 	return &UpdateTenantDomainInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant domain internal server error response
+func (o *UpdateTenantDomainInternalServerError) WithPayload(payload string) *UpdateTenantDomainInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant domain internal server error response
+func (o *UpdateTenantDomainInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantDomainInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

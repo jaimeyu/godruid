@@ -57,6 +57,49 @@ func (o *GetTenantDomainOK) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
+// GetTenantDomainForbiddenCode is the HTTP code returned for type GetTenantDomainForbidden
+const GetTenantDomainForbiddenCode int = 403
+
+/*GetTenantDomainForbidden Requestor does not have authorization to perform this action
+
+swagger:response getTenantDomainForbidden
+*/
+type GetTenantDomainForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTenantDomainForbidden creates GetTenantDomainForbidden with default headers values
+func NewGetTenantDomainForbidden() *GetTenantDomainForbidden {
+
+	return &GetTenantDomainForbidden{}
+}
+
+// WithPayload adds the payload to the get tenant domain forbidden response
+func (o *GetTenantDomainForbidden) WithPayload(payload string) *GetTenantDomainForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant domain forbidden response
+func (o *GetTenantDomainForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTenantDomainForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetTenantDomainInternalServerErrorCode is the HTTP code returned for type GetTenantDomainInternalServerError
 const GetTenantDomainInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetTenantDomainInternalServerErrorCode int = 500
 swagger:response getTenantDomainInternalServerError
 */
 type GetTenantDomainInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTenantDomainInternalServerError creates GetTenantDomainInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetTenantDomainInternalServerError() *GetTenantDomainInternalServerError
 	return &GetTenantDomainInternalServerError{}
 }
 
+// WithPayload adds the payload to the get tenant domain internal server error response
+func (o *GetTenantDomainInternalServerError) WithPayload(payload string) *GetTenantDomainInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant domain internal server error response
+func (o *GetTenantDomainInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTenantDomainInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

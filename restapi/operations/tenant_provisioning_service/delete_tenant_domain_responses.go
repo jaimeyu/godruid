@@ -57,6 +57,49 @@ func (o *DeleteTenantDomainOK) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
+// DeleteTenantDomainForbiddenCode is the HTTP code returned for type DeleteTenantDomainForbidden
+const DeleteTenantDomainForbiddenCode int = 403
+
+/*DeleteTenantDomainForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantDomainForbidden
+*/
+type DeleteTenantDomainForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantDomainForbidden creates DeleteTenantDomainForbidden with default headers values
+func NewDeleteTenantDomainForbidden() *DeleteTenantDomainForbidden {
+
+	return &DeleteTenantDomainForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant domain forbidden response
+func (o *DeleteTenantDomainForbidden) WithPayload(payload string) *DeleteTenantDomainForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant domain forbidden response
+func (o *DeleteTenantDomainForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantDomainForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantDomainInternalServerErrorCode is the HTTP code returned for type DeleteTenantDomainInternalServerError
 const DeleteTenantDomainInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantDomainInternalServerErrorCode int = 500
 swagger:response deleteTenantDomainInternalServerError
 */
 type DeleteTenantDomainInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantDomainInternalServerError creates DeleteTenantDomainInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantDomainInternalServerError() *DeleteTenantDomainInternalServe
 	return &DeleteTenantDomainInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant domain internal server error response
+func (o *DeleteTenantDomainInternalServerError) WithPayload(payload string) *DeleteTenantDomainInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant domain internal server error response
+func (o *DeleteTenantDomainInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantDomainInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

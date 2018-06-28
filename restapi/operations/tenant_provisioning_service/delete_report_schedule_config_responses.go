@@ -57,6 +57,49 @@ func (o *DeleteReportScheduleConfigOK) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// DeleteReportScheduleConfigForbiddenCode is the HTTP code returned for type DeleteReportScheduleConfigForbidden
+const DeleteReportScheduleConfigForbiddenCode int = 403
+
+/*DeleteReportScheduleConfigForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteReportScheduleConfigForbidden
+*/
+type DeleteReportScheduleConfigForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteReportScheduleConfigForbidden creates DeleteReportScheduleConfigForbidden with default headers values
+func NewDeleteReportScheduleConfigForbidden() *DeleteReportScheduleConfigForbidden {
+
+	return &DeleteReportScheduleConfigForbidden{}
+}
+
+// WithPayload adds the payload to the delete report schedule config forbidden response
+func (o *DeleteReportScheduleConfigForbidden) WithPayload(payload string) *DeleteReportScheduleConfigForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete report schedule config forbidden response
+func (o *DeleteReportScheduleConfigForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteReportScheduleConfigForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteReportScheduleConfigInternalServerErrorCode is the HTTP code returned for type DeleteReportScheduleConfigInternalServerError
 const DeleteReportScheduleConfigInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteReportScheduleConfigInternalServerErrorCode int = 500
 swagger:response deleteReportScheduleConfigInternalServerError
 */
 type DeleteReportScheduleConfigInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteReportScheduleConfigInternalServerError creates DeleteReportScheduleConfigInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteReportScheduleConfigInternalServerError() *DeleteReportScheduleCon
 	return &DeleteReportScheduleConfigInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete report schedule config internal server error response
+func (o *DeleteReportScheduleConfigInternalServerError) WithPayload(payload string) *DeleteReportScheduleConfigInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete report schedule config internal server error response
+func (o *DeleteReportScheduleConfigInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteReportScheduleConfigInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

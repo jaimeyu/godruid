@@ -57,6 +57,49 @@ func (o *DeleteTenantConnectorInstanceOK) WriteResponse(rw http.ResponseWriter, 
 	}
 }
 
+// DeleteTenantConnectorInstanceForbiddenCode is the HTTP code returned for type DeleteTenantConnectorInstanceForbidden
+const DeleteTenantConnectorInstanceForbiddenCode int = 403
+
+/*DeleteTenantConnectorInstanceForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantConnectorInstanceForbidden
+*/
+type DeleteTenantConnectorInstanceForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantConnectorInstanceForbidden creates DeleteTenantConnectorInstanceForbidden with default headers values
+func NewDeleteTenantConnectorInstanceForbidden() *DeleteTenantConnectorInstanceForbidden {
+
+	return &DeleteTenantConnectorInstanceForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant connector instance forbidden response
+func (o *DeleteTenantConnectorInstanceForbidden) WithPayload(payload string) *DeleteTenantConnectorInstanceForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant connector instance forbidden response
+func (o *DeleteTenantConnectorInstanceForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantConnectorInstanceForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantConnectorInstanceInternalServerErrorCode is the HTTP code returned for type DeleteTenantConnectorInstanceInternalServerError
 const DeleteTenantConnectorInstanceInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantConnectorInstanceInternalServerErrorCode int = 500
 swagger:response deleteTenantConnectorInstanceInternalServerError
 */
 type DeleteTenantConnectorInstanceInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantConnectorInstanceInternalServerError creates DeleteTenantConnectorInstanceInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantConnectorInstanceInternalServerError() *DeleteTenantConnecto
 	return &DeleteTenantConnectorInstanceInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant connector instance internal server error response
+func (o *DeleteTenantConnectorInstanceInternalServerError) WithPayload(payload string) *DeleteTenantConnectorInstanceInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant connector instance internal server error response
+func (o *DeleteTenantConnectorInstanceInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantConnectorInstanceInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

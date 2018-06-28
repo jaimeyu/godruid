@@ -24,7 +24,6 @@ func HandleCreateTenant(allowedRoles []string, adminDB datastore.AdminServiceDat
 	return func(params admin_provisioning_service.CreateTenantParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-
 		logger.Log.Infof("Creating %s: %s", admmod.TenantStr, params.Body.Data.Attributes.Name)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {

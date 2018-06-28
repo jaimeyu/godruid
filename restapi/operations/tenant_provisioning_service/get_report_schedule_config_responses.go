@@ -57,6 +57,49 @@ func (o *GetReportScheduleConfigOK) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// GetReportScheduleConfigForbiddenCode is the HTTP code returned for type GetReportScheduleConfigForbidden
+const GetReportScheduleConfigForbiddenCode int = 403
+
+/*GetReportScheduleConfigForbidden Requestor does not have authorization to perform this action
+
+swagger:response getReportScheduleConfigForbidden
+*/
+type GetReportScheduleConfigForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetReportScheduleConfigForbidden creates GetReportScheduleConfigForbidden with default headers values
+func NewGetReportScheduleConfigForbidden() *GetReportScheduleConfigForbidden {
+
+	return &GetReportScheduleConfigForbidden{}
+}
+
+// WithPayload adds the payload to the get report schedule config forbidden response
+func (o *GetReportScheduleConfigForbidden) WithPayload(payload string) *GetReportScheduleConfigForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get report schedule config forbidden response
+func (o *GetReportScheduleConfigForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetReportScheduleConfigForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetReportScheduleConfigInternalServerErrorCode is the HTTP code returned for type GetReportScheduleConfigInternalServerError
 const GetReportScheduleConfigInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetReportScheduleConfigInternalServerErrorCode int = 500
 swagger:response getReportScheduleConfigInternalServerError
 */
 type GetReportScheduleConfigInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetReportScheduleConfigInternalServerError creates GetReportScheduleConfigInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetReportScheduleConfigInternalServerError() *GetReportScheduleConfigInt
 	return &GetReportScheduleConfigInternalServerError{}
 }
 
+// WithPayload adds the payload to the get report schedule config internal server error response
+func (o *GetReportScheduleConfigInternalServerError) WithPayload(payload string) *GetReportScheduleConfigInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get report schedule config internal server error response
+func (o *GetReportScheduleConfigInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetReportScheduleConfigInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

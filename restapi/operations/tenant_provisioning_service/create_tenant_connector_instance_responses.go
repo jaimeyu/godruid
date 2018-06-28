@@ -65,6 +65,11 @@ const CreateTenantConnectorInstanceBadRequestCode int = 400
 swagger:response createTenantConnectorInstanceBadRequest
 */
 type CreateTenantConnectorInstanceBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantConnectorInstanceBadRequest creates CreateTenantConnectorInstanceBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateTenantConnectorInstanceBadRequest() *CreateTenantConnectorInstance
 	return &CreateTenantConnectorInstanceBadRequest{}
 }
 
+// WithPayload adds the payload to the create tenant connector instance bad request response
+func (o *CreateTenantConnectorInstanceBadRequest) WithPayload(payload string) *CreateTenantConnectorInstanceBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant connector instance bad request response
+func (o *CreateTenantConnectorInstanceBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantConnectorInstanceBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateTenantConnectorInstanceForbiddenCode is the HTTP code returned for type CreateTenantConnectorInstanceForbidden
+const CreateTenantConnectorInstanceForbiddenCode int = 403
+
+/*CreateTenantConnectorInstanceForbidden Requestor does not have authorization to perform this action
+
+swagger:response createTenantConnectorInstanceForbidden
+*/
+type CreateTenantConnectorInstanceForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateTenantConnectorInstanceForbidden creates CreateTenantConnectorInstanceForbidden with default headers values
+func NewCreateTenantConnectorInstanceForbidden() *CreateTenantConnectorInstanceForbidden {
+
+	return &CreateTenantConnectorInstanceForbidden{}
+}
+
+// WithPayload adds the payload to the create tenant connector instance forbidden response
+func (o *CreateTenantConnectorInstanceForbidden) WithPayload(payload string) *CreateTenantConnectorInstanceForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant connector instance forbidden response
+func (o *CreateTenantConnectorInstanceForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateTenantConnectorInstanceForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateTenantConnectorInstanceInternalServerErrorCode is the HTTP code returned for type CreateTenantConnectorInstanceInternalServerError
@@ -89,6 +151,11 @@ const CreateTenantConnectorInstanceInternalServerErrorCode int = 500
 swagger:response createTenantConnectorInstanceInternalServerError
 */
 type CreateTenantConnectorInstanceInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantConnectorInstanceInternalServerError creates CreateTenantConnectorInstanceInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewCreateTenantConnectorInstanceInternalServerError() *CreateTenantConnecto
 	return &CreateTenantConnectorInstanceInternalServerError{}
 }
 
+// WithPayload adds the payload to the create tenant connector instance internal server error response
+func (o *CreateTenantConnectorInstanceInternalServerError) WithPayload(payload string) *CreateTenantConnectorInstanceInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant connector instance internal server error response
+func (o *CreateTenantConnectorInstanceInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantConnectorInstanceInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -115,7 +115,7 @@ type ProtobufAny struct {
 	//   breaking changes.)
 	//
 	// Schemes other than `http`, `https` (or the empty scheme) might be
-	// used with implementation specific semantics.
+	// used with implementation et semantics.
 	TypeURL string `json:"type_url,omitempty"`
 
 	// Must be a valid serialized protocol buffer of the above specified type.

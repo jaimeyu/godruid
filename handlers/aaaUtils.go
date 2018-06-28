@@ -11,6 +11,7 @@ var (
 
 	SkylightAdminRoleOnly       = []string{userRoleSkylight}
 	SkylightAndTenantAdminRoles = []string{userRoleSkylight, userRoleTenantAdmin}
+	AllRoles                    = []string{userRoleSkylight, userRoleTenantAdmin, userRoleTenantUser}
 )
 
 func InitializeAuthHelper() {
@@ -18,9 +19,17 @@ func InitializeAuthHelper() {
 }
 
 func isRequestAuthorized(request *http.Request, allowedRoles []string) bool {
+	// No need for Authorization check if Authorization is disabled
 	if !authEnabled {
 		return true
 	}
 
-	return gather.DoesSliceContainString(allowedRoles, request.Header.Get(xFwdUserRoles))
+	requestRole := request.Header.Get(xFwdUserRoles)
+
+	// Allow system elements to have access
+	if requestRole == userRoleSystem {
+		return true
+	}
+
+	return gather.DoesSliceContainString(allowedRoles, requestRole)
 }

@@ -65,6 +65,11 @@ const UpdateIngestionDictionaryBadRequestCode int = 400
 swagger:response updateIngestionDictionaryBadRequest
 */
 type UpdateIngestionDictionaryBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateIngestionDictionaryBadRequest creates UpdateIngestionDictionaryBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateIngestionDictionaryBadRequest() *UpdateIngestionDictionaryBadReque
 	return &UpdateIngestionDictionaryBadRequest{}
 }
 
+// WithPayload adds the payload to the update ingestion dictionary bad request response
+func (o *UpdateIngestionDictionaryBadRequest) WithPayload(payload string) *UpdateIngestionDictionaryBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update ingestion dictionary bad request response
+func (o *UpdateIngestionDictionaryBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateIngestionDictionaryBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateIngestionDictionaryForbiddenCode is the HTTP code returned for type UpdateIngestionDictionaryForbidden
+const UpdateIngestionDictionaryForbiddenCode int = 403
+
+/*UpdateIngestionDictionaryForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateIngestionDictionaryForbidden
+*/
+type UpdateIngestionDictionaryForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateIngestionDictionaryForbidden creates UpdateIngestionDictionaryForbidden with default headers values
+func NewUpdateIngestionDictionaryForbidden() *UpdateIngestionDictionaryForbidden {
+
+	return &UpdateIngestionDictionaryForbidden{}
+}
+
+// WithPayload adds the payload to the update ingestion dictionary forbidden response
+func (o *UpdateIngestionDictionaryForbidden) WithPayload(payload string) *UpdateIngestionDictionaryForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update ingestion dictionary forbidden response
+func (o *UpdateIngestionDictionaryForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateIngestionDictionaryForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateIngestionDictionaryInternalServerErrorCode is the HTTP code returned for type UpdateIngestionDictionaryInternalServerError
@@ -89,6 +151,11 @@ const UpdateIngestionDictionaryInternalServerErrorCode int = 500
 swagger:response updateIngestionDictionaryInternalServerError
 */
 type UpdateIngestionDictionaryInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateIngestionDictionaryInternalServerError creates UpdateIngestionDictionaryInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateIngestionDictionaryInternalServerError() *UpdateIngestionDictionar
 	return &UpdateIngestionDictionaryInternalServerError{}
 }
 
+// WithPayload adds the payload to the update ingestion dictionary internal server error response
+func (o *UpdateIngestionDictionaryInternalServerError) WithPayload(payload string) *UpdateIngestionDictionaryInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update ingestion dictionary internal server error response
+func (o *UpdateIngestionDictionaryInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateIngestionDictionaryInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

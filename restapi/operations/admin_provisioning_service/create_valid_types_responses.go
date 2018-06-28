@@ -65,6 +65,11 @@ const CreateValidTypesBadRequestCode int = 400
 swagger:response createValidTypesBadRequest
 */
 type CreateValidTypesBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateValidTypesBadRequest creates CreateValidTypesBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateValidTypesBadRequest() *CreateValidTypesBadRequest {
 	return &CreateValidTypesBadRequest{}
 }
 
+// WithPayload adds the payload to the create valid types bad request response
+func (o *CreateValidTypesBadRequest) WithPayload(payload string) *CreateValidTypesBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create valid types bad request response
+func (o *CreateValidTypesBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateValidTypesBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateValidTypesForbiddenCode is the HTTP code returned for type CreateValidTypesForbidden
+const CreateValidTypesForbiddenCode int = 403
+
+/*CreateValidTypesForbidden Requestor does not have authorization to perform this action
+
+swagger:response createValidTypesForbidden
+*/
+type CreateValidTypesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateValidTypesForbidden creates CreateValidTypesForbidden with default headers values
+func NewCreateValidTypesForbidden() *CreateValidTypesForbidden {
+
+	return &CreateValidTypesForbidden{}
+}
+
+// WithPayload adds the payload to the create valid types forbidden response
+func (o *CreateValidTypesForbidden) WithPayload(payload string) *CreateValidTypesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create valid types forbidden response
+func (o *CreateValidTypesForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateValidTypesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateValidTypesInternalServerErrorCode is the HTTP code returned for type CreateValidTypesInternalServerError
@@ -89,6 +151,11 @@ const CreateValidTypesInternalServerErrorCode int = 500
 swagger:response createValidTypesInternalServerError
 */
 type CreateValidTypesInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateValidTypesInternalServerError creates CreateValidTypesInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewCreateValidTypesInternalServerError() *CreateValidTypesInternalServerErr
 	return &CreateValidTypesInternalServerError{}
 }
 
+// WithPayload adds the payload to the create valid types internal server error response
+func (o *CreateValidTypesInternalServerError) WithPayload(payload string) *CreateValidTypesInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create valid types internal server error response
+func (o *CreateValidTypesInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateValidTypesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

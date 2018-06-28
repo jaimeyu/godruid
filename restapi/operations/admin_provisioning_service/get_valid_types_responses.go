@@ -57,6 +57,49 @@ func (o *GetValidTypesOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
+// GetValidTypesForbiddenCode is the HTTP code returned for type GetValidTypesForbidden
+const GetValidTypesForbiddenCode int = 403
+
+/*GetValidTypesForbidden Requestor does not have authorization to perform this action
+
+swagger:response getValidTypesForbidden
+*/
+type GetValidTypesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetValidTypesForbidden creates GetValidTypesForbidden with default headers values
+func NewGetValidTypesForbidden() *GetValidTypesForbidden {
+
+	return &GetValidTypesForbidden{}
+}
+
+// WithPayload adds the payload to the get valid types forbidden response
+func (o *GetValidTypesForbidden) WithPayload(payload string) *GetValidTypesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get valid types forbidden response
+func (o *GetValidTypesForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetValidTypesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetValidTypesInternalServerErrorCode is the HTTP code returned for type GetValidTypesInternalServerError
 const GetValidTypesInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetValidTypesInternalServerErrorCode int = 500
 swagger:response getValidTypesInternalServerError
 */
 type GetValidTypesInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetValidTypesInternalServerError creates GetValidTypesInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetValidTypesInternalServerError() *GetValidTypesInternalServerError {
 	return &GetValidTypesInternalServerError{}
 }
 
+// WithPayload adds the payload to the get valid types internal server error response
+func (o *GetValidTypesInternalServerError) WithPayload(payload string) *GetValidTypesInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get valid types internal server error response
+func (o *GetValidTypesInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetValidTypesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

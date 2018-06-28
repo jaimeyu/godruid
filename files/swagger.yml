@@ -353,8 +353,16 @@ paths:
             $ref: '#/definitions/JsonApiIngestionDictionary'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -377,8 +385,16 @@ paths:
             $ref: '#/definitions/JsonApiIngestionDictionary'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -397,8 +413,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
     delete:
@@ -411,8 +433,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   /v1/valid-types:
@@ -430,8 +458,16 @@ paths:
             $ref: '#/definitions/JsonApiValidTypes'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -454,8 +490,16 @@ paths:
             $ref: '#/definitions/JsonApiValidTypes'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -474,8 +518,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
     delete:
@@ -488,8 +538,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   /v1/tenants/{tenantId}/users:

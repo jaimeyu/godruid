@@ -57,6 +57,49 @@ func (o *DeleteIngestionDictionaryOK) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// DeleteIngestionDictionaryForbiddenCode is the HTTP code returned for type DeleteIngestionDictionaryForbidden
+const DeleteIngestionDictionaryForbiddenCode int = 403
+
+/*DeleteIngestionDictionaryForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteIngestionDictionaryForbidden
+*/
+type DeleteIngestionDictionaryForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteIngestionDictionaryForbidden creates DeleteIngestionDictionaryForbidden with default headers values
+func NewDeleteIngestionDictionaryForbidden() *DeleteIngestionDictionaryForbidden {
+
+	return &DeleteIngestionDictionaryForbidden{}
+}
+
+// WithPayload adds the payload to the delete ingestion dictionary forbidden response
+func (o *DeleteIngestionDictionaryForbidden) WithPayload(payload string) *DeleteIngestionDictionaryForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete ingestion dictionary forbidden response
+func (o *DeleteIngestionDictionaryForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteIngestionDictionaryForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteIngestionDictionaryInternalServerErrorCode is the HTTP code returned for type DeleteIngestionDictionaryInternalServerError
 const DeleteIngestionDictionaryInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteIngestionDictionaryInternalServerErrorCode int = 500
 swagger:response deleteIngestionDictionaryInternalServerError
 */
 type DeleteIngestionDictionaryInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteIngestionDictionaryInternalServerError creates DeleteIngestionDictionaryInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteIngestionDictionaryInternalServerError() *DeleteIngestionDictionar
 	return &DeleteIngestionDictionaryInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete ingestion dictionary internal server error response
+func (o *DeleteIngestionDictionaryInternalServerError) WithPayload(payload string) *DeleteIngestionDictionaryInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete ingestion dictionary internal server error response
+func (o *DeleteIngestionDictionaryInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteIngestionDictionaryInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

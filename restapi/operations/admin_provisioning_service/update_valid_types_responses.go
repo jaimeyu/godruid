@@ -65,6 +65,11 @@ const UpdateValidTypesBadRequestCode int = 400
 swagger:response updateValidTypesBadRequest
 */
 type UpdateValidTypesBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateValidTypesBadRequest creates UpdateValidTypesBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateValidTypesBadRequest() *UpdateValidTypesBadRequest {
 	return &UpdateValidTypesBadRequest{}
 }
 
+// WithPayload adds the payload to the update valid types bad request response
+func (o *UpdateValidTypesBadRequest) WithPayload(payload string) *UpdateValidTypesBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update valid types bad request response
+func (o *UpdateValidTypesBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateValidTypesBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateValidTypesForbiddenCode is the HTTP code returned for type UpdateValidTypesForbidden
+const UpdateValidTypesForbiddenCode int = 403
+
+/*UpdateValidTypesForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateValidTypesForbidden
+*/
+type UpdateValidTypesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateValidTypesForbidden creates UpdateValidTypesForbidden with default headers values
+func NewUpdateValidTypesForbidden() *UpdateValidTypesForbidden {
+
+	return &UpdateValidTypesForbidden{}
+}
+
+// WithPayload adds the payload to the update valid types forbidden response
+func (o *UpdateValidTypesForbidden) WithPayload(payload string) *UpdateValidTypesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update valid types forbidden response
+func (o *UpdateValidTypesForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateValidTypesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateValidTypesInternalServerErrorCode is the HTTP code returned for type UpdateValidTypesInternalServerError
@@ -89,6 +151,11 @@ const UpdateValidTypesInternalServerErrorCode int = 500
 swagger:response updateValidTypesInternalServerError
 */
 type UpdateValidTypesInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateValidTypesInternalServerError creates UpdateValidTypesInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateValidTypesInternalServerError() *UpdateValidTypesInternalServerErr
 	return &UpdateValidTypesInternalServerError{}
 }
 
+// WithPayload adds the payload to the update valid types internal server error response
+func (o *UpdateValidTypesInternalServerError) WithPayload(payload string) *UpdateValidTypesInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update valid types internal server error response
+func (o *UpdateValidTypesInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateValidTypesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

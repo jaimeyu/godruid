@@ -57,6 +57,49 @@ func (o *GetIngestionDictionaryOK) WriteResponse(rw http.ResponseWriter, produce
 	}
 }
 
+// GetIngestionDictionaryForbiddenCode is the HTTP code returned for type GetIngestionDictionaryForbidden
+const GetIngestionDictionaryForbiddenCode int = 403
+
+/*GetIngestionDictionaryForbidden Requestor does not have authorization to perform this action
+
+swagger:response getIngestionDictionaryForbidden
+*/
+type GetIngestionDictionaryForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetIngestionDictionaryForbidden creates GetIngestionDictionaryForbidden with default headers values
+func NewGetIngestionDictionaryForbidden() *GetIngestionDictionaryForbidden {
+
+	return &GetIngestionDictionaryForbidden{}
+}
+
+// WithPayload adds the payload to the get ingestion dictionary forbidden response
+func (o *GetIngestionDictionaryForbidden) WithPayload(payload string) *GetIngestionDictionaryForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get ingestion dictionary forbidden response
+func (o *GetIngestionDictionaryForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetIngestionDictionaryForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetIngestionDictionaryInternalServerErrorCode is the HTTP code returned for type GetIngestionDictionaryInternalServerError
 const GetIngestionDictionaryInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetIngestionDictionaryInternalServerErrorCode int = 500
 swagger:response getIngestionDictionaryInternalServerError
 */
 type GetIngestionDictionaryInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetIngestionDictionaryInternalServerError creates GetIngestionDictionaryInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetIngestionDictionaryInternalServerError() *GetIngestionDictionaryInter
 	return &GetIngestionDictionaryInternalServerError{}
 }
 
+// WithPayload adds the payload to the get ingestion dictionary internal server error response
+func (o *GetIngestionDictionaryInternalServerError) WithPayload(payload string) *GetIngestionDictionaryInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get ingestion dictionary internal server error response
+func (o *GetIngestionDictionaryInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetIngestionDictionaryInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

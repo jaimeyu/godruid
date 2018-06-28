@@ -61,9 +61,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		return middleware.NotImplemented("operation tenant_provisioning_service.BulkUpdateMonitoredObject has not yet been implemented")
 	})
 
-	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.CreateIngestionDictionary has not yet been implemented")
-	})
+	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(handlers.HandleCreateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceCreateIngestionProfileHandler = tenant_provisioning_service.CreateIngestionProfileHandlerFunc(func(params tenant_provisioning_service.CreateIngestionProfileParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateIngestionProfile has not yet been implemented")
 	})
@@ -92,13 +90,8 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceCreateTenantUserHandler = tenant_provisioning_service.CreateTenantUserHandlerFunc(func(params tenant_provisioning_service.CreateTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantUser has not yet been implemented")
 	})
-	api.AdminProvisioningServiceCreateValidTypesHandler = admin_provisioning_service.CreateValidTypesHandlerFunc(func(params admin_provisioning_service.CreateValidTypesParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.CreateValidTypes has not yet been implemented")
-	})
-
-	api.AdminProvisioningServiceDeleteIngestionDictionaryHandler = admin_provisioning_service.DeleteIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.DeleteIngestionDictionaryParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.DeleteIngestionDictionary has not yet been implemented")
-	})
+	api.AdminProvisioningServiceCreateValidTypesHandler = admin_provisioning_service.CreateValidTypesHandlerFunc(handlers.HandleCreateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
+	api.AdminProvisioningServiceDeleteIngestionDictionaryHandler = admin_provisioning_service.DeleteIngestionDictionaryHandlerFunc(handlers.HandleDeleteIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceDeleteReportScheduleConfigHandler = tenant_provisioning_service.DeleteReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.DeleteReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteReportScheduleConfig has not yet been implemented")
 	})
@@ -127,9 +120,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteTenantUserHandler = tenant_provisioning_service.DeleteTenantUserHandlerFunc(func(params tenant_provisioning_service.DeleteTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantUser has not yet been implemented")
 	})
-	api.AdminProvisioningServiceDeleteValidTypesHandler = admin_provisioning_service.DeleteValidTypesHandlerFunc(func(params admin_provisioning_service.DeleteValidTypesParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.DeleteValidTypes has not yet been implemented")
-	})
+	api.AdminProvisioningServiceDeleteValidTypesHandler = admin_provisioning_service.DeleteValidTypesHandlerFunc(handlers.HandleDeleteValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 	api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(func(params metrics_service.GenSLAReportParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.GenSLAReport has not yet been implemented")
 	})
@@ -168,9 +159,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(func(params metrics_service.GetHistogramParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.GetHistogram has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.GetIngestionDictionaryParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetIngestionDictionary has not yet been implemented")
-	})
+	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(handlers.HandleGetIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(func(params metrics_service.GetRawMetricsParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.GetRawMetrics has not yet been implemented")
 	})
@@ -219,9 +208,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(func(params metrics_service.GetTopNForMetricParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.GetTopNForMetric has not yet been implemented")
 	})
-	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetValidTypes has not yet been implemented")
-	})
+	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(handlers.HandleGetValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceGetTenantIDByAliasHandler = admin_provisioning_service.GetTenantIDByAliasHandlerFunc(handlers.HandleGetTenantIDByAlias(adminDB))
 	api.TenantProvisioningServicePatchTenantMetadataHandler = tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantMetadata has not yet been implemented")
@@ -247,9 +234,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		return middleware.NotImplemented("operation metrics_service.QueryThresholdCrossing has not yet been implemented")
 	})
 
-	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.UpdateIngestionDictionaryParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateIngestionDictionary has not yet been implemented")
-	})
+	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(handlers.HandleUpdateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceUpdateReportScheduleConfigHandler = tenant_provisioning_service.UpdateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.UpdateReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateReportScheduleConfig has not yet been implemented")
 	})
@@ -260,11 +245,10 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceUpdateTenantConnectorInstanceHandler = tenant_provisioning_service.UpdateTenantConnectorInstanceHandlerFunc(func(params tenant_provisioning_service.UpdateTenantConnectorInstanceParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantConnectorInstance has not yet been implemented")
 	})
-	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(func(params admin_provisioning_service.UpdateValidTypesParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateValidTypes has not yet been implemented")
-	})
+	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(handlers.HandleUpdateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 
 	// TODO: calls that will be removed, but just moving them here for now until it is certain we will not use them
+	// ======================= START OF CALLS TO REMOVE ===========================================================
 	api.AdminProvisioningServiceCreateAdminUserHandler = admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.CreateAdminUser has not yet been implemented")
 	})
@@ -304,7 +288,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceUpdateTenantUserHandler = tenant_provisioning_service.UpdateTenantUserHandlerFunc(func(params tenant_provisioning_service.UpdateTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantUser has not yet been implemented")
 	})
-	// END OF CALLS TO BE REMOVED
+	// ============================================ END OF CALLS TO BE REMOVED ==================================================================
 
 	api.ServerShutdown = func() {}
 

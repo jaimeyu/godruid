@@ -789,6 +789,7 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	return &result
 }
 
+// Generates random meta data for monitored objects
 func generateRandomMeta() map[string]string {
 	num := rand.Intn(8)
 	// Generate random meta data

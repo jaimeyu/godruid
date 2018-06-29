@@ -1648,7 +1648,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
       tags:
         - TenantProvisioningService
     put:
@@ -3479,6 +3479,8 @@ definitions:
       _rev:
         type: "string"
       datatype:
+        type: "string"
+      name:
         type: "string"
       thresholds:
         $ref: '#/definitions/TenantThresholdProfileVendorMap'

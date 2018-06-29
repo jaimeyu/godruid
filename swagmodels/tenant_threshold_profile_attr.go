@@ -31,6 +31,9 @@ type TenantThresholdProfileAttr struct {
 	// last modified timestamp
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
 
+	// name
+	Name string `json:"name,omitempty"`
+
 	// tenant Id
 	TenantID string `json:"tenantId,omitempty"`
 

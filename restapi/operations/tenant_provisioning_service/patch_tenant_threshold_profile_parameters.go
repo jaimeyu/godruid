@@ -38,7 +38,7 @@ type PatchTenantThresholdProfileParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *swagmodels.JSONAPITenantMonitoredObject
+	Body *swagmodels.JSONAPITenantThresholdProfile
 	/*
 	  Required: true
 	  In: path
@@ -57,7 +57,7 @@ func (o *PatchTenantThresholdProfileParams) BindRequest(r *http.Request, route *
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body swagmodels.JSONAPITenantMonitoredObject
+		var body swagmodels.JSONAPITenantThresholdProfile
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

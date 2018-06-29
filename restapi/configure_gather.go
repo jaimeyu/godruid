@@ -76,9 +76,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceCreateTenantMonitoredObjectHandler = tenant_provisioning_service.CreateTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.CreateTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantMonitoredObject has not yet been implemented")
 	})
-	api.TenantProvisioningServiceCreateTenantThresholdProfileHandler = tenant_provisioning_service.CreateTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.CreateTenantThresholdProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantThresholdProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceCreateTenantThresholdProfileHandler = tenant_provisioning_service.CreateTenantThresholdProfileHandlerFunc(handlers.HandleCreateTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceCreateTenantUserHandler = tenant_provisioning_service.CreateTenantUserHandlerFunc(func(params tenant_provisioning_service.CreateTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantUser has not yet been implemented")
 	})
@@ -98,9 +96,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteTenantMonitoredObjectHandler = tenant_provisioning_service.DeleteTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.DeleteTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantMonitoredObject has not yet been implemented")
 	})
-	api.TenantProvisioningServiceDeleteTenantThresholdProfileHandler = tenant_provisioning_service.DeleteTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.DeleteTenantThresholdProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantThresholdProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceDeleteTenantThresholdProfileHandler = tenant_provisioning_service.DeleteTenantThresholdProfileHandlerFunc(handlers.HandleDeleteTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceDeleteTenantUserHandler = tenant_provisioning_service.DeleteTenantUserHandlerFunc(func(params tenant_provisioning_service.DeleteTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantUser has not yet been implemented")
 	})
@@ -122,9 +118,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceGetAllTenantMonitoredObjectsHandler = tenant_provisioning_service.GetAllTenantMonitoredObjectsHandlerFunc(func(params tenant_provisioning_service.GetAllTenantMonitoredObjectsParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllTenantMonitoredObjects has not yet been implemented")
 	})
-	api.TenantProvisioningServiceGetAllTenantThresholdProfilesHandler = tenant_provisioning_service.GetAllTenantThresholdProfilesHandlerFunc(func(params tenant_provisioning_service.GetAllTenantThresholdProfilesParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllTenantThresholdProfiles has not yet been implemented")
-	})
+	api.TenantProvisioningServiceGetAllTenantThresholdProfilesHandler = tenant_provisioning_service.GetAllTenantThresholdProfilesHandlerFunc(handlers.HandleGetAllTenantThresholdProfiles(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetAllTenantUsersHandler = tenant_provisioning_service.GetAllTenantUsersHandlerFunc(func(params tenant_provisioning_service.GetAllTenantUsersParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllTenantUsers has not yet been implemented")
 	})
@@ -158,9 +152,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantMonitoredObject has not yet been implemented")
 	})
 	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(handlers.HandleGetTenantSummaryByAlias(adminDB))
-	api.TenantProvisioningServiceGetTenantThresholdProfileHandler = tenant_provisioning_service.GetTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.GetTenantThresholdProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantThresholdProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceGetTenantThresholdProfileHandler = tenant_provisioning_service.GetTenantThresholdProfileHandlerFunc(handlers.HandleGetTenantThresholdProfile(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetTenantUserHandler = tenant_provisioning_service.GetTenantUserHandlerFunc(func(params tenant_provisioning_service.GetTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantUser has not yet been implemented")
 	})
@@ -187,9 +179,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServicePatchTenantMonitoredObjectHandler = tenant_provisioning_service.PatchTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.PatchTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantMonitoredObject has not yet been implemented")
 	})
-	api.TenantProvisioningServicePatchTenantThresholdProfileHandler = tenant_provisioning_service.PatchTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.PatchTenantThresholdProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantThresholdProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServicePatchTenantThresholdProfileHandler = tenant_provisioning_service.PatchTenantThresholdProfileHandlerFunc(handlers.HandlePatchTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(func(params metrics_service.QueryAggregatedMetricsParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.QueryAggregatedMetrics has not yet been implemented")
@@ -238,9 +228,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceUpdateTenantMonitoredObjectHandler = tenant_provisioning_service.UpdateTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.UpdateTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantMonitoredObject has not yet been implemented")
 	})
-	api.TenantProvisioningServiceUpdateTenantThresholdProfileHandler = tenant_provisioning_service.UpdateTenantThresholdProfileHandlerFunc(func(params tenant_provisioning_service.UpdateTenantThresholdProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantThresholdProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceUpdateTenantThresholdProfileHandler = tenant_provisioning_service.UpdateTenantThresholdProfileHandlerFunc(handlers.HandleUpdateTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceUpdateTenantUserHandler = tenant_provisioning_service.UpdateTenantUserHandlerFunc(func(params tenant_provisioning_service.UpdateTenantUserParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantUser has not yet been implemented")
 	})

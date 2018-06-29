@@ -179,7 +179,7 @@ func HandleDeleteTenantIngestionProfile(allowedRoles []string, tenantDB datastor
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.DeleteTenantConnectorConfig(params.TenantID, params.IngestionProfileID)
+		result, err := tenantDB.DeleteTenantIngestionProfile(params.TenantID, params.IngestionProfileID)
 		if err != nil {
 			return tenant_provisioning_service.NewDeleteTenantIngestionProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantIngestionProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteIngPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}

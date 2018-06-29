@@ -103,7 +103,7 @@ func HandleUpdateTenantDomain(allowedRoles []string, tenantDB datastore.TenantSe
 		}
 
 		if changeNotificationEnabled {
-			NotifyDomainCreated(data.TenantID, &data)
+			NotifyDomainUpdated(data.TenantID, &data)
 		}
 
 		converted := swagmodels.JSONAPITenantDomain{}

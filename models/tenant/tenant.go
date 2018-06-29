@@ -432,7 +432,7 @@ type MonitoredObject struct {
 	REV                   string   `json:"_rev"`
 	Datatype              string   `json:"datatype"`
 	TenantID              string   `json:"tenantId"`
-	MonitoredObjectID     string   `json:"id"`
+	MonitoredObjectID     string   `json:"objectId"`
 	ActuatorType          string   `json:"actuatorType"`
 	ActuatorName          string   `json:"actuatorName"`
 	ReflectorType         string   `json:"reflectorType"`

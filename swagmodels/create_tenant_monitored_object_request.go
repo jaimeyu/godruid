@@ -19,6 +19,12 @@ import (
 // swagger:model CreateTenantMonitoredObjectRequest
 type CreateTenantMonitoredObjectRequest struct {
 
+	// id
+	ID string `json:"_id,omitempty"`
+
+	// rev
+	Rev string `json:"_rev,omitempty"`
+
 	// actuator name
 	ActuatorName string `json:"actuatorName,omitempty"`
 
@@ -28,8 +34,8 @@ type CreateTenantMonitoredObjectRequest struct {
 	// domain set
 	DomainSet []string `json:"domainSet"`
 
-	// id
-	ID string `json:"id,omitempty"`
+	// object Id
+	ObjectID string `json:"objectId,omitempty"`
 
 	// object name
 	ObjectName string `json:"objectName,omitempty"`

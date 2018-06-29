@@ -38,7 +38,7 @@ type BulkUpdateMonitoredObjectParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body swagmodels.BulkUpdateMonitoredObjectParamsBody
+	Body swagmodels.BulkMonitoredObjectRequest
 	/*
 	  Required: true
 	  In: path
@@ -57,7 +57,7 @@ func (o *BulkUpdateMonitoredObjectParams) BindRequest(r *http.Request, route *mi
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body swagmodels.BulkUpdateMonitoredObjectParamsBody
+		var body swagmodels.BulkMonitoredObjectRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

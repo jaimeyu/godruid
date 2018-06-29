@@ -54,12 +54,8 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
 
-	api.TenantProvisioningServiceBulkInsertMonitoredObjectHandler = tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.BulkInsertMonitoredObject has not yet been implemented")
-	})
-	api.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler = tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.BulkUpdateMonitoredObject has not yet been implemented")
-	})
+	api.TenantProvisioningServiceBulkInsertMonitoredObjectHandler = tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(handlers.HandleBulkInsertMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
+	api.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler = tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(handlers.HandleBulkUpdateMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(handlers.HandleCreateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceCreateTenantIngestionProfileHandler = tenant_provisioning_service.CreateTenantIngestionProfileHandlerFunc(handlers.HandleCreateTenantIngestionProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))

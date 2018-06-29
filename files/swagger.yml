@@ -2011,7 +2011,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/BulkOperationResult'
+            $ref: '#/definitions/BulkOperationResponse'
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -2033,9 +2033,7 @@ paths:
           in: body
           required: true
           schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
     put:
@@ -2047,7 +2045,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/BulkOperationResult'
+            $ref: '#/definitions/BulkOperationResponse'
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -2069,9 +2067,7 @@ paths:
           in: body
           required: true
           schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
 
@@ -3266,12 +3262,21 @@ definitions:
       domains:
         $ref: '#/definitions/JsonApiRelationship'
 
+  BulkMonitoredObjectRequest:
+    type: array
+    items:
+      $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+
   CreateTenantMonitoredObjectRequest:
     type: "object"
     properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -3315,6 +3320,11 @@ definitions:
           type: "array"
           items: 
             type: "string"
+
+  BulkOperationResponse:
+    type: "array"
+    items:
+      $ref: '#/definitions/BulkOperationResult'
 
   BulkOperationResult:
     type: "object"

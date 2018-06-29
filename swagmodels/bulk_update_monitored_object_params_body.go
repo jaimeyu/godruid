@@ -22,7 +22,7 @@ type BulkUpdateMonitoredObjectParamsBody struct {
 
 	// p0
 	// Required: true
-	P0 *CreateTenantMonitoredObjectRequest `json:"-"` // custom serializer
+	P0 BulkMonitoredObjectRequest `json:"-"` // custom serializer
 
 }
 
@@ -44,7 +44,7 @@ func (m *BulkUpdateMonitoredObjectParamsBody) UnmarshalJSON(raw []byte) error {
 		buf = bytes.NewBuffer(stage1[0])
 		dec := json.NewDecoder(buf)
 		dec.UseNumber()
-		if err := dec.Decode(m.P0); err != nil {
+		if err := dec.Decode(&m.P0); err != nil {
 			return err
 		}
 
@@ -83,15 +83,11 @@ func (m *BulkUpdateMonitoredObjectParamsBody) validateP0(formats strfmt.Registry
 		return err
 	}
 
-	if m.P0 != nil {
-
-		if err := m.P0.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("0")
-			}
-			return err
+	if err := m.P0.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("0")
 		}
-
+		return err
 	}
 
 	return nil

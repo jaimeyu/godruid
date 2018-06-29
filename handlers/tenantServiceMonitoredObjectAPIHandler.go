@@ -312,3 +312,130 @@ func HandleGetDomainToMonitoredObjectMap(allowedRoles []string, tenantDB datasto
 		return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapOK().WithPayload(&converted)
 	}
 }
+
+// HandleBulkInsertMonitoredObjects - inserts monitored objects in bulk for a tenant
+func HandleBulkInsertMonitoredObjects(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
+	return func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		logger.Log.Infof("Creating %s in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
+
+		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk insert %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		logger.Log.Infof("Recieved: %s", models.AsJSONString(params.Body))
+		requestBytes, err := json.Marshal(params.Body)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Unmarshal the request
+		data := []*tenmod.MonitoredObject{}
+		err = json.Unmarshal(requestBytes, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		if len(data) == 0 {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, "No Monitored Objects in provided in the request"), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Validate the request data
+		for _, obj := range data {
+			if err = obj.Validate(false); err != nil {
+
+			}
+
+			if obj.TenantID != params.TenantID {
+				return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+		}
+
+		// Issue request to DAO Layer
+		result, err := tenantDB.BulkInsertMonitoredObjects(params.TenantID, data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		if changeNotificationEnabled {
+			NotifyMonitoredObjectCreated(params.TenantID, data...)
+		}
+
+		res, err := json.Marshal(result)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to serialize bulk insert %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := swagmodels.BulkOperationResponse{}
+		err = json.Unmarshal(res, &converted)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to format bulk insert %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
+		return tenant_provisioning_service.NewBulkInsertMonitoredObjectOK().WithPayload(converted)
+	}
+}
+
+// HandleBulkUpdateMonitoredObjects - inserts monitored objects in bulk for a tenant
+func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
+	return func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		logger.Log.Infof("Updating %s in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
+
+		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		requestBytes, err := json.Marshal(params.Body)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Unmarshal the request
+		data := []*tenmod.MonitoredObject{}
+		err = json.Unmarshal(requestBytes, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Validate the request data
+		for _, obj := range data {
+			if err = obj.Validate(true); err != nil || obj.TenantID != params.TenantID {
+				return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have ID and revision"), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+			if obj.TenantID != params.TenantID {
+				return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID "+params.TenantID), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+
+		}
+
+		// Issue request to DAO Layer
+		result, err := tenantDB.BulkUpdateMonitoredObjects(params.TenantID, data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		if changeNotificationEnabled {
+			NotifyMonitoredObjectUpdated(params.TenantID, data...)
+		}
+
+		res, err := json.Marshal(result)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to serialize bulk update %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := swagmodels.BulkOperationResponse{}
+		err = json.Unmarshal(res, &converted)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to format bulk update %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
+		return tenant_provisioning_service.NewBulkUpdateMonitoredObjectOK().WithPayload(converted)
+	}
+}

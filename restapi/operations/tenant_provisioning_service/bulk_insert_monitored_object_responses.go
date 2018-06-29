@@ -25,7 +25,7 @@ type BulkInsertMonitoredObjectOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.BulkOperationResult `json:"body,omitempty"`
+	Payload swagmodels.BulkOperationResponse `json:"body,omitempty"`
 }
 
 // NewBulkInsertMonitoredObjectOK creates BulkInsertMonitoredObjectOK with default headers values
@@ -35,13 +35,13 @@ func NewBulkInsertMonitoredObjectOK() *BulkInsertMonitoredObjectOK {
 }
 
 // WithPayload adds the payload to the bulk insert monitored object o k response
-func (o *BulkInsertMonitoredObjectOK) WithPayload(payload *swagmodels.BulkOperationResult) *BulkInsertMonitoredObjectOK {
+func (o *BulkInsertMonitoredObjectOK) WithPayload(payload swagmodels.BulkOperationResponse) *BulkInsertMonitoredObjectOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the bulk insert monitored object o k response
-func (o *BulkInsertMonitoredObjectOK) SetPayload(payload *swagmodels.BulkOperationResult) {
+func (o *BulkInsertMonitoredObjectOK) SetPayload(payload swagmodels.BulkOperationResponse) {
 	o.Payload = payload
 }
 
@@ -49,12 +49,15 @@ func (o *BulkInsertMonitoredObjectOK) SetPayload(payload *swagmodels.BulkOperati
 func (o *BulkInsertMonitoredObjectOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
+	payload := o.Payload
+	if payload == nil {
+		payload = make(swagmodels.BulkOperationResponse, 0, 50)
 	}
+
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // BulkInsertMonitoredObjectBadRequestCode is the HTTP code returned for type BulkInsertMonitoredObjectBadRequest

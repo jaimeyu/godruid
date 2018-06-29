@@ -384,7 +384,6 @@ func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeL
 	if err != nil {
 		return err
 	}
-	logger.Log.Debugf("dbname: %s", dbName)
 
 	genericFormat := make(map[string]interface{})
 
@@ -392,12 +391,10 @@ func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeL
 
 	dataToBytes, err = json.Marshal(data)
 	if err != nil {
-		logger.Log.Debugf("Unable to convert data to CouchDB format to persist: %s", err.Error())
 		return err
 	}
 	err = json.Unmarshal(dataToBytes, &genericFormat)
 	if err != nil {
-		logger.Log.Debugf("Unable to convert data to CouchDB format to persist: %s", err.Error())
 		return err
 	}
 
@@ -413,7 +410,9 @@ func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeL
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Updated %s: %+v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %+v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 

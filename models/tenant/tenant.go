@@ -677,3 +677,48 @@ type Dashboard struct {
 	Name      string   `json:"name"`
 	DomainSet []string `json:"domainSet"`
 }
+
+type MonitoredObjectMetadataPostItem struct {
+	// Relates to which property in the monitoredbjects
+	// Tells gather that MetadataKey in the Metadata should match
+	// the key in monitored object.
+	// Eg:
+	// Keyname     -> "objectName"
+	// MetadataKey -> "Enode B"
+	// Metadata    -> {"Enode B": "E1000", "region":"Paris","Voip":"true"}
+	//
+	KeyName string `json:"keyName"`
+
+	// Mandatory
+	MetadataKey string `json:"MetadataKey"`
+
+	// Mandatory
+	Metadata map[string]string `json:"metadata"`
+}
+
+type MonitoredObjectMetadataPost struct {
+	ID  string `json:"_id"`
+	REV string `json:"_rev"`
+	// LIMIT TO 50
+	Items []MonitoredObjectMetadataPostItem `json:"items"`
+}
+
+func (meta *MonitoredObjectMetadataPost) Validate(isUpdate bool) error {
+	if len(meta.Items) == 0 {
+		return errors.New("Monitored Object List cannot be empty")
+	}
+	return nil
+}
+
+// Error models
+type RequestErrorItem struct {
+	Reason string                          `json:"reason"`
+	Item   MonitoredObjectMetadataPostItem `json:"item"`
+}
+
+// On a non-200 response, the body will contain a
+// JSON object describing the failure,
+// especially which monitored object failed to get inserted.
+type RequestError struct {
+	Issues []RequestErrorItem `json:"issues"`
+}

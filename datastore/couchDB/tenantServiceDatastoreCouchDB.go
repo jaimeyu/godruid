@@ -787,19 +787,108 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
 			return err
 		}
-
-		// There is a bug here whe update design doc adds _design to the dbname.
-		dbName = createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-		if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
-			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
+		err = writeMetaDesignDocument(tsd, tenantID, designDoc)
+		if err != nil {
 			return err
 		}
-		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
-
 	}
 
 	return nil
 
+}
+
+func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
+	// There is a bug here whe update design doc adds _design to the dbname.
+	dbName := generateMonitoredObjectUrl(tenantID, tsd) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
+		if logger.IsDebugEnabled() {
+			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
+		}
+		return err
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
+	}
+	return nil
+}
+
+func generateMonitoredObjectUrl(tenantID string, tsd *TenantServiceDatastoreCouchDB) string {
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	return dbName
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
+
+	dbName := generateMonitoredObjectUrl(tenantID, tsd)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	index := "monitoredObjectCount/byName"
+	selector := fmt.Sprintf(`in(objectName, []string{"%s"}`, name)
+	// Expect only 1 return
+	const expectOnly1Result = 1
+	fetchedData, err := db.Query([]string{"meta.objectName"}, selector, nil, expectOnly1Result, nil, index)
+	logger.Log.Debugf("!!Returning objectName search : %s", models.AsJSONString(fetchedData))
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("!!Returning objectName search : %s", models.AsJSONString(fetchedData))
+	mo := tenmod.MonitoredObject{}
+
+	fetchedMonObject, err := getByDocID("1", "getting by objectname", db)
+	//fetchedMonObject, err := getByDocID(data["rows"], "getting by objectname", db)
+	if err != nil {
+		return nil, err
+	}
+	raw, _ := json.Marshal(fetchedMonObject)
+	err = json.Unmarshal(raw, mo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mo, nil
+}
+
+/*
+ This function takes a key and then creates an index for it and then start the indexer.
+ We currently only support generating an index based on a singular key.
+*/
+func createMetaDataIndex(tenantID string, keyNames []string, docName string, indexName string, tsd *TenantServiceDatastoreCouchDB) error {
+
+	dbName := generateMonitoredObjectUrl(tenantID, tsd)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+	//func (d *Database) PutIndex(indexFields []string, ddoc, name string) (string, string, error)
+	design, index, err := db.PutIndex(keyNames, docName, indexName)
+	if err != nil {
+		return err
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Successfully created Indexer -> %s:%s", design, index)
+	}
+
+	// Now force the indexer to crunch!
+	// TODO, needs to prove this works
+	// Do not wait for this to finish, it will certainly take tens of minutes
+	go func(design string) {
+		logger.Log.Errorf("Starting to Index %s", design)
+		// View() will automatically convert the {{design}}/{{index}} to
+		// _design/{{design}}/_view/{{index}}
+		_, err = db.View(design+"/"+index, nil, nil)
+		if err != nil {
+			logger.Log.Errorf("Unsuccessfully Indexed %s", design)
+			return
+		}
+		logger.Log.Debugf("Successfully Indexer %s", design)
+
+	}(design)
+
+	return nil
 }
 
 func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
@@ -808,7 +897,7 @@ func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *te
 		keyViewName = "%sView"
 		keyViewFn   = `function (doc) {
 			if (doc.data.meta["%s"]) {
-				emit(doc.data.datatype, doc)
+				emit(doc.data.datatype, doc.id)
 			}
 		}`
 		keyCountName = "%sCount"
@@ -837,9 +926,9 @@ func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *te
 		if designDoc.Views[countName] == nil {
 			changeDetected = true
 			logger.Log.Debugf("Adding %s key to couchdb view", countName)
-			designDoc.Views[countName] = make(map[string]string)
-			designDoc.Views[countName][mapFnName] = fmt.Sprintf(keyCountFn, key)
-			designDoc.Views[countName][reduceFnName] = reduceCountFnName
+			//designDoc.Views[countName] = make(map[string]string)
+			//designDoc.Views[countName][mapFnName] = fmt.Sprintf(keyCountFn, key, key)
+			//designDoc.Views[countName][reduceFnName] = reduceCountFnName
 
 			designDoc.Views[mapName] = make(map[string]string)
 			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)

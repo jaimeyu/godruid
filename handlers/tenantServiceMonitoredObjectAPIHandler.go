@@ -277,3 +277,38 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		return tenant_provisioning_service.NewDeleteTenantMonitoredObjectOK().WithPayload(&converted)
 	}
 }
+
+// HandleGetDomainToMonitoredObjectMap - retrieves a mapping of which domains are associated with which monitored objects
+func HandleGetDomainToMonitoredObjectMap(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
+	return func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		logger.Log.Infof("Fetching %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, params.TenantID)
+
+		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+			return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.MonitoredObjectToDomainMapStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetMonObjToDomMapStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Convert the request
+		data := tenmod.MonitoredObjectCountByDomainRequest{
+			TenantID:  params.TenantID,
+			DomainSet: params.Body.DomainSet,
+			ByCount:   params.Body.ByCount,
+		}
+
+		// Issue request to DAO Layer
+		result, err := tenantDB.GetMonitoredObjectToDomainMap(&data)
+		if err != nil {
+			return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s : %s", tenmod.MonitoredObjectToDomainMapStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetMonObjToDomMapStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := swagmodels.MonitoredObjectCountByDomainResponse{
+			DomainToMonitoredObjectCountMap: result.DomainToMonitoredObjectCountMap,
+			DomainToMonitoredObjectSetMap:   result.DomainToMonitoredObjectSetMap,
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Retrieved %s %s", tenmod.TenantMonitoredObjectStr, utils.AsJSONString(result))
+		return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapOK().WithPayload(&converted)
+	}
+}

@@ -3572,8 +3572,6 @@ definitions:
         type: "string"
       tenantName:
         type: "string"
-      # defaultThresholdProfile:
-      #   type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:

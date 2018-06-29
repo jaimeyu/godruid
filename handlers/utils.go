@@ -356,7 +356,6 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 
 	result.TenantID = tenantID
 	result.Datatype = string(tenmod.TenantMetaType)
-	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 
 	result.CreatedTimestamp = db.MakeTimestamp()

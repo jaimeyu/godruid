@@ -783,7 +783,24 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	result.ObjectName = generateRandomString(10)
 	result.ObjectType = string(tenmod.TwampPE)
 
+	// Generate random meta data
+	result.Meta = generateRandomMeta()
+
 	return &result
+}
+
+func generateRandomMeta() map[string]string {
+	num := rand.Intn(8)
+	// Generate random meta data
+	regions := []string{"london", "tokyo", "toronto", "montreal", "vancouver", "calgary", "regina", "new york"}
+	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple"}
+	superheroes := []string{"superman", "batman", "ironman", "spider-man"}
+	meta := make(map[string]string)
+	meta["region"] = regions[num%len(regions)]
+	meta["colors"] = regions[num%len(colors)]
+	meta["superheroes"] = regions[num%len(superheroes)]
+
+	return meta
 }
 
 // Compares two uint64 and returns the smallest one

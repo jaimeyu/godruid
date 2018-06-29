@@ -57,6 +57,49 @@ func (o *GetAllTenantThresholdProfilesOK) WriteResponse(rw http.ResponseWriter, 
 	}
 }
 
+// GetAllTenantThresholdProfilesForbiddenCode is the HTTP code returned for type GetAllTenantThresholdProfilesForbidden
+const GetAllTenantThresholdProfilesForbiddenCode int = 403
+
+/*GetAllTenantThresholdProfilesForbidden Requestor does not have authorization to perform this action
+
+swagger:response getAllTenantThresholdProfilesForbidden
+*/
+type GetAllTenantThresholdProfilesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetAllTenantThresholdProfilesForbidden creates GetAllTenantThresholdProfilesForbidden with default headers values
+func NewGetAllTenantThresholdProfilesForbidden() *GetAllTenantThresholdProfilesForbidden {
+
+	return &GetAllTenantThresholdProfilesForbidden{}
+}
+
+// WithPayload adds the payload to the get all tenant threshold profiles forbidden response
+func (o *GetAllTenantThresholdProfilesForbidden) WithPayload(payload string) *GetAllTenantThresholdProfilesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant threshold profiles forbidden response
+func (o *GetAllTenantThresholdProfilesForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAllTenantThresholdProfilesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetAllTenantThresholdProfilesInternalServerErrorCode is the HTTP code returned for type GetAllTenantThresholdProfilesInternalServerError
 const GetAllTenantThresholdProfilesInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetAllTenantThresholdProfilesInternalServerErrorCode int = 500
 swagger:response getAllTenantThresholdProfilesInternalServerError
 */
 type GetAllTenantThresholdProfilesInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetAllTenantThresholdProfilesInternalServerError creates GetAllTenantThresholdProfilesInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetAllTenantThresholdProfilesInternalServerError() *GetAllTenantThreshol
 	return &GetAllTenantThresholdProfilesInternalServerError{}
 }
 
+// WithPayload adds the payload to the get all tenant threshold profiles internal server error response
+func (o *GetAllTenantThresholdProfilesInternalServerError) WithPayload(payload string) *GetAllTenantThresholdProfilesInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant threshold profiles internal server error response
+func (o *GetAllTenantThresholdProfilesInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetAllTenantThresholdProfilesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

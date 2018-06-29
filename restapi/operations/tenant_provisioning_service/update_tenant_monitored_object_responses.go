@@ -65,6 +65,11 @@ const UpdateTenantMonitoredObjectBadRequestCode int = 400
 swagger:response updateTenantMonitoredObjectBadRequest
 */
 type UpdateTenantMonitoredObjectBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantMonitoredObjectBadRequest creates UpdateTenantMonitoredObjectBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantMonitoredObjectBadRequest() *UpdateTenantMonitoredObjectBadR
 	return &UpdateTenantMonitoredObjectBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant monitored object bad request response
+func (o *UpdateTenantMonitoredObjectBadRequest) WithPayload(payload string) *UpdateTenantMonitoredObjectBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant monitored object bad request response
+func (o *UpdateTenantMonitoredObjectBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantMonitoredObjectBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantMonitoredObjectForbiddenCode is the HTTP code returned for type UpdateTenantMonitoredObjectForbidden
+const UpdateTenantMonitoredObjectForbiddenCode int = 403
+
+/*UpdateTenantMonitoredObjectForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantMonitoredObjectForbidden
+*/
+type UpdateTenantMonitoredObjectForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantMonitoredObjectForbidden creates UpdateTenantMonitoredObjectForbidden with default headers values
+func NewUpdateTenantMonitoredObjectForbidden() *UpdateTenantMonitoredObjectForbidden {
+
+	return &UpdateTenantMonitoredObjectForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant monitored object forbidden response
+func (o *UpdateTenantMonitoredObjectForbidden) WithPayload(payload string) *UpdateTenantMonitoredObjectForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant monitored object forbidden response
+func (o *UpdateTenantMonitoredObjectForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantMonitoredObjectForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantMonitoredObjectInternalServerErrorCode is the HTTP code returned for type UpdateTenantMonitoredObjectInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantMonitoredObjectInternalServerErrorCode int = 500
 swagger:response updateTenantMonitoredObjectInternalServerError
 */
 type UpdateTenantMonitoredObjectInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantMonitoredObjectInternalServerError creates UpdateTenantMonitoredObjectInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantMonitoredObjectInternalServerError() *UpdateTenantMonitoredO
 	return &UpdateTenantMonitoredObjectInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant monitored object internal server error response
+func (o *UpdateTenantMonitoredObjectInternalServerError) WithPayload(payload string) *UpdateTenantMonitoredObjectInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant monitored object internal server error response
+func (o *UpdateTenantMonitoredObjectInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantMonitoredObjectInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

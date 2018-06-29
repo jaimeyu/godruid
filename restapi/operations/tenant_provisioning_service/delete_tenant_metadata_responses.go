@@ -57,6 +57,49 @@ func (o *DeleteTenantMetadataOK) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// DeleteTenantMetadataForbiddenCode is the HTTP code returned for type DeleteTenantMetadataForbidden
+const DeleteTenantMetadataForbiddenCode int = 403
+
+/*DeleteTenantMetadataForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantMetadataForbidden
+*/
+type DeleteTenantMetadataForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantMetadataForbidden creates DeleteTenantMetadataForbidden with default headers values
+func NewDeleteTenantMetadataForbidden() *DeleteTenantMetadataForbidden {
+
+	return &DeleteTenantMetadataForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant metadata forbidden response
+func (o *DeleteTenantMetadataForbidden) WithPayload(payload string) *DeleteTenantMetadataForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant metadata forbidden response
+func (o *DeleteTenantMetadataForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantMetadataForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantMetadataInternalServerErrorCode is the HTTP code returned for type DeleteTenantMetadataInternalServerError
 const DeleteTenantMetadataInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantMetadataInternalServerErrorCode int = 500
 swagger:response deleteTenantMetadataInternalServerError
 */
 type DeleteTenantMetadataInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantMetadataInternalServerError creates DeleteTenantMetadataInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantMetadataInternalServerError() *DeleteTenantMetadataInternalS
 	return &DeleteTenantMetadataInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant metadata internal server error response
+func (o *DeleteTenantMetadataInternalServerError) WithPayload(payload string) *DeleteTenantMetadataInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant metadata internal server error response
+func (o *DeleteTenantMetadataInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantMetadataInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

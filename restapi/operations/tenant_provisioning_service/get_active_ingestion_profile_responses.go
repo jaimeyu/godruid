@@ -57,6 +57,49 @@ func (o *GetActiveIngestionProfileOK) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// GetActiveIngestionProfileForbiddenCode is the HTTP code returned for type GetActiveIngestionProfileForbidden
+const GetActiveIngestionProfileForbiddenCode int = 403
+
+/*GetActiveIngestionProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response getActiveIngestionProfileForbidden
+*/
+type GetActiveIngestionProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetActiveIngestionProfileForbidden creates GetActiveIngestionProfileForbidden with default headers values
+func NewGetActiveIngestionProfileForbidden() *GetActiveIngestionProfileForbidden {
+
+	return &GetActiveIngestionProfileForbidden{}
+}
+
+// WithPayload adds the payload to the get active ingestion profile forbidden response
+func (o *GetActiveIngestionProfileForbidden) WithPayload(payload string) *GetActiveIngestionProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get active ingestion profile forbidden response
+func (o *GetActiveIngestionProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetActiveIngestionProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetActiveIngestionProfileInternalServerErrorCode is the HTTP code returned for type GetActiveIngestionProfileInternalServerError
 const GetActiveIngestionProfileInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetActiveIngestionProfileInternalServerErrorCode int = 500
 swagger:response getActiveIngestionProfileInternalServerError
 */
 type GetActiveIngestionProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetActiveIngestionProfileInternalServerError creates GetActiveIngestionProfileInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetActiveIngestionProfileInternalServerError() *GetActiveIngestionProfil
 	return &GetActiveIngestionProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the get active ingestion profile internal server error response
+func (o *GetActiveIngestionProfileInternalServerError) WithPayload(payload string) *GetActiveIngestionProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get active ingestion profile internal server error response
+func (o *GetActiveIngestionProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetActiveIngestionProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

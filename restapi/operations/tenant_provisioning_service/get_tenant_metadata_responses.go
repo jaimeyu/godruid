@@ -57,6 +57,49 @@ func (o *GetTenantMetadataOK) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// GetTenantMetadataForbiddenCode is the HTTP code returned for type GetTenantMetadataForbidden
+const GetTenantMetadataForbiddenCode int = 403
+
+/*GetTenantMetadataForbidden Requestor does not have authorization to perform this action
+
+swagger:response getTenantMetadataForbidden
+*/
+type GetTenantMetadataForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTenantMetadataForbidden creates GetTenantMetadataForbidden with default headers values
+func NewGetTenantMetadataForbidden() *GetTenantMetadataForbidden {
+
+	return &GetTenantMetadataForbidden{}
+}
+
+// WithPayload adds the payload to the get tenant metadata forbidden response
+func (o *GetTenantMetadataForbidden) WithPayload(payload string) *GetTenantMetadataForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant metadata forbidden response
+func (o *GetTenantMetadataForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTenantMetadataForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetTenantMetadataInternalServerErrorCode is the HTTP code returned for type GetTenantMetadataInternalServerError
 const GetTenantMetadataInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetTenantMetadataInternalServerErrorCode int = 500
 swagger:response getTenantMetadataInternalServerError
 */
 type GetTenantMetadataInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTenantMetadataInternalServerError creates GetTenantMetadataInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetTenantMetadataInternalServerError() *GetTenantMetadataInternalServerE
 	return &GetTenantMetadataInternalServerError{}
 }
 
+// WithPayload adds the payload to the get tenant metadata internal server error response
+func (o *GetTenantMetadataInternalServerError) WithPayload(payload string) *GetTenantMetadataInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant metadata internal server error response
+func (o *GetTenantMetadataInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTenantMetadataInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

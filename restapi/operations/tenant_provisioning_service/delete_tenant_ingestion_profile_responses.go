@@ -57,6 +57,49 @@ func (o *DeleteTenantIngestionProfileOK) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// DeleteTenantIngestionProfileForbiddenCode is the HTTP code returned for type DeleteTenantIngestionProfileForbidden
+const DeleteTenantIngestionProfileForbiddenCode int = 403
+
+/*DeleteTenantIngestionProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantIngestionProfileForbidden
+*/
+type DeleteTenantIngestionProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantIngestionProfileForbidden creates DeleteTenantIngestionProfileForbidden with default headers values
+func NewDeleteTenantIngestionProfileForbidden() *DeleteTenantIngestionProfileForbidden {
+
+	return &DeleteTenantIngestionProfileForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant ingestion profile forbidden response
+func (o *DeleteTenantIngestionProfileForbidden) WithPayload(payload string) *DeleteTenantIngestionProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant ingestion profile forbidden response
+func (o *DeleteTenantIngestionProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantIngestionProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantIngestionProfileInternalServerErrorCode is the HTTP code returned for type DeleteTenantIngestionProfileInternalServerError
 const DeleteTenantIngestionProfileInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantIngestionProfileInternalServerErrorCode int = 500
 swagger:response deleteTenantIngestionProfileInternalServerError
 */
 type DeleteTenantIngestionProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantIngestionProfileInternalServerError creates DeleteTenantIngestionProfileInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantIngestionProfileInternalServerError() *DeleteTenantIngestion
 	return &DeleteTenantIngestionProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant ingestion profile internal server error response
+func (o *DeleteTenantIngestionProfileInternalServerError) WithPayload(payload string) *DeleteTenantIngestionProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant ingestion profile internal server error response
+func (o *DeleteTenantIngestionProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantIngestionProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -65,6 +65,11 @@ const PatchTenantThresholdProfileBadRequestCode int = 400
 swagger:response patchTenantThresholdProfileBadRequest
 */
 type PatchTenantThresholdProfileBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantThresholdProfileBadRequest creates PatchTenantThresholdProfileBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewPatchTenantThresholdProfileBadRequest() *PatchTenantThresholdProfileBadR
 	return &PatchTenantThresholdProfileBadRequest{}
 }
 
+// WithPayload adds the payload to the patch tenant threshold profile bad request response
+func (o *PatchTenantThresholdProfileBadRequest) WithPayload(payload string) *PatchTenantThresholdProfileBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant threshold profile bad request response
+func (o *PatchTenantThresholdProfileBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantThresholdProfileBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// PatchTenantThresholdProfileForbiddenCode is the HTTP code returned for type PatchTenantThresholdProfileForbidden
+const PatchTenantThresholdProfileForbiddenCode int = 403
+
+/*PatchTenantThresholdProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response patchTenantThresholdProfileForbidden
+*/
+type PatchTenantThresholdProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewPatchTenantThresholdProfileForbidden creates PatchTenantThresholdProfileForbidden with default headers values
+func NewPatchTenantThresholdProfileForbidden() *PatchTenantThresholdProfileForbidden {
+
+	return &PatchTenantThresholdProfileForbidden{}
+}
+
+// WithPayload adds the payload to the patch tenant threshold profile forbidden response
+func (o *PatchTenantThresholdProfileForbidden) WithPayload(payload string) *PatchTenantThresholdProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant threshold profile forbidden response
+func (o *PatchTenantThresholdProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchTenantThresholdProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // PatchTenantThresholdProfileInternalServerErrorCode is the HTTP code returned for type PatchTenantThresholdProfileInternalServerError
@@ -89,6 +151,11 @@ const PatchTenantThresholdProfileInternalServerErrorCode int = 500
 swagger:response patchTenantThresholdProfileInternalServerError
 */
 type PatchTenantThresholdProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantThresholdProfileInternalServerError creates PatchTenantThresholdProfileInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewPatchTenantThresholdProfileInternalServerError() *PatchTenantThresholdPr
 	return &PatchTenantThresholdProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the patch tenant threshold profile internal server error response
+func (o *PatchTenantThresholdProfileInternalServerError) WithPayload(payload string) *PatchTenantThresholdProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant threshold profile internal server error response
+func (o *PatchTenantThresholdProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantThresholdProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

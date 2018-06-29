@@ -57,6 +57,49 @@ func (o *GetTenantIngestionProfileOK) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// GetTenantIngestionProfileForbiddenCode is the HTTP code returned for type GetTenantIngestionProfileForbidden
+const GetTenantIngestionProfileForbiddenCode int = 403
+
+/*GetTenantIngestionProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response getTenantIngestionProfileForbidden
+*/
+type GetTenantIngestionProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTenantIngestionProfileForbidden creates GetTenantIngestionProfileForbidden with default headers values
+func NewGetTenantIngestionProfileForbidden() *GetTenantIngestionProfileForbidden {
+
+	return &GetTenantIngestionProfileForbidden{}
+}
+
+// WithPayload adds the payload to the get tenant ingestion profile forbidden response
+func (o *GetTenantIngestionProfileForbidden) WithPayload(payload string) *GetTenantIngestionProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant ingestion profile forbidden response
+func (o *GetTenantIngestionProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTenantIngestionProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetTenantIngestionProfileInternalServerErrorCode is the HTTP code returned for type GetTenantIngestionProfileInternalServerError
 const GetTenantIngestionProfileInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetTenantIngestionProfileInternalServerErrorCode int = 500
 swagger:response getTenantIngestionProfileInternalServerError
 */
 type GetTenantIngestionProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTenantIngestionProfileInternalServerError creates GetTenantIngestionProfileInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetTenantIngestionProfileInternalServerError() *GetTenantIngestionProfil
 	return &GetTenantIngestionProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the get tenant ingestion profile internal server error response
+func (o *GetTenantIngestionProfileInternalServerError) WithPayload(payload string) *GetTenantIngestionProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get tenant ingestion profile internal server error response
+func (o *GetTenantIngestionProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTenantIngestionProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

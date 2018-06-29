@@ -65,6 +65,11 @@ const GetDomainToMonitoredObjectMapBadRequestCode int = 400
 swagger:response getDomainToMonitoredObjectMapBadRequest
 */
 type GetDomainToMonitoredObjectMapBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetDomainToMonitoredObjectMapBadRequest creates GetDomainToMonitoredObjectMapBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewGetDomainToMonitoredObjectMapBadRequest() *GetDomainToMonitoredObjectMap
 	return &GetDomainToMonitoredObjectMapBadRequest{}
 }
 
+// WithPayload adds the payload to the get domain to monitored object map bad request response
+func (o *GetDomainToMonitoredObjectMapBadRequest) WithPayload(payload string) *GetDomainToMonitoredObjectMapBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get domain to monitored object map bad request response
+func (o *GetDomainToMonitoredObjectMapBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetDomainToMonitoredObjectMapBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// GetDomainToMonitoredObjectMapForbiddenCode is the HTTP code returned for type GetDomainToMonitoredObjectMapForbidden
+const GetDomainToMonitoredObjectMapForbiddenCode int = 403
+
+/*GetDomainToMonitoredObjectMapForbidden Requestor does not have authorization to perform this action
+
+swagger:response getDomainToMonitoredObjectMapForbidden
+*/
+type GetDomainToMonitoredObjectMapForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetDomainToMonitoredObjectMapForbidden creates GetDomainToMonitoredObjectMapForbidden with default headers values
+func NewGetDomainToMonitoredObjectMapForbidden() *GetDomainToMonitoredObjectMapForbidden {
+
+	return &GetDomainToMonitoredObjectMapForbidden{}
+}
+
+// WithPayload adds the payload to the get domain to monitored object map forbidden response
+func (o *GetDomainToMonitoredObjectMapForbidden) WithPayload(payload string) *GetDomainToMonitoredObjectMapForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get domain to monitored object map forbidden response
+func (o *GetDomainToMonitoredObjectMapForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetDomainToMonitoredObjectMapForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetDomainToMonitoredObjectMapInternalServerErrorCode is the HTTP code returned for type GetDomainToMonitoredObjectMapInternalServerError
@@ -89,6 +151,11 @@ const GetDomainToMonitoredObjectMapInternalServerErrorCode int = 500
 swagger:response getDomainToMonitoredObjectMapInternalServerError
 */
 type GetDomainToMonitoredObjectMapInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetDomainToMonitoredObjectMapInternalServerError creates GetDomainToMonitoredObjectMapInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewGetDomainToMonitoredObjectMapInternalServerError() *GetDomainToMonitored
 	return &GetDomainToMonitoredObjectMapInternalServerError{}
 }
 
+// WithPayload adds the payload to the get domain to monitored object map internal server error response
+func (o *GetDomainToMonitoredObjectMapInternalServerError) WithPayload(payload string) *GetDomainToMonitoredObjectMapInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get domain to monitored object map internal server error response
+func (o *GetDomainToMonitoredObjectMapInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetDomainToMonitoredObjectMapInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

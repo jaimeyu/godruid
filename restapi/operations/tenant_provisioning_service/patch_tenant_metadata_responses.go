@@ -65,6 +65,11 @@ const PatchTenantMetadataBadRequestCode int = 400
 swagger:response patchTenantMetadataBadRequest
 */
 type PatchTenantMetadataBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantMetadataBadRequest creates PatchTenantMetadataBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewPatchTenantMetadataBadRequest() *PatchTenantMetadataBadRequest {
 	return &PatchTenantMetadataBadRequest{}
 }
 
+// WithPayload adds the payload to the patch tenant metadata bad request response
+func (o *PatchTenantMetadataBadRequest) WithPayload(payload string) *PatchTenantMetadataBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant metadata bad request response
+func (o *PatchTenantMetadataBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantMetadataBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// PatchTenantMetadataForbiddenCode is the HTTP code returned for type PatchTenantMetadataForbidden
+const PatchTenantMetadataForbiddenCode int = 403
+
+/*PatchTenantMetadataForbidden Requestor does not have authorization to perform this action
+
+swagger:response patchTenantMetadataForbidden
+*/
+type PatchTenantMetadataForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewPatchTenantMetadataForbidden creates PatchTenantMetadataForbidden with default headers values
+func NewPatchTenantMetadataForbidden() *PatchTenantMetadataForbidden {
+
+	return &PatchTenantMetadataForbidden{}
+}
+
+// WithPayload adds the payload to the patch tenant metadata forbidden response
+func (o *PatchTenantMetadataForbidden) WithPayload(payload string) *PatchTenantMetadataForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant metadata forbidden response
+func (o *PatchTenantMetadataForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchTenantMetadataForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // PatchTenantMetadataInternalServerErrorCode is the HTTP code returned for type PatchTenantMetadataInternalServerError
@@ -89,6 +151,11 @@ const PatchTenantMetadataInternalServerErrorCode int = 500
 swagger:response patchTenantMetadataInternalServerError
 */
 type PatchTenantMetadataInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewPatchTenantMetadataInternalServerError creates PatchTenantMetadataInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewPatchTenantMetadataInternalServerError() *PatchTenantMetadataInternalSer
 	return &PatchTenantMetadataInternalServerError{}
 }
 
+// WithPayload adds the payload to the patch tenant metadata internal server error response
+func (o *PatchTenantMetadataInternalServerError) WithPayload(payload string) *PatchTenantMetadataInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch tenant metadata internal server error response
+func (o *PatchTenantMetadataInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *PatchTenantMetadataInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

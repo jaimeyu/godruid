@@ -65,6 +65,11 @@ const UpdateTenantIngestionProfileBadRequestCode int = 400
 swagger:response updateTenantIngestionProfileBadRequest
 */
 type UpdateTenantIngestionProfileBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantIngestionProfileBadRequest creates UpdateTenantIngestionProfileBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantIngestionProfileBadRequest() *UpdateTenantIngestionProfileBa
 	return &UpdateTenantIngestionProfileBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant ingestion profile bad request response
+func (o *UpdateTenantIngestionProfileBadRequest) WithPayload(payload string) *UpdateTenantIngestionProfileBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant ingestion profile bad request response
+func (o *UpdateTenantIngestionProfileBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantIngestionProfileBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantIngestionProfileForbiddenCode is the HTTP code returned for type UpdateTenantIngestionProfileForbidden
+const UpdateTenantIngestionProfileForbiddenCode int = 403
+
+/*UpdateTenantIngestionProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantIngestionProfileForbidden
+*/
+type UpdateTenantIngestionProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantIngestionProfileForbidden creates UpdateTenantIngestionProfileForbidden with default headers values
+func NewUpdateTenantIngestionProfileForbidden() *UpdateTenantIngestionProfileForbidden {
+
+	return &UpdateTenantIngestionProfileForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant ingestion profile forbidden response
+func (o *UpdateTenantIngestionProfileForbidden) WithPayload(payload string) *UpdateTenantIngestionProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant ingestion profile forbidden response
+func (o *UpdateTenantIngestionProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantIngestionProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantIngestionProfileInternalServerErrorCode is the HTTP code returned for type UpdateTenantIngestionProfileInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantIngestionProfileInternalServerErrorCode int = 500
 swagger:response updateTenantIngestionProfileInternalServerError
 */
 type UpdateTenantIngestionProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantIngestionProfileInternalServerError creates UpdateTenantIngestionProfileInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantIngestionProfileInternalServerError() *UpdateTenantIngestion
 	return &UpdateTenantIngestionProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant ingestion profile internal server error response
+func (o *UpdateTenantIngestionProfileInternalServerError) WithPayload(payload string) *UpdateTenantIngestionProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant ingestion profile internal server error response
+func (o *UpdateTenantIngestionProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantIngestionProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

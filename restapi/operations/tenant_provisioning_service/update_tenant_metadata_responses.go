@@ -65,6 +65,11 @@ const UpdateTenantMetadataBadRequestCode int = 400
 swagger:response updateTenantMetadataBadRequest
 */
 type UpdateTenantMetadataBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantMetadataBadRequest creates UpdateTenantMetadataBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewUpdateTenantMetadataBadRequest() *UpdateTenantMetadataBadRequest {
 	return &UpdateTenantMetadataBadRequest{}
 }
 
+// WithPayload adds the payload to the update tenant metadata bad request response
+func (o *UpdateTenantMetadataBadRequest) WithPayload(payload string) *UpdateTenantMetadataBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant metadata bad request response
+func (o *UpdateTenantMetadataBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantMetadataBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateTenantMetadataForbiddenCode is the HTTP code returned for type UpdateTenantMetadataForbidden
+const UpdateTenantMetadataForbiddenCode int = 403
+
+/*UpdateTenantMetadataForbidden Requestor does not have authorization to perform this action
+
+swagger:response updateTenantMetadataForbidden
+*/
+type UpdateTenantMetadataForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateTenantMetadataForbidden creates UpdateTenantMetadataForbidden with default headers values
+func NewUpdateTenantMetadataForbidden() *UpdateTenantMetadataForbidden {
+
+	return &UpdateTenantMetadataForbidden{}
+}
+
+// WithPayload adds the payload to the update tenant metadata forbidden response
+func (o *UpdateTenantMetadataForbidden) WithPayload(payload string) *UpdateTenantMetadataForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant metadata forbidden response
+func (o *UpdateTenantMetadataForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateTenantMetadataForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // UpdateTenantMetadataInternalServerErrorCode is the HTTP code returned for type UpdateTenantMetadataInternalServerError
@@ -89,6 +151,11 @@ const UpdateTenantMetadataInternalServerErrorCode int = 500
 swagger:response updateTenantMetadataInternalServerError
 */
 type UpdateTenantMetadataInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewUpdateTenantMetadataInternalServerError creates UpdateTenantMetadataInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewUpdateTenantMetadataInternalServerError() *UpdateTenantMetadataInternalS
 	return &UpdateTenantMetadataInternalServerError{}
 }
 
+// WithPayload adds the payload to the update tenant metadata internal server error response
+func (o *UpdateTenantMetadataInternalServerError) WithPayload(payload string) *UpdateTenantMetadataInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update tenant metadata internal server error response
+func (o *UpdateTenantMetadataInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateTenantMetadataInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

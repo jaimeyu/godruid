@@ -54,9 +54,6 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		AdminProvisioningServiceCreateIngestionDictionaryHandler: admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceCreateIngestionDictionary has not yet been implemented")
 		}),
-		TenantProvisioningServiceCreateIngestionProfileHandler: tenant_provisioning_service.CreateIngestionProfileHandlerFunc(func(params tenant_provisioning_service.CreateIngestionProfileParams) middleware.Responder {
-			return middleware.NotImplemented("operation TenantProvisioningServiceCreateIngestionProfile has not yet been implemented")
-		}),
 		TenantProvisioningServiceCreateReportScheduleConfigHandler: tenant_provisioning_service.CreateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.CreateReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceCreateReportScheduleConfig has not yet been implemented")
 		}),
@@ -71,6 +68,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceCreateTenantDomainHandler: tenant_provisioning_service.CreateTenantDomainHandlerFunc(func(params tenant_provisioning_service.CreateTenantDomainParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceCreateTenantDomain has not yet been implemented")
+		}),
+		TenantProvisioningServiceCreateTenantIngestionProfileHandler: tenant_provisioning_service.CreateTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.CreateTenantIngestionProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceCreateTenantIngestionProfile has not yet been implemented")
 		}),
 		TenantProvisioningServiceCreateTenantMetadataHandler: tenant_provisioning_service.CreateTenantMetadataHandlerFunc(func(params tenant_provisioning_service.CreateTenantMetadataParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceCreateTenantMetadata has not yet been implemented")
@@ -129,8 +129,8 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		MetricsServiceGenSLAReportHandler: metrics_service.GenSLAReportHandlerFunc(func(params metrics_service.GenSLAReportParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceGenSLAReport has not yet been implemented")
 		}),
-		TenantProvisioningServiceGetActiveIngestionProfileHandler: tenant_provisioning_service.GetActiveIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveIngestionProfileParams) middleware.Responder {
-			return middleware.NotImplemented("operation TenantProvisioningServiceGetActiveIngestionProfile has not yet been implemented")
+		TenantProvisioningServiceGetActiveTenantIngestionProfileHandler: tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveTenantIngestionProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceGetActiveTenantIngestionProfile has not yet been implemented")
 		}),
 		AdminProvisioningServiceGetAdminUserHandler: admin_provisioning_service.GetAdminUserHandlerFunc(func(params admin_provisioning_service.GetAdminUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetAdminUser has not yet been implemented")
@@ -338,8 +338,6 @@ type GatherAPI struct {
 	AdminProvisioningServiceCreateAdminUserHandler admin_provisioning_service.CreateAdminUserHandler
 	// AdminProvisioningServiceCreateIngestionDictionaryHandler sets the operation handler for the create ingestion dictionary operation
 	AdminProvisioningServiceCreateIngestionDictionaryHandler admin_provisioning_service.CreateIngestionDictionaryHandler
-	// TenantProvisioningServiceCreateIngestionProfileHandler sets the operation handler for the create ingestion profile operation
-	TenantProvisioningServiceCreateIngestionProfileHandler tenant_provisioning_service.CreateIngestionProfileHandler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
 	TenantProvisioningServiceCreateReportScheduleConfigHandler tenant_provisioning_service.CreateReportScheduleConfigHandler
 	// AdminProvisioningServiceCreateTenantHandler sets the operation handler for the create tenant operation
@@ -350,6 +348,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceCreateTenantConnectorInstanceHandler tenant_provisioning_service.CreateTenantConnectorInstanceHandler
 	// TenantProvisioningServiceCreateTenantDomainHandler sets the operation handler for the create tenant domain operation
 	TenantProvisioningServiceCreateTenantDomainHandler tenant_provisioning_service.CreateTenantDomainHandler
+	// TenantProvisioningServiceCreateTenantIngestionProfileHandler sets the operation handler for the create tenant ingestion profile operation
+	TenantProvisioningServiceCreateTenantIngestionProfileHandler tenant_provisioning_service.CreateTenantIngestionProfileHandler
 	// TenantProvisioningServiceCreateTenantMetadataHandler sets the operation handler for the create tenant metadata operation
 	TenantProvisioningServiceCreateTenantMetadataHandler tenant_provisioning_service.CreateTenantMetadataHandler
 	// TenantProvisioningServiceCreateTenantMonitoredObjectHandler sets the operation handler for the create tenant monitored object operation
@@ -388,8 +388,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceDeleteValidTypesHandler admin_provisioning_service.DeleteValidTypesHandler
 	// MetricsServiceGenSLAReportHandler sets the operation handler for the gen SLA report operation
 	MetricsServiceGenSLAReportHandler metrics_service.GenSLAReportHandler
-	// TenantProvisioningServiceGetActiveIngestionProfileHandler sets the operation handler for the get active ingestion profile operation
-	TenantProvisioningServiceGetActiveIngestionProfileHandler tenant_provisioning_service.GetActiveIngestionProfileHandler
+	// TenantProvisioningServiceGetActiveTenantIngestionProfileHandler sets the operation handler for the get active tenant ingestion profile operation
+	TenantProvisioningServiceGetActiveTenantIngestionProfileHandler tenant_provisioning_service.GetActiveTenantIngestionProfileHandler
 	// AdminProvisioningServiceGetAdminUserHandler sets the operation handler for the get admin user operation
 	AdminProvisioningServiceGetAdminUserHandler admin_provisioning_service.GetAdminUserHandler
 	// AdminProvisioningServiceGetAllAdminUsersHandler sets the operation handler for the get all admin users operation
@@ -583,10 +583,6 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "admin_provisioning_service.CreateIngestionDictionaryHandler")
 	}
 
-	if o.TenantProvisioningServiceCreateIngestionProfileHandler == nil {
-		unregistered = append(unregistered, "tenant_provisioning_service.CreateIngestionProfileHandler")
-	}
-
 	if o.TenantProvisioningServiceCreateReportScheduleConfigHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.CreateReportScheduleConfigHandler")
 	}
@@ -605,6 +601,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceCreateTenantDomainHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.CreateTenantDomainHandler")
+	}
+
+	if o.TenantProvisioningServiceCreateTenantIngestionProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.CreateTenantIngestionProfileHandler")
 	}
 
 	if o.TenantProvisioningServiceCreateTenantMetadataHandler == nil {
@@ -683,8 +683,8 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "metrics_service.GenSLAReportHandler")
 	}
 
-	if o.TenantProvisioningServiceGetActiveIngestionProfileHandler == nil {
-		unregistered = append(unregistered, "tenant_provisioning_service.GetActiveIngestionProfileHandler")
+	if o.TenantProvisioningServiceGetActiveTenantIngestionProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.GetActiveTenantIngestionProfileHandler")
 	}
 
 	if o.AdminProvisioningServiceGetAdminUserHandler == nil {
@@ -1037,11 +1037,6 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/v1/tenants/{tenantId}/ingestion-profiles"] = tenant_provisioning_service.NewCreateIngestionProfile(o.context, o.TenantProvisioningServiceCreateIngestionProfileHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/report-schedule-configs"] = tenant_provisioning_service.NewCreateReportScheduleConfig(o.context, o.TenantProvisioningServiceCreateReportScheduleConfigHandler)
 
 	if o.handlers["POST"] == nil {
@@ -1063,6 +1058,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/domains"] = tenant_provisioning_service.NewCreateTenantDomain(o.context, o.TenantProvisioningServiceCreateTenantDomainHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v1/tenants/{tenantId}/ingestion-profiles"] = tenant_provisioning_service.NewCreateTenantIngestionProfile(o.context, o.TenantProvisioningServiceCreateTenantIngestionProfileHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -1162,7 +1162,7 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/tenants/{tenantId}/active-ingestion-profile"] = tenant_provisioning_service.NewGetActiveIngestionProfile(o.context, o.TenantProvisioningServiceGetActiveIngestionProfileHandler)
+	o.handlers["GET"]["/v1/tenants/{tenantId}/active-ingestion-profile"] = tenant_provisioning_service.NewGetActiveTenantIngestionProfile(o.context, o.TenantProvisioningServiceGetActiveTenantIngestionProfileHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

@@ -65,6 +65,11 @@ const CreateIngestionProfileBadRequestCode int = 400
 swagger:response createIngestionProfileBadRequest
 */
 type CreateIngestionProfileBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateIngestionProfileBadRequest creates CreateIngestionProfileBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateIngestionProfileBadRequest() *CreateIngestionProfileBadRequest {
 	return &CreateIngestionProfileBadRequest{}
 }
 
+// WithPayload adds the payload to the create ingestion profile bad request response
+func (o *CreateIngestionProfileBadRequest) WithPayload(payload string) *CreateIngestionProfileBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create ingestion profile bad request response
+func (o *CreateIngestionProfileBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateIngestionProfileBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateIngestionProfileForbiddenCode is the HTTP code returned for type CreateIngestionProfileForbidden
+const CreateIngestionProfileForbiddenCode int = 403
+
+/*CreateIngestionProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response createIngestionProfileForbidden
+*/
+type CreateIngestionProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateIngestionProfileForbidden creates CreateIngestionProfileForbidden with default headers values
+func NewCreateIngestionProfileForbidden() *CreateIngestionProfileForbidden {
+
+	return &CreateIngestionProfileForbidden{}
+}
+
+// WithPayload adds the payload to the create ingestion profile forbidden response
+func (o *CreateIngestionProfileForbidden) WithPayload(payload string) *CreateIngestionProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create ingestion profile forbidden response
+func (o *CreateIngestionProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateIngestionProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateIngestionProfileInternalServerErrorCode is the HTTP code returned for type CreateIngestionProfileInternalServerError
@@ -89,6 +151,11 @@ const CreateIngestionProfileInternalServerErrorCode int = 500
 swagger:response createIngestionProfileInternalServerError
 */
 type CreateIngestionProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateIngestionProfileInternalServerError creates CreateIngestionProfileInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewCreateIngestionProfileInternalServerError() *CreateIngestionProfileInter
 	return &CreateIngestionProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the create ingestion profile internal server error response
+func (o *CreateIngestionProfileInternalServerError) WithPayload(payload string) *CreateIngestionProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create ingestion profile internal server error response
+func (o *CreateIngestionProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateIngestionProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

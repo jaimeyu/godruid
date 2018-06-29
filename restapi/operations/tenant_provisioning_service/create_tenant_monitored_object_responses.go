@@ -65,6 +65,11 @@ const CreateTenantMonitoredObjectBadRequestCode int = 400
 swagger:response createTenantMonitoredObjectBadRequest
 */
 type CreateTenantMonitoredObjectBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantMonitoredObjectBadRequest creates CreateTenantMonitoredObjectBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewCreateTenantMonitoredObjectBadRequest() *CreateTenantMonitoredObjectBadR
 	return &CreateTenantMonitoredObjectBadRequest{}
 }
 
+// WithPayload adds the payload to the create tenant monitored object bad request response
+func (o *CreateTenantMonitoredObjectBadRequest) WithPayload(payload string) *CreateTenantMonitoredObjectBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant monitored object bad request response
+func (o *CreateTenantMonitoredObjectBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantMonitoredObjectBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// CreateTenantMonitoredObjectForbiddenCode is the HTTP code returned for type CreateTenantMonitoredObjectForbidden
+const CreateTenantMonitoredObjectForbiddenCode int = 403
+
+/*CreateTenantMonitoredObjectForbidden Requestor does not have authorization to perform this action
+
+swagger:response createTenantMonitoredObjectForbidden
+*/
+type CreateTenantMonitoredObjectForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewCreateTenantMonitoredObjectForbidden creates CreateTenantMonitoredObjectForbidden with default headers values
+func NewCreateTenantMonitoredObjectForbidden() *CreateTenantMonitoredObjectForbidden {
+
+	return &CreateTenantMonitoredObjectForbidden{}
+}
+
+// WithPayload adds the payload to the create tenant monitored object forbidden response
+func (o *CreateTenantMonitoredObjectForbidden) WithPayload(payload string) *CreateTenantMonitoredObjectForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant monitored object forbidden response
+func (o *CreateTenantMonitoredObjectForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *CreateTenantMonitoredObjectForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // CreateTenantMonitoredObjectInternalServerErrorCode is the HTTP code returned for type CreateTenantMonitoredObjectInternalServerError
@@ -89,6 +151,11 @@ const CreateTenantMonitoredObjectInternalServerErrorCode int = 500
 swagger:response createTenantMonitoredObjectInternalServerError
 */
 type CreateTenantMonitoredObjectInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewCreateTenantMonitoredObjectInternalServerError creates CreateTenantMonitoredObjectInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewCreateTenantMonitoredObjectInternalServerError() *CreateTenantMonitoredO
 	return &CreateTenantMonitoredObjectInternalServerError{}
 }
 
+// WithPayload adds the payload to the create tenant monitored object internal server error response
+func (o *CreateTenantMonitoredObjectInternalServerError) WithPayload(payload string) *CreateTenantMonitoredObjectInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the create tenant monitored object internal server error response
+func (o *CreateTenantMonitoredObjectInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *CreateTenantMonitoredObjectInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

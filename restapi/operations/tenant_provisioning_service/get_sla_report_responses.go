@@ -57,6 +57,49 @@ func (o *GetSLAReportOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
+// GetSLAReportForbiddenCode is the HTTP code returned for type GetSLAReportForbidden
+const GetSLAReportForbiddenCode int = 403
+
+/*GetSLAReportForbidden Requestor does not have authorization to perform this action
+
+swagger:response getSlaReportForbidden
+*/
+type GetSLAReportForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetSLAReportForbidden creates GetSLAReportForbidden with default headers values
+func NewGetSLAReportForbidden() *GetSLAReportForbidden {
+
+	return &GetSLAReportForbidden{}
+}
+
+// WithPayload adds the payload to the get Sla report forbidden response
+func (o *GetSLAReportForbidden) WithPayload(payload string) *GetSLAReportForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get Sla report forbidden response
+func (o *GetSLAReportForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSLAReportForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetSLAReportInternalServerErrorCode is the HTTP code returned for type GetSLAReportInternalServerError
 const GetSLAReportInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetSLAReportInternalServerErrorCode int = 500
 swagger:response getSlaReportInternalServerError
 */
 type GetSLAReportInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetSLAReportInternalServerError creates GetSLAReportInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetSLAReportInternalServerError() *GetSLAReportInternalServerError {
 	return &GetSLAReportInternalServerError{}
 }
 
+// WithPayload adds the payload to the get Sla report internal server error response
+func (o *GetSLAReportInternalServerError) WithPayload(payload string) *GetSLAReportInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get Sla report internal server error response
+func (o *GetSLAReportInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetSLAReportInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

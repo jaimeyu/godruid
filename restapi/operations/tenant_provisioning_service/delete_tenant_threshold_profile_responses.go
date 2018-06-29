@@ -57,6 +57,49 @@ func (o *DeleteTenantThresholdProfileOK) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// DeleteTenantThresholdProfileForbiddenCode is the HTTP code returned for type DeleteTenantThresholdProfileForbidden
+const DeleteTenantThresholdProfileForbiddenCode int = 403
+
+/*DeleteTenantThresholdProfileForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantThresholdProfileForbidden
+*/
+type DeleteTenantThresholdProfileForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantThresholdProfileForbidden creates DeleteTenantThresholdProfileForbidden with default headers values
+func NewDeleteTenantThresholdProfileForbidden() *DeleteTenantThresholdProfileForbidden {
+
+	return &DeleteTenantThresholdProfileForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant threshold profile forbidden response
+func (o *DeleteTenantThresholdProfileForbidden) WithPayload(payload string) *DeleteTenantThresholdProfileForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant threshold profile forbidden response
+func (o *DeleteTenantThresholdProfileForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantThresholdProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantThresholdProfileInternalServerErrorCode is the HTTP code returned for type DeleteTenantThresholdProfileInternalServerError
 const DeleteTenantThresholdProfileInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantThresholdProfileInternalServerErrorCode int = 500
 swagger:response deleteTenantThresholdProfileInternalServerError
 */
 type DeleteTenantThresholdProfileInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantThresholdProfileInternalServerError creates DeleteTenantThresholdProfileInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantThresholdProfileInternalServerError() *DeleteTenantThreshold
 	return &DeleteTenantThresholdProfileInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant threshold profile internal server error response
+func (o *DeleteTenantThresholdProfileInternalServerError) WithPayload(payload string) *DeleteTenantThresholdProfileInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant threshold profile internal server error response
+func (o *DeleteTenantThresholdProfileInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantThresholdProfileInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

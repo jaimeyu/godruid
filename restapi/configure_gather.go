@@ -62,9 +62,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	})
 
 	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(handlers.HandleCreateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
-	api.TenantProvisioningServiceCreateIngestionProfileHandler = tenant_provisioning_service.CreateIngestionProfileHandlerFunc(func(params tenant_provisioning_service.CreateIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.CreateIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceCreateTenantIngestionProfileHandler = tenant_provisioning_service.CreateTenantIngestionProfileHandlerFunc(handlers.HandleCreateTenantIngestionProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceCreateReportScheduleConfigHandler = tenant_provisioning_service.CreateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.CreateReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.CreateReportScheduleConfig has not yet been implemented")
 	})
@@ -93,9 +91,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteTenantConnectorConfigHandler = tenant_provisioning_service.DeleteTenantConnectorConfigHandlerFunc(handlers.HandleDeleteTenantConnectorConfig(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceDeleteTenantConnectorInstanceHandler = tenant_provisioning_service.DeleteTenantConnectorInstanceHandlerFunc(handlers.HandleDeleteTenantConnectorInstance(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceDeleteTenantDomainHandler = tenant_provisioning_service.DeleteTenantDomainHandlerFunc(handlers.HandleDeleteTenantDomain(handlers.SkylightAndTenantAdminRoles, tenantDB))
-	api.TenantProvisioningServiceDeleteTenantIngestionProfileHandler = tenant_provisioning_service.DeleteTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.DeleteTenantIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceDeleteTenantIngestionProfileHandler = tenant_provisioning_service.DeleteTenantIngestionProfileHandlerFunc(handlers.HandleDeleteTenantIngestionProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceDeleteTenantMetadataHandler = tenant_provisioning_service.DeleteTenantMetadataHandlerFunc(func(params tenant_provisioning_service.DeleteTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantMetadata has not yet been implemented")
 	})
@@ -112,9 +108,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(func(params metrics_service.GenSLAReportParams) middleware.Responder {
 		return middleware.NotImplemented("operation metrics_service.GenSLAReport has not yet been implemented")
 	})
-	api.TenantProvisioningServiceGetActiveIngestionProfileHandler = tenant_provisioning_service.GetActiveIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetActiveIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceGetActiveTenantIngestionProfileHandler = tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(handlers.HandleGetActiveTenantIngestionProfile(handlers.AllRoles, tenantDB))
 
 	api.TenantProvisioningServiceGetAllReportScheduleConfigHandler = tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.GetAllReportScheduleConfigParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllReportScheduleConfig has not yet been implemented")
@@ -156,9 +150,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceGetTenantConnectorConfigHandler = tenant_provisioning_service.GetTenantConnectorConfigHandlerFunc(handlers.HandleGetTenantConnectorConfig(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetTenantConnectorInstanceHandler = tenant_provisioning_service.GetTenantConnectorInstanceHandlerFunc(handlers.HandleGetTenantConnectorInstance(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetTenantDomainHandler = tenant_provisioning_service.GetTenantDomainHandlerFunc(handlers.HandleGetTenantDomain(handlers.AllRoles, tenantDB))
-	api.TenantProvisioningServiceGetTenantIngestionProfileHandler = tenant_provisioning_service.GetTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetTenantIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceGetTenantIngestionProfileHandler = tenant_provisioning_service.GetTenantIngestionProfileHandlerFunc(handlers.HandleGetTenantIngestionProfile(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetTenantMetadataHandler = tenant_provisioning_service.GetTenantMetadataHandlerFunc(func(params tenant_provisioning_service.GetTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantMetadata has not yet been implemented")
 	})
@@ -191,9 +183,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	})
 	api.AdminProvisioningServicePatchTenantHandler = admin_provisioning_service.PatchTenantHandlerFunc(handlers.HandlePatchTenant(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServicePatchTenantDomainHandler = tenant_provisioning_service.PatchTenantDomainHandlerFunc(handlers.HandlePatchTenantDomain(handlers.SkylightAndTenantAdminRoles, tenantDB))
-	api.TenantProvisioningServicePatchTenantIngestionProfileHandler = tenant_provisioning_service.PatchTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.PatchTenantIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServicePatchTenantIngestionProfileHandler = tenant_provisioning_service.PatchTenantIngestionProfileHandlerFunc(handlers.HandlePatchTenantIngestionProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServicePatchTenantMonitoredObjectHandler = tenant_provisioning_service.PatchTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.PatchTenantMonitoredObjectParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantMonitoredObject has not yet been implemented")
 	})
@@ -241,9 +231,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		return middleware.NotImplemented("operation admin_provisioning_service.UpdateTenant has not yet been implemented")
 	})
 	api.TenantProvisioningServiceUpdateTenantDomainHandler = tenant_provisioning_service.UpdateTenantDomainHandlerFunc(handlers.HandleUpdateTenantDomain(handlers.SkylightAndTenantAdminRoles, tenantDB))
-	api.TenantProvisioningServiceUpdateTenantIngestionProfileHandler = tenant_provisioning_service.UpdateTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.UpdateTenantIngestionProfileParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantIngestionProfile has not yet been implemented")
-	})
+	api.TenantProvisioningServiceUpdateTenantIngestionProfileHandler = tenant_provisioning_service.UpdateTenantIngestionProfileHandlerFunc(handlers.HandleUpdateTenantIngestionProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceUpdateTenantMetadataHandler = tenant_provisioning_service.UpdateTenantMetadataHandlerFunc(func(params tenant_provisioning_service.UpdateTenantMetadataParams) middleware.Responder {
 		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantMetadata has not yet been implemented")
 	})

@@ -65,6 +65,11 @@ const BulkInsertMonitoredObjectBadRequestCode int = 400
 swagger:response bulkInsertMonitoredObjectBadRequest
 */
 type BulkInsertMonitoredObjectBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewBulkInsertMonitoredObjectBadRequest creates BulkInsertMonitoredObjectBadRequest with default headers values
@@ -73,12 +78,69 @@ func NewBulkInsertMonitoredObjectBadRequest() *BulkInsertMonitoredObjectBadReque
 	return &BulkInsertMonitoredObjectBadRequest{}
 }
 
+// WithPayload adds the payload to the bulk insert monitored object bad request response
+func (o *BulkInsertMonitoredObjectBadRequest) WithPayload(payload string) *BulkInsertMonitoredObjectBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the bulk insert monitored object bad request response
+func (o *BulkInsertMonitoredObjectBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *BulkInsertMonitoredObjectBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// BulkInsertMonitoredObjectForbiddenCode is the HTTP code returned for type BulkInsertMonitoredObjectForbidden
+const BulkInsertMonitoredObjectForbiddenCode int = 403
+
+/*BulkInsertMonitoredObjectForbidden Requestor does not have authorization to perform this action
+
+swagger:response bulkInsertMonitoredObjectForbidden
+*/
+type BulkInsertMonitoredObjectForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewBulkInsertMonitoredObjectForbidden creates BulkInsertMonitoredObjectForbidden with default headers values
+func NewBulkInsertMonitoredObjectForbidden() *BulkInsertMonitoredObjectForbidden {
+
+	return &BulkInsertMonitoredObjectForbidden{}
+}
+
+// WithPayload adds the payload to the bulk insert monitored object forbidden response
+func (o *BulkInsertMonitoredObjectForbidden) WithPayload(payload string) *BulkInsertMonitoredObjectForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the bulk insert monitored object forbidden response
+func (o *BulkInsertMonitoredObjectForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *BulkInsertMonitoredObjectForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // BulkInsertMonitoredObjectInternalServerErrorCode is the HTTP code returned for type BulkInsertMonitoredObjectInternalServerError
@@ -89,6 +151,11 @@ const BulkInsertMonitoredObjectInternalServerErrorCode int = 500
 swagger:response bulkInsertMonitoredObjectInternalServerError
 */
 type BulkInsertMonitoredObjectInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewBulkInsertMonitoredObjectInternalServerError creates BulkInsertMonitoredObjectInternalServerError with default headers values
@@ -97,10 +164,24 @@ func NewBulkInsertMonitoredObjectInternalServerError() *BulkInsertMonitoredObjec
 	return &BulkInsertMonitoredObjectInternalServerError{}
 }
 
+// WithPayload adds the payload to the bulk insert monitored object internal server error response
+func (o *BulkInsertMonitoredObjectInternalServerError) WithPayload(payload string) *BulkInsertMonitoredObjectInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the bulk insert monitored object internal server error response
+func (o *BulkInsertMonitoredObjectInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *BulkInsertMonitoredObjectInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

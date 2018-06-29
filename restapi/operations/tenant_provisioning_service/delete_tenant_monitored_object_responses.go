@@ -57,6 +57,49 @@ func (o *DeleteTenantMonitoredObjectOK) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
+// DeleteTenantMonitoredObjectForbiddenCode is the HTTP code returned for type DeleteTenantMonitoredObjectForbidden
+const DeleteTenantMonitoredObjectForbiddenCode int = 403
+
+/*DeleteTenantMonitoredObjectForbidden Requestor does not have authorization to perform this action
+
+swagger:response deleteTenantMonitoredObjectForbidden
+*/
+type DeleteTenantMonitoredObjectForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteTenantMonitoredObjectForbidden creates DeleteTenantMonitoredObjectForbidden with default headers values
+func NewDeleteTenantMonitoredObjectForbidden() *DeleteTenantMonitoredObjectForbidden {
+
+	return &DeleteTenantMonitoredObjectForbidden{}
+}
+
+// WithPayload adds the payload to the delete tenant monitored object forbidden response
+func (o *DeleteTenantMonitoredObjectForbidden) WithPayload(payload string) *DeleteTenantMonitoredObjectForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant monitored object forbidden response
+func (o *DeleteTenantMonitoredObjectForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteTenantMonitoredObjectForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // DeleteTenantMonitoredObjectInternalServerErrorCode is the HTTP code returned for type DeleteTenantMonitoredObjectInternalServerError
 const DeleteTenantMonitoredObjectInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const DeleteTenantMonitoredObjectInternalServerErrorCode int = 500
 swagger:response deleteTenantMonitoredObjectInternalServerError
 */
 type DeleteTenantMonitoredObjectInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewDeleteTenantMonitoredObjectInternalServerError creates DeleteTenantMonitoredObjectInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewDeleteTenantMonitoredObjectInternalServerError() *DeleteTenantMonitoredO
 	return &DeleteTenantMonitoredObjectInternalServerError{}
 }
 
+// WithPayload adds the payload to the delete tenant monitored object internal server error response
+func (o *DeleteTenantMonitoredObjectInternalServerError) WithPayload(payload string) *DeleteTenantMonitoredObjectInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete tenant monitored object internal server error response
+func (o *DeleteTenantMonitoredObjectInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteTenantMonitoredObjectInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

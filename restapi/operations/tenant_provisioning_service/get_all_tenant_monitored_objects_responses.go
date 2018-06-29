@@ -57,6 +57,49 @@ func (o *GetAllTenantMonitoredObjectsOK) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// GetAllTenantMonitoredObjectsForbiddenCode is the HTTP code returned for type GetAllTenantMonitoredObjectsForbidden
+const GetAllTenantMonitoredObjectsForbiddenCode int = 403
+
+/*GetAllTenantMonitoredObjectsForbidden Requestor does not have authorization to perform this action
+
+swagger:response getAllTenantMonitoredObjectsForbidden
+*/
+type GetAllTenantMonitoredObjectsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetAllTenantMonitoredObjectsForbidden creates GetAllTenantMonitoredObjectsForbidden with default headers values
+func NewGetAllTenantMonitoredObjectsForbidden() *GetAllTenantMonitoredObjectsForbidden {
+
+	return &GetAllTenantMonitoredObjectsForbidden{}
+}
+
+// WithPayload adds the payload to the get all tenant monitored objects forbidden response
+func (o *GetAllTenantMonitoredObjectsForbidden) WithPayload(payload string) *GetAllTenantMonitoredObjectsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant monitored objects forbidden response
+func (o *GetAllTenantMonitoredObjectsForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAllTenantMonitoredObjectsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // GetAllTenantMonitoredObjectsInternalServerErrorCode is the HTTP code returned for type GetAllTenantMonitoredObjectsInternalServerError
 const GetAllTenantMonitoredObjectsInternalServerErrorCode int = 500
 
@@ -65,6 +108,11 @@ const GetAllTenantMonitoredObjectsInternalServerErrorCode int = 500
 swagger:response getAllTenantMonitoredObjectsInternalServerError
 */
 type GetAllTenantMonitoredObjectsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetAllTenantMonitoredObjectsInternalServerError creates GetAllTenantMonitoredObjectsInternalServerError with default headers values
@@ -73,10 +121,24 @@ func NewGetAllTenantMonitoredObjectsInternalServerError() *GetAllTenantMonitored
 	return &GetAllTenantMonitoredObjectsInternalServerError{}
 }
 
+// WithPayload adds the payload to the get all tenant monitored objects internal server error response
+func (o *GetAllTenantMonitoredObjectsInternalServerError) WithPayload(payload string) *GetAllTenantMonitoredObjectsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get all tenant monitored objects internal server error response
+func (o *GetAllTenantMonitoredObjectsInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetAllTenantMonitoredObjectsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

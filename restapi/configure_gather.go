@@ -5,6 +5,7 @@ package restapi
 import (
 	"crypto/tls"
 	"net/http"
+	"strings"
 
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
@@ -18,9 +19,19 @@ import (
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
+	mux "github.com/gorilla/mux"
 )
 
 //go:generate swagger generate server --target .. --name gather --spec ../files/swagger.yml --model-package swagmodels --exclude-main --exclude-spec
+
+const (
+	testDataAPIPrefix = "/test-data"
+)
+
+var (
+	testSH        *handlers.TestDataServiceHandler
+	nonSwaggerMUX *mux.Router
+)
 
 func configureFlags(api *operations.GatherAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -183,6 +194,11 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	api.ServerShutdown = func() {}
 
+	// Setup non-swagger MUX
+	testSH = handlers.CreateTestDataServiceHandler()
+	nonSwaggerMUX = mux.NewRouter().StrictSlash(true)
+	testSH.RegisterAPIHandlers(nonSwaggerMUX)
+
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
 
@@ -207,5 +223,21 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
-	return handler
+	return addNonSwaggerHandler(handler)
+}
+
+func addNonSwaggerHandler(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Log.Debugf("Received request: %s%s", r.Method, r.URL)
+
+		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
+			logger.Log.Warningf("Handling call with non-swagger MUX")
+			nonSwaggerMUX.ServeHTTP(w, r)
+		} else {
+			logger.Log.Warningf("Handling call with swagger generated MUX")
+			next.ServeHTTP(w, r)
+		}
+
+	})
 }

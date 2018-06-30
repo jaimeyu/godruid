@@ -11,6 +11,7 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 	graceful "github.com/tylerb/graceful"
 
+	"github.com/accedian/adh-gather/datastore/druid"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/restapi/operations"
@@ -54,6 +55,8 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
 
+	druidDB := druid.NewDruidDatasctoreClient()
+
 	api.TenantProvisioningServiceBulkInsertMonitoredObjectHandler = tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(handlers.HandleBulkInsertMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler = tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(handlers.HandleBulkUpdateMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
@@ -81,9 +84,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteTenantThresholdProfileHandler = tenant_provisioning_service.DeleteTenantThresholdProfileHandlerFunc(handlers.HandleDeleteTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.AdminProvisioningServiceDeleteValidTypesHandler = admin_provisioning_service.DeleteValidTypesHandlerFunc(handlers.HandleDeleteValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
-	api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(func(params metrics_service.GenSLAReportParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GenSLAReport has not yet been implemented")
-	})
+	api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(handlers.HandleGenSLAReport(handlers.AllRoles, tenantDB, druidDB))
 	api.TenantProvisioningServiceGetActiveTenantIngestionProfileHandler = tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(handlers.HandleGetActiveTenantIngestionProfile(handlers.AllRoles, tenantDB))
 
 	api.TenantProvisioningServiceGetAllReportScheduleConfigHandler = tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(handlers.HandleGetAllReportScheduleConfigs(handlers.AllRoles, tenantDB))
@@ -96,13 +97,9 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	api.AdminProvisioningServiceGetAllTenantsHandler = admin_provisioning_service.GetAllTenantsHandlerFunc(handlers.HandleGetAllTenants(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler = tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(handlers.HandleGetDomainToMonitoredObjectMap(handlers.AllRoles, tenantDB))
-	api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(func(params metrics_service.GetHistogramParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetHistogram has not yet been implemented")
-	})
+	api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(handlers.HandleGetHistogram(handlers.AllRoles, druidDB))
 	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(handlers.HandleGetIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
-	api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(func(params metrics_service.GetRawMetricsParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetRawMetrics has not yet been implemented")
-	})
+	api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(handlers.HandleGetRawMetrics(handlers.AllRoles, druidDB))
 	api.TenantProvisioningServiceGetReportScheduleConfigHandler = tenant_provisioning_service.GetReportScheduleConfigHandlerFunc(handlers.HandleGetReportScheduleConfig(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetSLAReportHandler = tenant_provisioning_service.GetSLAReportHandlerFunc(handlers.HandleGetSLAReport(handlers.AllRoles, tenantDB))
 	api.AdminProvisioningServiceGetTenantHandler = admin_provisioning_service.GetTenantHandlerFunc(handlers.HandleGetTenant(handlers.SkylightAdminRoleOnly, adminDB))
@@ -116,18 +113,10 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(handlers.HandleGetTenantSummaryByAlias(adminDB))
 	api.TenantProvisioningServiceGetTenantThresholdProfileHandler = tenant_provisioning_service.GetTenantThresholdProfileHandlerFunc(handlers.HandleGetTenantThresholdProfile(handlers.AllRoles, tenantDB))
 
-	api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetThresholdCrossing has not yet been implemented")
-	})
-	api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetThresholdCrossingByMonitoredObject has not yet been implemented")
-	})
-	api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(func(params metrics_service.GetThresholdCrossingByMonitoredObjectTopNParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetThresholdCrossingByMonitoredObjectTopN has not yet been implemented")
-	})
-	api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(func(params metrics_service.GetTopNForMetricParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.GetTopNForMetric has not yet been implemented")
-	})
+	api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(handlers.HandleGetThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
+	api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObject(handlers.AllRoles, tenantDB, druidDB))
+	api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopN(handlers.AllRoles, tenantDB, druidDB))
+	api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(handlers.HandleGetTopNFor(handlers.AllRoles, tenantDB, druidDB))
 	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(handlers.HandleGetValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceGetTenantIDByAliasHandler = admin_provisioning_service.GetTenantIDByAliasHandlerFunc(handlers.HandleGetTenantIDByAlias(adminDB))
 	api.TenantProvisioningServicePatchTenantMetadataHandler = tenant_provisioning_service.PatchTenantMetadataHandlerFunc(handlers.HandlePatchTenantMetadata(handlers.SkylightAdminRoleOnly, tenantDB))
@@ -137,12 +126,8 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServicePatchTenantMonitoredObjectHandler = tenant_provisioning_service.PatchTenantMonitoredObjectHandlerFunc(handlers.HandlePatchTenantMonitoredObject(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServicePatchTenantThresholdProfileHandler = tenant_provisioning_service.PatchTenantThresholdProfileHandlerFunc(handlers.HandlePatchTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
-	api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(func(params metrics_service.QueryAggregatedMetricsParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.QueryAggregatedMetrics has not yet been implemented")
-	})
-	api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
-		return middleware.NotImplemented("operation metrics_service.QueryThresholdCrossing has not yet been implemented")
-	})
+	api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(handlers.HandleQueryAggregatedMetrics(handlers.AllRoles, tenantDB, druidDB))
+	api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(handlers.HandleQueryThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
 
 	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(handlers.HandleUpdateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceUpdateReportScheduleConfigHandler = tenant_provisioning_service.UpdateReportScheduleConfigHandlerFunc(handlers.HandleUpdateReportScheduleConfig(handlers.SkylightAndTenantAdminRoles, tenantDB))

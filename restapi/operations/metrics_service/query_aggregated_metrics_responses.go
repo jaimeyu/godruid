@@ -65,6 +65,11 @@ const QueryAggregatedMetricsBadRequestCode int = 400
 swagger:response queryAggregatedMetricsBadRequest
 */
 type QueryAggregatedMetricsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewQueryAggregatedMetricsBadRequest creates QueryAggregatedMetricsBadRequest with default headers values
@@ -73,12 +78,112 @@ func NewQueryAggregatedMetricsBadRequest() *QueryAggregatedMetricsBadRequest {
 	return &QueryAggregatedMetricsBadRequest{}
 }
 
+// WithPayload adds the payload to the query aggregated metrics bad request response
+func (o *QueryAggregatedMetricsBadRequest) WithPayload(payload string) *QueryAggregatedMetricsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query aggregated metrics bad request response
+func (o *QueryAggregatedMetricsBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *QueryAggregatedMetricsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// QueryAggregatedMetricsForbiddenCode is the HTTP code returned for type QueryAggregatedMetricsForbidden
+const QueryAggregatedMetricsForbiddenCode int = 403
+
+/*QueryAggregatedMetricsForbidden Requestor does not have authorization to perform this action
+
+swagger:response queryAggregatedMetricsForbidden
+*/
+type QueryAggregatedMetricsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewQueryAggregatedMetricsForbidden creates QueryAggregatedMetricsForbidden with default headers values
+func NewQueryAggregatedMetricsForbidden() *QueryAggregatedMetricsForbidden {
+
+	return &QueryAggregatedMetricsForbidden{}
+}
+
+// WithPayload adds the payload to the query aggregated metrics forbidden response
+func (o *QueryAggregatedMetricsForbidden) WithPayload(payload string) *QueryAggregatedMetricsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query aggregated metrics forbidden response
+func (o *QueryAggregatedMetricsForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QueryAggregatedMetricsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// QueryAggregatedMetricsNotFoundCode is the HTTP code returned for type QueryAggregatedMetricsNotFound
+const QueryAggregatedMetricsNotFoundCode int = 404
+
+/*QueryAggregatedMetricsNotFound Missing provisioned data from request parameters
+
+swagger:response queryAggregatedMetricsNotFound
+*/
+type QueryAggregatedMetricsNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewQueryAggregatedMetricsNotFound creates QueryAggregatedMetricsNotFound with default headers values
+func NewQueryAggregatedMetricsNotFound() *QueryAggregatedMetricsNotFound {
+
+	return &QueryAggregatedMetricsNotFound{}
+}
+
+// WithPayload adds the payload to the query aggregated metrics not found response
+func (o *QueryAggregatedMetricsNotFound) WithPayload(payload string) *QueryAggregatedMetricsNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query aggregated metrics not found response
+func (o *QueryAggregatedMetricsNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QueryAggregatedMetricsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // QueryAggregatedMetricsInternalServerErrorCode is the HTTP code returned for type QueryAggregatedMetricsInternalServerError
@@ -89,6 +194,11 @@ const QueryAggregatedMetricsInternalServerErrorCode int = 500
 swagger:response queryAggregatedMetricsInternalServerError
 */
 type QueryAggregatedMetricsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewQueryAggregatedMetricsInternalServerError creates QueryAggregatedMetricsInternalServerError with default headers values
@@ -97,10 +207,24 @@ func NewQueryAggregatedMetricsInternalServerError() *QueryAggregatedMetricsInter
 	return &QueryAggregatedMetricsInternalServerError{}
 }
 
+// WithPayload adds the payload to the query aggregated metrics internal server error response
+func (o *QueryAggregatedMetricsInternalServerError) WithPayload(payload string) *QueryAggregatedMetricsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query aggregated metrics internal server error response
+func (o *QueryAggregatedMetricsInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *QueryAggregatedMetricsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

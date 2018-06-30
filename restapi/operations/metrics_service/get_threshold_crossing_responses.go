@@ -65,6 +65,11 @@ const GetThresholdCrossingBadRequestCode int = 400
 swagger:response getThresholdCrossingBadRequest
 */
 type GetThresholdCrossingBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingBadRequest creates GetThresholdCrossingBadRequest with default headers values
@@ -73,22 +78,84 @@ func NewGetThresholdCrossingBadRequest() *GetThresholdCrossingBadRequest {
 	return &GetThresholdCrossingBadRequest{}
 }
 
+// WithPayload adds the payload to the get threshold crossing bad request response
+func (o *GetThresholdCrossingBadRequest) WithPayload(payload string) *GetThresholdCrossingBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing bad request response
+func (o *GetThresholdCrossingBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// GetThresholdCrossingForbiddenCode is the HTTP code returned for type GetThresholdCrossingForbidden
+const GetThresholdCrossingForbiddenCode int = 403
+
+/*GetThresholdCrossingForbidden Requestor does not have authorization to perform this action
+
+swagger:response getThresholdCrossingForbidden
+*/
+type GetThresholdCrossingForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetThresholdCrossingForbidden creates GetThresholdCrossingForbidden with default headers values
+func NewGetThresholdCrossingForbidden() *GetThresholdCrossingForbidden {
+
+	return &GetThresholdCrossingForbidden{}
+}
+
+// WithPayload adds the payload to the get threshold crossing forbidden response
+func (o *GetThresholdCrossingForbidden) WithPayload(payload string) *GetThresholdCrossingForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing forbidden response
+func (o *GetThresholdCrossingForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetThresholdCrossingForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetThresholdCrossingNotFoundCode is the HTTP code returned for type GetThresholdCrossingNotFound
 const GetThresholdCrossingNotFoundCode int = 404
 
-/*GetThresholdCrossingNotFound Unable to find Threshold Profile for provided id
+/*GetThresholdCrossingNotFound Threshold profile not found
 
 swagger:response getThresholdCrossingNotFound
 */
 type GetThresholdCrossingNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingNotFound creates GetThresholdCrossingNotFound with default headers values
@@ -97,12 +164,26 @@ func NewGetThresholdCrossingNotFound() *GetThresholdCrossingNotFound {
 	return &GetThresholdCrossingNotFound{}
 }
 
+// WithPayload adds the payload to the get threshold crossing not found response
+func (o *GetThresholdCrossingNotFound) WithPayload(payload string) *GetThresholdCrossingNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing not found response
+func (o *GetThresholdCrossingNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetThresholdCrossingInternalServerErrorCode is the HTTP code returned for type GetThresholdCrossingInternalServerError
@@ -113,6 +194,11 @@ const GetThresholdCrossingInternalServerErrorCode int = 500
 swagger:response getThresholdCrossingInternalServerError
 */
 type GetThresholdCrossingInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingInternalServerError creates GetThresholdCrossingInternalServerError with default headers values
@@ -121,10 +207,24 @@ func NewGetThresholdCrossingInternalServerError() *GetThresholdCrossingInternalS
 	return &GetThresholdCrossingInternalServerError{}
 }
 
+// WithPayload adds the payload to the get threshold crossing internal server error response
+func (o *GetThresholdCrossingInternalServerError) WithPayload(payload string) *GetThresholdCrossingInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing internal server error response
+func (o *GetThresholdCrossingInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

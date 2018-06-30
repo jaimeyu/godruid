@@ -65,6 +65,11 @@ const GetTopNForMetricBadRequestCode int = 400
 swagger:response getTopNForMetricBadRequest
 */
 type GetTopNForMetricBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTopNForMetricBadRequest creates GetTopNForMetricBadRequest with default headers values
@@ -73,12 +78,112 @@ func NewGetTopNForMetricBadRequest() *GetTopNForMetricBadRequest {
 	return &GetTopNForMetricBadRequest{}
 }
 
+// WithPayload adds the payload to the get top n for metric bad request response
+func (o *GetTopNForMetricBadRequest) WithPayload(payload string) *GetTopNForMetricBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get top n for metric bad request response
+func (o *GetTopNForMetricBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTopNForMetricBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// GetTopNForMetricForbiddenCode is the HTTP code returned for type GetTopNForMetricForbidden
+const GetTopNForMetricForbiddenCode int = 403
+
+/*GetTopNForMetricForbidden Requestor does not have authorization to perform this action
+
+swagger:response getTopNForMetricForbidden
+*/
+type GetTopNForMetricForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTopNForMetricForbidden creates GetTopNForMetricForbidden with default headers values
+func NewGetTopNForMetricForbidden() *GetTopNForMetricForbidden {
+
+	return &GetTopNForMetricForbidden{}
+}
+
+// WithPayload adds the payload to the get top n for metric forbidden response
+func (o *GetTopNForMetricForbidden) WithPayload(payload string) *GetTopNForMetricForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get top n for metric forbidden response
+func (o *GetTopNForMetricForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTopNForMetricForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// GetTopNForMetricNotFoundCode is the HTTP code returned for type GetTopNForMetricNotFound
+const GetTopNForMetricNotFoundCode int = 404
+
+/*GetTopNForMetricNotFound Missing proviosned data
+
+swagger:response getTopNForMetricNotFound
+*/
+type GetTopNForMetricNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetTopNForMetricNotFound creates GetTopNForMetricNotFound with default headers values
+func NewGetTopNForMetricNotFound() *GetTopNForMetricNotFound {
+
+	return &GetTopNForMetricNotFound{}
+}
+
+// WithPayload adds the payload to the get top n for metric not found response
+func (o *GetTopNForMetricNotFound) WithPayload(payload string) *GetTopNForMetricNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get top n for metric not found response
+func (o *GetTopNForMetricNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTopNForMetricNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetTopNForMetricInternalServerErrorCode is the HTTP code returned for type GetTopNForMetricInternalServerError
@@ -89,6 +194,11 @@ const GetTopNForMetricInternalServerErrorCode int = 500
 swagger:response getTopNForMetricInternalServerError
 */
 type GetTopNForMetricInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetTopNForMetricInternalServerError creates GetTopNForMetricInternalServerError with default headers values
@@ -97,10 +207,24 @@ func NewGetTopNForMetricInternalServerError() *GetTopNForMetricInternalServerErr
 	return &GetTopNForMetricInternalServerError{}
 }
 
+// WithPayload adds the payload to the get top n for metric internal server error response
+func (o *GetTopNForMetricInternalServerError) WithPayload(payload string) *GetTopNForMetricInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get top n for metric internal server error response
+func (o *GetTopNForMetricInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetTopNForMetricInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -31,7 +31,7 @@ func NewGetHistogram(ctx *middleware.Context, handler GetHistogramHandler) *GetH
 
 /*GetHistogram swagger:route GET /v1/histogram MetricsService getHistogram
 
-Retrieve a histogram of measurements for given time range and metric
+Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
 
 */
 type GetHistogram struct {

@@ -57,28 +57,47 @@ func (o *GetHistogramOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
-// GetHistogramBadRequestCode is the HTTP code returned for type GetHistogramBadRequest
-const GetHistogramBadRequestCode int = 400
+// GetHistogramForbiddenCode is the HTTP code returned for type GetHistogramForbidden
+const GetHistogramForbiddenCode int = 403
 
-/*GetHistogramBadRequest Request data does not pass validation
+/*GetHistogramForbidden Requestor does not have authorization to perform this action
 
-swagger:response getHistogramBadRequest
+swagger:response getHistogramForbidden
 */
-type GetHistogramBadRequest struct {
+type GetHistogramForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
-// NewGetHistogramBadRequest creates GetHistogramBadRequest with default headers values
-func NewGetHistogramBadRequest() *GetHistogramBadRequest {
+// NewGetHistogramForbidden creates GetHistogramForbidden with default headers values
+func NewGetHistogramForbidden() *GetHistogramForbidden {
 
-	return &GetHistogramBadRequest{}
+	return &GetHistogramForbidden{}
+}
+
+// WithPayload adds the payload to the get histogram forbidden response
+func (o *GetHistogramForbidden) WithPayload(payload string) *GetHistogramForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get histogram forbidden response
+func (o *GetHistogramForbidden) SetPayload(payload string) {
+	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetHistogramBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetHistogramForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
 
-	rw.WriteHeader(400)
 }
 
 // GetHistogramInternalServerErrorCode is the HTTP code returned for type GetHistogramInternalServerError
@@ -89,6 +108,11 @@ const GetHistogramInternalServerErrorCode int = 500
 swagger:response getHistogramInternalServerError
 */
 type GetHistogramInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetHistogramInternalServerError creates GetHistogramInternalServerError with default headers values
@@ -97,10 +121,24 @@ func NewGetHistogramInternalServerError() *GetHistogramInternalServerError {
 	return &GetHistogramInternalServerError{}
 }
 
+// WithPayload adds the payload to the get histogram internal server error response
+func (o *GetHistogramInternalServerError) WithPayload(payload string) *GetHistogramInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get histogram internal server error response
+func (o *GetHistogramInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetHistogramInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

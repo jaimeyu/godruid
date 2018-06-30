@@ -2292,7 +2292,7 @@ paths:
 # when the MetricsService is altered to use the jsonapi implementation.
   /v1/histogram:
     get:
-      summary: Retrieve a histogram of measurements for given time range and metric
+      summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
       operationId: GetHistogram
       produces:
         - application/vnd.api+json
@@ -2301,10 +2301,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2364,10 +2368,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2422,10 +2430,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2499,8 +2517,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2521,10 +2551,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2595,10 +2635,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2669,8 +2719,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2693,8 +2755,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing proviosned data"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2717,10 +2791,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Components of the request parameters were not in the provisioning database"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.

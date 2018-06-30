@@ -65,6 +65,11 @@ const QueryThresholdCrossingBadRequestCode int = 400
 swagger:response queryThresholdCrossingBadRequest
 */
 type QueryThresholdCrossingBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewQueryThresholdCrossingBadRequest creates QueryThresholdCrossingBadRequest with default headers values
@@ -73,12 +78,112 @@ func NewQueryThresholdCrossingBadRequest() *QueryThresholdCrossingBadRequest {
 	return &QueryThresholdCrossingBadRequest{}
 }
 
+// WithPayload adds the payload to the query threshold crossing bad request response
+func (o *QueryThresholdCrossingBadRequest) WithPayload(payload string) *QueryThresholdCrossingBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query threshold crossing bad request response
+func (o *QueryThresholdCrossingBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *QueryThresholdCrossingBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// QueryThresholdCrossingForbiddenCode is the HTTP code returned for type QueryThresholdCrossingForbidden
+const QueryThresholdCrossingForbiddenCode int = 403
+
+/*QueryThresholdCrossingForbidden Requestor does not have authorization to perform this action
+
+swagger:response queryThresholdCrossingForbidden
+*/
+type QueryThresholdCrossingForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewQueryThresholdCrossingForbidden creates QueryThresholdCrossingForbidden with default headers values
+func NewQueryThresholdCrossingForbidden() *QueryThresholdCrossingForbidden {
+
+	return &QueryThresholdCrossingForbidden{}
+}
+
+// WithPayload adds the payload to the query threshold crossing forbidden response
+func (o *QueryThresholdCrossingForbidden) WithPayload(payload string) *QueryThresholdCrossingForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query threshold crossing forbidden response
+func (o *QueryThresholdCrossingForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QueryThresholdCrossingForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// QueryThresholdCrossingNotFoundCode is the HTTP code returned for type QueryThresholdCrossingNotFound
+const QueryThresholdCrossingNotFoundCode int = 404
+
+/*QueryThresholdCrossingNotFound Threshold profile not found
+
+swagger:response queryThresholdCrossingNotFound
+*/
+type QueryThresholdCrossingNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewQueryThresholdCrossingNotFound creates QueryThresholdCrossingNotFound with default headers values
+func NewQueryThresholdCrossingNotFound() *QueryThresholdCrossingNotFound {
+
+	return &QueryThresholdCrossingNotFound{}
+}
+
+// WithPayload adds the payload to the query threshold crossing not found response
+func (o *QueryThresholdCrossingNotFound) WithPayload(payload string) *QueryThresholdCrossingNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query threshold crossing not found response
+func (o *QueryThresholdCrossingNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *QueryThresholdCrossingNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // QueryThresholdCrossingInternalServerErrorCode is the HTTP code returned for type QueryThresholdCrossingInternalServerError
@@ -89,6 +194,11 @@ const QueryThresholdCrossingInternalServerErrorCode int = 500
 swagger:response queryThresholdCrossingInternalServerError
 */
 type QueryThresholdCrossingInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewQueryThresholdCrossingInternalServerError creates QueryThresholdCrossingInternalServerError with default headers values
@@ -97,10 +207,24 @@ func NewQueryThresholdCrossingInternalServerError() *QueryThresholdCrossingInter
 	return &QueryThresholdCrossingInternalServerError{}
 }
 
+// WithPayload adds the payload to the query threshold crossing internal server error response
+func (o *QueryThresholdCrossingInternalServerError) WithPayload(payload string) *QueryThresholdCrossingInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the query threshold crossing internal server error response
+func (o *QueryThresholdCrossingInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *QueryThresholdCrossingInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

@@ -57,28 +57,47 @@ func (o *GetRawMetricsOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
-// GetRawMetricsBadRequestCode is the HTTP code returned for type GetRawMetricsBadRequest
-const GetRawMetricsBadRequestCode int = 400
+// GetRawMetricsForbiddenCode is the HTTP code returned for type GetRawMetricsForbidden
+const GetRawMetricsForbiddenCode int = 403
 
-/*GetRawMetricsBadRequest Request data does not pass validation
+/*GetRawMetricsForbidden Requestor does not have authorization to perform this action
 
-swagger:response getRawMetricsBadRequest
+swagger:response getRawMetricsForbidden
 */
-type GetRawMetricsBadRequest struct {
+type GetRawMetricsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
-// NewGetRawMetricsBadRequest creates GetRawMetricsBadRequest with default headers values
-func NewGetRawMetricsBadRequest() *GetRawMetricsBadRequest {
+// NewGetRawMetricsForbidden creates GetRawMetricsForbidden with default headers values
+func NewGetRawMetricsForbidden() *GetRawMetricsForbidden {
 
-	return &GetRawMetricsBadRequest{}
+	return &GetRawMetricsForbidden{}
+}
+
+// WithPayload adds the payload to the get raw metrics forbidden response
+func (o *GetRawMetricsForbidden) WithPayload(payload string) *GetRawMetricsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get raw metrics forbidden response
+func (o *GetRawMetricsForbidden) SetPayload(payload string) {
+	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetRawMetricsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetRawMetricsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
 
-	rw.WriteHeader(400)
 }
 
 // GetRawMetricsInternalServerErrorCode is the HTTP code returned for type GetRawMetricsInternalServerError
@@ -89,6 +108,11 @@ const GetRawMetricsInternalServerErrorCode int = 500
 swagger:response getRawMetricsInternalServerError
 */
 type GetRawMetricsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetRawMetricsInternalServerError creates GetRawMetricsInternalServerError with default headers values
@@ -97,10 +121,24 @@ func NewGetRawMetricsInternalServerError() *GetRawMetricsInternalServerError {
 	return &GetRawMetricsInternalServerError{}
 }
 
+// WithPayload adds the payload to the get raw metrics internal server error response
+func (o *GetRawMetricsInternalServerError) WithPayload(payload string) *GetRawMetricsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get raw metrics internal server error response
+func (o *GetRawMetricsInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetRawMetricsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

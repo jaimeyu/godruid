@@ -65,6 +65,11 @@ const GetThresholdCrossingByMonitoredObjectTopNBadRequestCode int = 400
 swagger:response getThresholdCrossingByMonitoredObjectTopNBadRequest
 */
 type GetThresholdCrossingByMonitoredObjectTopNBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingByMonitoredObjectTopNBadRequest creates GetThresholdCrossingByMonitoredObjectTopNBadRequest with default headers values
@@ -73,22 +78,84 @@ func NewGetThresholdCrossingByMonitoredObjectTopNBadRequest() *GetThresholdCross
 	return &GetThresholdCrossingByMonitoredObjectTopNBadRequest{}
 }
 
+// WithPayload adds the payload to the get threshold crossing by monitored object top n bad request response
+func (o *GetThresholdCrossingByMonitoredObjectTopNBadRequest) WithPayload(payload string) *GetThresholdCrossingByMonitoredObjectTopNBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing by monitored object top n bad request response
+func (o *GetThresholdCrossingByMonitoredObjectTopNBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingByMonitoredObjectTopNBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// GetThresholdCrossingByMonitoredObjectTopNForbiddenCode is the HTTP code returned for type GetThresholdCrossingByMonitoredObjectTopNForbidden
+const GetThresholdCrossingByMonitoredObjectTopNForbiddenCode int = 403
+
+/*GetThresholdCrossingByMonitoredObjectTopNForbidden Requestor does not have authorization to perform this action
+
+swagger:response getThresholdCrossingByMonitoredObjectTopNForbidden
+*/
+type GetThresholdCrossingByMonitoredObjectTopNForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetThresholdCrossingByMonitoredObjectTopNForbidden creates GetThresholdCrossingByMonitoredObjectTopNForbidden with default headers values
+func NewGetThresholdCrossingByMonitoredObjectTopNForbidden() *GetThresholdCrossingByMonitoredObjectTopNForbidden {
+
+	return &GetThresholdCrossingByMonitoredObjectTopNForbidden{}
+}
+
+// WithPayload adds the payload to the get threshold crossing by monitored object top n forbidden response
+func (o *GetThresholdCrossingByMonitoredObjectTopNForbidden) WithPayload(payload string) *GetThresholdCrossingByMonitoredObjectTopNForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing by monitored object top n forbidden response
+func (o *GetThresholdCrossingByMonitoredObjectTopNForbidden) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetThresholdCrossingByMonitoredObjectTopNForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetThresholdCrossingByMonitoredObjectTopNNotFoundCode is the HTTP code returned for type GetThresholdCrossingByMonitoredObjectTopNNotFound
 const GetThresholdCrossingByMonitoredObjectTopNNotFoundCode int = 404
 
-/*GetThresholdCrossingByMonitoredObjectTopNNotFound Unable to find Threshold Profile for provided id
+/*GetThresholdCrossingByMonitoredObjectTopNNotFound Threshold profile not found
 
 swagger:response getThresholdCrossingByMonitoredObjectTopNNotFound
 */
 type GetThresholdCrossingByMonitoredObjectTopNNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingByMonitoredObjectTopNNotFound creates GetThresholdCrossingByMonitoredObjectTopNNotFound with default headers values
@@ -97,12 +164,26 @@ func NewGetThresholdCrossingByMonitoredObjectTopNNotFound() *GetThresholdCrossin
 	return &GetThresholdCrossingByMonitoredObjectTopNNotFound{}
 }
 
+// WithPayload adds the payload to the get threshold crossing by monitored object top n not found response
+func (o *GetThresholdCrossingByMonitoredObjectTopNNotFound) WithPayload(payload string) *GetThresholdCrossingByMonitoredObjectTopNNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing by monitored object top n not found response
+func (o *GetThresholdCrossingByMonitoredObjectTopNNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingByMonitoredObjectTopNNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // GetThresholdCrossingByMonitoredObjectTopNInternalServerErrorCode is the HTTP code returned for type GetThresholdCrossingByMonitoredObjectTopNInternalServerError
@@ -113,6 +194,11 @@ const GetThresholdCrossingByMonitoredObjectTopNInternalServerErrorCode int = 500
 swagger:response getThresholdCrossingByMonitoredObjectTopNInternalServerError
 */
 type GetThresholdCrossingByMonitoredObjectTopNInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetThresholdCrossingByMonitoredObjectTopNInternalServerError creates GetThresholdCrossingByMonitoredObjectTopNInternalServerError with default headers values
@@ -121,10 +207,24 @@ func NewGetThresholdCrossingByMonitoredObjectTopNInternalServerError() *GetThres
 	return &GetThresholdCrossingByMonitoredObjectTopNInternalServerError{}
 }
 
+// WithPayload adds the payload to the get threshold crossing by monitored object top n internal server error response
+func (o *GetThresholdCrossingByMonitoredObjectTopNInternalServerError) WithPayload(payload string) *GetThresholdCrossingByMonitoredObjectTopNInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get threshold crossing by monitored object top n internal server error response
+func (o *GetThresholdCrossingByMonitoredObjectTopNInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetThresholdCrossingByMonitoredObjectTopNInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

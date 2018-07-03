@@ -20,7 +20,7 @@ import (
 const (
 	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
 	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
-	monitoredObjectIndex              = "monitoredObjectIndex"
+	monitoredObjectIndex              = "monitoredObjectIndexByObjectName"
 
 	monitoredObjectDBSuffix           = "_monitored-objects"
 	reportObjectDBSuffix              = "_reports"
@@ -149,13 +149,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		logger.Log.Debugf("Unable to create monitored object database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
-
-	err = asd.CreateMonitoredObjectIndex(tenantDescriptor.ID, []string{monitoredObjectsByObjectNameKey}, monitoredObjectIndex, monitoredObjectsByObjectNameIndex)
-	if err != nil {
-		logger.Log.Debugf("Unable to create monitored object Index for Tenant %s: %s", tenantDescriptor.ID, err.Error())
-		return nil, err
-	}
-
 	// Create a CouchDB database to isolate reports for the tenant
 	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, reportObjectDBSuffix))
 	if err != nil {
@@ -166,6 +159,13 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 	// Add in the views/indicies necessary for the db:
 	if err = asd.addTenantViewsToDB(tenantDescriptor.ID); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.ID, err.Error())
+		return nil, err
+	}
+
+	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantDescriptor.ID, monitoredObjectDBSuffix))
+	err = createCouchDBViewIndex(dbName, []string{monitoredObjectsByObjectNameKey}, "")
+	if err != nil {
+		logger.Log.Debugf("Unable to create monitored object Index for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
 
@@ -617,44 +617,4 @@ func generateAdminViews() []map[string]interface{} {
 
 	logger.Log.Debug("Adding view for monitoredObjectCountByDomain")
 	return append(result, tenantIDByName)
-}
-
-/*
- This function takes a key and then creates an index for it and then start the indexer.
- We currently only support generating an index based on a singular key.
-*/
-func (asd *AdminServiceDatastoreCouchDB) CreateMonitoredObjectIndex(tenantID string, keyNames []string, docName string, indexName string) error {
-
-	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantID, monitoredObjectDBSuffix))
-	logger.Log.Debugf("Creating index for %s", dbName)
-	db, err := getDatabase(dbName)
-	if err != nil {
-		return err
-	}
-	//func (d *Database) PutIndex(indexFields []string, ddoc, name string) (string, string, error)
-	design, index, err := db.PutIndex(keyNames, docName, indexName)
-	if err != nil {
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully created Indexer -> %s:%s", design, index)
-	}
-
-	// Now force the indexer to crunch!
-	// TODO, needs to prove this works
-	// Do not wait for this to finish, it will certainly take tens of minutes
-	go func(design string) {
-		logger.Log.Errorf("Starting to Index %s", design)
-		// View() will automatically convert the {{design}}/{{index}} to
-		// _design/{{design}}/_view/{{index}}
-		_, err = db.View(design+"/"+index, nil, nil)
-		if err != nil {
-			logger.Log.Errorf("Unsuccessfully Indexed %s", design)
-			return
-		}
-		logger.Log.Debugf("Successfully Indexer %s", design)
-
-	}(design)
-
-	return nil
 }

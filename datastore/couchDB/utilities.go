@@ -2,6 +2,7 @@ package couchDB
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -378,6 +379,38 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	return nil
 }
 
+// updateDdocIndex - encapsulates logic required for basic data updates for objects that follow the basic data format.
+func updateCouchDBDocWithStringDoc(dbName string, data string, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	genericFormat := make(map[string]interface{})
+
+	err = json.Unmarshal([]byte(data), &genericFormat)
+	if err != nil {
+		return err
+	}
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(genericFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Populate the response
+	if err = convertCouchDesignDocumentToObject(genericFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %+v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	}
+	return nil
+}
+
 // updateDesignDoc - encapsulates logic required for basic data updates for objects that follow the basic data format.
 func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
@@ -633,4 +666,125 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
+}
+
+func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
+	// There is a bug here whe update design doc adds _design to the dbname.
+	dbName := generateMonitoredObjectUrl(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
+		if logger.IsDebugEnabled() {
+			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
+		}
+		return err
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
+	}
+	return nil
+}
+
+func generateMonitoredObjectUrl(tenantID string, uri string) string {
+	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	return dbName
+}
+
+/*
+ This function takes a key and then creates an index for it and then start the indexer.
+ We currently only support generating an index based on a singular key.
+*/
+func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) error {
+
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+	if len(keyNames) == 0 {
+		return errors.New("keyNames cannot be 0")
+	}
+
+	var item string
+	if len(prefix) == 0 {
+		item = keyNames[0]
+	} else {
+		item = fmt.Sprintf("%s.%s", prefix, keyNames[0])
+	}
+	//func (d *Database) PutIndex(indexFields []string, ddoc, name string) (string, string, error)
+
+	var docret tenmod.MonitoredObjectMetaDesignDocument
+	var document = fmt.Sprintf(metaIndexTemplate, keyNames[0], keyNames[0], item, item)
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Creating new Index for key '%s' file with payload:%s", keyNames[0], models.AsJSONString(document))
+	}
+	err = updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
+
+	if err != nil {
+		logger.Log.Errorf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
+
+		return err
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Successfully created Indexer -> %s", "xx")
+	}
+
+	// Now force the indexer to crunch!
+	// @TODO, needs to prove this works
+	// Do not wait for this to finish, it will certainly take tens of minutes
+	go func(designIdx string) {
+		logger.Log.Errorf("Starting to Index %s", designIdx)
+		// View() will automatically convert the {{design}}/{{index}} to
+		// _design/{{design}}/_view/{{index}}
+		_, err = db.View(designIdx+"/"+"key", nil, nil)
+		if err != nil {
+			logger.Log.Errorf("Unsuccessfully Indexed %s", designIdx)
+			return
+		}
+		logger.Log.Debugf("Successfully Indexer %s", designIdx)
+
+	}(dbName)
+
+	return nil
+}
+
+func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
+	changeDetected := false
+	// Go thru a list of KV pairs and add the keys to the Metadata.
+	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
+	for key, data := range meta {
+		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
+		// Stop betenantMetaing meta, Ahbed
+		tenantMeta.MonitorObjectMetaKeys[key] = key
+
+		// Check if view exist
+		mapName := fmt.Sprintf(keyViewName, key)
+		logger.Log.Debugf("Checking/Adding %s key to couchdb view", mapName)
+
+		if designDoc.Views[mapName] == nil {
+			changeDetected = true
+			logger.Log.Debugf("Adding %s key to couchdb view", mapName)
+			designDoc.Views[mapName] = make(map[string]string)
+			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
+
+			logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
+		}
+	}
+
+	return changeDetected, nil
+}
+
+// updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object
+func updateTenantMetadataMetadata(meta map[string]string, tenantMeta *tenmod.Metadata) (bool, error) {
+	changeDetected := false
+	// Go thru a list of KV pairs and add the keys to the Metadata.
+	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
+	for key, data := range meta {
+		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
+
+		if len(tenantMeta.MonitorObjectMetaKeys[key]) == 0 {
+			changeDetected = true
+			// Stop being meta, Ahbed
+			tenantMeta.MonitorObjectMetaKeys[key] = key
+		}
+	}
+
+	return changeDetected, nil
 }

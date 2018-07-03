@@ -39,27 +39,29 @@ const (
 	mapFnName         = "map"
 	reduceCountFnName = "_count"
 
-	metaIndexURL      = "_design/monitoredObjectIndexOf%s"
+	metaFieldPrefix = "meta"
+
 	metaIndexTemplate = `{
-		"_id": "_design/by%s",
+		"_id": "_design/monitoredObjectIndexOf%s",
 		"language": "query",
 		"views": {
-		  "by%s": {
-			"map": {
-			  "fields": {
-				"data.meta.%s": "asc"
-			  },
-			  "partial_filter_selector": {}
-			},
-			"options": {
-			  "def": {
-				"fields": [
-				  "data.meta.%s"
-				]
-			  }
+			"by%s": {
+				"map": {
+					"fields": {
+						"data.%s": "asc"
+					},
+					"partial_filter_selector": {}
+				},
+				"options": {
+					"def": {
+						"fields": [
+							"data.%s"
+						]
+					}
+				}
 			}
-		  }
-		}`
+		}
+	}`
 )
 
 // TenantServiceDatastoreCouchDB - struct responsible for handling
@@ -648,9 +650,11 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 	}
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 
-	for key, _ := range dataContainer.Meta {
-		createMetaDataIndex(dbName, []string{"data.meta." + key}, monitoredObjectIndex, "by"+key, tsd)
+	err := tsd.MonitoredObjectKeysUpdate(monitoredObjectReq.TenantID, dataContainer.Meta)
+	if err != nil {
+		return nil, err
 	}
+
 	return dataContainer, nil
 }
 
@@ -810,36 +814,24 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 		return err
 	}
 
-	// Get CouchDB Design Documents
-	dbName := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/_design/", tenantID, monitoredObjectDBSuffix))
-	logger.Log.Debugf("db name to access design docs %s", dbName)
-	designDoc := tenmod.MonitoredObjectMetaDesignDocument{}
-	if err = getDataFromCouch(dbName, designDocName, &designDoc, tenmod.TenantMonitoredObjectKeysStr); err != nil {
-		return err
-	}
-	logger.Log.Debugf("Retrieved %s design doc: %s\n", tenmod.TenantMonitoredObjectKeysStr, models.AsJSONString(designDoc))
-
 	// Create a map if it doesn't exist
 	if tenantMeta.MonitorObjectMetaKeys == nil {
 		tenantMeta.MonitorObjectMetaKeys = make(map[string]string)
 	}
 
-	dbNameKeys := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
-	for key := range tenantMeta.MonitorObjectMetaKeys {
-		createMetaDataIndex(dbNameKeys, []string{"data.meta." + key}, monitoredObjectIndex, "by"+key, tsd)
-	}
-
-	changeDetected, err := updateMetaDesignDocAndTenantMetadata(meta, tenantMeta, designDoc)
+	changeDetected, err := updateTenantMetadataMetadata(meta, tenantMeta)
 	if changeDetected {
 		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
+
 		_, err := tsd.UpdateTenantMeta(tenantMeta)
 		if err != nil {
 			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
 			return err
 		}
-		err = writeMetaDesignDocument(tsd, tenantID, designDoc)
-		if err != nil {
-			return err
+
+		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+		for key := range tenantMeta.MonitorObjectMetaKeys {
+			createCouchDBViewIndex(dbNameKeys, []string{key}, metaFieldPrefix)
 		}
 	}
 
@@ -849,7 +841,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 
-	dbName := generateMonitoredObjectUrl(tenantID, tsd)
+	dbName := generateMonitoredObjectUrl(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
 		return nil, err
@@ -1022,6 +1014,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 // BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
 func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
 	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
+	origTenantID := tenantID
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
 	resource, err := couchdb.NewResource(dbName, nil)
@@ -1046,6 +1039,11 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
 
 		data = append(data, genericMO)
+
+		err = tsd.MonitoredObjectKeysUpdate(origTenantID, mo.Meta)
+		if err != nil {
+			return nil, err
+		}
 	}
 	body := map[string]interface{}{
 		"docs": data}
@@ -1348,89 +1346,4 @@ func (tsd *TenantServiceDatastoreCouchDB) HasDashboardsWithDomain(tenantID strin
 		}
 	}
 	return false, nil
-}
-
-func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
-	// There is a bug here whe update design doc adds _design to the dbname.
-	dbName := generateMonitoredObjectUrl(tenantID, tsd) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
-		if logger.IsDebugEnabled() {
-			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
-		}
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
-	}
-	return nil
-}
-
-func generateMonitoredObjectUrl(tenantID string, tsd *TenantServiceDatastoreCouchDB) string {
-	dbName := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-	return dbName
-}
-
-/*
- This function takes a key and then creates an index for it and then start the indexer.
- We currently only support generating an index based on a singular key.
-*/
-func createMetaDataIndex(dbName string, keyNames []string, docName string, indexName string, tsd *TenantServiceDatastoreCouchDB) error {
-
-	//dbName := generateMonitoredObjectUrl(tenantID, tsd)
-	db, err := getDatabase(dbName)
-	if err != nil {
-		return err
-	}
-	//func (d *Database) PutIndex(indexFields []string, ddoc, name string) (string, string, error)
-	design, index, err := db.PutIndex(keyNames, docName, indexName)
-	if err != nil {
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully created Indexer -> %s:%s", design, index)
-	}
-
-	// Now force the indexer to crunch!
-	// TODO, needs to prove this works
-	// Do not wait for this to finish, it will certainly take tens of minutes
-	go func(design string) {
-		logger.Log.Errorf("Starting to Index %s", design)
-		// View() will automatically convert the {{design}}/{{index}} to
-		// _design/{{design}}/_view/{{index}}
-		_, err = db.View(design+"/"+index, nil, nil)
-		if err != nil {
-			logger.Log.Errorf("Unsuccessfully Indexed %s", design)
-			return
-		}
-		logger.Log.Debugf("Successfully Indexer %s", design)
-
-	}(design)
-
-	return nil
-}
-
-func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
-	changeDetected := false
-	// Go thru a list of KV pairs and add the keys to the Metadata.
-	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
-	for key, data := range meta {
-		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
-		// Stop being meta, Ahbed
-		tenantMeta.MonitorObjectMetaKeys[key] = key
-
-		// Check if view exist
-		mapName := fmt.Sprintf(keyViewName, key)
-		logger.Log.Debugf("Checking/Adding %s key to couchdb view", mapName)
-
-		if designDoc.Views[mapName] == nil {
-			changeDetected = true
-			logger.Log.Debugf("Adding %s key to couchdb view", mapName)
-			designDoc.Views[mapName] = make(map[string]string)
-			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
-
-			logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
-		}
-	}
-
-	return changeDetected, nil
 }

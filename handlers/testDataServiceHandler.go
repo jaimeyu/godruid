@@ -771,10 +771,11 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.MonitoredObject {
 	result := tenmod.MonitoredObject{DomainSet: generateRandomStringArray(domainSet)}
 
-	tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
+	//tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
 
 	// Generate basic field values randomly and associate the appropriate tenant with the MO
-	result.MonitoredObjectID = db.GenerateID(result, tenantMonObjStr)
+	//result.MonitoredObjectID = db.GenerateID(resul, tenantMonObjStr)
+	result.MonitoredObjectID = uuid.NewV4().String() //.GenerateID(result, tenantMonObjStr)
 	result.TenantID = tenantID
 	result.ActuatorName = generateRandomString(10)
 	result.ActuatorType = string(tenmod.AccedianVNID)
@@ -798,8 +799,8 @@ func generateRandomMeta() map[string]string {
 	superheroes := []string{"superman", "batman", "ironman", "spider-man"}
 	meta := make(map[string]string)
 	meta["region"] = regions[num%len(regions)]
-	meta["colors"] = regions[num%len(colors)]
-	meta["superheroes"] = regions[num%len(superheroes)]
+	meta["colors"] = colors[num%len(colors)]
+	meta["superheroes"] = superheroes[num%len(superheroes)]
 
 	return meta
 }

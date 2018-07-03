@@ -20,7 +20,7 @@ import (
 const (
 	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
 	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
-	monitoredObjectIndex              = "_design/monitoredObjectIndex"
+	monitoredObjectIndex              = "monitoredObjectIndex"
 
 	monitoredObjectDBSuffix           = "_monitored-objects"
 	reportObjectDBSuffix              = "_reports"
@@ -152,7 +152,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 
 	err = asd.CreateMonitoredObjectIndex(tenantDescriptor.ID, []string{monitoredObjectsByObjectNameKey}, monitoredObjectIndex, monitoredObjectsByObjectNameIndex)
 	if err != nil {
-		logger.Log.Debugf("Unable to create monitored object database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
+		logger.Log.Debugf("Unable to create monitored object Index for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
 
@@ -625,7 +625,8 @@ func generateAdminViews() []map[string]interface{} {
 */
 func (asd *AdminServiceDatastoreCouchDB) CreateMonitoredObjectIndex(tenantID string, keyNames []string, docName string, indexName string) error {
 
-	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantID, monitoredObjectDBSuffix))
+	logger.Log.Debugf("Creating index for %s", dbName)
 	db, err := getDatabase(dbName)
 	if err != nil {
 		return err

@@ -1,7 +1,12 @@
 ## Current Release 
+### 0.160.0 
+**Release Date:** Wed Jun 27 18:23:46 UTC 2018     
+## Previous Releases 
+### 0.159.0 
+**Release Date:** Wed Jun 27 18:02:30 UTC 2018     
+* Feature - adding metric instrumentation for Druid queries to track individual time of query from the entire API time.
 ### 0.158.0 
 **Release Date:** Mon Jun 25 18:58:20 UTC 2018     
-## Previous Releases 
 * Fix - Changed default log level on gather to turn off debug logs
 ### 0.157.0 
 **Release Date:** Mon Jun 25 12:52:02 UTC 2018     

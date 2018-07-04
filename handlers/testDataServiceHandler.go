@@ -794,13 +794,26 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 func generateRandomMeta() map[string]string {
 	num := rand.Intn(8)
 	// Generate random meta data
-	regions := []string{"london", "tokyo", "toronto", "montreal", "vancouver", "calgary", "regina", "new york"}
-	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple"}
-	superheroes := []string{"superman", "batman", "ironman", "spider-man"}
+	regions := []string{"london", "tokyo", "toronto", "montreal", "vancouver", "calgary", "regina", "new york", "las vegas", "boston", "chicago", "winnepeg", "washington", "hamilton", "paris", "lyon"}
+	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
+	superheroes := []string{"superman", "batman", "ironman", "spider-man", "ant-man", "aquaman", "wonderwoman", "batwoman", "birdman", "catwoman", "invisible woman"}
 	meta := make(map[string]string)
-	meta["region"] = regions[num%len(regions)]
-	meta["colors"] = colors[num%len(colors)]
-	meta["superheroes"] = superheroes[num%len(superheroes)]
+
+	// The following inserts monitored objects with blanks, so schemas are not always the same across all objects.
+	rI := num % len(regions)
+	if rI != 0 {
+		meta["region"] = regions[rI]
+	}
+
+	rI = num % len(colors)
+	if rI != 0 {
+		meta["colors"] = colors[num%len(colors)]
+	}
+
+	rI = num % len(superheroes)
+	if rI != 0 {
+		meta["superheroes"] = superheroes[num%len(superheroes)]
+	}
 
 	return meta
 }

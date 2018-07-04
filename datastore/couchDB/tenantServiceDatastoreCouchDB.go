@@ -2,6 +2,7 @@ package couchDB
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/accedian/adh-gather/config"
@@ -41,7 +42,8 @@ const (
 
 	metaFieldPrefix = "meta"
 
-	metaIndexTemplate = `{
+	metaIndexDdocTemplate = "monitoredObjectIndexOf%s"
+	metaIndexTemplate     = `{
 		"_id": "_design/monitoredObjectIndexOf%s",
 		"language": "query",
 		"views": {
@@ -809,34 +811,40 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 
 	// Get Tenant Meta data
 	tenantMeta, err := tsd.GetTenantMeta(tenantID)
-	logger.Log.Debugf("Got Tenant metadata: %+v", tenantMeta)
 	if err != nil {
-		return err
+		logger.Log.Errorf("Could not find Tenant %s's metadata, cannot complete updating the DB Cached Index Views for Monitored Objects's metadata", tenantID)
+		// We're silently dropping the error condition because there is a chance that we feed
+		// monitored objects into the system but for some reason
+		// did not create a Tenant Metadata object. Rather than completely dropping the monitored object,
+		// we're going to drop the metadata index generator.
+		return nil
 	}
+	logger.Log.Debugf("Got Tenant metadata: %+v", tenantMeta)
 
 	// Create a map if it doesn't exist
 	if tenantMeta.MonitorObjectMetaKeys == nil {
 		tenantMeta.MonitorObjectMetaKeys = make(map[string]string)
 	}
 
-	changeDetected, err := updateTenantMetadataMetadata(meta, tenantMeta)
-	if changeDetected {
-		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
-
+	// Update the tenant's metadata and get a list of new keys
+	newKeys, err := updateTenantMetadataMetadata(meta, tenantMeta)
+	if len(newKeys) != 0 {
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
+		}
 		_, err := tsd.UpdateTenantMeta(tenantMeta)
 		if err != nil {
-			logger.Log.Errorf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
-			return err
+			msg := fmt.Sprintf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
+			return errors.New(msg)
 		}
 
-		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
-		for key := range tenantMeta.MonitorObjectMetaKeys {
+		// Create the couchDB views
+		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+		for _, key := range newKeys {
 			createCouchDBViewIndex(dbNameKeys, []string{key}, metaFieldPrefix)
 		}
 	}
-
 	return nil
-
 }
 
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {

@@ -708,10 +708,11 @@ func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) err
 	} else {
 		item = fmt.Sprintf("%s.%s", prefix, keyNames[0])
 	}
-	//func (d *Database) PutIndex(indexFields []string, ddoc, name string) (string, string, error)
+	ckey := keyNames[0]
 
 	var docret tenmod.MonitoredObjectMetaDesignDocument
-	var document = fmt.Sprintf(metaIndexTemplate, keyNames[0], keyNames[0], item, item)
+	var document = fmt.Sprintf(metaIndexTemplate, ckey, ckey, item, item)
+	ddocName := fmt.Sprintf(metaIndexDdocTemplate, ckey)
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Creating new Index for key '%s' file with payload:%s", keyNames[0], models.AsJSONString(document))
 	}
@@ -729,18 +730,20 @@ func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) err
 	// Now force the indexer to crunch!
 	// @TODO, needs to prove this works
 	// Do not wait for this to finish, it will certainly take tens of minutes
-	go func(designIdx string) {
-		logger.Log.Errorf("Starting to Index %s", designIdx)
+	go func(ddoc string, key string) {
+		logger.Log.Errorf("Starting to Index %s/%s", ddoc, key)
 		// View() will automatically convert the {{design}}/{{index}} to
 		// _design/{{design}}/_view/{{index}}
-		_, err = db.View(designIdx+"/"+"key", nil, nil)
+		v, err := db.View(ddoc+"/"+key, nil, nil)
 		if err != nil {
-			logger.Log.Errorf("Unsuccessfully Indexed %s", designIdx)
+			logger.Log.Errorf("Unsuccessfully Indexed %s/%s", ddoc, key)
 			return
 		}
-		logger.Log.Debugf("Successfully Indexer %s", designIdx)
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Successfully Indexed %s/%s -> %s", ddoc, key, models.AsJSONString(v))
+		}
 
-	}(dbName)
+	}(ddocName, ckey)
 
 	return nil
 }
@@ -771,20 +774,20 @@ func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *te
 	return changeDetected, nil
 }
 
-// updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object
-func updateTenantMetadataMetadata(meta map[string]string, tenantMeta *tenmod.Metadata) (bool, error) {
-	changeDetected := false
+// updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object' metakeys
+func updateTenantMetadataMetadata(meta map[string]string, tenantMeta *tenmod.Metadata) ([]string, error) {
+	keys := make([]string, 0)
 	// Go thru a list of KV pairs and add the keys to the Metadata.
 	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
-	for key, data := range meta {
-		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
+	for key, _ := range meta {
 
 		if len(tenantMeta.MonitorObjectMetaKeys[key]) == 0 {
-			changeDetected = true
+			logger.Log.Debugf("\"%s\" is a new key", key)
+			keys = append(keys, key)
 			// Stop being meta, Ahbed
 			tenantMeta.MonitorObjectMetaKeys[key] = key
 		}
 	}
 
-	return changeDetected, nil
+	return keys, nil
 }

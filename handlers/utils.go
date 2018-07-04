@@ -530,13 +530,18 @@ func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 	}
 
 	// Otherwise, handle the roles
-	for _, role := range user.UserRoles {
-		if role == allowedRole {
-			logger.Log.Debugf("Request from %s matches allowed access: %s", role, allowedRole)
-			return true
+	for _, userRole := range user.UserRoles {
+		for _, provisionnedRole := range allowedRoles {
+			if userRole == provisionnedRole {
+				logger.Log.Debugf("Request from %s matches allowed access: %s", userRole, provisionnedRole)
+				return true
+			}
 		}
 	}
 
+	logger.Log.Debugf("Request from %s doesn't match any allowed access roles: User Roles{%s}, Provisionned Access Roles {%s}",
+		user.UserRoles,
+		allowedRoles)
 	return false
 }
 

@@ -1,3 +1,4 @@
+* Fix - Cannot create domains for other tenant admin users that are not skylight admin. We did provisionned the roles properly, but the for loop that checked for the roles wasn't really looping. [Fixes Issue 47](https://app.trackduck.com/project/5af4415b55b8b593751d5527/issue/5b3bd4b994cf14512d43feb7?utm_source=integration&utm_medium=app_slack&utm_content=task)
 ## Current Release 
 ### 0.160.0 
 **Release Date:** Wed Jun 27 18:23:46 UTC 2018     

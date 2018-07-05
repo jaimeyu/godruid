@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
@@ -15,6 +16,8 @@ import (
 )
 
 const defaultQueryResultsLimit = 1000
+
+var couchdbViewBuilderBusyMap sync.Map
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
 // that can be stored. Changes the provided object into a map[string]interface{} generic
@@ -692,12 +695,8 @@ func generateMonitoredObjectUrl(tenantID string, uri string) string {
  This function takes a key and then creates an index for it and then start the indexer.
  We currently only support generating an index based on a singular key.
 */
-func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) error {
+func createCouchDBViewIndex(dbName string, template string, ddocName string, keyNames []string, prefix string) error {
 
-	db, err := getDatabase(dbName)
-	if err != nil {
-		return err
-	}
 	if len(keyNames) == 0 {
 		return errors.New("keyNames cannot be 0")
 	}
@@ -711,12 +710,15 @@ func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) err
 	ckey := keyNames[0]
 
 	var docret tenmod.MonitoredObjectMetaDesignDocument
-	var document = fmt.Sprintf(metaIndexTemplate, ckey, ckey, item, item)
-	ddocName := fmt.Sprintf(metaIndexDdocTemplate, ckey)
+	//var document = fmt.Sprintf(metaIndexTemplate, ckey, ckey, item, item)
+	document := strings.Replace(template, metaKeyName, ckey, -1)
+	document = strings.Replace(document, metaKeyField, item, -1)
+
+	//ddocName := fmt.Sprintf(metaIndexDdocTemplate, ckey)
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Creating new Index for key '%s' file with payload:%s", keyNames[0], models.AsJSONString(document))
 	}
-	err = updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
+	err := updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
 
 	if err != nil {
 		logger.Log.Errorf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
@@ -727,25 +729,38 @@ func createCouchDBViewIndex(dbName string, keyNames []string, prefix string) err
 		logger.Log.Debugf("Successfully created Indexer -> %s", "xx")
 	}
 
-	// Now force the indexer to crunch!
-	// @TODO, needs to prove this works
-	// Do not wait for this to finish, it will certainly take tens of minutes
-	go func(ddoc string, key string) {
-		logger.Log.Errorf("Starting to Index %s/%s", ddoc, key)
-		// View() will automatically convert the {{design}}/{{index}} to
-		// _design/{{design}}/_view/{{index}}
-		v, err := db.View(ddoc+"/"+key, nil, nil)
-		if err != nil {
-			logger.Log.Errorf("Unsuccessfully Indexed %s/%s", ddoc, key)
-			return
-		}
-		if logger.IsDebugEnabled() {
-			logger.Log.Debugf("Successfully Indexed %s/%s -> %s", ddoc, key, models.AsJSONString(v))
-		}
-
-	}(ddocName, ckey)
-
 	return nil
+}
+
+func indexViewTriggerBuild(dbName string, ddoc string, key string) {
+
+	// When we do a bulk update on monitored objects, we'll be issuing
+	// a lot of view queries so instead. So now we check if there is already
+	// generating a view and if so, then just quit. There's no point in hammering
+	// couch to update the views.
+	_, stored := couchdbViewBuilderBusyMap.LoadOrStore(ddoc, true)
+	if stored == true {
+		// We're already building the index, don't interrupt it.
+		return
+	}
+
+	db, err := getDatabase(dbName)
+	if err != nil {
+		logger.Log.Errorf("Could not load db %s", dbName)
+	}
+	uri := fmt.Sprintf("_design/%s/_view/by%s", ddoc, key)
+	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
+	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
+	_, err = db.Get(uri, nil)
+	if err != nil {
+		logger.Log.Errorf("Unsuccessfully Indexed %sbecause %s", uri, err.Error())
+		return
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Successfully Indexed %s -> %s", uri, "") //models.AsJSONString(v))
+	}
+
+	couchdbViewBuilderBusyMap.Delete(ddoc)
 }
 
 func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {

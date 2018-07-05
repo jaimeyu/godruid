@@ -30,34 +30,48 @@ const (
 				emit(doc.data.datatype, doc.id)
 			}
 		}`
-	keyCountName = "%sCount"
-	keyCountFn   = `function (doc) {
-			if (doc.data.meta["%s"]) {
-				emit(doc.data.meta["%s"],1);
-			}
-		}`
-	reduceFnName      = "reduce"
-	mapFnName         = "map"
-	reduceCountFnName = "_count"
 
-	metaFieldPrefix = "meta"
+	mapFnName = "map"
 
-	metaIndexDdocTemplate = "monitoredObjectIndexOf%s"
-	metaIndexTemplate     = `{
-		"_id": "_design/monitoredObjectIndexOf%s",
+	metaFieldPrefix              = "meta"
+	metakeysViewDdocName         = "uniqueMeta"
+	metakeysViewUniqueKeysURI    = "uniqueMeta/uniquesKeys"
+	metakeysViewUniqueValuessURI = "uniqueMeta/uniqueValues"
+	metaKeyName                  = "{{KeyName}}"
+	metaKeyField                 = "{{KeyField}}"
+	metaAllUniqueKVDdocTemplate  = `{
+		"_id": "_design/uniqueMeta",
+		"views": {
+		  "uniquesKeys": {
+			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n          emit(key, doc.data.meta[key]);\n      }\n    }\n}",
+			"reduce": "function(keys, values) {\n    return count(keys);\n}"
+		  },
+		  "uniqueValues": {
+			"map": "function(doc) {\n    if(doc.data.meta) {\n    \n      for (var key in doc.data.meta) {\n          emit(doc.data.meta[key], 1);\n      }\n       }\n}",
+			"reduce": "function(keys, values) {\n    return sum(values);\n}"
+		  }
+		},
+		"language": "javascript"
+	  }`
+	metaUniqueValuesViewsURI          = "{{KeyName}}/{{KeyField}}"
+	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
+
+	metaDdocTemplate  = "%s"
+	metaIndexTemplate = `{
+		"_id": "_design/indexOf{{KeyName}}",
 		"language": "query",
 		"views": {
-			"by%s": {
+			"by{{KeyName}}": {
 				"map": {
 					"fields": {
-						"data.%s": "asc"
+						"data.{{KeyField}}": "asc"
 					},
 					"partial_filter_selector": {}
 				},
 				"options": {
 					"def": {
 						"fields": [
-							"data.%s"
+							"data.{{KeyField}}"
 						]
 					}
 				}
@@ -829,6 +843,25 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	// Update the tenant's metadata and get a list of new keys
 	newKeys, err := updateTenantMetadataMetadata(meta, tenantMeta)
 	if len(newKeys) != 0 {
+
+		// Create the couchDB views
+		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+		for _, key := range newKeys {
+			// Create an index based on metadata keys
+			err = createCouchDBViewIndex(dbNameKeys, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
+			if err != nil {
+				msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				return errors.New(msg)
+			}
+			// Create a view based on unique values per new value
+			err = createCouchDBViewIndex(dbNameKeys, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
+			if err != nil {
+				msg := fmt.Sprintf("Could not create metadata View for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				return errors.New(msg)
+			}
+		}
+
+		// Only update the TenantMetadata if we were successful in creating the views!
 		if logger.IsDebugEnabled() {
 			logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
 		}
@@ -838,15 +871,25 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 			return errors.New(msg)
 		}
 
-		// Create the couchDB views
-		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
-		for _, key := range newKeys {
-			createCouchDBViewIndex(dbNameKeys, []string{key}, metaFieldPrefix)
-		}
 	}
+
+	// Now force the indexer to crunch!
+	// @TODO, needs to prove this works
+	// Do not wait for this to finish, it will certainly take tens of minutes
+	// Create the couchDB views
+	dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+	for key := range meta {
+		go indexViewTriggerBuild(dbNameKeys, "indexOf"+key, key)
+		go indexViewTriggerBuild(dbNameKeys, "viewOf"+key, key)
+	}
+
 	return nil
 }
 
+// GetMonitoredObjectByObjectName - Returns an Monitored based on its Object Name
+// This is useful because the tool used to ingest data from the NID creates unique IDs but
+// the clients may use a different mapping based on monitored object name.
+// Assumption right now is that most clients monitored object objectName will be unique.
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 
 	dbName := generateMonitoredObjectUrl(tenantID, tsd.server)

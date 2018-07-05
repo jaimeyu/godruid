@@ -20,12 +20,14 @@ import (
 const (
 	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
 	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
-	monitoredObjectIndex              = "monitoredObjectIndexByObjectName"
 
-	monitoredObjectDBSuffix           = "_monitored-objects"
-	reportObjectDBSuffix              = "_reports"
+	monitoredObjectDBSuffix = "_monitored-objects"
+	reportObjectDBSuffix    = "_reports"
+
+	//
 	monitoredObjectsByObjectNameIndex = "byObjectName"
 	monitoredObjectsByObjectNameKey   = "objectName"
+	monitoredObjectIndex              = "indexOfObjectName"
 )
 
 // AdminServiceDatastoreCouchDB - struct responsible for handling
@@ -149,6 +151,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		logger.Log.Debugf("Unable to create monitored object database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
+
 	// Create a CouchDB database to isolate reports for the tenant
 	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, reportObjectDBSuffix))
 	if err != nil {
@@ -162,10 +165,18 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
+	// Create index for monitored objects based on their objectName
 	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantDescriptor.ID, monitoredObjectDBSuffix))
-	err = createCouchDBViewIndex(dbName, []string{monitoredObjectsByObjectNameKey}, "")
+	err = createCouchDBViewIndex(dbName, metaIndexTemplate, monitoredObjectsByObjectNameKey, []string{monitoredObjectsByObjectNameKey}, "")
 	if err != nil {
-		logger.Log.Debugf("Unable to create monitored object Index for Tenant %s: %s", tenantDescriptor.ID, err.Error())
+		logger.Log.Debugf("Unable to create monitored object views %s for Tenant %s: %s", monitoredObjectsByObjectNameKey, tenantDescriptor.ID, err.Error())
+		return nil, err
+	}
+
+	// Create index for monitored objects' unique metadata keys & values
+	err = createCouchDBViewIndex(dbName, metaAllUniqueKVDdocTemplate, metakeysViewDdocName, []string{monitoredObjectsByObjectNameKey}, "")
+	if err != nil {
+		logger.Log.Debugf("Unable to create monitored object views %s for Tenant %s: %s", metakeysViewDdocName, tenantDescriptor.ID, err.Error())
 		return nil, err
 	}
 

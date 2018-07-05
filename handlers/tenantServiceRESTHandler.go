@@ -1763,21 +1763,13 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
 
 	// Issue request to DAO Layer
-	result := oldData
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// @TODO: REMOVE THE COMMENTED OUT CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// DEBUG code to make it faster to test the monitored object updates.
-	//result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
-	//if err != nil {
-	//	msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-	//	reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
-	//	return
-	//}
+
+	result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
+		return
+	}
 
 	err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData.Meta)
 	if err != nil {

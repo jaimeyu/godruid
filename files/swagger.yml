@@ -2110,7 +2110,7 @@ paths:
         - TenantProvisioningService
     patch:
       summary: Patch a Tenant Metadata record
-      operationId: Patch TenantMetadata
+      operationId: PatchTenantMetadata
       consumes:
         - application/vnd.api+json
       produces:

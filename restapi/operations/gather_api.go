@@ -231,9 +231,6 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		AdminProvisioningServiceGetValidTypesHandler: admin_provisioning_service.GetValidTypesHandlerFunc(func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetValidTypes has not yet been implemented")
 		}),
-		TenantProvisioningServicePatchTenantMetadataHandler: tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
-			return middleware.NotImplemented("operation TenantProvisioningServicePatchTenantMetadata has not yet been implemented")
-		}),
 		AdminProvisioningServicePatchTenantHandler: admin_provisioning_service.PatchTenantHandlerFunc(func(params admin_provisioning_service.PatchTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServicePatchTenant has not yet been implemented")
 		}),
@@ -242,6 +239,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServicePatchTenantIngestionProfileHandler: tenant_provisioning_service.PatchTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.PatchTenantIngestionProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServicePatchTenantIngestionProfile has not yet been implemented")
+		}),
+		TenantProvisioningServicePatchTenantMetadataHandler: tenant_provisioning_service.PatchTenantMetadataHandlerFunc(func(params tenant_provisioning_service.PatchTenantMetadataParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServicePatchTenantMetadata has not yet been implemented")
 		}),
 		TenantProvisioningServicePatchTenantMonitoredObjectHandler: tenant_provisioning_service.PatchTenantMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.PatchTenantMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServicePatchTenantMonitoredObject has not yet been implemented")
@@ -325,7 +325,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -456,14 +456,14 @@ type GatherAPI struct {
 	MetricsServiceGetTopNForMetricHandler metrics_service.GetTopNForMetricHandler
 	// AdminProvisioningServiceGetValidTypesHandler sets the operation handler for the get valid types operation
 	AdminProvisioningServiceGetValidTypesHandler admin_provisioning_service.GetValidTypesHandler
-	// TenantProvisioningServicePatchTenantMetadataHandler sets the operation handler for the patch tenant metadata operation
-	TenantProvisioningServicePatchTenantMetadataHandler tenant_provisioning_service.PatchTenantMetadataHandler
 	// AdminProvisioningServicePatchTenantHandler sets the operation handler for the patch tenant operation
 	AdminProvisioningServicePatchTenantHandler admin_provisioning_service.PatchTenantHandler
 	// TenantProvisioningServicePatchTenantDomainHandler sets the operation handler for the patch tenant domain operation
 	TenantProvisioningServicePatchTenantDomainHandler tenant_provisioning_service.PatchTenantDomainHandler
 	// TenantProvisioningServicePatchTenantIngestionProfileHandler sets the operation handler for the patch tenant ingestion profile operation
 	TenantProvisioningServicePatchTenantIngestionProfileHandler tenant_provisioning_service.PatchTenantIngestionProfileHandler
+	// TenantProvisioningServicePatchTenantMetadataHandler sets the operation handler for the patch tenant metadata operation
+	TenantProvisioningServicePatchTenantMetadataHandler tenant_provisioning_service.PatchTenantMetadataHandler
 	// TenantProvisioningServicePatchTenantMonitoredObjectHandler sets the operation handler for the patch tenant monitored object operation
 	TenantProvisioningServicePatchTenantMonitoredObjectHandler tenant_provisioning_service.PatchTenantMonitoredObjectHandler
 	// TenantProvisioningServicePatchTenantThresholdProfileHandler sets the operation handler for the patch tenant threshold profile operation
@@ -819,10 +819,6 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "admin_provisioning_service.GetValidTypesHandler")
 	}
 
-	if o.TenantProvisioningServicePatchTenantMetadataHandler == nil {
-		unregistered = append(unregistered, "tenant_provisioning_service.PatchTenantMetadataHandler")
-	}
-
 	if o.AdminProvisioningServicePatchTenantHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.PatchTenantHandler")
 	}
@@ -833,6 +829,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServicePatchTenantIngestionProfileHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.PatchTenantIngestionProfileHandler")
+	}
+
+	if o.TenantProvisioningServicePatchTenantMetadataHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.PatchTenantMetadataHandler")
 	}
 
 	if o.TenantProvisioningServicePatchTenantMonitoredObjectHandler == nil {
@@ -1332,11 +1332,6 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/v1/tenants/{tenantId}/meta"] = tenant_provisioning_service.NewPatchTenantMetadata(o.context, o.TenantProvisioningServicePatchTenantMetadataHandler)
-
-	if o.handlers["PATCH"] == nil {
-		o.handlers["PATCH"] = make(map[string]http.Handler)
-	}
 	o.handlers["PATCH"]["/v1/tenants/{tenantId}"] = admin_provisioning_service.NewPatchTenant(o.context, o.AdminProvisioningServicePatchTenantHandler)
 
 	if o.handlers["PATCH"] == nil {
@@ -1348,6 +1343,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/v1/tenants/{tenantId}/ingestion-profiles"] = tenant_provisioning_service.NewPatchTenantIngestionProfile(o.context, o.TenantProvisioningServicePatchTenantIngestionProfileHandler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v1/tenants/{tenantId}/meta"] = tenant_provisioning_service.NewPatchTenantMetadata(o.context, o.TenantProvisioningServicePatchTenantMetadataHandler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

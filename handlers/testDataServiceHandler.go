@@ -771,10 +771,7 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.MonitoredObject {
 	result := tenmod.MonitoredObject{DomainSet: generateRandomStringArray(domainSet)}
 
-	tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
-
 	// Generate basic field values randomly and associate the appropriate tenant with the MO
-	result.MonitoredObjectID = db.GenerateID(result, tenantMonObjStr)
 	result.TenantID = tenantID
 	result.ActuatorName = generateRandomString(10)
 	result.ActuatorType = string(tenmod.AccedianVNID)
@@ -782,6 +779,7 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	result.ReflectorType = string(tenmod.AccedianVNID)
 	result.ObjectName = generateRandomString(10)
 	result.ObjectType = string(tenmod.TwampPE)
+	result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
 
 	return &result
 }

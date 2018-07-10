@@ -12,12 +12,12 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 	graceful "github.com/tylerb/graceful"
 
-	"github.com/accedian/adh-gather/datastore/druid"
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
-	"github.com/accedian/adh-gather/restapi/operations/metrics_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
 	mux "github.com/gorilla/mux"
 )
@@ -29,8 +29,14 @@ const (
 )
 
 var (
+	metricSH      *handlers.MetricServiceHandler
 	testSH        *handlers.TestDataServiceHandler
 	nonSwaggerMUX *mux.Router
+
+	metricServiceV1APIRouteRoots = []string{
+		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
+		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/histogram-custom", "/api/v1/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
+	}
 )
 
 func configureFlags(api *operations.GatherAPI) {
@@ -66,7 +72,8 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
 
-	druidDB := druid.NewDruidDatasctoreClient()
+	// TODO : druid db not used in V1 apis...re-enable this when the Metrics Servcei V2 APIs are in place.
+	// druidDB := druid.NewDruidDatasctoreClient()
 
 	api.TenantProvisioningServiceBulkInsertMonitoredObjectHandler = tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(handlers.HandleBulkInsertMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler = tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(handlers.HandleBulkUpdateMonitoredObjects(handlers.SkylightAndTenantAdminRoles, tenantDB))
@@ -95,7 +102,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceDeleteTenantThresholdProfileHandler = tenant_provisioning_service.DeleteTenantThresholdProfileHandlerFunc(handlers.HandleDeleteTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.AdminProvisioningServiceDeleteValidTypesHandler = admin_provisioning_service.DeleteValidTypesHandlerFunc(handlers.HandleDeleteValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
-	api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(handlers.HandleGenSLAReport(handlers.AllRoles, tenantDB, druidDB))
+
 	api.TenantProvisioningServiceGetActiveTenantIngestionProfileHandler = tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(handlers.HandleGetActiveTenantIngestionProfile(handlers.AllRoles, tenantDB))
 
 	api.TenantProvisioningServiceGetAllReportScheduleConfigHandler = tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(handlers.HandleGetAllReportScheduleConfigs(handlers.AllRoles, tenantDB))
@@ -108,9 +115,9 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	api.AdminProvisioningServiceGetAllTenantsHandler = admin_provisioning_service.GetAllTenantsHandlerFunc(handlers.HandleGetAllTenants(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler = tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(handlers.HandleGetDomainToMonitoredObjectMap(handlers.AllRoles, tenantDB))
-	api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(handlers.HandleGetHistogram(handlers.AllRoles, druidDB))
+
 	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(handlers.HandleGetIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
-	api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(handlers.HandleGetRawMetrics(handlers.AllRoles, druidDB))
+
 	api.TenantProvisioningServiceGetReportScheduleConfigHandler = tenant_provisioning_service.GetReportScheduleConfigHandlerFunc(handlers.HandleGetReportScheduleConfig(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceGetSLAReportHandler = tenant_provisioning_service.GetSLAReportHandlerFunc(handlers.HandleGetSLAReport(handlers.AllRoles, tenantDB))
 	api.AdminProvisioningServiceGetTenantHandler = admin_provisioning_service.GetTenantHandlerFunc(handlers.HandleGetTenant(handlers.SkylightAdminRoleOnly, adminDB))
@@ -124,10 +131,6 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(handlers.HandleGetTenantSummaryByAlias(adminDB))
 	api.TenantProvisioningServiceGetTenantThresholdProfileHandler = tenant_provisioning_service.GetTenantThresholdProfileHandlerFunc(handlers.HandleGetTenantThresholdProfile(handlers.AllRoles, tenantDB))
 
-	api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(handlers.HandleGetThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-	api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObject(handlers.AllRoles, tenantDB, druidDB))
-	api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopN(handlers.AllRoles, tenantDB, druidDB))
-	api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(handlers.HandleGetTopNFor(handlers.AllRoles, tenantDB, druidDB))
 	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(handlers.HandleGetValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceGetTenantIDByAliasHandler = admin_provisioning_service.GetTenantIDByAliasHandlerFunc(handlers.HandleGetTenantIDByAlias(adminDB))
 	api.TenantProvisioningServicePatchTenantMetadataHandler = tenant_provisioning_service.PatchTenantMetadataHandlerFunc(handlers.HandlePatchTenantMetadata(handlers.SkylightAdminRoleOnly, tenantDB))
@@ -137,15 +140,25 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServicePatchTenantMonitoredObjectHandler = tenant_provisioning_service.PatchTenantMonitoredObjectHandlerFunc(handlers.HandlePatchTenantMonitoredObject(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServicePatchTenantThresholdProfileHandler = tenant_provisioning_service.PatchTenantThresholdProfileHandlerFunc(handlers.HandlePatchTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
-	api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(handlers.HandleQueryAggregatedMetrics(handlers.AllRoles, tenantDB, druidDB))
-	api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(handlers.HandleQueryThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-
 	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(handlers.HandleUpdateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.TenantProvisioningServiceUpdateReportScheduleConfigHandler = tenant_provisioning_service.UpdateReportScheduleConfigHandlerFunc(handlers.HandleUpdateReportScheduleConfig(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.TenantProvisioningServiceUpdateTenantConnectorConfigHandler = tenant_provisioning_service.UpdateTenantConnectorConfigHandlerFunc(handlers.HandleUpdateTenantConnectorConfig(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceUpdateTenantConnectorInstanceHandler = tenant_provisioning_service.UpdateTenantConnectorInstanceHandlerFunc(handlers.HandleUpdateTenantConnectorInstance(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(handlers.HandleUpdateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
+
+	// TODO calls from V1 Metrics service that were hooked up with generated code, but are having issues with unmarshalling the pb.Any object
+	// ======================= START OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
+	// api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(handlers.HandleQueryAggregatedMetrics(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(handlers.HandleQueryThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(handlers.HandleGetThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObject(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopN(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(handlers.HandleGetTopNFor(handlers.AllRoles, tenantDB, druidDB))
+	// api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(handlers.HandleGetRawMetrics(handlers.AllRoles, druidDB))
+	// api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(handlers.HandleGetHistogram(handlers.AllRoles, druidDB))
+	// api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(handlers.HandleGenSLAReport(handlers.AllRoles, tenantDB, druidDB))
+	// ======================= END OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
 
 	// TODO: calls that will be removed, but just moving them here for now until it is certain we will not use them
 	// ======================= START OF CALLS TO REMOVE ===========================================================
@@ -195,9 +208,11 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.ServerShutdown = func() {}
 
 	// Setup non-swagger MUX
+	metricSH = handlers.CreateMetricServiceHandler(nil)
 	testSH = handlers.CreateTestDataServiceHandler()
 	nonSwaggerMUX = mux.NewRouter().StrictSlash(true)
 	testSH.RegisterAPIHandlers(nonSwaggerMUX)
+	metricSH.RegisterAPIHandlers(nonSwaggerMUX)
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
@@ -232,10 +247,14 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 		logger.Log.Debugf("Received request: %s%s", r.Method, r.URL)
 
 		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
-			logger.Log.Warningf("Handling call with non-swagger MUX")
+			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
+		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {
+			// Metric Service V1 call
+			monitoring.IncrementCounter(monitoring.MetricAPIRecieved)
+			nonSwaggerMUX.ServeHTTP(w, r)
+			monitoring.IncrementCounter(monitoring.MetricAPICompleted)
 		} else {
-			logger.Log.Warningf("Handling call with swagger generated MUX")
 			next.ServeHTTP(w, r)
 		}
 

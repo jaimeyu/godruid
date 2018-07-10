@@ -405,7 +405,7 @@ func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		// Validate the request data
 		for _, obj := range data {
 			if err = obj.Validate(true); err != nil || obj.TenantID != params.TenantID {
-				return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have ID and revision"), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+				return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 			}
 			if obj.TenantID != params.TenantID {
 				return tenant_provisioning_service.NewBulkUpdateMonitoredObjectBadRequest().WithPayload(reportAPIError(fmt.Sprintf("Unable to Update %ss in bulk: %s", tenmod.TenantMonitoredObjectStr, "All Monitored Objects must have Tenant ID "+params.TenantID), startTime, http.StatusBadRequest, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))

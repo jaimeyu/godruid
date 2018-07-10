@@ -28,7 +28,7 @@ func NewPatchTenantMetadataParams() PatchTenantMetadataParams {
 // PatchTenantMetadataParams contains all the bound params for the patch tenant metadata operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters Patch TenantMetadata
+// swagger:parameters PatchTenantMetadata
 type PatchTenantMetadataParams struct {
 
 	// HTTP Request Object

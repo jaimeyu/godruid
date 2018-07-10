@@ -1,3 +1,4 @@
+* Feat - include a query filter to query only clean metrics
 ## Current Release 
 ### 0.161.0 
 **Release Date:** Wed Jul  4 15:49:24 UTC 2018     

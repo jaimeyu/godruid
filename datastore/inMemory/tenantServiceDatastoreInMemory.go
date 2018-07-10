@@ -1320,7 +1320,7 @@ func doesSliceContainString(container []string, value string) bool {
 	return false
 }
 
-func (tsd *TenantServiceDatastoreInMemory) MonitoredObjectKeysUpdate(tenantID string, meta map[string]string) error {
+func (tsd *TenantServiceDatastoreInMemory) MonitoredObjectKeysUpdate(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
 	return nil
 }
 

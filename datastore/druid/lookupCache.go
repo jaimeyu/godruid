@@ -52,15 +52,15 @@ func getLookupName(dimType, tenantID, dimValue string) (string, bool) {
 
 // Construct a lookup name
 func buildLookupName(dimType, tenantID, dimValue string) string {
-	return strings.ToLower(dimType + "|" + tenantID + "|" + dimValue)
+	return strings.ToLower(dimType + "." + tenantID + "." + dimValue)
 }
 
 func buildLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + "|" + tenantID)
+	return strings.ToLower(dimType + "." + tenantID)
 }
 
 func getLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + "|" + tenantID)
+	return strings.ToLower(dimType + "." + tenantID)
 }
 
 /* Heads up. The following is so when a getLookup is executed, it only allows it

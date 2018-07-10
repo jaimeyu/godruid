@@ -7,6 +7,8 @@ import (
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/druid"
+
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
@@ -87,12 +89,15 @@ type TenantServiceDatastoreCouchDB struct {
 	server              string
 	cfg                 config.Provider
 	connectorUpdateChan chan *tenmod.ConnectorConfig
+	metricsDB           ds.DruidDatastore
 }
 
 // CreateTenantServiceDAO - instantiates a CouchDB implementation of the
 // TenantServiceDatastore.
 func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	result := new(TenantServiceDatastoreCouchDB)
+
+	result.metricsDB = druid.NewDruidDatasctoreClient()
 	result.cfg = gather.GetConfig()
 	result.connectorUpdateChan = make(chan *tenmod.ConnectorConfig)
 
@@ -666,7 +671,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 	}
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 
-	err := tsd.MonitoredObjectKeysUpdate(monitoredObjectReq.TenantID, dataContainer.Meta)
+	err := tsd.MonitoredObjectKeysUpdate(monitoredObjectReq.TenantID, dataContainer)
 	if err != nil {
 		return nil, err
 	}
@@ -817,11 +822,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 }
 
 // MonitoredObjectKeysUpdate - Updates the Tenant's Metadata's Monitored Object Meta key list
-func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID string, meta map[string]string) error {
+func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
 
 	const (
 		designDocName = "metadataColumns"
 	)
+	meta := monitoredObject.Meta
 
 	// Get Tenant Meta data
 	tenantMeta, err := tsd.GetTenantMeta(tenantID)
@@ -867,10 +873,22 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 		}
 		_, err := tsd.UpdateTenantMeta(tenantMeta)
 		if err != nil {
-			msg := fmt.Sprintf("Error updating tenant meta%s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
+			msg := fmt.Sprintf("Error updating tenant meta%s: %v :%s", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
 			return errors.New(msg)
 		}
 
+	}
+
+	var keys []string
+	for key := range meta {
+		keys = append(keys, key)
+	}
+
+	// Update the lookups on druid
+	err = tsd.metricsDB.AddMonitoredObjectToLookup(tenantID, []*tenmod.MonitoredObject{monitoredObject}, "meta", keys, false)
+	if err != nil {
+		msg := fmt.Sprintf("Tenant %s Error adding metadata keys(%v) to druid lookup, %+v, err: %s", tenantID, keys, []*tenmod.MonitoredObject{monitoredObject}, err.Error())
+		return errors.New(msg)
 	}
 
 	// Now force the indexer to crunch!
@@ -1091,7 +1109,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 
 		data = append(data, genericMO)
 
-		err = tsd.MonitoredObjectKeysUpdate(origTenantID, mo.Meta)
+		err = tsd.MonitoredObjectKeysUpdate(origTenantID, mo)
 		if err != nil {
 			return nil, err
 		}

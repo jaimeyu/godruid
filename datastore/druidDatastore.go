@@ -73,4 +73,7 @@ type DruidDatastore interface {
 
 	// Update Monitored Object meta-data
 	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error
+
+	// Adds a monitored object to a druid look up
+	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string, qualifiers []string, reset bool) error
 }

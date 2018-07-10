@@ -1687,7 +1687,7 @@ func (tsh *TenantServiceRESTHandler) PostMonitoredObjectMeta(w http.ResponseWrit
 			return
 		}
 
-		err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData.Meta)
+		err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
 			reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1771,7 +1771,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 		return
 	}
 
-	err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData.Meta)
+	err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)

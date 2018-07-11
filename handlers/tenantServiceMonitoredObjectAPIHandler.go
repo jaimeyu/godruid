@@ -434,7 +434,7 @@ func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.
 			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to format bulk update %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		reportAPICompletionState(startTime, http.StatusOK, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
 		return tenant_provisioning_service.NewBulkUpdateMonitoredObjectOK().WithPayload(converted)
 	}

@@ -238,7 +238,7 @@ func HandleGetThresholdCrossing(allowedRoles []string, tenantDB datastore.Tenant
 func HandleQueryThresholdCrossing(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
 	return func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.QueryThresholdCrossingStr, params.Body.TenantID, tenmod.TenantThresholdProfileStr, params.Body.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -290,7 +290,7 @@ func HandleQueryThresholdCrossing(allowedRoles []string, tenantDB datastore.Tena
 func HandleGenSLAReport(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GenSLAReportParams) middleware.Responder {
 	return func(params metrics_service.GenSLAReportParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.SLAReportStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -338,7 +338,7 @@ func HandleGenSLAReport(allowedRoles []string, tenantDB datastore.TenantServiceD
 func HandleGetThresholdCrossingByMonitoredObject(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
 	return func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -386,7 +386,7 @@ func HandleGetThresholdCrossingByMonitoredObject(allowedRoles []string, tenantDB
 func HandleGetThresholdCrossingByMonitoredObjectTopN(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingByMonitoredObjectTopNParams) middleware.Responder {
 	return func(params metrics_service.GetThresholdCrossingByMonitoredObjectTopNParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.TenantID, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -434,7 +434,7 @@ func HandleGetThresholdCrossingByMonitoredObjectTopN(allowedRoles []string, tena
 func HandleGetHistogram(allowedRoles []string, druidDB datastore.DruidDatastore) func(params metrics_service.GetHistogramParams) middleware.Responder {
 	return func(params metrics_service.GetHistogramParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Fetching %s for Tenant %s for Metric %s", datastore.HistogramStr, params.Tenant, params.Metric)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -465,7 +465,7 @@ func HandleGetHistogram(allowedRoles []string, druidDB datastore.DruidDatastore)
 func HandleGetRawMetrics(allowedRoles []string, druidDB datastore.DruidDatastore) func(params metrics_service.GetRawMetricsParams) middleware.Responder {
 	return func(params metrics_service.GetRawMetricsParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Fetching %s for Tenant %s for Metric %s", datastore.RawMetricStr, params.Tenant, params.Metric)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -497,7 +497,7 @@ func HandleGetRawMetrics(allowedRoles []string, druidDB datastore.DruidDatastore
 func HandleQueryAggregatedMetrics(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.QueryAggregatedMetricsParams) middleware.Responder {
 	return func(params metrics_service.QueryAggregatedMetricsParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Fetching %s for Tenant %s", datastore.AggMetricsStr, params.Body.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
@@ -539,7 +539,7 @@ func HandleQueryAggregatedMetrics(allowedRoles []string, tenantDB datastore.Tena
 func HandleGetTopNFor(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetTopNForMetricParams) middleware.Responder {
 	return func(params metrics_service.GetTopNForMetricParams) middleware.Responder {
 		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
 		logger.Log.Infof("Fetching %s for Tenant %s", datastore.TopNForMetricString, params.Body.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {

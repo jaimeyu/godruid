@@ -12,13 +12,15 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 	graceful "github.com/tylerb/graceful"
 
+	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
-	"github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
+	slasched "github.com/accedian/adh-gather/scheduler"
+	"github.com/accedian/adh-gather/websocket"
 	mux "github.com/gorilla/mux"
 )
 
@@ -32,6 +34,8 @@ var (
 	metricSH      *handlers.MetricServiceHandler
 	testSH        *handlers.TestDataServiceHandler
 	nonSwaggerMUX *mux.Router
+	adminDB       datastore.AdminServiceDatastore
+	tenantDB      datastore.TenantServiceDatastore
 
 	metricServiceV1APIRouteRoots = []string{
 		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
@@ -62,12 +66,13 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	handlers.InitializeAuthHelper()
 
 	// Create DAO objects to handle data retrieval as needed.
-	adminDB, err := handlers.GetAdminServiceDatastore()
+	var err error
+	adminDB, err = handlers.GetAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate Admin Service DAO: %s", err.Error())
 	}
 
-	tenantDB, err := handlers.GetTenantServiceDatastore()
+	tenantDB, err = handlers.GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
@@ -207,13 +212,6 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	api.ServerShutdown = func() {}
 
-	// Setup non-swagger MUX
-	metricSH = handlers.CreateMetricServiceHandler(nil)
-	testSH = handlers.CreateTestDataServiceHandler()
-	nonSwaggerMUX = mux.NewRouter().StrictSlash(true)
-	testSH.RegisterAPIHandlers(nonSwaggerMUX)
-	metricSH.RegisterAPIHandlers(nonSwaggerMUX)
-
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
 
@@ -238,6 +236,32 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
+	cfg := gather.GetConfig()
+
+	// Setup non-swagger MUX
+	metricSH = handlers.CreateMetricServiceHandler()
+	testSH = handlers.CreateTestDataServiceHandler()
+	nonSwaggerMUX = mux.NewRouter().StrictSlash(true)
+	testSH.RegisterAPIHandlers(nonSwaggerMUX)
+	metricSH.RegisterAPIHandlers(nonSwaggerMUX)
+
+	// Register the metrics to be tracked in Gather
+	go startMonitoring(cfg)
+
+	// Start pprof profiler
+	go startProfile(cfg)
+
+	// Start websocket server
+	websocket.Server(tenantDB)
+
+	// Start the scheduler for handling SLA report generation
+	slasched.Initialize(metricSH, nil, nil, 5)
+
+	// Make sure necessary Couch data is present
+	pouchSH := handlers.CreatePouchDBPluginServiceHandler()
+	adminDBStr := cfg.GetString(gather.CK_args_admindb_name.String())
+	provisionCouchData(pouchSH, adminDB, adminDBStr, cfg)
+
 	return addNonSwaggerHandler(handler)
 }
 
@@ -251,9 +275,7 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {
 			// Metric Service V1 call
-			monitoring.IncrementCounter(monitoring.MetricAPIRecieved)
 			nonSwaggerMUX.ServeHTTP(w, r)
-			monitoring.IncrementCounter(monitoring.MetricAPICompleted)
 		} else {
 			next.ServeHTTP(w, r)
 		}

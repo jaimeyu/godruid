@@ -32,7 +32,7 @@ type MetricServiceHandler struct {
 	routes   []server.Route
 }
 
-func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricServiceHandler {
+func CreateMetricServiceHandler() *MetricServiceHandler {
 	result := new(MetricServiceHandler)
 
 	ddb := druid.NewDruidDatasctoreClient()

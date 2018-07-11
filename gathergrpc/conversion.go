@@ -54,6 +54,9 @@ func ConvertFromPBObject(pbObject interface{}, dataContainer interface{}) error 
 	case *MonitoredObject:
 		casted := pbObject.(*MonitoredObject)
 		flattenedObject["objectId"] = casted.Data.Id
+	case MonitoredObject:
+		casted := pbObject.(MonitoredObject)
+		flattenedObject["objectId"] = casted.Data.Id
 	}
 
 	resultBytes, err := json.Marshal(flattenedObject)
@@ -92,6 +95,12 @@ func ConvertToPBObject(initialObj interface{}, pbObjectContainer interface{}) er
 			value := genericObject["state"].(string)
 			genericObject["state"] = userStateToPBUserStateMap[value]
 		}
+	case *tenmod.MonitoredObject:
+		casted := initialObj.(*tenmod.MonitoredObject)
+		genericObject["id"] = casted.MonitoredObjectID
+	case tenmod.MonitoredObject:
+		casted := initialObj.(tenmod.MonitoredObject)
+		genericObject["id"] = casted.MonitoredObjectID
 	}
 
 	resultBytes, err := json.Marshal(expanded)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -354,7 +356,6 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 
 	result.TenantID = tenantID
 	result.Datatype = string(tenmod.TenantMetaType)
-	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 
 	result.CreatedTimestamp = db.MakeTimestamp()
@@ -498,6 +499,15 @@ func GetAuthorizationToggle() bool {
 	return authAAA
 }
 
+// GetChangeNotificationsToggle - Check if we need to send notifications for certain model changes
+func GetChangeNotificationsToggle() bool {
+	cfg := gather.GetConfig()
+	chgNtf := cfg.GetBool("changeNotifications")
+	logger.Log.Debugf("Change Notifications are enabled? %t", chgNtf)
+
+	return chgNtf
+}
+
 // RoleAccessControl - Checks if the user-role from AAA is allowed to access this endpoint
 func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 	// if auth is disabled, let the calls go through
@@ -583,4 +593,45 @@ func BuildRouteHandlerWithRACSystemCall(allow []string, fn func(w http.ResponseW
 	}
 
 	return functor
+}
+
+// reportAPIError - Used to document API errors both in logging and in the Metrics reporting tool.
+func reportAPIError(msg string, startTime time.Time, code int, objType string, counterMetrics ...mon.MetricCounterType) string {
+	logger.Log.Errorf(msg)
+	reportAPICompletionState(startTime, code, objType, counterMetrics...)
+	return msg
+}
+
+// reportAPICompletionState - Used to document API completion state both in logging and in the Metrics reporting tool.
+func reportAPICompletionState(startTime time.Time, code int, objType string, counterMetrics ...mon.MetricCounterType) {
+	incrementAPICounters(counterMetrics...)
+	trackAPIMetricsByHttpCode(startTime, code, objType)
+}
+
+// incrementAPICounters - updates API call counters in the metric service
+func incrementAPICounters(counterMetrics ...mon.MetricCounterType) {
+	for _, counter := range counterMetrics {
+		mon.IncrementCounter(counter)
+	}
+}
+
+// trackAPIMetrics - updates API call durations in the metric service
+func trackAPIMetricsByHttpCode(startTime time.Time, code int, objType string) {
+	codeStr := strconv.Itoa(code)
+	mon.TrackAPITimeMetricInSeconds(startTime, codeStr, objType)
+}
+
+func convertToJsonapiObject(obj interface{}, dataContainer interface{}) error {
+	// Marshal this object into the appropriate format
+	jsonapiBytes, err := jsonapi.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonapiBytes, dataContainer)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

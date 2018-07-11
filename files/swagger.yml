@@ -132,10 +132,20 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '409':
           description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -158,8 +168,16 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -179,11 +197,17 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
-  '/v1/tenants/{value}':
+  '/v1/tenants/{tenantId}':
     get:
       summary: Retrieve a Tenant by id.
       operationId: GetTenant
@@ -194,10 +218,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -213,10 +243,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -236,10 +272,18 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -253,16 +297,18 @@ paths:
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.
-      operationId: GettenantIdByAlias
+      operationId: GetTenantIdByAlias
       produces:
         - text/plain
       responses:
         '200':
           description: ''
           schema:
-                type: "string"
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path
@@ -283,6 +329,8 @@ paths:
             $ref: "#/definitions/TenantSummary"
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path
@@ -305,8 +353,16 @@ paths:
             $ref: '#/definitions/JsonApiIngestionDictionary'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -329,8 +385,16 @@ paths:
             $ref: '#/definitions/JsonApiIngestionDictionary'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -349,8 +413,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
     delete:
@@ -363,8 +433,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   /v1/valid-types:
@@ -382,8 +458,16 @@ paths:
             $ref: '#/definitions/JsonApiValidTypes'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -406,8 +490,16 @@ paths:
             $ref: '#/definitions/JsonApiValidTypes'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -426,8 +518,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
     delete:
@@ -440,8 +538,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   /v1/tenants/{tenantId}/users:
@@ -611,8 +715,20 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -639,8 +755,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorConfig'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -664,8 +788,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: connectorId
           in: path
@@ -687,8 +817,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: connectorId
           in: path
@@ -711,8 +847,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorConfigList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -739,8 +881,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -767,8 +917,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -781,7 +939,7 @@ paths:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
       tags:
         - TenantProvisioningService
-  '/v1/tenants/{tenantId}/connector-instances/{connectorId}':
+  '/v1/tenants/{tenantId}/connector-instances/{connectorInstanceId}':
     get:
       summary: Retrieve a Tenant ConnectorInstance by Id.
       operationId: GetTenantConnectorInstance
@@ -792,8 +950,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: connectorInstanceId
           in: path
@@ -815,8 +979,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: connectorInstanceId
           in: path
@@ -839,8 +1009,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantConnectorInstanceList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -863,8 +1039,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -892,8 +1076,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -920,8 +1112,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -945,8 +1145,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: configId
           in: path
@@ -968,8 +1174,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: configId
           in: path
@@ -992,8 +1204,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantReportScheduleConfigList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1012,8 +1230,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomainList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1032,8 +1256,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: domainId
           in: path
@@ -1059,8 +1289,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: domainId
           in: path
@@ -1091,8 +1329,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantDomain'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: domainId
           in: path
@@ -1119,8 +1365,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantDomain'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: domainId
           in: path
@@ -1135,7 +1387,7 @@ paths:
   /v1/tenants/{tenantId}/ingestion-profiles:
     post:
       summary: Create an Ingestion Profile for a Tenant.
-      operationId: CreateIngestionProfile
+      operationId: CreateTenantIngestionProfile
       consumes:
         - application/vnd.api+json
       produces:
@@ -1147,8 +1399,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1175,8 +1435,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1203,8 +1471,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1220,7 +1496,7 @@ paths:
   /v1/tenants/{tenantId}/active-ingestion-profile:
     get:
       summary: Retrieve the active Ingestion Profile for the specified Tenant.
-      operationId: GetActiveIngestionProfile
+      operationId: GetActiveTenantIngestionProfile
       produces:
         - application/vnd.api+json
       responses:
@@ -1228,8 +1504,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1248,8 +1530,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: ingestionProfileId
           in: path
@@ -1271,8 +1559,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: ingestionProfileId
           in: path
@@ -1299,8 +1593,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1327,8 +1629,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1338,7 +1648,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
       tags:
         - TenantProvisioningService
     put:
@@ -1355,8 +1665,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1380,8 +1698,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantThresholdProfileList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1400,8 +1724,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: thrPrfId
           in: path
@@ -1423,8 +1753,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: thrPrfId
           in: path
@@ -1451,8 +1787,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1479,8 +1823,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1507,8 +1859,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1532,8 +1892,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1552,8 +1918,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: monObjId
           in: path
@@ -1575,8 +1947,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: monObjId
           in: path
@@ -1601,8 +1979,16 @@ paths:
             $ref: '#/definitions/MonitoredObjectCountByDomainResponse'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1625,11 +2011,19 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/BulkOperationResult'
+            $ref: '#/definitions/BulkOperationResponse'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1639,9 +2033,7 @@ paths:
           in: body
           required: true
           schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
     put:
@@ -1653,11 +2045,19 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/BulkOperationResult'
+            $ref: '#/definitions/BulkOperationResponse'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1667,9 +2067,7 @@ paths:
           in: body
           required: true
           schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
 
@@ -1688,8 +2086,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1704,7 +2110,7 @@ paths:
         - TenantProvisioningService
     patch:
       summary: Patch a Tenant Metadata record
-      operationId: Patch TenantMetadata
+      operationId: PatchTenantMetadata
       consumes:
         - application/vnd.api+json
       produces:
@@ -1716,8 +2122,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1745,8 +2159,16 @@ paths:
             $ref: '#/definitions/JsonApiTenantMetadata'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1769,8 +2191,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMetadata'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1788,8 +2216,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantMetadata'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1808,8 +2242,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: reportID
           in: path
@@ -1832,8 +2272,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: tenantId
           in: path
@@ -1846,7 +2292,7 @@ paths:
 # when the MetricsService is altered to use the jsonapi implementation.
   /v1/histogram:
     get:
-      summary: Retrieve a histogram of measurements for given time range and metric
+      summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
       operationId: GetHistogram
       produces:
         - application/vnd.api+json
@@ -1855,10 +2301,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -1918,10 +2368,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -1976,10 +2430,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2053,8 +2517,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2075,10 +2551,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2149,10 +2635,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2223,8 +2719,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2247,15 +2755,27 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing proviosned data"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
           required: true
           schema:
             $ref: '#/definitions/TopNMetricsAPIRequestObject'
-    tags:
+      tags:
         - MetricsService
  
   /v1/generate-sla-report:
@@ -2271,10 +2791,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Components of the request parameters were not in the provisioning database"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2785,7 +3315,7 @@ definitions:
         type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -2816,12 +3346,21 @@ definitions:
       domains:
         $ref: '#/definitions/JsonApiRelationship'
 
+  BulkMonitoredObjectRequest:
+    type: array
+    items:
+      $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+
   CreateTenantMonitoredObjectRequest:
     type: "object"
     properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -2865,6 +3404,11 @@ definitions:
           type: "array"
           items: 
             type: "string"
+
+  BulkOperationResponse:
+    type: "array"
+    items:
+      $ref: '#/definitions/BulkOperationResult'
 
   BulkOperationResult:
     type: "object"
@@ -3030,6 +3574,8 @@ definitions:
         type: "string"
       datatype:
         type: "string"
+      name:
+        type: "string"
       thresholds:
         $ref: '#/definitions/TenantThresholdProfileVendorMap'
       createdTimestamp:
@@ -3120,8 +3666,6 @@ definitions:
         type: "string"
       tenantName:
         type: "string"
-      # defaultThresholdProfile:
-      #   type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:
@@ -3139,7 +3683,7 @@ definitions:
       - aggregator
       - metrics
     properties:
-      tenant:
+      tenantId:
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
@@ -3170,7 +3714,7 @@ definitions:
       aggregator:
         type: string
         description: The type of aggregation (avg/min/max)
-        xample: "avg"
+        example: "avg"
       numResults:
         type: integer
         description: Number of results to return
@@ -3248,7 +3792,6 @@ definitions:
     required:
       - tenantId
       - interval
-      - metrics
     properties:
       tenantId:
         type: string
@@ -3428,7 +3971,7 @@ definitions:
             breaking changes.)
 
           Schemes other than `http`, `https` (or the empty scheme) might be
-          used with implementation specific semantics.
+          used with implementation et semantics.
       value:
         type: string
         format: byte

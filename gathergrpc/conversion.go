@@ -51,6 +51,9 @@ func ConvertFromPBObject(pbObject interface{}, dataContainer interface{}) error 
 			value := flattenedObject["state"].(float64)
 			flattenedObject["state"] = pbStateEnumToStringMap[value]
 		}
+	case *MonitoredObject:
+		casted := pbObject.(*MonitoredObject)
+		flattenedObject["objectId"] = casted.Data.Id
 	}
 
 	resultBytes, err := json.Marshal(flattenedObject)

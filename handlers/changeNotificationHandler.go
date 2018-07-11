@@ -67,12 +67,12 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		return nil
 	}
 
-	tenantDB, err := getTenantServiceDatastore()
+	tenantDB, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantDB: %s", err.Error())
 		return nil
 	}
-	adminDB, err := getAdminServiceDatastore()
+	adminDB, err := GetAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminDB: %s", err.Error())
 		return nil

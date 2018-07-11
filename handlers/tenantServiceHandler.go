@@ -28,7 +28,7 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 	result := new(TenantServiceHandler)
 
 	// Seteup the DB implementation based on configuration
-	db, err := getTenantServiceDatastore()
+	db, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceHandler: %s", err.Error())
 	}
@@ -37,7 +37,7 @@ func CreateTenantServiceHandler() *TenantServiceHandler {
 	return result
 }
 
-func getTenantServiceDatastore() (db.TenantServiceDatastore, error) {
+func GetTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_tenantdb_impl.String()))
 	switch dbType {

@@ -13,7 +13,6 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
 	"github.com/accedian/adh-gather/swagmodels"
-	"github.com/accedian/skylight-aaa/utils"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/manyminds/api2go/jsonapi"
 )
@@ -315,7 +314,7 @@ func HandleDeleteTenantDomain(allowedRoles []string, tenantDB datastore.TenantSe
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted)
-		logger.Log.Infof("Retrieved %s %s", tenmod.TenantDomainStr, utils.AsJSONString(result))
+		logger.Log.Infof("Retrieved %s %s", tenmod.TenantDomainStr, models.AsJSONString(result))
 		return tenant_provisioning_service.NewDeleteTenantDomainOK().WithPayload(&converted)
 	}
 }

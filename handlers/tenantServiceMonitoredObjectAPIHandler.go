@@ -13,7 +13,6 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
 	"github.com/accedian/adh-gather/swagmodels"
-	"github.com/accedian/skylight-aaa/utils"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/manyminds/api2go/jsonapi"
 )
@@ -273,7 +272,7 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
-		logger.Log.Infof("Retrieved %s %s", tenmod.TenantMonitoredObjectStr, utils.AsJSONString(result))
+		logger.Log.Infof("Retrieved %s %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(result))
 		return tenant_provisioning_service.NewDeleteTenantMonitoredObjectOK().WithPayload(&converted)
 	}
 }
@@ -308,7 +307,7 @@ func HandleGetDomainToMonitoredObjectMap(allowedRoles []string, tenantDB datasto
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
-		logger.Log.Infof("Retrieved %s %s", tenmod.TenantMonitoredObjectStr, utils.AsJSONString(result))
+		logger.Log.Infof("Retrieved %s %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(result))
 		return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapOK().WithPayload(&converted)
 	}
 }

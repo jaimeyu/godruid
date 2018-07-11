@@ -299,7 +299,7 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 	}
 
 	// Store the views related to Monitored Objects
-	for _, viewPayload := range tenantMonitoredObjectViews {
+	for _, viewPayload := range getTenantViews() {
 		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", moDB, nil)
 		if err != nil {
 			return err

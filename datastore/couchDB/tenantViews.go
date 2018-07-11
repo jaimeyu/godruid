@@ -62,15 +62,13 @@ var (
 	  }
 	}
   }`)
-
-	uniqueMetaIndexObject           = map[string]interface{}{}
-	monitoredObjectMetaIndexObject  = map[string]interface{}{}
-	monitoredObjectCountIndexObject = map[string]interface{}{}
-
-	tenantMonitoredObjectViews = []map[string]interface{}{}
 )
 
-func init() {
+func getTenantViews() []map[string]interface{} {
+	uniqueMetaIndexObject := map[string]interface{}{}
+	monitoredObjectMetaIndexObject := map[string]interface{}{}
+	monitoredObjectCountIndexObject := map[string]interface{}{}
+
 	if err := json.Unmarshal(uniqueMetaIndexBytes, &uniqueMetaIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
@@ -81,5 +79,5 @@ func init() {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
 
-	tenantMonitoredObjectViews = append(tenantMonitoredObjectViews, uniqueMetaIndexObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject)
+	return []map[string]interface{}{uniqueMetaIndexObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject}
 }

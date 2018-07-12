@@ -1,0 +1,18 @@
+swagger: '2.0'
+host: 'localhost:10001'
+info:
+  title: Gather
+  description: Gather API Documentation
+  version: 1.0.0
+  contact:
+    email: "mpreston@accedian.com"
+basePath: "/api"
+schemes:
+  - http
+consumes:
+  - application/json
+  - application/vnd.api+json
+produces:
+  - application/json
+  - application/vnd.api+json
+paths:

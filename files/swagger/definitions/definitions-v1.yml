@@ -1,0 +1,1245 @@
+  JsonApiAdminUser:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/AdminUser'
+  JsonApiAdminUserList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/AdminUser'
+
+  AdminUser:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [adminUsers]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/AdminUserAttr'
+
+  AdminUserAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
+  JsonApiTenant:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/Tenant'
+  JsonApiTenantList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Tenant'
+  Tenant:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [tenants]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantAttr'
+  TenantAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      name:
+        type: "string"
+      urlSubdomain:
+        type: "string"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
+  JsonApiIngestionDictionary:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/IngestionDictionary'
+  IngestionDictionary:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionDictionaries]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/IngestionDictionaryAttr'
+  IngestionDictionaryAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      metrics:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/IngestionDictionaryMetrics'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  IngestionDictionaryMetrics:
+    type: "object"
+    additionalProperties:
+      $ref: '#/definitions/IngestionDictionaryMetricMap'
+  IngestionDictionaryMetricMap:
+    type: "object"
+    properties:
+      ui:
+        $ref: '#/definitions/IngestionDictionaryMetricMapUI'
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinition'
+  IngestionDictionaryMetricMapUI:
+    type: "array"
+    items:
+      type: "string"
+  IngestionDictionaryMetricMapMetricDefinition:
+    type: "object"
+    properties:
+      monitoredObjectTypes:
+        type: "array"
+        items:
+          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
+      ui:
+        $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
+  IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      rawMetricId:
+        type: "string"
+      units:
+        type: "array"
+        items:
+          type: "string"
+      directions:
+        type: "array"
+        items:
+          type: "string"
+  IngestionDictionaryMetricMapMetricDefinitionUIData:
+    type: "object"
+    properties:
+      group:
+        type: "string"
+      position:
+        type: "string"
+  TenantSummary:
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      alias:
+        type: "string"
+
+  JsonApiValidTypes:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/ValidTypes'
+  ValidTypes:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [validTypes]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/ValidTypesAttr'
+  ValidTypesAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      monitoredObjectTypes:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      monitoredObjectDeviceTypes:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
+  JsonApiTenantUser:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantUser'
+  JsonApiTenantUserList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantUser'
+  TenantUser:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [users]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantUserAttr'  
+  TenantUserAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      username:
+        type: "string"
+      password: 
+        type: "string"
+      sendOnboardingEmail:
+        type: "boolean"
+      onboardingToken:
+        type: "string"
+      userVerified:
+        type: "boolean"
+      state:
+        type: "string"
+        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+      domains:
+        type: "array"
+        items: 
+          type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
+  JsonApiRelationship:
+    type: "object"
+    properties:
+      data: 
+        type: "array"
+        items:
+          $ref: '#/definitions/JsonApiRelationshipData'
+  JsonApiRelationshipData:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+      id:
+        type: "string"
+
+  JsonApiTenantConnectorConfig:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorInstance:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantConnectorInstance'
+  JsonApiTenantConnectorConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantConnectorConfig'
+  JsonApiTenantConnectorInstanceList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantConnectorInstance'
+  TenantConnectorConfig:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorConfigs]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantConnectorConfigAttr'
+  TenantConnectorConfigAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      url: 
+        type: "string"
+      port:
+        type: "integer"
+      pollingFrequency:
+        type: "integer"
+      username:
+        type: "string"
+      password:
+        type: "string"
+      exportGroup:
+        type: "string"
+      datahubHeartbeatFrequency:
+        type: "integer"
+      datahubConnectionRetryFrequency:
+        type: "integer"
+      type:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantConnectorInstance:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorInstances]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantConnectorInstanceAttr'
+  TenantConnectorInstanceAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      status:
+        type: "string"
+      hostname: 
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  JsonApiTenantDomain:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantDomain'
+  JsonApiTenantDomainList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantDomain'
+  TenantDomain:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [domains]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantDomainAttr'
+
+  TenantDomainAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      name:
+        type: "string"
+      color: 
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+
+  JsonApiTenantMonitoredObject:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantMonitoredObject'
+  JsonApiTenantMonitoredObjectList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantMonitoredObject'
+  TenantMonitoredObject:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantMonitoredObjectAttr'
+      relationships:
+        $ref: '#/definitions/TenantMonitoredObjectRelationships'
+  TenantMonitoredObjectAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      objectId:
+        type: "string"
+      actuatorName: 
+        type: "string"
+      actuatorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      reflectorName: 
+        type: "string"
+      reflectorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      objectName: 
+        type: "string"
+      objectType: 
+        type: "string"
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      # domainSet:
+      #   type: "array"
+      #   items: 
+      #     type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantMonitoredObjectRelationships:
+    type: "object"
+    properties:
+      domains:
+        $ref: '#/definitions/JsonApiRelationship'
+
+  BulkMonitoredObjectRequest:
+    type: array
+    items:
+      $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+
+  CreateTenantMonitoredObjectRequest:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      tenantId:
+        type: "string"
+      objectId:
+        type: "string"
+      actuatorName: 
+        type: "string"
+      actuatorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      reflectorName: 
+        type: "string"
+      reflectorType: 
+        type: "string"
+        enum: [unknown, accedian-nid, accedian-vnid]
+      objectName: 
+        type: "string"
+      objectType: 
+        type: "string"
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+
+  MonitoredObjectCountByDomainRequest:
+    type: "object"
+    properties:
+      byCount: 
+        type: "boolean"
+      domainSet:
+        type: "array"
+        items: 
+          type: "string"
+  MonitoredObjectCountByDomainResponse:
+    type: "object"
+    properties:
+      domainToMonitoredObjectCountMap:
+        type: "object"
+        additionalProperties:
+          type: "integer"
+      domainToMonitoredObjectSetMap:
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items: 
+            type: "string"
+
+  BulkOperationResponse:
+    type: "array"
+    items:
+      $ref: '#/definitions/BulkOperationResult'
+
+  BulkOperationResult:
+    type: "object"
+    properties:
+      ok:
+        type: "boolean"
+      id:
+        type: "string"
+      rev:
+        type: "string"
+      error:
+        type: "string"
+      reason:
+        type: "string"
+
+  JsonApiTenantIngestionProfile:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantIngestionProfile'
+  TenantIngestionProfile:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionProfiles]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantIngestionProfileAttr'
+  TenantIngestionProfileAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      metrics:
+        $ref: '#/definitions/TenantIngestionProfileVendorMap'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantIngestionProfileVendorMap:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantIngestionProfileVendorMapMonitoredObjectTypeMap'
+  TenantIngestionProfileVendorMapMonitoredObjectTypeMap:
+    type: "object"
+    properties:
+      monitoredObjectTypeMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantIngestionProfileVendorMapMonitoredObjectTypeMapMetricMap'
+  TenantIngestionProfileVendorMapMonitoredObjectTypeMapMetricMap:
+    type: "object"
+    additionalProperties:
+      type: "boolean"
+  JsonApiTenantReportScheduleConfig:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantReportScheduleConfig'
+  JsonApiTenantReportScheduleConfigList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
+  TenantReportScheduleConfig:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [reportScheduleConfigs]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantReportScheduleConfigAttr'
+  TenantReportScheduleConfigAttr:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantId:
+        type: "string"
+      timeRangeDuration: 
+        type: "string"
+      domains: 
+        type: "array"
+        items: 
+          type: "string"
+      thresholdProfile: 
+        type: "string"
+      granularity: 
+        type: "string"
+      timeout: 
+        type: "integer"
+      timezone: 
+        type: "string"
+      name: 
+        type: "string"
+      reportType:
+        type: "string"
+      minute: 
+        type: "string"
+      hour: 
+        type: "string"
+      dayMonth: 
+        type: "string"
+      month: 
+        type: "string"
+      dayWeek: 
+        type: "string"
+      active:
+        type: "boolean"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  JsonApiTenantThresholdProfile:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantThresholdProfile'
+  JsonApiTenantThresholdProfileList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantThresholdProfile'
+  TenantThresholdProfile:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [thresholdProfiles]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantThresholdProfileAttr'
+  TenantThresholdProfileAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      name:
+        type: "string"
+      thresholds:
+        $ref: '#/definitions/TenantThresholdProfileVendorMap'
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantThresholdProfileVendorMap:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMetric'
+  TenantThresholdProfileMetric:
+    type: "object"
+    properties:
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileUIEventAttrMap'
+      monitoredObjectTypeMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMap'
+  TenantThresholdProfileUIEventAttrMap:
+    type: "object"
+    properties:
+      eventAttrMap:
+        type: "object"
+        additionalProperties:
+          type: "string"
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMap:
+    type: "object"
+    properties:
+      metricMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap:
+    type: "object"
+    properties:
+      directionMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap:
+    type: "object"
+    properties:
+      eventMap:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEventAttrMap'
+  TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEventAttrMap:
+    type: "object"
+    properties:
+      eventAttrMap:
+        type: "object"
+        additionalProperties:
+          type: "string"
+
+  JsonApiTenantMetadata:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantMetadata'
+  TenantMetadata:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [tenantMetadata]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/TenantMetadataAttr'
+      relationships:
+        $ref: '#/definitions/TenantMetadataRelationships'
+  TenantMetadataAttr:
+    type: "object"
+    properties:
+      tenantId:
+        type: "string"
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
+      datatype:
+        type: "string"
+      tenantName:
+        type: "string"
+      createdTimestamp:
+        type: "integer"
+      lastModifiedTimestamp:
+        type: "integer"
+  TenantMetadataRelationships:
+    type: "object"
+    properties:
+      defaultThresholdProfile:
+        $ref: '#/definitions/JsonApiRelationship'
+  TopNMetricsAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - aggregator
+      - metrics
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domains:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      monitoredObjects:
+        type: array
+        description: set of monitored objects identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      aggregator:
+        type: string
+        description: The type of aggregation (avg/min/max)
+        example: "avg"
+      numResults:
+        type: integer
+        description: Number of results to return
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+      metricsView:
+        type: array
+        items:
+          $ref: '#/definitions/MetricViewObject'
+  MetricViewObject:
+    type: object
+    required:
+      - metric
+      - aggregator 
+      - name
+    properties:
+      metric:
+        type: string
+        example: delayP95_max
+      aggregator:
+        type: string
+        example: min/max/sum/
+      name:
+        type: string
+        example: delayP95
+
+  AggregateMetricsAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - aggregation
+      - metrics
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domainIds:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      aggregation:
+        type: object
+        description: the aggregation function
+        properties:
+          name:
+            type: string
+            example: avg
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+
+  ThresholdCrossingAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      domainIds:
+        type: array
+        description: set of domains identifiers to use for filtering
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      thresholdProfileId:
+        type: string
+        description: ID of the threshold profile that is used to select metrics and events
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      metricWhitelist:
+        type: array
+        description: limits the results to include only metrics in the whitelist
+        items:
+          $ref: '#/definitions/MetricIdentifierObject'
+
+  MetricIdentifierObject:
+    type: object
+    required:
+      - vendor
+      - objectType
+      - name
+    properties:
+      vendor:
+        type: string
+        example: accedian-twamp
+      objectType:
+        type: string
+        example: twamp-pe
+      name:
+        type: string
+        example: delayP95
+      direction:
+        type: integer
+        example: 0
+        default: 0
+
+  MetricResultsResponseObject:
+    type: object
+    properties:
+      results:
+        type: array
+        items: 
+          type: object
+
+  # Here down are Metrics Service object definitions that are currently carried over from the 
+  # Protobuf definitions we were using. Until we clean this up with the jsonapi implementation
+  # this will remain
+  gathergrpcJSONAPIObject:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/gathergrpcData'
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/gathergrpcError'
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+      jsonapi:
+        type: object
+        additionalProperties:
+          type: string
+      links:
+        $ref: '#/definitions/gathergrpcLinks'
+      included:
+        type: array
+        items:
+          $ref: '#/definitions/gathergrpcResource'
+  gathergrpcLinks:
+    type: object
+    properties:
+      related:
+        $ref: '#/definitions/LinksRelated'
+      self:
+        type: string
+      first:
+        type: string
+      next:
+        type: string
+      prev:
+        type: string
+      last:
+        type: string
+      about:
+        type: string
+      article:
+        type: string
+    description: |-
+      Links technically allow any valid json string as a key,
+      we obviously can't do this, so we have to stick to the following.
+  LinksRelated:
+    type: object
+    properties:
+      href:
+        type: string
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+  gathergrpcResource:
+    type: object
+    properties:
+      id:
+        type: string
+      type:
+        type: string
+      attributes:
+        type: object
+        additionalProperties:
+          type: string
+      links:
+        $ref: '#/definitions/gathergrpcLinks'
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+      relationships:
+        $ref: '#/definitions/gathergrpcRelationships'
+  gathergrpcRelationships:
+    type: object
+    properties:
+      links:
+        $ref: '#/definitions/gathergrpcLinks'
+      data:
+        $ref: '#/definitions/protobufAny'
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+  protobufAny:
+    type: object
+    properties:
+      type_url:
+        type: string
+        description: |-
+          A URL/resource name whose content describes the type of the
+          serialized protocol buffer message.
+
+          For URLs which use the scheme `http`, `https`, or no scheme, the
+          following restrictions and interpretations apply:
+
+          * If no scheme is provided, `https` is assumed.
+          * The last segment of the URL's path must represent the fully
+            qualified name of the type (as in `path/google.protobuf.Duration`).
+            The name should be in a canonical form (e.g., leading "." is
+            not accepted).
+          * An HTTP GET on the URL must yield a [google.protobuf.Type][]
+            value in binary format, or produce an error.
+          * Applications are allowed to cache lookup results based on the
+            URL, or have them precompiled into a binary to avoid any
+            lookup. Therefore, binary compatibility needs to be preserved
+            on changes to types. (Use versioned type names to manage
+            breaking changes.)
+
+          Schemes other than `http`, `https` (or the empty scheme) might be
+          used with implementation et semantics.
+      value:
+        type: string
+        format: byte
+        description: Must be a valid serialized protocol buffer of the above specified type.
+    description: |-
+      `Any` contains an arbitrary serialized protocol buffer message along with a
+      URL that describes the type of the serialized message.
+
+      Protobuf library provides support to pack/unpack Any values in the form
+      of utility functions or additional generated methods of the Any type.
+
+      Example 1: Pack and unpack a message in C++.
+
+          Foo foo = ...;
+          Any any;
+          any.PackFrom(foo);
+          ...
+          if (any.UnpackTo(&foo)) {
+            ...
+          }
+
+      Example 2: Pack and unpack a message in Java.
+
+          Foo foo = ...;
+          Any any = Any.pack(foo);
+          ...
+          if (any.is(Foo.class)) {
+            foo = any.unpack(Foo.class);
+          }
+
+       Example 3: Pack and unpack a message in Python.
+
+          foo = Foo(...)
+          any = Any()
+          any.Pack(foo)
+          ...
+          if any.Is(Foo.DESCRIPTOR):
+            any.Unpack(foo)
+            ...
+
+       Example 4: Pack and unpack a message in Go
+
+           foo := &pb.Foo{...}
+           any, err := ptypes.MarshalAny(foo)
+           ...
+           foo := &pb.Foo{}
+           if err := ptypes.UnmarshalAny(any, foo); err != nil {
+             ...
+           }
+
+      The pack methods provided by protobuf library will by default use
+      'type.googleapis.com/full.type.name' as the type URL and the unpack
+      methods only use the fully qualified type name after the last '/'
+      in the type URL, for example "foo.bar.com/x/y.z" will yield type
+      name "y.z".
+
+
+      JSON
+      ====
+      The JSON representation of an `Any` value uses the regular
+      representation of the deserialized, embedded message, with an
+      additional field `@type` which contains the type URL. Example:
+
+          package google.profile;
+          message Person {
+            string first_name = 1;
+            string last_name = 2;
+          }
+
+          {
+            "@type": "type.googleapis.com/google.profile.Person",
+            "firstName": <string>,
+            "lastName": <string>
+          }
+
+      If the embedded message type is well-known and has a custom JSON
+      representation, that representation will be embedded adding a field
+      `value` which holds the custom JSON in addition to the `@type`
+      field. Example (for message [google.protobuf.Duration][]):
+
+          {
+            "@type": "type.googleapis.com/google.protobuf.Duration",
+            "value": "1.212s"
+          }
+  gathergrpcData:
+    type: object
+    properties:
+      id:
+        type: string
+      type:
+        type: string
+      attributes:
+        $ref: '#/definitions/protobufAny'
+  gathergrpcError:
+    type: object
+    properties:
+      id:
+        type: string
+      links:
+        $ref: '#/definitions/gathergrpcLinks'
+      status:
+        type: string
+      code:
+        type: string
+      title:
+        type: string
+      detail:
+        type: string
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+      source:
+        type: object
+        additionalProperties:
+          type: string
+  gathergrpcJSONAPIObjectList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/gathergrpcJSONAPIObject'

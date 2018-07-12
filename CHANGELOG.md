@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.163.0 
+**Release Date:** Thu Jul 12 14:52:46 UTC 2018     
+## Previous Releases 
 ### 0.162.0 
 **Release Date:** Thu Jul 12 00:41:01 UTC 2018     
-## Previous Releases 
 * Refactor - now using swagger file to generate the server
 ### 0.161.0 
 **Release Date:** Wed Jul  4 15:49:24 UTC 2018     

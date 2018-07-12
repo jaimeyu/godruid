@@ -32,13 +32,13 @@ type MetricServiceHandler struct {
 	routes   []server.Route
 }
 
-func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricServiceHandler {
+func CreateMetricServiceHandler() *MetricServiceHandler {
 	result := new(MetricServiceHandler)
 
 	ddb := druid.NewDruidDatasctoreClient()
 	result.druidDB = ddb
 
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
 	}

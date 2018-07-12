@@ -52,6 +52,7 @@ const (
 	purgeDBStr                          = "purge_db"
 	generateSLAReportStr                = "gen_sla_report"
 	getDocsByTypeStr                    = "get_docs_by_type"
+	insertTenViewsStr                   = "insert_tenant_views"
 
 	stringGeneratorCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
@@ -112,6 +113,13 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Method:      "GET",
 			Pattern:     "/test-data/{dbname}/{datatype}",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllDocsByType),
+		},
+
+		server.Route{
+			Name:        "InsertTenantViews",
+			Method:      "PUT",
+			Pattern:     "/test-data/tenant-views/{dbname}",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.InsertTenantViews),
 		},
 	}
 
@@ -470,6 +478,24 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	}
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", getDocsByTypeStr)
 	fmt.Fprintf(w, string(response))
+}
+
+// InsertTenantViews - inserts tenant views.
+func (tsh *TestDataServiceHandler) InsertTenantViews(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	dbName := getDBFieldFromRequest(r, 3)
+
+	if len(dbName) == 0 {
+		msg := fmt.Sprintf("Unable to insert documents without a DB name")
+		reportError(w, startTime, "500", insertTenViewsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result := tsh.testDB.InsertTenantViews(dbName)
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", insertTenViewsStr)
+	fmt.Fprintf(w, string(result))
 }
 
 // Generates a set of monitored objects with randomized values according to query parameters provided in the incoming rest request

@@ -17,4 +17,5 @@ const (
 // of the TestData Service Datastore.
 type TestDataServiceDatastore interface {
 	GetAllDocsByDatatype(dbName string, datatype string) ([]map[string]interface{}, error)
+	InsertTenantViews(dbName string) string
 }

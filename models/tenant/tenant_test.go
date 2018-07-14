@@ -503,7 +503,7 @@ func TestTenantMonitoredObjectSerialization(t *testing.T) {
 
 	attrKeys := []string{"_rev", "datatype", "tenantId", "actuatorName", "actuatorType",
 		"reflectorName", "reflectorType", "objectName", "objectType", "domainSet",
-		"id", "createdTimestamp", "lastModifiedTimestamp"}
+		"objectId", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &MonitoredObject{}, original.ID, attrKeys)
 }
@@ -550,17 +550,16 @@ func TestTenantMonitoredObjectValidation(t *testing.T) {
 
 func TestTenantMetadataSerialization(t *testing.T) {
 	original := &Metadata{
-		ID:                      uuid.NewV4().String(),
-		REV:                     uuid.NewV4().String(),
-		Datatype:                string(TenantMetaType),
-		TenantID:                fake.CharactersN(12),
-		TenantName:              fake.Company(),
-		DefaultThresholdProfile: uuid.NewV4().String(),
-		CreatedTimestamp:        time.Now().UnixNano() / int64(time.Millisecond),
-		LastModifiedTimestamp:   time.Now().UnixNano() / int64(time.Millisecond),
+		ID:                    uuid.NewV4().String(),
+		REV:                   uuid.NewV4().String(),
+		Datatype:              string(TenantMetaType),
+		TenantID:              fake.CharactersN(12),
+		TenantName:            fake.Company(),
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
-	attrKeys := []string{"_rev", "datatype", "tenantId", "tenantName", "defaultThresholdProfile", "createdTimestamp", "lastModifiedTimestamp"}
+	attrKeys := []string{"_rev", "datatype", "tenantId", "tenantName", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &Metadata{}, original.ID, attrKeys)
 }

@@ -1,8 +1,10 @@
-* Feat - include a query filter to query only clean metrics
 ## Current Release 
+### 0.164.0 
+**Release Date:** Sat Jul 14 14:23:34 UTC 2018     
+## Previous Releases 
+* Feat - include a query filter to query only clean metrics
 ### 0.163.0 
 **Release Date:** Thu Jul 12 14:52:46 UTC 2018     
-## Previous Releases 
 ### 0.162.0 
 **Release Date:** Thu Jul 12 00:41:01 UTC 2018     
 * Refactor - now using swagger file to generate the server

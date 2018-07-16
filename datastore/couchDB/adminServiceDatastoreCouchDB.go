@@ -173,13 +173,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
-	// Create index for monitored objects' unique metadata keys & values
-	err = createCouchDBViewIndex(dbName, metaAllUniqueKVDdocTemplate, metakeysViewDdocName, []string{monitoredObjectsByObjectNameKey}, "")
-	if err != nil {
-		logger.Log.Debugf("Unable to create monitored object views %s for Tenant %s: %s", metakeysViewDdocName, tenantDescriptor.ID, err.Error())
-		return nil, err
-	}
-
 	// Return the provisioned object.
 	logger.Log.Debugf("Created %s: %v\n", admmod.TenantStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil

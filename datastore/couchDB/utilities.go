@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -689,78 +688,6 @@ func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string
 func generateMonitoredObjectUrl(tenantID string, uri string) string {
 	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
 	return dbName
-}
-
-/*
- This function takes a key and then creates an index for it and then start the indexer.
- We currently only support generating an index based on a singular key.
-*/
-func createCouchDBViewIndex(dbName string, template string, ddocName string, keyNames []string, prefix string) error {
-
-	if len(keyNames) == 0 {
-		return errors.New("keyNames cannot be 0")
-	}
-
-	var item string
-	if len(prefix) == 0 {
-		item = keyNames[0]
-	} else {
-		item = fmt.Sprintf("%s.%s", prefix, keyNames[0])
-	}
-	ckey := keyNames[0]
-
-	var docret tenmod.MonitoredObjectMetaDesignDocument
-	//var document = fmt.Sprintf(metaIndexTemplate, ckey, ckey, item, item)
-	document := strings.Replace(template, metaKeyName, ckey, -1)
-	document = strings.Replace(document, metaKeyField, item, -1)
-
-	//ddocName := fmt.Sprintf(metaIndexDdocTemplate, ckey)
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Creating new Index for key '%s' file with payload:%s", keyNames[0], models.AsJSONString(document))
-	}
-	err := updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
-
-	if err != nil {
-		logger.Log.Errorf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
-
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully created Indexer -> %s", "xx")
-	}
-
-	return nil
-}
-
-func indexViewTriggerBuild(dbName string, ddoc string, key string) {
-
-	// When we do a bulk update on monitored objects, we'll be issuing
-	// a lot of view queries so instead. So now we check if there is already
-	// generating a view and if so, then just quit. There's no point in hammering
-	// couch to update the views.
-	_, stored := couchdbViewBuilderBusyMap.LoadOrStore(ddoc, true)
-	if stored == true {
-		// We're already building the index, don't interrupt it.
-		return
-	}
-
-	db, err := getDatabase(dbName)
-	if err != nil {
-		logger.Log.Errorf("Could not load db %s", dbName)
-	}
-	uri := fmt.Sprintf("_design/%s/_view/by%s", ddoc, key)
-	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
-	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
-	_, err = db.Get(uri, nil)
-	if err != nil {
-		logger.Log.Errorf("Unsuccessfully Indexed %sbecause %s", uri, err.Error())
-		return
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully Indexed %s -> %s", uri, "") //models.AsJSONString(v))
-	}
-
-	couchdbViewBuilderBusyMap.Delete(ddoc)
 }
 
 func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {

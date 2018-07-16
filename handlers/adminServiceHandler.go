@@ -30,7 +30,7 @@ func CreateAdminServiceHandler() *AdminServiceHandler {
 	result := new(AdminServiceHandler)
 
 	// Seteup the DB implementation based on configuration
-	db, err := getAdminServiceDatastore()
+	db, err := GetAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceHandler: %s", err.Error())
 	}
@@ -468,7 +468,7 @@ func (ash *AdminServiceHandler) DeleteValidTypes(ctx context.Context, noValue *e
 	return nil, nil
 }
 
-func getAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
+func GetAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	cfg := gather.GetConfig()
 	dbType := gather.DBImpl(cfg.GetInt(gather.CK_args_admindb_impl.String()))
 	switch dbType {

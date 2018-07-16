@@ -802,7 +802,8 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		granularity = "PT1M"
 	}
 
-	query, err := RawMetricsQuery(request.GetTenant(), table, request.Metric, request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity)
+	cleanOnly := !request.GetIncludeUncleaned()
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.Metric, request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity, cleanOnly)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)

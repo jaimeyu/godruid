@@ -1031,9 +1031,8 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing
 
 	// Create a record
 	meta := tenmod.Metadata{
-		TenantName:              COMPANY1,
-		TenantID:                TENANT,
-		DefaultThresholdProfile: THRPRF}
+		TenantName: COMPANY1,
+		TenantID:   TENANT}
 	created, err := runner.tenantDB.CreateTenantMeta(&meta)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
@@ -1041,7 +1040,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing
 	assert.NotEmpty(t, created.REV)
 	assert.Equal(t, string(tenmod.TenantMetaType), created.Datatype)
 	assert.Equal(t, created.TenantName, COMPANY1, "Name not the same")
-	assert.Equal(t, created.DefaultThresholdProfile, THRPRF, "Threshold Profile not the same")
 	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
 	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
@@ -1056,7 +1054,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing
 	// Update a record
 	updateRecord := tenmod.Metadata{}
 	deepcopy.Copy(&updateRecord, fetched)
-	updateRecord.DefaultThresholdProfile = THRPRF2
 	updated, err := runner.tenantDB.UpdateTenantMeta(&updateRecord)
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)
@@ -1064,16 +1061,14 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetadataCRUD(t *testing
 	assert.NotEqual(t, updated.REV, fetched.REV)
 	assert.Equal(t, string(tenmod.TenantMetaType), updated.Datatype)
 	assert.Equal(t, updated.TenantName, COMPANY1, "Name not the same")
-	assert.Equal(t, updated.DefaultThresholdProfile, THRPRF2, "Threshold Profile was not updated")
 	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
 	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
 	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
 
 	// Add a second record.
 	meta2 := tenmod.Metadata{
-		TenantName:              COMPANY1,
-		TenantID:                TENANT,
-		DefaultThresholdProfile: THRPRF}
+		TenantName: COMPANY1,
+		TenantID:   TENANT}
 	created2, err := runner.tenantDB.CreateTenantMeta(&meta2)
 	assert.NotNil(t, err)
 	assert.Nil(t, created2)

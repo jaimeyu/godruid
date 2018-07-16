@@ -8,7 +8,6 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
-	admmod "github.com/accedian/adh-gather/models/admin"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
@@ -28,30 +27,13 @@ const (
 	Minor                  = "minor"
 )
 
-var (
-	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
-	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
-		"pe": tenmod.TwampPE,
-		"sf": tenmod.TwampSF,
-		"sl": tenmod.TwampSL,
-		string(tenmod.TwampPE): tenmod.TwampPE,
-		string(tenmod.TwampSF): tenmod.TwampSF,
-		string(tenmod.TwampSL): tenmod.TwampSL}
-
-	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
-	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
-		string(tenmod.AccedianNID):  tenmod.AccedianNID,
-		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
-)
-
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
 // implementation details to each unique service handler. When new
 // gRPC services are added, a new Service Handler should be created,
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
-	ash               *AdminServiceHandler
-	Tsh               *TenantServiceHandler
-	DefaultValidTypes *admmod.ValidTypes
+	ash *AdminServiceHandler
+	Tsh *TenantServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -62,22 +44,6 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	result.ash = CreateAdminServiceHandler()
 	result.Tsh = CreateTenantServiceHandler()
-
-	// Setup the known values of the Valid Types for the system
-	// by using the enumerated protobuf values
-	validMonObjTypes := make(map[string]string, 0)
-	validMonObjDevTypes := make(map[string]string, 0)
-
-	for key, val := range ValidMonitoredObjectTypes {
-		validMonObjTypes[key] = string(val)
-	}
-	for key, val := range ValidMonitoredObjectDeviceTypes {
-		validMonObjDevTypes[key] = string(val)
-	}
-
-	result.DefaultValidTypes = &admmod.ValidTypes{
-		MonitoredObjectTypes:       validMonObjTypes,
-		MonitoredObjectDeviceTypes: validMonObjDevTypes}
 
 	return result
 }

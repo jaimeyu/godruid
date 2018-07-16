@@ -2,7 +2,6 @@ package inMemory
 
 import (
 	"errors"
-
 )
 
 // TestDataServiceDatastoreInMemory - test data InMemory impl.
@@ -21,4 +20,10 @@ func CreateTestDataServiceDAO() (*TestDataServiceDatastoreInMemory, error) {
 func (testDB *TestDataServiceDatastoreInMemory) GetAllDocsByDatatype(dbName string, datatype string) ([]map[string]interface{}, error) {
 	// Stub to implement
 	return nil, errors.New("GetAllDocsByDatatype() not implemented for InMemory DB")
+}
+
+// InsertTenantViews - InMemory implementation of InsertTenantViews
+func (testDB *TestDataServiceDatastoreInMemory) InsertTenantViews(dbName string) string {
+	// Stub to implement
+	return "InsertTenantViews() not implemented for InMemory DB"
 }

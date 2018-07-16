@@ -31,13 +31,13 @@ func CreateAdminServiceRESTHandler() *AdminServiceRESTHandler {
 	result := new(AdminServiceRESTHandler)
 
 	// Setup the DB implementation based on configuration
-	db, err := getAdminServiceDatastore()
+	db, err := GetAdminServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
 	}
 	result.adminDB = db
 
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
 	}

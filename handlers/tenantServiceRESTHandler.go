@@ -31,7 +31,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 	result := new(TenantServiceRESTHandler)
 
 	// Setup the DB implementation based on configuration
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceRESTHandler: %s", err.Error())
 	}
@@ -1822,6 +1822,31 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 
 	NotifyMonitoredObjectUpdated(data.TenantID, &data)
 	sendSuccessResponse(result, w, startTime, mon.UpdateMonObjStr, tenmod.TenantMonitoredObjectStr, "Updated")
+}
+
+// GetFilteredMonitoredObjects - fetches monitored objects based on a metadata filter.
+func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	// Get the IDs from the URL
+	tenantID := getDBFieldFromRequest(r, 4)
+	dataID := getDBFieldFromRequest(r, 6)
+	// Turn the query Params into the request object:
+	//	queryParams := r.URL.Query()
+
+	// Populate the params for druid
+
+	logger.Log.Infof("Fetching %s: %s", tenmod.TenantMonitoredObjectStr, dataID)
+
+	// Issue request to DAO Layer
+	result, err := tsh.TenantDB.GetMonitoredObject(tenantID, dataID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		reportError(w, startTime, "500", mon.GetMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccessResponse(result, w, startTime, mon.GetMonObjStr, tenmod.TenantMonitoredObjectStr, "Retrieved")
 }
 
 // GetMonitoredObject - fetches a tenant monitored object

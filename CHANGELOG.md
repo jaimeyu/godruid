@@ -1,7 +1,18 @@
 ## Current Release 
+### 0.164.0 
+**Release Date:** Sat Jul 14 14:23:34 UTC 2018     
+## Previous Releases 
+* Feat - include a query filter to query only clean metrics
+### 0.163.0 
+**Release Date:** Thu Jul 12 14:52:46 UTC 2018     
+### 0.162.0 
+**Release Date:** Thu Jul 12 00:41:01 UTC 2018     
+* Refactor - now using swagger file to generate the server
+### 0.161.0 
+**Release Date:** Wed Jul  4 15:49:24 UTC 2018     
+* Fix - Cannot create domains for other tenant admin users that are not skylight admin. We did provisionned the roles properly, but the for loop that checked for the roles wasn't really looping. [Fixes Issue 47](https://app.trackduck.com/project/5af4415b55b8b593751d5527/issue/5b3bd4b994cf14512d43feb7?utm_source=integration&utm_medium=app_slack&utm_content=task)
 ### 0.160.0 
 **Release Date:** Wed Jun 27 18:23:46 UTC 2018     
-## Previous Releases 
 ### 0.159.0 
 **Release Date:** Wed Jun 27 18:02:30 UTC 2018     
 * Feature - adding metric instrumentation for Druid queries to track individual time of query from the entire API time.

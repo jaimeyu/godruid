@@ -31,7 +31,7 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 	result := new(TenantServiceRESTHandler)
 
 	// Setup the DB implementation based on configuration
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TenantServiceRESTHandler: %s", err.Error())
 	}

@@ -176,6 +176,7 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 
 			parts := strings.Split(k, ".")
 			monObj = parts[0]
+			direction := parts[1]
 			lastParts := parts[len(parts)-1]
 
 			switch v.(type) {
@@ -187,7 +188,7 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 				hasData = true
 			}
 			if !strings.Contains(lastParts, "temporary") && hasData {
-				obj.SetP(v, lastParts)
+				obj.SetP(v, direction+"."+lastParts)
 			}
 		}
 

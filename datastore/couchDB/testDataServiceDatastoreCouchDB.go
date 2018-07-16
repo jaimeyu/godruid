@@ -2,6 +2,7 @@ package couchDB
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/gather"
@@ -43,4 +44,47 @@ func (testDB *TestDataServiceDatastoreCouchDB) GetAllDocsByDatatype(dbName strin
 	}
 
 	return getAllOfTypeByIDPrefix(datatype, datatype, db)
+}
+
+// InsertTenantViews - CouchDB implementation of InsertTenantViews
+func (testDB *TestDataServiceDatastoreCouchDB) InsertTenantViews(dbName string) string {
+	if len(dbName) == 0 {
+		return fmt.Sprintf("Unable to insert Tenant Views if no DB name is provided")
+	}
+
+	fullDBName := createDBPathStr(testDB.couchHost, dbName)
+	moDB, err := getDatabase(fullDBName)
+	if err != nil {
+		return fmt.Sprintf("Unable to insert Tenant Views: %s", err.Error())
+	}
+
+	errorMessageContainer := []string{}
+	// Store the views related to Monitored Objects
+	for _, viewPayload := range getTenantViews() {
+		// See if a view already exists
+		existing, err := getByDocID(viewPayload["_id"].(string), "Tenant View", moDB)
+		if existing == nil || existing["_rev"] == nil {
+			errorMessageContainer = append(errorMessageContainer, fmt.Sprintf("View %s was not found: %s. Going to try to create it.", viewPayload["_id"].(string), err.Error()))
+
+			// Data does not exist, try to insert it
+			_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", moDB, nil)
+			if err != nil {
+				errorMessageContainer = append(errorMessageContainer, fmt.Sprintf("Error tring to create View %s: %s", viewPayload["_id"].(string), err.Error()))
+			} else {
+				errorMessageContainer = append(errorMessageContainer, fmt.Sprintf("Successfully created View %s", viewPayload["_id"].(string)))
+			}
+			continue
+		}
+
+		// Record exists, let's update it
+		viewPayload["_rev"] = existing["_rev"].(string)
+		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", moDB, nil)
+		if err != nil {
+			errorMessageContainer = append(errorMessageContainer, fmt.Sprintf("Error tring to update View %s: %s", viewPayload["_id"].(string), err.Error()))
+		} else {
+			errorMessageContainer = append(errorMessageContainer, fmt.Sprintf("Successfully updated View %s", viewPayload["_id"].(string)))
+		}
+	}
+
+	return strings.Join(errorMessageContainer, "\n")
 }

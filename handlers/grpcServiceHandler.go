@@ -8,7 +8,6 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
-	admmod "github.com/accedian/adh-gather/models/admin"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
@@ -28,30 +27,13 @@ const (
 	Minor                  = "minor"
 )
 
-var (
-	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
-	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
-		"pe": tenmod.TwampPE,
-		"sf": tenmod.TwampSF,
-		"sl": tenmod.TwampSL,
-		string(tenmod.TwampPE): tenmod.TwampPE,
-		string(tenmod.TwampSF): tenmod.TwampSF,
-		string(tenmod.TwampSL): tenmod.TwampSL}
-
-	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
-	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
-		string(tenmod.AccedianNID):  tenmod.AccedianNID,
-		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
-)
-
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
 // implementation details to each unique service handler. When new
 // gRPC services are added, a new Service Handler should be created,
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
-	ash               *AdminServiceHandler
-	Tsh               *TenantServiceHandler
-	DefaultValidTypes *admmod.ValidTypes
+	ash *AdminServiceHandler
+	Tsh *TenantServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -62,22 +44,6 @@ func CreateCoordinator() *GRPCServiceHandler {
 
 	result.ash = CreateAdminServiceHandler()
 	result.Tsh = CreateTenantServiceHandler()
-
-	// Setup the known values of the Valid Types for the system
-	// by using the enumerated protobuf values
-	validMonObjTypes := make(map[string]string, 0)
-	validMonObjDevTypes := make(map[string]string, 0)
-
-	for key, val := range ValidMonitoredObjectTypes {
-		validMonObjTypes[key] = string(val)
-	}
-	for key, val := range ValidMonitoredObjectDeviceTypes {
-		validMonObjDevTypes[key] = string(val)
-	}
-
-	result.DefaultValidTypes = &admmod.ValidTypes{
-		MonitoredObjectTypes:       validMonObjTypes,
-		MonitoredObjectDeviceTypes: validMonObjDevTypes}
 
 	return result
 }
@@ -576,6 +542,7 @@ func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateThrPrfStr)
 		return nil, err
 	}
@@ -590,6 +557,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateThrPrfStr)
 		return nil, err
 	}
@@ -604,6 +572,7 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 
 	res, err := gsh.Tsh.GetTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetThrPrfStr)
 		return nil, err
 	}
@@ -618,6 +587,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteThrPrfStr)
 		return nil, err
 	}
@@ -632,6 +602,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context
 
 	res, err := gsh.Tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve all Tenant ThresholdProfiles for Tenant %s: %s", tenantID, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetAllThrPrfStr)
 		return nil, err
 	}
@@ -646,6 +617,7 @@ func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateMonObjStr)
 		return nil, err
 	}
@@ -660,6 +632,7 @@ func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateMonObjStr)
 		return nil, err
 	}
@@ -674,6 +647,7 @@ func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitored
 
 	res, err := gsh.Tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not Get Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetMonObjStr)
 		return nil, err
 	}
@@ -688,6 +662,7 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteMonObjStr)
 		return nil, err
 	}

@@ -538,14 +538,13 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 
 // Metadata - defines a Tenant Metadata.
 type Metadata struct {
-	ID                      string `json:"_id"`
-	REV                     string `json:"_rev"`
-	Datatype                string `json:"datatype"`
-	TenantID                string `json:"tenantId"`
-	TenantName              string `json:"tenantName"`
-	DefaultThresholdProfile string `json:"defaultThresholdProfile"`
-	CreatedTimestamp        int64  `json:"createdTimestamp"`
-	LastModifiedTimestamp   int64  `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	TenantName            string `json:"tenantName"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -562,38 +561,6 @@ func (meta *Metadata) SetID(s string) error {
 // GetName - required implementation for renaming the type in jsonapi payload
 func (meta *Metadata) GetName() string {
 	return string(TenantMetaType)
-}
-
-// GetReferences to satisfy the jsonapi.MarshalReferences interface
-func (meta *Metadata) GetReferences() []jsonapi.Reference {
-	return []jsonapi.Reference{
-		{
-			Type: "defaultThresholdProfile",
-			Name: "defaultThresholdProfile",
-		},
-	}
-}
-
-// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
-func (meta *Metadata) GetReferencedIDs() []jsonapi.ReferenceID {
-	result := []jsonapi.ReferenceID{}
-	result = append(result, jsonapi.ReferenceID{
-		ID:   meta.DefaultThresholdProfile,
-		Type: "defaultThresholdProfile",
-		Name: "defaultThresholdProfile",
-	})
-
-	return result
-}
-
-// SetToOneReferenceID sets domain reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (meta *Metadata) SetToOneReferenceID(name string, ID string) error {
-	if name == "defaultThresholdProfile" {
-		meta.DefaultThresholdProfile = ID
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 // Validate - used during validation of incoming REST requests for this object

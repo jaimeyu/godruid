@@ -37,6 +37,7 @@ func HistogramQuery(tenant string, dataSource string, metric string, granularity
 			godruid.AggFiltered(
 				godruid.FilterAnd(
 					godruid.FilterSelector("tenantId", tenant),
+					cleanFilter(),
 					godruid.FilterSelector("direction", direction),
 				),
 				&aggHist,
@@ -145,6 +146,7 @@ func HistogramCustomQuery(tenant string, domains []string, dataSource string, in
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Aggregations: aggregations,
@@ -209,6 +211,7 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Aggregations: aggregations,
@@ -471,6 +474,7 @@ func ThresholdViolationsQuery(tenant string, dataSource string, domains []string
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Aggregations:     aggregations,
@@ -643,6 +647,7 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, gran
 		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Aggregations:     aggregations,
@@ -702,6 +707,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, time
 		Context:     map[string]interface{}{"timeout": timeout},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 			thresholdFilter,
 			godruid.FilterSelector("objectType", objectType),
@@ -769,6 +775,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Intervals: []string{interval},
@@ -838,6 +845,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
@@ -851,7 +859,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 }
 
 //RawMetricsQuery  - Query that returns a raw metric values
-func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, directions []string, monitoredObjects []string, timeout int32, granularity string) (*godruid.QueryTimeseries, error) {
+func RawMetricsQuery(tenant string, dataSource string, metrics []string, interval string, objectType string, directions []string, monitoredObjects []string, timeout int32, granularity string, cleanOnly bool) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
@@ -874,16 +882,26 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 		}
 	}
 
+	var queryFilter *godruid.Filter
+	if cleanOnly {
+		queryFilter = godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
+			godruid.FilterSelector("objectType", objectType),
+		)
+	} else {
+		godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			godruid.FilterSelector("objectType", objectType),
+		)
+	}
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
 		Context:      map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
 		Aggregations: aggregations,
-		Filter: godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			godruid.FilterSelector("objectType", objectType),
-		),
-		Intervals: []string{interval},
+		Filter:       queryFilter,
+		Intervals:    []string{interval},
 	}, nil
 }
 
@@ -940,6 +958,7 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, domains 
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+			cleanFilter(),
 			buildDomainFilter(tenant, domains),
 		),
 		Intervals:        []string{interval},
@@ -1128,6 +1147,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 
 	filterOn = godruid.FilterAnd(
 		godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+		cleanFilter(),
 		godruid.FilterSelector("objectType", metric.ObjectType),
 	)
 
@@ -1136,6 +1156,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 		domObjFilter := buildDomainFilter(request.TenantID, request.Domains)
 		filterOn = godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			cleanFilter(),
 			godruid.FilterSelector("objectType", metric.ObjectType),
 			domObjFilter,
 		)
@@ -1143,6 +1164,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 		monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
 		filterOn = godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
+			cleanFilter(),
 			godruid.FilterSelector("objectType", metric.ObjectType),
 			monObjFilter,
 		)
@@ -1218,4 +1240,12 @@ func inWhitelist(whitelist []metrics.MetricIdentifier, vendor, objectType, metri
 	}
 	return false
 
+}
+
+func cleanFilter() *godruid.Filter {
+	// CleanStatus is null (for old data) OR cleanStatus > -1.
+	return godruid.FilterOr(
+		godruid.FilterSelector("cleanStatus", ""),
+		godruid.FilterLowerBound("cleanStatus", godruid.NUMERIC, -1, true),
+	)
 }

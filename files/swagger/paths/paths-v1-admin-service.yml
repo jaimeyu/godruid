@@ -1,0 +1,532 @@
+  /v1/admin:
+    post:
+      summary: Create a User with Administrative access.
+      operationId: CreateAdminUser
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a User with Administrative access.
+      operationId: UpdateAdminUser
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+        '400':
+          description: "Request data does not pass validation"
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+      tags:
+        - AdminProvisioningService
+  /v1/admin-user-list:
+    get:
+      summary: Retrieve all Administrative Users.
+      operationId: GetAllAdminUsers
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiAdminUserList'
+      tags:
+        - AdminProvisioningService
+  '/v1/admin/{value}':
+    get:
+      summary: Retrieve an Administrative User by id.
+      operationId: GetAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a User with Administrative access.
+      operationId: DeleteAdminUser
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiAdminUser'
+        '500':
+          description: "Unexpected error processing request"
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  /v1/tenants:
+    post:
+      summary: Create a Tenant.
+      operationId: CreateTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a Tenant.
+      operationId: UpdateTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+      tags:
+        - AdminProvisioningService
+  /v1/tenant-list:
+    get:
+      summary: Retrieve all Tenants.
+      operationId: GetAllTenants
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningService
+  '/v1/tenants/{tenantId}':
+    get:
+      summary: Retrieve a Tenant by id.
+      operationId: GetTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a Tenant
+      operationId: DeleteTenant
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenant
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenant'
+      tags:
+        - AdminProvisioningService
+  '/v1/tenant-by-alias/{value}':
+    get:
+      summary: Returns the Id of a Tenant that matches the provided alias.
+      operationId: GetTenantIdByAlias
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  '/v1/tenant-summary-by-alias/{value}':
+    get:
+      summary: Returns a summary of the Tenant that matches the provided alias.
+      operationId: GetTenantSummaryByAlias
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: "#/definitions/TenantSummary"
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningService
+  /v1/ingestion-dictionaries:
+    post:
+      summary: Create an Ingestion Dictionary. 
+      operationId: CreateIngestionDictionary
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update an Ingestion Dictionary. 
+      operationId: UpdateIngestionDictionary
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+      tags:
+        - AdminProvisioningService
+    get:
+      summary: Retrieve an Ingestion Dictionary.
+      operationId: GetIngestionDictionary
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete an Ingestion Dictionary.
+      operationId: DeleteIngestionDictionary
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiIngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningService
+  /v1/valid-types:
+    post:
+      summary: Create a Valid Types object. 
+      operationId: CreateValidTypes
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+      tags:
+        - AdminProvisioningService
+    put:
+      summary: Update a Valid Types object. 
+      operationId: UpdateValidTypes
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+      tags:
+        - AdminProvisioningService
+    get:
+      summary: Retrieve a Valid Types object.
+      operationId: GetValidTypes
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningService
+    delete:
+      summary: Delete a Valid Types object.
+      operationId: DeleteValidTypes
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningService

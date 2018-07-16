@@ -548,6 +548,564 @@ paths:
             type: string
       tags:
         - AdminProvisioningService
+  /v1/histogram:
+    get:
+      summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
+      operationId: GetHistogram
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: false
+          type: string
+        - name: tenant
+          in: query
+          required: false
+          type: string
+        - name: domain
+          in: query
+          required: false
+          type: string
+        - name: granularity
+          description: ISO-8601 period combination.
+          in: query
+          required: false
+          type: string
+        - name: direction
+          in: query
+          required: false
+          type: string
+        - name: metric
+          in: query
+          required: false
+          type: string
+        - name: granularityBuckets
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: resolution
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: vendor
+          in: query
+          required: false
+          type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
+  /v1/raw-metrics:
+    get:
+      summary: Returns raw metrics from druid
+      operationId: GetRawMetrics
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: false
+          type: string
+        - name: tenant
+          in: query
+          required: false
+          type: string
+        - name: direction
+          in: query
+          required: false
+          type: string
+        - name: metric
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: objectType
+          in: query
+          required: false
+          type: string
+        - name: monitoredObjectId
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: granularity
+          in: query
+          required: false
+          type: string
+      tags:
+        - MetricsService
+  /v1/threshold-crossing:
+    get:
+      summary: Retrieve threshold crossing for given metric.
+      operationId: GetThresholdCrossing
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenant
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: granularity
+          description: ISO-8601 period combination.
+          in: query
+          required: false
+          type: string
+        - name: objectType
+          description: the type of object (e.g. twamp-pe)
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: metric
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: thresholdProfileId
+          in: query
+          required: true
+          type: string
+        - name: vendor
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
+    post:
+      summary: Retrieve threshold crossings
+      operationId: QueryThresholdCrossing
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricResultsResponseObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ThresholdCrossingAPIRequestObject'
+      tags:
+        - MetricsService
+  /v1/threshold-crossing-by-monitored-object:
+    get:
+      operationId: GetThresholdCrossingByMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenant
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: granularity
+          description: ISO-8601 period combination.
+          in: query
+          required: false
+          type: string
+        - name: objectType
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: metric
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: thresholdProfileId
+          in: query
+          required: true
+          type: string
+        - name: vendor
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
+  /v1/threshold-crossing-by-monitored-object-top-n:
+    get:
+      operationId: GetThresholdCrossingByMonitoredObjectTopN
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenantId
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: granularity
+          description: ISO-8601 period combination.
+          in: query
+          required: false
+          type: string
+        - name: objectType
+          in: query
+          required: true
+          type: string
+        - name: direction
+          in: query
+          required: false
+          type: string
+        - name: metric
+          in: query
+          required: true
+          type: string
+        - name: thresholdProfileId
+          in: query
+          required: true
+          type: string
+        - name: vendor
+          in: query
+          required: true
+          type: string
+        - name: timeout
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: numResults
+          in: query
+          required: false
+          type: integer
+          format: int32
+      tags:
+        - MetricsService
+  '/v1/aggregated-metrics':
+    post:
+      summary: Query metrics and perform aggregations
+      operationId: QueryAggregatedMetrics
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricResultsResponseObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AggregateMetricsAPIRequestObject'
+      tags:
+        - MetricsService
+
+  /v1/topn-metrics:
+    post:
+      summary: Retrieve a Top-N for a given sets of metrics
+      operationId: GetTopNForMetric
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing proviosned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TopNMetricsAPIRequestObject'
+      tags:
+        - MetricsService
+ 
+  /v1/generate-sla-report:
+    get:
+      summary: Generate an SLA Report.
+      operationId: GenSLAReport
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Components of the request parameters were not in the provisioning database"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: interval
+          description: ISO-8601 Intervals.
+          in: query
+          required: true
+          type: string
+        - name: tenant
+          description: Tenant ID
+          in: query
+          required: true
+          type: string
+        - name: domain
+          description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: thresholdProfileId
+          description: ID of the ThresholdProfile to use for the report
+          in: query
+          required: true
+          type: string
+        - name: granularity
+          description: the granularity for timeseries in ISO-8601 Duration format
+          in: query
+          required: false
+          type: string
+          default: PT1H
+        - name: timeout
+          description: database query timeout in milliseconds
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: timezone
+          description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
+          in: query
+          required: false
+          type: string
+
+      tags:
+        - MetricsService
   /v1/tenants/{tenantId}/users:
     post:
       summary: Create a User for a Tenant.
@@ -2287,569 +2845,7 @@ paths:
           type: string
       tags:
         - TenantProvisioningService
-
-# All API definitions below here are for the MetricsService and will need to be modified
-# when the MetricsService is altered to use the jsonapi implementation.
-  /v1/histogram:
-    get:
-      summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
-      operationId: GetHistogram
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: false
-          type: string
-        - name: tenant
-          in: query
-          required: false
-          type: string
-        - name: domain
-          in: query
-          required: false
-          type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: false
-          type: string
-        - name: granularityBuckets
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: resolution
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: vendor
-          in: query
-          required: false
-          type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-      tags:
-        - MetricsService
-  /v1/raw-metrics:
-    get:
-      summary: Returns raw metrics from druid
-      operationId: GetRawMetrics
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: false
-          type: string
-        - name: tenant
-          in: query
-          required: false
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: objectType
-          in: query
-          required: false
-          type: string
-        - name: monitoredObjectId
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: granularity
-          in: query
-          required: false
-          type: string
-      tags:
-        - MetricsService
-  /v1/threshold-crossing:
-    get:
-      summary: Retrieve threshold crossing for given metric.
-      operationId: GetThresholdCrossing
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: domain
-          description: Domain ID
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          description: the type of object (e.g. twamp-pe)
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: direction
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: metric
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-      tags:
-        - MetricsService
-    post:
-      summary: Retrieve threshold crossings
-      operationId: QueryThresholdCrossing
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricResultsResponseObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ThresholdCrossingAPIRequestObject'
-      tags:
-        - MetricsService
-  /v1/threshold-crossing-by-monitored-object:
-    get:
-      operationId: GetThresholdCrossingByMonitoredObject
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: domain
-          description: Domain ID
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: direction
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: metric
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-      tags:
-        - MetricsService
-  /v1/threshold-crossing-by-monitored-object-top-n:
-    get:
-      operationId: GetThresholdCrossingByMonitoredObjectTopN
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: true
-          type: string
-        - name: tenantId
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: domain
-          description: Domain ID
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          in: query
-          required: true
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: true
-          type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: true
-          type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: numResults
-          in: query
-          required: false
-          type: integer
-          format: int32
-      tags:
-        - MetricsService
-  '/v1/aggregated-metrics':
-    post:
-      summary: Query metrics and perform aggregations
-      operationId: QueryAggregatedMetrics
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricResultsResponseObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Missing provisioned data from request parameters"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/AggregateMetricsAPIRequestObject'
-      tags:
-        - MetricsService
-
-  /v1/topn-metrics:
-    post:
-      summary: Retrieve a Top-N for a given sets of metrics
-      operationId: GetTopNForMetric
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Missing proviosned data"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/TopNMetricsAPIRequestObject'
-      tags:
-        - MetricsService
- 
-  /v1/generate-sla-report:
-    get:
-      summary: Generate an SLA Report.
-      operationId: GenSLAReport
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Components of the request parameters were not in the provisioning database"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: domain
-          description: Domain ID
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          description: ID of the ThresholdProfile to use for the report
-          in: query
-          required: true
-          type: string
-        - name: granularity
-          description: the granularity for timeseries in ISO-8601 Duration format
-          in: query
-          required: false
-          type: string
-          default: PT1H
-        - name: timeout
-          description: database query timeout in milliseconds
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: timezone
-          description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
-          in: query
-          required: false
-          type: string
-
-      tags:
-        - MetricsService
 definitions:
-
   JsonApiAdminUser:
     type: "object"
     properties:

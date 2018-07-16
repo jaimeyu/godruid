@@ -1734,7 +1734,7 @@ func (tsh *TenantServiceRESTHandler) GetFilteredMonitoredObjects(w http.Response
 	tenantID := getDBFieldFromRequest(r, 4)
 	dataID := getDBFieldFromRequest(r, 6)
 	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
+	//	queryParams := r.URL.Query()
 
 	// Populate the params for druid
 

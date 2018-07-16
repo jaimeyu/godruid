@@ -793,7 +793,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	if len(newKeys) != 0 {
 
 		// Create the couchDB views
-		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+		dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 		for _, key := range newKeys {
 			// Create an index based on metadata keys
 			err = createCouchDBViewIndex(dbNameKeys, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
@@ -837,7 +837,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	// @TODO, needs to prove this works
 	// Do not wait for this to finish, it will certainly take tens of minutes
 	// Create the couchDB views
-	dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	for key := range meta {
 		go indexViewTriggerBuild(dbNameKeys, "indexOf"+key, key)
 		go indexViewTriggerBuild(dbNameKeys, "viewOf"+key, key)
@@ -852,7 +852,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 // Assumption right now is that most clients monitored object objectName will be unique.
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 
-	dbName := generateMonitoredObjectUrl(tenantID, tsd.server)
+	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
 		return nil, err

@@ -672,7 +672,7 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 
 func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
 	// There is a bug here whe update design doc adds _design to the dbname.
-	dbName := generateMonitoredObjectUrl(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
 	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
 		if logger.IsDebugEnabled() {
 			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
@@ -685,7 +685,8 @@ func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string
 	return nil
 }
 
-func generateMonitoredObjectUrl(tenantID string, uri string) string {
+// GenerateMonitoredObjectURL - Generates a Monitored Object URL
+func GenerateMonitoredObjectURL(tenantID string, uri string) string {
 	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
 	return dbName
 }

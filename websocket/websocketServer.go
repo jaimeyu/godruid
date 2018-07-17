@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"sync"
 	"time"
 
@@ -83,8 +84,8 @@ func setBatchSize() {
 func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 	for ws != nil {
-
 		_, p, err := ws.ReadMessage()
+
 		if err != nil {
 			logger.Log.Errorf("Lost connection to Connector with ID: %v. Error: %v", connectorID, err)
 
@@ -190,7 +191,22 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 				// take the first available config, and assign a connector instance ID to it
 				if len(configs) == 0 {
-					logger.Log.Errorf("No available configurations for Connector with ID: %v", connectorID)
+					errMsg := fmt.Sprintf("No available configurations for Connector with ID: %v", connectorID)
+					logger.Log.Error(errMsg)
+
+					returnMsg := &ConnectorMessage{
+						MsgType:  "Config",
+						ErrorMsg: errMsg,
+					}
+
+					msgJSON, _ := json.Marshal(returnMsg)
+
+					err = wsServer.ConnectionMeta[connectorID].Connection.WriteMessage(websocket.BinaryMessage, msgJSON)
+
+					if err != nil {
+						logger.Log.Errorf("Error sending configuration to Connector with ID: %v", connectorID)
+						break
+					}
 					break
 				}
 
@@ -203,23 +219,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				// remove the couchDB type prefix from the ID
 				selectedConfig.ID = datastore.GetDataIDFromFullID(selectedConfig.ID)
 				selectedConfig.ConnectorInstanceID = connectorID
-
-				// Convert our data to JSON
-				configJSON, _ := json.Marshal(selectedConfig)
-
-				returnMsg := &ConnectorMessage{
-					MsgType: "Config",
-					Data:    configJSON,
-				}
-
-				msgJSON, _ := json.Marshal(returnMsg)
-
-				// Send the config to the connector
-				err = wsServer.ConnectionMeta[connectorID].Connection.WriteMessage(websocket.BinaryMessage, msgJSON)
-				if err != nil {
-					logger.Log.Errorf("Error sending configuration to Connector with ID: %v", connectorID)
-					break
-				}
 
 				// After successfully sending config to connector, update ConnectorConfig with the instance iD
 				_, err = wsServer.TenantDB.UpdateTenantConnectorConfig(selectedConfig)
@@ -361,6 +360,7 @@ func (wsServer *ServerStruct) listenToConnectorChanges() {
 
 	// if a connector config changes, push it to the connector
 	for config := range wsServer.TenantDB.GetConnectorConfigUpdateChan() {
+
 		instanceID := config.ConnectorInstanceID
 		meta := wsServer.ConnectionMeta[instanceID]
 		if instanceID != "" && meta != nil {

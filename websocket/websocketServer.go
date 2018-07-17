@@ -310,6 +310,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					// Otherwise, just add the record to the batch
 					updateProperties := sessionDataMap[m.ID]
 					m.ObjectName = updateProperties.Name
+					m.ObjectType = updateProperties.Type
 
 					logger.Log.Debugf("Updating Monitored object %s to have name %s as per properties %v", m.ID, m.ObjectName, updateProperties)
 					moUpdateBatch = append(moUpdateBatch, m)

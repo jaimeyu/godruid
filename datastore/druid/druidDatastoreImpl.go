@@ -884,6 +884,7 @@ func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, m
 
 // GetMonitoredObjectsLookUpList - Goes to Druid and grabs the list of monitored objects for a lookup
 func (dc *DruidDatastoreClient) GetMonitoredObjectsLookUpList(filterOn string) (map[string]string, error) {
+
 	//{{DOMAIN}}/coordinator/druid/coordinator/v1/lookups/config/__default?pretty
 	/*
 	   {
@@ -905,24 +906,40 @@ func (dc *DruidDatastoreClient) GetMonitoredObjectsLookUpList(filterOn string) (
 		Version                string                      `json:"version"`
 		LookupExtractorFactory druidLookupExtractorFactory `json:"lookupExtractorFactory"`
 	}
+	var data druidLookUpResponse
 
-	lookupEndpoint := dc.server + ":8082" + "/druid/listen/v1/lookups/" + filterOn
+	var druidCoordPath string
+	// This doesn't seem right. How come DruidDatastoreClient struct doesn't have a server port for the broker?!
+	if dc.coordinatorPort == "-1" {
+		druidCoordPath = "/druid/listen/v1/lookups/"
 
-	logger.Log.Infof("Start time: %s", lookupEndpoint)
+	} else {
+		druidCoordPath = ":8082" + "/druid/listen/v1/lookups/"
+	}
+	lookupEndpoint := dc.server + druidCoordPath + filterOn
+	logger.Log.Infof("Making ")
+
+	logger.Log.Infof("Get Druid look up: %s", lookupEndpoint)
 
 	benchmark := time.Now().Nanosecond()
 	resp, err := sendRequest("GET", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Could not get look up list from druid %s", err.Error())
+		logger.Log.Infof("Get Druid look up failed: %s", err.Error())
+
+		// 404 is valid on new metadata keys
+		if !strings.Contains(err.Error(), "404") {
+			return nil, fmt.Errorf("Could not get look up list from druid %s", err.Error())
+		} else {
+			return data.LookupExtractorFactory.Map, nil
+		}
 	}
 	ts := time.Now().Nanosecond() - benchmark
 	logger.Log.Info("Getting obj list took %d nsec -> %d ms", ts, ts/1000/1000)
 
 	// Unmarshal the response
-	var data druidLookUpResponse
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
-		return nil, fmt.Errorf("Druid response is bad, could not unmarshal %s %s", resp, err.Error())
+		return nil, fmt.Errorf("Druid response is bad, could not unmarshal '%s' with error: %s", resp, err.Error())
 	}
 	logger.Log.Info("dump raw resp %s", string(resp))
 
@@ -934,8 +951,13 @@ func (dc *DruidDatastoreClient) GetMonitoredObjectsLookUpList(filterOn string) (
 // AddMonitoredObjectToLookup - Adds a monitored object to the druid look ups
 func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenant.MonitoredObject, datatype string, qualifiers []string, reset bool) error {
 	version := time.Now().Format(time.RFC3339)
-	lookupEndpoint := dc.coordinatorServer + ":" + dc.coordinatorPort + "/druid/coordinator/v1/lookups/config"
+	var lookupEndpoint string
+	if dc.coordinatorPort == "-1" {
+		lookupEndpoint = dc.coordinatorServer + "/druid/coordinator/v1/lookups/config"
 
+	} else {
+		lookupEndpoint = dc.coordinatorServer + ":" + dc.coordinatorPort + "/druid/coordinator/v1/lookups/config"
+	}
 	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
 	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
 	// Every domain should have a map even if it has no monitored objects.
@@ -1050,13 +1072,13 @@ func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, moni
 		return err
 	}
 
-	//if logger.IsDebugEnabled(){
-	// 		logger.Log.Debugf("Sending lookup request %s", string(b))
-	//	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Sending lookup request %s, payload: %s", lookupEndpoint, string(b))
+	}
 
 	_, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
 	if err != nil {
-		logger.Log.Errorf("Failed to update lookup", err.Error())
+		logger.Log.Errorf("Failed to update lookup %s", err.Error())
 		return err
 	}
 	updateLookupCache(lookups)

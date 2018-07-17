@@ -20,7 +20,7 @@ var lookups = lookupCache{
 
 const (
 	druidLookupWriteDelay time.Duration = 15 * time.Second // This should really be coordinated with Druid's config
-	druidLookupSeparator                = "{}"
+	druidLookupSeparator                = "*"
 )
 
 // Lookup cache with lazy initialization.  The cache is not guaranteed to be initialized immediately because

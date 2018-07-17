@@ -624,8 +624,6 @@ func TestTenantDataCleaningProfileSerialization(t *testing.T) {
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
-	casted := &DataCleaningProfile{}.(jsonapi.UnmarshalIdenitifier)
-
 	attrKeys := []string{"_rev", "datatype", "tenantId", "rules", "createdTimestamp", "lastModifiedTimestamp"}
 
 	testUtil.RunSerializationTest(t, original, &DataCleaningProfile{}, original.ID, attrKeys)

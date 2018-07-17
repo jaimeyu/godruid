@@ -79,4 +79,9 @@ type TenantServiceDatastore interface {
 	// For testing
 	DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error)
 	HasDashboardsWithDomain(tenantID string, domainID string) (bool, error)
+
+	CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
+	UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
+	GetTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error)
+	DeleteTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error)
 }

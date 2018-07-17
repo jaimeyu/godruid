@@ -108,4 +108,5 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunTenantReportScheduleCRUD(t)
 
 	tester.RunMonitoredObjectGetAllInList(t)
+	tester.RunTenantDataCleaningProfileCRUD(t)
 }

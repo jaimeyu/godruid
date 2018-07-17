@@ -11,8 +11,19 @@ import (
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 )
 
-var (
-	monitoredObjectCountIndexBytes = []byte(`{
+const (
+	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
+	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
+
+	monitoredObjectDBSuffix = "_monitored-objects"
+	reportObjectDBSuffix    = "_reports"
+
+	// Indexer for monitored objects by name
+	monitoredObjectsByObjectNameIndex = "byObjectName"
+	monitoredObjectsByObjectNameKey   = "objectName"
+	monitoredObjectIndex              = "indexOfObjectName"
+
+	monitoredObjectCountIndexBytes = `{
 	"_id": "_design/monitoredObjectCount",
 	"language": "javascript",
 	"views": {
@@ -24,9 +35,9 @@ var (
 		"reduce": "_count"
 	  }
 	}
-  }`)
+  }`
 
-	monitoredObjectMetaIndexBytes = []byte(`{
+	monitoredObjectMetaIndexBytes = `{
 	"_id": "_design/monitoredObject-meta",
 	"language": "query",
 	"views": {
@@ -47,7 +58,7 @@ var (
 		}
 	  }
 	}
-  }`)
+  }`
 
 	keyViewName = "%sView"
 	keyViewFn   = `function (doc) {
@@ -64,7 +75,7 @@ var (
 	metakeysViewUniqueValuessURI = "uniqueMeta/uniqueValues"
 	metaKeyName                  = "{{KeyName}}"
 	metaKeyField                 = "{{KeyField}}"
-	uniqueMetaIndexBytes         = []byte(`{
+	uniqueMetaIndexBytes         = `{
 		"_id": "_design/uniqueMeta",
 		"language": "javascript",
 		"views": {
@@ -83,9 +94,12 @@ var (
 			"searchLookup": {
 				"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n      \n        emit([doc.data.meta[key], key], key);\n        \n      }\n    }\n}",
 				"reduce": "function (keys, values, rereduce) {\n  if (rereduce) {\n    return sum(values);\n  } else {\n    return values.length;\n  }\n}"
+			},
+			"wordSearch": {
+				"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n        var sentence = doc.data.meta[key];\n        \n        // split on space\n        var words = sentence.split(\" \");\n        \n        for (var word in words) {\n            emit(words[word], {\"category\":key, \"sentence\":sentence});\n        }\n      }\n    }\n}"
 			}
 		}
-	}`)
+	}`
 	metaUniqueValuesViewsURI          = "{{KeyName}}/{{KeyField}}"
 	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
 
@@ -118,13 +132,13 @@ func getTenantViews() []map[string]interface{} {
 	monitoredObjectMetaIndexObject := map[string]interface{}{}
 	monitoredObjectCountIndexObject := map[string]interface{}{}
 
-	if err := json.Unmarshal(uniqueMetaIndexBytes, &uniqueMetaIndexObject); err != nil {
+	if err := json.Unmarshal([]byte(uniqueMetaIndexBytes), &uniqueMetaIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
-	if err := json.Unmarshal(monitoredObjectMetaIndexBytes, &monitoredObjectMetaIndexObject); err != nil {
+	if err := json.Unmarshal([]byte(monitoredObjectMetaIndexBytes), &monitoredObjectMetaIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
-	if err := json.Unmarshal(monitoredObjectCountIndexBytes, &monitoredObjectCountIndexObject); err != nil {
+	if err := json.Unmarshal([]byte(monitoredObjectCountIndexBytes), &monitoredObjectCountIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
 
@@ -166,7 +180,7 @@ func createCouchDBViewIndex(dbName string, template string, ddocName string, key
 		return err
 	}
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully created Indexer -> %s", "xx")
+		logger.Log.Debugf("Successfully created Indexer -> %s", models.AsJSONString(document))
 	}
 
 	return nil

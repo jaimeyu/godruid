@@ -17,19 +17,6 @@ import (
 	admmod "github.com/accedian/adh-gather/models/admin"
 )
 
-const (
-	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
-	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
-
-	monitoredObjectDBSuffix = "_monitored-objects"
-	reportObjectDBSuffix    = "_reports"
-
-	//
-	monitoredObjectsByObjectNameIndex = "byObjectName"
-	monitoredObjectsByObjectNameKey   = "objectName"
-	monitoredObjectIndex              = "indexOfObjectName"
-)
-
 // AdminServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Admin Service when using CouchDB
 // as the storage option.
@@ -166,7 +153,7 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 	}
 
 	// Create index for monitored objects based on their objectName
-	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantDescriptor.ID, monitoredObjectDBSuffix))
+	dbName := GenerateMonitoredObjectURL(tenantDescriptor.ID, asd.couchHost)
 	err = createCouchDBViewIndex(dbName, metaIndexTemplate, monitoredObjectsByObjectNameKey, []string{monitoredObjectsByObjectNameKey}, "")
 	if err != nil {
 		logger.Log.Debugf("Unable to create monitored object views %s for Tenant %s: %s", monitoredObjectsByObjectNameKey, tenantDescriptor.ID, err.Error())

@@ -20,6 +20,7 @@ var lookups = lookupCache{
 
 const (
 	druidLookupWriteDelay time.Duration = 15 * time.Second // This should really be coordinated with Druid's config
+	druidLookupSeparator                = "{}"
 )
 
 // Lookup cache with lazy initialization.  The cache is not guaranteed to be initialized immediately because
@@ -52,15 +53,15 @@ func getLookupName(dimType, tenantID, dimValue string) (string, bool) {
 
 // Construct a lookup name
 func buildLookupName(dimType, tenantID, dimValue string) string {
-	return strings.ToLower(dimType + "." + tenantID + "." + dimValue)
+	return strings.ToLower(dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimValue)
 }
 
 func buildLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + "." + tenantID)
+	return strings.ToLower(dimType + druidLookupSeparator + tenantID)
 }
 
 func getLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + "." + tenantID)
+	return strings.ToLower(dimType + druidLookupSeparator + tenantID)
 }
 
 /* Heads up. The following is so when a getLookup is executed, it only allows it

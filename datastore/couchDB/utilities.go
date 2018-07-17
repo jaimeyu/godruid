@@ -16,6 +16,10 @@ import (
 
 const defaultQueryResultsLimit = 1000
 
+// When metadata is being updated in monitored objects, we want to issue a request to the view
+// so couchdb would start to build/update the view. Since the builds function is asynchronous,
+// we don't want overlapping calls to the build since it makes no sense to start/stop a build
+// while it is functioning.
 var couchdbViewBuilderBusyMap sync.Map
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
@@ -381,7 +385,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	return nil
 }
 
-// updateDdocIndex - encapsulates logic required for basic data updates for objects that follow the basic data format.
+// updateCouchDBDocWithStringDoc - Updates a couchdb design document in coucdb.
 func updateCouchDBDocWithStringDoc(dbName string, data string, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
 	if err != nil {
@@ -670,51 +674,10 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
 }
 
-func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
-	// There is a bug here whe update design doc adds _design to the dbname.
-	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
-		if logger.IsDebugEnabled() {
-			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
-		}
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
-	}
-	return nil
-}
-
 // GenerateMonitoredObjectURL - Generates a Monitored Object URL
 func GenerateMonitoredObjectURL(tenantID string, uri string) string {
 	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
 	return dbName
-}
-
-func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
-	changeDetected := false
-	// Go thru a list of KV pairs and add the keys to the Metadata.
-	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
-	for key, data := range meta {
-		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
-		// Stop betenantMetaing meta, Ahbed
-		tenantMeta.MonitorObjectMetaKeys[key] = key
-
-		// Check if view exist
-		mapName := fmt.Sprintf(keyViewName, key)
-		logger.Log.Debugf("Checking/Adding %s key to couchdb view", mapName)
-
-		if designDoc.Views[mapName] == nil {
-			changeDetected = true
-			logger.Log.Debugf("Adding %s key to couchdb view", mapName)
-			designDoc.Views[mapName] = make(map[string]string)
-			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
-
-			logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
-		}
-	}
-
-	return changeDetected, nil
 }
 
 // updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object' metakeys

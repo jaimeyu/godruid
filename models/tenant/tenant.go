@@ -40,8 +40,11 @@ const (
 	// TenantReportType - datatype string used to identify a Tenant Report in the datastore record
 	TenantReportType TenantDataType = "report"
 
-	// DashboardType - datatype string used to identify a Tenant Meta in the datastore record
+	// TenantDashboardType - datatype string used to identify a Tenant Dashboard in the datastore record
 	TenantDashboardType TenantDataType = "dashboard"
+
+	// TenantDataCleaningProfileType - datatype string used to identify a Tenant Data Cleaning Profile in the datastore record
+	TenantDataCleaningProfileType TenantDataType = "dataCleaningProfile"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -126,6 +129,9 @@ const (
 
 	// TenantDashboardStr - common name for the Dashboard for use in logs.
 	TenantDashboardStr = "Tenant Dashboard"
+
+	// TenantDataCleaningProfileStr - common name for the Tenant Cleaning Profile for use in logs.
+	TenantDataCleaningProfileStr = "Tenant Data Cleaning Profile"
 )
 
 // User - defines a Tenant user.
@@ -610,4 +616,41 @@ type Dashboard struct {
 	TenantID  string   `json:"-"` // UI does not write this property
 	Name      string   `json:"name"`
 	DomainSet []string `json:"domainSet"`
+}
+
+// DataCleaningProfile - defines a Tenant Data Cleaning Profile.
+type DataCleaningProfile struct {
+	ID                    string              `json:"_id"`
+	REV                   string              `json:"_rev"`
+	Datatype              string              `json:"datatype"`
+	TenantID              string              `json:"tenantId"`
+	Rules                 []*DataCleaningRule `json:"rules"`
+	CreatedTimestamp      int64               `json:"createdTimestamp"`
+	LastModifiedTimestamp int64               `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (dcp *DataCleaningProfile) GetID() string {
+	return dcp.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (dcp *DataCleaningProfile) SetID(s string) error {
+	dcp.ID = s
+	return nil
+}
+
+type DataCleaningRule struct {
+	MetricVendor     string                     `json:"metricVendor"`
+	MetricLabel      string                     `json:"metricLabel"`
+	IsEnabled        bool                       `json:"isEnabled"`
+	TriggerCondition *DataCleaningRuleCondition `json:"triggerCondition"`
+	ClearCondition   *DataCleaningRuleCondition `json:"clearCondition"`
+}
+
+type DataCleaningRuleCondition struct {
+	Comparator     string `json:"comparator"`
+	Value          string `json:"value"`
+	ValueAggregate string `json:"valueAggregate"`
+	Duration       string `json:"duration"`
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 	admmod "github.com/accedian/adh-gather/models/admin"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
 	"github.com/go-openapi/runtime/middleware"
@@ -72,6 +73,16 @@ func HandleCreateTenant(allowedRoles []string, adminDB datastore.AdminServiceDat
 		threshProfileResponse, err := tenantDB.CreateTenantThresholdProfile(threshPrfData)
 		if err != nil {
 			return admin_provisioning_service.NewCreateTenantInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to create default Threshold Profile %s", err.Error()), startTime, http.StatusInternalServerError, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
+		}
+
+		// Create a default Data Cleaning Profile for the Tenant
+		dcp := &tenmod.DataCleaningProfile{
+			TenantID: idForTenant,
+			Rules:    []*tenmod.DataCleaningRule{},
+		}
+		_, err = tenantDB.CreateTenantDataCleaningProfile(dcp)
+		if err != nil {
+			return admin_provisioning_service.NewCreateTenantInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to create Tenant Data Cleaning Profile %s", err.Error()), startTime, http.StatusInternalServerError, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Create the tenant metadata

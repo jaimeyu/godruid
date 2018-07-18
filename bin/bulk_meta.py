@@ -11,7 +11,7 @@ def conf_logging():
 def construct_entry_func(headers, metadatakey):
     def construct_entry(entry): 
         metadata = dict(zip(headers, entry))
-        entry_struct = { "keyName":metadata[metadatakey],"MetadataKey":metadatakey,"metadata":metadata}
+        entry_struct = { "keyName":metadata[metadatakey],"metadataKey":metadatakey,"metadata":metadata}
         return json.dumps(entry_struct)
     return construct_entry
 
@@ -70,6 +70,14 @@ parser.add_argument("-p", "--password", help="Password to be used for logging in
 parser.add_argument("-t", "--tenantname", help="Name of the tenant that the monitored objects to be enriched are associated with")
 
 args = parser.parse_args()
+
+batchsize = args.batchsize
+metafile = args.file
+host = args.host
+username = args.username
+password = args.password
+tenant = args.tenant
+keyname = "Enode B"
 
 conf_logging()
 

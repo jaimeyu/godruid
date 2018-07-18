@@ -8,15 +8,19 @@ def conf_logging():
     logging.basicConfig(format='%(asctime)s:%(levelname)s: %(message)s', level=logging.INFO)
     logging.info("Logging configured...")
 
-def construct_entry_func(headers):
+def construct_entry_func(headers, metadatakey):
     def construct_entry(entry): 
-        return json.dumps(dict(zip(headers, entry)))
+        metadata = dict(zip(headers, entry))
+        entry_struct = { "keyName":metadata[metadatakey],"MetadataKey":metadatakey,"metadata":metadata}
+        return json.dumps(entry_struct)
     return construct_entry
 
 def envoy_func(conn, auth, host, tenantid):
     def envoy(b_id, batch):
         batchlist = list(batch)
         logging.info("Sending batch %s of size %d to %s", b_id, len(batchlist), host)
+        payload = "{'_id'='1','_rev'='1','items':[" + ",".join(batchlist)+"]}"
+        print(payload)
     return envoy
 
 def login(conn, host, username, password):
@@ -37,36 +41,24 @@ def tenant_id(conn, auth, host, tenantname):
         return
     return alias_response.read().decode("utf-8")
 
-def mo_id(conn, auth, host, tenantid, objectname):
-    logging.debug("Retrieving monitored object ID with object name %s", objectname)
-    conn.request("GET","/couchdb/tenant_2_"+tenantid+"_monitored-objects/_design/indexOfobjectName/_view/byobjectName?startkey=[\""+objectname+"\"]&endkey=[\""+objectname+"\"]",body=None, headers={"Authorization":auth})
-    mo_response = conn.getresponse()
-    if mo_response.status != 200:
-        logging.error("Could not retrieve monitored object id for object name %s", objectname)
-        return
-    r_data = json.loads(mo_response.read().decode("utf-8"))
-    object_mo_id = r_data["rows"][0]["id"] #TODO work on this
-    return object_mo_id
-
-
-def process(file, batchsize, f_envoy):
+def process(file, batchsize, keyname, f_envoy):
     with open(file) as csvfile:
         bulkmetareader = csv.reader(csvfile, delimiter=',')
         i = 0
         headers = bulkmetareader.__next__()
-        entry_func = construct_entry_func(headers)
+        f_entry = construct_entry_func(headers, keyname)
         batch = []
 
         logging.info("Processing csv with headers: \n" + "\n".join(headers))
         for entry in bulkmetareader:
-            i = i+1
             batch += [entry]
-            if i == batchsize:
-                f_envoy(i/batchsize, map(entry_func, batch))
+            i += 1
+            if i%batchsize == 0:
+                f_envoy(i//batchsize, map(f_entry, batch))
                 batch = []
         
         if len(batch) > 0:
-            f_envoy(i/batchsize, map(entry_func, batch))
+            f_envoy(i//batchsize, map(f_entry, batch))
 
 # Process the command line arguments
 parser = argparse.ArgumentParser(description="Bulk insert meta information against monitored objects in datahub.")
@@ -78,20 +70,6 @@ parser.add_argument("-p", "--password", help="Password to be used for logging in
 parser.add_argument("-t", "--tenantname", help="Name of the tenant that the monitored objects to be enriched are associated with")
 
 args = parser.parse_args()
-
-batchsize = 5
-metafile = "/Users/abatosparac/go/src/github.com/accedian/adh-gather/bin/test.csv"
-host = "jyu.npav.accedian.net"
-username = "admin@datahub.com"
-password = "AccedianPass"
-tenant = "iris"
-
-# batchsize = args.batchsize
-# metafile = args.file
-# host = args.host
-# username = args.username
-# password = args.password
-# tenant = args.tenant
 
 conf_logging()
 
@@ -106,6 +84,6 @@ if auth is None:
 
 tid = tenant_id(conn, auth, host, tenant)
 
-print(mo_id(conn, auth, host, "1eda2fea-3571-4600-ae0f-b9ed2a6071e8", "00f8EdIAVC"))
+process(metafile, batchsize, keyname, envoy_func(conn, auth, host, tid))
 
-#process(metafile, batchsize, envoy_func(conn, auth, host, tid))
+logging.info("Finishing processing %s", metafile)

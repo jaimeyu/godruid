@@ -27,9 +27,49 @@ type IngestionDictionaryMetricMap struct {
 func (m *IngestionDictionaryMetricMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetricMap(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUI(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *IngestionDictionaryMetricMap) validateMetricMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricMap) { // not required
+		return nil
+	}
+
+	if err := m.MetricMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("metricMap")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *IngestionDictionaryMetricMap) validateUI(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.UI) { // not required
+		return nil
+	}
+
+	if err := m.UI.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("ui")
+		}
+		return err
+	}
+
 	return nil
 }
 

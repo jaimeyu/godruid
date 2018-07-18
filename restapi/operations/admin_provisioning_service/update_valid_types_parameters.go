@@ -57,8 +57,9 @@ func (o *UpdateValidTypesParams) BindRequest(r *http.Request, route *middleware.
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -67,11 +68,9 @@ func (o *UpdateValidTypesParams) BindRequest(r *http.Request, route *middleware.
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}

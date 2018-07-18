@@ -27,9 +27,49 @@ type TenantThresholdProfileMetric struct {
 func (m *TenantThresholdProfileMetric) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetricMap(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMonitoredObjectTypeMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantThresholdProfileMetric) validateMetricMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricMap) { // not required
+		return nil
+	}
+
+	if err := m.MetricMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("metricMap")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *TenantThresholdProfileMetric) validateMonitoredObjectTypeMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MonitoredObjectTypeMap) { // not required
+		return nil
+	}
+
+	if err := m.MonitoredObjectTypeMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("monitoredObjectTypeMap")
+		}
+		return err
+	}
+
 	return nil
 }
 

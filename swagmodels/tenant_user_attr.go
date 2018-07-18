@@ -47,6 +47,7 @@ type TenantUserAttr struct {
 	SendOnboardingEmail bool `json:"sendOnboardingEmail,omitempty"`
 
 	// state
+	// Enum: [USER_UNKNOWN INVITED ACTIVE SUSPENDED PENDING_DELETE]
 	State string `json:"state,omitempty"`
 
 	// tenant Id
@@ -63,28 +64,13 @@ type TenantUserAttr struct {
 func (m *TenantUserAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDomains(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateState(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *TenantUserAttr) validateDomains(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Domains) { // not required
-		return nil
-	}
-
 	return nil
 }
 

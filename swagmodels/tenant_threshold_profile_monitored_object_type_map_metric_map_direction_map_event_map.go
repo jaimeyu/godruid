@@ -24,9 +24,29 @@ type TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap s
 func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateEventMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap) validateEventMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.EventMap) { // not required
+		return nil
+	}
+
+	if err := m.EventMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("eventMap")
+		}
+		return err
+	}
+
 	return nil
 }
 

@@ -7,6 +7,9 @@ package swagmodels
 
 import (
 	strfmt "github.com/go-openapi/strfmt"
+
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/swag"
 )
 
 // IngestionDictionaryAttrMetrics ingestion dictionary attr metrics
@@ -15,5 +18,24 @@ type IngestionDictionaryAttrMetrics map[string]IngestionDictionaryMetrics
 
 // Validate validates this ingestion dictionary attr metrics
 func (m IngestionDictionaryAttrMetrics) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	for k := range m {
+
+		if swag.IsZero(m[k]) { // not required
+			continue
+		}
+
+		if val, ok := m[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
 	return nil
 }

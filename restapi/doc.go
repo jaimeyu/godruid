@@ -13,10 +13,10 @@ Gather API Documentation
     Contact: <mpreston@accedian.com>
 
     Consumes:
-    - application/vnd.api+json
+    - application/json
 
     Produces:
-    - application/vnd.api+json
+    - application/json
     - text/plain
 
 swagger:meta

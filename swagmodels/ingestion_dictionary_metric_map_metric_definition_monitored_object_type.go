@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -31,39 +30,6 @@ type IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType struct {
 
 // Validate validates this ingestion dictionary metric map metric definition monitored object type
 func (m *IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateDirections(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateUnits(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType) validateDirections(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Directions) { // not required
-		return nil
-	}
-
-	return nil
-}
-
-func (m *IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType) validateUnits(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Units) { // not required
-		return nil
-	}
-
 	return nil
 }
 

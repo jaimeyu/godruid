@@ -29,6 +29,7 @@ type TenantMonitoredObject struct {
 	Relationships *TenantMonitoredObjectRelationships `json:"relationships,omitempty"`
 
 	// type
+	// Enum: [monitoredObjects]
 	Type string `json:"type,omitempty"`
 }
 
@@ -37,17 +38,14 @@ func (m *TenantMonitoredObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRelationships(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -64,14 +62,12 @@ func (m *TenantMonitoredObject) validateAttributes(formats strfmt.Registry) erro
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -84,14 +80,12 @@ func (m *TenantMonitoredObject) validateRelationships(formats strfmt.Registry) e
 	}
 
 	if m.Relationships != nil {
-
 		if err := m.Relationships.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("relationships")
 			}
 			return err
 		}
-
 	}
 
 	return nil

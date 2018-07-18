@@ -35,17 +35,14 @@ func (m *MetricViewObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAggregator(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetric(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

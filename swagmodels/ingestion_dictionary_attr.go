@@ -39,9 +39,29 @@ type IngestionDictionaryAttr struct {
 func (m *IngestionDictionaryAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetrics(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *IngestionDictionaryAttr) validateMetrics(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Metrics) { // not required
+		return nil
+	}
+
+	if err := m.Metrics.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("metrics")
+		}
+		return err
+	}
+
 	return nil
 }
 

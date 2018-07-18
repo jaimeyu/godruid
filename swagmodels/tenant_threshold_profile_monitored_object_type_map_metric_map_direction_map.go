@@ -24,9 +24,29 @@ type TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap struct {
 func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDirectionMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap) validateDirectionMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DirectionMap) { // not required
+		return nil
+	}
+
+	if err := m.DirectionMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("directionMap")
+		}
+		return err
+	}
+
 	return nil
 }
 

@@ -38,17 +38,14 @@ func (m *MetricIdentifierObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateObjectType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVendor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

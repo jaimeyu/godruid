@@ -64,8 +64,9 @@ func (o *UpdateTenantUserParams) BindRequest(r *http.Request, route *middleware.
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -74,11 +75,9 @@ func (o *UpdateTenantUserParams) BindRequest(r *http.Request, route *middleware.
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rTenantID, rhkTenantID, _ := route.Params.GetOK("tenantId")
 	if err := o.bindTenantID(rTenantID, rhkTenantID, route.Formats); err != nil {
 		res = append(res, err)

@@ -657,7 +657,7 @@ type MonitoredObjectMetadataPostItem struct {
 	KeyName string `json:"keyName"`
 
 	// Mandatory
-	MetadataKey string `json:"MetadataKey"`
+	MetadataKey string `json:"metadataKey"`
 
 	// Mandatory
 	Metadata map[string]string `json:"metadata"`

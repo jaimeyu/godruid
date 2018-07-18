@@ -4236,9 +4236,6 @@ definitions:
     type: "object"
     required: ["rules"]
     properties:
-      _rev:
-        type: "string"
-        description: "Value used to ensure updates to this object are handled in order."
       rules:
         type: "array"
         items: 

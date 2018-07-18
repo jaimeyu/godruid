@@ -17,9 +17,6 @@ import (
 // swagger:model DataCleaningProfileCreateRequestAttr
 type DataCleaningProfileCreateRequestAttr struct {
 
-	// Value used to ensure updates to this object are handled in order.
-	Rev string `json:"_rev,omitempty"`
-
 	// rules
 	// Required: true
 	Rules DataCleaningProfileCreateRequestAttrRules `json:"rules"`

@@ -44,3 +44,7 @@ druid:
     server: "https://jyu.npav.accedian.net/broker"
     table: "npav-ts-metrics"
 
+
+  coordinator:
+    server: "https://jyu.npav.accedian.net/coordinator"
+    port: -1

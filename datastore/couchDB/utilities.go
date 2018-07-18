@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -17,6 +16,10 @@ import (
 
 const defaultQueryResultsLimit = 1000
 
+// When metadata is being updated in monitored objects, we want to issue a request to the view
+// so couchdb would start to build/update the view. Since the builds function is asynchronous,
+// we don't want overlapping calls to the build since it makes no sense to start/stop a build
+// while it is functioning.
 var couchdbViewBuilderBusyMap sync.Map
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
@@ -382,7 +385,7 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	return nil
 }
 
-// updateDdocIndex - encapsulates logic required for basic data updates for objects that follow the basic data format.
+// updateCouchDBDocWithStringDoc - Updates a couchdb design document in coucdb.
 func updateCouchDBDocWithStringDoc(dbName string, data string, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
 	if err != nil {
@@ -671,122 +674,10 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
 }
 
-func writeMetaDesignDocument(tsd *TenantServiceDatastoreCouchDB, tenantID string, designDoc tenmod.MonitoredObjectMetaDesignDocument) error {
-	// There is a bug here whe update design doc adds _design to the dbname.
-	dbName := generateMonitoredObjectUrl(tenantID, tsd.server) //createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
-	if err := updateDesignDoc(dbName, designDoc, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, designDoc); err != nil {
-		if logger.IsDebugEnabled() {
-			logger.Log.Errorf("Error updating design document %s: %v :%s\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc), err.Error())
-		}
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Updated design document %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(designDoc))
-	}
-	return nil
-}
-
-func generateMonitoredObjectUrl(tenantID string, uri string) string {
+// GenerateMonitoredObjectURL - Generates a Monitored Object URL
+func GenerateMonitoredObjectURL(tenantID string, uri string) string {
 	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
 	return dbName
-}
-
-/*
- This function takes a key and then creates an index for it and then start the indexer.
- We currently only support generating an index based on a singular key.
-*/
-func createCouchDBViewIndex(dbName string, template string, ddocName string, keyNames []string, prefix string) error {
-
-	if len(keyNames) == 0 {
-		return errors.New("keyNames cannot be 0")
-	}
-
-	var item string
-	if len(prefix) == 0 {
-		item = keyNames[0]
-	} else {
-		item = fmt.Sprintf("%s.%s", prefix, keyNames[0])
-	}
-	ckey := keyNames[0]
-
-	var docret tenmod.MonitoredObjectMetaDesignDocument
-	//var document = fmt.Sprintf(metaIndexTemplate, ckey, ckey, item, item)
-	document := strings.Replace(template, metaKeyName, ckey, -1)
-	document = strings.Replace(document, metaKeyField, item, -1)
-
-	//ddocName := fmt.Sprintf(metaIndexDdocTemplate, ckey)
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Creating new Index for key '%s' file with payload:%s", keyNames[0], models.AsJSONString(document))
-	}
-	err := updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
-
-	if err != nil {
-		logger.Log.Errorf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
-
-		return err
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully created Indexer -> %s", "xx")
-	}
-
-	return nil
-}
-
-func indexViewTriggerBuild(dbName string, ddoc string, key string) {
-
-	// When we do a bulk update on monitored objects, we'll be issuing
-	// a lot of view queries so instead. So now we check if there is already
-	// generating a view and if so, then just quit. There's no point in hammering
-	// couch to update the views.
-	_, stored := couchdbViewBuilderBusyMap.LoadOrStore(ddoc, true)
-	if stored == true {
-		// We're already building the index, don't interrupt it.
-		return
-	}
-
-	db, err := getDatabase(dbName)
-	if err != nil {
-		logger.Log.Errorf("Could not load db %s", dbName)
-	}
-	uri := fmt.Sprintf("_design/%s/_view/by%s", ddoc, key)
-	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
-	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
-	_, err = db.Get(uri, nil)
-	if err != nil {
-		logger.Log.Errorf("Unsuccessfully Indexed %sbecause %s", uri, err.Error())
-		return
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully Indexed %s -> %s", uri, "") //models.AsJSONString(v))
-	}
-
-	couchdbViewBuilderBusyMap.Delete(ddoc)
-}
-
-func updateMetaDesignDocAndTenantMetadata(meta map[string]string, tenantMeta *tenmod.Metadata, designDoc tenmod.MonitoredObjectMetaDesignDocument) (bool, error) {
-	changeDetected := false
-	// Go thru a list of KV pairs and add the keys to the Metadata.
-	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
-	for key, data := range meta {
-		logger.Log.Debugf("Checking if %s is a new key, data:%s", key, data)
-		// Stop betenantMetaing meta, Ahbed
-		tenantMeta.MonitorObjectMetaKeys[key] = key
-
-		// Check if view exist
-		mapName := fmt.Sprintf(keyViewName, key)
-		logger.Log.Debugf("Checking/Adding %s key to couchdb view", mapName)
-
-		if designDoc.Views[mapName] == nil {
-			changeDetected = true
-			logger.Log.Debugf("Adding %s key to couchdb view", mapName)
-			designDoc.Views[mapName] = make(map[string]string)
-			designDoc.Views[mapName][mapFnName] = fmt.Sprintf(keyViewFn, key)
-
-			logger.Log.Debugf("DesignDoc[%s] -> '%+v'", key, designDoc.Views[key])
-		}
-	}
-
-	return changeDetected, nil
 }
 
 // updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object' metakeys

@@ -24,64 +24,6 @@ const (
 	monitoredObjectsByDomainIndex = "_design/monitoredObjectCount/_view/byDomain"
 )
 
-// Templates to help build couchdb index design documents
-const (
-	keyViewName = "%sView"
-	keyViewFn   = `function (doc) {
-			if (doc.data.meta["%s"]) {
-				emit(doc.data.datatype, doc.id)
-			}
-		}`
-
-	mapFnName = "map"
-
-	metaFieldPrefix              = "meta"
-	metakeysViewDdocName         = "uniqueMeta"
-	metakeysViewUniqueKeysURI    = "uniqueMeta/uniquesKeys"
-	metakeysViewUniqueValuessURI = "uniqueMeta/uniqueValues"
-	metaKeyName                  = "{{KeyName}}"
-	metaKeyField                 = "{{KeyField}}"
-	metaAllUniqueKVDdocTemplate  = `{
-		"_id": "_design/uniqueMeta",
-		"views": {
-		  "uniquesKeys": {
-			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n          emit(key, doc.data.meta[key]);\n      }\n    }\n}",
-			"reduce": "function(keys, values) {\n    return count(keys);\n}"
-		  },
-		  "uniqueValues": {
-			"map": "function(doc) {\n    if(doc.data.meta) {\n    \n      for (var key in doc.data.meta) {\n          emit(doc.data.meta[key], 1);\n      }\n       }\n}",
-			"reduce": "function(keys, values) {\n    return sum(values);\n}"
-		  }
-		},
-		"language": "javascript"
-	  }`
-	metaUniqueValuesViewsURI          = "{{KeyName}}/{{KeyField}}"
-	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
-
-	metaDdocTemplate  = "%s"
-	metaIndexTemplate = `{
-		"_id": "_design/indexOf{{KeyName}}",
-		"language": "query",
-		"views": {
-			"by{{KeyName}}": {
-				"map": {
-					"fields": {
-						"data.{{KeyField}}": "asc"
-					},
-					"partial_filter_selector": {}
-				},
-				"options": {
-					"def": {
-						"fields": [
-							"data.{{KeyField}}"
-						]
-					}
-				}
-			}
-		}
-	}`
-)
-
 // TenantServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Tenant Service when using CouchDB
 // as the storage option.
@@ -851,7 +793,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	if len(newKeys) != 0 {
 
 		// Create the couchDB views
-		dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+		dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 		for _, key := range newKeys {
 			// Create an index based on metadata keys
 			err = createCouchDBViewIndex(dbNameKeys, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
@@ -895,7 +837,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 	// @TODO, needs to prove this works
 	// Do not wait for this to finish, it will certainly take tens of minutes
 	// Create the couchDB views
-	dbNameKeys := generateMonitoredObjectUrl(tenantID, tsd.server)
+	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	for key := range meta {
 		go indexViewTriggerBuild(dbNameKeys, "indexOf"+key, key)
 		go indexViewTriggerBuild(dbNameKeys, "viewOf"+key, key)
@@ -910,7 +852,7 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 // Assumption right now is that most clients monitored object objectName will be unique.
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 
-	dbName := generateMonitoredObjectUrl(tenantID, tsd.server)
+	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
 		return nil, err

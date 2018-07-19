@@ -99,7 +99,7 @@ var dataCleaningProfileRuleTypeMetricVendorPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["accedian-twamp","acedian-flowmeter"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["accedian-twamp","accedian-flowmeter"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -112,8 +112,8 @@ const (
 	// DataCleaningProfileRuleMetricVendorAccedianTwamp captures enum value "accedian-twamp"
 	DataCleaningProfileRuleMetricVendorAccedianTwamp string = "accedian-twamp"
 
-	// DataCleaningProfileRuleMetricVendorAcedianFlowmeter captures enum value "acedian-flowmeter"
-	DataCleaningProfileRuleMetricVendorAcedianFlowmeter string = "acedian-flowmeter"
+	// DataCleaningProfileRuleMetricVendorAccedianFlowmeter captures enum value "accedian-flowmeter"
+	DataCleaningProfileRuleMetricVendorAccedianFlowmeter string = "accedian-flowmeter"
 )
 
 // prop value enum

@@ -26,6 +26,7 @@ type TenantDomain struct {
 	ID string `json:"id,omitempty"`
 
 	// type
+	// Enum: [domains]
 	Type string `json:"type,omitempty"`
 }
 
@@ -34,12 +35,10 @@ func (m *TenantDomain) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -56,14 +55,12 @@ func (m *TenantDomain) validateAttributes(formats strfmt.Registry) error {
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil

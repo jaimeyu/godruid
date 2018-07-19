@@ -6,6 +6,8 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -27,8 +29,8 @@ type ThresholdCrossingAPIRequestObject struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// metric whitelist
-	MetricWhitelist ThresholdCrossingAPIRequestObjectMetricWhitelist `json:"metricWhitelist"`
+	// limits the results to include only metrics in the whitelist
+	MetricWhitelist []*MetricIdentifierObject `json:"metricWhitelist"`
 
 	// the tenant identifier
 	// Required: true
@@ -45,18 +47,15 @@ type ThresholdCrossingAPIRequestObject struct {
 func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDomainIds(formats); err != nil {
-		// prop
+	if err := m.validateInterval(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateInterval(formats); err != nil {
-		// prop
+	if err := m.validateMetricWhitelist(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateTenantID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -66,19 +65,35 @@ func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) er
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateDomainIds(formats strfmt.Registry) error {
+func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.DomainIds) { // not required
-		return nil
+	if err := validate.Required("interval", "body", m.Interval); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Registry) error {
+func (m *ThresholdCrossingAPIRequestObject) validateMetricWhitelist(formats strfmt.Registry) error {
 
-	if err := validate.Required("interval", "body", m.Interval); err != nil {
-		return err
+	if swag.IsZero(m.MetricWhitelist) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MetricWhitelist); i++ {
+		if swag.IsZero(m.MetricWhitelist[i]) { // not required
+			continue
+		}
+
+		if m.MetricWhitelist[i] != nil {
+			if err := m.MetricWhitelist[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("metricWhitelist" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

@@ -72,7 +72,7 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 	return func(params tenant_provisioning_service.UpdateTenantMonitoredObjectParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
-		logger.Log.Infof("Updating %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
+		logger.Log.Infof("Updating %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
 			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -122,7 +122,7 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 	return func(params tenant_provisioning_service.PatchTenantMonitoredObjectParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
-		logger.Log.Infof("Patching %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.ID, params.TenantID)
+		logger.Log.Infof("Patching %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.Body.Data.ID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))

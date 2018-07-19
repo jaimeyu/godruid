@@ -24,9 +24,36 @@ type TenantIngestionProfileVendorMapMonitoredObjectTypeMap struct {
 func (m *TenantIngestionProfileVendorMapMonitoredObjectTypeMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMonitoredObjectTypeMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantIngestionProfileVendorMapMonitoredObjectTypeMap) validateMonitoredObjectTypeMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MonitoredObjectTypeMap) { // not required
+		return nil
+	}
+
+	for k := range m.MonitoredObjectTypeMap {
+
+		if swag.IsZero(m.MonitoredObjectTypeMap[k]) { // not required
+			continue
+		}
+
+		if val, ok := m.MonitoredObjectTypeMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

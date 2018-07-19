@@ -480,6 +480,10 @@
       objectType: 
         type: "string"
         enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      meta:
+        type: "object"
+        additionalProperties:
+          type: "string"
       # domainSet:
       #   type: "array"
       #   items: 

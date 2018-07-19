@@ -119,6 +119,7 @@ type ProtobufAny struct {
 	TypeURL string `json:"type_url,omitempty"`
 
 	// Must be a valid serialized protocol buffer of the above specified type.
+	// Format: byte
 	Value strfmt.Base64 `json:"value,omitempty"`
 }
 
@@ -127,7 +128,6 @@ func (m *ProtobufAny) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateValue(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

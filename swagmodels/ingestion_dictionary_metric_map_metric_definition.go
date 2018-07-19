@@ -6,6 +6,8 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,7 +19,7 @@ import (
 type IngestionDictionaryMetricMapMetricDefinition struct {
 
 	// monitored object types
-	MonitoredObjectTypes IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectTypes `json:"monitoredObjectTypes"`
+	MonitoredObjectTypes []*IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType `json:"monitoredObjectTypes"`
 
 	// ui
 	UI *IngestionDictionaryMetricMapMetricDefinitionUidata `json:"ui,omitempty"`
@@ -27,14 +29,42 @@ type IngestionDictionaryMetricMapMetricDefinition struct {
 func (m *IngestionDictionaryMetricMapMetricDefinition) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMonitoredObjectTypes(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateUI(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *IngestionDictionaryMetricMapMetricDefinition) validateMonitoredObjectTypes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MonitoredObjectTypes) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MonitoredObjectTypes); i++ {
+		if swag.IsZero(m.MonitoredObjectTypes[i]) { // not required
+			continue
+		}
+
+		if m.MonitoredObjectTypes[i] != nil {
+			if err := m.MonitoredObjectTypes[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("monitoredObjectTypes" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -45,14 +75,12 @@ func (m *IngestionDictionaryMetricMapMetricDefinition) validateUI(formats strfmt
 	}
 
 	if m.UI != nil {
-
 		if err := m.UI.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ui")
 			}
 			return err
 		}
-
 	}
 
 	return nil

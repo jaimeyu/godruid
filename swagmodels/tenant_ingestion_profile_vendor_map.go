@@ -24,9 +24,29 @@ type TenantIngestionProfileVendorMap struct {
 func (m *TenantIngestionProfileVendorMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateVendorMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantIngestionProfileVendorMap) validateVendorMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.VendorMap) { // not required
+		return nil
+	}
+
+	if err := m.VendorMap.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("vendorMap")
+		}
+		return err
+	}
+
 	return nil
 }
 

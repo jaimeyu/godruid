@@ -57,8 +57,9 @@ func (o *CreateIngestionDictionaryParams) BindRequest(r *http.Request, route *mi
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -67,11 +68,9 @@ func (o *CreateIngestionDictionaryParams) BindRequest(r *http.Request, route *mi
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}

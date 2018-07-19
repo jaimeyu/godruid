@@ -7,8 +7,6 @@ package swagmodels
 
 import (
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/go-openapi/errors"
 )
 
 // IngestionDictionaryMetricMapUI ingestion dictionary metric map UI
@@ -17,10 +15,5 @@ type IngestionDictionaryMetricMapUI []string
 
 // Validate validates this ingestion dictionary metric map UI
 func (m IngestionDictionaryMetricMapUI) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

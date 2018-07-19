@@ -44,6 +44,7 @@ type AdminUserAttr struct {
 	SendOnboardingEmail bool `json:"sendOnboardingEmail,omitempty"`
 
 	// state
+	// Enum: [USER_UNKNOWN INVITED ACTIVE SUSPENDED PENDING_DELETE]
 	State string `json:"state,omitempty"`
 
 	// user verified
@@ -58,7 +59,6 @@ func (m *AdminUserAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateState(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

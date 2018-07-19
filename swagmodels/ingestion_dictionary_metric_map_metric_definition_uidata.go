@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -25,11 +24,6 @@ type IngestionDictionaryMetricMapMetricDefinitionUidata struct {
 
 // Validate validates this ingestion dictionary metric map metric definition uidata
 func (m *IngestionDictionaryMetricMapMetricDefinitionUidata) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

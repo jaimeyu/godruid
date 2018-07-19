@@ -64,18 +64,20 @@ func (o *BulkUpdateMonitoredObjectParams) BindRequest(r *http.Request, route *mi
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
+			if err := body.Validate(route.Formats); err != nil {
+				res = append(res, err)
+			}
 
 			if len(res) == 0 {
 				o.Body = body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rTenantID, rhkTenantID, _ := route.Params.GetOK("tenantId")
 	if err := o.bindTenantID(rTenantID, rhkTenantID, route.Formats); err != nil {
 		res = append(res, err)

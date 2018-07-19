@@ -29,6 +29,7 @@ type TenantMetadata struct {
 	Relationships *TenantMetadataRelationships `json:"relationships,omitempty"`
 
 	// type
+	// Enum: [tenantMetadata]
 	Type string `json:"type,omitempty"`
 }
 
@@ -37,17 +38,14 @@ func (m *TenantMetadata) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRelationships(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -64,14 +62,12 @@ func (m *TenantMetadata) validateAttributes(formats strfmt.Registry) error {
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -84,14 +80,12 @@ func (m *TenantMetadata) validateRelationships(formats strfmt.Registry) error {
 	}
 
 	if m.Relationships != nil {
-
 		if err := m.Relationships.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("relationships")
 			}
 			return err
 		}
-
 	}
 
 	return nil

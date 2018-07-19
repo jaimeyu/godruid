@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -22,29 +21,6 @@ type MetricResultsResponseObject struct {
 
 // Validate validates this metric results response object
 func (m *MetricResultsResponseObject) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateResults(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *MetricResultsResponseObject) validateResults(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Results) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.Results); i++ {
-
-	}
-
 	return nil
 }
 

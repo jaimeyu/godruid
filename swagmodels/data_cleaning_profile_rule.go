@@ -23,10 +23,6 @@ type DataCleaningProfileRule struct {
 	// Required: true
 	ClearCondition *DataCleaningCondition `json:"clearCondition"`
 
-	// Toggle to indicate whether or not the rule will be applied.
-	// Required: true
-	IsEnabled *bool `json:"isEnabled"`
-
 	// The name of the metric used in the rule.
 	// Required: true
 	MetricLabel *string `json:"metricLabel"`
@@ -45,11 +41,6 @@ func (m *DataCleaningProfileRule) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClearCondition(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateIsEnabled(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -90,15 +81,6 @@ func (m *DataCleaningProfileRule) validateClearCondition(formats strfmt.Registry
 			return err
 		}
 
-	}
-
-	return nil
-}
-
-func (m *DataCleaningProfileRule) validateIsEnabled(formats strfmt.Registry) error {
-
-	if err := validate.Required("isEnabled", "body", m.IsEnabled); err != nil {
-		return err
 	}
 
 	return nil

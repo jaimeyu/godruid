@@ -25,7 +25,7 @@ type CreateDataCleaningProfileCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.JSONAPIDataCleaningProfileResponse `json:"body,omitempty"`
+	Payload *swagmodels.DataCleaningProfileResponse `json:"body,omitempty"`
 }
 
 // NewCreateDataCleaningProfileCreated creates CreateDataCleaningProfileCreated with default headers values
@@ -35,13 +35,13 @@ func NewCreateDataCleaningProfileCreated() *CreateDataCleaningProfileCreated {
 }
 
 // WithPayload adds the payload to the create data cleaning profile created response
-func (o *CreateDataCleaningProfileCreated) WithPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) *CreateDataCleaningProfileCreated {
+func (o *CreateDataCleaningProfileCreated) WithPayload(payload *swagmodels.DataCleaningProfileResponse) *CreateDataCleaningProfileCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create data cleaning profile created response
-func (o *CreateDataCleaningProfileCreated) SetPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) {
+func (o *CreateDataCleaningProfileCreated) SetPayload(payload *swagmodels.DataCleaningProfileResponse) {
 	o.Payload = payload
 }
 

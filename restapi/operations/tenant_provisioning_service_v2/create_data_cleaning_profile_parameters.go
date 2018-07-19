@@ -36,7 +36,7 @@ type CreateDataCleaningProfileParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *swagmodels.JSONAPIDataCleaningProfileCreateRequest
+	Body *swagmodels.DataCleaningProfileCreateRequest
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -50,7 +50,7 @@ func (o *CreateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body swagmodels.JSONAPIDataCleaningProfileCreateRequest
+		var body swagmodels.DataCleaningProfileCreateRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

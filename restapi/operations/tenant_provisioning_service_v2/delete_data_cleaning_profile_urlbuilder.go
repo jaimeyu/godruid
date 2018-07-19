@@ -9,11 +9,16 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+	"strings"
 )
 
 // DeleteDataCleaningProfileURL generates an URL for the delete data cleaning profile operation
 type DeleteDataCleaningProfileURL struct {
+	ProfileID string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -35,7 +40,14 @@ func (o *DeleteDataCleaningProfileURL) SetBasePath(bp string) {
 func (o *DeleteDataCleaningProfileURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/v2/data-cleaning-profiles"
+	var _path = "/v2/data-cleaning-profiles/{profileId}"
+
+	profileID := o.ProfileID
+	if profileID != "" {
+		_path = strings.Replace(_path, "{profileId}", profileID, -1)
+	} else {
+		return nil, errors.New("ProfileID is required on DeleteDataCleaningProfileURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {

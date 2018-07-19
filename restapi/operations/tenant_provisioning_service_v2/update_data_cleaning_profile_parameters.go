@@ -13,6 +13,8 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
+	strfmt "github.com/go-openapi/strfmt"
+
 	swagmodels "github.com/accedian/adh-gather/swagmodels"
 )
 
@@ -36,7 +38,12 @@ type UpdateDataCleaningProfileParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *swagmodels.JSONAPIDataCleaningProfileUpdateRequest
+	Body *swagmodels.DataCleaningProfileUpdateRequest
+	/*
+	  Required: true
+	  In: path
+	*/
+	ProfileID string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -50,7 +57,7 @@ func (o *UpdateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body swagmodels.JSONAPIDataCleaningProfileUpdateRequest
+		var body swagmodels.DataCleaningProfileUpdateRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))
@@ -72,8 +79,27 @@ func (o *UpdateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 		res = append(res, errors.Required("body", "body"))
 	}
 
+	rProfileID, rhkProfileID, _ := route.Params.GetOK("profileId")
+	if err := o.bindProfileID(rProfileID, rhkProfileID, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *UpdateDataCleaningProfileParams) bindProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
+
+	o.ProfileID = raw
+
 	return nil
 }

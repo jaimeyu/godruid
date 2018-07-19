@@ -175,6 +175,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2GetDataCleaningProfileHandler: tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfile has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetDataCleaningProfilesHandler: tenant_provisioning_service_v2.GetDataCleaningProfilesHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfiles has not yet been implemented")
+		}),
 		TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler: tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetDomainToMonitoredObjectMap has not yet been implemented")
 		}),
@@ -335,10 +338,10 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -431,6 +434,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceGetAllTenantsHandler admin_provisioning_service.GetAllTenantsHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfileHandler sets the operation handler for the get data cleaning profile operation
 	TenantProvisioningServiceV2GetDataCleaningProfileHandler tenant_provisioning_service_v2.GetDataCleaningProfileHandler
+	// TenantProvisioningServiceV2GetDataCleaningProfilesHandler sets the operation handler for the get data cleaning profiles operation
+	TenantProvisioningServiceV2GetDataCleaningProfilesHandler tenant_provisioning_service_v2.GetDataCleaningProfilesHandler
 	// TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler sets the operation handler for the get domain to monitored object map operation
 	TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler
 	// MetricsServiceGetHistogramHandler sets the operation handler for the get histogram operation
@@ -762,6 +767,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetDataCleaningProfileHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningProfileHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDataCleaningProfilesHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningProfilesHandler")
 	}
 
 	if o.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler == nil {
@@ -1139,7 +1148,7 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewDeleteDataCleaningProfile(o.context, o.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler)
+	o.handlers["DELETE"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewDeleteDataCleaningProfile(o.context, o.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1269,7 +1278,12 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewGetDataCleaningProfile(o.context, o.TenantProvisioningServiceV2GetDataCleaningProfileHandler)
+	o.handlers["GET"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewGetDataCleaningProfile(o.context, o.TenantProvisioningServiceV2GetDataCleaningProfileHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewGetDataCleaningProfiles(o.context, o.TenantProvisioningServiceV2GetDataCleaningProfilesHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -1434,7 +1448,7 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewUpdateDataCleaningProfile(o.context, o.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler)
+	o.handlers["PATCH"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewUpdateDataCleaningProfile(o.context, o.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

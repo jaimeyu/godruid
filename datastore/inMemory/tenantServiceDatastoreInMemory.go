@@ -1324,7 +1324,7 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantDataCleaningProfile(dcp *
 		tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID] = make([]*tenmod.DataCleaningProfile, 1)
 	}
 
-	existing, _ := tsd.GetTenantDataCleaningProfile(dcp.TenantID)
+	existing := tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID][0]
 	if existing != nil {
 		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantDataCleaningProfileStr)
 	}
@@ -1366,16 +1366,16 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateTenantDataCleaningProfile(dcp *
 }
 
 // DeleteTenantDataCleaningProfile - InMemory implementation of DeleteTenantDataCleaningProfile
-func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error) {
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
 	}
 	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDataCleaningProfileType); err != nil {
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
 	}
-	existing, err := tsd.GetTenantDataCleaningProfile(tenantID)
-	if err != nil {
-		return nil, err
+	existing := tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0]
+	if existing == nil || existing.ID != dataID {
+		return nil, fmt.Errorf("%s %ss: %s", tenmod.TenantDataCleaningProfileStr, dataID, ds.NotFoundStr)
 	}
 
 	tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] = nil
@@ -1384,7 +1384,7 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDataCleaningProfile(tenan
 }
 
 // GetTenantDataCleaningProfile - InMemory implementation of GetTenantDataCleaningProfile
-func (tsd *TenantServiceDatastoreInMemory) GetTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
 	}
@@ -1392,11 +1392,27 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantDataCleaningProfile(tenantID
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
 	}
 
-	if tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] == nil {
+	if tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] == nil || tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0].ID != dataID {
 		return nil, fmt.Errorf("%s not found", tenmod.TenantDataCleaningProfileStr)
 	}
 
 	return tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0], nil
+}
+
+// GetAllTenantDataCleaningProfiles - InMemory implementation of GetAllTenantDataCleaningProfiles
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	if len(tsd.tenantIDtoDataCleaningProfileSlice[tenantID]) == 0 || tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] == nil {
+		return nil, fmt.Errorf("%ss: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+	}
+
+	return tsd.tenantIDtoDataCleaningProfileSlice[tenantID], nil
 }
 
 func doesSliceContainString(container []string, value string) bool {

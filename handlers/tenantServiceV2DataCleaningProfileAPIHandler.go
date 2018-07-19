@@ -25,12 +25,15 @@ func HandleGetDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Te
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.GetTenantDataCleaningProfile(tenantID)
+		result, err := tenantDB.GetTenantDataCleaningProfile(tenantID, params.ProfileID)
 		if err != nil {
+			if checkForNotFound(err.Error()) {
+				return tenant_provisioning_service_v2.NewGetDataCleaningProfileNotFound().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, err.Error()), startTime, http.StatusBadRequest, mon.GetDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
 			return tenant_provisioning_service_v2.NewGetDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		converted := swagmodels.JSONAPIDataCleaningProfileResponse{}
+		converted := swagmodels.DataCleaningProfileResponse{}
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service_v2.NewGetDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -39,6 +42,37 @@ func HandleGetDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Te
 		reportAPICompletionState(startTime, http.StatusOK, mon.GetDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Retrieved %s %s", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(converted))
 		return tenant_provisioning_service_v2.NewGetDataCleaningProfileOK().WithPayload(&converted)
+	}
+}
+
+// HandleGetDataCleaningProfilesV2 - retrieve all Data Cleaning Profile for a Tenant
+func HandleGetDataCleaningProfilesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.GetDataCleaningProfilesParams) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.GetDataCleaningProfilesParams) middleware.Responder {
+		tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+		isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching all %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
+
+		if !isAuthorized {
+			return tenant_provisioning_service_v2.NewGetDataCleaningProfilesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Issue request to DAO Layer
+		result, err := tenantDB.GetAllTenantDataCleaningProfiles(tenantID)
+		if err != nil {
+			if checkForNotFound(err.Error()) {
+				return tenant_provisioning_service_v2.NewGetDataCleaningProfilesNotFound().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, err.Error()), startTime, http.StatusBadRequest, mon.GetAllDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+			return tenant_provisioning_service_v2.NewGetDataCleaningProfilesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetAllDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := swagmodels.DataCleaningProfileListResponse{}
+		err = convertToJsonapiObject(result, &converted)
+		if err != nil {
+			return tenant_provisioning_service_v2.NewGetDataCleaningProfilesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetAllDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.GetAllDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Retrieved %d %ss", len(converted.Data), tenmod.TenantDataCleaningProfileStr)
+		return tenant_provisioning_service_v2.NewGetDataCleaningProfilesOK().WithPayload(&converted)
 	}
 }
 
@@ -53,12 +87,15 @@ func HandleDeleteDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.DeleteTenantDataCleaningProfile(tenantID)
+		result, err := tenantDB.DeleteTenantDataCleaningProfile(tenantID, params.ProfileID)
 		if err != nil {
+			if checkForNotFound(err.Error()) {
+				return tenant_provisioning_service_v2.NewDeleteDataCleaningProfileNotFound().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, err.Error()), startTime, http.StatusBadRequest, mon.DeleteDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
 			return tenant_provisioning_service_v2.NewDeleteDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to delete %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		converted := swagmodels.JSONAPIDataCleaningProfileResponse{}
+		converted := swagmodels.DataCleaningProfileResponse{}
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service_v2.NewDeleteDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -81,7 +118,7 @@ func HandleUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 		}
 
 		// Fetch the existing record
-		existing, err := tenantDB.GetTenantDataCleaningProfile(tenantID)
+		existing, err := tenantDB.GetTenantDataCleaningProfile(tenantID, params.ProfileID)
 		if err != nil {
 			return tenant_provisioning_service_v2.NewUpdateDataCleaningProfileConflict().WithPayload(reportAPIError(fmt.Sprintf("Unable to update %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusConflict, mon.UpdateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
@@ -98,10 +135,13 @@ func HandleUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 		// Issue request to DAO Layer
 		result, err := tenantDB.UpdateTenantDataCleaningProfile(existing)
 		if err != nil {
+			if checkForNotFound(err.Error()) {
+				return tenant_provisioning_service_v2.NewUpdateDataCleaningProfileNotFound().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, err.Error()), startTime, http.StatusBadRequest, mon.UpdateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
 			return tenant_provisioning_service_v2.NewUpdateDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		converted := swagmodels.JSONAPIDataCleaningProfileResponse{}
+		converted := swagmodels.DataCleaningProfileResponse{}
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service_v2.NewUpdateDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -138,7 +178,7 @@ func HandleCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service_v2.NewCreateDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to create %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		converted := swagmodels.JSONAPIDataCleaningProfileResponse{}
+		converted := swagmodels.DataCleaningProfileResponse{}
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service_v2.NewCreateDataCleaningProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantDataCleaningProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted))

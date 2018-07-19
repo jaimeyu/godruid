@@ -29,7 +29,7 @@ func NewUpdateDataCleaningProfile(ctx *middleware.Context, handler UpdateDataCle
 	return &UpdateDataCleaningProfile{Context: ctx, Handler: handler}
 }
 
-/*UpdateDataCleaningProfile swagger:route PATCH /v2/data-cleaning-profiles TenantProvisioningServiceV2 updateDataCleaningProfile
+/*UpdateDataCleaningProfile swagger:route PATCH /v2/data-cleaning-profiles/{profileId} TenantProvisioningServiceV2 updateDataCleaningProfile
 
 Provides ability to Update a Tenant Data Cleaning Profile
 

@@ -643,7 +643,6 @@ func (dcp *DataCleaningProfile) SetID(s string) error {
 type DataCleaningRule struct {
 	MetricVendor     string                     `json:"metricVendor"`
 	MetricLabel      string                     `json:"metricLabel"`
-	IsEnabled        bool                       `json:"isEnabled"`
 	TriggerCondition *DataCleaningRuleCondition `json:"triggerCondition"`
 	ClearCondition   *DataCleaningRuleCondition `json:"clearCondition"`
 }

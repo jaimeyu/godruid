@@ -10,6 +10,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+var (
+	NotFoundStr = "status 404 - not found"
+)
+
 const (
 
 	// PouchDBIdBridgeStr - value required for pouchDB to properly identify a an item. Used in the

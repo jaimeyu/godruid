@@ -664,3 +664,7 @@ func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interfac
 
 	return nil
 }
+
+func checkForNotFound(s string) bool {
+	return strings.Contains(s, string(notFound))
+}

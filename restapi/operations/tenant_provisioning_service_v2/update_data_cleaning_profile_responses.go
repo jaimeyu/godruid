@@ -25,7 +25,7 @@ type UpdateDataCleaningProfileOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.JSONAPIDataCleaningProfileResponse `json:"body,omitempty"`
+	Payload *swagmodels.DataCleaningProfileResponse `json:"body,omitempty"`
 }
 
 // NewUpdateDataCleaningProfileOK creates UpdateDataCleaningProfileOK with default headers values
@@ -35,13 +35,13 @@ func NewUpdateDataCleaningProfileOK() *UpdateDataCleaningProfileOK {
 }
 
 // WithPayload adds the payload to the update data cleaning profile o k response
-func (o *UpdateDataCleaningProfileOK) WithPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) *UpdateDataCleaningProfileOK {
+func (o *UpdateDataCleaningProfileOK) WithPayload(payload *swagmodels.DataCleaningProfileResponse) *UpdateDataCleaningProfileOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update data cleaning profile o k response
-func (o *UpdateDataCleaningProfileOK) SetPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) {
+func (o *UpdateDataCleaningProfileOK) SetPayload(payload *swagmodels.DataCleaningProfileResponse) {
 	o.Payload = payload
 }
 
@@ -136,6 +136,49 @@ func (o *UpdateDataCleaningProfileForbidden) SetPayload(payload string) {
 func (o *UpdateDataCleaningProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// UpdateDataCleaningProfileNotFoundCode is the HTTP code returned for type UpdateDataCleaningProfileNotFound
+const UpdateDataCleaningProfileNotFoundCode int = 404
+
+/*UpdateDataCleaningProfileNotFound No records found
+
+swagger:response updateDataCleaningProfileNotFound
+*/
+type UpdateDataCleaningProfileNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewUpdateDataCleaningProfileNotFound creates UpdateDataCleaningProfileNotFound with default headers values
+func NewUpdateDataCleaningProfileNotFound() *UpdateDataCleaningProfileNotFound {
+
+	return &UpdateDataCleaningProfileNotFound{}
+}
+
+// WithPayload adds the payload to the update data cleaning profile not found response
+func (o *UpdateDataCleaningProfileNotFound) WithPayload(payload string) *UpdateDataCleaningProfileNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update data cleaning profile not found response
+func (o *UpdateDataCleaningProfileNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateDataCleaningProfileNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
 	payload := o.Payload
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this

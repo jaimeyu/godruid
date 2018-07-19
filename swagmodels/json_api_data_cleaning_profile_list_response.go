@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningProfileCreateRequest data cleaning profile create request
-// swagger:model DataCleaningProfileCreateRequest
-type DataCleaningProfileCreateRequest struct {
+// JSONAPIDataCleaningProfileListResponse Json Api data cleaning profile list response
+// swagger:model JsonApiDataCleaningProfileListResponse
+type JSONAPIDataCleaningProfileListResponse struct {
 
 	// data
 	// Required: true
-	Data *DataCleaningProfileCreateRequestData `json:"data"`
+	Data JSONAPIDataCleaningProfileListResponseData `json:"data"`
 }
 
-// Validate validates this data cleaning profile create request
-func (m *DataCleaningProfileCreateRequest) Validate(formats strfmt.Registry) error {
+// Validate validates this Json Api data cleaning profile list response
+func (m *JSONAPIDataCleaningProfileListResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateData(formats); err != nil {
@@ -37,28 +37,24 @@ func (m *DataCleaningProfileCreateRequest) Validate(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *DataCleaningProfileCreateRequest) validateData(formats strfmt.Registry) error {
+func (m *JSONAPIDataCleaningProfileListResponse) validateData(formats strfmt.Registry) error {
 
 	if err := validate.Required("data", "body", m.Data); err != nil {
 		return err
 	}
 
-	if m.Data != nil {
-
-		if err := m.Data.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("data")
-			}
-			return err
+	if err := m.Data.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("data")
 		}
-
+		return err
 	}
 
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *DataCleaningProfileCreateRequest) MarshalBinary() ([]byte, error) {
+func (m *JSONAPIDataCleaningProfileListResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -66,8 +62,8 @@ func (m *DataCleaningProfileCreateRequest) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataCleaningProfileCreateRequest) UnmarshalBinary(b []byte) error {
-	var res DataCleaningProfileCreateRequest
+func (m *JSONAPIDataCleaningProfileListResponse) UnmarshalBinary(b []byte) error {
+	var res JSONAPIDataCleaningProfileListResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

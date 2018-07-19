@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningProfileCreateRequestAttr data cleaning profile create request attr
-// swagger:model DataCleaningProfileCreateRequestAttr
-type DataCleaningProfileCreateRequestAttr struct {
+// DataCleaningProfileCreateRequestDataAttributes data cleaning profile create request data attributes
+// swagger:model dataCleaningProfileCreateRequestDataAttributes
+type DataCleaningProfileCreateRequestDataAttributes struct {
 
 	// rules
 	// Required: true
-	Rules DataCleaningProfileCreateRequestAttrRules `json:"rules"`
+	Rules DataCleaningProfileCreateRequestDataAttributesRules `json:"rules"`
 }
 
-// Validate validates this data cleaning profile create request attr
-func (m *DataCleaningProfileCreateRequestAttr) Validate(formats strfmt.Registry) error {
+// Validate validates this data cleaning profile create request data attributes
+func (m *DataCleaningProfileCreateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRules(formats); err != nil {
@@ -37,7 +37,7 @@ func (m *DataCleaningProfileCreateRequestAttr) Validate(formats strfmt.Registry)
 	return nil
 }
 
-func (m *DataCleaningProfileCreateRequestAttr) validateRules(formats strfmt.Registry) error {
+func (m *DataCleaningProfileCreateRequestDataAttributes) validateRules(formats strfmt.Registry) error {
 
 	if err := validate.Required("rules", "body", m.Rules); err != nil {
 		return err
@@ -54,7 +54,7 @@ func (m *DataCleaningProfileCreateRequestAttr) validateRules(formats strfmt.Regi
 }
 
 // MarshalBinary interface implementation
-func (m *DataCleaningProfileCreateRequestAttr) MarshalBinary() ([]byte, error) {
+func (m *DataCleaningProfileCreateRequestDataAttributes) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -62,8 +62,8 @@ func (m *DataCleaningProfileCreateRequestAttr) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DataCleaningProfileCreateRequestAttr) UnmarshalBinary(b []byte) error {
-	var res DataCleaningProfileCreateRequestAttr
+func (m *DataCleaningProfileCreateRequestDataAttributes) UnmarshalBinary(b []byte) error {
+	var res DataCleaningProfileCreateRequestDataAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

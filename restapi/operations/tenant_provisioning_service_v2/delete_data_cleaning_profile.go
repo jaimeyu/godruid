@@ -29,9 +29,9 @@ func NewDeleteDataCleaningProfile(ctx *middleware.Context, handler DeleteDataCle
 	return &DeleteDataCleaningProfile{Context: ctx, Handler: handler}
 }
 
-/*DeleteDataCleaningProfile swagger:route DELETE /v2/data-cleaning-profiles TenantProvisioningServiceV2 deleteDataCleaningProfile
+/*DeleteDataCleaningProfile swagger:route DELETE /v2/data-cleaning-profiles/{profileId} TenantProvisioningServiceV2 deleteDataCleaningProfile
 
-Delete the Data Cleaning Profile for a Tenant.
+Delete a Data Cleaning Profile for a Tenant.
 
 */
 type DeleteDataCleaningProfile struct {

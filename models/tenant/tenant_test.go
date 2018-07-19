@@ -603,7 +603,6 @@ func TestTenantDataCleaningProfileSerialization(t *testing.T) {
 		TenantID: fake.CharactersN(12),
 		Rules: []*DataCleaningRule{
 			&DataCleaningRule{
-				IsEnabled:    false,
 				MetricLabel:  fake.CharactersN(12),
 				MetricVendor: fake.CharactersN(12),
 				TriggerCondition: &DataCleaningRuleCondition{

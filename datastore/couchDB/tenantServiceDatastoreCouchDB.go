@@ -1226,8 +1226,8 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDataCleaningProfile(dcp *t
 	tenantID := ds.PrependToDataID(dcp.TenantID, string(admmod.TenantType))
 
 	// Only create one if one does not already exist:
-	existing, _ := tsd.GetTenantDataCleaningProfile(dcp.TenantID)
-	if existing != nil {
+	existing, _ := tsd.GetAllTenantDataCleaningProfiles(dcp.TenantID)
+	if len(existing) != 0 {
 		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantDataCleaningProfileStr)
 	}
 
@@ -1256,14 +1256,19 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDataCleaningProfile(dcp *t
 }
 
 // DeleteTenantDataCleaningProfile - CouchDB implementation of DeleteTenantDataCleaningProfile
-func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error) {
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDataCleaningProfileStr, tenantID)
 
 	// Obtain the value of the existing record for a return value.
-	existingObject, err := tsd.GetTenantDataCleaningProfile(tenantID)
-	if err != nil {
-		logger.Log.Debugf("Unable to fetch %s to delete: %s", tenmod.TenantDataCleaningProfileStr, err.Error())
-		return nil, err
+	existing, err := tsd.GetAllTenantDataCleaningProfiles(tenantID)
+	if err != nil || len(existing) == 0 {
+		return nil, fmt.Errorf("Unable to fetch %s to delete: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+	}
+
+	existingObject := existing[0]
+
+	if existingObject.ID != dataID {
+		return nil, fmt.Errorf("%s %s: %s", tenmod.TenantDataCleaningProfileStr, dataID, ds.NotFoundStr)
 	}
 
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
@@ -1280,31 +1285,35 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDataCleaningProfile(tenant
 }
 
 // GetTenantDataCleaningProfile - CouchDB implementation of GetTenantDataCleaningProfile
-func (tsd *TenantServiceDatastoreCouchDB) GetTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error) {
-	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantDataCleaningProfileStr, tenantID)
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantDataCleaningProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDataCleaningProfileType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
+	dataContainer := tenmod.DataCleaningProfile{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDataCleaningProfileStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
+// GetAllTenantDataCleaningProfiles - CouchDB implementation of GetAllTenantDataCleaningProfiles
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Fetching all %ss for Tenant %s\n", tenmod.TenantDataCleaningProfileStr, tenantID)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.DataCleaningProfile, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr, &res); err != nil {
 		return nil, err
 	}
 
-	fetchedData, err := getAllOfTypeByIDPrefix(string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr, db)
-	if err != nil {
-		return nil, err
+	if len(res) == 0 {
+		return nil, fmt.Errorf("%ss: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
 	}
 
-	// Populate the response
-	res := tenmod.DataCleaningProfile{}
-	if len(fetchedData) != 0 {
-		if err = convertGenericCouchDataToObject(fetchedData[0], &res, tenmod.TenantDataCleaningProfileStr); err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, fmt.Errorf("Unable to find %s", tenmod.TenantDataCleaningProfileStr)
-	}
-
-	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(res))
-	return &res, nil
+	logger.Log.Debugf("Retrieved %d %ss\n", len(res), tenmod.TenantDataCleaningProfileStr)
+	return res, nil
 }

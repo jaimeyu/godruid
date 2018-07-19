@@ -2939,7 +2939,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 	const THRPRF2 = "ThresholdPrf2"
 
 	RULE1 := &tenmod.DataCleaningRule{
-		IsEnabled:    true,
 		MetricLabel:  "SomeLabel1",
 		MetricVendor: "SomeVendor1",
 		TriggerCondition: &tenmod.DataCleaningRuleCondition{
@@ -2956,7 +2955,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 		},
 	}
 	RULE2 := &tenmod.DataCleaningRule{
-		IsEnabled:    false,
 		MetricLabel:  "SomeLabel2",
 		MetricVendor: "SomeVendor2",
 		TriggerCondition: &tenmod.DataCleaningRuleCondition{
@@ -2987,9 +2985,9 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Validate that there are currently no records
-	record, err := runner.tenantDB.GetTenantDataCleaningProfile(TENANT)
+	record, err := runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
 	assert.NotNil(t, err)
-	assert.Nil(t, record)
+	assert.Empty(t, record)
 
 	// Try to Update a record that does not exist:
 	fail, err := runner.tenantDB.UpdateTenantDataCleaningProfile(&tenmod.DataCleaningProfile{})
@@ -3013,7 +3011,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
 	// Get a record
-	fetched, err := runner.tenantDB.GetTenantDataCleaningProfile(TENANT)
+	fetched, err := runner.tenantDB.GetTenantDataCleaningProfile(TENANT, created.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, string(tenmod.TenantDataCleaningProfileType), fetched.Datatype)
 	assert.Equal(t, 2, len(fetched.Rules), "Not the correct number of rules")
@@ -3043,14 +3041,24 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 	assert.NotNil(t, err)
 	assert.Nil(t, created2)
 
+	// Try the get all
+	allRecords, err := runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, allRecords)
+	assert.Equal(t, 1, len(allRecords), "Should have found 1 record")
+
 	// Delete a record.
-	deleted, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT)
+	deleted, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT, updated.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, deleted)
 	assert.Equal(t, 0, len(deleted.Rules), "Deleted should not have any rules")
 
-	// Delete a record that oes not exist
-	deleteDNE, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT)
+	// Delete a record that does not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT, updated.ID)
 	assert.NotNil(t, err)
 	assert.Nil(t, deleteDNE)
+
+	allRecords, err = runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, allRecords)
 }

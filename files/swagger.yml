@@ -581,6 +581,12 @@ paths:
           in: query
           required: false
           type: string
+        - name: meta
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
         - name: granularity
           description: ISO-8601 period combination.
           in: query
@@ -720,6 +726,12 @@ paths:
           type: array
           items:
             type: string
+        - name: meta
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
         - name: granularity
           description: ISO-8601 period combination.
           in: query
@@ -841,6 +853,12 @@ paths:
           type: array
           items:
             type: string
+        - name: meta
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
         - name: granularity
           description: ISO-8601 period combination.
           in: query
@@ -920,6 +938,12 @@ paths:
           type: string
         - name: domain
           description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: meta
           in: query
           required: false
           type: array
@@ -1076,6 +1100,12 @@ paths:
           type: string
         - name: domain
           description: Domain ID
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+        - name: meta
           in: query
           required: false
           type: array
@@ -3695,6 +3725,11 @@ definitions:
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       monitoredObjects:
         type: array
         description: set of monitored objects identifiers to use for filtering
@@ -3763,6 +3798,11 @@ definitions:
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       interval:
         type: string
         description: ISO-8601 interval
@@ -3805,6 +3845,11 @@ definitions:
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       interval:
         type: string
         description: ISO-8601 interval

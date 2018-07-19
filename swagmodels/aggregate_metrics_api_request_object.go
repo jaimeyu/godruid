@@ -33,6 +33,9 @@ type AggregateMetricsAPIRequestObject struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
+	// set of domains identifiers to use for filtering
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// metrics
 	// Required: true
 	Metrics []*MetricIdentifierObject `json:"metrics"`

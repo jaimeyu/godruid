@@ -55,6 +55,10 @@ type GenSLAReportParams struct {
 	  In: query
 	*/
 	Interval string
+	/*
+	  In: query
+	*/
+	Meta []string
 	/*Tenant ID
 	  Required: true
 	  In: query
@@ -98,6 +102,11 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qInterval, qhkInterval, _ := qs.GetOK("interval")
 	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMeta, qhkMeta, _ := qs.GetOK("meta")
+	if err := o.bindMeta(qMeta, qhkMeta, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -186,6 +195,31 @@ func (o *GenSLAReportParams) bindInterval(rawData []string, hasKey bool, formats
 	}
 
 	o.Interval = raw
+
+	return nil
+}
+
+func (o *GenSLAReportParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	var qvMeta string
+	if len(rawData) > 0 {
+		qvMeta = rawData[len(rawData)-1]
+	}
+
+	// CollectionFormat:
+	metaIC := swag.SplitByFormat(qvMeta, "")
+	if len(metaIC) == 0 {
+		return nil
+	}
+
+	var metaIR []string
+	for _, metaIV := range metaIC {
+		metaI := metaIV
+
+		metaIR = append(metaIR, metaI)
+	}
+
+	o.Meta = metaIR
 
 	return nil
 }

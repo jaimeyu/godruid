@@ -51,6 +51,10 @@ type GetThresholdCrossingByMonitoredObjectTopNParams struct {
 	*/
 	Interval string
 	/*
+	  In: query
+	*/
+	Meta []string
+	/*
 	  Required: true
 	  In: query
 	*/
@@ -113,6 +117,11 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) BindRequest(r *http.Re
 
 	qInterval, qhkInterval, _ := qs.GetOK("interval")
 	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMeta, qhkMeta, _ := qs.GetOK("meta")
+	if err := o.bindMeta(qMeta, qhkMeta, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -232,6 +241,31 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindInterval(rawData [
 	}
 
 	o.Interval = raw
+
+	return nil
+}
+
+func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	var qvMeta string
+	if len(rawData) > 0 {
+		qvMeta = rawData[len(rawData)-1]
+	}
+
+	// CollectionFormat:
+	metaIC := swag.SplitByFormat(qvMeta, "")
+	if len(metaIC) == 0 {
+		return nil
+	}
+
+	var metaIR []string
+	for _, metaIV := range metaIC {
+		metaI := metaIV
+
+		metaIR = append(metaIR, metaI)
+	}
+
+	o.Meta = metaIR
 
 	return nil
 }

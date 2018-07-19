@@ -29,6 +29,9 @@ type ThresholdCrossingAPIRequestObject struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
+	// set of domains identifiers to use for filtering
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// limits the results to include only metrics in the whitelist
 	MetricWhitelist []*MetricIdentifierObject `json:"metricWhitelist"`
 

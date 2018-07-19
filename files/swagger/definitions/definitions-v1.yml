@@ -847,6 +847,11 @@
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       monitoredObjects:
         type: array
         description: set of monitored objects identifiers to use for filtering
@@ -915,6 +920,11 @@
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       interval:
         type: string
         description: ISO-8601 interval
@@ -957,6 +967,11 @@
         example: 
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: string
       interval:
         type: string
         description: ISO-8601 interval

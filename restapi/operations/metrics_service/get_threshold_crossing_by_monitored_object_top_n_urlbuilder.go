@@ -19,6 +19,7 @@ type GetThresholdCrossingByMonitoredObjectTopNURL struct {
 	Domain             []string
 	Granularity        *string
 	Interval           string
+	Meta               []string
 	Metric             string
 	NumResults         *int32
 	ObjectType         string
@@ -97,6 +98,23 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNURL) Build() (*url.URL, error)
 	interval := o.Interval
 	if interval != "" {
 		qs.Set("interval", interval)
+	}
+
+	var metaIR []string
+	for _, metaI := range o.Meta {
+		metaIS := metaI
+		if metaIS != "" {
+			metaIR = append(metaIR, metaIS)
+		}
+	}
+
+	meta := swag.JoinByFormat(metaIR, "")
+
+	if len(meta) > 0 {
+		qsv := meta[0]
+		if qsv != "" {
+			qs.Set("meta", qsv)
+		}
 	}
 
 	metric := o.Metric

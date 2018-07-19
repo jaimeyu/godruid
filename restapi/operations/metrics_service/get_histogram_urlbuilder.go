@@ -20,6 +20,7 @@ type GetHistogramURL struct {
 	Granularity        *string
 	GranularityBuckets *int32
 	Interval           *string
+	Meta               []string
 	Metric             *string
 	Resolution         *int32
 	Tenant             *string
@@ -98,6 +99,23 @@ func (o *GetHistogramURL) Build() (*url.URL, error) {
 	}
 	if interval != "" {
 		qs.Set("interval", interval)
+	}
+
+	var metaIR []string
+	for _, metaI := range o.Meta {
+		metaIS := metaI
+		if metaIS != "" {
+			metaIR = append(metaIR, metaIS)
+		}
+	}
+
+	meta := swag.JoinByFormat(metaIR, "")
+
+	if len(meta) > 0 {
+		qsv := meta[0]
+		if qsv != "" {
+			qs.Set("meta", qsv)
+		}
 	}
 
 	var metric string

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -205,12 +206,25 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.Thre
 	return &thresholdCrossingReq, nil
 }
 
-func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest {
+func populateSLAReportRequest(queryParams url.Values) (*metrics.SLAReportRequest, error) {
+
+	// Build the flat key/value structure into a map
+	metaAttrs := make(map[string]string)
+	for _, tuple := range toStringSplice(queryParams.Get("meta")) {
+		splitTuple := strings.Split(tuple, ":")
+
+		if len(splitTuple) != 2 {
+			return nil, errors.New("Improperly formatted meta data request. Expecting meta=key1:value1,key2:value2,...")
+		} else {
+			metaAttrs[splitTuple[0]] = splitTuple[1]
+		}
+	}
 
 	request := metrics.SLAReportRequest{
 		TenantID:           queryParams.Get("tenant"),
 		Interval:           queryParams.Get("interval"),
 		Domain:             toStringSplice(queryParams.Get("domains")),
+		Meta:               metaAttrs,
 		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
 		Granularity:        queryParams.Get("granularity"),
 		Timezone:           queryParams.Get("timezone"),
@@ -227,7 +241,7 @@ func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest 
 		request.Granularity = "PT1H"
 	}
 
-	return &request
+	return &request, nil
 }
 
 func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
@@ -458,7 +472,11 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 
 	// Turn the query Params into the request object:
 	queryParams := r.URL.Query()
-	slaReportRequest := populateSLAReportRequest(queryParams)
+	slaReportRequest, err := populateSLAReportRequest(queryParams)
+	if err != nil {
+		reportError(w, startTime, "400", mon.GenerateSLAReportStr, err.Error(), http.StatusBadRequest)
+		return
+	}
 	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
 
 	tenantID := slaReportRequest.TenantID

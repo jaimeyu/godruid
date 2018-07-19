@@ -11,8 +11,9 @@ type SLAReportRequest struct {
 	SlaScheduleConfig string `json:"slaScheduleConfigId"`
 	TenantID          string `json:"tenantId"`
 	// ISO-8601 Intervals
-	Interval string   `json:"interval,omitempty"`
-	Domain   []string `json:"domain,omitempty"`
+	Interval string            `json:"interval,omitempty"`
+	Domain   []string          `json:"domain,omitempty"`
+	Meta     map[string]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`

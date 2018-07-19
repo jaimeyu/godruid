@@ -637,7 +637,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		timeout = 5000
 	}
 
-	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
+	query, err := SLAViolationsQuery(request.TenantID, table, request.Domain, request.Meta, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -665,7 +665,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 	}
 
-	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
+	query, err = SLAViolationsQuery(request.TenantID, table, request.Domain, request.Meta, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetSLAReportStr)
 		return nil, err

@@ -176,6 +176,7 @@ const (
 	SLAViolationsQueryStr = SLAReportStr + metricNameDelimiter + "violations" + metricNameDelimiter + OPGetStr
 
 	GetDataCleaningProfileStr    = DataCleaningProfileStr + metricNameDelimiter + OPGetStr
+	GetAllDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPGetAllStr
 	DeleteDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPDeleteStr
 	CreateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPPatchStr

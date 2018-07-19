@@ -82,6 +82,7 @@ type TenantServiceDatastore interface {
 
 	CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
 	UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
-	GetTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error)
-	DeleteTenantDataCleaningProfile(tenantID string) (*tenmod.DataCleaningProfile, error)
+	GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
+	DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
+	GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error)
 }

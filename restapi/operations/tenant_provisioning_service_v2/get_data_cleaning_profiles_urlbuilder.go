@@ -9,22 +9,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
-// GetDataCleaningProfileURL generates an URL for the get data cleaning profile operation
-type GetDataCleaningProfileURL struct {
-	ProfileID string
-
+// GetDataCleaningProfilesURL generates an URL for the get data cleaning profiles operation
+type GetDataCleaningProfilesURL struct {
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetDataCleaningProfileURL) WithBasePath(bp string) *GetDataCleaningProfileURL {
+func (o *GetDataCleaningProfilesURL) WithBasePath(bp string) *GetDataCleaningProfilesURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -32,22 +27,15 @@ func (o *GetDataCleaningProfileURL) WithBasePath(bp string) *GetDataCleaningProf
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetDataCleaningProfileURL) SetBasePath(bp string) {
+func (o *GetDataCleaningProfilesURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *GetDataCleaningProfileURL) Build() (*url.URL, error) {
+func (o *GetDataCleaningProfilesURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/v2/data-cleaning-profiles/{profileId}"
-
-	profileID := o.ProfileID
-	if profileID != "" {
-		_path = strings.Replace(_path, "{profileId}", profileID, -1)
-	} else {
-		return nil, errors.New("ProfileID is required on GetDataCleaningProfileURL")
-	}
+	var _path = "/v2/data-cleaning-profiles"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -59,7 +47,7 @@ func (o *GetDataCleaningProfileURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *GetDataCleaningProfileURL) Must(u *url.URL, err error) *url.URL {
+func (o *GetDataCleaningProfilesURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -70,17 +58,17 @@ func (o *GetDataCleaningProfileURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *GetDataCleaningProfileURL) String() string {
+func (o *GetDataCleaningProfilesURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *GetDataCleaningProfileURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *GetDataCleaningProfilesURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on GetDataCleaningProfileURL")
+		return nil, errors.New("scheme is required for a full url on GetDataCleaningProfilesURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on GetDataCleaningProfileURL")
+		return nil, errors.New("host is required for a full url on GetDataCleaningProfilesURL")
 	}
 
 	base, err := o.Build()
@@ -94,6 +82,6 @@ func (o *GetDataCleaningProfileURL) BuildFull(scheme, host string) (*url.URL, er
 }
 
 // StringFull returns the string representation of a complete url
-func (o *GetDataCleaningProfileURL) StringFull(scheme, host string) string {
+func (o *GetDataCleaningProfilesURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

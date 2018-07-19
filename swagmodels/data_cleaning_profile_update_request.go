@@ -6,8 +6,6 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -19,34 +17,16 @@ import (
 // swagger:model DataCleaningProfileUpdateRequest
 type DataCleaningProfileUpdateRequest struct {
 
-	// attributes
+	// data
 	// Required: true
-	Attributes *DataCleaningProfileUpdateRequestAttr `json:"attributes"`
-
-	// id
-	// Required: true
-	ID *string `json:"id"`
-
-	// type
-	// Required: true
-	Type *string `json:"type"`
+	Data *DataCleaningProfileUpdateRequestData `json:"data"`
 }
 
 // Validate validates this data cleaning profile update request
 func (m *DataCleaningProfileUpdateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAttributes(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateType(formats); err != nil {
+	if err := m.validateData(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -57,70 +37,21 @@ func (m *DataCleaningProfileUpdateRequest) Validate(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *DataCleaningProfileUpdateRequest) validateAttributes(formats strfmt.Registry) error {
+func (m *DataCleaningProfileUpdateRequest) validateData(formats strfmt.Registry) error {
 
-	if err := validate.Required("attributes", "body", m.Attributes); err != nil {
+	if err := validate.Required("data", "body", m.Data); err != nil {
 		return err
 	}
 
-	if m.Attributes != nil {
+	if m.Data != nil {
 
-		if err := m.Attributes.Validate(formats); err != nil {
+		if err := m.Data.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("attributes")
+				return ve.ValidateName("data")
 			}
 			return err
 		}
 
-	}
-
-	return nil
-}
-
-func (m *DataCleaningProfileUpdateRequest) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("id", "body", m.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var dataCleaningProfileUpdateRequestTypeTypePropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["dataCleaningProfiles"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		dataCleaningProfileUpdateRequestTypeTypePropEnum = append(dataCleaningProfileUpdateRequestTypeTypePropEnum, v)
-	}
-}
-
-const (
-
-	// DataCleaningProfileUpdateRequestTypeDataCleaningProfiles captures enum value "dataCleaningProfiles"
-	DataCleaningProfileUpdateRequestTypeDataCleaningProfiles string = "dataCleaningProfiles"
-)
-
-// prop value enum
-func (m *DataCleaningProfileUpdateRequest) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, dataCleaningProfileUpdateRequestTypeTypePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *DataCleaningProfileUpdateRequest) validateType(formats strfmt.Registry) error {
-
-	if err := validate.Required("type", "body", m.Type); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
-		return err
 	}
 
 	return nil

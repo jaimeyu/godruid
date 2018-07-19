@@ -25,7 +25,7 @@ type DeleteDataCleaningProfileOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.JSONAPIDataCleaningProfileResponse `json:"body,omitempty"`
+	Payload *swagmodels.DataCleaningProfileResponse `json:"body,omitempty"`
 }
 
 // NewDeleteDataCleaningProfileOK creates DeleteDataCleaningProfileOK with default headers values
@@ -35,13 +35,13 @@ func NewDeleteDataCleaningProfileOK() *DeleteDataCleaningProfileOK {
 }
 
 // WithPayload adds the payload to the delete data cleaning profile o k response
-func (o *DeleteDataCleaningProfileOK) WithPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) *DeleteDataCleaningProfileOK {
+func (o *DeleteDataCleaningProfileOK) WithPayload(payload *swagmodels.DataCleaningProfileResponse) *DeleteDataCleaningProfileOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete data cleaning profile o k response
-func (o *DeleteDataCleaningProfileOK) SetPayload(payload *swagmodels.JSONAPIDataCleaningProfileResponse) {
+func (o *DeleteDataCleaningProfileOK) SetPayload(payload *swagmodels.DataCleaningProfileResponse) {
 	o.Payload = payload
 }
 
@@ -93,6 +93,49 @@ func (o *DeleteDataCleaningProfileForbidden) SetPayload(payload string) {
 func (o *DeleteDataCleaningProfileForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(403)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// DeleteDataCleaningProfileNotFoundCode is the HTTP code returned for type DeleteDataCleaningProfileNotFound
+const DeleteDataCleaningProfileNotFoundCode int = 404
+
+/*DeleteDataCleaningProfileNotFound No records found
+
+swagger:response deleteDataCleaningProfileNotFound
+*/
+type DeleteDataCleaningProfileNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewDeleteDataCleaningProfileNotFound creates DeleteDataCleaningProfileNotFound with default headers values
+func NewDeleteDataCleaningProfileNotFound() *DeleteDataCleaningProfileNotFound {
+
+	return &DeleteDataCleaningProfileNotFound{}
+}
+
+// WithPayload adds the payload to the delete data cleaning profile not found response
+func (o *DeleteDataCleaningProfileNotFound) WithPayload(payload string) *DeleteDataCleaningProfileNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete data cleaning profile not found response
+func (o *DeleteDataCleaningProfileNotFound) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteDataCleaningProfileNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
 	payload := o.Payload
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this

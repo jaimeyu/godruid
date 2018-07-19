@@ -29,9 +29,9 @@ func NewGetDataCleaningProfile(ctx *middleware.Context, handler GetDataCleaningP
 	return &GetDataCleaningProfile{Context: ctx, Handler: handler}
 }
 
-/*GetDataCleaningProfile swagger:route GET /v2/data-cleaning-profiles TenantProvisioningServiceV2 getDataCleaningProfile
+/*GetDataCleaningProfile swagger:route GET /v2/data-cleaning-profiles/{profileId} TenantProvisioningServiceV2 getDataCleaningProfile
 
-Retrieve the Data Cleaning Profile for a Tenant.
+Retrieve a Data Cleaning Profiles for a Tenant.
 
 */
 type GetDataCleaningProfile struct {

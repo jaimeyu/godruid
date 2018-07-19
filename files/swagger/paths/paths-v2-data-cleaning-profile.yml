@@ -10,7 +10,7 @@
         '201':
           description: "Profile creation completed successfully"
           schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileResponse'
+            $ref: '#/definitions/DataCleaningProfileResponse'
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -36,7 +36,61 @@
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileCreateRequest'
+            $ref: '#/definitions/DataCleaningProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Data Cleaning Profiles for a Tenant.
+      operationId: GetDataCleaningProfiles
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Record not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/data-cleaning-profiles/{profileId}:
+    get:
+      summary: Retrieve a Data Cleaning Profiles for a Tenant.
+      operationId: GetDataCleaningProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
       tags:
         - TenantProvisioningServiceV2
     patch:
@@ -50,13 +104,17 @@
         '200':
           description: "Update completed successfully"
           schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileResponse'
+            $ref: '#/definitions/DataCleaningProfileResponse'
         '400':
           description: "Request data does not pass validation"
           schema:
             type: string
         '403':
           description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
           schema:
             type: string
         '409':
@@ -72,35 +130,19 @@
           schema:
             type: string
       parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
         - name: body
           in: body
           required: true
           schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileUpdateRequest'
-      tags:
-        - TenantProvisioningServiceV2
-    get:
-      summary: Retrieve the Data Cleaning Profile for a Tenant.
-      operationId: GetDataCleaningProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: "Fetch completed successfully"
-          schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
+            $ref: '#/definitions/DataCleaningProfileUpdateRequest'
       tags:
         - TenantProvisioningServiceV2
     delete:
-      summary: Delete the Data Cleaning Profile for a Tenant.
+      summary: Delete a Data Cleaning Profile for a Tenant.
       operationId: DeleteDataCleaningProfile
       produces:
         - application/vnd.api+json
@@ -108,14 +150,23 @@
         '200':
           description: "Deletion completed successfully"
           schema:
-            $ref: '#/definitions/JsonApiDataCleaningProfileResponse'
+            $ref: '#/definitions/DataCleaningProfileResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
           schema:
             type: string
         '500':
           description: "Unexpected error processing request"
           schema:
             type: string
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
       tags:
         - TenantProvisioningServiceV2

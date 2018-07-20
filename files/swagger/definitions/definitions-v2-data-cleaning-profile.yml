@@ -19,7 +19,7 @@
               rules:
                 type: "array"
                 items: 
-                  $ref: '#/definitions/DataCleaningProfileRule'
+                  $ref: '#/definitions/DataCleaningRule'
                 description: "List of all the rules to evaluate for Data Cleaning"
 
   DataCleaningProfileUpdateRequest:
@@ -46,10 +46,10 @@
               rules:
                 type: "array"
                 items: 
-                  $ref: '#/definitions/DataCleaningProfileRule'
+                  $ref: '#/definitions/DataCleaningRule'
                 description: "List of all the rules to evaluate for Data Cleaning"
 
-  DataCleaningProfileRule:
+  DataCleaningRule:
     type: "object"
     required: ["metricVendor","metricLabel","triggerCondition","clearCondition"]
     properties:
@@ -123,7 +123,7 @@
           rules:
             type: "array"
             items: 
-              $ref: '#/definitions/DataCleaningProfileRule'
+              $ref: '#/definitions/DataCleaningRule'
             description: "List of all the rules to evaluate for Data Cleaning"
           createdTimestamp:
             type: "integer"

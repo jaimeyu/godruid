@@ -16,7 +16,7 @@ import (
 
 // DataCleaningProfileAttributesRules List of all the rules to evaluate for Data Cleaning
 // swagger:model dataCleaningProfileAttributesRules
-type DataCleaningProfileAttributesRules []*DataCleaningProfileRule
+type DataCleaningProfileAttributesRules []*DataCleaningRule
 
 // Validate validates this data cleaning profile attributes rules
 func (m DataCleaningProfileAttributesRules) Validate(formats strfmt.Registry) error {

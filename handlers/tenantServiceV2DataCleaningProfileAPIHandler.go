@@ -148,11 +148,11 @@ func HandleCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 }
 
 func doGetDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetDataCleaningProfileParams) (time.Time, int, *swagmodels.DataCleaningProfileResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
 	if !isAuthorized {
-		err := fmt.Errorf("Get %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles))
+		err := fmt.Errorf("Get %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 		return startTime, http.StatusForbidden, nil, err
 	}
 
@@ -180,11 +180,11 @@ func doGetDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Tenant
 }
 
 func doGetDataCleaningProfilesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetDataCleaningProfilesParams) (time.Time, int, *swagmodels.DataCleaningProfileListResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching all %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
 	if !isAuthorized {
-		err := fmt.Errorf("Get all %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles))
+		err := fmt.Errorf("Get all %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 		return startTime, http.StatusForbidden, nil, err
 	}
 
@@ -212,11 +212,11 @@ func doGetDataCleaningProfilesV2(allowedRoles []string, tenantDB datastore.Tenan
 }
 
 func doDeleteDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.DeleteDataCleaningProfileParams) (time.Time, int, *swagmodels.DataCleaningProfileResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Deleting %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
 	if !isAuthorized {
-		err := fmt.Errorf("Delete %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles))
+		err := fmt.Errorf("Delete %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 		return startTime, http.StatusForbidden, nil, err
 	}
 
@@ -244,11 +244,11 @@ func doDeleteDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 }
 
 func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.UpdateDataCleaningProfileParams) (time.Time, int, *swagmodels.DataCleaningProfileResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Updating %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
 	if !isAuthorized {
-		err := fmt.Errorf("Update %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles))
+		err := fmt.Errorf("Update %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 		return startTime, http.StatusForbidden, nil, err
 	}
 
@@ -291,11 +291,11 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 }
 
 func doCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.CreateDataCleaningProfileParams) (time.Time, int, *swagmodels.DataCleaningProfileResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(xFwdTenantId)
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
 	if !isAuthorized {
-		return startTime, http.StatusForbidden, nil, fmt.Errorf("Update %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles))
+		return startTime, http.StatusForbidden, nil, fmt.Errorf("Update %s operation not authorized for role: %s", tenmod.TenantDataCleaningProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 	}
 
 	// Convert the request to a db model type:

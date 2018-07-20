@@ -23,7 +23,7 @@ func HandleGetSLAReport(allowedRoles []string, tenantDB datastore.TenantServiceD
 		logger.Log.Infof("Fetching %s %s for Tenant %s", metmod.ReportStr, params.ReportID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetSLAReportForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetSLAReportStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetSLAReportForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetSLAReportStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -52,7 +52,7 @@ func HandleGetAllSLAReports(allowedRoles []string, tenantDB datastore.TenantServ
 		logger.Log.Infof("Fetching all %ss for Tenant %s", metmod.ReportStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllSLAReportsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", metmod.ReportStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllSLAReportStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllSLAReportsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", metmod.ReportStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllSLAReportStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer

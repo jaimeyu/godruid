@@ -23,6 +23,7 @@ type httpErrorString string
 const (
 	// Error search strings
 	notFound httpErrorString = "status 404 - not found"
+	conflict httpErrorString = "already exists"
 
 	// Custom Error types
 	errorMarshal = -100

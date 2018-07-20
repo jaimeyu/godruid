@@ -803,9 +803,10 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	result.ActuatorType = string(tenmod.AccedianVNID)
 	result.ReflectorName = generateRandomString(10)
 	result.ReflectorType = string(tenmod.AccedianVNID)
-	result.ObjectName = generateRandomString(10)
+	result.ObjectName = generateRandomEnodeB()
 	result.ObjectType = string(tenmod.TwampPE)
-	result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
+	//result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
+	result.MonitoredObjectID = strings.Join([]string{result.ObjectName}, "-")
 
 	// Generate random meta data
 	result.Meta = generateRandomMeta()
@@ -891,4 +892,18 @@ func generateRandomString(length int) string {
 		generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
 	}
 	return string(generated)
+}
+
+// Generate a string that uses a simulated BYT enode name.
+func generateRandomEnodeB() string {
+	offset := rand.Int() % 99999
+	//generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
+	// Enode B template
+	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
+	regions := []string{"WST", "EST", "NOE", "SWT", "CTA"}
+	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
+	objname_template := "E%d_%s_H_ENB_MON_ZIPEC_AF22_admin_%s"
+	t := time.Now()
+	generatedName := fmt.Sprintf(objname_template, offset, regions[offset%len(regions)], t.Format("2006-01-02"))
+	return generatedName
 }

@@ -255,8 +255,11 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	// Fetch the existing record
 	existing, err := tenantDB.GetTenantDataCleaningProfile(tenantID, params.ProfileID)
 	if err != nil {
+		if checkForNotFound(err.Error()) {
+			return startTime, http.StatusNotFound, nil, err
+		}
 		errResp := fmt.Errorf("Unable to update %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error())
-		return startTime, http.StatusConflict, nil, errResp
+		return startTime, http.StatusInternalServerError, nil, errResp
 	}
 
 	// Convert the request to a db model type:
@@ -264,6 +267,10 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	err = convertRequestBodyToDBModel(params.Body, &data)
 	if err != nil {
 		return startTime, http.StatusBadRequest, nil, err
+	}
+
+	if existing.REV != data.REV {
+		return startTime, http.StatusConflict, nil, fmt.Errorf("Attempting to update object rev %s but rev from request wwas %s", existing.REV, data.REV)
 	}
 
 	existing.Rules = data.Rules

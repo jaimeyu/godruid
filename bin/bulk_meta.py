@@ -1,12 +1,24 @@
 import argparse
+import calendar
 import csv
 import http.client, urllib.parse
 import json
 import logging
+import os
+import sys
+import time
 
 def conf_logging():
     logging.basicConfig(format='%(asctime)s:%(levelname)s: %(message)s', level=logging.INFO)
     logging.info("Logging configured...")
+
+def open_processed_file():
+    processed_headers = ["key","status"]
+    processed_filename = "%s/processed_%s.csv" % (os.path.dirname(sys.argv[0]), calendar.timegm(time.gmtime()))
+    logging.info("Generating processed log at %s", processed_filename)
+    f = open(processed_filename,"w+")
+    f.write(",".join(processed_headers))
+    return f
 
 def construct_entry_func(headers, metadatakey):
     def construct_entry(entry): 
@@ -15,11 +27,11 @@ def construct_entry_func(headers, metadatakey):
         return json.dumps(entry_struct)
     return construct_entry
 
-def envoy_func(conn, auth, host, tenantid):
+def envoy_func(conn, auth, host, tenantid, processfile):
     def envoy(b_id, batch):
         batchlist = list(batch)
         logging.info("Sending batch %s of size %d to %s", b_id, len(batchlist), host)
-        payload = "{'_id'='1','_rev'='1','items':[" + ",".join(batchlist)+"]}"
+        payload = "{'_id'='1','_rev'='1','items':[%s]}" % ",".join(batchlist)
         print(payload)
     return envoy
 
@@ -49,7 +61,8 @@ def process(file, batchsize, keyname, f_envoy):
         f_entry = construct_entry_func(headers, keyname)
         batch = []
 
-        logging.info("Processing csv with headers: \n" + "\n".join(headers))
+        logging.info("Processing csv with headers: \n%s", "\n".join(headers))
+        
         for entry in bulkmetareader:
             batch += [entry]
             i += 1
@@ -92,6 +105,12 @@ if auth is None:
 
 tid = tenant_id(conn, auth, host, tenant)
 
-process(metafile, batchsize, keyname, envoy_func(conn, auth, host, tid))
+pf = open_processed_file()
+
+try:
+    logging.info("Starting to process...")
+    #process(metafile, batchsize, keyname, envoy_func(conn, auth, host, tid, pf))
+finally:
+    pf.close()
 
 logging.info("Finishing processing %s", metafile)

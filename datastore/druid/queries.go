@@ -649,6 +649,7 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, meta
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
 			buildDomainFilter(tenant, domains),
+			buildMetaFilter(tenant, meta),
 		),
 		Aggregations:     aggregations,
 		PostAggregations: postAggregations,
@@ -1002,6 +1003,52 @@ func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *god
 			Dimension: "monitoredObjectId",
 			Value:     monobj,
 		}
+	}
+
+	return godruid.FilterOr(filters...)
+}
+
+func buildMetaFilter(tenantID string, meta map[string]string) *godruid.Filter {
+	if len(meta) < 1 {
+		return nil
+	}
+
+	filters := make([]*godruid.Filter, len(meta))
+	atLeastOneMetaFilter := false
+	i := 0
+	for mk, mv := range meta {
+		var ef godruid.ExtractionFn
+		// TODO add multiple dimensions to this
+		lookupName, exists := getLookupName("meta", tenantID, mk)
+		if !exists {
+			logger.Log.Warningf("No lookup (%s) found for meta dimension %s. It will be excluded from the meta filter", lookupName, mk)
+			continue
+		}
+
+		atLeastOneMetaFilter = true
+		ef = godruid.RegisteredLookupExtractionFn{
+			Type:   "registeredLookup",
+			Lookup: lookupName,
+		}
+
+		filters[i] = &godruid.Filter{
+			Type:         "selector",
+			Dimension:    "monitoredObjectId",
+			Value:        mv,
+			ExtractionFn: &ef,
+		}
+
+		i += 1
+	}
+
+	if !atLeastOneMetaFilter {
+		// This is a hack to get around no meta lookups being ready yet.  Basically want to
+		// create an 'always false filter".
+		logger.Log.Debugf("No meta information found in cache using false filter")
+		return godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
+			godruid.FilterNot(godruid.FilterSelector("tenantId", strings.ToLower(tenantID))),
+		)
 	}
 
 	return godruid.FilterOr(filters...)

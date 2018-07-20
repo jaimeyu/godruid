@@ -58,7 +58,7 @@ func getRandomTenantDescriptor() *admmod.Tenant {
 	}
 }
 
-func createRandomDataCleaningProfile() *swagmodels.DataCleaningProfileCreateRequestData {
+func createRandomDataCleaningProfileCreateRequest() *swagmodels.DataCleaningProfileCreateRequestData {
 	dcpType := "dataCleaningProfiles"
 	return &swagmodels.DataCleaningProfileCreateRequestData{
 		Type: &dcpType,

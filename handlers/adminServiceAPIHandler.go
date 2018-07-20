@@ -28,7 +28,7 @@ func HandleCreateTenant(allowedRoles []string, adminDB datastore.AdminServiceDat
 		logger.Log.Infof("Creating %s: %s", admmod.TenantStr, params.Body.Data.Attributes.Name)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewCreateTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -115,7 +115,7 @@ func HandleGetTenant(allowedRoles []string, adminDB datastore.AdminServiceDatast
 		logger.Log.Infof("Fetching %s: %s", admmod.TenantStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewGetTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewGetTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -194,7 +194,7 @@ func HandleDeleteTenant(allowedRoles []string, adminDB datastore.AdminServiceDat
 		logger.Log.Infof("Deleting %s: %s", admmod.TenantStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewDeleteTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewDeleteTenantForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -223,7 +223,7 @@ func HandleGetAllTenants(allowedRoles []string, adminDB datastore.AdminServiceDa
 		logger.Log.Infof("Fetching %s list", admmod.TenantStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewGetAllTenantsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get All %ss operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewGetAllTenantsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get All %ss operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -292,7 +292,7 @@ func HandleCreateIngestionDictionary(allowedRoles []string, adminDB datastore.Ad
 		logger.Log.Infof("Creating %s", admmod.IngestionDictionaryStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewCreateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -338,7 +338,7 @@ func HandleUpdateIngestionDictionary(allowedRoles []string, adminDB datastore.Ad
 		logger.Log.Infof("Updating %s", admmod.IngestionDictionaryStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewUpdateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -384,7 +384,7 @@ func HandleGetIngestionDictionary(allowedRoles []string, adminDB datastore.Admin
 		logger.Log.Infof("Fetching %s", admmod.IngestionDictionaryStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewGetIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewGetIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -413,7 +413,7 @@ func HandleDeleteIngestionDictionary(allowedRoles []string, adminDB datastore.Ad
 		logger.Log.Infof("Deleting %s", admmod.IngestionDictionaryStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -442,7 +442,7 @@ func HandleCreateValidTypes(allowedRoles []string, adminDB datastore.AdminServic
 		logger.Log.Infof("Creating %s", admmod.ValidTypesStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -488,7 +488,7 @@ func HandleUpdateValidTypes(allowedRoles []string, adminDB datastore.AdminServic
 		logger.Log.Infof("Updating %s", admmod.ValidTypesStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -534,7 +534,7 @@ func HandleGetValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDa
 		logger.Log.Infof("Fetching %s", admmod.ValidTypesStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewGetIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewGetIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -563,7 +563,7 @@ func HandleDeleteValidTypes(allowedRoles []string, adminDB datastore.AdminServic
 		logger.Log.Infof("Deleting %s", admmod.ValidTypesStr)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
 		// Issue request to DAO Layer

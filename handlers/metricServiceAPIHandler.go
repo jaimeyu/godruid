@@ -195,7 +195,7 @@ func HandleGetThresholdCrossing(allowedRoles []string, tenantDB datastore.Tenant
 		logger.Log.Infof("Fetching %s for Tenant %s using %s %s", datastore.ThresholdCrossingStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.ThresholdCrossingStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.ThresholdCrossingStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Turn the query Params into the request object:
@@ -242,7 +242,7 @@ func HandleQueryThresholdCrossing(allowedRoles []string, tenantDB datastore.Tena
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.QueryThresholdCrossingStr, params.Body.TenantID, tenmod.TenantThresholdProfileStr, params.Body.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewQueryThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("%s operation not authorized for role: %s", datastore.QueryThresholdCrossingStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.QueryThresholdCrossingStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewQueryThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("%s operation not authorized for role: %s", datastore.QueryThresholdCrossingStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.QueryThresholdCrossingStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		requestBytes, err := json.Marshal(params.Body)
@@ -294,7 +294,7 @@ func HandleGenSLAReport(allowedRoles []string, tenantDB datastore.TenantServiceD
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.SLAReportStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGenSLAReportForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.SLAReportStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GenSLAReportStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGenSLAReportForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.SLAReportStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GenSLAReportStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Turn the query Params into the request object:
@@ -342,7 +342,7 @@ func HandleGetThresholdCrossingByMonitoredObject(allowedRoles []string, tenantDB
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetThresholdCrossingByMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Turn the query Params into the request object:
@@ -390,7 +390,7 @@ func HandleGetThresholdCrossingByMonitoredObjectTopN(allowedRoles []string, tena
 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.TenantID, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectTopNForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjTopNStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetThresholdCrossingByMonitoredObjectTopNForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjTopNStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Turn the query Params into the request object:
@@ -399,7 +399,7 @@ func HandleGetThresholdCrossingByMonitoredObjectTopN(allowedRoles []string, tena
 
 		thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 		if err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectTopNNotFound().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjTopNStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetThresholdCrossingByMonitoredObjectTopNNotFound().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjTopNStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Convert to PB type...will remove this when we remove the PB handling
@@ -438,7 +438,7 @@ func HandleGetHistogram(allowedRoles []string, druidDB datastore.DruidDatastore)
 		logger.Log.Infof("Fetching %s for Tenant %s for Metric %s", datastore.HistogramStr, params.Tenant, params.Metric)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetHistogramForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.HistogramStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetHistogramObjStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetHistogramForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.HistogramStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetHistogramObjStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		histogramReq := populateHistogramRequestSwag(params)
@@ -469,7 +469,7 @@ func HandleGetRawMetrics(allowedRoles []string, druidDB datastore.DruidDatastore
 		logger.Log.Infof("Fetching %s for Tenant %s for Metric %s", datastore.RawMetricStr, params.Tenant, params.Metric)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetRawMetricsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.RawMetricStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetRawMetricStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetRawMetricsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.RawMetricStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetRawMetricStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		// Turn the query Params into the request object:
@@ -501,7 +501,7 @@ func HandleQueryAggregatedMetrics(allowedRoles []string, tenantDB datastore.Tena
 		logger.Log.Infof("Fetching %s for Tenant %s", datastore.AggMetricsStr, params.Body.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewQueryAggregatedMetricsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.AggMetricsStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.QueryAggregatedMetricsStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewQueryAggregatedMetricsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.AggMetricsStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.QueryAggregatedMetricsStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		requestBytes, err := json.Marshal(params.Body)
@@ -543,7 +543,7 @@ func HandleGetTopNFor(allowedRoles []string, tenantDB datastore.TenantServiceDat
 		logger.Log.Infof("Fetching %s for Tenant %s", datastore.TopNForMetricString, params.Body.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetTopNForMetricForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.TopNForMetricString, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTopNReqStr, mon.APICompleted, mon.MetricAPICompleted))
+			return metrics_service.NewGetTopNForMetricForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.TopNForMetricString, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTopNReqStr, mon.APICompleted, mon.MetricAPICompleted))
 		}
 
 		requestBytes, err := json.Marshal(params.Body)

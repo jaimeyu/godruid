@@ -152,19 +152,6 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	api.TenantProvisioningServiceUpdateTenantConnectorInstanceHandler = tenant_provisioning_service.UpdateTenantConnectorInstanceHandlerFunc(handlers.HandleUpdateTenantConnectorInstance(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(handlers.HandleUpdateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 
-	// TODO calls from V1 Metrics service that were hooked up with generated code, but are having issues with unmarshalling the pb.Any object
-	// ======================= START OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
-	// api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(handlers.HandleQueryAggregatedMetrics(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(handlers.HandleQueryThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(handlers.HandleGetThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObject(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopN(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(handlers.HandleGetTopNFor(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(handlers.HandleGetRawMetrics(handlers.AllRoles, druidDB))
-	// api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(handlers.HandleGetHistogram(handlers.AllRoles, druidDB))
-	// api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(handlers.HandleGenSLAReport(handlers.AllRoles, tenantDB, druidDB))
-	// ======================= END OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
-
 	// TODO: calls that will be removed, but just moving them here for now until it is certain we will not use them
 	// ======================= START OF CALLS TO REMOVE ===========================================================
 	api.AdminProvisioningServiceCreateAdminUserHandler = admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {

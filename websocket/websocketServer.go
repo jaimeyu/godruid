@@ -322,6 +322,15 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				if err != nil {
 					logger.Log.Errorf("Unable to update last batch of MonitoredObjects for tenant: %s. Error: %s", tenantID, err.Error())
 				}
+
+				returnMsg := &ConnectorMessage{
+					MsgType: "Session",
+				}
+
+				msgJSON, _ := json.Marshal(returnMsg)
+
+				err = wsServer.ConnectionMeta[connectorID].Connection.WriteMessage(websocket.BinaryMessage, msgJSON)
+
 			}
 		default:
 			{

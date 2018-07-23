@@ -133,18 +133,18 @@ func (msh *MetricServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 	}
 }
 
-func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCrossingRequest {
+func populateThresholdCrossingRequest(queryParams url.Values) *metrics.ThresholdCrossingRequest {
 
-	thresholdCrossingReq := pb.ThresholdCrossingRequest{
-		Direction:          toStringSplice(queryParams.Get("direction")),
-		Domain:             toStringSplice(queryParams.Get("domain")),
-		Granularity:        queryParams.Get("granularity"),
-		Interval:           queryParams.Get("interval"),
-		Metric:             toStringSplice(queryParams.Get("metric")),
-		ObjectType:         toStringSplice(queryParams.Get("objectType")),
-		Tenant:             queryParams.Get("tenant"),
-		ThresholdProfileId: queryParams.Get("thresholdProfileId"),
-		Vendor:             toStringSplice(queryParams.Get("vendor")),
+	thresholdCrossingReq := metrics.ThresholdCrossingRequest{
+		DirectionWhiteList:  toStringSplice(queryParams.Get("direction")),
+		DomainIDs:           toStringSplice(queryParams.Get("domain")),
+		Granularity:         queryParams.Get("granularity"),
+		Interval:            queryParams.Get("interval"),
+		MetricNameWhiteList: toStringSplice(queryParams.Get("metric")),
+		ObjectTypeWhiteList: toStringSplice(queryParams.Get("objectType")),
+		TenantID:            queryParams.Get("tenant"),
+		ThresholdProfileID:  queryParams.Get("thresholdProfileId"),
+		VendorWhiteList:     toStringSplice(queryParams.Get("vendor")),
 	}
 
 	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
@@ -320,9 +320,9 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
 	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
 
-	tenantID := thresholdCrossingReq.Tenant
+	tenantID := thresholdCrossingReq.TenantID
 
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
@@ -337,7 +337,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 		return
 	}
 
-	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
+	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.DomainIDs); err != nil {
 		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
@@ -533,9 +533,9 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
 	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
 
-	tenantID := thresholdCrossingReq.Tenant
+	tenantID := thresholdCrossingReq.TenantID
 
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
+	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
@@ -550,7 +550,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 		return
 	}
 
-	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
+	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.DomainIDs); err != nil {
 		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
 		return

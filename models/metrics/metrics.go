@@ -23,8 +23,9 @@ type SLAReportRequest struct {
 }
 
 type HistogramCustomRequest struct {
-	TenantID  string   `json:"tenantId"`
-	DomainIds []string `json:"domainIds"`
+	TenantID  string            `json:"tenantId"`
+	DomainIds []string          `json:"domainIds"`
+	Meta      map[string]string `json:"meta:omitempty"`
 	// ISO-8601 Intervals
 	Interval string `json:"interval,omitempty"`
 	// ISO-8601 period combination
@@ -152,8 +153,9 @@ type ThresholdCrossingTopNRequest struct {
 	Vendor     string `json:"vendor"`
 	TenantID   string `json:"tenantId"`
 	// ISO-8601 Intervals
-	Interval string   `json:"interval,omitempty"`
-	Domain   []string `json:"domain,omitempty"`
+	Interval string            `json:"interval,omitempty"`
+	Domain   []string          `json:"domain,omitempty"`
+	Meta     map[string]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
@@ -166,6 +168,8 @@ type TopNForMetric struct {
 	// But if both are given, then the behaviour will be the query will be based on a subset of monitoredObjects that belong to the domains.
 	// List of domains (optional)
 	Domains []string `json:"domains,omitempty"`
+
+	Meta map[string]string `json:"meta,omitempty"`
 	// List of monitored objects (optional)
 	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
 
@@ -222,18 +226,24 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 }
 
 type ThresholdCrossingRequest struct {
-	TenantID           string             `json:"tenantId"`
-	DomainIDs          []string           `json:"domainIds,omitempty"`
-	Interval           string             `json:"interval,omitempty"`
-	Granularity        string             `json:"granularity,omitempty"`
-	ThresholdProfileID string             `json:"thresholdProfileId,omitempty"`
-	MetricWhitelist    []MetricIdentifier `json:"metricWhitelist,omitempty"`
-	Timeout            int32              `json:"timeout,omitempty"`
+	TenantID            string             `json:"tenantId"`
+	DomainIDs           []string           `json:"domainIds,omitempty"`
+	Meta                map[string]string  `json:"meta,omitempty"`
+	Interval            string             `json:"interval,omitempty"`
+	Granularity         string             `json:"granularity,omitempty"`
+	ThresholdProfileID  string             `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist     []MetricIdentifier `json:"metricWhitelist,omitempty"`
+	MetricNameWhiteList []string           `json:"metricNameWhiteList,omitempty"`
+	ObjectTypeWhiteList []string           `json:"objectTypeWhiteList,omitempty"`
+	DirectionWhiteList  []string           `json:"directionWhiteList,omitempty"`
+	VendorWhiteList     []string           `json:"vendorWhiteList,omitempty"`
+	Timeout             int32              `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {
 	TenantID    string             `json:"tenantId"`
 	DomainIDs   []string           `json:"domainIds,omitempty"`
+	Meta        map[string]string  `json:"meta,omitempty"`
 	Interval    string             `json:"interval,omitempty"`
 	Granularity string             `json:"granularity,omitempty"`
 	Timeout     int32              `json:"timeout,omitempty"`

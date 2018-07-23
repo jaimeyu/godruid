@@ -187,52 +187,53 @@ func validateDomainsSwag(tenantId string, domains []string, tenantDB datastore.T
 	return nil
 }
 
+// ABP: COMMENTING OUT AS WE ARE NOT USING THIS ANYMORE. THIS FILE IS TO BE DELETED
 // HandleGetThresholdCrossing - retrieves threshold crossing details
-func HandleGetThresholdCrossing(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
-	return func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
-		logger.Log.Infof("Fetching %s for Tenant %s using %s %s", datastore.ThresholdCrossingStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
+// func HandleGetThresholdCrossing(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
+// 	return func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
+// 		startTime := time.Now()
+// 		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
+// 		logger.Log.Infof("Fetching %s for Tenant %s using %s %s", datastore.ThresholdCrossingStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.ThresholdCrossingStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+// 			return metrics_service.NewGetThresholdCrossingForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", datastore.ThresholdCrossingStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		// Turn the query Params into the request object:
-		thresholdCrossingReq := populateThresholdCrossingRequestSwag(params)
-		tenantID := thresholdCrossingReq.Tenant
+// 		// Turn the query Params into the request object:
+// 		thresholdCrossingReq := populateThresholdCrossingRequestSwag(params)
+// 		tenantID := thresholdCrossingReq.Tenant
 
-		thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		// Convert to PB type...will remove this when we remove the PB handling
-		pbTP := pb.TenantThresholdProfile{}
-		if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert request to fetch %s: %s", datastore.ThresholdCrossingStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		// Convert to PB type...will remove this when we remove the PB handling
+// 		pbTP := pb.TenantThresholdProfile{}
+// 		if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+// 			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert request to fetch %s: %s", datastore.ThresholdCrossingStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		if err = validateDomainsSwag(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain, tenantDB); err != nil {
-			return metrics_service.NewGetThresholdCrossingNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		if err = validateDomainsSwag(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain, tenantDB); err != nil {
+// 			return metrics_service.NewGetThresholdCrossingNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		result, err := druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		result, err := druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		converted := swagmodels.GathergrpcJSONAPIObject{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		converted := swagmodels.GathergrpcJSONAPIObject{}
+// 		err = convertToJsonapiObject(result, &converted)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		reportAPICompletionState(startTime, http.StatusOK, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted)
-		logger.Log.Infof("Retrieved %s for Tenant %s using %s %s", datastore.ThresholdCrossingStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
-		return metrics_service.NewGetThresholdCrossingOK().WithPayload(&converted)
-	}
-}
+// 		reportAPICompletionState(startTime, http.StatusOK, mon.GetThrCrossStr, mon.APICompleted, mon.MetricAPICompleted)
+// 		logger.Log.Infof("Retrieved %s for Tenant %s using %s %s", datastore.ThresholdCrossingStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
+// 		return metrics_service.NewGetThresholdCrossingOK().WithPayload(&converted)
+// 	}
+// }
 
 // HandleQueryThresholdCrossing - query for threshold crossing data
 func HandleQueryThresholdCrossing(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
@@ -334,53 +335,54 @@ func HandleGenSLAReport(allowedRoles []string, tenantDB datastore.TenantServiceD
 	}
 }
 
+// ABP: COMMENTING OUT AS WE ARE NOT USING THIS ANYMORE. THIS FILE IS TO BE DELETED
 // HandleGetThresholdCrossingByMonitoredObject - fetch all domains for a tenant
-func HandleGetThresholdCrossingByMonitoredObject(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
-	return func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
-		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
+// func HandleGetThresholdCrossingByMonitoredObject(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
+// 	return func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
+// 		startTime := time.Now()
+// 		incrementAPICounters(mon.APIRecieved, mon.MetricAPIRecieved)
+// 		logger.Log.Infof("Issuing %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
 
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Generate %s operation not authorized for role: %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		// Turn the query Params into the request object:
-		thresholdCrossingReq := populateThresholdCrossingRequestForMonObjSwag(params)
-		tenantID := thresholdCrossingReq.Tenant
+// 		// Turn the query Params into the request object:
+// 		thresholdCrossingReq := populateThresholdCrossingRequestForMonObjSwag(params)
+// 		tenantID := thresholdCrossingReq.Tenant
 
-		thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		// Convert to PB type...will remove this when we remove the PB handling
-		pbTP := pb.TenantThresholdProfile{}
-		if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert request to fetch %s: %s", datastore.ThresholdCrossingByMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		// Convert to PB type...will remove this when we remove the PB handling
+// 		pbTP := pb.TenantThresholdProfile{}
+// 		if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert request to fetch %s: %s", datastore.ThresholdCrossingByMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		if err = validateDomainsSwag(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain, tenantDB); err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(thresholdCrossingReq.Domain), err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		if err = validateDomainsSwag(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain, tenantDB); err != nil {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(thresholdCrossingReq.Domain), err.Error()), startTime, http.StatusNotFound, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		result, err := druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		result, err := druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		// Convert the res to byte[]
-		converted := swagmodels.GathergrpcJSONAPIObject{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingByMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
-		}
+// 		// Convert the res to byte[]
+// 		converted := swagmodels.GathergrpcJSONAPIObject{}
+// 		err = convertToJsonapiObject(result, &converted)
+// 		if err != nil {
+// 			return metrics_service.NewGetThresholdCrossingByMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingByMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted))
+// 		}
 
-		reportAPICompletionState(startTime, http.StatusOK, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted)
-		logger.Log.Infof("Generated %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
-		return metrics_service.NewGetThresholdCrossingByMonitoredObjectOK().WithPayload(&converted)
-	}
-}
+// 		reportAPICompletionState(startTime, http.StatusOK, mon.GetThrCrossByMonObjStr, mon.APICompleted, mon.MetricAPICompleted)
+// 		logger.Log.Infof("Generated %s for Tenant %s using %s %s", datastore.ThresholdCrossingByMonitoredObjectStr, params.Tenant, tenmod.TenantThresholdProfileStr, params.ThresholdProfileID)
+// 		return metrics_service.NewGetThresholdCrossingByMonitoredObjectOK().WithPayload(&converted)
+// 	}
+// }
 
 // HandleGetThresholdCrossingByMonitoredObjectTopN - delete a domain for a tenant
 func HandleGetThresholdCrossingByMonitoredObjectTopN(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) func(params metrics_service.GetThresholdCrossingByMonitoredObjectTopNParams) middleware.Responder {

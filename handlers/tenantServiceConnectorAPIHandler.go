@@ -25,7 +25,7 @@ func HandleCreateTenantConnectorConfig(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Creating %s %s for Tenant %s", tenmod.TenantConnectorConfigStr, params.Body.Data.Attributes.Name, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewCreateTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -71,7 +71,7 @@ func HandleUpdateTenantConnectorConfig(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Updating %s %s for Tenant %s", tenmod.TenantConnectorConfigStr, params.Body.Data.Attributes.Name, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewUpdateTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewUpdateTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -117,7 +117,7 @@ func HandleGetTenantConnectorConfig(allowedRoles []string, tenantDB datastore.Te
 		logger.Log.Infof("Fetching %s %s for Tenant %s", tenmod.TenantConnectorConfigStr, params.ConnectorID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -146,7 +146,7 @@ func HandleDeleteTenantConnectorConfig(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Deleting %s %s for Tenant %s", tenmod.TenantConnectorConfigStr, params.ConnectorID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantConnectorConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -175,7 +175,7 @@ func HandleGetAllTenantConnectorConfigs(allowedRoles []string, tenantDB datastor
 		logger.Log.Infof("Fetching all %ss for Tenant %s", tenmod.TenantConnectorConfigStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllTenantConnectorConfigsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllTenantConnectorConfigsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -204,7 +204,7 @@ func HandleCreateTenantConnectorInstance(allowedRoles []string, tenantDB datasto
 		logger.Log.Infof("Creating %s %s for Tenant %s", tenmod.TenantConnectorInstanceStr, params.Body.Data.Attributes.Hostname, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewCreateTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -250,7 +250,7 @@ func HandleUpdateTenantConnectorInstance(allowedRoles []string, tenantDB datasto
 		logger.Log.Infof("Updating %s %s for Tenant", tenmod.TenantConnectorInstanceStr, params.Body.Data.Attributes.Hostname, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewUpdateTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewUpdateTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -296,7 +296,7 @@ func HandleGetTenantConnectorInstance(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Fetching %s %s for Tenant %s", tenmod.TenantConnectorInstanceStr, params.ConnectorInstanceID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -325,7 +325,7 @@ func HandleDeleteTenantConnectorInstance(allowedRoles []string, tenantDB datasto
 		logger.Log.Infof("Deleting %s %s for Tenant %s", tenmod.TenantConnectorInstanceStr, params.ConnectorInstanceID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantConnectorInstanceForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -354,7 +354,7 @@ func HandleGetAllTenantConnectorInstances(allowedRoles []string, tenantDB datast
 		logger.Log.Infof("Fetching all %ss for Tenant %s", tenmod.TenantConnectorInstanceStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllTenantConnectorInstancesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllTenantConnectorInstancesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantConnectorInstanceStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer

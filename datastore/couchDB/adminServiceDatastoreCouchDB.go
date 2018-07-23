@@ -197,7 +197,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "reports", err.Error())
 		return nil, err
 	}
-	err = asd.deleteDatabase(reportDBID)
+	err = asd.DeleteDatabase(reportDBID)
 	if err != nil {
 		logger.Log.Debugf("Unable to delete report database for Tenant %s: %s", tenantID, err.Error())
 		return nil, err
@@ -209,7 +209,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "monitored objects", err.Error())
 		return nil, err
 	}
-	err = asd.deleteDatabase(moDBID)
+	err = asd.DeleteDatabase(moDBID)
 	if err != nil {
 		logger.Log.Debugf("Unable to delete monitored object database for Tenant %s: %s", tenantID, err.Error())
 		return nil, err
@@ -222,7 +222,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	}
 
 	// Try to delete the DB for the tenant
-	if err := asd.deleteDatabase(tenantIDWithPrefix); err != nil {
+	if err := asd.DeleteDatabase(tenantIDWithPrefix); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", admmod.TenantStr, err.Error())
 		return nil, err
 	}
@@ -310,8 +310,8 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 	return nil
 }
 
-// deleteDatabase - deletes a database in CouchDB identified by the provided name.
-func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
+// DeleteDatabase - deletes a database in CouchDB identified by the provided name.
+func (asd *AdminServiceDatastoreCouchDB) DeleteDatabase(dbName string) error {
 	if len(dbName) == 0 {
 		logger.Log.Debug("No database identifier provided, nothing to delete")
 		return nil

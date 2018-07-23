@@ -18,29 +18,29 @@ func TestExtractHeader(t *testing.T) {
 	logger.Log.Debug("Starting Header Text")
 	h := http.Header{}
 
-	h.Add(xFwdUserRoles, userRoleSkylight)
-	h.Add(xFwdUserName, "user")
-	h.Add(xFwdUserId, "0")
-	h.Add(xFwdTenantId, "0")
+	h.Add(XFwdUserRoles, UserRoleSkylight)
+	h.Add(XFwdUserName, "user")
+	h.Add(XFwdUserId, "0")
+	h.Add(XFwdTenantId, "0")
 
 	user, err := ExtractHeaderToUserAuthRequest(h)
 	assert.Nil(t, err)
 	assert.Equal(t, len(user.UserRoles), 1)
-	assert.Equal(t, user.UserRoles[0], userRoleSkylight)
+	assert.Equal(t, user.UserRoles[0], UserRoleSkylight)
 	assert.Equal(t, user.UserName, "user")
 	assert.Equal(t, user.UserID, "0")
 	assert.Equal(t, user.TenantID, "0")
 
-	rolesstr := fmt.Sprintf("%s,%s", userRoleSkylight, userRoleTenantUser)
+	rolesstr := fmt.Sprintf("%s,%s", UserRoleSkylight, UserRoleTenantUser)
 	h = http.Header{}
 	user = &RequestUserAuth{}
-	h.Add(xFwdUserRoles, rolesstr)
+	h.Add(XFwdUserRoles, rolesstr)
 
 	user, err = ExtractHeaderToUserAuthRequest(h)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(user.UserRoles))
-	assert.Equal(t, userRoleSkylight, user.UserRoles[0])
-	assert.Equal(t, userRoleTenantUser, user.UserRoles[1])
+	assert.Equal(t, UserRoleSkylight, user.UserRoles[0])
+	assert.Equal(t, UserRoleTenantUser, user.UserRoles[1])
 
 }
 
@@ -106,28 +106,28 @@ func TestRAC(t *testing.T) {
 	res = RoleAccessControl(h, []string{})
 	assert.Equal(t, false, res)
 
-	h.Add(xFwdUserRoles, userRoleSkylight)
-	h.Add(xFwdUserName, "user")
-	h.Add(xFwdUserId, "0")
-	h.Add(xFwdTenantId, "0")
+	h.Add(XFwdUserRoles, UserRoleSkylight)
+	h.Add(XFwdUserName, "user")
+	h.Add(XFwdUserId, "0")
+	h.Add(XFwdTenantId, "0")
 
 	// Deny access
-	res = RoleAccessControl(h, []string{userRoleTenantUser})
+	res = RoleAccessControl(h, []string{UserRoleTenantUser})
 	assert.Equal(t, false, res)
 
-	res = RoleAccessControl(h, []string{userRoleTenantAdmin})
+	res = RoleAccessControl(h, []string{UserRoleTenantAdmin})
 	assert.Equal(t, false, res)
 
-	res = RoleAccessControl(h, []string{userRoleUnknown})
+	res = RoleAccessControl(h, []string{UserRoleUnknown})
 	assert.Equal(t, false, res)
 
 	// Allow access
-	res = RoleAccessControl(h, []string{userRoleSkylight})
+	res = RoleAccessControl(h, []string{UserRoleSkylight})
 	assert.Equal(t, true, res)
 
 	// Allow access because RAC is disabled
 	cfg.Set(gather.CK_args_authorizationAAA.String(), false)
-	res = RoleAccessControl(h, []string{userRoleTenantUser})
+	res = RoleAccessControl(h, []string{UserRoleTenantUser})
 	assert.Equal(t, true, res)
 
 }
@@ -151,10 +151,10 @@ func TestBuildFunctor(t *testing.T) {
 	r.URL = &url.URL{Path: "test/path"}
 	r.Header = http.Header{}
 	h := http.Header{}
-	h.Add(xFwdUserRoles, userRoleSkylight)
-	h.Add(xFwdUserName, "user")
-	h.Add(xFwdUserId, "0")
-	h.Add(xFwdTenantId, "0")
+	h.Add(XFwdUserRoles, UserRoleSkylight)
+	h.Add(XFwdUserName, "user")
+	h.Add(XFwdUserId, "0")
+	h.Add(XFwdTenantId, "0")
 	r.Header = h
 
 	passed := false
@@ -176,7 +176,7 @@ func TestBuildFunctor(t *testing.T) {
 
 	cfg.Set(gather.CK_args_authorizationAAA.String(), false)
 
-	functor2test3 := BuildRouteHandlerWithRAC([]string{userRoleTenantUser}, functorHttpHandler)
+	functor2test3 := BuildRouteHandlerWithRAC([]string{UserRoleTenantUser}, functorHttpHandler)
 
 	functor2test3(&w, &r)
 
@@ -189,7 +189,7 @@ func TestBuildFunctor(t *testing.T) {
 	// Disabling the test for now since we shouldn't allow the test to panic even if we recover.
 
 	// Should deny access
-	//functor2test := BuildRouteHandlerWithRAC([]string{userRoleSkylight}, functorHttpHandler)
+	//functor2test := BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, functorHttpHandler)
 
 	//functor2test(&w, &r)
 
@@ -202,7 +202,7 @@ func TestBuildFunctor(t *testing.T) {
 
 	//cfg.Set(gather.CK_args_authorizationAAA.String(), true)
 
-	//functor2test2 := BuildRouteHandlerWithRAC([]string{userRoleTenantUser}, functorHttpHandler)
+	//functor2test2 := BuildRouteHandlerWithRAC([]string{UserRoleTenantUser}, functorHttpHandler)
 
 	//defer func() {
 	//	if r := recover(); r != nil {

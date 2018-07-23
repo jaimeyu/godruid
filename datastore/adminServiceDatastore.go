@@ -9,6 +9,7 @@ import (
 type AdminServiceDatastore interface {
 	AddAdminViews() error
 	CreateDatabase(dbName string) (Database, error)
+	DeleteDatabase(dbName string) error
 
 	CreateAdminUser(*admmod.User) (*admmod.User, error)
 	UpdateAdminUser(*admmod.User) (*admmod.User, error)

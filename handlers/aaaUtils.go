@@ -10,9 +10,9 @@ var (
 	authEnabled               = true
 	changeNotificationEnabled = true
 
-	SkylightAdminRoleOnly       = []string{userRoleSkylight}
-	SkylightAndTenantAdminRoles = []string{userRoleSkylight, userRoleTenantAdmin}
-	AllRoles                    = []string{userRoleSkylight, userRoleTenantAdmin, userRoleTenantUser}
+	SkylightAdminRoleOnly       = []string{UserRoleSkylight}
+	SkylightAndTenantAdminRoles = []string{UserRoleSkylight, UserRoleTenantAdmin}
+	AllRoles                    = []string{UserRoleSkylight, UserRoleTenantAdmin, UserRoleTenantUser}
 )
 
 // TODO: Make this better as I do not like how it is just free-floating vars on the package
@@ -27,10 +27,10 @@ func isRequestAuthorized(request *http.Request, allowedRoles []string) bool {
 		return true
 	}
 
-	requestRole := request.Header.Get(xFwdUserRoles)
+	requestRole := request.Header.Get(XFwdUserRoles)
 
 	// Allow system elements to have access
-	if requestRole == userRoleSystem {
+	if requestRole == UserRoleSystem {
 		return true
 	}
 

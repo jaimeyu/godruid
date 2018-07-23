@@ -25,7 +25,7 @@ func HandleCreateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Creating %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewCreateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -75,7 +75,7 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Updating %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -125,7 +125,7 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Patching %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.ID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewPatchTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewPatchTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -194,7 +194,7 @@ func HandleGetTenantMonitoredObject(allowedRoles []string, tenantDB datastore.Te
 		logger.Log.Infof("Fetching %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.MonObjID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -223,7 +223,7 @@ func HandleGetAllTenantMonitoredObjects(allowedRoles []string, tenantDB datastor
 		logger.Log.Infof("Fetching all %ss for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllTenantMonitoredObjectsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllTenantMonitoredObjectsForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -252,7 +252,7 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Deleting %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.MonObjID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -285,7 +285,7 @@ func HandleGetDomainToMonitoredObjectMap(allowedRoles []string, tenantDB datasto
 		logger.Log.Infof("Fetching %s for Tenant %s", tenmod.MonitoredObjectToDomainMapStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.MonitoredObjectToDomainMapStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetMonObjToDomMapStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetDomainToMonitoredObjectMapForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.MonitoredObjectToDomainMapStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetMonObjToDomMapStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Convert the request
@@ -320,7 +320,7 @@ func HandleBulkInsertMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Creating %s in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewBulkInsertMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk insert %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewBulkInsertMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk insert %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		logger.Log.Infof("Recieved: %s", models.AsJSONString(params.Body))
@@ -386,7 +386,7 @@ func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Updating %s in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		requestBytes, err := json.Marshal(params.Body)

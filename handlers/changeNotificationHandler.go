@@ -267,6 +267,29 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
 	}
+
+	// For metadata, we need to build a list of known qualifiers
+	logger.Log.Infof("Dumping Updating metadata from poll change")
+
+	tenantMeta, err := (*c.tenantDB).GetTenantMeta(tenantID)
+	if err != nil {
+		logger.Log.Errorf("Couldn't find tenant metadata for tenant: %s", tenantID)
+
+	}
+	var qualifiers []string
+
+	for key := range tenantMeta.MonitorObjectMetaKeys {
+		qualifiers = append(qualifiers, key)
+	}
+
+	setMetadataKeyCount(len(qualifiers))
+
+	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta", qualifiers, true); err != nil {
+		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
+
+	} else {
+		logger.Log.Infof("Updated metadata in metric DB for tenant %s", tenantID)
+	}
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {

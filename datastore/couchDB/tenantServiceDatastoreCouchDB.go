@@ -826,14 +826,14 @@ func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID str
 		keys = append(keys, key)
 	}
 
-	// Update the lookups on druid
-	err = tsd.metricsDB.AddMonitoredObjectToLookup(tenantID, []*tenmod.MonitoredObject{monitoredObject}, "meta", keys, false)
-	if err != nil {
-		msg := fmt.Sprintf("Tenant %s Error adding metadata keys(%v) to druid lookup, %+v, err: %s", tenantID, keys, []*tenmod.MonitoredObject{monitoredObject}, err.Error())
-		logger.Log.Error(msg)
-		// @TODO: REMOVE THIS DEBUG, there is an issue I'm debugging with this
-		//	return errors.New(msg)
-	}
+	// // Update the lookups on druid
+	// err = tsd.metricsDB.AddMonitoredObjectToLookup(tenantID, []*tenmod.MonitoredObject{monitoredObject}, "meta", keys, false)
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Tenant %s Error adding metadata keys(%v) to druid lookup, %+v, err: %s", tenantID, keys, []*tenmod.MonitoredObject{monitoredObject}, err.Error())
+	// 	logger.Log.Error(msg)
+	// 	// @TODO: REMOVE THIS DEBUG, there is an issue I'm debugging with this
+	// 	//	return errors.New(msg)
+	// }
 
 	// Now force the indexer to crunch!
 	// @TODO, needs to prove this works

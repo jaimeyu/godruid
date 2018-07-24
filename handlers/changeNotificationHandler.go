@@ -311,6 +311,10 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue
 		}
+
+		// Update counters
+		setMonitoredObjectCount(len(monitoredObjects))
+
 		if fullRefresh {
 			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
 		} else {
@@ -353,9 +357,12 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			}
 			var qualifiers []string
 
-			for key, _ := range tenantMeta.MonitorObjectMetaKeys {
+			for key := range tenantMeta.MonitorObjectMetaKeys {
 				qualifiers = append(qualifiers, key)
 			}
+
+			setMetadataKeyCount(len(qualifiers))
+
 			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta", qualifiers, true); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err

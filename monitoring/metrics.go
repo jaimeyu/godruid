@@ -173,6 +173,16 @@ const (
 
 	SLATimeBucketQueryStr = SLAReportStr + metricNameDelimiter + "time_bucket" + metricNameDelimiter + OPGetStr
 	SLAViolationsQueryStr = SLAReportStr + metricNameDelimiter + "violations" + metricNameDelimiter + OPGetStr
+
+	DruidStr           = "druid"
+	GetDruidLookups    = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPGetStr
+	UpdateDruidLookups = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPUpdateStr
+	DeleteLookups      = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPDeleteStr
+
+	GetDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPGetStr
+	UpdateDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPUpdateStr
+	DeleteDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPDeleteStr
+	AddDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPCreateStr
 )
 
 type MetricCounterType string
@@ -244,6 +254,12 @@ var (
 
 	// DruidAPIMethodDuration - Time it takes to complete a Druid API metyhod (includes query time, encoding time, etc.)
 	DruidAPIMethodDuration prometheus.SummaryVec
+
+	// MonitoredObjectCounter - the number of monitored objects during a pollChange call
+	MonitoredObjectCounter prometheus.Counter
+
+	// MonitoredObjectCounter - the number of monitored objects during a pollChange call
+	MetadataKeysCounter prometheus.Counter
 )
 
 // InitMetrics - registers all metrics to be collected for Gather.
@@ -265,6 +281,14 @@ func InitMetrics() {
 		Help:       "Time taken to execute a Driud calling method. Includes query time, encoding time, etc.",
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	}, []string{"code", "name"})
+
+	MonitoredObjectCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_metric_service_monitoredObjectCounter",
+		Help: "Number of monitored objects that is being accessed by pollChanges"})
+
+	MetadataKeysCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_metric_service_metadata_keys",
+		Help: "Number of metadata keys accessed by pollChanges"})
 
 	RecievedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "gather_api_call_received_since_startup",
@@ -329,6 +353,8 @@ func InitMetrics() {
 	prometheus.MustRegister(CompletedMetricServiceAPICalls)
 	prometheus.MustRegister(DruidAPIMethodDuration)
 	prometheus.MustRegister(DruidQueryDuration)
+	prometheus.MustRegister(MonitoredObjectCounter)
+	prometheus.MustRegister(MetadataKeysCounter)
 }
 
 // TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.

@@ -280,12 +280,6 @@ func CreateTenantServiceRESTHandler() *TenantServiceRESTHandler {
 			HandlerFunc: result.GetMonitoredObject,
 		},
 		server.Route{
-			Name:        "PostMonitoredObjectMeta",
-			Method:      "POST",
-			Pattern:     apiV1Prefix + tenantsAPIPrefix + "bulk/insert/monitored-objects/meta",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight, userRoleTenantAdmin}, result.PostMonitoredObjectMeta),
-		},
-		server.Route{
 			Name:        "DeleteMonitoredObject",
 			Method:      "DELETE",
 			Pattern:     apiV1Prefix + tenantsAPIPrefix + "monitored-objects/{dataID}",
@@ -1627,79 +1621,6 @@ func RespondWithStructuredErrorList(w http.ResponseWriter, startTime time.Time, 
 		logger.Log.Error("Couldn't marshal error message :%s", err.Error())
 	}
 	http.Error(w, fmt.Sprintf("%s", data), responseCode)
-}
-
-// PostMonitorObjectMetadata- Patch a tenant monitored object
-func (tsh *TenantServiceRESTHandler) PostMonitoredObjectMeta(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-	opStr := mon.PatchMonObjStr
-	postError := tenmod.RequestError{}
-
-	tenantID := getDBFieldFromRequest(r, 4)
-	// Unmarshal the request
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		issue := tenmod.RequestErrorItem{
-			Reason: fmt.Sprintf("Could not unmarshal request: %s", err.Error()),
-		}
-		postError.Issues = append(postError.Issues, issue)
-		RespondWithStructuredErrorList(w, startTime, "400", opStr, postError, http.StatusBadRequest)
-		return
-	}
-
-	data := tenmod.MonitoredObjectMetadataPost{}
-	err = jsonapi.Unmarshal(requestBytes, &data)
-	if err != nil {
-		issue := tenmod.RequestErrorItem{
-			Reason: fmt.Sprintf("Could not unmarshal request: %s", err.Error()),
-		}
-		postError.Issues = append(postError.Issues, issue)
-		RespondWithStructuredErrorList(w, startTime, "400", opStr, postError, http.StatusBadRequest)
-		return
-	}
-
-	err = data.Validate(true)
-	if err != nil {
-		issue := tenmod.RequestErrorItem{
-			Reason: fmt.Sprintf("Could not validate request: %s", err.Error()),
-		}
-		postError.Issues = append(postError.Issues, issue)
-		RespondWithStructuredErrorList(w, startTime, "400", opStr, postError, http.StatusBadRequest)
-		return
-	}
-
-	for _, item := range data.Items {
-		// Issue request to DAO Layer
-		oldData, err := tsh.TenantDB.GetMonitoredObjectByObjectName(item.KeyName, tenantID)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-			reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
-			return
-		}
-
-		logger.Log.Infof("Patching metadata only!%s: %s", tenmod.TenantMonitoredObjectStr, oldData)
-
-		// Issue request to DAO Layer
-		_, err = tsh.TenantDB.UpdateMonitoredObject(oldData)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-			reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
-			return
-		}
-
-		err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
-			reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
-			return
-		}
-
-		logger.Log.Debugf("DEBUG PATCHED GOING TO NOTIFY")
-		NotifyMonitoredObjectUpdated(oldData.TenantID, oldData)
-
-	}
-
-	sendSuccessResponse(postError, w, startTime, opStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
 
 //PatchUpdateMonitoredObject - Patch a tenant monitored object

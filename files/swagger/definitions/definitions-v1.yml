@@ -534,6 +534,26 @@
         items: 
           type: "string"
 
+  BulkMonitoredObjectMetaRequest:
+    type: "object"
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/MonitoredObjectMetadataItem'
+
+  MonitoredObjectMetadataItem:
+    type: "object"
+    properties:
+      keyName:
+        type: "string"
+      metadataKey:
+        type: "string"
+      metadata:
+        type: "object"
+        additionalProperties: 
+          type: "string"
+
   MonitoredObjectCountByDomainRequest:
     type: "object"
     properties:

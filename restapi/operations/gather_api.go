@@ -48,6 +48,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceBulkUpdateMonitoredObjectHandler: tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpdateMonitoredObject has not yet been implemented")
 		}),
+		TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler: tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpsertMonitoredObjectMeta has not yet been implemented")
+		}),
 		AdminProvisioningServiceCreateAdminUserHandler: admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceCreateAdminUser has not yet been implemented")
 		}),
@@ -325,7 +328,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -334,6 +337,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceBulkInsertMonitoredObjectHandler tenant_provisioning_service.BulkInsertMonitoredObjectHandler
 	// TenantProvisioningServiceBulkUpdateMonitoredObjectHandler sets the operation handler for the bulk update monitored object operation
 	TenantProvisioningServiceBulkUpdateMonitoredObjectHandler tenant_provisioning_service.BulkUpdateMonitoredObjectHandler
+	// TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler sets the operation handler for the bulk upsert monitored object meta operation
+	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
 	// AdminProvisioningServiceCreateAdminUserHandler sets the operation handler for the create admin user operation
 	AdminProvisioningServiceCreateAdminUserHandler admin_provisioning_service.CreateAdminUserHandler
 	// AdminProvisioningServiceCreateIngestionDictionaryHandler sets the operation handler for the create ingestion dictionary operation
@@ -573,6 +578,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpdateMonitoredObjectHandler")
+	}
+
+	if o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
 
 	if o.AdminProvisioningServiceCreateAdminUserHandler == nil {
@@ -1023,6 +1032,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/v1/tenants/{tenantId}/bulk/insert/monitored-objects"] = tenant_provisioning_service.NewBulkUpdateMonitoredObject(o.context, o.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v1/tenants/{tenantId}/bulk/upsert/monitored-objects/meta"] = tenant_provisioning_service.NewBulkUpsertMonitoredObjectMeta(o.context, o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

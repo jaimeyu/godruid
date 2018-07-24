@@ -438,3 +438,66 @@ func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		return tenant_provisioning_service.NewBulkUpdateMonitoredObjectOK().WithPayload(converted)
 	}
 }
+
+func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+	return func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		logger.Log.Infof("Updating %s meta data in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
+
+		tenantID := params.TenantID
+
+		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk upsert %s meta operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		requestBytes, err := json.Marshal(params.Body)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		println(string(requestBytes[:]))
+
+		// Unmarshal the request
+		data := tenmod.MonitoredObjectBulkMetadata{}
+		err = json.Unmarshal(requestBytes, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		for _, item := range data.Items {
+			// Issue request to DAO Layer
+			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.KeyName, tenantID)
+			if err != nil {
+				msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+
+			logger.Log.Infof("Patching metadata for %s with name %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName)
+
+			existingMonitoredObject.Meta = item.Metadata
+
+			// Issue request to DAO Layer
+			_, err = tenantDB.UpdateMonitoredObject(existingMonitoredObject)
+			if err != nil {
+				msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+
+			err = tenantDB.MonitoredObjectKeysUpdate(tenantID, existingMonitoredObject)
+			if err != nil {
+				msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject))
+				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+			}
+
+			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMonitoredObject.ObjectName)
+			NotifyMonitoredObjectUpdated(existingMonitoredObject.TenantID, existingMonitoredObject)
+
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
+		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK()
+	}
+}

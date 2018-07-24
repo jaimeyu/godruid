@@ -52,6 +52,7 @@ const (
 	OPAddStr       = "add"
 	OPBulkInsert   = "bulk_insert"
 	OPBulkUpdate   = "bulk_update"
+	OPBulkUpsert   = "bulk_upsert"
 
 	// TimeStr - metric constant for a time metric
 	TimeStr    = "time"
@@ -168,8 +169,9 @@ const (
 	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
 	AddAdminViewsStr           = AdminViewsStr + metricNameDelimiter + OPAddStr
 
-	BulkInsertMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
-	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+	BulkInsertMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
+	BulkUpdateMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+	BulkUpsertMonObjMetaStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
 
 	SLATimeBucketQueryStr = SLAReportStr + metricNameDelimiter + "time_bucket" + metricNameDelimiter + OPGetStr
 	SLAViolationsQueryStr = SLAReportStr + metricNameDelimiter + "violations" + metricNameDelimiter + OPGetStr

@@ -645,7 +645,7 @@ type Dashboard struct {
 	DomainSet []string `json:"domainSet"`
 }
 
-type MonitoredObjectMetadataPostItem struct {
+type MonitoredObjectBulkMetadataItem struct {
 	// Relates to which property in the monitoredbjects
 	// Tells gather that MetadataKey in the Metadata should match
 	// the key in monitored object.
@@ -663,14 +663,11 @@ type MonitoredObjectMetadataPostItem struct {
 	Metadata map[string]string `json:"metadata"`
 }
 
-type MonitoredObjectMetadataPost struct {
-	ID  string `json:"_id"`
-	REV string `json:"_rev"`
-	// LIMIT TO 50
-	Items []MonitoredObjectMetadataPostItem `json:"items"`
+type MonitoredObjectBulkMetadata struct {
+	Items []MonitoredObjectBulkMetadataItem `json:"items"`
 }
 
-func (meta *MonitoredObjectMetadataPost) Validate(isUpdate bool) error {
+func (meta *MonitoredObjectBulkMetadata) Validate(isUpdate bool) error {
 	if len(meta.Items) == 0 {
 		return errors.New("Monitored Object List cannot be empty")
 	}
@@ -680,7 +677,7 @@ func (meta *MonitoredObjectMetadataPost) Validate(isUpdate bool) error {
 // Error models
 type RequestErrorItem struct {
 	Reason string                          `json:"reason"`
-	Item   MonitoredObjectMetadataPostItem `json:"item"`
+	Item   MonitoredObjectBulkMetadataItem `json:"item"`
 }
 
 // On a non-200 response, the body will contain a

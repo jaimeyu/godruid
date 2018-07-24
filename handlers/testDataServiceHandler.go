@@ -84,42 +84,42 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Name:        "PopulateTestData",
 			Method:      "POST",
 			Pattern:     "/test-data",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PopulateTestData),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PopulateTestData),
 		},
 
 		server.Route{
 			Name:        "PopulateTestDataBulkRandomizedMO",
 			Method:      "POST",
 			Pattern:     "/test-data/bulkRandomizedMO",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PopulateTestDataBulkRandomizedMO),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PopulateTestDataBulkRandomizedMO),
 		},
 
 		server.Route{
 			Name:        "PurgeDB",
 			Method:      "DELETE",
 			Pattern:     "/test-data/{dbname}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PurgeDB),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PurgeDB),
 		},
 
 		server.Route{
 			Name:        "GenerateHistoricalDomainSLAReports",
 			Method:      "POST",
 			Pattern:     "/test-data/domain-sla-reports",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GenerateHistoricalDomainSLAReports),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.GenerateHistoricalDomainSLAReports),
 		},
 
 		server.Route{
 			Name:        "GetAllDocsByType",
 			Method:      "GET",
 			Pattern:     "/test-data/{dbname}/{datatype}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllDocsByType),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.GetAllDocsByType),
 		},
 
 		server.Route{
 			Name:        "InsertTenantViews",
 			Method:      "PUT",
 			Pattern:     "/test-data/tenant-views/{dbname}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.InsertTenantViews),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.InsertTenantViews),
 		},
 	}
 

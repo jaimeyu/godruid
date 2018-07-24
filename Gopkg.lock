@@ -243,7 +243,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "3fdea8d05856a0c8df22ed4bc71b3219245e4485"
+  revision = "efc7eb8984d6655c26b5c9d2e65c024e5767c37c"
 
 [[projects]]
   name = "github.com/manyminds/api2go"
@@ -388,6 +388,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/tylerb/graceful"
+  packages = ["."]
+  revision = "d72b0151351a13d0421b763b88f791469c4f5dc7"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -485,6 +491,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ba207b43d1d196b914cf5f8f3f8e7e690053af4407142464be6ecd7df59a8e79"
+  inputs-digest = "6a5128c826008221a940026120b1b7588844a0c5a97f66fe14ee03299ddb8068"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -23,6 +23,7 @@ type httpErrorString string
 const (
 	// Error search strings
 	notFound httpErrorString = "status 404 - not found"
+	conflict httpErrorString = "already exists"
 
 	// Custom Error types
 	errorMarshal = -100
@@ -445,11 +446,11 @@ User roles as defined by Skylight AAA
     UnknownRole   UserRole = "unknown"
 */
 const (
-	userRoleSkylight    = "skylight-admin"
-	userRoleTenantAdmin = "tenant-admin"
-	userRoleTenantUser  = "tenant-user"
-	userRoleSystem      = "system"
-	userRoleUnknown     = "unknown"
+	UserRoleSkylight    = "skylight-admin"
+	UserRoleTenantAdmin = "tenant-admin"
+	UserRoleTenantUser  = "tenant-user"
+	UserRoleSystem      = "system"
+	UserRoleUnknown     = "unknown"
 )
 
 // X-Forward strings that will come from skylight AAA
@@ -460,10 +461,10 @@ X-Forwarded-User-Roles   (format string)
 X-Forwarded-Tenant-Id   (format string)
 */
 const (
-	xFwdUserId    = "X-Forwarded-User-Id"
-	xFwdUserName  = "X-Forwarded-Username"
-	xFwdUserRoles = "X-Forwarded-User-Roles"
-	xFwdTenantId  = "X-Forwarded-Tenant-Id"
+	XFwdUserId    = "X-Forwarded-User-Id"
+	XFwdUserName  = "X-Forwarded-Username"
+	XFwdUserRoles = "X-Forwarded-User-Roles"
+	XFwdTenantId  = "X-Forwarded-Tenant-Id"
 )
 
 // RequestUserAuth - AAA will forward us information about the requester and this struct will hold the info
@@ -478,13 +479,13 @@ type RequestUserAuth struct {
 // ExtractHeaderToUserAuthRequest - Converts a header into a requestUserAuth struct
 func ExtractHeaderToUserAuthRequest(h http.Header) (*RequestUserAuth, error) {
 	logger.Log.Debugf("Received Headers: %s", models.AsJSONString(h))
-	roles := h.Get(xFwdUserRoles)
+	roles := h.Get(XFwdUserRoles)
 	lRoles := strings.Split(roles, ",")
 	req := RequestUserAuth{
-		UserID:    h.Get(xFwdUserId),
+		UserID:    h.Get(XFwdUserId),
 		UserRoles: lRoles,
-		UserName:  h.Get(xFwdUserName),
-		TenantID:  h.Get(xFwdTenantId),
+		UserName:  h.Get(XFwdUserName),
+		TenantID:  h.Get(XFwdTenantId),
 	}
 
 	return &req, nil
@@ -533,7 +534,7 @@ func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 
 	// We currenly only support 1 allowed role, this may change in the future
 	allowedRole := allowedRoles[0]
-	if allowedRole == userRoleSystem {
+	if allowedRole == UserRoleSystem {
 		// Always allow the "system" level auth access to the APIs
 		logger.Log.Debugf("Access role %s provided. Access Granted", allowedRole)
 		return true
@@ -644,4 +645,37 @@ func convertToJsonapiObject(obj interface{}, dataContainer interface{}) error {
 	}
 
 	return nil
+}
+
+// authorizeRequest - Does the initial setup of a REST handler function, including logging, incrementing API counters for monitoring and tracking the
+// initialization time of the call.
+// Returns:
+//  - isAuthorized (bool) -> indicates if the request was authorized based on the logged in userr's role.
+//  - startTime -> the time at which this API call was initiated
+func authorizeRequest(initMsg string, req *http.Request, allowedRoles []string, countersToIncrement ...mon.MetricCounterType) (bool, time.Time) {
+	startTime := time.Now()
+	incrementAPICounters(countersToIncrement...)
+
+	logger.Log.Info(initMsg)
+
+	return isRequestAuthorized(req, allowedRoles), startTime
+}
+
+// convertRequestBodyToDBModel - converts a generic object into a know type. Useful for converting a REST request body into a DB model.
+func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interface{}) error {
+	requestBytes, err := json.Marshal(requestBody)
+	if err != nil {
+		return err
+	}
+
+	err = jsonapi.Unmarshal(requestBytes, dataContainer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func checkForNotFound(s string) bool {
+	return strings.Contains(s, string(notFound))
 }

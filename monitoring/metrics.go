@@ -34,6 +34,7 @@ const (
 	AggMetricsStr              = "aggr_metrics"
 	TenantConnectorConfigStr   = "connector_config"
 	TenantConnectorInstanceStr = "connector_instance"
+	DataCleaningProfileStr     = "data_cln_prf"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -183,6 +184,13 @@ const (
 	UpdateDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPUpdateStr
 	DeleteDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPDeleteStr
 	AddDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPCreateStr
+
+	// Data Cleaning
+	GetDataCleaningProfileStr    = DataCleaningProfileStr + metricNameDelimiter + OPGetStr
+	GetAllDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPGetAllStr
+	DeleteDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPDeleteStr
+	CreateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPCreateStr
+	UpdateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPPatchStr
 )
 
 type MetricCounterType string

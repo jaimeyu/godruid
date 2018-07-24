@@ -2930,3 +2930,135 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 	assert.Equal(t, float32(0), sRep.ReportSummary.SLACompliancePercent)
 
 }
+
+func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD(t *testing.T) {
+
+	const COMPANY1 = "DomainCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const THRPRF = "ThresholdPrf"
+	const THRPRF2 = "ThresholdPrf2"
+
+	RULE1 := &tenmod.DataCleaningRule{
+		MetricLabel:  "SomeLabel1",
+		MetricVendor: "SomeVendor1",
+		TriggerCondition: &tenmod.DataCleaningRuleCondition{
+			Comparator:     "trigcomp1",
+			Duration:       "trigdur1",
+			Value:          "trigvalue1",
+			ValueAggregate: "trigagg1",
+		},
+		ClearCondition: &tenmod.DataCleaningRuleCondition{
+			Comparator:     "clearcomp1",
+			Duration:       "cleardur1",
+			Value:          "clearvalue1",
+			ValueAggregate: "clearagg1",
+		},
+	}
+	RULE2 := &tenmod.DataCleaningRule{
+		MetricLabel:  "SomeLabel2",
+		MetricVendor: "SomeVendor2",
+		TriggerCondition: &tenmod.DataCleaningRuleCondition{
+			Comparator:     "trigcomp2",
+			Duration:       "trigdur2",
+			Value:          "trigvalue2",
+			ValueAggregate: "trigagg2",
+		},
+		ClearCondition: &tenmod.DataCleaningRuleCondition{
+			Comparator:     "clearcomp2",
+			Duration:       "cleardur2",
+			Value:          "clearvalue2",
+			ValueAggregate: "clearagg2",
+		},
+	}
+	RULES1 := []*tenmod.DataCleaningRule{RULE1, RULE2}
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Validate that there are currently no records
+	record, err := runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
+	assert.NotNil(t, err)
+	assert.Empty(t, record)
+
+	// Try to Update a record that does not exist:
+	fail, err := runner.tenantDB.UpdateTenantDataCleaningProfile(&tenmod.DataCleaningProfile{})
+	assert.NotNil(t, err)
+	assert.Nil(t, fail)
+
+	// Create a record
+	dcp := tenmod.DataCleaningProfile{
+		TenantID: TENANT,
+		Rules:    RULES1,
+	}
+	created, err := runner.tenantDB.CreateTenantDataCleaningProfile(&dcp)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, string(tenmod.TenantDataCleaningProfileType), created.Datatype)
+	assert.Equal(t, 2, len(created.Rules), "Not the correct number of rules")
+	assert.Equal(t, created.TenantID, TENANT, "Tenant ID not the same")
+	assert.True(t, created.CreatedTimestamp > 0, "CreatedTimestamp was not set")
+	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
+
+	// Get a record
+	fetched, err := runner.tenantDB.GetTenantDataCleaningProfile(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, string(tenmod.TenantDataCleaningProfileType), fetched.Datatype)
+	assert.Equal(t, 2, len(fetched.Rules), "Not the correct number of rules")
+	assert.Equal(t, TENANT, fetched.TenantID, "Tenant ID not the same")
+
+	time.Sleep(time.Millisecond * 2)
+
+	// Update a record
+	updateRecord := tenmod.DataCleaningProfile{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Rules = []*tenmod.DataCleaningRule{}
+	updated, err := runner.tenantDB.UpdateTenantDataCleaningProfile(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, updated)
+	assert.Equal(t, updated.ID, fetched.ID)
+	assert.NotEqual(t, updated.REV, fetched.REV)
+	assert.Equal(t, string(tenmod.TenantDataCleaningProfileType), updated.Datatype)
+	assert.Equal(t, 0, len(updated.Rules), "Should not have any rules")
+	assert.Equal(t, updated.TenantID, TENANT, "Tenant ID not the same")
+	assert.Equal(t, updated.CreatedTimestamp, fetched.CreatedTimestamp, "CreatedTimestamp should not be updated")
+	assert.True(t, updated.LastModifiedTimestamp > fetched.LastModifiedTimestamp, "LastmodifiedTimestamp was not updated")
+
+	// Add a second record.
+	dcp2 := tenmod.DataCleaningProfile{
+		TenantID: TENANT}
+	created2, err := runner.tenantDB.CreateTenantDataCleaningProfile(&dcp2)
+	assert.NotNil(t, err)
+	assert.Nil(t, created2)
+
+	// Try the get all
+	allRecords, err := runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
+	assert.Nil(t, err)
+	assert.NotNil(t, allRecords)
+	assert.Equal(t, 1, len(allRecords), "Should have found 1 record")
+
+	// Delete a record.
+	deleted, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT, updated.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.Equal(t, 0, len(deleted.Rules), "Deleted should not have any rules")
+
+	// Delete a record that does not exist
+	deleteDNE, err := runner.tenantDB.DeleteTenantDataCleaningProfile(TENANT, updated.ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleteDNE)
+
+	allRecords, err = runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
+	assert.NotNil(t, err)
+	assert.Nil(t, allRecords)
+}

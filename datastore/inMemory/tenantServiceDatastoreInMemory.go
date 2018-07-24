@@ -28,8 +28,9 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantSLAReportMap            map[string]map[string]*metmod.SLAReport
 	tenantToIDtoDashboardMap                  map[string]map[string]*tenmod.Dashboard
 
-	tenantIDtoMetaSlice   map[string][]*tenmod.Metadata
-	tenantIDtoIngPrfSlice map[string][]*tenmod.IngestionProfile
+	tenantIDtoMetaSlice                map[string][]*tenmod.Metadata
+	tenantIDtoIngPrfSlice              map[string][]*tenmod.IngestionProfile
+	tenantIDtoDataCleaningProfileSlice map[string][]*tenmod.DataCleaningProfile
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -47,6 +48,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
+	res.tenantIDtoDataCleaningProfileSlice = map[string][]*tenmod.DataCleaningProfile{}
 
 	return res, nil
 }
@@ -101,6 +103,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantDashboardType:
 		if tsd.tenantToIDtoDashboardMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantDataCleaningProfileType:
+		if tsd.tenantIDtoDataCleaningProfileSlice[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -1309,6 +1315,104 @@ func (tsd *TenantServiceDatastoreInMemory) HasDashboardsWithDomain(tenantID stri
 	}
 	return false, nil
 
+}
+
+// CreateTenantDataCleaningProfile - InMemory implementation of CreateTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error) {
+	if err := tsd.DoesTenantExist(dcp.TenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID] = make([]*tenmod.DataCleaningProfile, 1)
+	}
+
+	existing := tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID][0]
+	if existing != nil {
+		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	recCopy := tenmod.DataCleaningProfile{}
+	deepcopy.Copy(&recCopy, dcp)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantDataCleaningProfileType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// UpdateTenantDataCleaningProfile - InMemory implementation of UpdateTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error) {
+	if len(dcp.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantDataCleaningProfileStr)
+	}
+	if len(dcp.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantDataCleaningProfileStr)
+	}
+	if err := tsd.DoesTenantExist(dcp.TenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	recCopy := tenmod.DataCleaningProfile{}
+	deepcopy.Copy(&recCopy, dcp)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantDataCleaningProfileType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantIDtoDataCleaningProfileSlice[dcp.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// DeleteTenantDataCleaningProfile - InMemory implementation of DeleteTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
+	}
+	existing := tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0]
+	if existing == nil || existing.ID != dataID {
+		return nil, fmt.Errorf("%s %ss: %s", tenmod.TenantDataCleaningProfileStr, dataID, ds.NotFoundStr)
+	}
+
+	tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] = nil
+
+	return existing, nil
+}
+
+// GetTenantDataCleaningProfile - InMemory implementation of GetTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreInMemory) GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	if tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] == nil || tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0].ID != dataID {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	return tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0], nil
+}
+
+// GetAllTenantDataCleaningProfiles - InMemory implementation of GetAllTenantDataCleaningProfiles
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDataCleaningProfileStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDataCleaningProfileType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	if len(tsd.tenantIDtoDataCleaningProfileSlice[tenantID]) == 0 || tsd.tenantIDtoDataCleaningProfileSlice[tenantID][0] == nil {
+		return nil, fmt.Errorf("%ss: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+	}
+
+	return tsd.tenantIDtoDataCleaningProfileSlice[tenantID], nil
 }
 
 func doesSliceContainString(container []string, value string) bool {

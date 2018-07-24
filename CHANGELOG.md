@@ -1,7 +1,27 @@
 ## Current Release 
+### 0.175.0 
+**Release Date:** Mon Jul 23 20:29:41 UTC 2018     
+## Previous Releases 
+### 0.174.0 
+**Release Date:** Fri Jul 20 17:57:47 UTC 2018     
+### 0.173.0 
+**Release Date:** Fri Jul 20 16:43:39 UTC 2018     
+### 0.172.0 
+**Release Date:** Fri Jul 20 14:29:20 UTC 2018     
+### 0.171.0 
+**Release Date:** Fri Jul 20 13:59:02 UTC 2018     
+### 0.170.0 
+**Release Date:** Thu Jul 19 19:50:34 UTC 2018     
+### 0.169.0 
+**Release Date:** Thu Jul 19 14:00:31 UTC 2018     
+### 0.168.0 
+**Release Date:** Tue Jul 17 16:40:38 UTC 2018     
+### 0.167.0 
+**Release Date:** Tue Jul 17 15:21:47 UTC 2018     
+### 0.166.0 
+**Release Date:** Tue Jul 17 15:04:37 UTC 2018     
 ### 0.165.0 
 **Release Date:** Mon Jul 16 15:43:02 UTC 2018     
-## Previous Releases 
 ### 0.164.0 
 **Release Date:** Sat Jul 14 14:23:34 UTC 2018     
 * Feat - include a query filter to query only clean metrics

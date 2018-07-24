@@ -26,7 +26,7 @@ func HandleCreateReportScheduleConfig(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Creating %s %s for Tenant %s", metmod.ReportScheduleConfigStr, params.Body.Data.Attributes.Name, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewCreateReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Ensure that we can unmarshal the provided report schedule payload into the model object
@@ -80,7 +80,7 @@ func HandleUpdateReportScheduleConfig(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Updating %s %s for Tenant %s", metmod.ReportScheduleConfigStr, params.Body.Data.Attributes.Name, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewUpdateReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewUpdateReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Ensure that we can unmarshal the provided report schedule payload into the model object
@@ -134,7 +134,7 @@ func HandleGetReportScheduleConfig(allowedRoles []string, tenantDB datastore.Ten
 		logger.Log.Infof("Fetching %s %s for Tenant %s", metmod.ReportScheduleConfigStr, params.ConfigID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -163,7 +163,7 @@ func HandleGetAllReportScheduleConfigs(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Fetching all %ss for Tenant %s", metmod.ReportScheduleConfigStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -192,7 +192,7 @@ func HandleDeleteReportScheduleConfig(allowedRoles []string, tenantDB datastore.
 		logger.Log.Infof("Deleting %s %s for Tenant %s", metmod.ReportScheduleConfigStr, params.ConfigID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewDeleteReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewDeleteReportScheduleConfigForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", metmod.ReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteReportScheduleConfigStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer

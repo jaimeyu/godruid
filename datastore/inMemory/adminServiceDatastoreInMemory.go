@@ -362,3 +362,9 @@ func (memDB *AdminServiceDatastoreInMemory) CreateDatabase(dbName string) (ds.Da
 	// Nothing to do for in memory
 	return nil, nil
 }
+
+// DeleteDatabase - InMemory implementation of DeleteDatabase
+func (memDB *AdminServiceDatastoreInMemory) DeleteDatabase(dbName string) error {
+	// Nothing to do for in memory
+	return nil
+}

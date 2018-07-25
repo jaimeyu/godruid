@@ -457,8 +457,6 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		println(string(requestBytes[:]))
-
 		// Unmarshal the request
 		data := tenmod.MonitoredObjectBulkMetadata{}
 		err = json.Unmarshal(requestBytes, &data)
@@ -468,7 +466,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 		for _, item := range data.Items {
 			// Issue request to DAO Layer
-			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.KeyName, tenantID)
+			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
 			if err != nil {
 				msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))

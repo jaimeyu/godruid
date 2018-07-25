@@ -858,21 +858,32 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, err
 	}
 
-	index := "monitoredObjectCount/byName"
-	selector := fmt.Sprintf(`in(objectName, []string{"%s"}`, name)
+	index := "indexOfobjectName"
+	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
 	// Expect only 1 return
 	const expectOnly1Result = 1
-	fetchedData, err := db.Query([]string{"meta.objectName"}, selector, nil, expectOnly1Result, nil, index)
-	logger.Log.Debugf("!!Returning objectName search : %s", models.AsJSONString(fetchedData))
+	fetchedData, err := db.Query([]string{"_id"}, selector, nil, expectOnly1Result, nil, index)
+
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Log.Debugf("!!Returning objectName search : %s", models.AsJSONString(fetchedData))
-	mo := tenmod.MonitoredObject{}
+	id, found := fetchedData[0]["_id"]
 
-	fetchedMonObject, err := getByDocID("1", "getting by objectname", db)
-	//fetchedMonObject, err := getByDocID(data["rows"], "getting by objectname", db)
+	if !found {
+		return nil, errors.New(fmt.Sprintf("Could not find mapping of monitored object with name %s to id %s", name, id))
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Found mapping of monitored object with name %s to id %s", name, id)
+	}
+
+	mo := &tenmod.MonitoredObject{}
+
+	fetchedMonObject, err := getByDocID(id.(string), "getting by objectname", db)
+
+	fmt.Println(fetchedMonObject)
+
 	if err != nil {
 		return nil, err
 	}
@@ -882,7 +893,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, err
 	}
 
-	return &mo, nil
+	fmt.Println(*mo)
+
+	return mo, nil
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta

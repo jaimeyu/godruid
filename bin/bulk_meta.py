@@ -14,7 +14,8 @@ def conf_logging():
 
 def open_processed_file():
     processed_headers = ["key","status"]
-    processed_filename = "%s/processed_%s.csv" % (os.path.dirname(sys.argv[0]), calendar.timegm(time.gmtime()))
+    #processed_filename = "%s/log/processed_%s.csv" % (os.path.dirname(sys.argv[0]), calendar.timegm(time.gmtime()))
+    processed_filename = "/tmp/processed.csv"
     logging.info("Generating processed log at %s", processed_filename)
     f = open(processed_filename,"w+")
     f.write(",".join(processed_headers))
@@ -22,8 +23,8 @@ def open_processed_file():
 
 def construct_entry_func(headers, metadatakey):
     def construct_entry(entry): 
-        metadata = dict(zip(headers, entry))
-        entry_struct = { "keyName":metadata[metadatakey],"metadataKey":metadatakey,"metadata":metadata}
+        metadata = {k: v for k, v in dict(zip(headers,entry)).items() if v}
+        entry_struct = { "keyName":metadatakey,"metadataKey":metadata[metadatakey],"metadata":metadata}
         return json.dumps(entry_struct)
     return construct_entry
 
@@ -31,8 +32,14 @@ def envoy_func(conn, auth, host, tenantid, processfile):
     def envoy(b_id, batch):
         batchlist = list(batch)
         logging.info("Sending batch %s of size %d to %s", b_id, len(batchlist), host)
-        payload = "{'_id'='1','_rev'='1','items':[%s]}" % ",".join(batchlist)
+        payload = "{\"items\":[%s]}" % ",".join(batchlist)
         print(payload)
+        conn.request("POST","/api/v1/tenants/%s/bulk/upsert/monitored-objects/meta" % tenantid, payload, {"Content-Type":"application/json","X-Forwarded-User-Roles":"skylight-admin"})
+        bulk_response = conn.getresponse()
+        if bulk_response.status != 200:
+            logging.error("Batch with id %s failed to properly apply" % b_id)
+            return
+        bulk_response.read()
     return envoy
 
 def login(conn, host, username, password):
@@ -71,7 +78,9 @@ def process(file, batchsize, keyname, f_envoy):
                 batch = []
         
         if len(batch) > 0:
-            f_envoy(i//batchsize, map(f_entry, batch))
+            f_envoy((i//batchsize)+1, map(f_entry, batch))
+
+start = time.time()
 
 # Process the command line arguments
 parser = argparse.ArgumentParser(description="Bulk insert meta information against monitored objects in datahub.")
@@ -84,24 +93,35 @@ parser.add_argument("-t", "--tenantname", help="Name of the tenant that the moni
 
 args = parser.parse_args()
 
-batchsize = args.batchsize
-metafile = args.file
-host = args.host
-username = args.username
-password = args.password
-tenant = args.tenant
+# batchsize = args.batchsize
+# metafile = args.file
+# host = args.host
+# username = args.username
+# password = args.password
+# tenant = args.tenant
+# keyname = "Enode B"
+
+batchsize = 50
+metafile = "/Users/abatosparac/go/src/github.com/accedian/adh-gather/bin/test.csv"
+#host = "abatos.npav.accedian.net"
+host = "localhost:10001"
+username = "admin@datahub.com"
+password = "AccedianPass"
+tenant = "abp-mechanicalturk"
 keyname = "Enode B"
 
 conf_logging()
 
 logging.info("Loading entries from " + metafile)
 
-conn = http.client.HTTPSConnection(host, timeout=5)
+#conn = http.client.HTTPSConnection(host, timeout=5)
+conn = http.client.HTTPConnection(host, timeout=10)
 
 logging.info("Logging into datahub...")
-auth = login(conn, host, username, password)
-if auth is None:
-    logging.error("Could not login. Exiting...")
+#auth = login(conn, host, username, password)
+#if auth is None:
+#    logging.error("Could not login. Exiting...")
+auth = "" #TDO REMOVE
 
 tid = tenant_id(conn, auth, host, tenant)
 
@@ -109,8 +129,8 @@ pf = open_processed_file()
 
 try:
     logging.info("Starting to process...")
-    #process(metafile, batchsize, keyname, envoy_func(conn, auth, host, tid, pf))
+    process(metafile, batchsize, keyname, envoy_func(conn, auth, host, tid, pf))
 finally:
     pf.close()
 
-logging.info("Finishing processing %s", metafile)
+logging.info("Finishing processing %s in %s seconds", metafile, (time.time() - start))

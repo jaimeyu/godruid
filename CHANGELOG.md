@@ -1,3 +1,4 @@
+* Fix raw metrics api to include unclean by default
 ## Current Release 
 ### 0.175.0 
 **Release Date:** Mon Jul 23 20:29:41 UTC 2018     

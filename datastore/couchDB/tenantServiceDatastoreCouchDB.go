@@ -880,20 +880,21 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 
 	mo := &tenmod.MonitoredObject{}
 
-	fetchedMonObject, err := getByDocID(id.(string), "getting by objectname", db)
+	fetchedMonObject, err := getByDocID(id.(string), "by objectname", db)
 
-	fmt.Println(fetchedMonObject)
+	// Flatten the map so that the unmarshaller can properly build the object
+	flatMO := fetchedMonObject["data"].(map[string]interface{})
+	flatMO["_id"] = id.(string)
+	flatMO["_rev"] = fetchedMonObject["_rev"].(string)
 
 	if err != nil {
 		return nil, err
 	}
-	raw, _ := json.Marshal(fetchedMonObject)
+	raw, _ := json.Marshal(flatMO)
 	err = json.Unmarshal(raw, mo)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(*mo)
 
 	return mo, nil
 }

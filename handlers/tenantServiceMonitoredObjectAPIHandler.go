@@ -475,6 +475,8 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			logger.Log.Infof("Patching metadata for %s with name %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName)
 
 			existingMonitoredObject.Meta = item.Metadata
+			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
+			existingMonitoredObject.ID = existingMonitoredObject.MonitoredObjectID
 
 			// Issue request to DAO Layer
 			_, err = tenantDB.UpdateMonitoredObject(existingMonitoredObject)

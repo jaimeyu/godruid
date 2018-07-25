@@ -2,10 +2,12 @@ package datastore
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	uuid "github.com/satori/go.uuid"
 )
@@ -82,4 +84,30 @@ func PrependToDataID(dataID string, dataType string) string {
 // MakeTimestamp - get a timestamp from epoch in milliseconds
 func MakeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
+}
+
+// GetPaginationOffsets - Returns the offsets required
+func GetPaginationOffsets(totalRows int64, rowsPerPage int64, currentPage int64) *common.PaginationOffsets {
+	numPages := math.Ceil(float64(float64(totalRows) / float64(rowsPerPage)))
+
+	lastPageOffset := int64(numPages - 1)
+
+	potentialNextOffset := currentPage + 1
+	hasNext := potentialNextOffset <= lastPageOffset
+	hasPrev := currentPage >= 1
+
+	prev, next := int64(0), int64(0)
+	if hasPrev {
+		prev = currentPage - 1
+	}
+	if hasNext {
+		next = currentPage + 1
+	}
+
+	return &common.PaginationOffsets{
+		Self: currentPage,
+		Prev: prev,
+		Next: next,
+		Last: lastPageOffset,
+	}
 }

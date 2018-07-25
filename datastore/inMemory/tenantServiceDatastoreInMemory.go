@@ -2,6 +2,7 @@ package inMemory
 
 import (
 	"fmt"
+	"sort"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
@@ -832,6 +833,43 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 	}
 
 	return recList, nil
+}
+
+// GetAllMonitoredObjectsByPage - InMemory implementation of GetAllMonitoredObjectsByPage
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsByPage(tenantID string, offset int64, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantMonitoredObjectType)
+	if err != nil {
+		return []*tenmod.MonitoredObject{}, nil, nil
+	}
+
+	recList := make([]*tenmod.MonitoredObject, 0)
+
+	// Sort the MO collection by name
+	storedMOs := make([]*tenmod.MonitoredObject, 0)
+	for _, val := range tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID] {
+		storedMOs = append(storedMOs, val)
+	}
+	sort.Slice(storedMOs, func(i, j int) bool {
+		return storedMOs[i].ObjectName < storedMOs[j].ObjectName
+	})
+
+	// Select the records after the specific page
+	skip := offset * limit
+	for i, rec := range storedMOs {
+		// If the limit is met, keep the next record value for the next page key but stop processing
+		if int64(len(recList)) == limit {
+			break
+		}
+
+		// Add record in if it is in the desired page
+		if int64(i) > skip {
+			recList = append(recList, rec)
+		}
+	}
+
+	pageOffsets := ds.GetPaginationOffsets(int64(len(tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID])), limit, offset)
+
+	return recList, pageOffsets, nil
 }
 
 // GetAllMonitoredObjectsInIDList - InMemory implementation of GetAllMonitoredObjectsInIDList

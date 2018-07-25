@@ -1,0 +1,34 @@
+  /v2/monitored-objects:
+    get:
+      summary: Retrieve all Monitored Objects for a Tenant.
+      operationId: GetAllMonitoredObjectsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/MonitoredObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Record not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: offset
+          in: query
+          type: integer
+          description: "The number of records to skip before starting this page of results"
+        - name: limit
+          in: query
+          type: integer
+          description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2

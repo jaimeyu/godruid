@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	ds "github.com/accedian/adh-gather/datastore"
@@ -12,7 +13,13 @@ import (
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
-const defaultQueryResultsLimit = 1000
+const (
+	defaultQueryResultsLimit = 1000
+
+	skipQueryParamStr        = "skip"
+	limitQueryParamStr       = "limit"
+	includeDocsQueryParamStr = "include_docs"
+)
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
 // that can be stored. Changes the provided object into a map[string]interface{} generic
@@ -130,6 +137,9 @@ func getByDocIDWithQueryParams(docID string, dataTypeStrForLogging string, db *c
 	if queryParams == nil {
 		queryParams = new(url.Values)
 	}
+
+	logger.Log.Warningf("Issuing query for %s with params %v", docID, queryParams)
+
 	fetchedData, err := db.Get(docID, *queryParams)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())
@@ -556,4 +566,16 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
+}
+
+func generatePaginationQueryParams(page int64, limit int64, includeDocs bool) url.Values {
+	params := url.Values{}
+
+	// pges offset in couchDB terms is index value, or number of pages * number of records per page
+	skip := page * limit
+	params.Add(skipQueryParamStr, strconv.FormatInt(skip, 10))
+	params.Add(limitQueryParamStr, strconv.FormatInt(limit, 10))
+	params.Add(includeDocsQueryParamStr, strconv.FormatBool(includeDocs))
+
+	return params
 }

@@ -19,6 +19,7 @@ import (
 
 const (
 	monitoredObjectsByDomainIndex = "_design/monitoredObjectCount/_view/byDomain"
+	monitoredObjectsByNameIndex   = "_design/moIndex/_view/byName"
 )
 
 // TenantServiceDatastoreCouchDB - struct responsible for handling
@@ -28,6 +29,7 @@ type TenantServiceDatastoreCouchDB struct {
 	server              string
 	cfg                 config.Provider
 	connectorUpdateChan chan *tenmod.ConnectorConfig
+	batchSize           int64
 }
 
 // CreateTenantServiceDAO - instantiates a CouchDB implementation of the
@@ -42,6 +44,8 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
 	logger.Log.Debugf("Tenant Service CouchDB URL is: %s, %v", provDBURL, result.connectorUpdateChan)
 	result.server = provDBURL
+
+	result.batchSize = int64(result.cfg.GetInt(gather.CK_server_datastore_batchsize.String()))
 
 	return result, nil
 }
@@ -667,6 +671,60 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 
 	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantMonitoredObjectStr)
 	return res, nil
+}
+
+// GetAllMonitoredObjectsByPage - CouchDB implementation of GetAllMonitoredObjectsByPage
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID string, offset int64, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+	logger.Log.Debugf("Fetching next %d %ss from offset %d\n", limit, tenmod.TenantMonitoredObjectStr, offset)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	res := make([]*tenmod.MonitoredObject, 0)
+
+	// Need to retrieve 1 more than the asking size to be able to give back a startKey for the next page
+	var batchSize int64
+	if limit <= 0 || limit > int64(tsd.batchSize) {
+		batchSize = tsd.batchSize
+		logger.Log.Warningf("Provided limit %d is outside of range [1 - %d]. Using value %d in query", limit, batchSize, batchSize)
+	} else {
+		batchSize = limit
+	}
+
+	params := generatePaginationQueryParams(offset, batchSize, true)
+	fetchResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, &params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if fetchResponse["rows"] == nil {
+		return nil, nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	castedRows := fetchResponse["rows"].([]interface{})
+	castedTotalRows := int64(fetchResponse["total_rows"].(float64))
+	if len(castedRows) == 0 {
+		return nil, nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	// Convert interface results to map results
+	rows := []map[string]interface{}{}
+	for _, obj := range castedRows {
+		castedObj := obj.(map[string]interface{})
+		genericDoc := castedObj["doc"].(map[string]interface{})
+		rows = append(rows, genericDoc)
+	}
+
+	convertCouchDataArrayToFlattenedArray(rows, &res, tenmod.TenantMonitoredObjectStr)
+
+	offsets := ds.GetPaginationOffsets(castedTotalRows, batchSize, offset)
+
+	logger.Log.Debugf("Retrieved %d %ss from offset %d\n", len(res), tenmod.TenantMonitoredObjectStr, offset)
+	return res, offsets, nil
 }
 
 // GetAllMonitoredObjectsInIDList - couchdb implementation of GetAllMonitoredObjectsInIDList

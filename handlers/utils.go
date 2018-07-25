@@ -13,6 +13,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/manyminds/api2go/jsonapi"
@@ -31,6 +32,16 @@ const (
 	// API Prefix values
 	apiV1Prefix      = "/api/v1/"
 	tenantsAPIPrefix = "tenants/{tenantID}/"
+
+	offsetQueryParamStr     = "offset"
+	limitQueryParamStr      = "limit"
+	descendingQueryParamStr = "descending"
+
+	linkFirstStr = "first"
+	linkLastStr  = "last"
+	linkPrevStr  = "prev"
+	linkNextStr  = "next"
+	linkSelfStr  = "self"
 )
 
 var (
@@ -668,4 +679,31 @@ func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interfac
 
 func checkForNotFound(s string) bool {
 	return strings.Contains(s, string(notFound))
+}
+
+// generateLinks - creates the "links" section to be used in a jsonapi response object
+func generateLinks(urlBase string, offsets *common.PaginationOffsets, limit int64) map[string]string {
+	links := map[string]string{}
+
+	links[linkFirstStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
+	links[linkSelfStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
+	links[linkLastStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
+
+	if offsets.Self != 0 {
+		links[linkSelfStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Self, limitQueryParamStr, limit)
+	}
+
+	if offsets.Self != 0 {
+		links[linkPrevStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Prev, limitQueryParamStr, limit)
+	}
+
+	if offsets.Next != 0 {
+		links[linkNextStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Next, limitQueryParamStr, limit)
+	}
+
+	if offsets.Last != 0 {
+		links[linkLastStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Last, limitQueryParamStr, limit)
+	}
+
+	return links
 }

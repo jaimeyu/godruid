@@ -145,6 +145,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		AdminProvisioningServiceGetAllAdminUsersHandler: admin_provisioning_service.GetAllAdminUsersHandlerFunc(func(params admin_provisioning_service.GetAllAdminUsersParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetAllAdminUsers has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler: tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMonitoredObjectsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceGetAllReportScheduleConfigHandler: tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.GetAllReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllReportScheduleConfig has not yet been implemented")
 		}),
@@ -338,7 +341,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/json" mime type
@@ -414,6 +417,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceGetAdminUserHandler admin_provisioning_service.GetAdminUserHandler
 	// AdminProvisioningServiceGetAllAdminUsersHandler sets the operation handler for the get all admin users operation
 	AdminProvisioningServiceGetAllAdminUsersHandler admin_provisioning_service.GetAllAdminUsersHandler
+	// TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler sets the operation handler for the get all monitored objects v2 operation
+	TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler
 	// TenantProvisioningServiceGetAllReportScheduleConfigHandler sets the operation handler for the get all report schedule config operation
 	TenantProvisioningServiceGetAllReportScheduleConfigHandler tenant_provisioning_service.GetAllReportScheduleConfigHandler
 	// TenantProvisioningServiceGetAllSLAReportsHandler sets the operation handler for the get all SLA reports operation
@@ -727,6 +732,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceGetAllAdminUsersHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.GetAllAdminUsersHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceGetAllReportScheduleConfigHandler == nil {
@@ -1229,6 +1238,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/admin-user-list"] = admin_provisioning_service.NewGetAllAdminUsers(o.context, o.AdminProvisioningServiceGetAllAdminUsersHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/monitored-objects"] = tenant_provisioning_service_v2.NewGetAllMonitoredObjectsV2(o.context, o.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

@@ -41,10 +41,10 @@ druid:
   cookieName: "skylight-aaa"
   broker:
       #server: "https://accedian-dh2.npav.accedian.net/broker"
-    server: "https://abatos.npav.accedian.net/broker"
+    server: "https://megatron.npav.accedian.net/broker"
     table: "npav-ts-metrics"
 
 
   coordinator:
-    server: "https://jyu.npav.accedian.net/coordinator"
+    server: "https://megatron.npav.accedian.net/coordinator"
     port: -1

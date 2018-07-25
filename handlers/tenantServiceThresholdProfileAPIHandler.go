@@ -25,7 +25,7 @@ func HandleCreateTenantThresholdProfile(allowedRoles []string, tenantDB datastor
 		logger.Log.Infof("Creating %s for Tenant %s", tenmod.TenantThresholdProfileStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewCreateTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -71,7 +71,7 @@ func HandleUpdateTenantThresholdProfile(allowedRoles []string, tenantDB datastor
 		logger.Log.Infof("Updating %s for Tenant %s", tenmod.TenantThresholdProfileStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewUpdateTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewUpdateTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request
@@ -117,7 +117,7 @@ func HandleGetTenantThresholdProfile(allowedRoles []string, tenantDB datastore.T
 		logger.Log.Infof("Fetching %s %s for Tenant %s", tenmod.TenantThresholdProfileStr, params.ThrPrfID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -146,7 +146,7 @@ func HandleGetAllTenantThresholdProfiles(allowedRoles []string, tenantDB datasto
 		logger.Log.Infof("Fetching all %ss for Tenant %s", tenmod.TenantThresholdProfileStr, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewGetAllTenantThresholdProfilesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewGetAllTenantThresholdProfilesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get all %ss operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.GetAllThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -175,7 +175,7 @@ func HandleDeleteTenantThresholdProfile(allowedRoles []string, tenantDB datastor
 		logger.Log.Infof("Deleting %s %s for Tenant %s", tenmod.TenantThresholdProfileStr, params.ThrPrfID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewDeleteTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewDeleteTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Delete %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
@@ -204,7 +204,7 @@ func HandlePatchTenantThresholdProfile(allowedRoles []string, tenantDB datastore
 		logger.Log.Infof("Patching %s %s for Tenant %s", tenmod.TenantThresholdProfileStr, params.Body.Data.ID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewPatchTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewPatchTenantThresholdProfileForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Unmarshal the request

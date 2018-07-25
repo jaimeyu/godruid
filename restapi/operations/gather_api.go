@@ -22,6 +22,7 @@ import (
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
+	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service_v2"
 )
 
 // NewGatherAPI creates a new Gather instance
@@ -53,6 +54,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		AdminProvisioningServiceCreateAdminUserHandler: admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceCreateAdminUser has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2CreateDataCleaningProfileHandler: tenant_provisioning_service_v2.CreateDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.CreateDataCleaningProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateDataCleaningProfile has not yet been implemented")
 		}),
 		AdminProvisioningServiceCreateIngestionDictionaryHandler: admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceCreateIngestionDictionary has not yet been implemented")
@@ -92,6 +96,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		AdminProvisioningServiceDeleteAdminUserHandler: admin_provisioning_service.DeleteAdminUserHandlerFunc(func(params admin_provisioning_service.DeleteAdminUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceDeleteAdminUser has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteDataCleaningProfileHandler: tenant_provisioning_service_v2.DeleteDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.DeleteDataCleaningProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteDataCleaningProfile has not yet been implemented")
 		}),
 		AdminProvisioningServiceDeleteIngestionDictionaryHandler: admin_provisioning_service.DeleteIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.DeleteIngestionDictionaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceDeleteIngestionDictionary has not yet been implemented")
@@ -167,6 +174,12 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		AdminProvisioningServiceGetAllTenantsHandler: admin_provisioning_service.GetAllTenantsHandlerFunc(func(params admin_provisioning_service.GetAllTenantsParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetAllTenants has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetDataCleaningProfileHandler: tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfile has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetDataCleaningProfilesHandler: tenant_provisioning_service_v2.GetDataCleaningProfilesHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfiles has not yet been implemented")
 		}),
 		TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler: tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetDomainToMonitoredObjectMap has not yet been implemented")
@@ -264,6 +277,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		AdminProvisioningServiceUpdateAdminUserHandler: admin_provisioning_service.UpdateAdminUserHandlerFunc(func(params admin_provisioning_service.UpdateAdminUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceUpdateAdminUser has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateDataCleaningProfileHandler: tenant_provisioning_service_v2.UpdateDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.UpdateDataCleaningProfileParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateDataCleaningProfile has not yet been implemented")
+		}),
 		AdminProvisioningServiceUpdateIngestionDictionaryHandler: admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(func(params admin_provisioning_service.UpdateIngestionDictionaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceUpdateIngestionDictionary has not yet been implemented")
 		}),
@@ -328,7 +344,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
+	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -341,6 +357,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
 	// AdminProvisioningServiceCreateAdminUserHandler sets the operation handler for the create admin user operation
 	AdminProvisioningServiceCreateAdminUserHandler admin_provisioning_service.CreateAdminUserHandler
+	// TenantProvisioningServiceV2CreateDataCleaningProfileHandler sets the operation handler for the create data cleaning profile operation
+	TenantProvisioningServiceV2CreateDataCleaningProfileHandler tenant_provisioning_service_v2.CreateDataCleaningProfileHandler
 	// AdminProvisioningServiceCreateIngestionDictionaryHandler sets the operation handler for the create ingestion dictionary operation
 	AdminProvisioningServiceCreateIngestionDictionaryHandler admin_provisioning_service.CreateIngestionDictionaryHandler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
@@ -367,6 +385,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceCreateValidTypesHandler admin_provisioning_service.CreateValidTypesHandler
 	// AdminProvisioningServiceDeleteAdminUserHandler sets the operation handler for the delete admin user operation
 	AdminProvisioningServiceDeleteAdminUserHandler admin_provisioning_service.DeleteAdminUserHandler
+	// TenantProvisioningServiceV2DeleteDataCleaningProfileHandler sets the operation handler for the delete data cleaning profile operation
+	TenantProvisioningServiceV2DeleteDataCleaningProfileHandler tenant_provisioning_service_v2.DeleteDataCleaningProfileHandler
 	// AdminProvisioningServiceDeleteIngestionDictionaryHandler sets the operation handler for the delete ingestion dictionary operation
 	AdminProvisioningServiceDeleteIngestionDictionaryHandler admin_provisioning_service.DeleteIngestionDictionaryHandler
 	// TenantProvisioningServiceDeleteReportScheduleConfigHandler sets the operation handler for the delete report schedule config operation
@@ -417,6 +437,10 @@ type GatherAPI struct {
 	TenantProvisioningServiceGetAllTenantUsersHandler tenant_provisioning_service.GetAllTenantUsersHandler
 	// AdminProvisioningServiceGetAllTenantsHandler sets the operation handler for the get all tenants operation
 	AdminProvisioningServiceGetAllTenantsHandler admin_provisioning_service.GetAllTenantsHandler
+	// TenantProvisioningServiceV2GetDataCleaningProfileHandler sets the operation handler for the get data cleaning profile operation
+	TenantProvisioningServiceV2GetDataCleaningProfileHandler tenant_provisioning_service_v2.GetDataCleaningProfileHandler
+	// TenantProvisioningServiceV2GetDataCleaningProfilesHandler sets the operation handler for the get data cleaning profiles operation
+	TenantProvisioningServiceV2GetDataCleaningProfilesHandler tenant_provisioning_service_v2.GetDataCleaningProfilesHandler
 	// TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler sets the operation handler for the get domain to monitored object map operation
 	TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler
 	// MetricsServiceGetHistogramHandler sets the operation handler for the get histogram operation
@@ -481,6 +505,8 @@ type GatherAPI struct {
 	MetricsServiceQueryThresholdCrossingHandler metrics_service.QueryThresholdCrossingHandler
 	// AdminProvisioningServiceUpdateAdminUserHandler sets the operation handler for the update admin user operation
 	AdminProvisioningServiceUpdateAdminUserHandler admin_provisioning_service.UpdateAdminUserHandler
+	// TenantProvisioningServiceV2UpdateDataCleaningProfileHandler sets the operation handler for the update data cleaning profile operation
+	TenantProvisioningServiceV2UpdateDataCleaningProfileHandler tenant_provisioning_service_v2.UpdateDataCleaningProfileHandler
 	// AdminProvisioningServiceUpdateIngestionDictionaryHandler sets the operation handler for the update ingestion dictionary operation
 	AdminProvisioningServiceUpdateIngestionDictionaryHandler admin_provisioning_service.UpdateIngestionDictionaryHandler
 	// TenantProvisioningServiceUpdateReportScheduleConfigHandler sets the operation handler for the update report schedule config operation
@@ -588,6 +614,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "admin_provisioning_service.CreateAdminUserHandler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateDataCleaningProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateDataCleaningProfileHandler")
+	}
+
 	if o.AdminProvisioningServiceCreateIngestionDictionaryHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.CreateIngestionDictionaryHandler")
 	}
@@ -638,6 +668,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceDeleteAdminUserHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.DeleteAdminUserHandler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteDataCleaningProfileHandler")
 	}
 
 	if o.AdminProvisioningServiceDeleteIngestionDictionaryHandler == nil {
@@ -738,6 +772,14 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceGetAllTenantsHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.GetAllTenantsHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDataCleaningProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningProfileHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDataCleaningProfilesHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningProfilesHandler")
 	}
 
 	if o.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler == nil {
@@ -866,6 +908,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceUpdateAdminUserHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.UpdateAdminUserHandler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateDataCleaningProfileHandler")
 	}
 
 	if o.AdminProvisioningServiceUpdateIngestionDictionaryHandler == nil {
@@ -1046,6 +1092,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewCreateDataCleaningProfile(o.context, o.TenantProvisioningServiceV2CreateDataCleaningProfileHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v1/ingestion-dictionaries"] = admin_provisioning_service.NewCreateIngestionDictionary(o.context, o.AdminProvisioningServiceCreateIngestionDictionaryHandler)
 
 	if o.handlers["POST"] == nil {
@@ -1107,6 +1158,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v1/admin/{value}"] = admin_provisioning_service.NewDeleteAdminUser(o.context, o.AdminProvisioningServiceDeleteAdminUserHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewDeleteDataCleaningProfile(o.context, o.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1232,6 +1288,16 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenant-list"] = admin_provisioning_service.NewGetAllTenants(o.context, o.AdminProvisioningServiceGetAllTenantsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewGetDataCleaningProfile(o.context, o.TenantProvisioningServiceV2GetDataCleaningProfileHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/data-cleaning-profiles"] = tenant_provisioning_service_v2.NewGetDataCleaningProfiles(o.context, o.TenantProvisioningServiceV2GetDataCleaningProfilesHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -1392,6 +1458,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/v1/admin"] = admin_provisioning_service.NewUpdateAdminUser(o.context, o.AdminProvisioningServiceUpdateAdminUserHandler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/data-cleaning-profiles/{profileId}"] = tenant_provisioning_service_v2.NewUpdateDataCleaningProfile(o.context, o.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

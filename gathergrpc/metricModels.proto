@@ -80,7 +80,7 @@ message RawMetricsRequest {
   repeated string monitoredObjectId = 6;
   int32  timeout = 10;
   string  granularity = 11;
-  bool includeUncleaned = 12;
+  bool cleanOnly = 12;
 }
 
 message RawMetricsResponse {

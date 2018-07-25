@@ -21,6 +21,7 @@ type DataCleaningCondition struct {
 
 	// Operand to use when evaluating the condition. [gt=greaterThan, lt=lessThan, gte=greaterThanOrEqual, lte=lessThanOrEqual, eq=equal]
 	// Required: true
+	// Enum: [gt lt gte lte eq]
 	Comparator *string `json:"comparator"`
 
 	// ISO-8601 interval over which this codition will be evaluated.
@@ -33,6 +34,7 @@ type DataCleaningCondition struct {
 
 	// The method of aggregation by which the selected metric will be aggregateds. [min=minimum, max=maximum, avg=average]
 	// Required: true
+	// Enum: [min max avg]
 	ValueAggregate *string `json:"valueAggregate"`
 }
 
@@ -41,22 +43,18 @@ func (m *DataCleaningCondition) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateComparator(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDuration(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateValue(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateValueAggregate(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

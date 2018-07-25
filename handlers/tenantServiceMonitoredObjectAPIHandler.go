@@ -449,7 +449,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 		tenantID := params.TenantID
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk upsert %s meta operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(xFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk upsert %s meta operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		requestBytes, err := json.Marshal(params.Body)

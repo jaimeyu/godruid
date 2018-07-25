@@ -6,6 +6,8 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,9 +19,9 @@ import (
 // swagger:model dataCleaningProfileCreateRequestDataAttributes
 type DataCleaningProfileCreateRequestDataAttributes struct {
 
-	// rules
+	// List of all the rules to evaluate for Data Cleaning
 	// Required: true
-	Rules DataCleaningProfileCreateRequestDataAttributesRules `json:"rules"`
+	Rules []*DataCleaningRule `json:"rules"`
 }
 
 // Validate validates this data cleaning profile create request data attributes
@@ -27,7 +29,6 @@ func (m *DataCleaningProfileCreateRequestDataAttributes) Validate(formats strfmt
 	var res []error
 
 	if err := m.validateRules(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -43,11 +44,20 @@ func (m *DataCleaningProfileCreateRequestDataAttributes) validateRules(formats s
 		return err
 	}
 
-	if err := m.Rules.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("rules")
+	for i := 0; i < len(m.Rules); i++ {
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
 		}
-		return err
+
+		if m.Rules[i] != nil {
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

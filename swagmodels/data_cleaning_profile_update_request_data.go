@@ -29,6 +29,7 @@ type DataCleaningProfileUpdateRequestData struct {
 
 	// type
 	// Required: true
+	// Enum: [dataCleaningProfiles]
 	Type *string `json:"type"`
 }
 
@@ -37,17 +38,14 @@ func (m *DataCleaningProfileUpdateRequestData) Validate(formats strfmt.Registry)
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -64,14 +62,12 @@ func (m *DataCleaningProfileUpdateRequestData) validateAttributes(formats strfmt
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil

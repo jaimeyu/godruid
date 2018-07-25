@@ -161,11 +161,6 @@ type ThresholdCrossingTopNRequest struct {
 }
 
 type TopNForMetric struct {
-	// One of the two must be populated for the request to be valid, domains or monitoredObjects.
-	// But if both are given, then the behaviour will be the query will be based on a subset of monitoredObjects that belong to the domains.
-	// List of domains (optional)
-	Domains []string `json:"domains,omitempty"`
-
 	Meta map[string]string `json:"meta,omitempty"`
 	// List of monitored objects (optional)
 	MonitoredObjects []string `json:"monitoredObjects,omitempty"`

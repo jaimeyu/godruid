@@ -20,9 +20,9 @@ type ReportScheduleConfig struct {
 	Active                bool   `json:"active"`
 
 	// Report parameters
-	TimeRangeDuration string   `json:"timeRangeDuration"`
-	Domains           []string `json:"domains,omitempty"`
-	ThresholdProfile  string   `json:"thresholdProfile,omitempty"`
+	TimeRangeDuration string            `json:"timeRangeDuration"`
+	Meta              map[string]string `json:"meta,omitempty"`
+	ThresholdProfile  string            `json:"thresholdProfile,omitempty"`
 	// Used for UI to help classify SLA Reports
 	Name       string `json:"name,omitempty"`
 	ReportType string `json:"reportType,omitempty"`

@@ -137,7 +137,7 @@ func populateThresholdCrossingRequest(queryParams url.Values) *metrics.Threshold
 
 	thresholdCrossingReq := metrics.ThresholdCrossingRequest{
 		DirectionWhiteList:  toStringSplice(queryParams.Get("direction")),
-		DomainIDs:           toStringSplice(queryParams.Get("domain")),
+		Meta:                nil, //TODO build out the meta map
 		Granularity:         queryParams.Get("granularity"),
 		Interval:            queryParams.Get("interval"),
 		MetricNameWhiteList: toStringSplice(queryParams.Get("metric")),
@@ -165,7 +165,7 @@ func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.Thre
 
 	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{
 		Direction:          queryParams.Get("direction"),
-		Domain:             toStringSplice(queryParams.Get("domain")),
+		Meta:               nil, //TODO build out the meta map
 		Granularity:        queryParams.Get("granularity"),
 		Interval:           queryParams.Get("interval"),
 		Metric:             queryParams.Get("metric"),
@@ -223,7 +223,6 @@ func populateSLAReportRequest(queryParams url.Values) (*metrics.SLAReportRequest
 	request := metrics.SLAReportRequest{
 		TenantID:           queryParams.Get("tenant"),
 		Interval:           queryParams.Get("interval"),
-		Domain:             toStringSplice(queryParams.Get("domains")),
 		Meta:               metaAttrs,
 		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
 		Granularity:        queryParams.Get("granularity"),
@@ -337,12 +336,6 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 		return
 	}
 
-	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
 	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
@@ -394,11 +387,6 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 		return
 	}
 
-	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
-		reportError(w, startTime, "404", mon.QueryThresholdCrossingStr, msg, http.StatusNotFound)
-		return
-	}
 	logger.Log.Infof("Retrieving %s for: %v", db.QueryThresholdCrossingStr, request)
 
 	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP)
@@ -433,12 +421,6 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportInternalError(startTime, "404", mon.GetSLAReportStr, msg)
-		return nil, err
-	}
-
-	if err := msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
 		reportInternalError(startTime, "404", mon.GetSLAReportStr, msg)
 		return nil, err
 	}
@@ -484,12 +466,6 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
-		return
-	}
-
-	if err = msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
 		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
@@ -550,12 +526,6 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 		return
 	}
 
-	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
 	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
@@ -610,12 +580,6 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 
 	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Vendor, thresholdCrossingReq.ObjectType, thresholdCrossingReq.Metric, &pbTP); err != nil {
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
 		return
 	}
 
@@ -760,12 +724,6 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 	}
 	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
 
-	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
 	result, err := msh.druidDB.GetAggregatedMetrics(&request)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Aggregated Metrics. %s:", err.Error())
@@ -793,18 +751,6 @@ func toStringSplice(paramCSV string) []string {
 	}
 
 	return strings.Split(paramCSV, ",")
-}
-
-func (msh *MetricServiceHandler) validateDomains(tenantId string, domains []string) error {
-	if domains == nil || len(domains) == 0 {
-		return nil
-	}
-	for _, dom := range domains {
-		if _, err := msh.tenantDB.GetTenantDomain(tenantId, dom); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func validateMetricForThresholdProfile(vendor, objectType, metric string, thresholdProfile *pb.TenantThresholdProfile) error {
@@ -853,12 +799,6 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 
 	topNreq := request
 	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
-
-	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
-		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
-		return
-	}
 
 	result, err := msh.druidDB.GetTopNForMetric(&topNreq)
 	if err != nil {

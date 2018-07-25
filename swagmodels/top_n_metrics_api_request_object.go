@@ -23,9 +23,6 @@ type TopNMetricsAPIRequestObject struct {
 	// Required: true
 	Aggregator *string `json:"aggregator"`
 
-	// set of domains identifiers to use for filtering
-	Domains []string `json:"domains"`
-
 	// ISO-8601 interval
 	// Required: true
 	Interval *string `json:"interval"`

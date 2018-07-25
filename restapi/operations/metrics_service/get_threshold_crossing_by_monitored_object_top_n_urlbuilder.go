@@ -16,7 +16,6 @@ import (
 // GetThresholdCrossingByMonitoredObjectTopNURL generates an URL for the get threshold crossing by monitored object top n operation
 type GetThresholdCrossingByMonitoredObjectTopNURL struct {
 	Direction          *string
-	Domain             []string
 	Granularity        *string
 	Interval           string
 	Meta               []string
@@ -68,23 +67,6 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNURL) Build() (*url.URL, error)
 	}
 	if direction != "" {
 		qs.Set("direction", direction)
-	}
-
-	var domainIR []string
-	for _, domainI := range o.Domain {
-		domainIS := domainI
-		if domainIS != "" {
-			domainIR = append(domainIR, domainIS)
-		}
-	}
-
-	domain := swag.JoinByFormat(domainIR, "")
-
-	if len(domain) > 0 {
-		qsv := domain[0]
-		if qsv != "" {
-			qs.Set("domain", qsv)
-		}
 	}
 
 	var granularity string

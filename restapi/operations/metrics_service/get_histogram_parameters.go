@@ -36,10 +36,6 @@ type GetHistogramParams struct {
 	  In: query
 	*/
 	Direction *string
-	/*
-	  In: query
-	*/
-	Domain *string
 	/*ISO-8601 period combination.
 	  In: query
 	*/
@@ -91,11 +87,6 @@ func (o *GetHistogramParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qDirection, qhkDirection, _ := qs.GetOK("direction")
 	if err := o.bindDirection(qDirection, qhkDirection, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -163,23 +154,6 @@ func (o *GetHistogramParams) bindDirection(rawData []string, hasKey bool, format
 	}
 
 	o.Direction = &raw
-
-	return nil
-}
-
-func (o *GetHistogramParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Domain = &raw
 
 	return nil
 }

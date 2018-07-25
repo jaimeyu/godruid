@@ -282,21 +282,6 @@ func HandleDeleteTenantDomain(allowedRoles []string, tenantDB datastore.TenantSe
 			return tenant_provisioning_service.NewDeleteTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantDashboardStr), startTime, http.StatusInternalServerError, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		configs, err := tenantDB.GetAllReportScheduleConfigs(params.TenantID)
-		if err != nil {
-			return tenant_provisioning_service.NewDeleteTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
-		}
-		for _, rep := range configs {
-			if len(rep.Domains) == 0 {
-				continue
-			}
-			for _, dom := range rep.Domains {
-				if dom == params.DomainID {
-					return tenant_provisioning_service.NewDeleteTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantReportScheduleConfigStr), startTime, http.StatusInternalServerError, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
-				}
-			}
-		}
-
 		// Issue request to DAO Layer
 		result, err := tenantDB.DeleteTenantDomain(params.TenantID, params.DomainID)
 		if err != nil {

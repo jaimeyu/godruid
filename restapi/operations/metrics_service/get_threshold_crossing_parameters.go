@@ -37,10 +37,6 @@ type GetThresholdCrossingParams struct {
 	  In: query
 	*/
 	Direction []string
-	/*Domain ID
-	  In: query
-	*/
-	Domain []string
 	/*ISO-8601 period combination.
 	  In: query
 	*/
@@ -95,11 +91,6 @@ func (o *GetThresholdCrossingParams) BindRequest(r *http.Request, route *middlew
 
 	qDirection, qhkDirection, _ := qs.GetOK("direction")
 	if err := o.bindDirection(qDirection, qhkDirection, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -175,31 +166,6 @@ func (o *GetThresholdCrossingParams) bindDirection(rawData []string, hasKey bool
 	}
 
 	o.Direction = directionIR
-
-	return nil
-}
-
-func (o *GetThresholdCrossingParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-
-	var qvDomain string
-	if len(rawData) > 0 {
-		qvDomain = rawData[len(rawData)-1]
-	}
-
-	// CollectionFormat:
-	domainIC := swag.SplitByFormat(qvDomain, "")
-	if len(domainIC) == 0 {
-		return nil
-	}
-
-	var domainIR []string
-	for _, domainIV := range domainIC {
-		domainI := domainIV
-
-		domainIR = append(domainIR, domainI)
-	}
-
-	o.Domain = domainIR
 
 	return nil
 }

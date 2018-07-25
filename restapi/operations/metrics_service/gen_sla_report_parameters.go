@@ -41,10 +41,6 @@ type GenSLAReportParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Domain ID
-	  In: query
-	*/
-	Domain []string
 	/*the granularity for timeseries in ISO-8601 Duration format
 	  In: query
 	  Default: "PT1H"
@@ -90,11 +86,6 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qs := runtime.Values(r.URL.Query())
 
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	qGranularity, qhkGranularity, _ := qs.GetOK("granularity")
 	if err := o.bindGranularity(qGranularity, qhkGranularity, route.Formats); err != nil {
 		res = append(res, err)
@@ -133,31 +124,6 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (o *GenSLAReportParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-
-	var qvDomain string
-	if len(rawData) > 0 {
-		qvDomain = rawData[len(rawData)-1]
-	}
-
-	// CollectionFormat:
-	domainIC := swag.SplitByFormat(qvDomain, "")
-	if len(domainIC) == 0 {
-		return nil
-	}
-
-	var domainIR []string
-	for _, domainIV := range domainIC {
-		domainI := domainIV
-
-		domainIR = append(domainIR, domainI)
-	}
-
-	o.Domain = domainIR
-
 	return nil
 }
 

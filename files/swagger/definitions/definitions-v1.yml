@@ -484,10 +484,6 @@
         type: "object"
         additionalProperties:
           type: "string"
-      # domainSet:
-      #   type: "array"
-      #   items: 
-      #     type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:
@@ -859,14 +855,6 @@
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
-      domains:
-        type: array
-        description: set of domains identifiers to use for filtering
-        items:
-          type: string
-        example: 
-          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
-          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
       meta:
         type: object
         description: set of domains identifiers to use for filtering
@@ -932,14 +920,6 @@
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
-      domainIds:
-        type: array
-        description: set of domains identifiers to use for filtering
-        items:
-          type: string
-        example: 
-          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
-          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
       meta:
         type: object
         description: set of domains identifiers to use for filtering
@@ -979,14 +959,6 @@
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
-      domainIds:
-        type: array
-        description: set of domains identifiers to use for filtering
-        items:
-          type: string
-        example: 
-          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
-          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
       meta:
         type: object
         description: set of domains identifiers to use for filtering

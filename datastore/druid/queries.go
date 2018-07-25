@@ -104,7 +104,7 @@ func FilterLimitSelectorHelper(metric string, lowerLimit float64, lowerStrict bo
 	return nil
 }
 
-func HistogramCustomQuery(tenant string, domains []string, meta map[string]string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
+func HistogramCustomQuery(tenant string, meta map[string]string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
@@ -147,7 +147,6 @@ func HistogramCustomQuery(tenant string, domains []string, meta map[string]strin
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Aggregations: aggregations,
@@ -156,7 +155,7 @@ func HistogramCustomQuery(tenant string, domains []string, meta map[string]strin
 
 // ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, meta map[string]string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryTimeseries, error) {
+func ThresholdCrossingQuery(tenant string, dataSource string, meta map[string]string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 
@@ -213,14 +212,13 @@ func ThresholdCrossingQuery(tenant string, dataSource string, domains []string, 
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
 }
 
-func ThresholdViolationsQuery(tenant string, dataSource string, domains []string, meta map[string]string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifier, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
+func ThresholdViolationsQuery(tenant string, dataSource string, meta map[string]string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifier, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
 	// all of the aggregations
 	var aggregations []godruid.Aggregation
 	// all of the post aggregations
@@ -477,7 +475,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, domains []string
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Aggregations:     aggregations,
@@ -485,7 +482,7 @@ func ThresholdViolationsQuery(tenant string, dataSource string, domains []string
 		Intervals:        []string{interval}}, nil
 }
 
-func SLAViolationsQuery(tenant string, dataSource string, domains []string, meta map[string]string, granularity string, interval string, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
+func SLAViolationsQuery(tenant string, dataSource string, meta map[string]string, granularity string, interval string, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
 	var aggregations []godruid.Aggregation
 	var postAggregations []godruid.PostAggregation
 	var violationCountAggs []string
@@ -651,7 +648,6 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, meta
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Aggregations:     aggregations,
@@ -659,7 +655,7 @@ func SLAViolationsQuery(tenant string, dataSource string, domains []string, meta
 		Intervals:        []string{interval}}, nil
 }
 
-func SLATimeBucketQuery(tenant string, dataSource string, domains []string, meta map[string]string, timeBucket TimeBucket, timeZone string, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, error) {
+func SLATimeBucketQuery(tenant string, dataSource string, meta map[string]string, timeBucket TimeBucket, timeZone string, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, error) {
 	var aggregations []godruid.Aggregation
 	var dimension godruid.DimSpec
 	threshold := 0
@@ -712,7 +708,6 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, meta
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 			thresholdFilter,
 			godruid.FilterSelector("objectType", objectType),
@@ -729,7 +724,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, domains []string, meta
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, domains []string, meta map[string]string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryGroupBy, error) {
+func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, meta map[string]string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
 
@@ -781,7 +776,6 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Intervals: []string{interval},
@@ -795,7 +789,7 @@ func ThresholdCrossingByMonitoredObjectQuery(tenant string, dataSource string, d
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, domains []string, meta map[string]string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
+func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, meta map[string]string, metric string, granularity string, interval string, objectType string, direction string, thresholdProfile *pb.TenantThresholdProfileData, vendor string, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations []godruid.PostAggregation
@@ -852,7 +846,6 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
@@ -913,7 +906,7 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 }
 
 //AggMetricsQuery  - Query that returns a aggregated metric values
-func AggMetricsQuery(tenant string, dataSource string, interval string, domains []string, meta map[string]string, aggregationFunc metrics.AggregationSpec, metrics []metrics.MetricIdentifier, timeout int32, granularity string) (*godruid.QueryTimeseries, *PostProcessor, error) {
+func AggMetricsQuery(tenant string, dataSource string, interval string, meta map[string]string, aggregationFunc metrics.AggregationSpec, metrics []metrics.MetricIdentifier, timeout int32, granularity string) (*godruid.QueryTimeseries, *PostProcessor, error) {
 
 	var aggregations []godruid.Aggregation
 	var pp PostProcessor
@@ -966,7 +959,6 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, domains 
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(),
-			buildDomainFilter(tenant, domains),
 			buildMetaFilter(tenant, meta),
 		),
 		Intervals:        []string{interval},
@@ -1052,49 +1044,6 @@ func buildMetaFilter(tenantID string, meta map[string]string) *godruid.Filter {
 		// This is a hack to get around no meta lookups being ready yet.  Basically want to
 		// create an 'always false filter".
 		logger.Log.Debugf("No meta information found in cache using false filter")
-		return godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
-			godruid.FilterNot(godruid.FilterSelector("tenantId", strings.ToLower(tenantID))),
-		)
-	}
-
-	return godruid.FilterOr(filters...)
-}
-
-func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
-	if len(domains) < 1 {
-		return nil
-	}
-
-	filters := make([]*godruid.Filter, len(domains))
-	atLeastOneDomainFilter := false
-	for i, domID := range domains {
-		var ef godruid.ExtractionFn
-
-		lookupName, exists := getLookupName("dom", tenantID, domID)
-		if !exists {
-			logger.Log.Warningf("No lookup (%s) found for domain ID %s. It will be excluded from the domain filter", lookupName, domID)
-			continue
-		}
-
-		atLeastOneDomainFilter = true
-		ef = godruid.RegisteredLookupExtractionFn{
-			Type:   "registeredLookup",
-			Lookup: lookupName,
-		}
-
-		filters[i] = &godruid.Filter{
-			Type:         "selector",
-			Dimension:    "monitoredObjectId",
-			Value:        domID,
-			ExtractionFn: &ef,
-		}
-	}
-
-	if !atLeastOneDomainFilter {
-		// This is a hack to get around no domain lookups being ready yet.  Basically want to
-		// create an 'always false filter".
-		logger.Log.Debugf("No domains found in cached using false filter")
 		return godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
 			godruid.FilterNot(godruid.FilterSelector("tenantId", strings.ToLower(tenantID))),
@@ -1211,7 +1160,6 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric) (*godru
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
 			cleanFilter(),
 			godruid.FilterSelector("objectType", metric.ObjectType),
-			buildDomainFilter(request.TenantID, request.Domains),
 			buildMetaFilter(request.TenantID, request.Meta),
 		)
 	} else {

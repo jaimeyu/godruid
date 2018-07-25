@@ -15,7 +15,6 @@ import (
 
 // GenSLAReportURL generates an URL for the gen SLA report operation
 type GenSLAReportURL struct {
-	Domain             []string
 	Granularity        *string
 	Interval           string
 	Meta               []string
@@ -57,23 +56,6 @@ func (o *GenSLAReportURL) Build() (*url.URL, error) {
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
-
-	var domainIR []string
-	for _, domainI := range o.Domain {
-		domainIS := domainI
-		if domainIS != "" {
-			domainIR = append(domainIR, domainIS)
-		}
-	}
-
-	domain := swag.JoinByFormat(domainIR, "")
-
-	if len(domain) > 0 {
-		qsv := domain[0]
-		if qsv != "" {
-			qs.Set("domain", qsv)
-		}
-	}
 
 	var granularity string
 	if o.Granularity != nil {

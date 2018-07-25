@@ -19,9 +19,6 @@ import (
 // swagger:model ThresholdCrossingAPIRequestObject
 type ThresholdCrossingAPIRequestObject struct {
 
-	// set of domains identifiers to use for filtering
-	DomainIds []string `json:"domainIds"`
-
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
 

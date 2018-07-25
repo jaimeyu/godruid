@@ -12,7 +12,6 @@ type SLAReportRequest struct {
 	TenantID          string `json:"tenantId"`
 	// ISO-8601 Intervals
 	Interval string            `json:"interval,omitempty"`
-	Domain   []string          `json:"domain,omitempty"`
 	Meta     map[string]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
@@ -23,9 +22,8 @@ type SLAReportRequest struct {
 }
 
 type HistogramCustomRequest struct {
-	TenantID  string            `json:"tenantId"`
-	DomainIds []string          `json:"domainIds"`
-	Meta      map[string]string `json:"meta:omitempty"`
+	TenantID string            `json:"tenantId"`
+	Meta     map[string]string `json:"meta:omitempty"`
 	// ISO-8601 Intervals
 	Interval string `json:"interval,omitempty"`
 	// ISO-8601 period combination
@@ -67,7 +65,7 @@ func (sr *SLAReport) GetName() string {
 type HistogramCustomReport struct {
 	ReportCompletionTime string                           `json:"reportCompletionTime"`
 	TenantID             string                           `json:"tenantId"`
-	DomainIds            []string                         `json:"domainIds"`
+	Meta                 map[string]string                `json:"meta"`
 	ReportTimeRange      string                           `json:"reportTimeRange"`
 	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
 }
@@ -154,7 +152,6 @@ type ThresholdCrossingTopNRequest struct {
 	TenantID   string `json:"tenantId"`
 	// ISO-8601 Intervals
 	Interval string            `json:"interval,omitempty"`
-	Domain   []string          `json:"domain,omitempty"`
 	Meta     map[string]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
@@ -227,7 +224,6 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 
 type ThresholdCrossingRequest struct {
 	TenantID            string             `json:"tenantId"`
-	DomainIDs           []string           `json:"domainIds,omitempty"`
 	Meta                map[string]string  `json:"meta,omitempty"`
 	Interval            string             `json:"interval,omitempty"`
 	Granularity         string             `json:"granularity,omitempty"`
@@ -242,7 +238,6 @@ type ThresholdCrossingRequest struct {
 
 type AggregateMetricsAPIRequest struct {
 	TenantID    string             `json:"tenantId"`
-	DomainIDs   []string           `json:"domainIds,omitempty"`
 	Meta        map[string]string  `json:"meta,omitempty"`
 	Interval    string             `json:"interval,omitempty"`
 	Granularity string             `json:"granularity,omitempty"`

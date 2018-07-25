@@ -16,7 +16,6 @@ import (
 // GetHistogramURL generates an URL for the get histogram operation
 type GetHistogramURL struct {
 	Direction          *string
-	Domain             *string
 	Granularity        *string
 	GranularityBuckets *int32
 	Interval           *string
@@ -67,14 +66,6 @@ func (o *GetHistogramURL) Build() (*url.URL, error) {
 	}
 	if direction != "" {
 		qs.Set("direction", direction)
-	}
-
-	var domain string
-	if o.Domain != nil {
-		domain = *o.Domain
-	}
-	if domain != "" {
-		qs.Set("domain", domain)
 	}
 
 	var granularity string

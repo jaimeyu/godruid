@@ -47,7 +47,7 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return dataContainer, nil
 }
 
-func convertHistogramCustomResponse(tenantId string, domainIds []string, interval string, rawResponse string) (map[string]interface{}, error) {
+func convertHistogramCustomResponse(tenantId string, meta map[string]string, interval string, rawResponse string) (map[string]interface{}, error) {
 
 	const (
 		HistogramCustomReport = "customHistogramReports"
@@ -117,7 +117,7 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 
 	hcReport.TimeSeriesResult = timeSlices
 	hcReport.TenantID = tenantId
-	hcReport.DomainIds = domainIds
+	hcReport.Meta = meta
 	hcReport.ReportTimeRange = interval
 	hcReport.ReportCompletionTime = time.Now().UTC().String()
 

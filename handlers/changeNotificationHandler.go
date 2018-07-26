@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -253,24 +254,42 @@ func (c *ChangeNotificationHandler) sendToKafka(tenantID string, monitoredObject
 
 }
 
+func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
+	var monitoredObjects []*tenmod.MonitoredObject
+	// For metadata, we need to build a list of known qualifiers
+	logger.Log.Infof("Dumping Updating metadata from poll change")
+	//debugging
+	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
+
+	testNodes := 25000 // change this for testing!
+	for i := 0; i < testNodes; i++ {
+		mo := tenmod.MonitoredObject{
+			ID:                fmt.Sprintf("debug_%d", i),
+			ObjectName:        fmt.Sprintf("debug_%d", i),
+			MonitoredObjectID: fmt.Sprintf("debug_%d", i),
+			Meta:              map[string]string{"colors": colors[i%len(colors)]},
+			CreatedTimestamp:  10,
+		}
+
+		monitoredObjects = append(monitoredObjects, &mo)
+	}
+	return monitoredObjects
+}
+
 func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
 	monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(tenantID)
 	if err != nil {
 		logger.Log.Error("Failed to get objects", err.Error())
 		return
 	}
-	domains, err := (*c.tenantDB).GetAllTenantDomains(tenantID)
-	if err != nil {
-		logger.Log.Error("Failed to get domains", err.Error())
-		return
-	}
-	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
-		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
-	}
 
-	// For metadata, we need to build a list of known qualifiers
-	logger.Log.Infof("Dumping Updating metadata from poll change")
+	// Enable this to add arbitary number of items into the druid look ups
+	//monitoredObjects = debugAddFakeMonitoredObjects()
 
+	// Update counters
+	setMonitoredObjectCount(len(monitoredObjects))
+
+	// @TODO > We will no longer need this. Please use the view instead
 	tenantMeta, err := (*c.tenantDB).GetTenantMeta(tenantID)
 	if err != nil {
 		logger.Log.Errorf("Couldn't find tenant metadata for tenant: %s", tenantID)
@@ -290,6 +309,16 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	} else {
 		logger.Log.Infof("Updated metadata in metric DB for tenant %s", tenantID)
 	}
+
+	domains, err := (*c.tenantDB).GetAllTenantDomains(tenantID)
+	if err != nil {
+		logger.Log.Error("Failed to get domains", err.Error())
+		return
+	}
+	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
+		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
+	}
+
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
@@ -335,6 +364,9 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			continue
 		}
 
+		// Enable this to add arbitary number of items into the druid look ups
+		//monitoredObjects = debugAddFakeMonitoredObjects()
+
 		// Update counters
 		setMonitoredObjectCount(len(monitoredObjects))
 
@@ -357,18 +389,6 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		}
 
 		if fullRefresh || changeDetected {
-			// Update the metrics DB so we can do queries by domain or other metadata
-			// Currently any metadataChange is handled by resynchronizing all metadata for the tenant so we
-			// don't really care what the nature of the change was.
-			// This approach is nice and simple but is also effectively similar to dropping a table
-			// and re-populating it.
-			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
-				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
-				lastError = err
-				continue
-			} else {
-				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
-			}
 
 			// For metadata, we need to build a list of known qualifiers
 			logger.Log.Infof("Dumping Updating metadata from poll change")
@@ -387,6 +407,19 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			setMetadataKeyCount(len(qualifiers))
 
 			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta", qualifiers, true); err != nil {
+				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
+				lastError = err
+				continue
+			} else {
+				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
+			}
+
+			// Update the metrics DB so we can do queries by domain or other metadata
+			// Currently any metadataChange is handled by resynchronizing all metadata for the tenant so we
+			// don't really care what the nature of the change was.
+			// This approach is nice and simple but is also effectively similar to dropping a table
+			// and re-populating it.
+			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err
 				continue

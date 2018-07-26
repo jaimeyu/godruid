@@ -1687,7 +1687,7 @@ func (tsh *TenantServiceRESTHandler) PostMonitoredObjectMeta(w http.ResponseWrit
 			return
 		}
 
-		err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData)
+		err = tsh.TenantDB.UpdateMonitoredObjectMetadataViews(tenantID, oldData)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
 			reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1771,7 +1771,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 		return
 	}
 
-	err = tsh.TenantDB.MonitoredObjectKeysUpdate(tenantID, oldData)
+	err = tsh.TenantDB.UpdateMonitoredObjectMetadataViews(tenantID, oldData)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1786,6 +1786,7 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 // UpdateMonitoredObject - updates a tenant monitored object
 func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
+	opStr := mon.UpdateMonObjStr
 
 	// Unmarshal the request
 	requestBytes, err := getRequestBytes(r)
@@ -1817,6 +1818,13 @@ func (tsh *TenantServiceRESTHandler) UpdateMonitoredObject(w http.ResponseWriter
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	err = tsh.TenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, &data)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(data))
+		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 

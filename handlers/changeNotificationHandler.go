@@ -261,7 +261,7 @@ func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
 	//debugging
 	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
 
-	testNodes := 25000 // change this for testing!
+	testNodes := 1000000 // change this for testing!
 	for i := 0; i < testNodes; i++ {
 		mo := tenmod.MonitoredObject{
 			ID:                fmt.Sprintf("debug_%d", i),
@@ -284,27 +284,12 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	}
 
 	// Enable this to add arbitary number of items into the druid look ups
-	//monitoredObjects = debugAddFakeMonitoredObjects()
+	monitoredObjects = debugAddFakeMonitoredObjects()
 
 	// Update counters
 	setMonitoredObjectCount(len(monitoredObjects))
 
-	pairs, err := (*c.tenantDB).GetMetadataKeys(tenantID)
-	if err != nil {
-		//return fmt.Errorf("Could not get list of known metadata keys:%s", err.Error())
-		return
-	}
-	var qualifiers []string
-	for k, v := range pairs {
-		// If there low cardinality in the dataset, then don't append
-		if v < 1000000 {
-			qualifiers = append(qualifiers, k)
-		}
-	}
-
-	setMetadataKeyCount(len(qualifiers))
-
-	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta", pairs); err != nil {
+	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta"); err != nil {
 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
 
 	} else {
@@ -351,7 +336,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		}
 
 		// Enable this to add arbitary number of items into the druid look ups
-		//monitoredObjects = debugAddFakeMonitoredObjects()
+		monitoredObjects = debugAddFakeMonitoredObjects()
 
 		// Update counters
 		setMonitoredObjectCount(len(monitoredObjects))
@@ -374,21 +359,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			// For metadata, we need to build a list of known qualifiers
 			logger.Log.Infof("Dumping Updating metadata from poll change")
 
-			pairs, err := (*c.tenantDB).GetMetadataKeys(t.ID)
-			if err != nil {
-				return fmt.Errorf("Could not get list of known metadata keys:%s", err.Error())
-			}
-			var qualifiers []string
-			for k, v := range pairs {
-				// If there low cardinality in the dataset, then don't append
-				if v < 1000000 {
-					qualifiers = append(qualifiers, k)
-				}
-			}
-
-			setMetadataKeyCount(len(qualifiers))
-
-			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta", pairs); err != nil {
+			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err
 				continue

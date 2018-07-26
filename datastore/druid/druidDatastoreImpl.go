@@ -1142,7 +1142,7 @@ func (dc *DruidDatastoreClient) checkAndPostDefaultLookup(lookupEndpoint string)
 }
 
 // AddMonitoredObjectToLookup - Adds a monitored object to the druid look ups
-func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenant.MonitoredObject, datatype string, qualifiers map[string]int) error {
+func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenant.MonitoredObject, datatype string) error {
 	methodStartTime := time.Now()
 	// version := time.Now().Format(time.RFC3339)
 	lookupEndpoint := dc.generateDruidCoordinatorURI(druidLookUpConfig)

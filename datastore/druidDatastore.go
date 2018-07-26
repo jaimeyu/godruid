@@ -72,5 +72,5 @@ type DruidDatastore interface {
 	GetTopNForMetric(metric *metrics.TopNForMetric) (map[string]interface{}, error)
 
 	// Adds a monitored object to a druid look up
-	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string, qualifiers map[string]int) error
+	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string) error
 }

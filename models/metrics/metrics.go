@@ -21,7 +21,7 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
-type HistogramCustomRequest struct {
+type HistogramRequest struct {
 	TenantID string            `json:"tenantId"`
 	Meta     map[string]string `json:"meta:omitempty"`
 	// ISO-8601 Intervals
@@ -62,15 +62,15 @@ func (sr *SLAReport) GetName() string {
 	return ReportType
 }
 
-type HistogramCustomReport struct {
-	ReportCompletionTime string                           `json:"reportCompletionTime"`
-	TenantID             string                           `json:"tenantId"`
-	Meta                 map[string]string                `json:"meta"`
-	ReportTimeRange      string                           `json:"reportTimeRange"`
-	TimeSeriesResult     []HistogramCustomTimeSeriesEntry `json:"timeSeriesResult"`
+type HistogramReport struct {
+	ReportCompletionTime string                     `json:"reportCompletionTime"`
+	TenantID             string                     `json:"tenantId"`
+	Meta                 map[string]string          `json:"meta"`
+	ReportTimeRange      string                     `json:"reportTimeRange"`
+	TimeSeriesResult     []HistogramTimeSeriesEntry `json:"timeSeriesResult"`
 }
 
-type HistogramCustomTimeSeriesEntry struct {
+type HistogramTimeSeriesEntry struct {
 	Timestamp string         `json:"timestamp"`
 	Result    []MetricResult `json:"result"`
 }
@@ -224,10 +224,10 @@ type ThresholdCrossingRequest struct {
 	Granularity         string             `json:"granularity,omitempty"`
 	ThresholdProfileID  string             `json:"thresholdProfileId,omitempty"`
 	MetricWhitelist     []MetricIdentifier `json:"metricWhitelist,omitempty"`
-	MetricNameWhiteList []string           `json:"metricNameWhiteList,omitempty"`
-	ObjectTypeWhiteList []string           `json:"objectTypeWhiteList,omitempty"`
-	DirectionWhiteList  []string           `json:"directionWhiteList,omitempty"`
-	VendorWhiteList     []string           `json:"vendorWhiteList,omitempty"`
+	MetricNameWhiteList []string           `json:"metricNameWhitelist,omitempty"`
+	ObjectTypeWhiteList []string           `json:"objectTypeWhitelist,omitempty"`
+	DirectionWhiteList  []string           `json:"directionWhitelist,omitempty"`
+	VendorWhiteList     []string           `json:"vendorWhitelist,omitempty"`
 	Timeout             int32              `json:"timeout,omitempty"`
 }
 

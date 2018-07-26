@@ -36,7 +36,7 @@ var (
 
 	metricServiceV1APIRouteRoots = []string{
 		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
-		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/histogram-custom", "/api/v1/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
+		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
 	}
 )
 

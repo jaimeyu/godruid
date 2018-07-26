@@ -23,30 +23,6 @@ const (
 
 var knownEventNames = []string{"critical", "major", "minor", "warn", "info"}
 
-// HistogramQuery - Count of metrics per bucket for given interval.
-func HistogramQuery(tenant string, dataSource string, metric string, granularity string, direction string, interval string, resolution int32, granularityBuckets int32, vendor string, timeout int32) (*godruid.QueryTimeseries, error) {
-
-	//peyo TODO need to figure out a better way than just appending Histo
-	aggHist := godruid.AggHistoFold("thresholdBuckets", metric+"Histo", resolution, granularityBuckets, "0", "Infinity")
-
-	return &godruid.QueryTimeseries{
-		DataSource:  dataSource,
-		Granularity: toGranularity(granularity),
-		Context:     map[string]interface{}{"timeout": timeout},
-		Aggregations: []godruid.Aggregation{
-			godruid.AggFiltered(
-				godruid.FilterAnd(
-					godruid.FilterSelector("tenantId", tenant),
-					cleanFilter(),
-					godruid.FilterSelector("direction", direction),
-				),
-				&aggHist,
-			),
-		},
-		Intervals: []string{interval},
-	}, nil
-}
-
 // FilterHelper - helper function to select correct druid filter based on
 // a given event and metric
 func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) (*godruid.Filter, error) {
@@ -104,7 +80,7 @@ func FilterLimitSelectorHelper(metric string, lowerLimit float64, lowerStrict bo
 	return nil
 }
 
-func HistogramCustomQuery(tenant string, meta map[string]string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
+func HistogramQuery(tenant string, meta map[string]string, dataSource string, interval string, granularity string, timeout int32, metrics []map[string]interface{}) (*godruid.QueryTimeseries, error) {
 
 	var aggregations []godruid.Aggregation
 

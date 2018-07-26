@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -48,7 +47,7 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 	result.routes = []server.Route{
 		server.Route{
 			Name:        "GetThresholdCrossing",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/threshold-crossing",
 			HandlerFunc: result.GetThresholdCrossing,
 		},
@@ -62,37 +61,30 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 
 		server.Route{
 			Name:        "GetThresholdCrossingByMonitoredObject",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object",
 			HandlerFunc: result.GetThresholdCrossingByMonitoredObject,
 		},
 
 		server.Route{
 			Name:        "GetThresholdCrossingByMonitoredObjectTopN",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object-top-n",
 			HandlerFunc: result.GetThresholdCrossingByMonitoredObjectTopN,
 		},
 
 		server.Route{
 			Name:        "GenSLAReport",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/generate-sla-report",
 			HandlerFunc: result.GetSLAReport,
 		},
 
 		server.Route{
 			Name:        "GetHistogram",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/histogram",
 			HandlerFunc: result.GetHistogram,
-		},
-
-		server.Route{
-			Name:        "GetHistogramCustom",
-			Method:      "POST",
-			Pattern:     "/api/v1/histogram-custom",
-			HandlerFunc: result.GetHistogramCustom,
 		},
 
 		server.Route{
@@ -133,161 +125,6 @@ func (msh *MetricServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 	}
 }
 
-func populateThresholdCrossingRequest(queryParams url.Values) *metrics.ThresholdCrossingRequest {
-
-	thresholdCrossingReq := metrics.ThresholdCrossingRequest{
-		DirectionWhiteList:  toStringSplice(queryParams.Get("direction")),
-		Meta:                nil, //TODO build out the meta map
-		Granularity:         queryParams.Get("granularity"),
-		Interval:            queryParams.Get("interval"),
-		MetricNameWhiteList: toStringSplice(queryParams.Get("metric")),
-		ObjectTypeWhiteList: toStringSplice(queryParams.Get("objectType")),
-		TenantID:            queryParams.Get("tenant"),
-		ThresholdProfileID:  queryParams.Get("thresholdProfileId"),
-		VendorWhiteList:     toStringSplice(queryParams.Get("vendor")),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		thresholdCrossingReq.Timeout = int32(timeout)
-	} else {
-		thresholdCrossingReq.Timeout = 0
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-
-	return &thresholdCrossingReq
-}
-
-func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.ThresholdCrossingTopNRequest, error) {
-
-	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{
-		Direction:          queryParams.Get("direction"),
-		Meta:               nil, //TODO build out the meta map
-		Granularity:        queryParams.Get("granularity"),
-		Interval:           queryParams.Get("interval"),
-		Metric:             queryParams.Get("metric"),
-		ObjectType:         queryParams.Get("objectType"),
-		TenantID:           queryParams.Get("tenantId"),
-		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
-		Vendor:             queryParams.Get("vendor"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		thresholdCrossingReq.Timeout = int32(timeout)
-	} else {
-		thresholdCrossingReq.Timeout = 5000 // default value
-	}
-
-	numResults, err := strconv.Atoi(queryParams.Get("numResults"))
-	if err == nil {
-		thresholdCrossingReq.NumResults = int32(numResults)
-	} else {
-		thresholdCrossingReq.NumResults = 10 // default value
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-
-	if len(thresholdCrossingReq.Vendor) == 0 {
-		err = fmt.Errorf("vendor is required")
-		return nil, err
-	}
-
-	if len(thresholdCrossingReq.ObjectType) == 0 {
-		err = fmt.Errorf("objectType is required")
-		return nil, err
-	}
-
-	return &thresholdCrossingReq, nil
-}
-
-func populateSLAReportRequest(queryParams url.Values) (*metrics.SLAReportRequest, error) {
-
-	// Build the flat key/value structure into a map
-	metaAttrs := make(map[string]string)
-	for _, tuple := range toStringSplice(queryParams.Get("meta")) {
-		splitTuple := strings.Split(tuple, ":")
-
-		if len(splitTuple) != 2 {
-			return nil, errors.New("Improperly formatted meta data request. Expecting meta=key1:value1,key2:value2,...")
-		} else {
-			metaAttrs[splitTuple[0]] = splitTuple[1]
-		}
-	}
-
-	request := metrics.SLAReportRequest{
-		TenantID:           queryParams.Get("tenant"),
-		Interval:           queryParams.Get("interval"),
-		Meta:               metaAttrs,
-		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
-		Granularity:        queryParams.Get("granularity"),
-		Timezone:           queryParams.Get("timezone"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		request.Timeout = int32(timeout)
-	} else {
-		request.Timeout = 0
-	}
-
-	if len(request.Granularity) == 0 {
-		request.Granularity = "PT1H"
-	}
-
-	return &request, nil
-}
-
-func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
-
-	histogramRequest := pb.HistogramRequest{
-		Direction:   queryParams.Get("direction"),
-		Domain:      queryParams.Get("domain"),
-		Granularity: queryParams.Get("granularity"),
-		Interval:    queryParams.Get("interval"),
-		Metric:      queryParams.Get("metric"),
-		Tenant:      queryParams.Get("tenant"),
-		Vendor:      queryParams.Get("vendor"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		histogramRequest.Timeout = int32(timeout)
-	} else {
-		histogramRequest.Timeout = 0
-	}
-
-	resolution, err := strconv.Atoi(queryParams.Get("resolution"))
-	if err == nil {
-		histogramRequest.Resolution = int32(resolution)
-	} else {
-		histogramRequest.Resolution = 0
-	}
-
-	granularityBuckets, err := strconv.Atoi(queryParams.Get("granularityBuckets"))
-	if err == nil {
-		histogramRequest.GranularityBuckets = int32(granularityBuckets)
-	} else {
-		histogramRequest.GranularityBuckets = 0
-	}
-
-	return &histogramRequest
-}
-
-// string interval = 1;
-// string tenant = 2;
-// string direction = 3;
-// string metric = 4;
-// string objectType = 5;
-// string monitoredObjectId = 6;
-// int32  timeout = 10;
-// string  granularity = 11;
-
 func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
 		Direction:         toStringSplice(queryParams.Get("direction")),
@@ -314,16 +151,30 @@ func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossStr, msg, http.StatusBadRequest)
+		return
+	}
+	thresholdCrossingReq := metrics.ThresholdCrossingRequest{}
+	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
+
 	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
 
 	tenantID := thresholdCrossingReq.TenantID
 
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq.ThresholdProfileID, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
 	}
@@ -336,7 +187,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
+	result, err := msh.druidDB.GetThresholdCrossing(&thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
@@ -452,11 +303,16 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	slaReportRequest, err := populateSLAReportRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
 	if err != nil {
-		reportError(w, startTime, "400", mon.GenerateSLAReportStr, err.Error(), http.StatusBadRequest)
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GenerateSLAReportStr, msg, http.StatusBadRequest)
+		return
+	}
+	slaReportRequest := metrics.SLAReportRequest{}
+	if err := json.Unmarshal(requestBytes, &slaReportRequest); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GenerateSLAReportStr, msg, http.StatusBadRequest)
 		return
 	}
 	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
@@ -478,7 +334,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	result, err := msh.druidDB.GetSLAReport(&slaReportRequest, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
@@ -504,16 +360,29 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+	thresholdCrossingReq := metrics.ThresholdCrossingRequest{}
+	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
 	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
 
 	tenantID := thresholdCrossingReq.TenantID
 
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
+		msg := fmt.Sprintf("Unable to find threshold profile: %s. Error: %s", thresholdCrossingReq.ThresholdProfileID, err.Error())
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
 		return
 	}
@@ -526,7 +395,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(&thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
@@ -552,9 +421,39 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq, err := populateThresholdCrossingTopNRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{}
+	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if thresholdCrossingReq.NumResults == 0 {
+		thresholdCrossingReq.NumResults = 10 // default value
+	}
+
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
+
+	if len(thresholdCrossingReq.Vendor) == 0 {
+		msg := generateErrorMessage(http.StatusBadRequest, "vendor is required")
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if len(thresholdCrossingReq.ObjectType) == 0 {
+		msg := generateErrorMessage(http.StatusBadRequest, "object type is required")
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
 	if err != nil {
 		reportError(w, startTime, "602", mon.GetThrCrossByMonObjTopNStr, err.Error(), 602)
 		return
@@ -583,7 +482,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(thresholdCrossingReq, &pbTP)
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(&thresholdCrossingReq, &pbTP)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
@@ -608,12 +507,25 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	histogramReq := populateHistogramRequest(queryParams)
-	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, histogramReq)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetHistogramObjStr, msg, http.StatusBadRequest)
+		return
+	}
 
-	result, err := msh.druidDB.GetHistogram(histogramReq)
+	// Turn the query Params into the request object:
+	hcRequest := &metrics.HistogramRequest{}
+	err = json.Unmarshal(requestBytes, hcRequest)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, hcRequest)
+
+	result, err := msh.druidDB.GetHistogram(hcRequest)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
@@ -629,51 +541,8 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, histogramReq)
+	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, hcRequest)
 	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
-	fmt.Fprintf(w, string(res))
-}
-
-// GetHistogram - Retrieve bucket data from druid
-func (msh *MetricServiceHandler) GetHistogramCustom(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetHistogramCustomObjStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	// Turn the query Params into the request object:
-	hcRequest := &metrics.HistogramCustomRequest{}
-	err = json.Unmarshal(requestBytes, hcRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	logger.Log.Infof("Retrieving %s for: %v", db.HistogramCustomStr, hcRequest)
-
-	result, err := msh.druidDB.GetHistogramCustom(hcRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Custom Histogram response. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramCustomStr, hcRequest)
-	trackAPIMetrics(startTime, "200", mon.GetHistogramCustomObjStr)
 	fmt.Fprintf(w, string(res))
 }
 

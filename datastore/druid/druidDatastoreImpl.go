@@ -145,77 +145,11 @@ func NewDruidDatasctoreClient() *DruidDatastoreClient {
 	}
 }
 
-// peyo TODO: implement this query
-func (dc *DruidDatastoreClient) GetHistogram(request *pb.HistogramRequest) (map[string]interface{}, error) {
+// Retrieves a histogram for specified metrics based on custom defined buckets
+func (dc *DruidDatastoreClient) GetHistogram(request *metrics.HistogramRequest) (map[string]interface{}, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetHistogram for request: %v", models.AsJSONString(request))
-	}
-	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
-
-	// peyo TODO we should have a better way to handle default query params
-	timeout := request.GetTimeout()
-	if timeout == 0 {
-		timeout = 5000
-	}
-
-	query, err := HistogramQuery(request.GetTenant(), table, request.Metric, request.Granularity, request.Direction, request.Interval, request.Resolution, request.GranularityBuckets, request.GetVendor(), timeout)
-
-	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
-		return nil, err
-	}
-
-	queryStartTime := time.Now()
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
-	}
-	response, err := dc.executeQuery(query)
-
-	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetHistogramObjStr)
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
-		return nil, err
-	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetHistogramObjStr)
-
-	histogram := []*pb.Histogram{}
-
-	err = json.Unmarshal(response, &histogram)
-	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetHistogramObjStr)
-		return nil, err
-	}
-
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, models.AsJSONString(histogram))
-	}
-
-	resp := &pb.HistogramResponse{
-		Data: histogram,
-	}
-
-	// peyo TODO: need to figure out where to get this ID and Type from.
-	uuid := uuid.NewV4()
-	data := make([]*pb.HistogramResponse, 0)
-	data = append(data, resp)
-	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       ThresholdCrossingReport,
-			"attributes": data,
-		},
-	}
-
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetHistogramObjStr)
-	return rr, nil
-}
-
-// Retrieves a histogram for specified metrics based on custom defined buckets
-func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCustomRequest) (map[string]interface{}, error) {
-	methodStartTime := time.Now()
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Calling GetHistogramCustom for request: %v", models.AsJSONString(request))
 	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
@@ -235,39 +169,39 @@ func (dc *DruidDatastoreClient) GetHistogramCustom(request *metrics.HistogramCus
 	}
 
 	// Build out the actual druid query to send
-	query, err := HistogramCustomQuery(request.TenantID, request.Meta, table, request.Interval, request.Granularity, timeout, metrics)
+	query, err := HistogramQuery(request.TenantID, request.Meta, table, request.Interval, request.Granularity, timeout, metrics)
 
 	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramCustomObjStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
 		return nil, err
 	}
 
 	// Execute the druid query
 	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramCustomStr, models.AsJSONString(query))
+		logger.Log.Debugf("Querying Druid for %s with query: %v", db.HistogramStr, models.AsJSONString(query))
 	}
 	response, err := dc.executeQuery(query)
 
 	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetHistogramCustomObjStr)
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramCustomObjStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetHistogramObjStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
 		return nil, err
 	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetHistogramCustomObjStr)
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetHistogramObjStr)
 
 	// Reformat the druid response from a flat structure to a json api structure
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Response from druid for %s: %v", db.HistogramCustomStr, string(response))
+		logger.Log.Debugf("Response from druid for %s: %v", db.HistogramStr, string(response))
 	}
-	rr, err := convertHistogramCustomResponse(request.TenantID, request.Meta, request.Interval, string(response))
+	rr, err := convertHistogramResponse(request.TenantID, request.Meta, request.Interval, string(response))
 
 	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramCustomObjStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
 		return nil, err
 	}
 
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetHistogramCustomObjStr)
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetHistogramObjStr)
 	return rr, nil
 }
 

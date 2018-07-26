@@ -78,6 +78,7 @@ type TenantServiceDatastore interface {
 	// For Monitored Objects Meta fields
 	CheckAndAddMetadataView(tenantID string, monitoredObject *tenmod.MonitoredObject) error
 	UpdateMonitoredObjectMetadataViews(tenantID string, monitoredObject *tenmod.MonitoredObject) error
+	GetMetadataKeys(tenantId string) (map[string]int, error)
 
 	// For testing
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)

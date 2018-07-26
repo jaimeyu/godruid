@@ -1433,3 +1433,7 @@ func (tsd *TenantServiceDatastoreInMemory) CheckAndAddMetadataView(tenantID stri
 func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 	return nil, nil
 }
+
+func (tsd *TenantServiceDatastoreInMemory) GetMetadataKeys(tenantId string) (map[string]int, error) {
+	return nil, nil
+}

@@ -1,3 +1,4 @@
+* Feature - pagination for v2 GetAllMonitoredObjects API
 ## Current Release 
 ### 0.176.0 
 **Release Date:** Wed Jul 25 14:09:56 UTC 2018     

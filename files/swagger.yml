@@ -3017,6 +3017,40 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/monitored-objects:
+    get:
+      summary: Retrieve all Monitored Objects for a Tenant.
+      operationId: GetAllMonitoredObjectsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/MonitoredObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Record not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: start_key
+          in: query
+          type: string
+          description: "The name of the Monitored Object from which the result set will begin"
+        - name: limit
+          in: query
+          type: integer
+          description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2
 definitions:
   JsonApiAdminUser:
     type: "object"
@@ -4398,3 +4432,63 @@ definitions:
             type: "integer"
             format: "int64"
             description: "Time since epoch at which this object was last altered."
+
+  MonitoredObjectList:
+    type: "object"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObject'
+
+  MonitoredObject:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        properties:
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          relationships:
+            type: "object"
+            properties:
+              domains:
+                $ref: '#/definitions/JsonApiRelationship'
+ 

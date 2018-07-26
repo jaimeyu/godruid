@@ -49,6 +49,7 @@ type ChangeNotificationHandler struct {
 	adminDB            *datastore.AdminServiceDatastore
 	tenantDB           *datastore.TenantServiceDatastore
 	metricsDB          datastore.DruidDatastore
+	batchSize          int64
 }
 
 // ChangeNotificationHandler singleton
@@ -78,6 +79,12 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		return nil
 	}
 
+	batchSize := int64(1000)
+	cfgBatchSize := cfg.GetInt(gather.CK_server_datastore_batchsize.String())
+	if cfgBatchSize > 0 {
+		batchSize = int64(cfgBatchSize)
+	}
+
 	changeNotifH = ChangeNotificationHandler{
 		brokers:            []string{broker},
 		topic:              defaultKafkaTopic,
@@ -85,6 +92,7 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		adminDB:            &adminDB,
 		provisioningEvents: make(chan *ChangeEvent, 20),
 		metricsDB:          druid.NewDruidDatasctoreClient(),
+		batchSize:          batchSize,
 	}
 
 	//	go changeNotifH.readFromKafka(broker, defaultKafkaTopic)
@@ -249,7 +257,7 @@ func (c *ChangeNotificationHandler) sendToKafka(tenantID string, monitoredObject
 }
 
 func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
-	monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(tenantID)
+	monitoredObjects, err := c.getAllMonitoredObjects(tenantID)
 	if err != nil {
 		logger.Log.Error("Failed to get objects", err.Error())
 		return
@@ -262,6 +270,30 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
 	}
+}
+
+// getAllMonitoredObjects - uses the paginated DB call to acquire all monitored objects
+func (c *ChangeNotificationHandler) getAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error) {
+
+	result := make([]*tenmod.MonitoredObject, 0)
+	startKey := ""
+
+	for true {
+		monitoredObjects, paginationOffsets, err := (*c.tenantDB).GetAllMonitoredObjectsByPage(tenantID, startKey, c.batchSize)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, monitoredObjects...)
+
+		if len(paginationOffsets.Next) == 0 {
+			break
+		}
+
+		startKey = paginationOffsets.Next
+	}
+
+	return result, nil
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
@@ -301,7 +333,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			continue
 		}
 
-		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
+		monitoredObjects, err := c.getAllMonitoredObjects(t.ID)
 		if err != nil {
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue

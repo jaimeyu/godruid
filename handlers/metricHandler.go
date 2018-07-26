@@ -45,12 +45,6 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 	result.tenantDB = tdb
 
 	result.routes = []server.Route{
-		server.Route{
-			Name:        "GetThresholdCrossing",
-			Method:      "POST",
-			Pattern:     "/api/v1/threshold-crossing",
-			HandlerFunc: result.GetThresholdCrossing,
-		},
 
 		server.Route{
 			Name:        "QueryThresholdCrossing",
@@ -144,68 +138,6 @@ func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	}
 
 	return &rmr
-}
-
-// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain
-func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetThrCrossStr, msg, http.StatusBadRequest)
-		return
-	}
-	thresholdCrossingReq := metrics.ThresholdCrossingRequest{}
-	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetThrCrossStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-
-	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
-
-	tenantID := thresholdCrossingReq.TenantID
-
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq.ThresholdProfileID, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
-	result, err := msh.druidDB.GetThresholdCrossing(&thresholdCrossingReq, &pbTP)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Threshold Crossing. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossStr)
-	fmt.Fprintf(w, string(res))
 }
 
 func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r *http.Request) {

@@ -166,7 +166,7 @@ type TopNForMetric struct {
 	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
 
 	// Required Time range for the requestin ISO 8601 format for intervals
-	Interval string `json:"interval,,omitempty"`
+	Interval string `json:"interval,omitempty"`
 	// Rquired Vendor (to avoid overlaps, eg: flowmeter does not have Jitter values
 	// so if you do a min TopN then you'll just get a list of 0s)
 	TenantID string `json:"tenant,omitempty"`

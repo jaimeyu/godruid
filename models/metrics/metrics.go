@@ -11,8 +11,8 @@ type SLAReportRequest struct {
 	SlaScheduleConfig string `json:"slaScheduleConfigId"`
 	TenantID          string `json:"tenantId"`
 	// ISO-8601 Intervals
-	Interval string            `json:"interval,omitempty"`
-	Meta     map[string]string `json:"meta,omitempty"`
+	Interval string              `json:"interval,omitempty"`
+	Meta     map[string][]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
@@ -22,8 +22,8 @@ type SLAReportRequest struct {
 }
 
 type HistogramRequest struct {
-	TenantID string            `json:"tenantId"`
-	Meta     map[string]string `json:"meta,omitempty"`
+	TenantID string              `json:"tenantId"`
+	Meta     map[string][]string `json:"meta,omitempty"`
 	// ISO-8601 Intervals
 	Interval string `json:"interval,omitempty"`
 	// ISO-8601 period combination
@@ -65,7 +65,7 @@ func (sr *SLAReport) GetName() string {
 type HistogramReport struct {
 	ReportCompletionTime string                     `json:"reportCompletionTime"`
 	TenantID             string                     `json:"tenantId"`
-	Meta                 map[string]string          `json:"meta"`
+	Meta                 map[string][]string        `json:"meta"`
 	ReportTimeRange      string                     `json:"reportTimeRange"`
 	TimeSeriesResult     []HistogramTimeSeriesEntry `json:"timeSeriesResult"`
 }
@@ -151,8 +151,8 @@ type ThresholdCrossingTopNRequest struct {
 	Vendor     string `json:"vendor"`
 	TenantID   string `json:"tenantId"`
 	// ISO-8601 Intervals
-	Interval string            `json:"interval,omitempty"`
-	Meta     map[string]string `json:"meta,omitempty"`
+	Interval string              `json:"interval,omitempty"`
+	Meta     map[string][]string `json:"meta,omitempty"`
 	// ISO-8601 period combination
 	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
 	Granularity        string `json:"granularity,omitempty"`
@@ -161,7 +161,7 @@ type ThresholdCrossingTopNRequest struct {
 }
 
 type TopNForMetric struct {
-	Meta map[string]string `json:"meta,omitempty"`
+	Meta map[string][]string `json:"meta,omitempty"`
 	// List of monitored objects (optional)
 	MonitoredObjects []string `json:"monitoredObjects,omitempty"`
 
@@ -218,27 +218,27 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 }
 
 type ThresholdCrossingRequest struct {
-	TenantID            string             `json:"tenantId"`
-	Meta                map[string]string  `json:"meta,omitempty"`
-	Interval            string             `json:"interval,omitempty"`
-	Granularity         string             `json:"granularity,omitempty"`
-	ThresholdProfileID  string             `json:"thresholdProfileId,omitempty"`
-	MetricWhitelist     []MetricIdentifier `json:"metricWhitelist,omitempty"`
-	MetricNameWhiteList []string           `json:"metricNameWhitelist,omitempty"`
-	ObjectTypeWhiteList []string           `json:"objectTypeWhitelist,omitempty"`
-	DirectionWhiteList  []string           `json:"directionWhitelist,omitempty"`
-	VendorWhiteList     []string           `json:"vendorWhitelist,omitempty"`
-	Timeout             int32              `json:"timeout,omitempty"`
+	TenantID            string              `json:"tenantId"`
+	Meta                map[string][]string `json:"meta,omitempty"`
+	Interval            string              `json:"interval,omitempty"`
+	Granularity         string              `json:"granularity,omitempty"`
+	ThresholdProfileID  string              `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist     []MetricIdentifier  `json:"metricWhitelist,omitempty"`
+	MetricNameWhiteList []string            `json:"metricNameWhitelist,omitempty"`
+	ObjectTypeWhiteList []string            `json:"objectTypeWhitelist,omitempty"`
+	DirectionWhiteList  []string            `json:"directionWhitelist,omitempty"`
+	VendorWhiteList     []string            `json:"vendorWhitelist,omitempty"`
+	Timeout             int32               `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {
-	TenantID    string             `json:"tenantId"`
-	Meta        map[string]string  `json:"meta,omitempty"`
-	Interval    string             `json:"interval,omitempty"`
-	Granularity string             `json:"granularity,omitempty"`
-	Timeout     int32              `json:"timeout,omitempty"`
-	Aggregation AggregationSpec    `json:"aggregation"`
-	Metrics     []MetricIdentifier `json:"metrics,omitempty"`
+	TenantID    string              `json:"tenantId"`
+	Meta        map[string][]string `json:"meta,omitempty"`
+	Interval    string              `json:"interval,omitempty"`
+	Granularity string              `json:"granularity,omitempty"`
+	Timeout     int32               `json:"timeout,omitempty"`
+	Aggregation AggregationSpec     `json:"aggregation"`
+	Metrics     []MetricIdentifier  `json:"metrics,omitempty"`
 }
 
 type AggregationSpec struct {

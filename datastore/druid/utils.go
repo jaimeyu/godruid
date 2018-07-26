@@ -47,7 +47,7 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return dataContainer, nil
 }
 
-func convertHistogramResponse(tenantId string, meta map[string]string, interval string, rawResponse string) (map[string]interface{}, error) {
+func convertHistogramResponse(tenantId string, meta map[string][]string, interval string, rawResponse string) (map[string]interface{}, error) {
 
 	const (
 		HistogramReport = "histogramReports"

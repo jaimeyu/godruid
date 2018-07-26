@@ -33,7 +33,7 @@ const (
 	apiV1Prefix      = "/api/v1/"
 	tenantsAPIPrefix = "tenants/{tenantID}/"
 
-	offsetQueryParamStr     = "offset"
+	startKeyQueryParamStr   = "start_key"
 	limitQueryParamStr      = "limit"
 	descendingQueryParamStr = "descending"
 
@@ -682,27 +682,22 @@ func checkForNotFound(s string) bool {
 }
 
 // generateLinks - creates the "links" section to be used in a jsonapi response object
-func generateLinks(urlBase string, offsets *common.PaginationOffsets, limit int64) map[string]string {
+func generateLinks(urlBase string, paginationOffsets *common.PaginationOffsets, limit int64) map[string]string {
 	links := map[string]string{}
 
-	links[linkFirstStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
-	links[linkSelfStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
-	links[linkLastStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, 0, limitQueryParamStr, limit)
+	links[linkFirstStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
+	links[linkSelfStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
 
-	if offsets.Self != 0 {
-		links[linkSelfStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Self, limitQueryParamStr, limit)
+	if len(paginationOffsets.Self) != 0 {
+		links[linkSelfStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Self, limitQueryParamStr, limit)
 	}
 
-	if offsets.Self != 0 {
-		links[linkPrevStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Prev, limitQueryParamStr, limit)
+	if len(paginationOffsets.Next) != 0 {
+		links[linkNextStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Next, limitQueryParamStr, limit)
 	}
 
-	if offsets.Next != 0 {
-		links[linkNextStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Next, limitQueryParamStr, limit)
-	}
-
-	if offsets.Last != 0 {
-		links[linkLastStr] = fmt.Sprintf("%s?%s=%d&%s=%d", urlBase, offsetQueryParamStr, offsets.Last, limitQueryParamStr, limit)
+	if len(paginationOffsets.Prev) != 0 {
+		links[linkPrevStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Prev, limitQueryParamStr, limit)
 	}
 
 	return links

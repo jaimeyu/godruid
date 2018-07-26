@@ -674,8 +674,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 }
 
 // GetAllMonitoredObjectsByPage - CouchDB implementation of GetAllMonitoredObjectsByPage
-func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID string, offset int64, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
-	logger.Log.Debugf("Fetching next %d %ss from offset %d\n", limit, tenmod.TenantMonitoredObjectStr, offset)
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+	logger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
@@ -695,7 +695,10 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID 
 		batchSize = limit
 	}
 
-	params := generatePaginationQueryParams(offset, batchSize, true)
+	// Get 1 more object than the real response so that we can have the start key of the next page
+	batchPlus1 := batchSize + 1
+
+	params := generatePaginationQueryParams(startKey, batchPlus1, true, false)
 	fetchResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, &params)
 	if err != nil {
 		return nil, nil, err
@@ -706,7 +709,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID 
 	}
 
 	castedRows := fetchResponse["rows"].([]interface{})
-	castedTotalRows := int64(fetchResponse["total_rows"].(float64))
 	if len(castedRows) == 0 {
 		return nil, nil, fmt.Errorf(ds.NotFoundStr)
 	}
@@ -721,10 +723,36 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID 
 
 	convertCouchDataArrayToFlattenedArray(rows, &res, tenmod.TenantMonitoredObjectStr)
 
-	offsets := ds.GetPaginationOffsets(castedTotalRows, batchSize, offset)
+	nextPageStartKey := ""
+	if int64(len(res)) == batchPlus1 {
+		// Have an extra item, need to remove it and store the key for the next page
+		nextPageStartKey = res[batchSize].ObjectName
+		res = res[:batchSize]
+	}
 
-	logger.Log.Debugf("Retrieved %d %ss from offset %d\n", len(res), tenmod.TenantMonitoredObjectStr, offset)
-	return res, offsets, nil
+	paginationOffsets := common.PaginationOffsets{
+		Self: startKey,
+		Next: nextPageStartKey,
+	}
+
+	// Try to retrieve the previous page as well to get the previous start key
+	prevPageParams := generatePaginationQueryParams(res[0].ObjectName, batchPlus1, true, true)
+	prevPageResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, &prevPageParams)
+	if err == nil {
+		// Try to get previous page details
+		if prevPageResponse["rows"] != nil {
+			prevPageRows := prevPageResponse["rows"].([]interface{})
+
+			// There will always be 1 result at this point for the start of the current page, only add previous page key if there are actually records on the prev page
+			if len(prevPageRows) > 1 {
+				lastRow := prevPageRows[len(prevPageRows)-1].(map[string]interface{})
+				paginationOffsets.Prev = lastRow["key"].(string)
+			}
+		}
+	}
+
+	logger.Log.Debugf("Retrieved %d %ss from startKey %s\n", len(res), tenmod.TenantMonitoredObjectStr, startKey)
+	return res, &paginationOffsets, nil
 }
 
 // GetAllMonitoredObjectsInIDList - couchdb implementation of GetAllMonitoredObjectsInIDList

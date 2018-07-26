@@ -36,10 +36,10 @@ type GetAllMonitoredObjectsV2Params struct {
 	  In: query
 	*/
 	Limit *int64
-	/*The number of records to skip before starting this page of results
+	/*The name of the Monitored Object from which the result set will begin
 	  In: query
 	*/
-	Offset *int64
+	StartKey *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -58,8 +58,8 @@ func (o *GetAllMonitoredObjectsV2Params) BindRequest(r *http.Request, route *mid
 		res = append(res, err)
 	}
 
-	qOffset, qhkOffset, _ := qs.GetOK("offset")
-	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
+	qStartKey, qhkStartKey, _ := qs.GetOK("start_key")
+	if err := o.bindStartKey(qStartKey, qhkStartKey, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -90,7 +90,7 @@ func (o *GetAllMonitoredObjectsV2Params) bindLimit(rawData []string, hasKey bool
 	return nil
 }
 
-func (o *GetAllMonitoredObjectsV2Params) bindOffset(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *GetAllMonitoredObjectsV2Params) bindStartKey(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -102,11 +102,7 @@ func (o *GetAllMonitoredObjectsV2Params) bindOffset(rawData []string, hasKey boo
 		return nil
 	}
 
-	value, err := swag.ConvertInt64(raw)
-	if err != nil {
-		return errors.InvalidType("offset", "query", "int64", raw)
-	}
-	o.Offset = &value
+	o.StartKey = &raw
 
 	return nil
 }

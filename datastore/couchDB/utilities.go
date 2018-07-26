@@ -16,9 +16,10 @@ import (
 const (
 	defaultQueryResultsLimit = 1000
 
-	skipQueryParamStr        = "skip"
+	startKeyQueryParamStr    = "startkey"
 	limitQueryParamStr       = "limit"
 	includeDocsQueryParamStr = "include_docs"
+	descendingQueryParamStr  = "descending"
 )
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
@@ -568,14 +569,17 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
 }
 
-func generatePaginationQueryParams(page int64, limit int64, includeDocs bool) url.Values {
+func generatePaginationQueryParams(startKey string, limit int64, includeDocs bool, descending bool) url.Values {
 	params := url.Values{}
 
 	// pges offset in couchDB terms is index value, or number of pages * number of records per page
-	skip := page * limit
-	params.Add(skipQueryParamStr, strconv.FormatInt(skip, 10))
+	if len(startKey) != 0 {
+		params.Add(startKeyQueryParamStr, fmt.Sprintf(`"%s"`, startKey))
+	}
+
 	params.Add(limitQueryParamStr, strconv.FormatInt(limit, 10))
 	params.Add(includeDocsQueryParamStr, strconv.FormatBool(includeDocs))
+	params.Add(descendingQueryParamStr, strconv.FormatBool(descending))
 
 	return params
 }

@@ -3041,10 +3041,10 @@ paths:
           schema:
             type: string
       parameters:
-        - name: offset
+        - name: start_key
           in: query
-          type: integer
-          description: "The number of records to skip before starting this page of results"
+          type: string
+          description: "The name of the Monitored Object from which the result set will begin"
         - name: limit
           in: query
           type: integer

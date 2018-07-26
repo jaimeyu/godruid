@@ -50,16 +50,16 @@ func doGetAllMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Tenant
 	}
 
 	// Issue request to DAO Layer
-	offset := int64(0)
+	startKey := ""
 	limit := int64(0)
-	if params.Offset != nil {
-		offset = *params.Offset
+	if params.StartKey != nil {
+		startKey = *params.StartKey
 	}
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
 
-	result, offsets, err := tenantDB.GetAllMonitoredObjectsByPage(tenantID, offset, limit)
+	result, paginationOffsets, err := tenantDB.GetAllMonitoredObjectsByPage(tenantID, startKey, limit)
 	if err != nil {
 		if checkForNotFound(err.Error()) {
 			return startTime, http.StatusNotFound, nil, err
@@ -77,7 +77,7 @@ func doGetAllMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Tenant
 	}
 
 	// Add in the links section of the payload
-	converted.Links = generateLinks(strings.Join([]string{params.HTTPRequest.URL.Scheme, params.HTTPRequest.URL.Host, params.HTTPRequest.URL.Path}, ""), offsets, limit)
+	converted.Links = generateLinks(strings.Join([]string{params.HTTPRequest.URL.Scheme, params.HTTPRequest.URL.Host, params.HTTPRequest.URL.Path}, ""), paginationOffsets, limit)
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetAllMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Retrieved %d %ss", len(converted.Data), tenmod.TenantMonitoredObjectStr)

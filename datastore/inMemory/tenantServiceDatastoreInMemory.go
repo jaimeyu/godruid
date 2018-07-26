@@ -836,10 +836,10 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 }
 
 // GetAllMonitoredObjectsByPage - InMemory implementation of GetAllMonitoredObjectsByPage
-func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsByPage(tenantID string, offset int64, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
 	err := tsd.DoesTenantExist(tenantID, tenmod.TenantMonitoredObjectType)
 	if err != nil {
-		return []*tenmod.MonitoredObject{}, nil, nil
+		return nil, nil, fmt.Errorf("Tenant does not exist")
 	}
 
 	recList := make([]*tenmod.MonitoredObject, 0)
@@ -853,23 +853,51 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsByPage(tenantID
 		return storedMOs[i].ObjectName < storedMOs[j].ObjectName
 	})
 
+	nextPageStartKey := ""
+
 	// Select the records after the specific page
-	skip := offset * limit
-	for i, rec := range storedMOs {
+	for _, rec := range storedMOs {
 		// If the limit is met, keep the next record value for the next page key but stop processing
 		if int64(len(recList)) == limit {
+			nextPageStartKey = rec.ObjectName
 			break
 		}
 
 		// Add record in if it is in the desired page
-		if int64(i) > skip {
+		if rec.ObjectName > startKey {
 			recList = append(recList, rec)
 		}
 	}
 
-	pageOffsets := ds.GetPaginationOffsets(int64(len(tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID])), limit, offset)
+	paginationValues := common.PaginationOffsets{
+		Self: startKey,
+		Next: nextPageStartKey,
+	}
 
-	return recList, pageOffsets, nil
+	// Now get the previous page so that we can get the start key for it
+	sort.Slice(storedMOs, func(i, j int) bool {
+		return storedMOs[i].ObjectName > storedMOs[j].ObjectName
+	})
+	prevPage := make([]*tenmod.MonitoredObject, 0)
+	previousPageStartKey := ""
+	for _, rec := range storedMOs {
+		// If the limit is met, keep the next record value for the next page key but stop processing
+		if int64(len(prevPage)) == limit {
+			break
+		}
+
+		// Add record in if it is in the desired page
+		if rec.ObjectName > startKey {
+			recList = append(recList, rec)
+		}
+	}
+
+	if len(prevPage) > 0 {
+		previousPageStartKey = prevPage[len(prevPage)].ObjectName
+	}
+	paginationValues.Prev = previousPageStartKey
+
+	return recList, &paginationValues, nil
 }
 
 // GetAllMonitoredObjectsInIDList - InMemory implementation of GetAllMonitoredObjectsInIDList

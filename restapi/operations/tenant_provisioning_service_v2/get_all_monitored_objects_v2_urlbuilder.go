@@ -15,8 +15,8 @@ import (
 
 // GetAllMonitoredObjectsV2URL generates an URL for the get all monitored objects v2 operation
 type GetAllMonitoredObjectsV2URL struct {
-	Limit  *int64
-	Offset *int64
+	Limit    *int64
+	StartKey *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -60,12 +60,12 @@ func (o *GetAllMonitoredObjectsV2URL) Build() (*url.URL, error) {
 		qs.Set("limit", limit)
 	}
 
-	var offset string
-	if o.Offset != nil {
-		offset = swag.FormatInt64(*o.Offset)
+	var startKey string
+	if o.StartKey != nil {
+		startKey = *o.StartKey
 	}
-	if offset != "" {
-		qs.Set("offset", offset)
+	if startKey != "" {
+		qs.Set("start_key", startKey)
 	}
 
 	result.RawQuery = qs.Encode()

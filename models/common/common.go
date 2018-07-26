@@ -33,8 +33,7 @@ type BulkOperationResult struct {
 
 // PaginationOffsets - struct to hold offsets for pagination related queries
 type PaginationOffsets struct {
-	Self int64
-	Prev int64
-	Next int64
-	Last int64
+	Self string
+	Prev string
+	Next string
 }

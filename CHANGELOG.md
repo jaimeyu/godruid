@@ -1,8 +1,10 @@
-* Feature - pagination for v2 GetAllMonitoredObjects API
 ## Current Release 
+### 0.177.0 
+**Release Date:** Thu Jul 26 15:18:15 UTC 2018     
+## Previous Releases 
+* Feature - pagination for v2 GetAllMonitoredObjects API
 ### 0.176.0 
 **Release Date:** Wed Jul 25 14:09:56 UTC 2018     
-## Previous Releases 
 * Fix raw metrics api to include unclean by default
 ### 0.175.0 
 **Release Date:** Mon Jul 23 20:29:41 UTC 2018     

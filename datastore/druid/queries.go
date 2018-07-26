@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
-	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
 	"github.com/satori/go.uuid"
@@ -1008,46 +1007,8 @@ func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *god
 }
 
 func buildDomainFilter(tenantID string, domains []string) *godruid.Filter {
-	if len(domains) < 1 {
-		return nil
-	}
+	return nil
 
-	filters := make([]*godruid.Filter, len(domains))
-	atLeastOneDomainFilter := false
-	for i, domID := range domains {
-		var ef godruid.ExtractionFn
-
-		lookupName, exists := getLookupName("dom", tenantID, domID)
-		if !exists {
-			logger.Log.Warningf("No lookup (%s) found for domain ID %s. It will be excluded from the domain filter", lookupName, domID)
-			continue
-		}
-
-		atLeastOneDomainFilter = true
-		ef = godruid.RegisteredLookupExtractionFn{
-			Type:   "registeredLookup",
-			Lookup: lookupName,
-		}
-
-		filters[i] = &godruid.Filter{
-			Type:         "selector",
-			Dimension:    "monitoredObjectId",
-			Value:        domID,
-			ExtractionFn: &ef,
-		}
-	}
-
-	if !atLeastOneDomainFilter {
-		// This is a hack to get around no domain lookups being ready yet.  Basically want to
-		// create an 'always false filter".
-		logger.Log.Debugf("No domains found in cached using false filter")
-		return godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
-			godruid.FilterNot(godruid.FilterSelector("tenantId", strings.ToLower(tenantID))),
-		)
-	}
-
-	return godruid.FilterOr(filters...)
 }
 
 func buildOrFilter(dimensionName string, values []string) *godruid.Filter {

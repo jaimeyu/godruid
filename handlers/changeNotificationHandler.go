@@ -289,21 +289,22 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	// Update counters
 	setMonitoredObjectCount(len(monitoredObjects))
 
-	// @TODO > We will no longer need this. Please use the view instead
-	tenantMeta, err := (*c.tenantDB).GetTenantMeta(tenantID)
+	pairs, err := (*c.tenantDB).GetMetadataKeys(tenantID)
 	if err != nil {
-		logger.Log.Errorf("Couldn't find tenant metadata for tenant: %s", tenantID)
-
+		//return fmt.Errorf("Could not get list of known metadata keys:%s", err.Error())
+		return
 	}
 	var qualifiers []string
-
-	for key := range tenantMeta.MonitorObjectMetaKeys {
-		qualifiers = append(qualifiers, key)
+	for k, v := range pairs {
+		// If there low cardinality in the dataset, then don't append
+		if v < 1000000 {
+			qualifiers = append(qualifiers, k)
+		}
 	}
 
 	setMetadataKeyCount(len(qualifiers))
 
-	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta", qualifiers, true); err != nil {
+	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta", pairs); err != nil {
 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
 
 	} else {
@@ -378,13 +379,16 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 				return fmt.Errorf("Could not get list of known metadata keys:%s", err.Error())
 			}
 			var qualifiers []string
-			for k := range pairs {
-				qualifiers = append(qualifiers, k)
+			for k, v := range pairs {
+				// If there low cardinality in the dataset, then don't append
+				if v < 1000000 {
+					qualifiers = append(qualifiers, k)
+				}
 			}
 
 			setMetadataKeyCount(len(qualifiers))
 
-			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta", qualifiers, true); err != nil {
+			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta", pairs); err != nil {
 				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
 				lastError = err
 				continue

@@ -1,6 +1,7 @@
 package druid
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -29,38 +30,35 @@ type lookupCache struct {
 	lookupNames map[string]*time.Time
 }
 
-// Generates a lookup name from the parameters and returns it only if it is considered to be valid and active
-func getLookupName(dimType, tenantID, dimValue string) (string, bool) {
-	lookup := buildLookupName(dimType, tenantID, dimValue)
+// // Generates a lookup name from the parameters and returns it only if it is considered to be valid and active
+// func getLookupName(dimType, tenantID, dimValue string) (string, bool) {
+// 	lookup := buildLookupName(dimType, tenantID, dimValue)
 
-	if lookups.lookupNames == nil {
-		// The cache hasn't been initialized. Assume the lookup name is
-		// valid.
-		return lookup, true
-	}
-	// Check the cache.  The lookup is valid to use if it's present in
-	// the cache and it has been committed for at least the write delay.
-	if ts, ok := lookups.lookupNames[lookup]; ok {
-		if ts.Add(druidLookupWriteDelay).Before(time.Now()) {
-			// Enough time has passed to commit the lookup
-			return lookup, true
-		}
-		logger.Log.Errorf("Not enough time has passed to commit the lookup:%s", lookup)
-	}
+// 	if lookups.lookupNames == nil {
+// 		// The cache hasn't been initialized. Assume the lookup name is
+// 		// valid.
+// 		return lookup, true
+// 	}
+// 	// Check the cache.  The lookup is valid to use if it's present in
+// 	// the cache and it has been committed for at least the write delay.
+// 	if ts, ok := lookups.lookupNames[lookup]; ok {
+// 		if ts.Add(druidLookupWriteDelay).Before(time.Now()) {
+// 			// Enough time has passed to commit the lookup
+// 			return lookup, true
+// 		}
+// 		logger.Log.Errorf("Not enough time has passed to commit the lookup:%s", lookup)
+// 	}
 
-	return lookup, false
-}
+// 	return lookup, false
+// }
 
 // Construct a lookup name
-func buildLookupName(dimType, tenantID, dimValue string) string {
-	return strings.ToLower(dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimValue)
+// Looks up have the format: type*tenantID*key*value*partition
+func buildLookupName(dimType, tenantID, dimKey string, dimValue string, dimPartition int) string {
+	return strings.ToLower(dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimKey + druidLookupSeparator + dimValue + druidLookupSeparator + fmt.Sprintf("%d", dimPartition))
 }
 
 func buildLookupNamePrefix(dimType, tenantID string) string {
-	return strings.ToLower(dimType + druidLookupSeparator + tenantID)
-}
-
-func getLookupNamePrefix(dimType, tenantID string) string {
 	return strings.ToLower(dimType + druidLookupSeparator + tenantID)
 }
 

@@ -139,8 +139,6 @@ func getByDocIDWithQueryParams(docID string, dataTypeStrForLogging string, db *c
 		queryParams = new(url.Values)
 	}
 
-	logger.Log.Warningf("Issuing query for %s with params %v", docID, queryParams)
-
 	fetchedData, err := db.Get(docID, *queryParams)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())

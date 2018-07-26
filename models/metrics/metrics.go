@@ -23,7 +23,7 @@ type SLAReportRequest struct {
 
 type HistogramRequest struct {
 	TenantID string            `json:"tenantId"`
-	Meta     map[string]string `json:"meta:omitempty"`
+	Meta     map[string]string `json:"meta,omitempty"`
 	// ISO-8601 Intervals
 	Interval string `json:"interval,omitempty"`
 	// ISO-8601 period combination

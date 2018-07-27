@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -11,6 +12,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	mon "github.com/accedian/adh-gather/monitoring"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -51,6 +53,8 @@ type ChangeNotificationHandler struct {
 	tenantDB           *datastore.TenantServiceDatastore
 	metricsDB          datastore.DruidDatastore
 	batchSize          int64
+	// To block pollChanges from overlapping
+	locker uint32
 }
 
 // ChangeNotificationHandler singleton
@@ -94,6 +98,7 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		provisioningEvents: make(chan *ChangeEvent, 20),
 		metricsDB:          druid.NewDruidDatasctoreClient(),
 		batchSize:          batchSize,
+		locker:             0,
 	}
 
 	//	go changeNotifH.readFromKafka(broker, defaultKafkaTopic)
@@ -269,7 +274,7 @@ func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
 	//debugging
 	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
 
-	testNodes := 1000000 // change this for testing!
+	testNodes := 10 // change this for testing!
 	for i := 0; i < testNodes; i++ {
 		mo := tenmod.MonitoredObject{
 			ID:                fmt.Sprintf("debug_%d", i),
@@ -285,6 +290,12 @@ func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
 }
 
 func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
+	// Avoid running overlapping pollChanges
+	if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
+		return
+	}
+	defer atomic.StoreUint32(&c.locker, 0)
+
 	monitoredObjects, err := c.getAllMonitoredObjects(tenantID)
 	if err != nil {
 		logger.Log.Error("Failed to get objects", err.Error())
@@ -292,7 +303,7 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	}
 
 	// Enable this to add arbitary number of items into the druid look ups
-	monitoredObjects = debugAddFakeMonitoredObjects()
+	//monitoredObjects = debugAddFakeMonitoredObjects()
 
 	// Update counters
 	setMonitoredObjectCount(len(monitoredObjects))
@@ -331,15 +342,26 @@ func (c *ChangeNotificationHandler) getAllMonitoredObjects(tenantID string) ([]*
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
+	// Avoid running overlapping pollChanges
+	if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
+		return nil
+	}
+	defer atomic.StoreUint32(&c.locker, 0)
+
+	startTime := time.Now()
+
 	logger.Log.Debugf("pollChanges fullRefresh=%v, lastSuccess=%d", fullRefresh, lastSyncTimestamp)
 	tenants, err := (*c.adminDB).GetAllTenantDescriptors()
 	if err != nil {
 		logger.Log.Error("Unable to fetch list of tenants: %s", err.Error())
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "500", mon.PollChanges)
+
 		return err
 	}
 
 	if len(tenants) < 1 {
 		logger.Log.Warning("No tenants found")
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "500", mon.PollChanges)
 		return nil
 	}
 
@@ -361,14 +383,14 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 
 		changeDetected := false
 
-		monitoredObjects, err := (*c.tenantDB).GetAllMonitoredObjects(t.ID)
+		monitoredObjects, err := c.getAllMonitoredObjects(t.ID)
 		if err != nil {
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue
 		}
 
 		// Enable this to add arbitary number of items into the druid look ups
-		monitoredObjects = debugAddFakeMonitoredObjects()
+		// monitoredObjects = debugAddFakeMonitoredObjects()
 
 		// Update counters
 		setMonitoredObjectCount(len(monitoredObjects))
@@ -400,6 +422,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			}
 
 		}
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "200", mon.PollChanges)
 
 	}
 

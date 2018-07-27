@@ -184,6 +184,7 @@ const (
 	UpdateDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPUpdateStr
 	DeleteDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPDeleteStr
 	AddDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPCreateStr
+	PollChanges            = DruidStr + metricNameDelimiter + "pollchanges" + OPUpdateStr
 
 	// Data Cleaning
 	GetDataCleaningProfileStr    = DataCleaningProfileStr + metricNameDelimiter + OPGetStr
@@ -260,7 +261,7 @@ var (
 	// DruidQueryDuration - Time it takes to complete a query to druid.
 	DruidQueryDuration prometheus.SummaryVec
 
-	// DruidAPIMethodDuration - Time it takes to complete a Druid API metyhod (includes query time, encoding time, etc.)
+	// DruidAPIMethodDuration - Time it takes to complete a Druid API method (includes query time, encoding time, etc.)
 	DruidAPIMethodDuration prometheus.SummaryVec
 
 	// MonitoredObjectCounter - the number of monitored objects during a pollChange call

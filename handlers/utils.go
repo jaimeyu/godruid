@@ -13,6 +13,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/manyminds/api2go/jsonapi"
@@ -31,6 +32,16 @@ const (
 	// API Prefix values
 	apiV1Prefix      = "/api/v1/"
 	tenantsAPIPrefix = "tenants/{tenantID}/"
+
+	startKeyQueryParamStr   = "start_key"
+	limitQueryParamStr      = "limit"
+	descendingQueryParamStr = "descending"
+
+	linkFirstStr = "first"
+	linkLastStr  = "last"
+	linkPrevStr  = "prev"
+	linkNextStr  = "next"
+	linkSelfStr  = "self"
 )
 
 var (
@@ -678,4 +689,26 @@ func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interfac
 
 func checkForNotFound(s string) bool {
 	return strings.Contains(s, string(notFound))
+}
+
+// generateLinks - creates the "links" section to be used in a jsonapi response object
+func generateLinks(urlBase string, paginationOffsets *common.PaginationOffsets, limit int64) map[string]string {
+	links := map[string]string{}
+
+	links[linkFirstStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
+	links[linkSelfStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
+
+	if len(paginationOffsets.Self) != 0 {
+		links[linkSelfStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Self, limitQueryParamStr, limit)
+	}
+
+	if len(paginationOffsets.Next) != 0 {
+		links[linkNextStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Next, limitQueryParamStr, limit)
+	}
+
+	if len(paginationOffsets.Prev) != 0 {
+		links[linkPrevStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Prev, limitQueryParamStr, limit)
+	}
+
+	return links
 }

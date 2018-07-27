@@ -152,14 +152,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
-	// Create index for monitored objects based on their objectName
-	dbName := createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s/", tenantDescriptor.ID, monitoredObjectDBSuffix))
-	err = createCouchDBViewIndex(dbName, metaIndexTemplate, monitoredObjectsByObjectNameKey, []string{monitoredObjectsByObjectNameKey}, "")
-	if err != nil {
-		logger.Log.Debugf("Unable to create monitored object views %s for Tenant %s: %s", monitoredObjectsByObjectNameKey, tenantDescriptor.ID, err.Error())
-		return nil, err
-	}
-
 	// Return the provisioned object.
 	logger.Log.Debugf("Created %s: %v\n", admmod.TenantStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil

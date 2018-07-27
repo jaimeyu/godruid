@@ -156,6 +156,15 @@ const (
 			}
 		}
 	}`
+	moIndexBytes = `{
+		"_id": "_design/moIndex",
+		"views": {
+			"byName": {
+				"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') {\n    emit(doc.data.objectName, doc._id);\n  }\n}"
+			}
+		},
+		"language": "javascript"
+	}`
 
 	indexMonObjectNames = `{
 		"_id": "_design/indexOfobjectName",
@@ -183,9 +192,9 @@ const (
 func getTenantViews() []map[string]interface{} {
 	indexMonObjectNamesObject := map[string]interface{}{}
 	metaViewObject := map[string]interface{}{}
-	uniqueMetaIndexObject := map[string]interface{}{}
 	monitoredObjectMetaIndexObject := map[string]interface{}{}
 	monitoredObjectCountIndexObject := map[string]interface{}{}
+	moIndexObject := map[string]interface{}{}
 
 	if err := json.Unmarshal([]byte(indexMonObjectNames), &indexMonObjectNamesObject); err != nil {
 		logger.Log.Errorf("Unable to generate Meta View Index: %s", err.Error())
@@ -196,11 +205,14 @@ func getTenantViews() []map[string]interface{} {
 	if err := json.Unmarshal([]byte(monitoredObjectMetaIndexBytes), &monitoredObjectMetaIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
+	if err := json.Unmarshal([]byte(moIndexBytes), &moIndexObject); err != nil {
+		logger.Log.Errorf("Unable to generate MO Index: %s", err.Error())
+	}
 	if err := json.Unmarshal([]byte(monitoredObjectCountIndexBytes), &monitoredObjectCountIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MO Index: %s", err.Error())
 	}
 
-	return []map[string]interface{}{uniqueMetaIndexObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject}
+	return []map[string]interface{}{metaViewObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject, moIndexObject, indexMonObjectNamesObject}
 }
 
 /*

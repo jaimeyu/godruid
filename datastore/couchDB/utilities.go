@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -14,7 +15,14 @@ import (
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
-const defaultQueryResultsLimit = 1000
+const (
+	defaultQueryResultsLimit = 1000
+
+	startKeyQueryParamStr    = "startkey"
+	limitQueryParamStr       = "limit"
+	includeDocsQueryParamStr = "include_docs"
+	descendingQueryParamStr  = "descending"
+)
 
 // When metadata is being updated in monitored objects, we want to issue a request to the view
 // so couchdb would start to build/update the view. Since the builds function is asynchronous,
@@ -138,6 +146,7 @@ func getByDocIDWithQueryParams(docID string, dataTypeStrForLogging string, db *c
 	if queryParams == nil {
 		queryParams = new(url.Values)
 	}
+
 	fetchedData, err := db.Get(docID, *queryParams)
 	if err != nil {
 		logger.Log.Debugf("Error retrieving %s %s: %s", dataTypeStrForLogging, docID, err.Error())
@@ -696,4 +705,18 @@ func updateTenantMetadataMetadata(meta map[string]string, tenantMeta *tenmod.Met
 	}
 
 	return keys, nil
+}
+func generatePaginationQueryParams(startKey string, limit int64, includeDocs bool, descending bool) url.Values {
+	params := url.Values{}
+
+	// pges offset in couchDB terms is index value, or number of pages * number of records per page
+	if len(startKey) != 0 {
+		params.Add(startKeyQueryParamStr, fmt.Sprintf(`"%s"`, startKey))
+	}
+
+	params.Add(limitQueryParamStr, strconv.FormatInt(limit, 10))
+	params.Add(includeDocsQueryParamStr, strconv.FormatBool(includeDocs))
+	params.Add(descendingQueryParamStr, strconv.FormatBool(descending))
+
+	return params
 }

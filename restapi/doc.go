@@ -16,7 +16,7 @@ Gather API Documentation
     - application/vnd.api+json
 
     Produces:
-    - application/json
+    - application/vnd.api+json
     - text/plain
 
 swagger:meta

@@ -14,7 +14,6 @@ def conf_logging():
 
 def open_processed_file():
     processed_headers = ["key","status"]
-    #processed_filename = "%s/log/processed_%s.csv" % (os.path.dirname(sys.argv[0]), calendar.timegm(time.gmtime()))
     processed_filename = "/tmp/processed.csv"
     logging.info("Generating processed log at %s", processed_filename)
     f = open(processed_filename,"w+")
@@ -93,35 +92,24 @@ parser.add_argument("-t", "--tenantname", help="Name of the tenant that the moni
 
 args = parser.parse_args()
 
-# batchsize = args.batchsize
-# metafile = args.file
-# host = args.host
-# username = args.username
-# password = args.password
-# tenant = args.tenant
-# keyname = "Enode B"
-
-batchsize = 50
-metafile = "/Users/abatosparac/go/src/github.com/accedian/adh-gather/bin/test.csv"
-#host = "abatos.npav.accedian.net"
-host = "localhost:10001"
-username = "admin@datahub.com"
-password = "AccedianPass"
-tenant = "abp-mechanicalturk"
+batchsize = args.batchsize
+metafile = args.file
+host = args.host
+username = args.username
+password = args.password
+tenant = args.tenant
 keyname = "Enode B"
 
 conf_logging()
 
 logging.info("Loading entries from " + metafile)
 
-#conn = http.client.HTTPSConnection(host, timeout=5)
-conn = http.client.HTTPConnection(host, timeout=10)
+conn = http.client.HTTPSConnection(host)
 
 logging.info("Logging into datahub...")
-#auth = login(conn, host, username, password)
-#if auth is None:
-#    logging.error("Could not login. Exiting...")
-auth = "" #TDO REMOVE
+auth = login(conn, host, username, password)
+if auth is None:
+    logging.error("Could not login. Exiting...")
 
 tid = tenant_id(conn, auth, host, tenant)
 

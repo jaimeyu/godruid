@@ -70,6 +70,8 @@ type Sess struct {
 
 var (
 	batchSize = -1
+	// TODO: PEYO this is temporary, this mapping will live outside of gather
+	objectTypes = make(map[string]string)
 )
 
 func setBatchSize() {
@@ -310,7 +312,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					// Otherwise, just add the record to the batch
 					updateProperties := sessionDataMap[m.ID]
 					m.ObjectName = updateProperties.Name
-					m.ObjectType = updateProperties.Type
+					m.ObjectType = objectTypes[updateProperties.Type]
 
 					logger.Log.Debugf("Updating Monitored object %s to have name %s as per properties %v", m.ID, m.ObjectName, updateProperties)
 					moUpdateBatch = append(moUpdateBatch, m)
@@ -396,6 +398,14 @@ func (wsServer *ServerStruct) listenToConnectorChanges() {
 
 // Server server waiting to accept websocket connections from the connector
 func Server(tenantDB datastore.TenantServiceDatastore) *ServerStruct {
+
+	objectTypes["8"] = "eth-lb"
+	objectTypes["9"] = "eth-dm"
+	objectTypes["10"] = "twamp-sf"
+	objectTypes["11"] = "echo-udp"
+	objectTypes["12"] = "echo-icmp"
+	objectTypes["13"] = "eth-vs"
+	objectTypes["16"] = "twamp-sl"
 
 	cfg := gather.GetConfig()
 

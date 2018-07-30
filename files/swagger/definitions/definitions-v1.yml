@@ -677,10 +677,12 @@
         type: "string"
       timeRangeDuration: 
         type: "string"
-      domains: 
-        type: "array"
-        items: 
-          type: "string"
+      meta: 
+        type: "object"
+        additionalProperties:
+          type: "array"
+          items:
+            type: "string"
       thresholdProfile: 
         type: "string"
       granularity: 

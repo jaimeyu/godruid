@@ -485,7 +485,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 			}
 
-			err = tenantDB.MonitoredObjectKeysUpdate(tenantID, existingMonitoredObject)
+			err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, existingMonitoredObject)
 			if err != nil {
 				msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject))
 				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))

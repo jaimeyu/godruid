@@ -738,6 +738,7 @@ type mapLookup struct {
 	Data       map[string]string `json:"map"`
 }
 
+// @Deprecated -- DO NOT USE THIS FUNCTION! DOMAINS ARE GOING AWAY.
 // UpdateMonitoredObjectMetadata - This function should be deprecated. AddMonitoredObjectToLookup is more generic
 func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenant.MonitoredObject, domains []*tenant.Domain, reset bool) error {
 	startTime := time.Now()
@@ -867,7 +868,7 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 		}
 	}
 
-	logger.Log.Infof("Lookups to add for %+v", lookups)
+	logger.Log.Debugf("Lookups to add for %+v", lookups)
 
 	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
 	for _, mo := range monitoredObjects {
@@ -882,8 +883,10 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 		}
 	}
 
-	for key, val := range lookups {
-		logger.Log.Infof("{%s,\t%+v }", key, val.LookupExtractorFactory.Data)
+	if logger.IsDebugEnabled() {
+		for key, val := range lookups {
+			logger.Log.Debugf("{%s,\t%+v }", key, val.LookupExtractorFactory.Data)
+		}
 	}
 
 	// now post it
@@ -1028,7 +1031,8 @@ func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, 
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Infof("Sending lookup request %s, payload: %s", url, string(b))
+		logger.Log.Debugf("Dumping url: %s", url)
+		logger.Log.Debugf("Sending lookup request %s, payload: %s", url, string(b))
 	}
 
 	_, err = sendRequest("POST", dc.dClient.HttpClient, url, dc.AuthToken, b)
@@ -1037,7 +1041,6 @@ func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, 
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.AddDruidMetaLookups)
 		return err
 	}
-	logger.Log.Debugf("Dumping url: %s", url)
 	return nil
 }
 
@@ -1105,7 +1108,9 @@ func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, moni
 		return err
 	}
 
-	logger.Log.Infof("Dumping lookupNames: %+v", lookupNames)
+	if logger.IsDebugEnabled() {
+		logger.Log.Infof("Dumping lookupNames: %+v", lookupNames)
+	}
 
 	if datatype == "dom" {
 		err2 := dc.updateDomainLookup(lookupEndpoint, tenantID, datatype, monitoredObjects, lookupNames, lookups)

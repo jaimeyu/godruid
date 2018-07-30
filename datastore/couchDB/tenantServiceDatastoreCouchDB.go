@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -52,6 +53,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 	return result, nil
 }
 
+//GetConnectorConfigUpdateChan - Get the Couchdb connector channel
 func (tsd *TenantServiceDatastoreCouchDB) GetConnectorConfigUpdateChan() chan *tenmod.ConnectorConfig {
 	return tsd.connectorUpdateChan
 }
@@ -608,16 +610,23 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
 	dataContainer := &tenmod.MonitoredObject{}
+
+	// Add missing metadata
+	err := tsd.CheckAndAddMetadataView(monitoredObjectReq.TenantID, monitoredObjectReq)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := createDataInCouch(dbName, monitoredObjectReq, dataContainer, string(tenmod.TenantMonitoredObjectType), tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 
-	err := tsd.MonitoredObjectKeysUpdate(monitoredObjectReq.TenantID, dataContainer)
+	// Update the metadata before updating the monitored object
+	err = tsd.UpdateMonitoredObjectMetadataViews(monitoredObjectReq.TenantID, dataContainer)
 	if err != nil {
 		return nil, err
 	}
-
 	return dataContainer, nil
 }
 
@@ -763,89 +772,119 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
-// MonitoredObjectKeysUpdate - Updates the Tenant's Metadata's Monitored Object Meta key list
-func (tsd *TenantServiceDatastoreCouchDB) MonitoredObjectKeysUpdate(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
-
-	const (
-		designDocName = "metadataColumns"
-	)
-	meta := monitoredObject.Meta
-
-	// Get Tenant Meta data
-	tenantMeta, err := tsd.GetTenantMeta(tenantID)
+func createNewTenantMetadataViews(dbName string, key string) error {
+	// Create an index based on metadata keys
+	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
 	if err != nil {
-		logger.Log.Errorf("Could not find Tenant %s's metadata, cannot complete updating the DB Cached Index Views for Monitored Objects's metadata", tenantID)
-		// We're silently dropping the error condition because there is a chance that we feed
-		// monitored objects into the system but for some reason
-		// did not create a Tenant Metadata object. Rather than completely dropping the monitored object,
-		// we're going to drop the metadata index generator.
-		return nil
+		msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", dbName, key, err.Error())
+		return errors.New(msg)
 	}
-	logger.Log.Debugf("Got Tenant metadata: %+v", tenantMeta)
-
-	// Create a map if it doesn't exist
-	if tenantMeta.MonitorObjectMetaKeys == nil {
-		tenantMeta.MonitorObjectMetaKeys = make(map[string]string)
+	// Create a view based on unique values per new value
+	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
+	if err != nil {
+		msg := fmt.Sprintf("Could not create metadata View for tenant %s, key %s. Error: %s", dbName, key, err.Error())
+		return errors.New(msg)
 	}
+	return nil
+}
 
-	// Update the tenant's metadata and get a list of new keys
-	newKeys, err := updateTenantMetadataMetadata(meta, tenantMeta)
-	if len(newKeys) != 0 {
+// CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata
+func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
 
-		// Create the couchDB views
-		dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
-		for _, key := range newKeys {
-			// Create an index based on metadata keys
-			err = createCouchDBViewIndex(dbNameKeys, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
-			if err != nil {
-				msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
-				return errors.New(msg)
-			}
-			// Create a view based on unique values per new value
-			err = createCouchDBViewIndex(dbNameKeys, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
-			if err != nil {
-				msg := fmt.Sprintf("Could not create metadata View for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
-				return errors.New(msg)
-			}
-		}
-
-		// Only update the TenantMetadata if we were successful in creating the views!
-		if logger.IsDebugEnabled() {
-			logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantMetaStr, models.AsJSONString(meta))
-		}
-		_, err := tsd.UpdateTenantMeta(tenantMeta)
-		if err != nil {
-			msg := fmt.Sprintf("Error updating tenant meta%s: %v :%s", tenmod.TenantMetaStr, models.AsJSONString(tenantMeta), err.Error())
-			return errors.New(msg)
-		}
-
+	newKeys, err := tsd.GetMetadataKeys(tenantID)
+	if err != nil {
+		return err
 	}
-
-	var keys []string
-	for key := range meta {
-		keys = append(keys, key)
-	}
-
-	// // Update the lookups on druid
-	// err = tsd.metricsDB.AddMonitoredObjectToLookup(tenantID, []*tenmod.MonitoredObject{monitoredObject}, "meta", keys, false)
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Tenant %s Error adding metadata keys(%v) to druid lookup, %+v, err: %s", tenantID, keys, []*tenmod.MonitoredObject{monitoredObject}, err.Error())
-	// 	logger.Log.Error(msg)
-	// 	// @TODO: REMOVE THIS DEBUG, there is an issue I'm debugging with this
-	// 	//	return errors.New(msg)
-	// }
-
-	// Now force the indexer to crunch!
-	// @TODO, needs to prove this works
-	// Do not wait for this to finish, it will certainly take tens of minutes
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
-	for key := range meta {
-		go indexViewTriggerBuild(dbNameKeys, "indexOf"+key, key)
-		go indexViewTriggerBuild(dbNameKeys, "viewOf"+key, key)
+	for key, _ := range monitoredObject.Meta {
+
+		// Check if metadata key is old/new
+		if _, ok := newKeys[key]; ok {
+			// Already in database
+			continue
+		}
+		// Create an index based on metadata keys
+		err = createNewTenantMetadataViews(dbNameKeys, key)
+		if err != nil {
+			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+			//return errors.New(msg)
+			// This isn't critical error but log it
+			logger.Log.Error(msg)
+		}
+	}
+	return nil
+}
+
+// UpdateMonitoredObjectMetadataViews - Updates the Tenant's Metadata's Monitored Object Meta key list
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
+
+	// Create the couchDB views
+	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
+	// Now force the indexer to crunch!
+	// Do not wait for this to finish, it will certainly take tens of minutes
+	// Create/update the couchDB views
+	for key := range monitoredObject.Meta {
+		go indexViewTriggerBuild(dbNameKeys, MetaKeyIndexOf+key, "by"+key)
+		go indexViewTriggerBuild(dbNameKeys, MetaKeyViewOf+key, "by"+key)
 	}
 
+	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, MetakeysViewUniqueKeysURI)
+	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metakeysViewUniqueValuessURI)
+	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup)
+	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewLookupWords)
+	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey)
+
 	return nil
+}
+
+// GetMetadataKeys - Gets all the known metadata keys from the couchdb view
+func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[string]int, error) {
+	//https://megatron.npav.accedian.net/couchdb/tenant_2_b4772641-c19b-45fb-ad0e-848de0cfb862_monitored-objects/_design/metaViews/_view/uniqueKeys?group=true
+
+	// model
+	type couchViewItem struct {
+		Key   string `json:"key"`
+		Value int    `json:"value"`
+	}
+	type couchView struct {
+		Rows []couchViewItem `json:"rows"`
+	}
+	dbName := GenerateMonitoredObjectURL(tenantId, tsd.server)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, err
+	}
+	v := url.Values{}
+	v.Set("group", "true")
+
+	//doc, err := db.Get("_design/"+metakeysViewDdocName+"/_view/"+MetakeysViewUniqueKeysURI, v)
+	url := "_design/metaViews/_view/uniqueKeys"
+	doc, err := db.Get(url, v)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Getting metadata keys from %s -> %s", dbName+url, models.AsJSONString(doc))
+	}
+
+	var resp couchView
+	raw, err := json.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("Could not marshal (%s) %s, %s", dbName+url, models.AsJSONString(doc), err.Error())
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("Could not unmarshal (%s) %s into couchView, %s", dbName+url, string(raw), err.Error())
+	}
+
+	rows := make(map[string]int, 0)
+	for i, item := range resp.Rows {
+		rows[item.Key] = resp.Rows[i].Value
+	}
+
+	return rows, nil
 }
 
 // GetMonitoredObjectByObjectName - Returns an Monitored based on its Object Name
@@ -1067,7 +1106,8 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 
 		data = append(data, genericMO)
 
-		err = tsd.MonitoredObjectKeysUpdate(origTenantID, mo)
+		// Check and add missing metadata views
+		err = tsd.CheckAndAddMetadataView(origTenantID, mo)
 		if err != nil {
 			return nil, err
 		}
@@ -1078,6 +1118,14 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 	fetchedData, err := performBulkUpdate(body, resource)
 	if err != nil {
 		return nil, err
+	}
+
+	// Now that we've done the bulk update, refresh the views
+	for _, mo := range value {
+		err = tsd.UpdateMonitoredObjectMetadataViews(origTenantID, mo)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Populate the response

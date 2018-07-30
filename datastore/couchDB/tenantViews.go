@@ -73,11 +73,18 @@ const (
 	mapFnName = "map"
 
 	metaFieldPrefix              = "meta"
-	metakeysViewDdocName         = "uniqueMeta"
-	metakeysViewUniqueKeysURI    = "uniqueMeta/uniquesKeys"
-	metakeysViewUniqueValuessURI = "uniqueMeta/uniqueValues"
-	metaKeyName                  = "{{KeyName}}"
-	metaKeyField                 = "{{KeyField}}"
+	metakeysViewDdocName         = "metaViews"
+	MetakeysViewUniqueKeysURI    = "uniqueKeys"
+	metakeysViewUniqueValuessURI = "uniqueValues"
+	metaViewAllValuesPerKey      = "allValuesByKeyWithCounts"
+	metaViewLookupWords          = "lookupWords"
+	metaViewSearchLookup         = "searchLookup"
+
+	MetaKeyIndexOf = "indexOf"
+	MetaKeyViewOf  = "indexOf"
+
+	metaKeyName  = "{{KeyName}}"
+	metaKeyField = "{{KeyField}}"
 
 	metaViews = `{
 		"_id": "_design/metaViews",
@@ -244,6 +251,7 @@ func indexViewTriggerBuild(dbName string, ddoc string, key string) {
 	// generating a view and if so, then just quit. There's no point in hammering
 	// couch to update the views.
 	_, stored := couchdbViewBuilderBusyMap.LoadOrStore(ddoc, true)
+	// Should we defer for 5 seconds to let the system settle?
 	if stored == true {
 		// We're already building the index, don't interrupt it.
 		return
@@ -253,12 +261,12 @@ func indexViewTriggerBuild(dbName string, ddoc string, key string) {
 	if err != nil {
 		logger.Log.Errorf("Could not load db %s", dbName)
 	}
-	uri := fmt.Sprintf("_design/%s/_view/by%s", ddoc, key)
+	uri := fmt.Sprintf("_design/%s/_view/%s", ddoc, key)
 	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
 	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
 	_, err = db.Get(uri, nil)
 	if err != nil {
-		logger.Log.Errorf("Unsuccessfully Indexed %sbecause %s", uri, err.Error())
+		logger.Log.Errorf("Unsuccessfully Indexed view: %s because %s", uri, err.Error())
 		return
 	}
 	if logger.IsDebugEnabled() {

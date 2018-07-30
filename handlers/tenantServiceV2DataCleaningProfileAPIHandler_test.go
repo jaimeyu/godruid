@@ -2,33 +2,14 @@ package handlers_test
 
 import (
 	"encoding/json"
-	"os"
 	"testing"
 
 	"github.com/accedian/adh-gather/swagmodels"
 
 	"github.com/accedian/adh-gather/handlers"
-	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service_v2"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-
-	err := setupTestDatastore()
-	if err != nil {
-		logger.Log.Fatalf("Unable to setup datastore for Data Cleaning Profile tests: %s", err.Error())
-	}
-
-	code := m.Run()
-
-	err = destroyTestDatastore()
-	if err != nil {
-		logger.Log.Errorf("Unable to remove test datastore for Data Cleaning Profile tests: %s", err.Error())
-	}
-
-	os.Exit(code)
-}
 
 func TestGetDataCleaningProfile(t *testing.T) {
 

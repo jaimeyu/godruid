@@ -61,23 +61,37 @@ var (
 		"reduce": "function(keys, values, rereduce) {\n    function flatten(arr) {\n      return arr.reduce(function (flat, toFlatten) {\n        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);\n      }, []);\n    }\n\n    if (rereduce) {\n        var resp = [];\n        resp = values;//.flat();\n        resp = flatten(resp);\n        var filteredArray = resp.filter(function(item, pos){\n            return resp.indexOf(item)== pos; \n        });\n\n        return filteredArray.slice(0,1000);\n    } else {\n     return values;\n    }\n\n}\n"
 	  }
 	}
-  }`)
+	}`)
+
+	moIndexBytes = []byte(`{
+		"_id": "_design/moIndex",
+		"views": {
+			"byName": {
+				"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') {\n    emit(doc.data.objectName, doc._id);\n  }\n}"
+			}
+		},
+		"language": "javascript"
+	}`)
 )
 
 func getTenantViews() []map[string]interface{} {
 	uniqueMetaIndexObject := map[string]interface{}{}
 	monitoredObjectMetaIndexObject := map[string]interface{}{}
 	monitoredObjectCountIndexObject := map[string]interface{}{}
+	moIndexObject := map[string]interface{}{}
 
 	if err := json.Unmarshal(uniqueMetaIndexBytes, &uniqueMetaIndexObject); err != nil {
 		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
 	}
 	if err := json.Unmarshal(monitoredObjectMetaIndexBytes, &monitoredObjectMetaIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MO Meta Index: %s", err.Error())
 	}
 	if err := json.Unmarshal(monitoredObjectCountIndexBytes, &monitoredObjectCountIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MO Object Count Index: %s", err.Error())
+	}
+	if err := json.Unmarshal(moIndexBytes, &moIndexObject); err != nil {
+		logger.Log.Errorf("Unable to generate MO Index: %s", err.Error())
 	}
 
-	return []map[string]interface{}{uniqueMetaIndexObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject}
+	return []map[string]interface{}{uniqueMetaIndexObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject, moIndexObject}
 }

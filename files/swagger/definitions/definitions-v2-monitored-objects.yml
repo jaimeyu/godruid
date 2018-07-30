@@ -1,0 +1,60 @@
+
+  MonitoredObjectList:
+    type: "object"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObject'
+
+  MonitoredObject:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        properties:
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          relationships:
+            type: "object"
+            properties:
+              domains:
+                $ref: '#/definitions/JsonApiRelationship'
+ 

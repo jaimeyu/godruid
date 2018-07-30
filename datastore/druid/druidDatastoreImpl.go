@@ -974,17 +974,41 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 	// The second argument is empty because lookupname is already part of the request
 
 	logger.Log.Infof("Sending Lookup table to druid")
+	waitForCompletion := make(chan string, 25)
 	for key, val := range lookups {
-
-		// Update the lookups
-		err := dc.addItemToLookup(lookupEndpoint, key, val)
-		if err != nil {
+		val.active = true
+		// Looks up are costly, let's see if we can parallalize the operations
+		go func(look string, key string, val *lookup, waitForCompletion chan string) {
+			// Update the lookups
+			err := dc.addItemToLookup(lookupEndpoint, key, val)
+			if err != nil {
+				mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
+				logger.Log.Errorf("Failed to update lookup %s", err.Error())
+			}
+			waitForCompletion <- key
+		}(lookupEndpoint, key, val, waitForCompletion)
+	}
+	for {
+		select {
+		case key := <-waitForCompletion:
+			lookups[key].active = false
+			// If lookups are still active, wait for the next response
+			for _, lk := range lookups {
+				if lk.active {
+					break
+				}
+			}
+			// No active lookups, return success
+			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
+			return lookups, nil
+		case <-time.After(5 * 60 * time.Second):
 			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
-			return nil, fmt.Errorf("Failed to update lookup %s", err.Error())
+			return nil, fmt.Errorf("Timed out trying to update lookup tables, lookups:%s", models.AsJSONString(lookups))
 		}
 	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
-	return lookups, nil
+
+	// mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
+	// return lookups, nil
 }
 
 // GetDruidLookupFor - Returns a list of lookup tables with partial matches
@@ -1120,6 +1144,8 @@ func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, 
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.AddDruidMetaLookups)
 		return err
 	}
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, successCode, mon.AddDruidMetaLookups)
+
 	return nil
 }
 

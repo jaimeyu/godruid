@@ -1,0 +1,266 @@
+  /v2/tenants:
+    post:
+      summary: Create a Tenant.
+      operationId: CreateTenantV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TenantCreationRequest'
+      tags:
+        - AdminProvisioningServiceV2
+    get:
+      summary: Retrieve all Tenants.
+      operationId: GetAllTenantsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There are no Tenants provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenants/{tenantId}:
+    get:
+      summary: Retrieve a Tenant by id.
+      operationId: GetTenantV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant
+      operationId: DeleteTenantV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenantV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for the update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TenantUpdateRequest'
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenant-by-alias/{value}:
+    get:
+      summary: Returns the Id of a Tenant that matches the provided alias.
+      operationId: GetTenantIdByAliasV2
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenant-summary-by-alias/{value}:
+    get:
+      summary: Returns a summary of the Tenant that matches the provided alias.
+      operationId: GetTenantSummaryByAliasV2
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: "#/definitions/TenantSummaryResponse"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/ingestion-dictionaries:
+    get:
+      summary: Retrieve an Ingestion Dictionary.
+      operationId: GetIngestionDictionaryV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionDictionary'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/valid-types:
+    get:
+      summary: Retrieve a Valid Types object.
+      operationId: GetValidTypesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2

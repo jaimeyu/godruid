@@ -20,14 +20,17 @@ import (
 type Tenant struct {
 
 	// attributes
-	Attributes *TenantAttr `json:"attributes,omitempty"`
+	// Required: true
+	Attributes *TenantAttributes `json:"attributes"`
 
 	// id
-	ID string `json:"id,omitempty"`
+	// Required: true
+	ID *string `json:"id"`
 
 	// type
+	// Required: true
 	// Enum: [tenants]
-	Type string `json:"type,omitempty"`
+	Type *string `json:"type"`
 }
 
 // Validate validates this tenant
@@ -35,6 +38,10 @@ func (m *Tenant) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -50,8 +57,8 @@ func (m *Tenant) Validate(formats strfmt.Registry) error {
 
 func (m *Tenant) validateAttributes(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Attributes) { // not required
-		return nil
+	if err := validate.Required("attributes", "body", m.Attributes); err != nil {
+		return err
 	}
 
 	if m.Attributes != nil {
@@ -61,6 +68,15 @@ func (m *Tenant) validateAttributes(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *Tenant) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
+		return err
 	}
 
 	return nil
@@ -94,12 +110,12 @@ func (m *Tenant) validateTypeEnum(path, location string, value string) error {
 
 func (m *Tenant) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) { // not required
-		return nil
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
 		return err
 	}
 
@@ -117,6 +133,185 @@ func (m *Tenant) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *Tenant) UnmarshalBinary(b []byte) error {
 	var res Tenant
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// TenantAttributes tenant attributes
+// swagger:model TenantAttributes
+type TenantAttributes struct {
+
+	// The current version of this record. Used to guarantee updates are made in the proper order
+	// Required: true
+	Rev *string `json:"_rev"`
+
+	// The timestamp at which this record was created in Datahub
+	// Required: true
+	CreatedTimestamp *int64 `json:"createdTimestamp"`
+
+	// The timestamp of the last update to this record in Datahub
+	// Required: true
+	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
+
+	// The name of the Tenant
+	// Required: true
+	Name *string `json:"name"`
+
+	// The current state of the Tenant
+	// Required: true
+	// Enum: [USER_UNKNOWN INVITED ACTIVE SUSPENDED PENDING_DELETE]
+	State *string `json:"state"`
+
+	// The subdomain used in the URL for accessing the Tenant's portal in Datahub
+	// Required: true
+	URLSubdomain *string `json:"urlSubdomain"`
+}
+
+// Validate validates this tenant attributes
+func (m *TenantAttributes) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateState(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateURLSubdomain(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *TenantAttributes) validateRev(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"_rev", "body", m.Rev); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TenantAttributes) validateCreatedTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"createdTimestamp", "body", m.CreatedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TenantAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TenantAttributes) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var tenantAttributesTypeStatePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USER_UNKNOWN","INVITED","ACTIVE","SUSPENDED","PENDING_DELETE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		tenantAttributesTypeStatePropEnum = append(tenantAttributesTypeStatePropEnum, v)
+	}
+}
+
+const (
+
+	// TenantAttributesStateUSERUNKNOWN captures enum value "USER_UNKNOWN"
+	TenantAttributesStateUSERUNKNOWN string = "USER_UNKNOWN"
+
+	// TenantAttributesStateINVITED captures enum value "INVITED"
+	TenantAttributesStateINVITED string = "INVITED"
+
+	// TenantAttributesStateACTIVE captures enum value "ACTIVE"
+	TenantAttributesStateACTIVE string = "ACTIVE"
+
+	// TenantAttributesStateSUSPENDED captures enum value "SUSPENDED"
+	TenantAttributesStateSUSPENDED string = "SUSPENDED"
+
+	// TenantAttributesStatePENDINGDELETE captures enum value "PENDING_DELETE"
+	TenantAttributesStatePENDINGDELETE string = "PENDING_DELETE"
+)
+
+// prop value enum
+func (m *TenantAttributes) validateStateEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, tenantAttributesTypeStatePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TenantAttributes) validateState(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"state", "body", m.State); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateStateEnum("attributes"+"."+"state", "body", *m.State); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TenantAttributes) validateURLSubdomain(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"urlSubdomain", "body", m.URLSubdomain); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *TenantAttributes) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *TenantAttributes) UnmarshalBinary(b []byte) error {
+	var res TenantAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -215,20 +215,7 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// Now the TenantDB exisits....add a default user.
 	dataIDForTenant := tenantDescriptor.GetXId()
-	user, err := generateTenantUser(tenantName, dataIDForTenant)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
-		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
-		return
-	}
-	_, err = tsh.grpcSH.CreateTenantUser(nil, user)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
-		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
-		return
-	}
 
 	// Fetch the tenant Meta so that teh default threshold profile id is available:
 	tenantMeta, err := tsh.grpcSH.GetTenantMeta(nil, &wr.StringValue{Value: tenantDescriptor.GetXId()})

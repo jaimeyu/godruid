@@ -9,6 +9,8 @@ GOPATH := $(GOPATH)
 
 SWAGGER_PATH := $(PWD)/files/swagger
 SWAGGER_TMP_FILE := __swagger.yml
+GENERATED_MODELS_DIR := $(PWD)/swagmodels
+GENERATED_OPERATIONS_DIR := $(PWD)/restapi/operations
 SWAGGER_TEMP := $(SWAGGER_PATH)/$(SWAGGER_TMP_FILE)
 SWAGGER_FILES := $(SWAGGER_PATH)/header.yml \
     $(SWAGGER_PATH)/paths/paths-*.yml \
@@ -35,6 +37,8 @@ push: docker
 swagger: $(SWAGGER_FILES)
 	echo "Generating code from swagger files"
 	rm -f $(SWAGGER_TEMP)
+	rm -rf $(GENERATED_MODELS_DIR)
+	rm -rf $(GENERATED_OPERATIONS_DIR)
 	cat $^ > $(SWAGGER_TEMP)
 	docker run --rm -it -e GOPATH=$(GOPATH):/go -v$(HOME):$(HOME) -w $(PWD) quay.io/goswagger/swagger:0.15.0 generate server \
 		 -f $(SWAGGER_TEMP) \

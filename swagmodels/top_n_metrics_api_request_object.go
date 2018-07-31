@@ -6,6 +6,8 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -30,10 +32,10 @@ type TopNMetricsAPIRequestObject struct {
 
 	// metrics
 	// Required: true
-	Metrics TopNMetricsAPIRequestObjectMetrics `json:"metrics"`
+	Metrics []*MetricIdentifierObject `json:"metrics"`
 
 	// metrics view
-	MetricsView TopNMetricsAPIRequestObjectMetricsView `json:"metricsView"`
+	MetricsView []*MetricViewObject `json:"metricsView"`
 
 	// set of monitored objects identifiers to use for filtering
 	MonitoredObjects []string `json:"monitoredObjects"`
@@ -54,32 +56,22 @@ func (m *TopNMetricsAPIRequestObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAggregator(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateDomains(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInterval(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetrics(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateMonitoredObjects(formats); err != nil {
-		// prop
+	if err := m.validateMetricsView(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateTenantID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -93,15 +85,6 @@ func (m *TopNMetricsAPIRequestObject) validateAggregator(formats strfmt.Registry
 
 	if err := validate.Required("aggregator", "body", m.Aggregator); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *TopNMetricsAPIRequestObject) validateDomains(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Domains) { // not required
-		return nil
 	}
 
 	return nil
@@ -122,20 +105,45 @@ func (m *TopNMetricsAPIRequestObject) validateMetrics(formats strfmt.Registry) e
 		return err
 	}
 
-	if err := m.Metrics.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("metrics")
+	for i := 0; i < len(m.Metrics); i++ {
+		if swag.IsZero(m.Metrics[i]) { // not required
+			continue
 		}
-		return err
+
+		if m.Metrics[i] != nil {
+			if err := m.Metrics[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("metrics" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
 }
 
-func (m *TopNMetricsAPIRequestObject) validateMonitoredObjects(formats strfmt.Registry) error {
+func (m *TopNMetricsAPIRequestObject) validateMetricsView(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.MonitoredObjects) { // not required
+	if swag.IsZero(m.MetricsView) { // not required
 		return nil
+	}
+
+	for i := 0; i < len(m.MetricsView); i++ {
+		if swag.IsZero(m.MetricsView[i]) { // not required
+			continue
+		}
+
+		if m.MetricsView[i] != nil {
+			if err := m.MetricsView[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("metricsView" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

@@ -67,6 +67,7 @@ func (o *DeleteTenantIngestionProfileParams) BindRequest(r *http.Request, route 
 	return nil
 }
 
+// bindIngestionProfileID binds and validates parameter IngestionProfileID from path.
 func (o *DeleteTenantIngestionProfileParams) bindIngestionProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *DeleteTenantIngestionProfileParams) bindIngestionProfileID(rawData []st
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteTenantIngestionProfileParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -67,6 +67,7 @@ func (o *DeleteReportScheduleConfigParams) BindRequest(r *http.Request, route *m
 	return nil
 }
 
+// bindConfigID binds and validates parameter ConfigID from path.
 func (o *DeleteReportScheduleConfigParams) bindConfigID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *DeleteReportScheduleConfigParams) bindConfigID(rawData []string, hasKey
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteReportScheduleConfigParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -6,6 +6,9 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -27,7 +30,6 @@ func (m *DataCleaningProfileUpdateRequest) Validate(formats strfmt.Registry) err
 	var res []error
 
 	if err := m.validateData(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -44,14 +46,12 @@ func (m *DataCleaningProfileUpdateRequest) validateData(formats strfmt.Registry)
 	}
 
 	if m.Data != nil {
-
 		if err := m.Data.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("data")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -68,6 +68,214 @@ func (m *DataCleaningProfileUpdateRequest) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *DataCleaningProfileUpdateRequest) UnmarshalBinary(b []byte) error {
 	var res DataCleaningProfileUpdateRequest
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// DataCleaningProfileUpdateRequestData data cleaning profile update request data
+// swagger:model DataCleaningProfileUpdateRequestData
+type DataCleaningProfileUpdateRequestData struct {
+
+	// attributes
+	// Required: true
+	Attributes *DataCleaningProfileUpdateRequestDataAttributes `json:"attributes"`
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// type
+	// Required: true
+	// Enum: [dataCleaningProfiles]
+	Type *string `json:"type"`
+}
+
+// Validate validates this data cleaning profile update request data
+func (m *DataCleaningProfileUpdateRequestData) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DataCleaningProfileUpdateRequestData) validateAttributes(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes", "body", m.Attributes); err != nil {
+		return err
+	}
+
+	if m.Attributes != nil {
+		if err := m.Attributes.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "attributes")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DataCleaningProfileUpdateRequestData) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"id", "body", m.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var dataCleaningProfileUpdateRequestDataTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["dataCleaningProfiles"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		dataCleaningProfileUpdateRequestDataTypeTypePropEnum = append(dataCleaningProfileUpdateRequestDataTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// DataCleaningProfileUpdateRequestDataTypeDataCleaningProfiles captures enum value "dataCleaningProfiles"
+	DataCleaningProfileUpdateRequestDataTypeDataCleaningProfiles string = "dataCleaningProfiles"
+)
+
+// prop value enum
+func (m *DataCleaningProfileUpdateRequestData) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, dataCleaningProfileUpdateRequestDataTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DataCleaningProfileUpdateRequestData) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"type", "body", m.Type); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("data"+"."+"type", "body", *m.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *DataCleaningProfileUpdateRequestData) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *DataCleaningProfileUpdateRequestData) UnmarshalBinary(b []byte) error {
+	var res DataCleaningProfileUpdateRequestData
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// DataCleaningProfileUpdateRequestDataAttributes data cleaning profile update request data attributes
+// swagger:model DataCleaningProfileUpdateRequestDataAttributes
+type DataCleaningProfileUpdateRequestDataAttributes struct {
+
+	// Value used to ensure updates to this object are handled in order.
+	// Required: true
+	Rev *string `json:"_rev"`
+
+	// List of all the rules to evaluate for Data Cleaning
+	// Required: true
+	Rules []*DataCleaningRule `json:"rules"`
+}
+
+// Validate validates this data cleaning profile update request data attributes
+func (m *DataCleaningProfileUpdateRequestDataAttributes) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRules(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DataCleaningProfileUpdateRequestDataAttributes) validateRev(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes"+"."+"_rev", "body", m.Rev); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DataCleaningProfileUpdateRequestDataAttributes) validateRules(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes"+"."+"rules", "body", m.Rules); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Rules); i++ {
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
+		}
+
+		if m.Rules[i] != nil {
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + "attributes" + "." + "rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *DataCleaningProfileUpdateRequestDataAttributes) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *DataCleaningProfileUpdateRequestDataAttributes) UnmarshalBinary(b []byte) error {
+	var res DataCleaningProfileUpdateRequestDataAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

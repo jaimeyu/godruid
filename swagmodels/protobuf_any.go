@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // ProtobufAny `Any` contains an arbitrary serialized protocol buffer message along with a
@@ -119,6 +118,7 @@ type ProtobufAny struct {
 	TypeURL string `json:"type_url,omitempty"`
 
 	// Must be a valid serialized protocol buffer of the above specified type.
+	// Format: byte
 	Value strfmt.Base64 `json:"value,omitempty"`
 }
 
@@ -127,7 +127,6 @@ func (m *ProtobufAny) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateValue(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -143,9 +142,7 @@ func (m *ProtobufAny) validateValue(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.FormatOf("value", "body", "byte", m.Value.String(), formats); err != nil {
-		return err
-	}
+	// Format "byte" (base64 string) is already validated when unmarshalled
 
 	return nil
 }

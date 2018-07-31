@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // TenantThresholdProfileMetric tenant threshold profile metric
@@ -17,19 +18,71 @@ import (
 type TenantThresholdProfileMetric struct {
 
 	// metric map
-	MetricMap TenantThresholdProfileMetricMetricMap `json:"metricMap,omitempty"`
+	MetricMap map[string]TenantThresholdProfileUIEventAttrMap `json:"metricMap,omitempty"`
 
 	// monitored object type map
-	MonitoredObjectTypeMap TenantThresholdProfileMetricMonitoredObjectTypeMap `json:"monitoredObjectTypeMap,omitempty"`
+	MonitoredObjectTypeMap map[string]TenantThresholdProfileMonitoredObjectTypeMapMetricMap `json:"monitoredObjectTypeMap,omitempty"`
 }
 
 // Validate validates this tenant threshold profile metric
 func (m *TenantThresholdProfileMetric) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetricMap(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMonitoredObjectTypeMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantThresholdProfileMetric) validateMetricMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricMap) { // not required
+		return nil
+	}
+
+	for k := range m.MetricMap {
+
+		if err := validate.Required("metricMap"+"."+k, "body", m.MetricMap[k]); err != nil {
+			return err
+		}
+		if val, ok := m.MetricMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *TenantThresholdProfileMetric) validateMonitoredObjectTypeMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MonitoredObjectTypeMap) { // not required
+		return nil
+	}
+
+	for k := range m.MonitoredObjectTypeMap {
+
+		if err := validate.Required("monitoredObjectTypeMap"+"."+k, "body", m.MonitoredObjectTypeMap[k]); err != nil {
+			return err
+		}
+		if val, ok := m.MonitoredObjectTypeMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

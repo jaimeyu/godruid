@@ -29,6 +29,7 @@ type DataCleaningRule struct {
 
 	// The name of the vendor which provides the metric used in the rule.
 	// Required: true
+	// Enum: [accedian-twamp accedian-flowmeter]
 	MetricVendor *string `json:"metricVendor"`
 
 	// Object which determines when a rule will be triggered/applied
@@ -41,22 +42,18 @@ func (m *DataCleaningRule) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateClearCondition(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetricLabel(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMetricVendor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTriggerCondition(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -73,14 +70,12 @@ func (m *DataCleaningRule) validateClearCondition(formats strfmt.Registry) error
 	}
 
 	if m.ClearCondition != nil {
-
 		if err := m.ClearCondition.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("clearCondition")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -145,14 +140,12 @@ func (m *DataCleaningRule) validateTriggerCondition(formats strfmt.Registry) err
 	}
 
 	if m.TriggerCondition != nil {
-
 		if err := m.TriggerCondition.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("triggerCondition")
 			}
 			return err
 		}
-
 	}
 
 	return nil

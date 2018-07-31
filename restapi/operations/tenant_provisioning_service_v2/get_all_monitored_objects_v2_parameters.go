@@ -69,6 +69,7 @@ func (o *GetAllMonitoredObjectsV2Params) BindRequest(r *http.Request, route *mid
 	return nil
 }
 
+// bindLimit binds and validates parameter Limit from query.
 func (o *GetAllMonitoredObjectsV2Params) bindLimit(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -90,6 +91,7 @@ func (o *GetAllMonitoredObjectsV2Params) bindLimit(rawData []string, hasKey bool
 	return nil
 }
 
+// bindStartKey binds and validates parameter StartKey from query.
 func (o *GetAllMonitoredObjectsV2Params) bindStartKey(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

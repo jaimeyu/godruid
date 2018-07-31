@@ -46,7 +46,6 @@ func (m *TenantThresholdProfileAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateThresholds(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,14 +62,12 @@ func (m *TenantThresholdProfileAttr) validateThresholds(formats strfmt.Registry)
 	}
 
 	if m.Thresholds != nil {
-
 		if err := m.Thresholds.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("thresholds")
 			}
 			return err
 		}
-
 	}
 
 	return nil

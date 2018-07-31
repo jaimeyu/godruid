@@ -69,6 +69,7 @@ func (o *GetAllTenantConnectorConfigsParams) BindRequest(r *http.Request, route 
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetAllTenantConnectorConfigsParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -83,6 +84,7 @@ func (o *GetAllTenantConnectorConfigsParams) bindTenantID(rawData []string, hasK
 	return nil
 }
 
+// bindZone binds and validates parameter Zone from query.
 func (o *GetAllTenantConnectorConfigsParams) bindZone(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -1,54 +1,3 @@
-  JsonApiAdminUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/AdminUser'
-  JsonApiAdminUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/AdminUser'
-
-  AdminUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [adminUsers]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/AdminUserAttr'
-
-  AdminUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
   JsonApiTenant:
     type: "object"
     properties:
@@ -96,82 +45,69 @@
     type: "object"
     properties:
       data:
-        $ref: '#/definitions/IngestionDictionary'
-  IngestionDictionary:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [ingestionDictionaries]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/IngestionDictionaryAttr'
-  IngestionDictionaryAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      metrics:
         type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetrics'
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-  IngestionDictionaryMetrics:
-    type: "object"
-    additionalProperties:
-      $ref: '#/definitions/IngestionDictionaryMetricMap'
-  IngestionDictionaryMetricMap:
-    type: "object"
-    properties:
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapUI'
-      metricMap:
-        type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinition'
-  IngestionDictionaryMetricMapUI:
-    type: "array"
-    items:
-      type: "string"
-  IngestionDictionaryMetricMapMetricDefinition:
-    type: "object"
-    properties:
-      monitoredObjectTypes:
-        type: "array"
-        items:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
-  IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
-    type: "object"
-    properties:
-      key:
-        type: "string"
-      rawMetricId:
-        type: "string"
-      units:
-        type: "array"
-        items:
-          type: "string"
-      directions:
-        type: "array"
-        items:
-          type: "string"
-  IngestionDictionaryMetricMapMetricDefinitionUIData:
-    type: "object"
-    properties:
-      group:
-        type: "string"
-      position:
-        type: "string"
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionDictionaries]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              _id:
+                type: "string"
+              _rev:
+                type: "string"
+              datatype:
+                type: "string"
+              createdTimestamp:
+                type: "integer"
+              lastModifiedTimestamp:
+                type: "integer"
+              metrics:
+                type: "object"
+                additionalProperties:               
+                  type: "object"
+                  properties:
+                    ui:
+                      type: "object"
+                      properties:
+                        metricGroups:
+                          type: "array"
+                          items: 
+                              type: "string"
+                    metricMap:
+                      type: "object"
+                      additionalProperties:
+                        type: "object"
+                        properties:
+                          monitoredObjectTypes:
+                            type: "array"
+                            items:
+                              type: "object"
+                              properties:
+                                key:
+                                  type: "string"
+                                rawMetricId:
+                                  type: "string"
+                                units:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                                directions:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                          ui:
+                            type: "object"
+                            properties:
+                              group:
+                                type: "string"
+                              position:
+                                type: "string"
+
+
   TenantSummary:
     type: "object"
     properties:
@@ -211,61 +147,6 @@
       monitoredObjectDeviceTypes:
         type: "object"
         additionalProperties:
-          type: "string"
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
-  JsonApiTenantUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/TenantUser'
-  JsonApiTenantUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/TenantUser'
-  TenantUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [users]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/TenantUserAttr'  
-  TenantUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      tenantId:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      domains:
-        type: "array"
-        items: 
           type: "string"
       createdTimestamp:
         type: "integer"

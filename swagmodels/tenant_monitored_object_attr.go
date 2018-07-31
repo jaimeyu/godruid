@@ -29,6 +29,7 @@ type TenantMonitoredObjectAttr struct {
 	ActuatorName string `json:"actuatorName,omitempty"`
 
 	// actuator type
+	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType string `json:"actuatorType,omitempty"`
 
 	// created timestamp
@@ -47,12 +48,14 @@ type TenantMonitoredObjectAttr struct {
 	ObjectName string `json:"objectName,omitempty"`
 
 	// object type
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType string `json:"objectType,omitempty"`
 
 	// reflector name
 	ReflectorName string `json:"reflectorName,omitempty"`
 
 	// reflector type
+	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType string `json:"reflectorType,omitempty"`
 
 	// tenant Id
@@ -64,17 +67,14 @@ func (m *TenantMonitoredObjectAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateActuatorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateObjectType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateReflectorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

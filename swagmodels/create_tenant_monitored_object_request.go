@@ -29,6 +29,7 @@ type CreateTenantMonitoredObjectRequest struct {
 	ActuatorName string `json:"actuatorName,omitempty"`
 
 	// actuator type
+	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType string `json:"actuatorType,omitempty"`
 
 	// domain set
@@ -41,12 +42,14 @@ type CreateTenantMonitoredObjectRequest struct {
 	ObjectName string `json:"objectName,omitempty"`
 
 	// object type
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType string `json:"objectType,omitempty"`
 
 	// reflector name
 	ReflectorName string `json:"reflectorName,omitempty"`
 
 	// reflector type
+	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType string `json:"reflectorType,omitempty"`
 
 	// tenant Id
@@ -58,22 +61,14 @@ func (m *CreateTenantMonitoredObjectRequest) Validate(formats strfmt.Registry) e
 	var res []error
 
 	if err := m.validateActuatorType(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateDomainSet(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateObjectType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateReflectorType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -124,15 +119,6 @@ func (m *CreateTenantMonitoredObjectRequest) validateActuatorType(formats strfmt
 	// value enum
 	if err := m.validateActuatorTypeEnum("actuatorType", "body", m.ActuatorType); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *CreateTenantMonitoredObjectRequest) validateDomainSet(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DomainSet) { // not required
-		return nil
 	}
 
 	return nil

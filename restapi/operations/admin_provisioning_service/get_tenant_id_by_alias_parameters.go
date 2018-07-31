@@ -57,6 +57,7 @@ func (o *GetTenantIDByAliasParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindValue binds and validates parameter Value from path.
 func (o *GetTenantIDByAliasParams) bindValue(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

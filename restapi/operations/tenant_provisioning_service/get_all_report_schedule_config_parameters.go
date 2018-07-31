@@ -57,6 +57,7 @@ func (o *GetAllReportScheduleConfigParams) BindRequest(r *http.Request, route *m
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetAllReportScheduleConfigParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

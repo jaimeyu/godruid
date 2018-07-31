@@ -16,107 +16,6 @@ produces:
   - application/json
   - application/vnd.api+json
 paths:
-  /v1/admin:
-    post:
-      summary: Create a User with Administrative access.
-      operationId: CreateAdminUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update a User with Administrative access.
-      operationId: UpdateAdminUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-      tags:
-        - AdminProvisioningService
-  /v1/admin-user-list:
-    get:
-      summary: Retrieve all Administrative Users.
-      operationId: GetAllAdminUsers
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUserList'
-      tags:
-        - AdminProvisioningService
-  '/v1/admin/{value}':
-    get:
-      summary: Retrieve an Administrative User by id.
-      operationId: GetAdminUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: value
-          in: path
-          required: true
-          type: string
-      tags:
-        - AdminProvisioningService
-    delete:
-      summary: Delete a User with Administrative access.
-      operationId: DeleteAdminUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: value
-          in: path
-          required: true
-          type: string
-      tags:
-        - AdminProvisioningService
   /v1/tenants:
     post:
       summary: Create a Tenant.
@@ -339,70 +238,6 @@ paths:
       tags:
         - AdminProvisioningService
   /v1/ingestion-dictionaries:
-    post:
-      summary: Create an Ingestion Dictionary. 
-      operationId: CreateIngestionDictionary
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update an Ingestion Dictionary. 
-      operationId: UpdateIngestionDictionary
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-      tags:
-        - AdminProvisioningService
     get:
       summary: Retrieve an Ingestion Dictionary.
       operationId: GetIngestionDictionary
@@ -423,114 +258,10 @@ paths:
             type: string
       tags:
         - AdminProvisioningService
-    delete:
-      summary: Delete an Ingestion Dictionary.
-      operationId: DeleteIngestionDictionary
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      tags:
-        - AdminProvisioningService
   /v1/valid-types:
-    post:
-      summary: Create a Valid Types object. 
-      operationId: CreateValidTypes
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update a Valid Types object. 
-      operationId: UpdateValidTypes
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-      tags:
-        - AdminProvisioningService
     get:
       summary: Retrieve a Valid Types object.
       operationId: GetValidTypes
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      tags:
-        - AdminProvisioningService
-    delete:
-      summary: Delete a Valid Types object.
-      operationId: DeleteValidTypes
       produces:
         - application/vnd.api+json
       responses:
@@ -1106,158 +837,6 @@ paths:
 
       tags:
         - MetricsService
-  /v1/tenants/{tenantId}/users:
-    post:
-      summary: Create a User for a Tenant.
-      operationId: CreateTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Update a Tenant User
-      operationId: PatchTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant User
-      operationId: UpdateTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/user-list:
-    get:
-      summary: Retrieve all Users for the specified Tenant.
-      operationId: GetAllTenantUsers
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUserList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/users/{userId}':
-    get:
-      summary: Retrieve a Tenant User by id.
-      operationId: GetTenantUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant User specified by the provided userId.
-      operationId: DeleteTenantUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
   /v1/tenants/{tenantId}/connector-configs:
     post:
       summary: Create a ConnectorConfig for a Tenant.
@@ -3052,57 +2631,6 @@ paths:
       tags:
         - TenantProvisioningServiceV2
 definitions:
-  JsonApiAdminUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/AdminUser'
-  JsonApiAdminUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/AdminUser'
-
-  AdminUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [adminUsers]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/AdminUserAttr'
-
-  AdminUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
   JsonApiTenant:
     type: "object"
     properties:
@@ -3150,82 +2678,69 @@ definitions:
     type: "object"
     properties:
       data:
-        $ref: '#/definitions/IngestionDictionary'
-  IngestionDictionary:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [ingestionDictionaries]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/IngestionDictionaryAttr'
-  IngestionDictionaryAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      metrics:
         type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetrics'
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-  IngestionDictionaryMetrics:
-    type: "object"
-    additionalProperties:
-      $ref: '#/definitions/IngestionDictionaryMetricMap'
-  IngestionDictionaryMetricMap:
-    type: "object"
-    properties:
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapUI'
-      metricMap:
-        type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinition'
-  IngestionDictionaryMetricMapUI:
-    type: "array"
-    items:
-      type: "string"
-  IngestionDictionaryMetricMapMetricDefinition:
-    type: "object"
-    properties:
-      monitoredObjectTypes:
-        type: "array"
-        items:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
-  IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
-    type: "object"
-    properties:
-      key:
-        type: "string"
-      rawMetricId:
-        type: "string"
-      units:
-        type: "array"
-        items:
-          type: "string"
-      directions:
-        type: "array"
-        items:
-          type: "string"
-  IngestionDictionaryMetricMapMetricDefinitionUIData:
-    type: "object"
-    properties:
-      group:
-        type: "string"
-      position:
-        type: "string"
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionDictionaries]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              _id:
+                type: "string"
+              _rev:
+                type: "string"
+              datatype:
+                type: "string"
+              createdTimestamp:
+                type: "integer"
+              lastModifiedTimestamp:
+                type: "integer"
+              metrics:
+                type: "object"
+                additionalProperties:               
+                  type: "object"
+                  properties:
+                    ui:
+                      type: "object"
+                      properties:
+                        metricGroups:
+                          type: "array"
+                          items: 
+                              type: "string"
+                    metricMap:
+                      type: "object"
+                      additionalProperties:
+                        type: "object"
+                        properties:
+                          monitoredObjectTypes:
+                            type: "array"
+                            items:
+                              type: "object"
+                              properties:
+                                key:
+                                  type: "string"
+                                rawMetricId:
+                                  type: "string"
+                                units:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                                directions:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                          ui:
+                            type: "object"
+                            properties:
+                              group:
+                                type: "string"
+                              position:
+                                type: "string"
+
+
   TenantSummary:
     type: "object"
     properties:
@@ -3265,61 +2780,6 @@ definitions:
       monitoredObjectDeviceTypes:
         type: "object"
         additionalProperties:
-          type: "string"
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
-  JsonApiTenantUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/TenantUser'
-  JsonApiTenantUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/TenantUser'
-  TenantUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [users]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/TenantUserAttr'  
-  TenantUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      tenantId:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      domains:
-        type: "array"
-        items: 
           type: "string"
       createdTimestamp:
         type: "integer"

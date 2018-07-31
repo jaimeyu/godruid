@@ -67,6 +67,7 @@ func (o *DeleteTenantDomainParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindDomainID binds and validates parameter DomainID from path.
 func (o *DeleteTenantDomainParams) bindDomainID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *DeleteTenantDomainParams) bindDomainID(rawData []string, hasKey bool, f
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteTenantDomainParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

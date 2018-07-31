@@ -52,76 +52,6 @@ func trackAPIMetrics(startTime time.Time, code string, objType string) {
 	mon.TrackAPITimeMetricInSeconds(startTime, code, objType)
 }
 
-// CreateAdminUser - Create an Administrative User.
-func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateAdminUser(ctx, user)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateAdminUserStr)
-	return res, nil
-}
-
-// UpdateAdminUser - Update an Administrative User.
-func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateAdminUser(ctx, user)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateAdminUserStr)
-	return res, nil
-}
-
-// DeleteAdminUser - Delete an Administrative User.
-func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteAdminUser(ctx, userID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteAdminUserStr)
-	return res, nil
-}
-
-// GetAdminUser - Retrieve an Administrative User by the ID.
-func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetAdminUser(ctx, userID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAdminUserStr)
-	return res, nil
-}
-
-// GetAllAdminUsers -  Retrieve all Administrative Users.
-func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetAllAdminUsers(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAllAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAllAdminUserStr)
-	return res, nil
-}
-
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,
 // TenantDescriptor, as well as generate the Tenant Datastore for the
 // Tenant data.
@@ -270,130 +200,26 @@ func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noVa
 	return nil, nil
 }
 
-// CreateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) CreateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateIngestionDictionary(ctx, ingDictionary)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetTenantStr)
-	return res, nil
-}
-
-// UpdateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) UpdateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateIngestionDictionary(ctx, ingDictionary)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateIngDictStr)
-	return res, nil
-}
-
-// DeleteIngestionDictionary - Delete an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) DeleteIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteIngestionDictionary(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteIngDictStr)
-	return res, nil
-}
-
 // GetIngestionDictionary - Retrieve an IngestionDictionary used for the entire deployment.
 func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
 	startTime := time.Now()
 
-	res, err := gsh.ash.GetIngestionDictionary(ctx, noValue)
+	ingDict, err := getIngestionDictionaryFromFile()
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetIngDictStr)
 		return nil, err
 	}
 
+	// Convert to PB object
+	converted := pb.IngestionDictionary{}
+	if err := pb.ConvertToPBObject(ingDict, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", "Ingestion Dictionary", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	trackAPIMetrics(startTime, "200", mon.GetIngDictStr)
-	return res, nil
-}
-
-// CreateTenantUser - creates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.CreateTenantUser(ctx, tenantUserReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateTenantUserStr)
-	return res, nil
-}
-
-// UpdateTenantUser - updates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.UpdateTenantUser(ctx, tenantUserReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateTenantUserStr)
-	return res, nil
-}
-
-// DeleteTenantUser - deletes a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.DeleteTenantUser(ctx, tenantUserIDReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteTenantUserStr)
-	return res, nil
-}
-
-// GetTenantUser - retrieves a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.GetTenantUser(ctx, tenantUserIDReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetTenantUserStr)
-	return res, nil
-}
-
-// GetAllTenantUsers - retrieves all users scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.GetAllTenantUsers(ctx, tenantID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAllTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAllTenantUserStr)
-	return res, nil
+	return &converted, nil
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
@@ -799,74 +625,22 @@ func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	return nil
 }
 
-// CreateValidTypes - Create the valid type definition in the system.
-func (gsh *GRPCServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateValidTypesStr)
-	return res, nil
-}
-
-// UpdateValidTypes - Update the valid type definition in the system.
-func (gsh *GRPCServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateValidTypesStr)
-	return res, nil
-}
-
 // GetValidTypes - retrieve the enire list of ValidTypes in the system.
 func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
 	startTime := time.Now()
 
-	res, err := gsh.ash.GetValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetValidTypesStr)
-		return nil, err
+	validTypes := getValidTypes()
+
+	// Convert to PB object
+	converted := pb.ValidTypes{}
+	if err := pb.ConvertToPBObject(validTypes, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", "Valid Types", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	trackAPIMetrics(startTime, "200", mon.GetValidTypesStr)
-	return res, nil
-}
-
-// GetSpecificValidTypes - retrieve a subset of the known ValidTypes in the system.
-func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetSpecificValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetSpecificValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetSpecificValidTypesStr)
-	return res, nil
-}
-
-// DeleteValidTypes - Delete valid types used for the entire deployment.
-func (gsh *GRPCServiceHandler) DeleteValidTypes(ctx context.Context, noValue *emp.Empty) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteValidTypes(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.ValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.ValidTypesStr)
-	return res, nil
+	return &converted, nil
 }
 
 // BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.

@@ -40,12 +40,10 @@ func (m *GathergrpcResource) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateLinks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRelationships(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -62,14 +60,12 @@ func (m *GathergrpcResource) validateLinks(formats strfmt.Registry) error {
 	}
 
 	if m.Links != nil {
-
 		if err := m.Links.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("links")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -82,14 +78,12 @@ func (m *GathergrpcResource) validateRelationships(formats strfmt.Registry) erro
 	}
 
 	if m.Relationships != nil {
-
 		if err := m.Relationships.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("relationships")
 			}
 			return err
 		}
-
 	}
 
 	return nil

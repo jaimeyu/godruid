@@ -145,6 +145,9 @@ func (o *GetThresholdCrossingParams) BindRequest(r *http.Request, route *middlew
 	return nil
 }
 
+// bindDirection binds and validates array parameter Direction from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvDirection string
@@ -170,6 +173,9 @@ func (o *GetThresholdCrossingParams) bindDirection(rawData []string, hasKey bool
 	return nil
 }
 
+// bindDomain binds and validates array parameter Domain from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvDomain string
@@ -195,6 +201,7 @@ func (o *GetThresholdCrossingParams) bindDomain(rawData []string, hasKey bool, f
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GetThresholdCrossingParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -212,6 +219,7 @@ func (o *GetThresholdCrossingParams) bindGranularity(rawData []string, hasKey bo
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GetThresholdCrossingParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("interval", "query")
@@ -232,6 +240,9 @@ func (o *GetThresholdCrossingParams) bindInterval(rawData []string, hasKey bool,
 	return nil
 }
 
+// bindMetric binds and validates array parameter Metric from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMetric string
@@ -257,6 +268,9 @@ func (o *GetThresholdCrossingParams) bindMetric(rawData []string, hasKey bool, f
 	return nil
 }
 
+// bindObjectType binds and validates array parameter ObjectType from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingParams) bindObjectType(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvObjectType string
@@ -282,6 +296,7 @@ func (o *GetThresholdCrossingParams) bindObjectType(rawData []string, hasKey boo
 	return nil
 }
 
+// bindTenant binds and validates parameter Tenant from query.
 func (o *GetThresholdCrossingParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("tenant", "query")
@@ -302,6 +317,7 @@ func (o *GetThresholdCrossingParams) bindTenant(rawData []string, hasKey bool, f
 	return nil
 }
 
+// bindThresholdProfileID binds and validates parameter ThresholdProfileID from query.
 func (o *GetThresholdCrossingParams) bindThresholdProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("thresholdProfileId", "query")
@@ -322,6 +338,7 @@ func (o *GetThresholdCrossingParams) bindThresholdProfileID(rawData []string, ha
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GetThresholdCrossingParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -343,6 +360,9 @@ func (o *GetThresholdCrossingParams) bindTimeout(rawData []string, hasKey bool, 
 	return nil
 }
 
+// bindVendor binds and validates array parameter Vendor from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvVendor string

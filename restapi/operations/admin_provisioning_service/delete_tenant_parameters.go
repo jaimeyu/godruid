@@ -57,6 +57,7 @@ func (o *DeleteTenantParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteTenantParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -25,7 +25,6 @@ func (m *TenantMonitoredObjectRelationships) Validate(formats strfmt.Registry) e
 	var res []error
 
 	if err := m.validateDomains(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -42,14 +41,12 @@ func (m *TenantMonitoredObjectRelationships) validateDomains(formats strfmt.Regi
 	}
 
 	if m.Domains != nil {
-
 		if err := m.Domains.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("domains")
 			}
 			return err
 		}
-
 	}
 
 	return nil

@@ -57,6 +57,7 @@ func (o *GetTenantMetadataParams) BindRequest(r *http.Request, route *middleware
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetTenantMetadataParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -16,43 +16,6 @@ import "gathergrpc/commonModels.proto";
 // Tenants
 service AdminProvisioningService {
     
-    // Create a User with Administrative access. 
-    rpc CreateAdminUser(AdminUser) returns (AdminUser) {
-        option (google.api.http) = {
-            post: "/api/v1/admin"
-            body: "*"
-        };
-    }
-    
-    // Update a User with Administrative access. 
-    rpc UpdateAdminUser(AdminUser) returns (AdminUser) {
-        option (google.api.http) = {
-            put: "/api/v1/admin"
-            body: "*"
-        };
-    } 
-    
-    // Delete a User with Administrative access. 
-    rpc DeleteAdminUser(google.protobuf.StringValue) returns (AdminUser) {
-        option (google.api.http) = {
-            delete: "/api/v1/admin/{value}"
-        };
-    }
-    
-    // Retrieve and Administrative User by id. 
-    rpc GetAdminUser(google.protobuf.StringValue) returns (AdminUser) {
-        option (google.api.http) = {
-            get: "/api/v1/admin/{value}"
-        };
-    }
-    
-    // Retrieve all Administrative Users. 
-    rpc GetAllAdminUsers(google.protobuf.Empty) returns (AdminUserList) {
-        option (google.api.http) = {
-            get: "/api/v1/admin-user-list"
-        };
-    }
-    
     // Creates a Tenant and returns a TenantDescriptor which provides 
     // metadata for the newly created Tenant.   
     rpc CreateTenant(TenantDescriptor) returns (TenantDescriptor) {
@@ -92,29 +55,6 @@ service AdminProvisioningService {
             get: "/api/v1/tenant-list"
         };
     }
-
-    // Create an IngestionDictionary used for the entire deployment.
-    rpc CreateIngestionDictionary(IngestionDictionary) returns (IngestionDictionary) {
-        option (google.api.http) = {
-            post: "/api/v1/ingestion-dictionaries"
-            body: "*"
-        };
-    }
-    
-    // Update an IngestionDictionary used for the entire deployment.
-    rpc UpdateIngestionDictionary(IngestionDictionary) returns (IngestionDictionary) {
-        option (google.api.http) = {
-            put: "/api/v1/ingestion-dictionaries"
-            body: "*"
-        };
-    } 
-    
-    // Delete an IngestionDictionary used for the entire deployment.
-    rpc DeleteIngestionDictionary(google.protobuf.Empty) returns (IngestionDictionary) {
-        option (google.api.http) = {
-            delete: "/api/v1/ingestion-dictionaries"
-        };
-    }
     
     // Retrieve an IngestionDictionary used for the entire deployment.
     rpc GetIngestionDictionary(google.protobuf.Empty) returns (IngestionDictionary) {
@@ -136,81 +76,18 @@ service AdminProvisioningService {
         };
     }
 
-    rpc CreateValidTypes(ValidTypes) returns (ValidTypes) {
-        option (google.api.http) = {
-            post: "/api/v1/valid-types"
-            body: "*"
-        };
-    }
-
-    rpc UpdateValidTypes(ValidTypes) returns (ValidTypes) {
-        option (google.api.http) = {
-            put: "/api/v1/valid-types"
-            body: "*"
-        };
-    }
-
     rpc GetValidTypes(google.protobuf.Empty) returns (ValidTypes) {
         option (google.api.http) = {
             get: "/api/v1/valid-types"
         };
     }
 
-    rpc GetSpecificValidTypes(ValidTypesRequest) returns (ValidTypesData) {
-        option (google.api.http) = {
-            post: "/api/v1/specific-valid-types"
-            body: "*"
-        };
-    }
-
-    rpc DeleteValidTypes(google.protobuf.Empty) returns (ValidTypes) {
-        option (google.api.http) = {
-            delete: "/api/v1/valid-types"
-        };
-    }
 }
 
 
 // Service responsible for provisioning Tenant scope data including
 // Tenant Users, Tenant Domains, Tenant Injection Profiles.
 service TenantProvisioningService {
-    
-    // Create a User scoped to a Single Tenant. 
-    rpc CreateTenantUser(TenantUser) returns (TenantUser) {
-        option (google.api.http) = {
-            post: "/api/v1/tenants/{data.tenantId}/users"
-            body: "*"
-        };
-    }
-    
-    // Update a User scoped to a single Tenant. 
-    rpc UpdateTenantUser(TenantUser) returns (TenantUser) {
-        option (google.api.http) = {
-            put: "/api/v1/tenants/{data.tenantId}/users"
-            body: "*"
-        };
-    } 
-    
-    // Delete a User scoped to a single Tenant. 
-    rpc DeleteTenantUser(TenantUserIdRequest) returns (TenantUser) {
-        option (google.api.http) = {
-            delete: "/api/v1/tenants/{tenantId}/users/{userId}"
-        };
-    }
-    
-    // Retrieve a User scoped to a single Tenant. 
-    rpc GetTenantUser(TenantUserIdRequest) returns (TenantUser) {
-        option (google.api.http) = {
-            get: "/api/v1/tenants/{tenantId}/users/{userId}"
-        };
-    }
-    
-    // Retrieve all Users scoped to a single Tenant. 
-    rpc GetAllTenantUsers(google.protobuf.StringValue) returns (TenantUserList) {
-        option (google.api.http) = {
-            get: "/api/v1/tenants/{value}/user-list"
-        };
-    }
 
     // Create a Domain scoped to a Single Tenant. 
     rpc CreateTenantDomain(TenantDomain) returns (TenantDomain) {

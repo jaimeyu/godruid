@@ -64,8 +64,8 @@ func (o *UpdateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -74,11 +74,9 @@ func (o *UpdateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rProfileID, rhkProfileID, _ := route.Params.GetOK("profileId")
 	if err := o.bindProfileID(rProfileID, rhkProfileID, route.Formats); err != nil {
 		res = append(res, err)
@@ -90,6 +88,7 @@ func (o *UpdateDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 	return nil
 }
 
+// bindProfileID binds and validates parameter ProfileID from path.
 func (o *UpdateDataCleaningProfileParams) bindProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

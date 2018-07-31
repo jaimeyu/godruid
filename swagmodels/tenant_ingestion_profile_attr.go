@@ -43,7 +43,6 @@ func (m *TenantIngestionProfileAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMetrics(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -60,14 +59,12 @@ func (m *TenantIngestionProfileAttr) validateMetrics(formats strfmt.Registry) er
 	}
 
 	if m.Metrics != nil {
-
 		if err := m.Metrics.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("metrics")
 			}
 			return err
 		}
-
 	}
 
 	return nil

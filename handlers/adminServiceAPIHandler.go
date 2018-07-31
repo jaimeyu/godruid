@@ -3,9 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/accedian/adh-gather/gather"
 
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/swagmodels"
@@ -18,6 +21,28 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service"
 	"github.com/go-openapi/runtime/middleware"
+)
+
+var (
+	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
+	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
+		"pe": tenmod.TwampPE,
+		"sf": tenmod.TwampSF,
+		"sl": tenmod.TwampSL,
+		string(tenmod.TwampPE): tenmod.TwampPE,
+		string(tenmod.TwampSF): tenmod.TwampSF,
+		string(tenmod.TwampSL): tenmod.TwampSL}
+
+	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
+	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
+		string(tenmod.AccedianNID):  tenmod.AccedianNID,
+		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
+
+	// DefaultValidTypes - default values for the valid types supported by datahub
+	DefaultValidTypes = &admmod.ValidTypes{}
+
+	// DefaultIngestionDictionary - default values for the Ingestion Dictionary
+	DefaultIngestionDictionary = &admmod.IngestionDictionary{}
 )
 
 // HandleCreateTenant - create a new tenant
@@ -54,7 +79,7 @@ func HandleCreateTenant(allowedRoles []string, adminDB datastore.AdminServiceDat
 			return admin_provisioning_service.NewCreateTenantConflict().WithPayload(reportAPIError(fmt.Sprintf("Unable to create Tenant %s. A Tenant with this name already exists", data.Name), startTime, http.StatusConflict, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
-		// Issue request to DAO Layer to Create the Admin User
+		// Issue request to DAO Layer to Create Tenant
 		result, err := adminDB.CreateTenant(&data)
 		if err != nil {
 			return admin_provisioning_service.NewCreateTenantInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", admmod.TenantStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateTenantStr, mon.APICompleted, mon.AdminAPICompleted))
@@ -284,98 +309,6 @@ func HandleGetTenantSummaryByAlias(adminDB datastore.AdminServiceDatastore) func
 	}
 }
 
-// HandleCreateIngestionDictionary - creates an ingestion dictionary
-func HandleCreateIngestionDictionary(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
-	return func(params admin_provisioning_service.CreateIngestionDictionaryParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Creating %s", admmod.IngestionDictionaryStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Unmarshal the request
-		requestBytes, err := json.Marshal(params.Body)
-		if err != nil {
-			return admin_provisioning_service.NewCreateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusForbidden, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		data := admmod.IngestionDictionary{}
-		err = jsonapi.Unmarshal(requestBytes, &data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		err = data.Validate(false)
-		if err != nil {
-			return admin_provisioning_service.NewCreateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer to Create the record
-		result, err := adminDB.CreateIngestionDictionary(&data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		converted := swagmodels.JSONAPIIngestionDictionary{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewCreateIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		reportAPICompletionState(startTime, http.StatusOK, mon.CreateIngDictStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Created %s", admmod.IngestionDictionaryStr)
-		return admin_provisioning_service.NewCreateIngestionDictionaryOK().WithPayload(&converted)
-	}
-}
-
-// HandleUpdateIngestionDictionary - updates an ingestion dictionary
-func HandleUpdateIngestionDictionary(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.UpdateIngestionDictionaryParams) middleware.Responder {
-	return func(params admin_provisioning_service.UpdateIngestionDictionaryParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Updating %s", admmod.IngestionDictionaryStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Unmarshal the request
-		requestBytes, err := json.Marshal(params.Body)
-		if err != nil {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusForbidden, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		data := admmod.IngestionDictionary{}
-		err = jsonapi.Unmarshal(requestBytes, &data)
-		if err != nil {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		err = data.Validate(true)
-		if err != nil {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer to Create the record
-		result, err := adminDB.UpdateIngestionDictionary(&data)
-		if err != nil {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		converted := swagmodels.JSONAPIIngestionDictionary{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewUpdateIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		reportAPICompletionState(startTime, http.StatusOK, mon.UpdateIngDictStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Updated %s", admmod.IngestionDictionaryStr)
-		return admin_provisioning_service.NewUpdateIngestionDictionaryOK().WithPayload(&converted)
-	}
-}
-
 // HandleGetIngestionDictionary - retrieve an ingestion dictionary
 func HandleGetIngestionDictionary(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.GetIngestionDictionaryParams) middleware.Responder {
 	return func(params admin_provisioning_service.GetIngestionDictionaryParams) middleware.Responder {
@@ -388,7 +321,7 @@ func HandleGetIngestionDictionary(allowedRoles []string, adminDB datastore.Admin
 		}
 
 		// Issue request to DAO Layer
-		result, err := adminDB.GetIngestionDictionary()
+		result, err := getIngestionDictionaryFromFile()
 		if err != nil {
 			return admin_provisioning_service.NewGetIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
@@ -405,127 +338,6 @@ func HandleGetIngestionDictionary(allowedRoles []string, adminDB datastore.Admin
 	}
 }
 
-// HandleDeleteIngestionDictionary - delete an ingestion dictionary
-func HandleDeleteIngestionDictionary(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.DeleteIngestionDictionaryParams) middleware.Responder {
-	return func(params admin_provisioning_service.DeleteIngestionDictionaryParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Deleting %s", admmod.IngestionDictionaryStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.IngestionDictionaryStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer
-		result, err := adminDB.DeleteIngestionDictionary()
-		if err != nil {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		converted := swagmodels.JSONAPIIngestionDictionary{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteIngDictStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Deleted %s %s", admmod.IngestionDictionaryStr, models.AsJSONString(converted))
-		return admin_provisioning_service.NewDeleteIngestionDictionaryOK().WithPayload(&converted)
-	}
-}
-
-// HandleCreateValidTypes - creates valid types object
-func HandleCreateValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.CreateValidTypesParams) middleware.Responder {
-	return func(params admin_provisioning_service.CreateValidTypesParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Creating %s", admmod.ValidTypesStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Create %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Unmarshal the request
-		requestBytes, err := json.Marshal(params.Body)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusForbidden, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		data := admmod.ValidTypes{}
-		err = jsonapi.Unmarshal(requestBytes, &data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		err = data.Validate(false)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer to Create the record
-		result, err := adminDB.CreateValidTypes(&data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		converted := swagmodels.JSONAPIValidTypes{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		reportAPICompletionState(startTime, http.StatusOK, mon.CreateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Created %s", admmod.ValidTypesStr)
-		return admin_provisioning_service.NewCreateValidTypesOK().WithPayload(&converted)
-	}
-}
-
-// HandleUpdateValidTypes - updates valid types object
-func HandleUpdateValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.UpdateValidTypesParams) middleware.Responder {
-	return func(params admin_provisioning_service.UpdateValidTypesParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Updating %s", admmod.ValidTypesStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Unmarshal the request
-		requestBytes, err := json.Marshal(params.Body)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusForbidden, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		data := admmod.ValidTypes{}
-		err = jsonapi.Unmarshal(requestBytes, &data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		err = data.Validate(true)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesForbidden().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer to Create the record
-		result, err := adminDB.UpdateValidTypes(&data)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		converted := swagmodels.JSONAPIValidTypes{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewCreateValidTypesInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		reportAPICompletionState(startTime, http.StatusOK, mon.UpdateValidTypesStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Updated %s", admmod.ValidTypesStr)
-		return admin_provisioning_service.NewUpdateValidTypesOK().WithPayload(&converted)
-	}
-}
-
 // HandleGetValidTypes - retrieve an ingestion dictionary
 func HandleGetValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
 	return func(params admin_provisioning_service.GetValidTypesParams) middleware.Responder {
@@ -538,13 +350,10 @@ func HandleGetValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDa
 		}
 
 		// Issue request to DAO Layer
-		result, err := adminDB.GetValidTypes()
-		if err != nil {
-			return admin_provisioning_service.NewGetIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
+		result := getValidTypes()
 
 		converted := swagmodels.JSONAPIValidTypes{}
-		err = convertToJsonapiObject(result, &converted)
+		err := convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return admin_provisioning_service.NewGetIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
@@ -555,31 +364,50 @@ func HandleGetValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDa
 	}
 }
 
-// HandleDeleteValidTypes - delete valid types object
-func HandleDeleteValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service.DeleteValidTypesParams) middleware.Responder {
-	return func(params admin_provisioning_service.DeleteValidTypesParams) middleware.Responder {
-		startTime := time.Now()
-		incrementAPICounters(mon.APIRecieved, mon.AdminAPIRecieved)
-		logger.Log.Infof("Deleting %s", admmod.ValidTypesStr)
-
-		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryForbidden().WithPayload(reportAPIError(fmt.Sprintf("Get %s operation not authorized for role: %s", admmod.ValidTypesStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
-
-		// Issue request to DAO Layer
-		result, err := adminDB.DeleteValidTypes()
+// getIngestionDictionaryFromFile - retrieves the contents of the IngestionDictionary.
+func getIngestionDictionaryFromFile() (*admmod.IngestionDictionary, error) {
+	if DefaultIngestionDictionary == nil || DefaultIngestionDictionary.ID == "" {
+		cfg := gather.GetConfig()
+		ingDictFilePath := cfg.GetString("ingDict")
+		defaultDictionaryBytes, err := ioutil.ReadFile(ingDictFilePath)
 		if err != nil {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+			logger.Log.Fatalf("Unable to read Default Ingestion Dictionary from file: %s", err.Error())
 		}
 
-		converted := swagmodels.JSONAPIValidTypes{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
-			return admin_provisioning_service.NewDeleteIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.ValidTypesStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted))
+		DefaultIngestionDictionary = &admmod.IngestionDictionary{}
+		if err = json.Unmarshal(defaultDictionaryBytes, DefaultIngestionDictionary); err != nil {
+			logger.Log.Fatalf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
 		}
 
-		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteValidTypesStr, mon.APICompleted, mon.AdminAPICompleted)
-		logger.Log.Infof("Deleted %s %s", admmod.ValidTypesStr, models.AsJSONString(converted))
-		return admin_provisioning_service.NewDeleteValidTypesOK().WithPayload(&converted)
+		DefaultIngestionDictionary.ID = "1"
+		DefaultIngestionDictionary.REV = "1"
+		DefaultIngestionDictionary.Datatype = "ingestionDictionary"
 	}
+
+	return DefaultIngestionDictionary, nil
+}
+
+// getValidTypes - retrieves the known valid types
+func getValidTypes() *admmod.ValidTypes {
+	if DefaultValidTypes == nil || DefaultValidTypes.ID == "" {
+		validMonObjTypes := make(map[string]string, 0)
+		validMonObjDevTypes := make(map[string]string, 0)
+
+		for key, val := range ValidMonitoredObjectTypes {
+			validMonObjTypes[key] = string(val)
+		}
+		for key, val := range ValidMonitoredObjectDeviceTypes {
+			validMonObjDevTypes[key] = string(val)
+		}
+
+		DefaultValidTypes = &admmod.ValidTypes{
+			ID:       "1",
+			REV:      "1",
+			Datatype: "validTypes",
+
+			MonitoredObjectTypes:       validMonObjTypes,
+			MonitoredObjectDeviceTypes: validMonObjDevTypes}
+	}
+
+	return DefaultValidTypes
 }

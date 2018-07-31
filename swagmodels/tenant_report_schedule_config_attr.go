@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -79,25 +78,6 @@ type TenantReportScheduleConfigAttr struct {
 
 // Validate validates this tenant report schedule config attr
 func (m *TenantReportScheduleConfigAttr) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateDomains(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *TenantReportScheduleConfigAttr) validateDomains(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Domains) { // not required
-		return nil
-	}
-
 	return nil
 }
 

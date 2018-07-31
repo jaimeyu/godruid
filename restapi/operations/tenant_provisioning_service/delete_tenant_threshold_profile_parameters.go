@@ -67,6 +67,7 @@ func (o *DeleteTenantThresholdProfileParams) BindRequest(r *http.Request, route 
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteTenantThresholdProfileParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *DeleteTenantThresholdProfileParams) bindTenantID(rawData []string, hasK
 	return nil
 }
 
+// bindThrPrfID binds and validates parameter ThrPrfID from path.
 func (o *DeleteTenantThresholdProfileParams) bindThrPrfID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

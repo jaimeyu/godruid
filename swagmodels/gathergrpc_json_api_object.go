@@ -6,6 +6,8 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,13 +19,13 @@ import (
 type GathergrpcJSONAPIObject struct {
 
 	// data
-	Data GathergrpcJSONAPIObjectData `json:"data"`
+	Data []*GathergrpcData `json:"data"`
 
 	// errors
-	Errors GathergrpcJSONAPIObjectErrors `json:"errors"`
+	Errors []*GathergrpcError `json:"errors"`
 
 	// included
-	Included GathergrpcJSONAPIObjectIncluded `json:"included"`
+	Included []*GathergrpcResource `json:"included"`
 
 	// jsonapi
 	Jsonapi map[string]string `json:"jsonapi,omitempty"`
@@ -39,14 +41,100 @@ type GathergrpcJSONAPIObject struct {
 func (m *GathergrpcJSONAPIObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateData(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateErrors(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIncluded(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateLinks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *GathergrpcJSONAPIObject) validateData(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Data) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Data); i++ {
+		if swag.IsZero(m.Data[i]) { // not required
+			continue
+		}
+
+		if m.Data[i] != nil {
+			if err := m.Data[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *GathergrpcJSONAPIObject) validateErrors(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Errors) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Errors); i++ {
+		if swag.IsZero(m.Errors[i]) { // not required
+			continue
+		}
+
+		if m.Errors[i] != nil {
+			if err := m.Errors[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("errors" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *GathergrpcJSONAPIObject) validateIncluded(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Included) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Included); i++ {
+		if swag.IsZero(m.Included[i]) { // not required
+			continue
+		}
+
+		if m.Included[i] != nil {
+			if err := m.Included[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("included" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -57,14 +145,12 @@ func (m *GathergrpcJSONAPIObject) validateLinks(formats strfmt.Registry) error {
 	}
 
 	if m.Links != nil {
-
 		if err := m.Links.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("links")
 			}
 			return err
 		}
-
 	}
 
 	return nil

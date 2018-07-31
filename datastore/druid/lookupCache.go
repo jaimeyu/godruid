@@ -58,7 +58,7 @@ type lookupCache struct {
 func buildLookupName(dimType, tenantID, dimKey string, dimValue string, dimPartition int) string {
 	name := strings.ToLower(druidLookupSeparator + dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimKey + druidLookupSeparator + dimValue + druidLookupSeparator + fmt.Sprintf("%d", dimPartition))
 	hash := sha256.Sum256([]byte(name))
-	return fmt.Sprintf("%X*%s", hash, name)
+	return fmt.Sprintf("%X%s", hash, name)
 }
 
 func buildLookupNamePrefix(dimType, tenantID string) string {

@@ -949,7 +949,7 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 		// Special exception case for domains
 
 		for key, val := range mo.Meta {
-			dc.addToLookup(lookups, existingNames, datatype, tenantID, key, val, mo.ID, mo.ID, 0)
+			dc.addToLookup(lookups, existingNames, datatype, tenantID, key, val, mo.MonitoredObjectID, mo.MonitoredObjectID, 0)
 		}
 	}
 

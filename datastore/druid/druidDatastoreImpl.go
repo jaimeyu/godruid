@@ -955,11 +955,11 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 
 	// Now delete all the orphaned lookups
 	// We delete the active lookups only when we're about to update them.
-	for name, status := range existingNames {
+	for name, _ := range existingNames {
 		// Delete the look up first (don't worry about errors, best effort)
-		if status == false {
-			dc.deleteItemToLookup(lookupEndpoint, name)
-		}
+		//if status == false {
+		dc.deleteItemToLookup(lookupEndpoint, name)
+		//}
 	}
 
 	// Debugging only
@@ -1130,13 +1130,13 @@ func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, 
 		return err
 	}
 
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Dumping url: %s", url)
-		logger.Log.Debugf("Sending lookup request %s, payload: %s", url, string(b))
-	}
+	// if logger.IsDebugEnabled() {
+	// 	logger.Log.Debugf("Dumping url: %s", url)
+	// 	logger.Log.Debugf("Sending lookup request %s, payload: %s", url, string(b))
+	// }
 
 	// Delete the look up first (don't worry about errors, best effort)
-	dc.deleteItemToLookup(host, lookupName)
+	//dc.deleteItemToLookup(host, lookupName)
 
 	_, err = sendRequest("POST", dc.dClient.HttpClient, url, dc.AuthToken, b)
 	if err != nil {

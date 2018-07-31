@@ -1593,3 +1593,28 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 	logger.Log.Debugf("Retrieved %d %ss\n", len(res), tenmod.TenantDataCleaningProfileStr)
 	return res, nil
 }
+
+// @WARNING - This function shouldn't be exposed to the user APIs and should be used internally
+// GetAllMonitoredObjectsV2 - uses the paginated DB call to acquire all monitored objects
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsV2(tenantID string, bsize int64) ([]*tenmod.MonitoredObject, error) {
+
+	result := make([]*tenmod.MonitoredObject, 0)
+	startKey := ""
+
+	for true {
+		monitoredObjects, paginationOffsets, err := tsd.GetAllMonitoredObjectsByPage(tenantID, startKey, bsize)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, monitoredObjects...)
+
+		if len(paginationOffsets.Next) == 0 {
+			break
+		}
+
+		startKey = paginationOffsets.Next
+	}
+
+	return result, nil
+}

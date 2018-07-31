@@ -243,7 +243,7 @@ func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {
 			// and re-populating it. If it becomes inefficient we'll have to update this to do
 			// more of a CRUD approach to the metadata.
 			if _, ok := processedTenantIds[e.tenantID]; !ok {
-				//c.updateMetricsDatastoreMetadata(e.tenantID)
+				c.updateMetricsDatastoreMetadata(e.tenantID)
 				processedTenantIds[e.tenantID] = true
 			}
 		}
@@ -274,7 +274,7 @@ func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
 	//debugging
 	//colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
 
-	testNodes := 1000000 // change this for testing!
+	testNodes := 50000 // change this for testing!
 	for i := 0; i < testNodes; i++ {
 		mo := tenmod.MonitoredObject{
 			ID:                fmt.Sprintf("debug_%d", i),
@@ -304,7 +304,7 @@ func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID stri
 	}
 
 	// Enable this to add arbitary number of items into the druid look ups
-	monitoredObjects = debugAddFakeMonitoredObjects()
+	//monitoredObjects = debugAddFakeMonitoredObjects()
 
 	// Update counters
 	setMonitoredObjectCount(len(monitoredObjects))
@@ -391,7 +391,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		}
 
 		// Enable this to add arbitary number of items into the druid look ups
-		monitoredObjects = debugAddFakeMonitoredObjects()
+		//monitoredObjects = debugAddFakeMonitoredObjects()
 
 		// Update counters
 		setMonitoredObjectCount(len(monitoredObjects))
@@ -414,13 +414,13 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			// For metadata, we need to build a list of known qualifiers
 			logger.Log.Infof("Dumping Updating metadata from poll change")
 
-			// if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
-			// 	logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
-			// 	lastError = err
-			// 	continue
-			// } else {
-			// 	logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
-			// }
+			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
+				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
+				lastError = err
+				continue
+			} else {
+				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
+			}
 
 		}
 

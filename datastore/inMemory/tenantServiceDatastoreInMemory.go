@@ -1503,3 +1503,6 @@ func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectByObjectName(name s
 func (tsd *TenantServiceDatastoreInMemory) GetMetadataKeys(tenantId string) (map[string]int, error) {
 	return nil, nil
 }
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsV2(tenantID string, bsize int64) ([]*tenmod.MonitoredObject, error) {
+	return nil, nil
+}

@@ -1,6 +1,7 @@
 package druid
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"strings"
 	"time"
@@ -55,7 +56,9 @@ type lookupCache struct {
 // Construct a lookup name
 // Looks up have the format: type*tenantID*key*value*partition
 func buildLookupName(dimType, tenantID, dimKey string, dimValue string, dimPartition int) string {
-	return strings.ToLower(dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimKey + druidLookupSeparator + dimValue + druidLookupSeparator + fmt.Sprintf("%d", dimPartition))
+	name := strings.ToLower(druidLookupSeparator + dimType + druidLookupSeparator + tenantID + druidLookupSeparator + dimKey + druidLookupSeparator + dimValue + druidLookupSeparator + fmt.Sprintf("%d", dimPartition))
+	hash := sha256.Sum256([]byte(name))
+	return fmt.Sprintf("%X*%s", hash, name)
 }
 
 func buildLookupNamePrefix(dimType, tenantID string) string {

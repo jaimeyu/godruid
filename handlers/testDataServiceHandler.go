@@ -1041,7 +1041,7 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 // generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.
 func generateAndSendKafkaMsg(kafkaProducer *kafka.Writer, ts int64, tenantID string, mo *tenmod.MonitoredObject, faux string) (string, error) {
 	nts := fmt.Sprintf("%d", ts)
-	payload := strings.Replace(fauxDatatemplate, tenantWord, tenantID, -1)
+	payload := strings.Replace(faux, tenantWord, tenantID, -1)
 	payload = strings.Replace(payload, monObjIDWord, mo.MonitoredObjectID, -1)
 	payload = strings.Replace(payload, monObjNameWord, mo.ObjectName, -1)
 	payload = strings.Replace(payload, timestampWord, nts, -1)

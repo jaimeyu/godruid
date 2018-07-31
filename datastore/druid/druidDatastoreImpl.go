@@ -976,6 +976,8 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 	logger.Log.Infof("Sending Lookup table to druid")
 	waitForCompletion := make(chan string, 25)
 	for key, val := range lookups {
+		logger.Log.Debugf("Sending lookups to druid", key)
+
 		val.active = true
 		// Looks up are costly, let's see if we can parallalize the operations
 		go func(look string, key string, val *lookup, waitForCompletion chan string) {

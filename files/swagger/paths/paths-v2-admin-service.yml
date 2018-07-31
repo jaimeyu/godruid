@@ -232,7 +232,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/IngestionDictionary'
+            $ref: '#/definitions/IngestionDictionaryListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -253,7 +253,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/ValidTypes'
+            $ref: '#/definitions/ValidTypesListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:

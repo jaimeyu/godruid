@@ -15,70 +15,12 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ValidTypes Provides known values mappings for Datahub
+// ValidTypes valid types
 // swagger:model ValidTypes
 type ValidTypes struct {
 
-	// data
-	Data *ValidTypesData `json:"data,omitempty"`
-}
-
-// Validate validates this valid types
-func (m *ValidTypes) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateData(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ValidTypes) validateData(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Data) { // not required
-		return nil
-	}
-
-	if m.Data != nil {
-		if err := m.Data.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("data")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ValidTypes) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ValidTypes) UnmarshalBinary(b []byte) error {
-	var res ValidTypes
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// ValidTypesData valid types data
-// swagger:model ValidTypesData
-type ValidTypesData struct {
-
 	// attributes
-	Attributes *ValidTypesDataAttributes `json:"attributes,omitempty"`
+	Attributes *ValidTypesAttr `json:"attributes,omitempty"`
 
 	// id
 	ID string `json:"id,omitempty"`
@@ -88,8 +30,8 @@ type ValidTypesData struct {
 	Type string `json:"type,omitempty"`
 }
 
-// Validate validates this valid types data
-func (m *ValidTypesData) Validate(formats strfmt.Registry) error {
+// Validate validates this valid types
+func (m *ValidTypes) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
@@ -106,7 +48,7 @@ func (m *ValidTypesData) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ValidTypesData) validateAttributes(formats strfmt.Registry) error {
+func (m *ValidTypes) validateAttributes(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Attributes) { // not required
 		return nil
@@ -115,7 +57,7 @@ func (m *ValidTypesData) validateAttributes(formats strfmt.Registry) error {
 	if m.Attributes != nil {
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("data" + "." + "attributes")
+				return ve.ValidateName("attributes")
 			}
 			return err
 		}
@@ -124,7 +66,7 @@ func (m *ValidTypesData) validateAttributes(formats strfmt.Registry) error {
 	return nil
 }
 
-var validTypesDataTypeTypePropEnum []interface{}
+var validTypesTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
@@ -132,32 +74,32 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		validTypesDataTypeTypePropEnum = append(validTypesDataTypeTypePropEnum, v)
+		validTypesTypeTypePropEnum = append(validTypesTypeTypePropEnum, v)
 	}
 }
 
 const (
 
-	// ValidTypesDataTypeValidTypes captures enum value "validTypes"
-	ValidTypesDataTypeValidTypes string = "validTypes"
+	// ValidTypesTypeValidTypes captures enum value "validTypes"
+	ValidTypesTypeValidTypes string = "validTypes"
 )
 
 // prop value enum
-func (m *ValidTypesData) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, validTypesDataTypeTypePropEnum); err != nil {
+func (m *ValidTypes) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, validTypesTypeTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *ValidTypesData) validateType(formats strfmt.Registry) error {
+func (m *ValidTypes) validateType(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
 
 	// value enum
-	if err := m.validateTypeEnum("data"+"."+"type", "body", m.Type); err != nil {
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
 		return err
 	}
 
@@ -165,7 +107,7 @@ func (m *ValidTypesData) validateType(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *ValidTypesData) MarshalBinary() ([]byte, error) {
+func (m *ValidTypes) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -173,67 +115,8 @@ func (m *ValidTypesData) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ValidTypesData) UnmarshalBinary(b []byte) error {
-	var res ValidTypesData
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// ValidTypesDataAttributes valid types data attributes
-// swagger:model ValidTypesDataAttributes
-type ValidTypesDataAttributes struct {
-
-	// Lists the known Monitored Object Device Types as well as known alias values for Monitored Object Device types
-	// Required: true
-	MonitoredObjectDeviceTypes map[string]string `json:"monitoredObjectDeviceTypes"`
-
-	// Lists the known Monitored Object Types as well as known alias values for Monitored Object types
-	// Required: true
-	MonitoredObjectTypes map[string]string `json:"monitoredObjectTypes"`
-}
-
-// Validate validates this valid types data attributes
-func (m *ValidTypesDataAttributes) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateMonitoredObjectDeviceTypes(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateMonitoredObjectTypes(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ValidTypesDataAttributes) validateMonitoredObjectDeviceTypes(formats strfmt.Registry) error {
-
-	return nil
-}
-
-func (m *ValidTypesDataAttributes) validateMonitoredObjectTypes(formats strfmt.Registry) error {
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *ValidTypesDataAttributes) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *ValidTypesDataAttributes) UnmarshalBinary(b []byte) error {
-	var res ValidTypesDataAttributes
+func (m *ValidTypes) UnmarshalBinary(b []byte) error {
+	var res ValidTypes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

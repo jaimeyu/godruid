@@ -2658,7 +2658,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/IngestionDictionary'
+            $ref: '#/definitions/IngestionDictionaryListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -2679,7 +2679,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/ValidTypes'
+            $ref: '#/definitions/ValidTypesListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -4137,91 +4137,94 @@ definitions:
             type: "integer"
             description: "The timestamp of the last update to this record in Datahub"
 
-  IngestionDictionary:
+  IngestionDictionaryListResponse:
     type: "object"
     description: "Provides a listing of all metric values supported by Datahub"
     properties:
       data:
-        type: "object"
-        properties:
-          type: 
-            type: "string"
-            enum: [ingestionDictionaries]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            required: ["metrics"]
-            properties:
-              metrics:
-                type: "object"
-                additionalProperties:               
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            type: 
+              type: "string"
+              enum: [ingestionDictionaries]
+            id:
+              type: "string"
+            attributes:
+              type: "object"
+              required: ["metrics"]
+              properties:
+                metrics:
                   type: "object"
-                  properties:
-                    ui:
-                      type: "object"
-                      properties:
-                        metricGroups:
-                          type: "array"
-                          items: 
-                              type: "string"
-                    metricMap:
-                      type: "object"
-                      additionalProperties:
+                  additionalProperties:               
+                    type: "object"
+                    properties:
+                      ui:
                         type: "object"
                         properties:
-                          monitoredObjectTypes:
+                          metricGroups:
                             type: "array"
-                            items:
+                            items: 
+                                type: "string"
+                      metricMap:
+                        type: "object"
+                        additionalProperties:
+                          type: "object"
+                          properties:
+                            monitoredObjectTypes:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  key:
+                                    type: "string"
+                                  rawMetricId:
+                                    type: "string"
+                                  units:
+                                    type: "array"
+                                    items:
+                                      type: "string"
+                                  directions:
+                                    type: "array"
+                                    items:
+                                      type: "string"
+                            ui:
                               type: "object"
                               properties:
-                                key:
+                                group:
                                   type: "string"
-                                rawMetricId:
+                                position:
                                   type: "string"
-                                units:
-                                  type: "array"
-                                  items:
-                                    type: "string"
-                                directions:
-                                  type: "array"
-                                  items:
-                                    type: "string"
-                          ui:
-                            type: "object"
-                            properties:
-                              group:
-                                type: "string"
-                              position:
-                                type: "string"
 
-
-  ValidTypes:
+  ValidTypesListResponse:
     type: "object"
     description: "Provides known values mappings for Datahub"
     properties:
       data:
-        type: "object"
-        properties:
-          type: 
-            type: "string"
-            enum: [validTypes]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            required: ["monitoredObjectTypes", "monitoredObjectDeviceTypes"]
-            properties:
-              monitoredObjectTypes:
-                type: "object"
-                description: "Lists the known Monitored Object Types as well as known alias values for Monitored Object types"
-                additionalProperties:
-                  type: "string"
-              monitoredObjectDeviceTypes:
-                type: "object"
-                description: "Lists the known Monitored Object Device Types as well as known alias values for Monitored Object Device types"
-                additionalProperties:
-                  type: "string"
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            type: 
+              type: "string"
+              enum: [validTypes]
+            id:
+              type: "string"
+            attributes:
+              type: "object"
+              required: ["monitoredObjectTypes", "monitoredObjectDeviceTypes"]
+              properties:
+                monitoredObjectTypes:
+                  type: "object"
+                  description: "Lists the known Monitored Object Types as well as known alias values for Monitored Object types"
+                  additionalProperties:
+                    type: "string"
+                monitoredObjectDeviceTypes:
+                  type: "object"
+                  description: "Lists the known Monitored Object Device Types as well as known alias values for Monitored Object Device types"
+                  additionalProperties:
+                    type: "string"
 
   TenantSummaryResponse:
     type: "object"

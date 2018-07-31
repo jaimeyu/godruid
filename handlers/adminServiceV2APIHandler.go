@@ -505,7 +505,7 @@ func doGetTenantSummaryByAliasV2(adminDB datastore.AdminServiceDatastore, params
 	return startTime, http.StatusOK, &summary, nil
 }
 
-func doGetIngestionDictionaryV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, params admin_provisioning_service_v2.GetIngestionDictionaryV2Params) (time.Time, int, *swagmodels.IngestionDictionary, error) {
+func doGetIngestionDictionaryV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, params admin_provisioning_service_v2.GetIngestionDictionaryV2Params) (time.Time, int, *swagmodels.IngestionDictionaryListResponse, error) {
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s", admmod.IngestionDictionaryStr), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
@@ -518,8 +518,10 @@ func doGetIngestionDictionaryV2(allowedRoles []string, adminDB datastore.AdminSe
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", admmod.IngestionDictionaryStr, err.Error())
 	}
 
-	converted := swagmodels.IngestionDictionary{}
-	err = convertToJsonapiObject(result, &converted)
+	resultArray := []*admmod.IngestionDictionary{result}
+
+	converted := swagmodels.IngestionDictionaryListResponse{}
+	err = convertToJsonapiObject(resultArray, &converted)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", admmod.IngestionDictionaryStr, err.Error())
 	}
@@ -530,7 +532,7 @@ func doGetIngestionDictionaryV2(allowedRoles []string, adminDB datastore.AdminSe
 
 }
 
-func doGetValidTypesV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, params admin_provisioning_service_v2.GetValidTypesV2Params) (time.Time, int, *swagmodels.ValidTypes, error) {
+func doGetValidTypesV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, params admin_provisioning_service_v2.GetValidTypesV2Params) (time.Time, int, *swagmodels.ValidTypesListResponse, error) {
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s", admmod.ValidTypesStr), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
@@ -539,9 +541,10 @@ func doGetValidTypesV2(allowedRoles []string, adminDB datastore.AdminServiceData
 
 	// Issue request to DAO Layer
 	result := getValidTypes()
+	resultArray := []*admmod.ValidTypes{result}
 
-	converted := swagmodels.ValidTypes{}
-	err := convertToJsonapiObject(result, &converted)
+	converted := swagmodels.ValidTypesListResponse{}
+	err := convertToJsonapiObject(resultArray, &converted)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", admmod.ValidTypesStr, err.Error())
 	}

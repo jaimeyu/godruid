@@ -25,7 +25,7 @@ type GetIngestionDictionaryV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.IngestionDictionary `json:"body,omitempty"`
+	Payload *swagmodels.IngestionDictionaryListResponse `json:"body,omitempty"`
 }
 
 // NewGetIngestionDictionaryV2OK creates GetIngestionDictionaryV2OK with default headers values
@@ -35,13 +35,13 @@ func NewGetIngestionDictionaryV2OK() *GetIngestionDictionaryV2OK {
 }
 
 // WithPayload adds the payload to the get ingestion dictionary v2 o k response
-func (o *GetIngestionDictionaryV2OK) WithPayload(payload *swagmodels.IngestionDictionary) *GetIngestionDictionaryV2OK {
+func (o *GetIngestionDictionaryV2OK) WithPayload(payload *swagmodels.IngestionDictionaryListResponse) *GetIngestionDictionaryV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get ingestion dictionary v2 o k response
-func (o *GetIngestionDictionaryV2OK) SetPayload(payload *swagmodels.IngestionDictionary) {
+func (o *GetIngestionDictionaryV2OK) SetPayload(payload *swagmodels.IngestionDictionaryListResponse) {
 	o.Payload = payload
 }
 

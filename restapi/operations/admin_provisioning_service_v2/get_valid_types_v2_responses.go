@@ -25,7 +25,7 @@ type GetValidTypesV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.ValidTypes `json:"body,omitempty"`
+	Payload *swagmodels.ValidTypesListResponse `json:"body,omitempty"`
 }
 
 // NewGetValidTypesV2OK creates GetValidTypesV2OK with default headers values
@@ -35,13 +35,13 @@ func NewGetValidTypesV2OK() *GetValidTypesV2OK {
 }
 
 // WithPayload adds the payload to the get valid types v2 o k response
-func (o *GetValidTypesV2OK) WithPayload(payload *swagmodels.ValidTypes) *GetValidTypesV2OK {
+func (o *GetValidTypesV2OK) WithPayload(payload *swagmodels.ValidTypesListResponse) *GetValidTypesV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get valid types v2 o k response
-func (o *GetValidTypesV2OK) SetPayload(payload *swagmodels.ValidTypes) {
+func (o *GetValidTypesV2OK) SetPayload(payload *swagmodels.ValidTypesListResponse) {
 	o.Payload = payload
 }
 

@@ -203,15 +203,19 @@ func (m *ThresholdProfileUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model ThresholdProfileUpdateRequestDataAttributes
 type ThresholdProfileUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
 	// name
 	Name string `json:"name,omitempty"`
 
-	// thresholds
-	Thresholds *ThresholdsObject `json:"thresholds,omitempty"`
+	// A collection of objects that describe Thresholds which when crossed will trigger events in Datahub
+	ThresholdList ThresholdList `json:"thresholdList"`
+
+	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead
+	// Required: true
+	Thresholds *ThresholdsObject `json:"thresholds"`
 }
 
 // Validate validates this threshold profile update request data attributes
@@ -219,6 +223,10 @@ func (m *ThresholdProfileUpdateRequestDataAttributes) Validate(formats strfmt.Re
 	var res []error
 
 	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateThresholdList(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -241,10 +249,26 @@ func (m *ThresholdProfileUpdateRequestDataAttributes) validateRev(formats strfmt
 	return nil
 }
 
+func (m *ThresholdProfileUpdateRequestDataAttributes) validateThresholdList(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ThresholdList) { // not required
+		return nil
+	}
+
+	if err := m.ThresholdList.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("data" + "." + "attributes" + "." + "thresholdList")
+		}
+		return err
+	}
+
+	return nil
+}
+
 func (m *ThresholdProfileUpdateRequestDataAttributes) validateThresholds(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Thresholds) { // not required
-		return nil
+	if err := validate.Required("data"+"."+"attributes"+"."+"thresholds", "body", m.Thresholds); err != nil {
+		return err
 	}
 
 	if m.Thresholds != nil {

@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// BulkMonitoredObjectCreateRequest Object used to create a new Monitored Object in Datahub
+// BulkMonitoredObjectCreateRequest Object used to create one or more Monitored Object in Datahub
 // swagger:model BulkMonitoredObjectCreateRequest
 type BulkMonitoredObjectCreateRequest struct {
 

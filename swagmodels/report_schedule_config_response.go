@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ReportScheduleConfigResponse report schedule config response
+// ReportScheduleConfigResponse A single object Report Schedule Configuration response from Datahub
 // swagger:model ReportScheduleConfigResponse
 type ReportScheduleConfigResponse struct {
 

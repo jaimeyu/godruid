@@ -53,7 +53,8 @@ func TestThresholdProfileCRUDV2(t *testing.T) {
 	fetched := handlers.HandleGetThresholdProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetThresholdProfileV2Params{ThrPrfID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "GET")})
 	castedFetch := fetched.(*tenant_provisioning_service_v2.GetThresholdProfileV2OK)
 	assert.NotNil(t, castedFetch)
-	assert.Equal(t, castedCreate.Payload.Data, castedFetch.Payload.Data)
+	assert.Equal(t, castedCreate.Payload.Data.Attributes.Thresholds, castedFetch.Payload.Data.Attributes.Thresholds)
+	assert.NotEmpty(t, castedFetch.Payload.Data.Attributes.ThresholdList)
 
 	// Make sure there are now multiple records
 	fetchList := handlers.HandleGetAllThresholdProfilesV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params{HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "GET")})

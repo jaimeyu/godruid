@@ -1,6 +1,7 @@
   DashboardCreateRequest:
     type: "object"
     required: ["data"]
+    description: "Object used to create a Dashboard in Datahub"
     properties:
       data:
         type: "object"
@@ -19,18 +20,23 @@
             properties:
               name:
                 type: "string"
+                description: "User provided identifier for a Dashboard"
               category: 
                 type: "string"
+                description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
               metadataFilters:
                 type: "array"
                 items:
                   $ref: '#/definitions/MetadataFilter'
+                description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
               cardPositions:
+                description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
                 $ref: '#/definitions/CardPositions'
               
   DashboardUpdateRequest:
     type: "object"
     required: ["data"]
+    description: "Object used to update a Dashboard in Datahub"
     properties:
       data:
         type: "object"
@@ -49,26 +55,33 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
+                description: "User provided identifier for a Dashboard"
               category: 
                 type: "string"
+                description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
               metadataFilters:
                 type: "array"
                 items:
                   $ref: '#/definitions/MetadataFilter'
+                description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
               cardPositions:
+                description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
                 $ref: '#/definitions/CardPositions'
   
   DashboardResponse:
     type: "object"
     required: ["data"]
+    description: "A single object Dashboard response from Datahub"
     properties:
       data:
         $ref: '#/definitions/Dashboard'
   DashboardListResponse:
     type: "object"
     required: ["data"]
+    description: "Response for one ore more Dashboards from Datahub"
     properties:
       data:
         type: "array"
@@ -78,6 +91,7 @@
   Dashboard:
     type: "object"
     required: ["type", "id", "attributes"]
+    description: "Represents a Dashboard used to display metric information on the Datahub UI"
     properties:
       type: 
         type: "string"
@@ -92,35 +106,46 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
+            description: "Name used to identify this type of record in Datahub"
             type: "string"
           tenantId:
+            description: "Unique identifier of a Tenant in Datahub"
             type: "string"
           name:
             type: "string"
+            description: "User provided identifier for a Dashboard"
           category: 
             type: "string"
+            description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
           metadataFilters:
+            description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
             type: "array"
             items:
               $ref: '#/definitions/MetadataFilter'
           cardPositions:
+            description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
             $ref: '#/definitions/CardPositions'
           createdTimestamp:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   CardPositions:
     type: "object"
+    description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
     additionalProperties:
       type: "object"
       required: ["position"]
       properties:
         position: 
           type: "integer"
+          description: "The placement order of this card on the Dashboard"
         dimensions:
           type: "object"
+          description: "The amount of columns and rows this card will occupy"
           properties:
             columns: 
               type: "integer"
@@ -129,6 +154,7 @@
 
   MetadataFilter:
     type: "object"
+    description: "Used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
     properties:
       key:
         type: "string"
@@ -141,12 +167,15 @@
     type: "object"
     properties:
       cards:
+        description: "References the unique identifiers of the Cards that are used on this Dashboard in the Datahub UI"
         $ref: '#/definitions/JsonApiRelationship'
       thresholdProfile:
+        description: "References the unique identifier of the Threshold Profile used to generate Threshold Crossing Events on this Dashboard in the Datahub UI"
         $ref: '#/definitions/JsonApiSingleRelationship'
 
   CardCreateRequest:
     type: "object"
+    description: "Object used to create a Card in Datahub"
     required: ["data"]
     properties:
       data:
@@ -178,6 +207,7 @@
               
   CardUpdateRequest:
     type: "object"
+    description: "Object used to update a Card in Datahub"
     required: ["data"]
     properties:
       data:
@@ -195,6 +225,7 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               description: 
@@ -211,12 +242,14 @@
   
   CardResponse:
     type: "object"
+    description: "A single object Card response from Datahub"
     required: ["data"]
     properties:
       data:
         $ref: '#/definitions/Card'
   CardListResponse:
     type: "object"
+    description: "Response for one ore more Cards from Datahub"
     required: ["data"]
     properties:
       data:
@@ -226,6 +259,7 @@
   
   Card:
     type: "object"
+    description: "Models a single Card used by Dashboards in the Datahub UI"
     required: ["type", "id", "attributes"]
     properties:
       type: 
@@ -239,35 +273,46 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of a Tenant in Datahub"
           name:
             type: "string"
+            description: "User provided identifier for a Card"
           description: 
             type: "string"
+            description: "User provided description for a Card"
           state: 
             type: "string"
             enum: [active, pending]
           visualization:
             $ref: '#/definitions/CardVisualization'
+            description: "Object which contains the components to display on this Card"
           metrics:
             type: "array"
+            description: "A list of the data which will be displayed in the Card visualization"
             items:
               $ref: '#/definitions/CardMetric'
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   CardVisualization:
     type: "object"
     properties:
       key:
         type: "string"
+        description: "Label referencing the type of visualization to be displayed"
       label:
         type: "string"
+        description: "User provided identifier for a Visualization"
       category:
         type: "string"
       icon:

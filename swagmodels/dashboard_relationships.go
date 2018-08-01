@@ -16,10 +16,10 @@ import (
 // swagger:model DashboardRelationships
 type DashboardRelationships struct {
 
-	// cards
+	// References the unique identifiers of the Cards that are used on this Dashboard in the Datahub UI
 	Cards *JSONAPIRelationship `json:"cards,omitempty"`
 
-	// threshold profile
+	// References the unique identifier of the Threshold Profile used to generate Threshold Crossing Events on this Dashboard in the Datahub UI
 	ThresholdProfile *JSONAPISingleRelationship `json:"thresholdProfile,omitempty"`
 }
 

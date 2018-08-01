@@ -1,8 +1,24 @@
 * Fix - Adding ability to search monitored object name for partial matches based on underscore delimited words (this is how metadata was insert inserted into monitored objects)
 ## Current Release 
+### 0.208.0 
+**Release Date:** Tue Aug 28 00:34:21 UTC 2018     
+## Previous Releases 
+* Fix - Re-order timeseries data for raw query in chronological order
+### 0.207.0 
+**Release Date:** Sat Aug 25 11:23:50 UTC 2018     
+* Fix - Resolve inconsistency issue for raw query when more than a single monitored object is requested
+### 0.206.0 
+**Release Date:** Fri Aug 24 19:55:36 UTC 2018     
+### 0.205.0 
+**Release Date:** Thu Aug 23 20:12:31 UTC 2018     
+* Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
+### 0.204.0 
+**Release Date:** Thu Aug 23 15:32:47 UTC 2018     
+* Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
+### 0.203.0 
+**Release Date:** Tue Aug 21 18:21:04 UTC 2018     
 ### 0.202.0 
 **Release Date:** Tue Aug 21 17:29:36 UTC 2018     
-## Previous Releases 
 * Fix - Issue where couchdb views were not getting generated anymore.
 ### 0.201.0 
 **Release Date:** Mon Aug 20 16:24:35 UTC 2018     

@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CardResponse card response
+// CardResponse A single object Card response from Datahub
 // swagger:model CardResponse
 type CardResponse struct {
 

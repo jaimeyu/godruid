@@ -17,6 +17,7 @@
 
   MonitoredObjectListResponse:
     type: "object"
+    description: "Monitoerd Object response including one or more values"
     required: ["data"]
     properties:
       links:
@@ -30,6 +31,7 @@
 
   MonitoredObjectResponse:
     type: "object"
+    description: "A single object Monitored Object response from Datahub"
     required: ["data"]
     properties:
       links:
@@ -54,29 +56,40 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Common name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             pattern: '^[a-z_]+$'
             additionalProperties:
               type: "string"
@@ -86,8 +99,10 @@
               "wgs87_y": "-74.2130912"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   BulkOperationResponseV2:
     type: "object"
@@ -122,7 +137,7 @@
   BulkMonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
-    description: "Object used to create a new Monitored Object in Datahub"
+    description: "Object used to create one or more Monitored Object in Datahub"
     properties:
       data:
         type: "array"
@@ -144,23 +159,31 @@
         properties:
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             additionalProperties:
               type: "string"
             example:
@@ -170,6 +193,7 @@
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
+    description: "Object used to update one or more Monitored Objects in Datahub"
     required: ["data"]
     properties:
       data:
@@ -221,27 +245,37 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             additionalProperties:
               type: "string"
             example:

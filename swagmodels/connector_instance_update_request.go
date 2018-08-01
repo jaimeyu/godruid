@@ -203,17 +203,17 @@ func (m *ConnectorInstanceUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model ConnectorInstanceUpdateRequestDataAttributes
 type ConnectorInstanceUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	CreatedTimestamp int64 `json:"createdTimestamp,omitempty"`
 
 	// hostname
 	Hostname string `json:"hostname,omitempty"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
 
 	// status

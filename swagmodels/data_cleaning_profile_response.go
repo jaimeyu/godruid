@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningProfileResponse data cleaning profile response
+// DataCleaningProfileResponse A single object Data Cleaning Profile response from Datahub
 // swagger:model DataCleaningProfileResponse
 type DataCleaningProfileResponse struct {
 

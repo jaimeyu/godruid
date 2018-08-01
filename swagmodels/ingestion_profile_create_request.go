@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// IngestionProfileCreateRequest ingestion profile create request
+// IngestionProfileCreateRequest Object used to create an Ingestion Profile in Datahub
 // swagger:model IngestionProfileCreateRequest
 type IngestionProfileCreateRequest struct {
 
@@ -189,14 +189,21 @@ func (m *IngestionProfileCreateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model IngestionProfileCreateRequestDataAttributes
 type IngestionProfileCreateRequestDataAttributes struct {
 
-	// metrics
+	// metric list
+	MetricList IngestionProfileMetricList `json:"metricList"`
+
+	// Metrics will be deprecated in the next API version. Please use the 'metricList' property instead
 	// Required: true
-	Metrics *IngestionProfileCreateRequestDataAttributesMetrics `json:"metrics"`
+	Metrics *IngestionProfileMetrics `json:"metrics"`
 }
 
 // Validate validates this ingestion profile create request data attributes
 func (m *IngestionProfileCreateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateMetricList(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateMetrics(formats); err != nil {
 		res = append(res, err)
@@ -205,6 +212,22 @@ func (m *IngestionProfileCreateRequestDataAttributes) Validate(formats strfmt.Re
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *IngestionProfileCreateRequestDataAttributes) validateMetricList(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricList) { // not required
+		return nil
+	}
+
+	if err := m.MetricList.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("data" + "." + "attributes" + "." + "metricList")
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -237,161 +260,6 @@ func (m *IngestionProfileCreateRequestDataAttributes) MarshalBinary() ([]byte, e
 // UnmarshalBinary interface implementation
 func (m *IngestionProfileCreateRequestDataAttributes) UnmarshalBinary(b []byte) error {
 	var res IngestionProfileCreateRequestDataAttributes
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// IngestionProfileCreateRequestDataAttributesMetrics ingestion profile create request data attributes metrics
-// swagger:model IngestionProfileCreateRequestDataAttributesMetrics
-type IngestionProfileCreateRequestDataAttributesMetrics struct {
-
-	// vendor map
-	VendorMap map[string]IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon `json:"vendorMap,omitempty"`
-}
-
-// Validate validates this ingestion profile create request data attributes metrics
-func (m *IngestionProfileCreateRequestDataAttributesMetrics) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateVendorMap(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *IngestionProfileCreateRequestDataAttributesMetrics) validateVendorMap(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.VendorMap) { // not required
-		return nil
-	}
-
-	for k := range m.VendorMap {
-
-		if swag.IsZero(m.VendorMap[k]) { // not required
-			continue
-		}
-		if val, ok := m.VendorMap[k]; ok {
-			if err := val.Validate(formats); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetrics) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetrics) UnmarshalBinary(b []byte) error {
-	var res IngestionProfileCreateRequestDataAttributesMetrics
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon ingestion profile create request data attributes metrics vendor map anon
-// swagger:model IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon
-type IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon struct {
-
-	// monitored object type map
-	MonitoredObjectTypeMap map[string]IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon `json:"monitoredObjectTypeMap,omitempty"`
-}
-
-// Validate validates this ingestion profile create request data attributes metrics vendor map anon
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateMonitoredObjectTypeMap(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon) validateMonitoredObjectTypeMap(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.MonitoredObjectTypeMap) { // not required
-		return nil
-	}
-
-	for k := range m.MonitoredObjectTypeMap {
-
-		if swag.IsZero(m.MonitoredObjectTypeMap[k]) { // not required
-			continue
-		}
-		if val, ok := m.MonitoredObjectTypeMap[k]; ok {
-			if err := val.Validate(formats); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon) UnmarshalBinary(b []byte) error {
-	var res IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnon
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon ingestion profile create request data attributes metrics vendor map anon monitored object type map anon
-// swagger:model IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon
-type IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon struct {
-
-	// metric map
-	MetricMap map[string]bool `json:"metricMap,omitempty"`
-}
-
-// Validate validates this ingestion profile create request data attributes metrics vendor map anon monitored object type map anon
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon) UnmarshalBinary(b []byte) error {
-	var res IngestionProfileCreateRequestDataAttributesMetricsVendorMapAnonMonitoredObjectTypeMapAnon
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

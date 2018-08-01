@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DashboardResponse dashboard response
+// DashboardResponse A single object Dashboard response from Datahub
 // swagger:model DashboardResponse
 type DashboardResponse struct {
 

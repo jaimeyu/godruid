@@ -19,7 +19,11 @@
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
+                description: "A collection of objects that describe Thresholds which when crossed will trigger events in Datahub"
                     
   ThresholdProfileUpdateRequest:
     type: "object"
@@ -37,17 +41,23 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev"]
+            required: ["_rev", "thresholds"]
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
+                description: "A collection of objects that describe Thresholds which when crossed will trigger events in Datahub"
   
   ThresholdProfileListResponse:
     type: "object"
+    description: "Threshold Profile response including one or more values"
     required: ["data"]
     properties:
       data:
@@ -57,6 +67,7 @@
 
   ThresholdProfileResponse:
     type: "object"
+    description: "A single object Threshold Profileresponse from Datahub"
     required: ["data"]
     properties:
       data:
@@ -77,20 +88,58 @@
         properties:
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           _id:
             type: "string"
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           name:
             type: "string"
+            description: "Identifying name of a Threshold Profile"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
           thresholds:
+            description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
             $ref: '#/definitions/ThresholdsObject'
+          thresholdList:
+            $ref: '#/definitions/ThresholdList'
+
+  ThresholdList:
+    description: "Contains an array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+          description: "The name of the Vendor from which this Metric originates"
+        monitoredObjectType:
+          type: "string"
+          description: "The name of the type of Monitored Object for which this Metric is applicable"
+        metric:
+          type: "string"
+          description: "The name of the Metric"
+        direction:
+          type: "string"
+          description: "Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)"
+        enabled:
+          type: "string"
+          description: "When true, Threshold Crossing for this Metric will be reported. When false, Threshold Crossings for this Metric are not reported."
+        events:
+          description: "A collection of objects that describe the properties of a Threshold for a Metric"
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "string"
 
   ThresholdsObject:
     type: "object"

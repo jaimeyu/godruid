@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// BulkMonitoredObjectUpdateRequest bulk monitored object update request
+// BulkMonitoredObjectUpdateRequest Object used to update one or more Monitored Objects in Datahub
 // swagger:model BulkMonitoredObjectUpdateRequest
 type BulkMonitoredObjectUpdateRequest struct {
 

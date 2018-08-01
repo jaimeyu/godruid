@@ -166,18 +166,27 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 }
 
 func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
-	res := gabs.New()
-	var hasData bool
-	for _, r := range rawMetrics {
 
-		obj := gabs.New()
-		var monObj string
-		for k, v := range r.Result {
+	// v1 response structure of monId->timeseriesArray->direction->metricset
+	responseMap := make(map[string][]map[string]interface{})
 
+	for _, timeseriesEntry := range rawMetrics {
+		seriesTimestamp := timeseriesEntry.Timestamp
+
+		for k, v := range timeseriesEntry.Result {
+
+			hasData := false
 			parts := strings.Split(k, ".")
-			monObj = parts[0]
+			monObj := parts[0]
 			direction := parts[1]
-			lastParts := parts[len(parts)-1]
+			metric := parts[len(parts)-1]
+
+			// Initialize an empty map if one does not exist for the current monitored object
+			// We do this at this point since we still want an empty array for the monitored object
+			// even if there are no non-infinity metrics
+			if _, ok := responseMap[monObj]; !ok {
+				responseMap[monObj] = make([]map[string]interface{}, 0)
+			}
 
 			switch v.(type) {
 			case float32:
@@ -187,30 +196,39 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 			default:
 				hasData = true
 			}
-			if !strings.Contains(lastParts, "temporary") && hasData {
-				obj.SetP(v, direction+"."+lastParts)
+			if !strings.Contains(metric, "temporary") && hasData {
+				timeseries := responseMap[monObj]
+
+				var moTimeMap map[string]interface{}
+				// Retrieve the latest entry in the timeseries array to see if we are now processing a
+				// new timeblock or adding to an existing one
+				if len(timeseries) != 0 && timeseries[len(timeseries)-1]["timestamp"] == seriesTimestamp {
+					// We know we are working with the latest entry in the timeseries array
+					moTimeMap = timeseries[len(timeseries)-1]
+				} else {
+					// We know we are working now with a new time block so create a new entry with the associated timestamp
+					moTimeMap = make(map[string]interface{})
+					moTimeMap["timestamp"] = seriesTimestamp
+					timeseries = append(timeseries, moTimeMap)
+				}
+
+				// If the map for the specified direction did not exist before then add it in
+				if _, ok := moTimeMap[direction]; !ok {
+					moTimeMap[direction] = make(map[string]interface{})
+				}
+
+				// Retrieve the map for the specified direction and set the appropriate metric value
+				moDirMap := moTimeMap[direction].(map[string]interface{})
+				moDirMap[metric] = v
+
+				// Finally set the whole timeseries for the monitored object
+				responseMap[monObj] = timeseries
 			}
 		}
-
-		if !res.ExistsP("result." + monObj) {
-			_, err := res.ArrayP("result." + monObj)
-			if err != nil {
-				return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
-			}
-		}
-
-		if hasData {
-			obj.SetP(r.Timestamp, "timestamp")
-			res.ArrayAppendP(obj.Data(), "result."+monObj)
-		}
-
 	}
 
-	dataContainer := map[string]interface{}{}
-	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
-		return nil, err
-	}
-	logger.Log.Debugf("Reformatted raw metrics data: %v", dataContainer)
+	dataContainer := map[string]interface{}{"result": responseMap}
+	logger.Log.Debugf("Reformatted raw metrics data: %v", responseMap)
 	return dataContainer, nil
 }
 

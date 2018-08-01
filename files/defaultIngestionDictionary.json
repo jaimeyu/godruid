@@ -12,8 +12,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -25,8 +24,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dmin",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -38,8 +36,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dmin",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -59,8 +56,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -72,8 +68,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -85,8 +80,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -106,8 +100,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -119,8 +112,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -132,8 +124,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -153,8 +144,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -166,8 +156,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dStdDev",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -179,8 +168,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dStdDev",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -200,8 +188,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -213,8 +200,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -234,8 +220,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -247,8 +232,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -268,8 +252,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -281,8 +264,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -302,8 +284,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -315,8 +296,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -336,8 +316,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -349,8 +328,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -370,8 +348,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -383,8 +360,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -404,8 +380,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -417,8 +392,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -438,8 +412,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -451,8 +424,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -464,8 +436,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -485,8 +456,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -498,8 +468,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dvmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -511,8 +480,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dvmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -532,8 +500,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -545,8 +512,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dvmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -558,8 +524,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dvmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -579,8 +544,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -592,8 +556,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -613,8 +576,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -626,8 +588,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -647,8 +608,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -660,8 +620,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -681,8 +640,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -694,8 +652,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -715,8 +672,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dvpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -728,8 +684,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dvpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -749,8 +704,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dvpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -762,8 +716,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dvpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -783,8 +736,7 @@
               "key": "twamp-sl",
               "rawMetricId": "dvpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -796,8 +748,7 @@
               "key": "twamp-sf",
               "rawMetricId": "dvpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -817,8 +768,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jmin",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -830,8 +780,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jmin",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -851,8 +800,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -864,8 +812,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jmax",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -885,8 +832,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -898,8 +844,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jmean",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -919,8 +864,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jpStdDev",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -932,8 +876,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jpStdDev",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -953,8 +896,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -966,8 +908,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -987,8 +928,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1000,8 +940,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1021,8 +960,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1034,8 +972,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1055,8 +992,7 @@
               "key": "twamp-sl",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1068,8 +1004,7 @@
               "key": "twamp-sf",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1089,8 +1024,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1102,8 +1036,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jpLo",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1123,8 +1056,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1136,8 +1068,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jpMi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1157,8 +1088,7 @@
               "key": "twamp-sl",
               "rawMetricId": "jpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1170,8 +1100,7 @@
               "key": "twamp-sf",
               "rawMetricId": "jpHi",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "0",
@@ -1191,8 +1120,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1204,8 +1132,7 @@
               "key": "twamp-sl",
               "rawMetricId": "lostpkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1217,8 +1144,7 @@
               "key": "twamp-sf",
               "rawMetricId": "lostpkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1282,8 +1208,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1295,8 +1220,7 @@
               "key": "twamp-sl",
               "rawMetricId": "misorderpkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1308,8 +1232,7 @@
               "key": "twamp-sf",
               "rawMetricId": "misorderpkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1329,8 +1252,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1342,8 +1264,7 @@
               "key": "twamp-sl",
               "rawMetricId": "duplicatepkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1355,8 +1276,7 @@
               "key": "twamp-sf",
               "rawMetricId": "duplicatepkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1376,8 +1296,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1389,8 +1308,7 @@
               "key": "twamp-sl",
               "rawMetricId": "toolatepkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1402,8 +1320,7 @@
               "key": "twamp-sf",
               "rawMetricId": "toolatepkts",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1467,8 +1384,7 @@
               "key": "twamp-pe",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1480,8 +1396,7 @@
               "key": "twamp-sl",
               "rawMetricId": "lostperiods",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1493,8 +1408,7 @@
               "key": "twamp-sf",
               "rawMetricId": "lostperiods",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "0",
@@ -1991,7 +1905,11 @@
       },
       "ui": {
         "metricGroups": [
-          "delay", "delayVar", "jitter", "packets", "unknown"
+          "delay",
+          "delayVar",
+          "jitter",
+          "packets",
+          "unknown"
         ]
       }
     },
@@ -2089,7 +2007,7 @@
         }
       },
       "ui": {
-        "metricGroups":[
+        "metricGroups": [
           "unknown"
         ]
       }
@@ -2106,8 +2024,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2126,8 +2043,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2146,8 +2062,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2166,8 +2081,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2186,8 +2100,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2206,8 +2119,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "\u03bcs",
-                "pct"
+                "\u03bcs"
               ],
               "directions": [
                 "1",
@@ -2226,8 +2138,7 @@
               "key": "paa",
               "rawMetricId": "",
               "units": [
-                "value",
-                "pct"
+                "value"
               ],
               "directions": [
                 "1"
@@ -2256,7 +2167,11 @@
       },
       "ui": {
         "metricGroups": [
-          "delay", "delayVar", "jitter", "packets", "unknown"
+          "delay",
+          "delayVar",
+          "jitter",
+          "packets",
+          "unknown"
         ]
       }
     }

@@ -5563,7 +5563,59 @@ definitions:
               type: "object"
               required: ["metrics"]
               properties:
+                metricGroups:
+                  description: "This property will be deprecated in the next API version."
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      vendor:
+                        type: "string"
+                      groups:
+                        type: "array"
+                        items:
+                            type: "string"
+                metricList:
+                  description: "Provides an array of objects that describe the possible metric combinations that may be retained by Datahub"
+                  type: "array"
+                  items:
+                    type: "object"
+                    description: "Describes a single Metric available in Datahub"
+                    properties:
+                      vendor:
+                        description: "The name of the Vendor from which this Metric originates"
+                        type: "string"
+                      monitoredObjectType:
+                        description: "The name of the type of Monitored Object for which this Metric is applicable"
+                        type: "string"
+                      metric:
+                        description: "The name of the Metric"
+                        type: "string"
+                      rawMetricId:
+                        description: "The name of the Metric as it is reported during measurments"
+                        type: "string"
+                      dimensions:
+                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+                        type: "array"
+                        items:
+                          type: "object"
+                          additionalProperties:
+                            type: "array"
+                            items:
+                              type: "string"
+                      unit:
+                        description: "The unit of measurement used when capturing the value for this Metric"
+                        type: "string"
+                      ui:
+                        type: "object"
+                        description: "This property will be deprecated in the next API version."
+                        properties:
+                          group:
+                            type: "string"
+                          position:
+                            type: "string"
                 metrics:
+                  description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
                   type: "object"
                   additionalProperties:               
                     type: "object"
@@ -5718,6 +5770,7 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               url: 
@@ -5769,6 +5822,7 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
           tenantId:
@@ -5795,8 +5849,10 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceCreateRequest:
     type: "object"
@@ -5839,14 +5895,17 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               status:
                 type: "string"
               hostname: 
                 type: "string"
               createdTimestamp:
                 type: "integer"
+                description: "Time since epoch at which this object was instantiated."
               lastModifiedTimestamp:
                 type: "integer"
+                description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceResponse:
     type: "object"
@@ -5879,6 +5938,7 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
           tenantId:
@@ -5889,11 +5949,14 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
   DashboardCreateRequest:
     type: "object"
     required: ["data"]
+    description: "Object used to create a Dashboard in Datahub"
     properties:
       data:
         type: "object"
@@ -5912,18 +5975,23 @@ definitions:
             properties:
               name:
                 type: "string"
+                description: "User provided identifier for a Dashboard"
               category: 
                 type: "string"
+                description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
               metadataFilters:
                 type: "array"
                 items:
                   $ref: '#/definitions/MetadataFilter'
+                description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
               cardPositions:
+                description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
                 $ref: '#/definitions/CardPositions'
               
   DashboardUpdateRequest:
     type: "object"
     required: ["data"]
+    description: "Object used to update a Dashboard in Datahub"
     properties:
       data:
         type: "object"
@@ -5942,26 +6010,33 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
+                description: "User provided identifier for a Dashboard"
               category: 
                 type: "string"
+                description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
               metadataFilters:
                 type: "array"
                 items:
                   $ref: '#/definitions/MetadataFilter'
+                description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
               cardPositions:
+                description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
                 $ref: '#/definitions/CardPositions'
   
   DashboardResponse:
     type: "object"
     required: ["data"]
+    description: "A single object Dashboard response from Datahub"
     properties:
       data:
         $ref: '#/definitions/Dashboard'
   DashboardListResponse:
     type: "object"
     required: ["data"]
+    description: "Response for one ore more Dashboards from Datahub"
     properties:
       data:
         type: "array"
@@ -5971,6 +6046,7 @@ definitions:
   Dashboard:
     type: "object"
     required: ["type", "id", "attributes"]
+    description: "Represents a Dashboard used to display metric information on the Datahub UI"
     properties:
       type: 
         type: "string"
@@ -5985,35 +6061,46 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
+            description: "Name used to identify this type of record in Datahub"
             type: "string"
           tenantId:
+            description: "Unique identifier of a Tenant in Datahub"
             type: "string"
           name:
             type: "string"
+            description: "User provided identifier for a Dashboard"
           category: 
             type: "string"
+            description: "Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub"
           metadataFilters:
+            description: "List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
             type: "array"
             items:
               $ref: '#/definitions/MetadataFilter'
           cardPositions:
+            description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
             $ref: '#/definitions/CardPositions'
           createdTimestamp:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   CardPositions:
     type: "object"
+    description: "Describes the locations of the Cards on the Dashboard in the Datahub UI"
     additionalProperties:
       type: "object"
       required: ["position"]
       properties:
         position: 
           type: "integer"
+          description: "The placement order of this card on the Dashboard"
         dimensions:
           type: "object"
+          description: "The amount of columns and rows this card will occupy"
           properties:
             columns: 
               type: "integer"
@@ -6022,6 +6109,7 @@ definitions:
 
   MetadataFilter:
     type: "object"
+    description: "Used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard"
     properties:
       key:
         type: "string"
@@ -6034,12 +6122,15 @@ definitions:
     type: "object"
     properties:
       cards:
+        description: "References the unique identifiers of the Cards that are used on this Dashboard in the Datahub UI"
         $ref: '#/definitions/JsonApiRelationship'
       thresholdProfile:
+        description: "References the unique identifier of the Threshold Profile used to generate Threshold Crossing Events on this Dashboard in the Datahub UI"
         $ref: '#/definitions/JsonApiSingleRelationship'
 
   CardCreateRequest:
     type: "object"
+    description: "Object used to create a Card in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6071,6 +6162,7 @@ definitions:
               
   CardUpdateRequest:
     type: "object"
+    description: "Object used to update a Card in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6088,6 +6180,7 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               description: 
@@ -6104,12 +6197,14 @@ definitions:
   
   CardResponse:
     type: "object"
+    description: "A single object Card response from Datahub"
     required: ["data"]
     properties:
       data:
         $ref: '#/definitions/Card'
   CardListResponse:
     type: "object"
+    description: "Response for one ore more Cards from Datahub"
     required: ["data"]
     properties:
       data:
@@ -6119,6 +6214,7 @@ definitions:
   
   Card:
     type: "object"
+    description: "Models a single Card used by Dashboards in the Datahub UI"
     required: ["type", "id", "attributes"]
     properties:
       type: 
@@ -6132,35 +6228,46 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of a Tenant in Datahub"
           name:
             type: "string"
+            description: "User provided identifier for a Card"
           description: 
             type: "string"
+            description: "User provided description for a Card"
           state: 
             type: "string"
             enum: [active, pending]
           visualization:
             $ref: '#/definitions/CardVisualization'
+            description: "Object which contains the components to display on this Card"
           metrics:
             type: "array"
+            description: "A list of the data which will be displayed in the Card visualization"
             items:
               $ref: '#/definitions/CardMetric'
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   CardVisualization:
     type: "object"
     properties:
       key:
         type: "string"
+        description: "Label referencing the type of visualization to be displayed"
       label:
         type: "string"
+        description: "User provided identifier for a Visualization"
       category:
         type: "string"
       icon:
@@ -6216,6 +6323,7 @@ definitions:
               type: "number"
   DataCleaningProfileCreateRequest:
     type: "object"
+    description: "Object used to create a Data Cleaning Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6240,6 +6348,7 @@ definitions:
 
   DataCleaningProfileUpdateRequest:
     type: "object"
+    description: "Object used to update a Data Cleaning Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6267,6 +6376,7 @@ definitions:
 
   DataCleaningRule:
     type: "object"
+    description: "Provides the logic used to determine when data should be ommitted from queries"
     required: ["metricVendor","metricLabel","triggerCondition","clearCondition"]
     properties:
       metricVendor:
@@ -6305,6 +6415,7 @@ definitions:
 
   DataCleaningProfileResponse:
     type: "object"
+    description: "A single object Data Cleaning Profile response from Datahub"
     required: ["data"]
     properties:
       data:
@@ -6312,6 +6423,7 @@ definitions:
   
   DataCleaningProfileListResponse:
     type: "object"
+    description: "Response for one ore more Data Cleaning Profiles from Datahub"
     required: ["data"]
     properties:
       data:
@@ -6351,6 +6463,7 @@ definitions:
             description: "Time since epoch at which this object was last altered."
   IngestionProfileCreateRequest:
     type: "object"
+    description: "Object used to create an Ingestion Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6367,25 +6480,14 @@ definitions:
             required: ["metrics"]
             properties:
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
                     
   IngestionProfileUpdateRequest:
     type: "object"
+    description: "Object used to update an Ingestion Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6403,27 +6505,18 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                description: "A list of objects that allow customization on which Metrics will be available to query from Datahub"
+                $ref: '#/definitions/IngestionProfileMetricList'
             
              
   IngestionProfileListResponse:
     type: "object"
+    description: "Ingestion Profile response including one or more values"
     required: ["data"]
     properties:
       data:
@@ -6433,6 +6526,7 @@ definitions:
 
   IngestionProfileResponse:
     type: "object"
+    description: "A single object Ingestion Profile response from Datahub"
     required: ["data"]
     properties:
       data:
@@ -6453,33 +6547,74 @@ definitions:
         properties:
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           _id:
             type: "string"
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
+            description: "Name used to identify this type of record in Datahub"
             type: "string"
           metrics:
-            type: "object"
-            properties:
-              vendorMap:
-                type: "object"
-                additionalProperties:
-                  type: "object"
-                  properties:
-                    monitoredObjectTypeMap:
-                      type: "object"
-                      additionalProperties:
-                        type: "object"
-                        properties:
-                          metricMap:
-                            type: "object"
-                            additionalProperties:
-                              type: "boolean"
+            description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+            $ref: '#/definitions/IngestionProfileMetrics'
+          metricList:
+            description: "A collection of Metric descriptors that determine which metrics will be recorded by Datahub"
+            $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
+
+  IngestionProfileMetrics:
+    type: "object"
+    description: "This object will be deprecated in a future version of the Datahub API"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "boolean"
+
+  IngestionProfileMetricList:
+    description: "Provides an array of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          description: "The name of the Vendor from which this Metric originates"
+          type: "string"
+        monitoredObjectType:
+          description: "The name of the type of Monitored Object for which this Metric is applicable"
+          type: "string"
+        metric:
+          type: "string"
+          description: "The name of the Metric"
+        enabled:
+          description: "When true, this metric will be recorded by Datahub. When false, this metric is ommitted."
+          type: "boolean"
+        dimensions:
+          type: "array"
+          description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"
   MonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
@@ -6499,6 +6634,7 @@ definitions:
 
   MonitoredObjectListResponse:
     type: "object"
+    description: "Monitoerd Object response including one or more values"
     required: ["data"]
     properties:
       links:
@@ -6512,6 +6648,7 @@ definitions:
 
   MonitoredObjectResponse:
     type: "object"
+    description: "A single object Monitored Object response from Datahub"
     required: ["data"]
     properties:
       links:
@@ -6536,29 +6673,40 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Common name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             pattern: '^[a-z_]+$'
             additionalProperties:
               type: "string"
@@ -6568,8 +6716,10 @@ definitions:
               "wgs87_y": "-74.2130912"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   BulkOperationResponseV2:
     type: "object"
@@ -6604,7 +6754,7 @@ definitions:
   BulkMonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
-    description: "Object used to create a new Monitored Object in Datahub"
+    description: "Object used to create one or more Monitored Object in Datahub"
     properties:
       data:
         type: "array"
@@ -6626,23 +6776,31 @@ definitions:
         properties:
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             additionalProperties:
               type: "string"
             example:
@@ -6652,6 +6810,7 @@ definitions:
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
+    description: "Object used to update one or more Monitored Objects in Datahub"
     required: ["data"]
     properties:
       data:
@@ -6703,27 +6862,37 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           objectId:
             type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
           actuatorName: 
             type: "string"
+            description: "Name of the origin of the Monitored Object"
           actuatorType: 
             type: "string"
+            description: "Type of the origin of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           reflectorName: 
             type: "string"
+            description: "Name of the target of the Monitored Object"
           reflectorType: 
             type: "string"
+            description: "Type of the target of the Monitored Object"
             enum: [unknown, accedian-nid, accedian-vnid]
           objectName: 
             type: "string"
+            description: "Name of the Monitored Object"
           objectType: 
             type: "string"
+            description: "Type of the Monitored Object"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           meta:
             type: "object"
+            description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
             additionalProperties:
               type: "string"
             example:
@@ -6750,30 +6919,43 @@ definitions:
             properties:
               timeRangeDuration: 
                 type: "string"
+                description: "Period of time for which the report will be generated"
               thresholdProfile: 
                 type: "string"
+                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
+                description: "Time period for which individual results should be aggregated"
               timeout: 
                 type: "integer"
+                description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
               timezone: 
                 type: "string"
+                description: "Timezone used to display the results in the generated report"
               name: 
                 type: "string"
+                description: "Identifying name for the report to be generated"
               reportType:
                 type: "string"
+                description: "The type of report this config will generate"
               minute: 
                 type: "string"
+                description: "Recurring minute when this report should be generated"
               hour: 
                 type: "string"
+                description: "Recurring hour when this report should be generated"
               dayMonth: 
                 type: "string"
+                description: "Recurring day of the month when this report should be generated"
               month: 
                 type: "string"
+                description: "Recurring month when this report should be generated"
               dayWeek: 
                 type: "string"
+                description: "Recurring day of the week when this report should be generated"
               active:
                 type: "boolean"
+                description: "When true, the report will be generated. When false, the report will not be generated"
                     
   ReportScheduleConfigUpdateRequest:
     type: "object"
@@ -6795,41 +6977,57 @@ definitions:
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               timeRangeDuration: 
                 type: "string"
+                description: "Period of time for which the report will be generated"
               thresholdProfile: 
                 type: "string"
+                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
+                description: "Time period for which individual results should be aggregated"
               timeout: 
                 type: "integer"
+                description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
               timezone: 
                 type: "string"
+                description: "Timezone used to display the results in the generated report"
               name: 
                 type: "string"
+                description: "Identifying name for the report to be generated"
               reportType:
                 type: "string"
+                description: "The type of report this config will generate"
               minute: 
                 type: "string"
+                description: "Recurring minute when this report should be generated"
               hour: 
                 type: "string"
+                description: "Recurring hour when this report should be generated"
               dayMonth: 
                 type: "string"
+                description: "Recurring day of the month when this report should be generated"
               month: 
                 type: "string"
+                description: "Recurring month when this report should be generated"
               dayWeek: 
                 type: "string"
+                description: "Recurring day of the week when this report should be generated"
               active:
                 type: "boolean"
+                description: "When true, the report will be generated. When false, the report will not be generated"
 
   ReportScheduleConfigResponse:
     type: "object"
+    description: "A single object Report Schedule Configuration response from Datahub"
     properties:
       data:
         $ref: '#/definitions/TenantReportScheduleConfig'
 
   ReportScheduleConfigListResponse:
     type: "object"
+    description: "Report Schedule Configuration response including one or more values"
     properties:
       data:
         type: "array"
@@ -6851,40 +7049,58 @@ definitions:
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           timeRangeDuration: 
             type: "string"
+            description: "Period of time for which the report will be generated"
           thresholdProfile: 
             type: "string"
+            description: "The unique identifier of the Threshold Profile used to generate the report"
           granularity: 
             type: "string"
+            description: "Time period for which individual results should be aggregated"
           timeout: 
             type: "integer"
+            description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
           timezone: 
             type: "string"
+            description: "Timezone used to display the results in the generated report"
           name: 
             type: "string"
+            description: "Identifying name for the report to be generated"
           reportType:
             type: "string"
+            description: "The type of report this config will generate"
           minute: 
             type: "string"
+            description: "Recurring minute when this report should be generated"
           hour: 
             type: "string"
+            description: "Recurring hour when this report should be generated"
           dayMonth: 
             type: "string"
+            description: "Recurring day of the month when this report should be generated"
           month: 
             type: "string"
+            description: "Recurring month when this report should be generated"
           dayWeek: 
             type: "string"
+            description: "Recurring day of the week when this report should be generated"
           active:
             type: "boolean"
+            description: "When true, the report will be generated. When false, the report will not be generated"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
   ThresholdProfileCreateRequest:
     type: "object"
     required: ["data"]
@@ -6906,7 +7122,11 @@ definitions:
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
+                description: "A collection of objects that describe Thresholds which when crossed will trigger events in Datahub"
                     
   ThresholdProfileUpdateRequest:
     type: "object"
@@ -6924,17 +7144,23 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev"]
+            required: ["_rev", "thresholds"]
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
+                description: "A collection of objects that describe Thresholds which when crossed will trigger events in Datahub"
   
   ThresholdProfileListResponse:
     type: "object"
+    description: "Threshold Profile response including one or more values"
     required: ["data"]
     properties:
       data:
@@ -6944,6 +7170,7 @@ definitions:
 
   ThresholdProfileResponse:
     type: "object"
+    description: "A single object Threshold Profileresponse from Datahub"
     required: ["data"]
     properties:
       data:
@@ -6964,20 +7191,58 @@ definitions:
         properties:
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           _id:
             type: "string"
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           name:
             type: "string"
+            description: "Identifying name of a Threshold Profile"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
           thresholds:
+            description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
             $ref: '#/definitions/ThresholdsObject'
+          thresholdList:
+            $ref: '#/definitions/ThresholdList'
+
+  ThresholdList:
+    description: "Contains an array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+          description: "The name of the Vendor from which this Metric originates"
+        monitoredObjectType:
+          type: "string"
+          description: "The name of the type of Monitored Object for which this Metric is applicable"
+        metric:
+          type: "string"
+          description: "The name of the Metric"
+        direction:
+          type: "string"
+          description: "Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)"
+        enabled:
+          type: "string"
+          description: "When true, Threshold Crossing for this Metric will be reported. When false, Threshold Crossings for this Metric are not reported."
+        events:
+          description: "A collection of objects that describe the properties of a Threshold for a Metric"
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "string"
 
   ThresholdsObject:
     type: "object"

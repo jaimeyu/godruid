@@ -507,7 +507,16 @@ func (msh *MetricServiceHandler) GetRawMetricsV2(w http.ResponseWriter, r *http.
 
 	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, request)
 
-	metaMOs, err := msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	var metaMOs []string
+
+	if len(request.Meta) != 0 {
+		logger.Log.Debugf("Retrieving monitored objects by meta data for request: %v", request)
+		metaMOs, err = msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	} else {
+		logger.Log.Debugf("Retrieving all monitored objects for request: %v", request)
+		metaMOs, err = msh.tenantDB.GetAllMonitoredObjectsIDs(request.Tenant)
+	}
+
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)

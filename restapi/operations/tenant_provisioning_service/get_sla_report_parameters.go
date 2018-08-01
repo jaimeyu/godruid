@@ -67,6 +67,7 @@ func (o *GetSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindReportID binds and validates parameter ReportID from path.
 func (o *GetSLAReportParams) bindReportID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *GetSLAReportParams) bindReportID(rawData []string, hasKey bool, formats
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetSLAReportParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -26,6 +26,7 @@ type TenantConnectorConfig struct {
 	ID string `json:"id,omitempty"`
 
 	// type
+	// Enum: [connectorConfigs]
 	Type string `json:"type,omitempty"`
 }
 
@@ -34,12 +35,10 @@ func (m *TenantConnectorConfig) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -56,14 +55,12 @@ func (m *TenantConnectorConfig) validateAttributes(formats strfmt.Registry) erro
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil

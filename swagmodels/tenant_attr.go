@@ -38,6 +38,7 @@ type TenantAttr struct {
 	Name string `json:"name,omitempty"`
 
 	// state
+	// Enum: [USER_UNKNOWN INVITED ACTIVE SUSPENDED PENDING_DELETE]
 	State string `json:"state,omitempty"`
 
 	// url subdomain
@@ -49,7 +50,6 @@ func (m *TenantAttr) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateState(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -67,6 +67,7 @@ func (o *GetTenantDomainParams) BindRequest(r *http.Request, route *middleware.M
 	return nil
 }
 
+// bindDomainID binds and validates parameter DomainID from path.
 func (o *GetTenantDomainParams) bindDomainID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *GetTenantDomainParams) bindDomainID(rawData []string, hasKey bool, form
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetTenantDomainParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

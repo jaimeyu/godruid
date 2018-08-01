@@ -25,7 +25,6 @@ func (m *JSONAPITenant) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateData(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -42,14 +41,12 @@ func (m *JSONAPITenant) validateData(formats strfmt.Registry) error {
 	}
 
 	if m.Data != nil {
-
 		if err := m.Data.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("data")
 			}
 			return err
 		}
-
 	}
 
 	return nil

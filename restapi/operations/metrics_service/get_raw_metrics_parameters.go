@@ -123,6 +123,7 @@ func (o *GetRawMetricsParams) BindRequest(r *http.Request, route *middleware.Mat
 	return nil
 }
 
+// bindDirection binds and validates parameter Direction from query.
 func (o *GetRawMetricsParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -140,6 +141,7 @@ func (o *GetRawMetricsParams) bindDirection(rawData []string, hasKey bool, forma
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GetRawMetricsParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -157,6 +159,7 @@ func (o *GetRawMetricsParams) bindGranularity(rawData []string, hasKey bool, for
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GetRawMetricsParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -174,6 +177,9 @@ func (o *GetRawMetricsParams) bindInterval(rawData []string, hasKey bool, format
 	return nil
 }
 
+// bindMetric binds and validates array parameter Metric from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetRawMetricsParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMetric string
@@ -199,6 +205,9 @@ func (o *GetRawMetricsParams) bindMetric(rawData []string, hasKey bool, formats 
 	return nil
 }
 
+// bindMonitoredObjectID binds and validates array parameter MonitoredObjectID from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetRawMetricsParams) bindMonitoredObjectID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMonitoredObjectID string
@@ -224,6 +233,7 @@ func (o *GetRawMetricsParams) bindMonitoredObjectID(rawData []string, hasKey boo
 	return nil
 }
 
+// bindObjectType binds and validates parameter ObjectType from query.
 func (o *GetRawMetricsParams) bindObjectType(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -241,6 +251,7 @@ func (o *GetRawMetricsParams) bindObjectType(rawData []string, hasKey bool, form
 	return nil
 }
 
+// bindTenant binds and validates parameter Tenant from query.
 func (o *GetRawMetricsParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -258,6 +269,7 @@ func (o *GetRawMetricsParams) bindTenant(rawData []string, hasKey bool, formats 
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GetRawMetricsParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

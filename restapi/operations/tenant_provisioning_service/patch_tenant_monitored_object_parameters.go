@@ -64,8 +64,8 @@ func (o *PatchTenantMonitoredObjectParams) BindRequest(r *http.Request, route *m
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -74,11 +74,9 @@ func (o *PatchTenantMonitoredObjectParams) BindRequest(r *http.Request, route *m
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rTenantID, rhkTenantID, _ := route.Params.GetOK("tenantId")
 	if err := o.bindTenantID(rTenantID, rhkTenantID, route.Formats); err != nil {
 		res = append(res, err)
@@ -90,6 +88,7 @@ func (o *PatchTenantMonitoredObjectParams) BindRequest(r *http.Request, route *m
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *PatchTenantMonitoredObjectParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

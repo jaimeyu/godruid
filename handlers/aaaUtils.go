@@ -10,9 +10,9 @@ var (
 	authEnabled               = true
 	changeNotificationEnabled = true
 
-	SkylightAdminRoleOnly       = []string{UserRoleSkylight}
-	SkylightAndTenantAdminRoles = []string{UserRoleSkylight, UserRoleTenantAdmin}
-	AllRoles                    = []string{UserRoleSkylight, UserRoleTenantAdmin, UserRoleTenantUser}
+	SkylightAdminRoleOnly       = []string{UserRoleSystem, UserRoleSkylight}
+	SkylightAndTenantAdminRoles = []string{UserRoleSystem, UserRoleSkylight, UserRoleTenantAdmin}
+	AllRoles                    = []string{UserRoleSystem, UserRoleSkylight, UserRoleTenantAdmin, UserRoleTenantUser}
 )
 
 // TODO: Make this better as I do not like how it is just free-floating vars on the package

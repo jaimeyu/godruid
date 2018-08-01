@@ -46,7 +46,6 @@ func (m *GathergrpcError) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateLinks(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,14 +62,12 @@ func (m *GathergrpcError) validateLinks(formats strfmt.Registry) error {
 	}
 
 	if m.Links != nil {
-
 		if err := m.Links.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("links")
 			}
 			return err
 		}
-
 	}
 
 	return nil

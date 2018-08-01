@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -25,25 +24,6 @@ type MonitoredObjectCountByDomainResponse struct {
 
 // Validate validates this monitored object count by domain response
 func (m *MonitoredObjectCountByDomainResponse) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateDomainToMonitoredObjectSetMap(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *MonitoredObjectCountByDomainResponse) validateDomainToMonitoredObjectSetMap(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DomainToMonitoredObjectSetMap) { // not required
-		return nil
-	}
-
 	return nil
 }
 

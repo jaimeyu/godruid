@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // TenantThresholdProfileMonitoredObjectTypeMapMetricMap tenant threshold profile monitored object type map metric map
@@ -17,16 +18,42 @@ import (
 type TenantThresholdProfileMonitoredObjectTypeMapMetricMap struct {
 
 	// metric map
-	MetricMap TenantThresholdProfileMonitoredObjectTypeMapMetricMapMetricMap `json:"metricMap,omitempty"`
+	MetricMap map[string]TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap `json:"metricMap,omitempty"`
 }
 
 // Validate validates this tenant threshold profile monitored object type map metric map
 func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMap) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetricMap(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMap) validateMetricMap(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricMap) { // not required
+		return nil
+	}
+
+	for k := range m.MetricMap {
+
+		if err := validate.Required("metricMap"+"."+k, "body", m.MetricMap[k]); err != nil {
+			return err
+		}
+		if val, ok := m.MetricMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

@@ -8,7 +8,6 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -22,11 +21,6 @@ type TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEv
 
 // Validate validates this tenant threshold profile monitored object type map metric map direction map event map event attr map
 func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMapEventAttrMap) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 

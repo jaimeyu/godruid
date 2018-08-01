@@ -7,6 +7,7 @@ package swagmodels
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -29,6 +30,7 @@ type DataCleaningProfile struct {
 
 	// type
 	// Required: true
+	// Enum: [dataCleaningProfiles]
 	Type *string `json:"type"`
 }
 
@@ -37,17 +39,14 @@ func (m *DataCleaningProfile) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateID(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -64,14 +63,12 @@ func (m *DataCleaningProfile) validateAttributes(formats strfmt.Registry) error 
 	}
 
 	if m.Attributes != nil {
-
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("attributes")
 			}
 			return err
 		}
-
 	}
 
 	return nil
@@ -137,6 +134,123 @@ func (m *DataCleaningProfile) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *DataCleaningProfile) UnmarshalBinary(b []byte) error {
 	var res DataCleaningProfile
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// DataCleaningProfileAttributes data cleaning profile attributes
+// swagger:model DataCleaningProfileAttributes
+type DataCleaningProfileAttributes struct {
+
+	// Value used to ensure updates to this object are handled in order.
+	// Required: true
+	Rev *string `json:"_rev"`
+
+	// Time since epoch at which this object was instantiated.
+	// Required: true
+	CreatedTimestamp *int64 `json:"createdTimestamp"`
+
+	// Time since epoch at which this object was last altered.
+	// Required: true
+	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
+
+	// List of all the rules to evaluate for Data Cleaning
+	// Required: true
+	Rules []*DataCleaningRule `json:"rules"`
+}
+
+// Validate validates this data cleaning profile attributes
+func (m *DataCleaningProfileAttributes) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRules(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DataCleaningProfileAttributes) validateRev(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"_rev", "body", m.Rev); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DataCleaningProfileAttributes) validateCreatedTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"createdTimestamp", "body", m.CreatedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DataCleaningProfileAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DataCleaningProfileAttributes) validateRules(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"rules", "body", m.Rules); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Rules); i++ {
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
+		}
+
+		if m.Rules[i] != nil {
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("attributes" + "." + "rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *DataCleaningProfileAttributes) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *DataCleaningProfileAttributes) UnmarshalBinary(b []byte) error {
+	var res DataCleaningProfileAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

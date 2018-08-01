@@ -57,6 +57,7 @@ func (o *DeleteDataCleaningProfileParams) BindRequest(r *http.Request, route *mi
 	return nil
 }
 
+// bindProfileID binds and validates parameter ProfileID from path.
 func (o *DeleteDataCleaningProfileParams) bindProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

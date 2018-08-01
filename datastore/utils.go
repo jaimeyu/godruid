@@ -12,6 +12,7 @@ import (
 
 var (
 	NotFoundStr = "status 404 - not found"
+	ConflictStr = "already exists"
 )
 
 const (

@@ -35,6 +35,7 @@ const (
 	TenantConnectorConfigStr   = "connector_config"
 	TenantConnectorInstanceStr = "connector_instance"
 	DataCleaningProfileStr     = "data_cln_prf"
+	DataCleaningHistoryStr     = "data_cln_hist"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -180,6 +181,7 @@ const (
 	DeleteDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPDeleteStr
 	CreateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPCreateStr
 	UpdateDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPPatchStr
+	GetDataCleaningHistoryStr    = DataCleaningHistoryStr + metricNameDelimiter + OPGetStr
 )
 
 type MetricCounterType string

@@ -152,6 +152,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		AdminProvisioningServiceV2GetAllTenantsV2Handler: admin_provisioning_service_v2.GetAllTenantsV2HandlerFunc(func(params admin_provisioning_service_v2.GetAllTenantsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceV2GetAllTenantsV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetDataCleaningHistoryHandler: tenant_provisioning_service_v2.GetDataCleaningHistoryHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningHistory has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2GetDataCleaningProfileHandler: tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfile has not yet been implemented")
 		}),
@@ -318,7 +321,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
@@ -398,6 +401,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceGetAllTenantsHandler admin_provisioning_service.GetAllTenantsHandler
 	// AdminProvisioningServiceV2GetAllTenantsV2Handler sets the operation handler for the get all tenants v2 operation
 	AdminProvisioningServiceV2GetAllTenantsV2Handler admin_provisioning_service_v2.GetAllTenantsV2Handler
+	// TenantProvisioningServiceV2GetDataCleaningHistoryHandler sets the operation handler for the get data cleaning history operation
+	TenantProvisioningServiceV2GetDataCleaningHistoryHandler tenant_provisioning_service_v2.GetDataCleaningHistoryHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfileHandler sets the operation handler for the get data cleaning profile operation
 	TenantProvisioningServiceV2GetDataCleaningProfileHandler tenant_provisioning_service_v2.GetDataCleaningProfileHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfilesHandler sets the operation handler for the get data cleaning profiles operation
@@ -701,6 +706,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceV2GetAllTenantsV2Handler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service_v2.GetAllTenantsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDataCleaningHistoryHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningHistoryHandler")
 	}
 
 	if o.TenantProvisioningServiceV2GetDataCleaningProfileHandler == nil {
@@ -1177,6 +1186,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/tenants"] = admin_provisioning_service_v2.NewGetAllTenantsV2(o.context, o.AdminProvisioningServiceV2GetAllTenantsV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/data-cleaning-history"] = tenant_provisioning_service_v2.NewGetDataCleaningHistory(o.context, o.TenantProvisioningServiceV2GetDataCleaningHistoryHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

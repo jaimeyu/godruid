@@ -4068,7 +4068,7 @@ definitions:
         type: "string"
       attributes:
         type: "object"
-        required: ["name", "urlSubdomain"]
+        required: ["name", "urlSubdomain", "state"]
         properties:
           name:
             type: "string"
@@ -4076,6 +4076,10 @@ definitions:
           urlSubdomain:
             type: "string"
             description: "The subdomain used in the URL for accessing the Tenant's portal in Datahub"
+          state:
+            type: "string"
+            enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+            description: "The current state of the Tenant"
 
   TenantUpdateObject:
     type: "object"

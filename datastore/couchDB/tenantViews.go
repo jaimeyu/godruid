@@ -245,8 +245,9 @@ func createCouchDBViewIndex(dbName string, template string, ddocName string, key
 	err := updateCouchDBDocWithStringDoc(dbName, document, string(tenmod.TenantMetaType), tenmod.TenantMetaStr, docret)
 
 	if err != nil {
-		logger.Log.Errorf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
-
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Error creating index design document %s: %s :%s\n", tenmod.TenantMetaStr, models.AsJSONString(document), err.Error())
+		}
 		return err
 	}
 	if logger.IsDebugEnabled() {

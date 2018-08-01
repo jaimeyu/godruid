@@ -877,27 +877,31 @@ func createNewTenantMetadataViews(dbName string, key string) error {
 // CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata
 func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
 
-	newKeys, err := tsd.GetMetadataKeys(tenantID)
-	if err != nil {
-		return err
-	}
+	// _, err := tsd.GetMetadataKeys(tenantID)
+	// if err != nil {
+	// 	return err
+	// }
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
-	for key, _ := range monitoredObject.Meta {
+	for key := range monitoredObject.Meta {
 
 		// Check if metadata key is old/new
-		if _, ok := newKeys[key]; ok {
+		/*if _, ok := newKeys[key]; ok {
 			// Already in database
 			continue
-		}
+		}*/
+		//if err := tsd.CheckMetaDdocExist(tenantID, key); err != nil {
+		//logger.Log.Debugf("DDoc for %s does not exist, creating it,%s", key, err.Error())
+
 		// Create an index based on metadata keys
-		err = createNewTenantMetadataViews(dbNameKeys, key)
+		err := createNewTenantMetadataViews(dbNameKeys, key)
 		if err != nil {
 			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
 			//return errors.New(msg)
 			// This isn't critical error but log it
-			logger.Log.Error(msg)
+			logger.Log.Debug(msg)
 		}
+		//}
 	}
 	return nil
 }
@@ -971,6 +975,32 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 	}
 
 	return rows, nil
+}
+
+// CheckMetaDdocExist - Gets all the known metadata keys from the couchdb view
+func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, docname string) error {
+	//https://megatron.npav.accedian.net/couchdb/tenant_2_b4772641-c19b-45fb-ad0e-848de0cfb862_monitored-objects/_design/metaViews/_view/uniqueKeys?group=true
+
+	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	//doc, err := db.Get("_design/"+metakeysViewDdocName+"/_view/"+MetakeysViewUniqueKeysURI, v)
+	url := fmt.Sprintf("_design/indexOf%s/_view/by%s", docname, docname)
+	err = db.Contains(url)
+	if err != nil {
+		return fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
+	}
+
+	url = fmt.Sprintf("_design/viewOf%s/_view/by%s", docname, docname)
+	err = db.Contains(url)
+	if err != nil {
+		return fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
+	}
+
+	return nil
 }
 
 // GetMonitoredObjectByObjectName - Returns an Monitored based on its Object Name

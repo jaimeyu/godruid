@@ -172,7 +172,14 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 
 	logger.Log.Infof("Retrieving %s for: %v", db.QueryThresholdCrossingStr, request)
 
-	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve  Threshold Crossing Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryThresholdCrossingStr, msg, http.StatusInternalServerError)
@@ -216,7 +223,14 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
+	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
@@ -266,7 +280,14 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(&slaReportRequest, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetSLAReport(&slaReportRequest, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
@@ -327,7 +348,14 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.Re
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(&thresholdCrossingReq, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, thresholdCrossingReq.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(&thresholdCrossingReq, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
@@ -414,7 +442,14 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(&thresholdCrossingReq, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, thresholdCrossingReq.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(&thresholdCrossingReq, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
@@ -457,7 +492,14 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 
 	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, hcRequest)
 
-	result, err := msh.druidDB.GetHistogram(hcRequest)
+	metaMOs, err := msh.MetaToMonitoredObjects(hcRequest.TenantID, hcRequest.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetHistogram(hcRequest, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
@@ -525,7 +567,14 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 	}
 	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
 
-	result, err := msh.druidDB.GetAggregatedMetrics(&request)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetAggregatedMetrics(&request, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Aggregated Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
@@ -601,7 +650,14 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	topNreq := request
 	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
 
-	result, err := msh.druidDB.GetTopNForMetric(&topNreq)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetTopNForMetric(&topNreq, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
@@ -621,4 +677,58 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
 	fmt.Fprintf(w, string(res))
 
+}
+
+//MetaToMonitoredObjects - Retrieve a set of monitored object IDs based on the passed in metadata criteria
+func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta map[string][]string) ([]string, error) {
+
+	mos := make([]string, 0)
+
+	firstMeta := true
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieving monitored object IDs for tenant %s based on metadata criteria %v", tenantId, meta)
+	}
+
+	// Loop over all the metadata types
+	for mkey, mvalue := range meta {
+
+		mosForKey := make([]string, 0)
+		// Loop over all the metadata values associated with the current type
+		for _, valueItem := range mvalue {
+
+			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
+
+			if err != nil {
+				return nil, err
+			}
+
+			// Union all the IDs together since we need a conditional OR for all values of a particular key
+			mosForKey = listUnion(mosForKey, rMetaMOs)
+		}
+		if !firstMeta {
+			// Intersect all the IDs since monitored objects should contain at least one of the metadata values for each of the metadata keys in a conditional AND
+			mos = listIntersection(mos, mosForKey)
+		} else {
+			// We do this since we don't want to run an intersection against an initially empty list otherwise there will never be an intersection
+			firstMeta = false
+			mos = mosForKey
+		}
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata criteria %v: %v", tenantId, meta, mos)
+	}
+
+	return mos, nil
+}
+
+// MetaToMonitoredObjectsKV - Retrieve a set of monitored object IDs based on the provided key/value pair
+func (msh *MetricServiceHandler) MetaToMonitoredObjectsKV(tenantId string, key string, value string) ([]string, error) {
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata with key %s and value %s", tenantId, key, value)
+	}
+
+	return msh.tenantDB.GetMonitoredObjectIDsToMetaEntry(tenantId, key, value)
 }

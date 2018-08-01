@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
 	"testing"
 
 	"github.com/accedian/adh-gather/gather"
@@ -215,4 +216,32 @@ func TestBuildFunctor(t *testing.T) {
 	//if passed == true {
 	//	t.Fail()
 	//}
+}
+func TestUnion(t *testing.T) {
+
+	listA := []string{"a", "b"}
+	listB := []string{"a", "c"}
+
+	unionList := listUnion(listA, listB)
+	sort.Strings(unionList)
+
+	if unionList[0] != "a" && unionList[1] != "b" && unionList[2] != "c" {
+		t.Errorf("Incorrect union between %v and %v: %v", listA, listB, unionList)
+	}
+
+}
+
+func TestIntersection(t *testing.T) {
+	listA := []string{"a", "b"}
+	listB := []string{"a", "c"}
+
+	intersectionList := listIntersection(listA, listB)
+
+	if len(intersectionList) != 1 {
+		t.Errorf("Was expecting intersection list size of %d but got %d instead", 1, len(intersectionList))
+	}
+
+	if intersectionList[0] != "a" {
+		t.Errorf("Incorrect union between %v and %v: %v", listA, listB, intersectionList)
+	}
 }

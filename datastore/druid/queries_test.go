@@ -68,55 +68,20 @@ func TestThresholdCrossingQuery(t *testing.T) {
 	// assert.Equal(t, len(expectedJson), len(qJson))
 }
 
-func TestBuildMetaFilter(t *testing.T) {
-
-	testMetaMap := make(map[string][]string)
-
-	colours := []string{"blue", "red"}
-	cities := []string{"Ottawa", "Montreal"}
-
-	testMetaMap["colour"] = colours
-	testMetaMap["cities"] = cities
-
-	allEntries := append(colours, cities...)
-	comboFilter := druid.BuildMetaFilter("test", testMetaMap)
-
-	if comboFilter.Type != "and" {
-		t.Errorf("Incorrect filter built. Expecting '%s' but got '%s'", "and", comboFilter.Type)
+func TestBuildMonitoredObjectFilterNoEntries(t *testing.T) {
+	if druid.BuildMonitoredObjectFilter("1234", nil) != nil {
+		t.Errorf("Expecting nil filter to be returned")
 	}
+}
 
-	andFilters := comboFilter.Fields
+func TestBuildMonitoredObjectFilterOk(t *testing.T) {
+	testMOs := []string{"mon1", "mon2"}
+	tenantId := "1234"
 
-	if len(andFilters) != len(testMetaMap) {
-		t.Errorf("Incorrect number of AND filters. Expecting '%d' but got '%d'", len(testMetaMap), len(andFilters))
-	}
+	rFilter := druid.BuildMonitoredObjectFilter(tenantId, testMOs)
 
-	for _, andFilter := range andFilters {
-		if andFilter.Type != "or" {
-			t.Errorf("Incorrect sub-filter built. Expecting '%s' but got '%s'", "or", andFilter.Type)
-		}
-		for _, orFilter := range andFilter.Fields {
-			if orFilter.Type != "selector" {
-				t.Errorf("Incorrect sub-filter built. Expecting '%s' but got '%s'", "selector", orFilter.Type)
-			}
-
-			found := false
-
-			for i, testEntry := range allEntries {
-				if testEntry == orFilter.Value {
-					found = true
-					allEntries = append(allEntries[:i], allEntries[i+1:]...)
-					break
-				}
-			}
-			if !found {
-				t.Errorf("Extra filter with value %s was created but should not have been.", orFilter.Value)
-			}
-		}
-	}
-
-	if len(allEntries) > 0 {
-		t.Errorf("The following meta values do not have OR filters against them: %v", allEntries)
+	if len(rFilter.Fields) != 2 {
+		t.Errorf("Expecting only the tenant filter and monitored object filter to be return but got %d", len(rFilter.Fields))
 	}
 }
 

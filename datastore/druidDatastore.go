@@ -38,28 +38,28 @@ type DruidDatastore interface {
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+	QueryThresholdCrossing(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error)
 
-	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile) (*metrics.SLAReport, error)
+	GetSLAReport(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (*metrics.SLAReport, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	GetThresholdCrossingByMonitoredObject(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+	GetThresholdCrossingByMonitoredObject(request *metrics.ThresholdCrossingRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	// Uses TopN query.
-	GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile) (map[string]interface{}, error)
+	GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopNRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error)
 
 	// Returns the count for a set of specified metrics in set of specified buckets
-	GetHistogram(request *metrics.HistogramRequest) (map[string]interface{}, error)
+	GetHistogram(request *metrics.HistogramRequest, metaMOs []string) (map[string]interface{}, error)
 
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
 
 	// Get aggregated metrics from druid
-	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest) (map[string]interface{}, error)
-	GetTopNForMetric(metric *metrics.TopNForMetric) (map[string]interface{}, error)
+	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest, metaMOs []string) (map[string]interface{}, error)
+	GetTopNForMetric(metric *metrics.TopNForMetric, metaMOs []string) (map[string]interface{}, error)
 
 	// Update Monitored Object meta-data
 	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error

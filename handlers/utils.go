@@ -15,6 +15,7 @@ import (
 	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
+	setops "github.com/adam-hanna/arrayOperations"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -678,4 +679,14 @@ func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interfac
 
 func checkForNotFound(s string) bool {
 	return strings.Contains(s, string(notFound))
+}
+
+// Return the string union between the provided arrays
+func listUnion(listA []string, listB []string) []string {
+	return setops.UnionString(listA, listB)
+}
+
+// return the string intersection between the provided arrays
+func listIntersection(listA []string, listB []string) []string {
+	return setops.IntersectString(listA, listB)
 }

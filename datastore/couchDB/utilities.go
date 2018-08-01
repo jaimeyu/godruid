@@ -572,6 +572,36 @@ func createDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 	return nil
 }
 
+// Retrieve IDs from a particular view based on a key criteria
+func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
+
+	db, err := getDatabase(dbName)
+	view := createDBPathStr("_design", designDocName, "_view", viewName)
+
+	qp := url.Values{}
+	qp.Set("key", fmt.Sprintf("[\"%s\"]", key))
+
+	vr, err := db.Get(view, qp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// If no rows are returned then immediately return an empty list
+	moList := make([]string, 0)
+	rows, found := vr["rows"]
+	if !found {
+		return moList, nil
+	}
+
+	for _, r := range rows.([]interface{}) {
+		rMap := r.(map[string]interface{})
+		moList = append(moList, rMap["id"].(string))
+	}
+
+	return moList, nil
+}
+
 func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
 	logger.Log.Debugf("Updating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
 

@@ -92,6 +92,8 @@ func HandlePatchTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDa
 			return admin_provisioning_service_v2.NewPatchTenantV2Forbidden().WithPayload(errorMessage)
 		case http.StatusBadRequest:
 			return admin_provisioning_service_v2.NewPatchTenantV2BadRequest().WithPayload(errorMessage)
+		case http.StatusNotFound:
+			return admin_provisioning_service_v2.NewPatchTenantV2NotFound().WithPayload(errorMessage)
 		case http.StatusConflict:
 			return admin_provisioning_service_v2.NewPatchTenantV2Conflict().WithPayload(errorMessage)
 		default:
@@ -167,8 +169,6 @@ func HandleGetTenantIDByAliasV2(adminDB datastore.AdminServiceDatastore) func(pa
 		// Error Responses
 		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetTenantIDByAliasStr, mon.APICompleted, mon.AdminAPICompleted)
 		switch responseCode {
-		case http.StatusForbidden:
-			return admin_provisioning_service_v2.NewGetTenantIDByAliasV2Forbidden().WithPayload(errorMessage)
 		case http.StatusNotFound:
 			return admin_provisioning_service_v2.NewGetTenantIDByAliasV2NotFound().WithPayload(errorMessage)
 		default:
@@ -248,7 +248,7 @@ func HandleGetValidTypesV2(allowedRoles []string, adminDB datastore.AdminService
 }
 
 func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore, params admin_provisioning_service_v2.CreateTenantV2Params) (time.Time, int, *swagmodels.TenantResponse, error) {
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s: %s", admmod.TenantStr, *params.Body.Data.Attributes.Name), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s: %s", admmod.TenantStr, models.AsJSONString(params.Body)), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Create %s operation not authorized for role: %s", admmod.TenantStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
@@ -333,6 +333,10 @@ func doGetTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastor
 	// Issue request to DAO Layer
 	result, err := adminDB.GetTenantDescriptor(params.TenantID)
 	if err != nil {
+		if strings.Contains(err.Error(), datastore.NotFoundStr) {
+			return startTime, http.StatusNotFound, nil, err
+		}
+
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", admmod.TenantStr, err.Error())
 	}
 
@@ -356,8 +360,8 @@ func doUpdateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 
 	// Retrieve tne request bytes from the payload in order to convert it to a map
 	patchRequestBytes, err := json.Marshal(params.Body)
-	if err != nil {
-		return startTime, http.StatusBadRequest, nil, err
+	if err != nil || params.Body == nil {
+		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Invalid request body: %s", models.AsJSONString(params.Body))
 	}
 
 	// Attempt to retrieve the tenant that we are trying to patch from the DB in order to do a merge
@@ -380,7 +384,7 @@ func doUpdateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 	// Finally update the tenant in the datastore with the merged map and fetched tenant
 	result, err := adminDB.UpdateTenantDescriptor(patchedTenant)
 	if err != nil {
-		if strings.Contains(err.Error(), datastore.ConflictStr) {
+		if strings.Contains(err.Error(), datastore.ConflictErrorStr) {
 			return startTime, http.StatusConflict, nil, err
 		}
 
@@ -443,6 +447,10 @@ func doGetAllTenantsV2(allowedRoles []string, adminDB datastore.AdminServiceData
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s list: %s", admmod.TenantStr, err.Error())
 	}
 
+	if len(result) == 0 {
+		return startTime, http.StatusNotFound, nil, fmt.Errorf(datastore.NotFoundStr)
+	}
+
 	converted := swagmodels.TenantListResponse{}
 	err = convertToJsonapiObject(result, &converted)
 	if err != nil {
@@ -469,6 +477,10 @@ func doGetTenantIDByAliasV2(adminDB datastore.AdminServiceDatastore, params admi
 		return startTime, http.StatusInternalServerError, "", fmt.Errorf("Unable to retrieve %s ID for %s: %s", admmod.TenantStr, params.Value, err.Error())
 	}
 
+	if result == "" {
+		return startTime, http.StatusNotFound, "", fmt.Errorf(datastore.NotFoundStr)
+	}
+
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetTenantIDByAliasStr, mon.APICompleted, mon.AdminAPICompleted)
 	logger.Log.Infof("Found ID %s for %s %s", result, admmod.TenantStr, params.Value)
 	return startTime, http.StatusOK, result, nil
@@ -487,6 +499,10 @@ func doGetTenantSummaryByAliasV2(adminDB datastore.AdminServiceDatastore, params
 		}
 
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s summary for %s: %s", admmod.TenantStr, params.Value, err.Error())
+	}
+
+	if result == "" {
+		return startTime, http.StatusNotFound, nil, fmt.Errorf(datastore.NotFoundStr)
 	}
 
 	summary := swagmodels.TenantSummaryResponse{

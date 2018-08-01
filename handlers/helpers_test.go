@@ -36,8 +36,10 @@ var (
 
 func setupTestDatastore() error {
 	// Setup Test Env
-	gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
+	cfg := gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
 	monitoring.InitMetrics()
+
+	cfg.Set("ingDict", "../files/defaultIngestionDictionary.json")
 
 	var err error
 	adminDB, err = handlers.GetAdminServiceDatastore()
@@ -53,6 +55,15 @@ func setupTestDatastore() error {
 	adminDB.DeleteDatabase(adminDBName)
 
 	_, err = adminDB.CreateDatabase(adminDBName)
+	if err != nil {
+		return fmt.Errorf("Unable to create Admin DB: %s", err.Error())
+	}
+
+	err = adminDB.AddAdminViews()
+	if err != nil {
+		return fmt.Errorf("Unable to add Admin Views to Admin DB: %s", err.Error())
+	}
+
 	return err
 }
 

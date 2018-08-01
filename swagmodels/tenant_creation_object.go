@@ -134,6 +134,11 @@ type TenantCreationObjectAttributes struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// The current state of the Tenant
+	// Required: true
+	// Enum: [USER_UNKNOWN INVITED ACTIVE SUSPENDED PENDING_DELETE]
+	State *string `json:"state"`
+
 	// The subdomain used in the URL for accessing the Tenant's portal in Datahub
 	// Required: true
 	URLSubdomain *string `json:"urlSubdomain"`
@@ -144,6 +149,10 @@ func (m *TenantCreationObjectAttributes) Validate(formats strfmt.Registry) error
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateState(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -160,6 +169,58 @@ func (m *TenantCreationObjectAttributes) Validate(formats strfmt.Registry) error
 func (m *TenantCreationObjectAttributes) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var tenantCreationObjectAttributesTypeStatePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USER_UNKNOWN","INVITED","ACTIVE","SUSPENDED","PENDING_DELETE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		tenantCreationObjectAttributesTypeStatePropEnum = append(tenantCreationObjectAttributesTypeStatePropEnum, v)
+	}
+}
+
+const (
+
+	// TenantCreationObjectAttributesStateUSERUNKNOWN captures enum value "USER_UNKNOWN"
+	TenantCreationObjectAttributesStateUSERUNKNOWN string = "USER_UNKNOWN"
+
+	// TenantCreationObjectAttributesStateINVITED captures enum value "INVITED"
+	TenantCreationObjectAttributesStateINVITED string = "INVITED"
+
+	// TenantCreationObjectAttributesStateACTIVE captures enum value "ACTIVE"
+	TenantCreationObjectAttributesStateACTIVE string = "ACTIVE"
+
+	// TenantCreationObjectAttributesStateSUSPENDED captures enum value "SUSPENDED"
+	TenantCreationObjectAttributesStateSUSPENDED string = "SUSPENDED"
+
+	// TenantCreationObjectAttributesStatePENDINGDELETE captures enum value "PENDING_DELETE"
+	TenantCreationObjectAttributesStatePENDINGDELETE string = "PENDING_DELETE"
+)
+
+// prop value enum
+func (m *TenantCreationObjectAttributes) validateStateEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, tenantCreationObjectAttributesTypeStatePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TenantCreationObjectAttributes) validateState(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"state", "body", m.State); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateStateEnum("attributes"+"."+"state", "body", *m.State); err != nil {
 		return err
 	}
 

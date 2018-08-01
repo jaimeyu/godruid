@@ -2,6 +2,7 @@ package inMemory
 
 import (
 	"fmt"
+	"sort"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
@@ -834,6 +835,71 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjects(tenantID strin
 	return recList, nil
 }
 
+// GetAllMonitoredObjectsByPage - InMemory implementation of GetAllMonitoredObjectsByPage
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantMonitoredObjectType)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Tenant does not exist")
+	}
+
+	recList := make([]*tenmod.MonitoredObject, 0)
+
+	// Sort the MO collection by name
+	storedMOs := make([]*tenmod.MonitoredObject, 0)
+	for _, val := range tsd.tenantToIDtoTenantMonitoredObjectMap[tenantID] {
+		storedMOs = append(storedMOs, val)
+	}
+	sort.Slice(storedMOs, func(i, j int) bool {
+		return storedMOs[i].ObjectName < storedMOs[j].ObjectName
+	})
+
+	nextPageStartKey := ""
+
+	// Select the records after the specific page
+	for _, rec := range storedMOs {
+		// If the limit is met, keep the next record value for the next page key but stop processing
+		if int64(len(recList)) == limit {
+			nextPageStartKey = rec.ObjectName
+			break
+		}
+
+		// Add record in if it is in the desired page
+		if rec.ObjectName > startKey {
+			recList = append(recList, rec)
+		}
+	}
+
+	paginationValues := common.PaginationOffsets{
+		Self: startKey,
+		Next: nextPageStartKey,
+	}
+
+	// Now get the previous page so that we can get the start key for it
+	sort.Slice(storedMOs, func(i, j int) bool {
+		return storedMOs[i].ObjectName > storedMOs[j].ObjectName
+	})
+	prevPage := make([]*tenmod.MonitoredObject, 0)
+	previousPageStartKey := ""
+	for _, rec := range storedMOs {
+		// If the limit is met, keep the next record value for the next page key but stop processing
+		if int64(len(prevPage)) == limit {
+			break
+		}
+
+		// Add record in if it is in the desired page
+		if rec.ObjectName > startKey {
+			recList = append(recList, rec)
+		}
+	}
+
+	if len(prevPage) > 0 {
+		previousPageStartKey = prevPage[len(prevPage)].ObjectName
+	}
+	paginationValues.Prev = previousPageStartKey
+
+	return recList, &paginationValues, nil
+}
+
 // GetAllMonitoredObjectsInIDList - InMemory implementation of GetAllMonitoredObjectsInIDList
 func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error) {
 	if idList == nil || len(idList) == 0 {
@@ -1435,5 +1501,11 @@ func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectByObjectName(name s
 }
 
 func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error) {
+	return nil, nil
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetadataKeys(tenantId string) (map[string]int, error) {
+	return nil, nil
+}
+func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsV2(tenantID string, bsize int64) ([]*tenmod.MonitoredObject, error) {
 	return nil, nil
 }

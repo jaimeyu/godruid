@@ -61,9 +61,6 @@ type DruidDatastore interface {
 	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest, metaMOs []string) (map[string]interface{}, error)
 	GetTopNForMetric(metric *metrics.TopNForMetric, metaMOs []string) (map[string]interface{}, error)
 
-	// Update Monitored Object meta-data
-	UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenmod.MonitoredObject, domains []*tenmod.Domain, reset bool) error
-
 	// Adds a monitored object to a druid look up
-	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string, qualifiers []string, reset bool) error
+	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string) error
 }

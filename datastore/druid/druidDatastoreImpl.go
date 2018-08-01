@@ -669,8 +669,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 		granularity = "PT1M"
 	}
 
-	cleanOnly := !request.GetIncludeUncleaned()
-	query, err := RawMetricsQuery(request.GetTenant(), table, request.Metric, request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity, cleanOnly)
+	query, err := RawMetricsQuery(request.GetTenant(), table, request.Metric, request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity, request.GetCleanOnly())
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)
@@ -731,6 +730,7 @@ type lookup struct {
 	Version                string    `json:"version"`
 	LookupExtractorFactory mapLookup `json:"lookupExtractorFactory"`
 	active                 bool
+	count                  int
 }
 
 type mapLookup struct {
@@ -738,152 +738,99 @@ type mapLookup struct {
 	Data       map[string]string `json:"map"`
 }
 
-// @Deprecated -- DO NOT USE THIS FUNCTION! DOMAINS ARE GOING AWAY.
-// UpdateMonitoredObjectMetadata - This function should be deprecated. AddMonitoredObjectToLookup is more generic
-func (dc *DruidDatastoreClient) UpdateMonitoredObjectMetadata(tenantID string, monitoredObjects []*tenant.MonitoredObject, domains []*tenant.Domain, reset bool) error {
-	startTime := time.Now()
-	version := time.Now().Format(time.RFC3339)
-	lookupEndpoint := dc.coordinatorServer + ":" + dc.coordinatorPort + "/druid/coordinator/v1/lookups/config"
+func buildLookup(datatype, tenant, key, val string, partition int) *lookup {
 
-	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
-	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
-	// Every domain should have a map even if it has no monitored objects.
-	lookups := make(map[string]*lookup)
-	for _, domain := range domains {
-		lookupName := buildLookupName("dom", tenantID, domain.ID)
-		domLookup := lookup{
-			Version: version,
-			LookupExtractorFactory: mapLookup{
-				LookupType: "map",
-				Data:       map[string]string{},
-			},
-		}
-		lookups[lookupName] = &domLookup
+	version := time.Now().Format(time.RFC3339)
+	domLookup := lookup{
+		count:   0,
+		Version: version,
+		LookupExtractorFactory: mapLookup{
+			LookupType: "map",
+			Data:       map[string]string{},
+		},
 	}
 
-	logger.Log.Infof("Creating dom for %+v", lookups)
+	return &domLookup
+}
 
-	// Fetch existing lookup names and delete any existing lookups on the server that are nolonger valid.
-	// Use the lookup map created in the previous step to identify valid domains.
-	lookupNames := []string{}
-	url := lookupEndpoint + "/__default"
-	result, err := sendRequest("GET", dc.dClient.HttpClient, url, dc.AuthToken, nil)
-	if err != nil {
-		if strings.Contains(err.Error(), "No lookups found") {
-			logger.Log.Infof("No lookups found.  Need to initialize lookups before any are created")
-			result, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, []byte("{}"))
-			if err != nil {
-				logger.Log.Errorf("Failed to initialize druid lookups", err.Error())
-				mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.UpdateDruidLookups)
-				return err
-			}
-			logger.Log.Infof("Lookups successfully initialized")
+func (dc *DruidDatastoreClient) buildNewDruidLookup(datatype, tenant, key, val, itemKey, itemVal string, partition int) *lookup {
+	// Can't find lookup, so create it
+	domLookup := buildLookup(datatype, tenant, key, val, partition)
+	// Now add the first item for this lookup
+	domLookup.LookupExtractorFactory.Data[itemKey] = itemVal
+	domLookup.count = 1
+	return domLookup
+}
+
+func (dc *DruidDatastoreClient) addToLookup(lookups map[string]*lookup, existingLookups DruidLookupStatus, datatype, tenant, key, val, itemKey, itemVal string, partition int) {
+
+	lookupName := buildLookupName(datatype, tenant, key, val, partition)
+	domLookup, ok := lookups[lookupName]
+	if ok {
+		// Ok, we have an existing look up for this key, check if there are too many values in this bucket and needs to spill over
+		if domLookup.count >= 50000 {
+			// Yes, there are too many items, spill over to the next bucket
+			dc.addToLookup(lookups, existingLookups, datatype, tenant, key, val, itemKey, itemVal, partition+1)
 		} else {
-			logger.Log.Errorf("Failed to fetch lookups", err.Error())
-			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.UpdateDruidLookups)
-			return err
+			// No, we can continue to use this bucket
+			domLookup.LookupExtractorFactory.Data[itemKey] = itemVal
+			domLookup.count = domLookup.count + 1
+			existingLookups[lookupName] = true
 		}
 	} else {
-		err = json.Unmarshal(result, &lookupNames)
+		// First time encountering this item, let's create a lookup for it
+		newLookup := dc.buildNewDruidLookup(datatype, tenant, key, val, itemKey, itemVal, partition)
+		// Now append the lookups
+		lookups[lookupName] = newLookup
+		existingLookups[lookupName] = true
 	}
-
-	// Only delete orphaned domain lookups for this tenant
-	lookupPrefix := buildLookupNamePrefix("dom", tenantID)
-	for _, lookupName := range lookupNames {
-		if !strings.HasPrefix(lookupName, lookupPrefix) {
-			continue
-		}
-
-		if lookup, ok := lookups[lookupName]; !ok {
-			url := lookupEndpoint + "/__default/" + lookupName
-			if logger.IsDebugEnabled() {
-				logger.Log.Debugf("Deleting lookup %s, url is %s", lookupName, url)
-			}
-			if _, err := sendRequest("DELETE", dc.dClient.HttpClient, url, dc.AuthToken, nil); err != nil {
-				logger.Log.Errorf("Failed to delete lookup %s", lookupName, err.Error())
-			}
-		} else {
-			lookup.active = true
-		}
-	}
-
-	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
-	for _, mo := range monitoredObjects {
-		if len(mo.DomainSet) < 1 || len(mo.MonitoredObjectID) < 1 {
-			continue
-		}
-		for _, domain := range mo.DomainSet {
-			lookupName := buildLookupName("dom", tenantID, domain)
-			domLookup, ok := lookups[lookupName]
-			if ok {
-				domLookup.LookupExtractorFactory.Data[mo.MonitoredObjectID] = domain
-			}
-		}
-	}
-
-	// Domain lookups are assigned to the __default tier
-	b, err := json.Marshal(map[string]map[string]*lookup{"__default": lookups})
-	if err != nil {
-		logger.Log.Error("Failed to marshal lookupRequest", err.Error())
-		return err
-	}
-
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Sending lookup request to %s -> %s", lookupEndpoint, string(b))
-	}
-
-	_, err = sendRequest("POST", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, b)
-	if err != nil {
-		logger.Log.Errorf("Failed to update lookup", err.Error())
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.UpdateDruidLookups)
-		return err
-	}
-	updateLookupCache(lookups)
-
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, successCode, mon.UpdateDruidLookups)
-	return nil
-	// var domainsIds []string
-	// for _, domain := range domains {
-	// 	domainsIds = append(domainsIds, domain.ID)
-	// }
-
-	// return dc.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "dom", domainsIds, reset)
 }
-func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tenantID string, datatype string, monitoredObjects []*tenant.MonitoredObject, lookupNames []string, lookups map[string]*lookup) error {
+
+/*
+Order of operations
+* Get all the monitored objects we want to work with
+* Walk the monitored objects
+	* Go through all the monitored object's metadata and add it to the lookup table
+	* Add them to the lookups
+	* if lookup is >= 50,000 rows
+		* Spill over to the next lookup bucket
+* For each lookups
+		* Delete existing lookups (cleans up the lookups)
+		* Send each Lookup  to druid
+
+*/
+func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tenantID string, datatype string, monitoredObjects []*tenant.MonitoredObject) (map[string]*lookup, error) {
 
 	methodStartTime := time.Now()
 
-	// Only delete orphaned domain lookups for this tenant
-	lookupPrefix := buildLookupNamePrefix(datatype, tenantID)
-	for _, lookupName := range lookupNames {
-		if !strings.HasPrefix(lookupName, lookupPrefix) {
-			continue
-		}
-
-		if lookup, ok := lookups[lookupName]; !ok {
-			// Log the error but don't send it back up.
-			dc.deleteItemToLookup(lookupEndpoint, lookupName)
-		} else {
-			lookup.active = true
-		}
+	existingNames, err := dc.GetDruidLookupNames()
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
+		return nil, fmt.Errorf("Failed to update lookup %s", err.Error())
 	}
 
-	logger.Log.Debugf("Lookups to add for %+v", lookups)
-
+	//logger.Log.Debugf("Lookups to add for %+v", lookups)
+	lookups := make(map[string]*lookup, 0)
 	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
 	for _, mo := range monitoredObjects {
 		// Special exception case for domains
 
 		for key, val := range mo.Meta {
-			lookupName := buildLookupName(datatype, tenantID, key)
-			domLookup, ok := lookups[lookupName]
-			if ok {
-				domLookup.LookupExtractorFactory.Data[mo.MonitoredObjectID] = val
-			}
+			dc.addToLookup(lookups, existingNames, datatype, tenantID, key, val, mo.MonitoredObjectID, mo.MonitoredObjectID, 0)
 		}
 	}
 
-	if logger.IsDebugEnabled() {
+	// Now delete all the orphaned lookups
+	// We delete the active lookups only when we're about to update them.
+	for name, _ := range existingNames {
+		// Delete the look up first (don't worry about errors, best effort)
+		//if status == false {
+		dc.deleteItemToLookup(lookupEndpoint, name)
+		//}
+	}
+
+	// Debugging only
+	if logger.IsDebugEnabled() && false {
 		for key, val := range lookups {
 			logger.Log.Debugf("{%s,\t%+v }", key, val.LookupExtractorFactory.Data)
 		}
@@ -894,87 +841,108 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 	// The second argument is empty because lookupname is already part of the request
 
 	logger.Log.Infof("Sending Lookup table to druid")
-	err := dc.addItemToLookup(lookupEndpoint, "", lookups)
-	if err != nil {
-		logger.Log.Errorf("Failed to update lookup %s", err.Error())
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
-		return err
+	waitForCompletion := make(chan string, 25)
+	for key, val := range lookups {
+		logger.Log.Debugf("Sending lookups to druid", key)
+
+		val.active = true
+		// Looks up are costly, let's see if we can parallalize the operations
+		go func(look string, key string, val *lookup, waitForCompletion chan string) {
+			// Update the lookups
+			err := dc.addItemToLookup(lookupEndpoint, key, val)
+			if err != nil {
+				mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
+				logger.Log.Errorf("Failed to update lookup %s", err.Error())
+			}
+			waitForCompletion <- key
+		}(lookupEndpoint, key, val, waitForCompletion)
 	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
-	return nil
-}
-
-// This is specific to domains metadata updates. This will go away and be completely replaced by metadata.
-func (dc *DruidDatastoreClient) updateDomainLookup(lookupEndpoint string, tenantID string, datatype string, monitoredObjects []*tenant.MonitoredObject, lookupNames []string, lookups map[string]*lookup) error {
-	// Not being used
-
-	return nil
-}
-
-// GetMonitoredObjectsLookUpList - Goes to Druid and grabs the list of monitored objects for a lookup
-func (dc *DruidDatastoreClient) GetMonitoredObjectsLookUpList(filterOn string) (map[string]string, error) {
-
-	//{{DOMAIN}}/coordinator/druid/coordinator/v1/lookups/config/__default?pretty
-	/*
-	   {
-	       "version": "2018-07-09T15:20:31Z",
-	       "lookupExtractorFactory": {
-	           "type": "map",
-	           "map": {
-	               "c5c59bb7-d59e-4baa-8e42-12fb149cee74": "ironman"
-	           },
-	           "isOneToOne": false
-	       }
-	   }*/
-	type druidLookupExtractorFactory struct {
-		Map        map[string]string `json:"map"`
-		Type       string            `json:"type"`
-		IsOneToOne bool              `json:"isOneToOne"`
-	}
-	type druidLookUpResponse struct {
-		Version                string                      `json:"version"`
-		LookupExtractorFactory druidLookupExtractorFactory `json:"lookupExtractorFactory"`
-	}
-	var data druidLookUpResponse
-
-	var druidCoordPath string
-	// This doesn't seem right. How come DruidDatastoreClient struct doesn't have a server port for the broker?!
-	if dc.coordinatorPort == "-1" {
-		druidCoordPath = "/druid/listen/v1/lookups/"
-
-	} else {
-		druidCoordPath = ":8082" + "/druid/listen/v1/lookups/"
-	}
-	lookupEndpoint := dc.server + druidCoordPath + filterOn
-	logger.Log.Infof("Making ")
-
-	logger.Log.Infof("Get Druid look up: %s", lookupEndpoint)
-
-	benchmark := time.Now().Nanosecond()
-	resp, err := sendRequest("GET", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, nil)
-	if err != nil {
-		logger.Log.Infof("Get Druid look up failed: %s", err.Error())
-
-		// 404 is valid on new metadata keys
-		if !strings.Contains(err.Error(), "404") {
-			return nil, fmt.Errorf("Could not get look up list from druid %s", err.Error())
-		} else {
-			return data.LookupExtractorFactory.Map, nil
+	for {
+		select {
+		case key := <-waitForCompletion:
+			lookups[key].active = false
+			// If lookups are still active, wait for the next response
+			for _, lk := range lookups {
+				if lk.active {
+					break
+				}
+			}
+			// No active lookups, return success
+			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
+			return lookups, nil
+		case <-time.After(5 * 60 * time.Second):
+			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidMetaLookups)
+			return nil, fmt.Errorf("Timed out trying to update lookup tables, lookups:%s", models.AsJSONString(lookups))
 		}
 	}
-	ts := time.Now().Nanosecond() - benchmark
-	logger.Log.Info("Getting obj list took %d nsec -> %d ms", ts, ts/1000/1000)
 
-	// Unmarshal the response
-	err = json.Unmarshal(resp, &data)
+	// mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.UpdateDruidMetaLookups)
+	// return lookups, nil
+}
+
+// GetDruidLookupFor - Returns a list of lookup tables with partial matches
+func (dc *DruidDatastoreClient) GetDruidLookupFor(keyval string) ([]string, error) {
+
+	var matches []string
+	list, err := dc.GetDruidLookupNames()
 	if err != nil {
-		return nil, fmt.Errorf("Druid response is bad, could not unmarshal '%s' with error: %s", resp, err.Error())
+		return nil, fmt.Errorf("Could not get look up list from druid %s", err.Error())
 	}
-	logger.Log.Info("dump raw resp %s", string(resp))
 
-	logger.Log.Info("dump objlist %+v", data)
+	for k := range list {
+		if idx := strings.Index(k, keyval); idx != -1 {
+			// Check that the next character is a * because that is how we delim the names
+			if k[idx+1] == druidLookupSeparator[0] {
+				matches = append(matches, k)
+			}
+		}
+	}
+	return matches, nil
+}
 
-	return data.LookupExtractorFactory.Map, nil
+// DruidLookupStatus - This is a map of all the active lookups tables in Druid
+type DruidLookupStatus map[string]bool
+
+// GetDruidLookupNames - Goes to Druid and grabs the list of monitored objects for a lookup
+func (dc *DruidDatastoreClient) GetDruidLookupNames() (DruidLookupStatus, error) {
+
+	methodStartTime := time.Now()
+
+	lookupEndpoint := dc.generateDruidCoordinatorURI(druidLookUpConfig, druidLookUpTierName)
+
+	logger.Log.Infof("Getting Druid look up: %s", lookupEndpoint)
+
+	resp, err := sendRequest("GET", dc.dClient.HttpClient, lookupEndpoint, dc.AuthToken, nil)
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetDruidLookups)
+		return nil, fmt.Errorf("Could not get look up list from druid %s", err.Error())
+	}
+
+	// Druid returns an array of strings which is a problem because go/encoding/json expects a starting brace
+	// According to https://stackoverflow.com/questions/5034444/can-json-start-with druid is sending valid json
+	construct := fmt.Sprintf("{\"results\":%s}", string(resp))
+
+	type convert2json struct {
+		Results []string `json:"results"`
+	}
+	var responseMap convert2json
+	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetDruidLookups)
+		return nil, fmt.Errorf("Unable to unmarshal response from druid for request %s: %s", models.AsJSONString(resp), err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for query %s ->  %s", mon.GetDruidLookups, models.AsJSONString(responseMap))
+	}
+
+	lookupMap := make(DruidLookupStatus)
+	for _, val := range responseMap.Results {
+		lookupMap[val] = false
+	}
+
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetDruidLookups)
+
+	return lookupMap, nil
 }
 
 const (
@@ -1019,21 +987,25 @@ func (dc *DruidDatastoreClient) deleteItemToLookup(host string, lookupName strin
 	return nil
 }
 
-func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, payload map[string]*lookup) error {
+func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, payload *lookup) error {
 	startTime := time.Now()
+
 	url := host //+ "/__default/" + lookupName
 	// Domain lookups are assigned to the __default tier
-	b, err := json.Marshal(map[string]map[string]*lookup{"__default": payload})
+	b, err := json.Marshal(map[string]map[string]*lookup{"__default": map[string]*lookup{lookupName: payload}})
 	if err != nil {
 		logger.Log.Error("Failed to marshal lookupRequest", err.Error())
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.AddDruidMetaLookups)
 		return err
 	}
 
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Dumping url: %s", url)
-		logger.Log.Debugf("Sending lookup request %s, payload: %s", url, string(b))
-	}
+	// if logger.IsDebugEnabled() {
+	// 	logger.Log.Debugf("Dumping url: %s", url)
+	// 	logger.Log.Debugf("Sending lookup request %s, payload: %s", url, string(b))
+	// }
+
+	// Delete the look up first (don't worry about errors, best effort)
+	//dc.deleteItemToLookup(host, lookupName)
 
 	_, err = sendRequest("POST", dc.dClient.HttpClient, url, dc.AuthToken, b)
 	if err != nil {
@@ -1041,6 +1013,8 @@ func (dc *DruidDatastoreClient) addItemToLookup(host string, lookupName string, 
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, errorCode, mon.AddDruidMetaLookups)
 		return err
 	}
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, successCode, mon.AddDruidMetaLookups)
+
 	return nil
 }
 
@@ -1075,30 +1049,13 @@ func (dc *DruidDatastoreClient) checkAndPostDefaultLookup(lookupEndpoint string)
 }
 
 // AddMonitoredObjectToLookup - Adds a monitored object to the druid look ups
-func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenant.MonitoredObject, datatype string, qualifiers []string, reset bool) error {
+func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenant.MonitoredObject, datatype string) error {
 	methodStartTime := time.Now()
-	version := time.Now().Format(time.RFC3339)
+	// version := time.Now().Format(time.RFC3339)
 	lookupEndpoint := dc.generateDruidCoordinatorURI(druidLookUpConfig)
-
 	logger.Log.Info("Druid Lookup URI:%s", lookupEndpoint)
 
-	// Create 1 lookup per domain. Lookups don't support multiple values so the solution is to create
-	// 1 lookup per domain and each lookup has a map where key is monitoredObjectId that belongs in that domain.
-	// Every domain should have a map even if it has no monitored objects.
-	lookups := make(map[string]*lookup)
-	for _, q := range qualifiers {
-		lookupName := buildLookupName(datatype, tenantID, q)
-		domLookup := lookup{
-			Version: version,
-			LookupExtractorFactory: mapLookup{
-				LookupType: "map",
-				Data:       map[string]string{},
-			},
-		}
-		lookups[lookupName] = &domLookup
-
-	}
-
+	var lookups map[string]*lookup
 	// Fetch existing lookup names and delete any existing lookups on the server that are nolonger valid.
 	// Use the lookup map created in the previous step to identify valid domains.
 	lookupNames, err := dc.checkAndPostDefaultLookup(lookupEndpoint)
@@ -1112,16 +1069,9 @@ func (dc *DruidDatastoreClient) AddMonitoredObjectToLookup(tenantID string, moni
 		logger.Log.Infof("Dumping lookupNames: %+v", lookupNames)
 	}
 
-	if datatype == "dom" {
-		err2 := dc.updateDomainLookup(lookupEndpoint, tenantID, datatype, monitoredObjects, lookupNames, lookups)
-		if err2 != nil {
-			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidLookups)
-
-			return err
-		}
-	} else if datatype == "meta" {
-		err2 := dc.updateMetadataLookup(lookupEndpoint, tenantID, datatype, monitoredObjects, lookupNames, lookups)
-		if err2 != nil {
+	if datatype == "meta" {
+		lookups, err = dc.updateMetadataLookup(lookupEndpoint, tenantID, datatype, monitoredObjects)
+		if err != nil {
 			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.UpdateDruidLookups)
 
 			return err

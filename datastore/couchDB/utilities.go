@@ -281,7 +281,7 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -305,7 +305,7 @@ func convertCouchDataArrayToFlattenedArray(genericData []map[string]interface{},
 		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
 		return err
 	}
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -322,7 +322,7 @@ func convertGenericArrayToObject(genericData []map[string]interface{}, dataConta
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -515,7 +515,7 @@ func convertCouchDesignDocumentToObject(genericData map[string]interface{}, data
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }

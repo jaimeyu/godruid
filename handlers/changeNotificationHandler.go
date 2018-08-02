@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync/atomic"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -53,8 +52,6 @@ type ChangeNotificationHandler struct {
 	tenantDB           *datastore.TenantServiceDatastore
 	metricsDB          datastore.DruidDatastore
 	batchSize          int64
-	// To block pollChanges from overlapping
-	locker uint32
 }
 
 // ChangeNotificationHandler singleton
@@ -98,7 +95,6 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		provisioningEvents: make(chan *ChangeEvent, 20),
 		metricsDB:          druid.NewDruidDatasctoreClient(),
 		batchSize:          batchSize,
-		locker:             0,
 	}
 
 	//	go changeNotifH.readFromKafka(broker, defaultKafkaTopic)
@@ -291,30 +287,30 @@ func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
 }
 
 func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
-	// Avoid running overlapping pollChanges
-	if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
-		return
-	}
-	defer atomic.StoreUint32(&c.locker, 0)
+	// // Avoid running overlapping pollChanges
+	// if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
+	// 	return
+	// }
+	// defer atomic.StoreUint32(&c.locker, 0)
 
-	monitoredObjects, err := c.getAllMonitoredObjects(tenantID)
-	if err != nil {
-		logger.Log.Error("Failed to get objects", err.Error())
-		return
-	}
+	// monitoredObjects, err := c.getAllMonitoredObjects(tenantID)
+	// if err != nil {
+	// 	logger.Log.Error("Failed to get objects", err.Error())
+	// 	return
+	// }
 
-	// Enable this to add arbitary number of items into the druid look ups
-	//monitoredObjects = debugAddFakeMonitoredObjects()
+	// // Enable this to add arbitary number of items into the druid look ups
+	// //monitoredObjects = debugAddFakeMonitoredObjects()
 
-	// Update counters
-	setMonitoredObjectCount(len(monitoredObjects))
+	// // Update counters
+	// setMonitoredObjectCount(len(monitoredObjects))
 
-	if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta"); err != nil {
-		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
+	// if err = c.metricsDB.AddMonitoredObjectToLookup(tenantID, monitoredObjects, "meta"); err != nil {
+	// 	logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
 
-	} else {
-		logger.Log.Infof("Updated metadata in metric DB for tenant %s", tenantID)
-	}
+	// } else {
+	// 	logger.Log.Infof("Updated metadata in metric DB for tenant %s", tenantID)
+	// }
 
 }
 
@@ -343,11 +339,11 @@ func (c *ChangeNotificationHandler) getAllMonitoredObjects(tenantID string) ([]*
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
-	// Avoid running overlapping pollChanges
-	if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
-		return nil
-	}
-	defer atomic.StoreUint32(&c.locker, 0)
+	// // Avoid running overlapping pollChanges
+	// if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
+	// 	return nil
+	// }
+	// defer atomic.StoreUint32(&c.locker, 0)
 
 	startTime := time.Now()
 
@@ -382,7 +378,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	var lastError error
 	for _, t := range tenants {
 
-		changeDetected := false
+		//changeDetected := false
 
 		monitoredObjects, err := c.getAllMonitoredObjects(t.ID)
 		if err != nil {
@@ -402,27 +398,27 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 			//TODO at a later time we could use change notification mechanism from DB rather than query all
 			for _, mo := range monitoredObjects {
 				if mo.CreatedTimestamp > lastSyncTimestamp || mo.LastModifiedTimestamp > lastSyncTimestamp {
-					changeDetected = true
+					//changeDetected = true
 					sendMonitoredObject(kafkaProducer, mo)
 				}
 			}
 
 		}
 
-		if fullRefresh || changeDetected {
+		// if fullRefresh || changeDetected {
 
-			// For metadata, we need to build a list of known qualifiers
-			logger.Log.Infof("Dumping Updating metadata from poll change")
+		// 	// For metadata, we need to build a list of known qualifiers
+		// 	logger.Log.Infof("Dumping Updating metadata from poll change")
 
-			if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
-				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
-				lastError = err
-				continue
-			} else {
-				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
-			}
+		// 	if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
+		// 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
+		// 		lastError = err
+		// 		continue
+		// 	} else {
+		// 		logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
+		// 	}
 
-		}
+		// }
 
 	}
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "200", mon.PollChanges)

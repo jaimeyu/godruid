@@ -993,7 +993,7 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 		kafkaProducer.Close()
 	}()
 
-	listOfMonObjs, err := tsh.tenantDB.GetAllMonitoredObjectsV2(tenantID, 1000)
+	listOfMonObjs, err := tsh.tenantDB.GetAllMonitoredObjectsIDs(tenantID)
 	if err != nil {
 		return fmt.Errorf("Could not get all monitored objects :%s", err.Error())
 	}
@@ -1005,14 +1005,9 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 	ts = ts - ((60 * 1000) * int64(minutes)) - 24000
 
 	logger.Log.Debugf("Sending FAKED OUT MO that has failure data")
-	faux := tenmod.MonitoredObject{
-		ID:                "debug_mo_failure_0000",
-		ObjectName:        "debug_mo_failure_0000",
-		TenantID:          tenantID,
-		MonitoredObjectID: "debug_mo_failure_0000",
-	}
-	logger.Log.Debugf("Sending data populating for MO: %s", faux.MonitoredObjectID)
-	_, err = generateAndSendKafkaMsg(kafkaProducer, ts, tenantID, &faux, fauxDataFailtemplate)
+	faux := "debug_mo_failure_0000"
+	logger.Log.Debugf("Sending data populating for MO: %s", faux)
+	_, err = generateAndSendKafkaMsg(kafkaProducer, ts, tenantID, faux, fauxDataFailtemplate)
 	if err != nil {
 		logger.Log.Errorf("Could not send to kafka %s", err.Error())
 		return err
@@ -1023,7 +1018,7 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 
 		ts = db.MakeTimestamp()
 		ts = ts - ((60 * 1000) * int64(minutes)) - 24000
-		logger.Log.Debugf("Starting data populating for MO: %s", mo.MonitoredObjectID)
+		logger.Log.Debugf("Starting data populating for MO: %s", mo)
 		// Make sure to send one for the defined number of minutes
 		for i := uint64(0); i < minutes; i++ {
 			ts = ts + (60 * 1000) // Add a minute
@@ -1039,11 +1034,11 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 }
 
 // generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.
-func generateAndSendKafkaMsg(kafkaProducer *kafka.Writer, ts int64, tenantID string, mo *tenmod.MonitoredObject, faux string) (string, error) {
+func generateAndSendKafkaMsg(kafkaProducer *kafka.Writer, ts int64, tenantID string, moName, faux string) (string, error) {
 	nts := fmt.Sprintf("%d", ts)
 	payload := strings.Replace(faux, tenantWord, tenantID, -1)
-	payload = strings.Replace(payload, monObjIDWord, mo.MonitoredObjectID, -1)
-	payload = strings.Replace(payload, monObjNameWord, mo.ObjectName, -1)
+	payload = strings.Replace(payload, monObjIDWord, moName, -1)
+	payload = strings.Replace(payload, monObjNameWord, moName, -1)
 	payload = strings.Replace(payload, timestampWord, nts, -1)
 	logger.Log.Debugf("Kafka sending: %s", payload)
 

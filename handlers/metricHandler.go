@@ -529,6 +529,19 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	rawMetricReq := populateRawMetricsRequest(queryParams)
 	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, rawMetricReq)
 
+	if len(rawMetricReq.MonitoredObjectId) == 1 {
+		logger.Log.Infof("DEBUG! GEtting 25,000k monitored objects for test")
+		mojbs, err := msh.tenantDB.GetAllMonitoredObjectsIDs(rawMetricReq.Tenant)
+		if err != nil {
+			logger.Log.Errorf("ERROR! GEtting 25,000k monitored objects for test")
+
+			msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+			reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+			return
+		}
+		rawMetricReq.MonitoredObjectId = mojbs
+	}
+
 	result, err := msh.druidDB.GetRawMetrics(rawMetricReq)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
@@ -646,9 +659,21 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		reportError(w, startTime, "400", mon.GetTopNReqStr, msg, http.StatusBadRequest)
 		return
 	}
+	if len(request.MonitoredObjects) == 1 {
+		logger.Log.Infof("DEBUG! GEtting 25,000k monitored objects for test")
+		mojbs, err := msh.tenantDB.GetAllMonitoredObjectsIDs(request.TenantID)
+		if err != nil {
+			logger.Log.Errorf("ERROR! GEtting 25,000k monitored objects for test")
+
+			msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+			reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
+			return
+		}
+		request.MonitoredObjects = mojbs
+	}
 
 	topNreq := request
-	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+	//logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
 
 	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
 	if err != nil {

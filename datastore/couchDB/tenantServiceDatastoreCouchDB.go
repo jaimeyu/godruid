@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/accedian/adh-gather/config"
 	ds "github.com/accedian/adh-gather/datastore"
@@ -18,6 +19,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	mon "github.com/accedian/adh-gather/monitoring"
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
@@ -1653,25 +1655,65 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenan
 
 // @WARNING - This function shouldn't be exposed to the user APIs and should be used internally
 // GetAllMonitoredObjectsV2 - uses the paginated DB call to acquire all monitored objects
-func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsV2(tenantID string, bsize int64) ([]*tenmod.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsIDs(tenantID string) ([]string, error) {
+	methodStartTime := time.Now()
+	//ogger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
-	result := make([]*tenmod.MonitoredObject, 0)
-	startKey := ""
-
-	for true {
-		monitoredObjects, paginationOffsets, err := tsd.GetAllMonitoredObjectsByPage(tenantID, startKey, bsize)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, monitoredObjects...)
-
-		if len(paginationOffsets.Next) == 0 {
-			break
-		}
-
-		startKey = paginationOffsets.Next
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, err
 	}
 
-	return result, nil
+	fetchResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if fetchResponse["rows"] == nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	castedRows := fetchResponse["rows"].([]interface{})
+	if len(castedRows) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+	var ids []string
+
+	// Convert interface results to map results
+	for _, obj := range castedRows {
+		castedObj := obj.(map[string]interface{})
+		genericDoc := castedObj["id"].(string)
+		moID := ds.GetDataIDFromFullID(genericDoc)
+
+		ids = append(ids, moID)
+	}
+
+	logger.Log.Debugf("Retrieved %d items from %ss\n", len(ids), tenmod.TenantMonitoredObjectStr)
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, "200", "GetAllMonitoredObjectsV2")
+
+	return ids, nil
+
+	/*
+		// old imlementation is slow. at 25,000 monitored objects, it takes 22 seconds to query
+			result := make([]*tenmod.MonitoredObject, 0)
+			startKey := ""
+
+			for true {
+				monitoredObjects, paginationOffsets, err := tsd.GetAllMonitoredObjectsByPage(tenantID, startKey, bsize)
+				if err != nil {
+					return nil, err
+				}
+
+				result = append(result, monitoredObjects...)
+
+				if len(paginationOffsets.Next) == 0 {
+					break
+				}
+
+				startKey = paginationOffsets.Next
+			}
+	*/
+
 }

@@ -330,6 +330,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObject(request *m
 
 // GetTopNFor - Executes a TopN on a given metric, based on its min/max/avg.
 func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric, metaMOs []string) (map[string]interface{}, error) {
+	stat := "druid_topn_get"
 	methodStartTime := time.Now()
 
 	if logger.IsDebugEnabled() {
@@ -338,28 +339,28 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 
 	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request, metaMOs)
 	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, stat)
 		return nil, fmt.Errorf("Failed to generate a druid query while processing request: %s: '%s'", models.AsJSONString(request), err.Error())
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(request))
+		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
 	}
 
 	queryStartTime := time.Now()
 	response, err := dc.executeQuery(query)
 	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetTopNReqStr)
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, stat)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, stat)
 		return nil, fmt.Errorf("Failed to get TopN result from druid for request %s: %s", models.AsJSONString(query), err.Error())
 	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetTopNReqStr)
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, "QUERY_"+stat)
 
 	construct := fmt.Sprintf("{\"results\":%s}", string(response))
 
 	responseMap := make(map[string]interface{})
 	if err = json.Unmarshal([]byte(construct), &responseMap); err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, stat)
 		return nil, fmt.Errorf("Unable to unmarshal response from druid for request %s: %s", models.AsJSONString(request), err.Error())
 	}
 
@@ -377,7 +378,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 		"data": data,
 	}
 
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetTopNReqStr)
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, "METHOD_"+stat)
 	return rr, nil
 }
 
@@ -773,7 +774,7 @@ func (dc *DruidDatastoreClient) addToLookup(lookups map[string]*lookup, existing
 			dc.addToLookup(lookups, existingLookups, datatype, tenant, key, val, itemKey, itemVal, partition+1)
 		} else {
 			// No, we can continue to use this bucket
-			domLookup.LookupExtractorFactory.Data[itemKey] = itemVal
+			domLookup.LookupExtractorFactory.Data[itemKey] = lookupName
 			domLookup.count = domLookup.count + 1
 			existingLookups[lookupName] = true
 		}
@@ -811,8 +812,12 @@ func (dc *DruidDatastoreClient) updateMetadataLookup(lookupEndpoint string, tena
 
 	//logger.Log.Debugf("Lookups to add for %+v", lookups)
 	lookups := make(map[string]*lookup, 0)
+
+	// debugging
+
 	// Now fill in the contents of each lookup by traversing the monitoredObject-to-domain associations.
 	for _, mo := range monitoredObjects {
+		dc.addToLookup(lookups, existingNames, datatype, tenantID, "allobjs", "test", mo.MonitoredObjectID, mo.MonitoredObjectID, 0)
 		// Special exception case for domains
 
 		for key, val := range mo.Meta {

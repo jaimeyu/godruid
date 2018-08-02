@@ -1643,20 +1643,23 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 // GetMonitoredObjectIDsToMetaEntry - CouchDB implementation to retrieve all monitored object Ids associated with a specific metadata key/value pair
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error) {
 	logger.Log.Debugf("Fetching all %ss for Tenant %s with meta kay %s and value %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, metakey, metavalue)
+
+	timeStart := time.Now()
 	tenantMODB := createDBPathStr(tsd.server, fmt.Sprintf("%s_monitored-objects", ds.PrependToDataID(tenantID, string(admmod.TenantType))))
 
 	res, err := getIDsByView(tenantMODB, fmt.Sprintf("indexOf%s", metakey), fmt.Sprintf("by%s", metakey), metavalue)
 	if err != nil {
 		return nil, err
 	}
+	mon.TrackAPITimeMetricInSeconds(timeStart, "200", mon.DbGetIDByViewStr)
 
 	return res, nil
 }
 
-// @WARNING - This function shouldn't be exposed to the user APIs and should be used internally
-// GetAllMonitoredObjectsV2 - uses the paginated DB call to acquire all monitored objects
+// GetAllMonitoredObjectsIDs - uses the paginated DB call to acquire all monitored objects' ID
+// Becarefully calling this function, it may take a long time to process
 func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsIDs(tenantID string) ([]string, error) {
-	methodStartTime := time.Now()
+	timeStart := time.Now()
 	//ogger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -1680,7 +1683,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsIDs(tenantID str
 		return nil, fmt.Errorf(ds.NotFoundStr)
 	}
 	var ids []string
-
+	moCount := 0
 	// Convert interface results to map results
 	for _, obj := range castedRows {
 		castedObj := obj.(map[string]interface{})
@@ -1688,32 +1691,15 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsIDs(tenantID str
 		moID := ds.GetDataIDFromFullID(genericDoc)
 
 		ids = append(ids, moID)
+		moCount = moCount + 1
 	}
 
+	// Update counters
+	mon.MonitoredObjectCounter.Set(float64(moCount))
+
 	logger.Log.Debugf("Retrieved %d items from %ss\n", len(ids), tenmod.TenantMonitoredObjectStr)
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, "200", "GetAllMonitoredObjectsV2")
+	mon.TrackAPITimeMetricInSeconds(timeStart, "200", mon.DbGetAllMoIDStr)
 
 	return ids, nil
-
-	/*
-		// old imlementation is slow. at 25,000 monitored objects, it takes 22 seconds to query
-			result := make([]*tenmod.MonitoredObject, 0)
-			startKey := ""
-
-			for true {
-				monitoredObjects, paginationOffsets, err := tsd.GetAllMonitoredObjectsByPage(tenantID, startKey, bsize)
-				if err != nil {
-					return nil, err
-				}
-
-				result = append(result, monitoredObjects...)
-
-				if len(paginationOffsets.Next) == 0 {
-					break
-				}
-
-				startKey = paginationOffsets.Next
-			}
-	*/
 
 }

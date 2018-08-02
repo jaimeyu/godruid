@@ -34,6 +34,8 @@ const (
 	TenantConnectorConfigStr   = "connector_config"
 	TenantConnectorInstanceStr = "connector_instance"
 	DataCleaningProfileStr     = "data_cln_prf"
+	DbGetIDByViewStr           = "db_get_id_by_view_get"
+	DbGetAllMoIDStr            = "db_get_all_mo_id_get"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"

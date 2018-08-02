@@ -583,7 +583,6 @@ func createDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 
 // Retrieve IDs from a particular view based on a key criteria
 func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
-
 	db, err := getDatabase(dbName)
 	view := createDBPathStr("_design", designDocName, "_view", viewName)
 

@@ -961,39 +961,32 @@ func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, na
 
 }
 
-func buildMonitoredObjectFilter(tenantID string, monitoredObjects []string) *godruid.Filter {
-	if len(monitoredObjects) < 1 {
-		return nil
-	}
-
-	filters := make([]*godruid.Filter, len(monitoredObjects))
-	if len(filters) == 0 {
-		return nil
-	}
-
-	for i, monobj := range monitoredObjects {
-		filters[i] = &godruid.Filter{
-			Type:      "selector",
-			Dimension: "monitoredObjectId",
-			Value:     monobj,
-		}
-	}
-
-	return godruid.FilterOr(filters...)
-}
-
 func BuildMonitoredObjectFilter(tenantID string, mos []string) *godruid.Filter {
-	if len(mos) < 1 {
+	// It is important to draw a distinction between a nil set of monitored objects and an empty set of monitored objects. A nil
+	// set means that the query does not care which monitored object it belongs to. An empty set means that no monitored objects
+	// were found as a result of potential pre-filtering activities
+	if mos == nil {
 		return nil
 	}
 
-	return godruid.FilterAnd(
+	var fMOs interface{}
+
+	// Send an empty array since we pre-filtered the monitored objects and came up with nothing
+	if len(mos) == 0 {
+		fMOs = []string{"[\"\"]"}
+	} else {
+		fMOs = mos
+	}
+
+	f := godruid.FilterAnd(
 		godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
 		&godruid.Filter{
 			Type:      "in",
 			Dimension: "monitoredObjectId",
-			Values:    mos,
+			Values:    fMOs,
 		})
+
+	return f
 }
 
 func buildOrFilter(dimensionName string, values []string) *godruid.Filter {
@@ -1106,7 +1099,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, metaMOs
 			BuildMonitoredObjectFilter(request.TenantID, metaMOs),
 		)
 	} else {
-		monObjFilter := buildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+		monObjFilter := BuildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
 		filterOn = godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
 			cleanFilter(),

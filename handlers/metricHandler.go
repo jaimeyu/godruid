@@ -707,6 +707,11 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 //MetaToMonitoredObjects - Retrieve a set of monitored object IDs based on the passed in metadata criteria
 func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta map[string][]string) ([]string, error) {
 
+	// Return nil since our query does not care about metadata
+	if len(meta) == 0 {
+		return nil, nil
+	}
+
 	mos := make([]string, 0)
 
 	firstMeta := true
@@ -725,7 +730,7 @@ func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta ma
 			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
 
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem, err)
 			}
 
 			// Union all the IDs together since we need a conditional OR for all values of a particular key

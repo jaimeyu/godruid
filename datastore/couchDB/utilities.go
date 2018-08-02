@@ -605,7 +605,7 @@ func getIDsByView(dbName string, designDocName string, viewName string, key stri
 
 	for _, r := range rows.([]interface{}) {
 		rMap := r.(map[string]interface{})
-		moList = append(moList, rMap["id"].(string))
+		moList = append(moList, ds.GetDataIDFromFullID(rMap["id"].(string)))
 	}
 
 	return moList, nil

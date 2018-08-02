@@ -913,12 +913,16 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
-	// Now force the indexer to crunch!
-	// Do not wait for this to finish, it will certainly take tens of minutes
-	// Create/update the couchDB views
-	for key := range monitoredObject.Meta {
-		go indexViewTriggerBuild(dbNameKeys, MetaKeyIndexOf+key, "by"+key)
-		go indexViewTriggerBuild(dbNameKeys, MetaKeyViewOf+key, "by"+key)
+	if monitoredObject != nil {
+		tsd.CheckAndAddMetadataView(tenantID, monitoredObject)
+
+		// Now force the indexer to crunch!
+		// Do not wait for this to finish, it will certainly take tens of minutes
+		// Create/update the couchDB views
+		for key := range monitoredObject.Meta {
+			go indexViewTriggerBuild(dbNameKeys, MetaKeyIndexOf+key, "by"+key)
+			go indexViewTriggerBuild(dbNameKeys, MetaKeyViewOf+key, "by"+key)
+		}
 	}
 
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, MetakeysViewUniqueKeysURI)

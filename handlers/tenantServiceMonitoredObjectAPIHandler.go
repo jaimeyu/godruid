@@ -61,6 +61,11 @@ func HandleCreateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
 		reportAPICompletionState(startTime, http.StatusOK, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Created %s %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(converted))
 		return tenant_provisioning_service.NewCreateTenantMonitoredObjectOK().WithPayload(&converted)
@@ -99,6 +104,12 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		result, err := tenantDB.UpdateMonitoredObject(&data)
 		if err != nil {
 			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
@@ -153,10 +164,17 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
+		meta := data.Meta
+		if meta == nil {
+			meta = make(map[string]string)
+		}
+
 		errMerge := models.MergeObjWithMap(oldMonitoredObject, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
+
+		oldMonitoredObject.Meta = meta
 
 		// This only checks if the ID&REV is set.
 		err = oldMonitoredObject.Validate(true)
@@ -168,6 +186,13 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		result, err := tenantDB.UpdateMonitoredObject(oldMonitoredObject)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(meta))
+			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, msg), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
@@ -269,6 +294,12 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s list data to jsonapi return format: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(params.TenantID, nil)
+		if err != nil {
+			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)

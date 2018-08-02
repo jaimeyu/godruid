@@ -160,7 +160,7 @@ const (
 		"_id": "_design/moIndex",
 		"views": {
 			"byName": {
-				"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') {\n    emit(doc.data.objectName, doc._id);\n  }\n}"
+				"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') {\n    emit(doc.data.objectName, doc.data.objectId);\n  }\n}"
 			}
 		},
 		"language": "javascript"

@@ -560,7 +560,7 @@ func HandleGetTopNFor(allowedRoles []string, tenantDB datastore.TenantServiceDat
 		}
 
 		topNreq := request
-		logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+		//logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
 
 		if err = validateDomainsSwag(topNreq.TenantID, topNreq.Domains, tenantDB); err != nil {
 			return metrics_service.NewGetTopNForMetricNotFound().WithPayload(reportAPIError(fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error()), startTime, http.StatusNotFound, mon.GetTopNReqStr, mon.APICompleted, mon.MetricAPICompleted))

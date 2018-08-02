@@ -730,7 +730,7 @@ func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta ma
 			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
 
 			if err != nil {
-				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem, err)
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
 			}
 
 			// Union all the IDs together since we need a conditional OR for all values of a particular key

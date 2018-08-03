@@ -64,7 +64,7 @@ func HandleCreateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		// Done, now generate the couchdb views
 		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, data.Meta)
 		if err != nil {
-			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views for %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 		reportAPICompletionState(startTime, http.StatusOK, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Created %s %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(converted))
@@ -299,7 +299,7 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		// Done, now generate the couchdb views
 		err = tenantDB.UpdateMonitoredObjectMetadataViews(params.TenantID, nil)
 		if err != nil {
-			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views for %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)

@@ -54,13 +54,6 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 		},
 
 		server.Route{
-			Name:        "GetThresholdCrossingByMonitoredObject",
-			Method:      "POST",
-			Pattern:     "/api/v1/threshold-crossing-by-monitored-object",
-			HandlerFunc: result.GetThresholdCrossingByMonitoredObject,
-		},
-
-		server.Route{
 			Name:        "GetThresholdCrossingByMonitoredObjectTopN",
 			Method:      "POST",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object-top-n",
@@ -305,74 +298,6 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
 	trackAPIMetrics(startTime, "200", mon.GenerateSLAReportStr)
-	fmt.Fprintf(w, string(res))
-}
-
-// GetThresholdCrossingByMonitoredObject - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain, and groups by monitoredObjectID
-func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetThrCrossByMonObjStr, msg, http.StatusBadRequest)
-		return
-	}
-	thresholdCrossingReq := metrics.ThresholdCrossingRequest{}
-	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetThrCrossByMonObjStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
-
-	tenantID := thresholdCrossingReq.TenantID
-
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileID)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile: %s. Error: %s", thresholdCrossingReq.ThresholdProfileID, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
-	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, thresholdCrossingReq.Meta)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(&thresholdCrossingReq, &pbTP, metaMOs)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjStr)
 	fmt.Fprintf(w, string(res))
 }
 
@@ -730,7 +655,7 @@ func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta ma
 			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
 
 			if err != nil {
-				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.%s", mkey, valueItem, err)
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
 			}
 
 			// Union all the IDs together since we need a conditional OR for all values of a particular key

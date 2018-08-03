@@ -67,6 +67,7 @@ func (o *DeleteTenantConnectorConfigParams) BindRequest(r *http.Request, route *
 	return nil
 }
 
+// bindConnectorID binds and validates parameter ConnectorID from path.
 func (o *DeleteTenantConnectorConfigParams) bindConnectorID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *DeleteTenantConnectorConfigParams) bindConnectorID(rawData []string, ha
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *DeleteTenantConnectorConfigParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -635,6 +635,7 @@ func trackAPIMetricsByHttpCode(startTime time.Time, code int, objType string) {
 }
 
 func convertToJsonapiObject(obj interface{}, dataContainer interface{}) error {
+
 	// Marshal this object into the appropriate format
 	jsonapiBytes, err := jsonapi.Marshal(obj)
 	if err != nil {

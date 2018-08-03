@@ -11,21 +11,15 @@ import (
 
 func configureAdminServiceV1API(api *operations.GatherAPI, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore) {
 
-	api.AdminProvisioningServiceCreateIngestionDictionaryHandler = admin_provisioning_service.CreateIngestionDictionaryHandlerFunc(handlers.HandleCreateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceCreateTenantHandler = admin_provisioning_service.CreateTenantHandlerFunc(handlers.HandleCreateTenant(handlers.SkylightAdminRoleOnly, adminDB, tenantDB))
-	api.AdminProvisioningServiceCreateValidTypesHandler = admin_provisioning_service.CreateValidTypesHandlerFunc(handlers.HandleCreateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
-	api.AdminProvisioningServiceDeleteIngestionDictionaryHandler = admin_provisioning_service.DeleteIngestionDictionaryHandlerFunc(handlers.HandleDeleteIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceDeleteTenantHandler = admin_provisioning_service.DeleteTenantHandlerFunc(handlers.HandleDeleteTenant(handlers.SkylightAdminRoleOnly, adminDB))
-	api.AdminProvisioningServiceDeleteValidTypesHandler = admin_provisioning_service.DeleteValidTypesHandlerFunc(handlers.HandleDeleteValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceGetAllTenantsHandler = admin_provisioning_service.GetAllTenantsHandlerFunc(handlers.HandleGetAllTenants(handlers.SkylightAdminRoleOnly, adminDB))
-	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(handlers.HandleGetIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
+	api.AdminProvisioningServiceGetIngestionDictionaryHandler = admin_provisioning_service.GetIngestionDictionaryHandlerFunc(handlers.HandleGetIngestionDictionary(handlers.AllRoles, adminDB))
 	api.AdminProvisioningServiceGetTenantHandler = admin_provisioning_service.GetTenantHandlerFunc(handlers.HandleGetTenant(handlers.SkylightAdminRoleOnly, adminDB))
 	api.AdminProvisioningServiceGetTenantSummaryByAliasHandler = admin_provisioning_service.GetTenantSummaryByAliasHandlerFunc(handlers.HandleGetTenantSummaryByAlias(adminDB))
-	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(handlers.HandleGetValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
+	api.AdminProvisioningServiceGetValidTypesHandler = admin_provisioning_service.GetValidTypesHandlerFunc(handlers.HandleGetValidTypes(handlers.AllRoles, adminDB))
 	api.AdminProvisioningServiceGetTenantIDByAliasHandler = admin_provisioning_service.GetTenantIDByAliasHandlerFunc(handlers.HandleGetTenantIDByAlias(adminDB))
 	api.AdminProvisioningServicePatchTenantHandler = admin_provisioning_service.PatchTenantHandlerFunc(handlers.HandlePatchTenant(handlers.SkylightAdminRoleOnly, adminDB))
-	api.AdminProvisioningServiceUpdateIngestionDictionaryHandler = admin_provisioning_service.UpdateIngestionDictionaryHandlerFunc(handlers.HandleUpdateIngestionDictionary(handlers.SkylightAdminRoleOnly, adminDB))
-	api.AdminProvisioningServiceUpdateValidTypesHandler = admin_provisioning_service.UpdateValidTypesHandlerFunc(handlers.HandleUpdateValidTypes(handlers.SkylightAdminRoleOnly, adminDB))
 }
 
 func configureTenantServiceV1API(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore) {
@@ -92,24 +86,6 @@ func configureMetricServiceV1API(api *operations.GatherAPI, druidDB datastore.Dr
 }
 
 func configurev1APIThatWeMayRemove(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore) {
-	api.AdminProvisioningServiceCreateAdminUserHandler = admin_provisioning_service.CreateAdminUserHandlerFunc(func(params admin_provisioning_service.CreateAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.CreateAdminUser has not yet been implemented")
-	})
-	api.AdminProvisioningServiceDeleteAdminUserHandler = admin_provisioning_service.DeleteAdminUserHandlerFunc(func(params admin_provisioning_service.DeleteAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.DeleteAdminUser has not yet been implemented")
-	})
-	api.AdminProvisioningServiceGetAdminUserHandler = admin_provisioning_service.GetAdminUserHandlerFunc(func(params admin_provisioning_service.GetAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetAdminUser has not yet been implemented")
-	})
-	api.AdminProvisioningServiceGetAllAdminUsersHandler = admin_provisioning_service.GetAllAdminUsersHandlerFunc(func(params admin_provisioning_service.GetAllAdminUsersParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.GetAllAdminUsers has not yet been implemented")
-	})
-	api.TenantProvisioningServicePatchTenantUserHandler = tenant_provisioning_service.PatchTenantUserHandlerFunc(func(params tenant_provisioning_service.PatchTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.PatchTenantUser has not yet been implemented")
-	})
-	api.AdminProvisioningServiceUpdateAdminUserHandler = admin_provisioning_service.UpdateAdminUserHandlerFunc(func(params admin_provisioning_service.UpdateAdminUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation admin_provisioning_service.UpdateAdminUser has not yet been implemented")
-	})
 	api.AdminProvisioningServiceUpdateTenantHandler = admin_provisioning_service.UpdateTenantHandlerFunc(func(params admin_provisioning_service.UpdateTenantParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.UpdateTenant has not yet been implemented")
 	})
@@ -118,19 +94,5 @@ func configurev1APIThatWeMayRemove(api *operations.GatherAPI, tenantDB datastore
 	api.TenantProvisioningServiceUpdateTenantMetadataHandler = tenant_provisioning_service.UpdateTenantMetadataHandlerFunc(handlers.HandleUpdateTenantMetadata(handlers.SkylightAdminRoleOnly, tenantDB))
 	api.TenantProvisioningServiceUpdateTenantMonitoredObjectHandler = tenant_provisioning_service.UpdateTenantMonitoredObjectHandlerFunc(handlers.HandleUpdateTenantMonitoredObject(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceUpdateTenantThresholdProfileHandler = tenant_provisioning_service.UpdateTenantThresholdProfileHandlerFunc(handlers.HandleUpdateTenantThresholdProfile(handlers.SkylightAndTenantAdminRoles, tenantDB))
-	api.TenantProvisioningServiceUpdateTenantUserHandler = tenant_provisioning_service.UpdateTenantUserHandlerFunc(func(params tenant_provisioning_service.UpdateTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.UpdateTenantUser has not yet been implemented")
-	})
-	api.TenantProvisioningServiceGetTenantUserHandler = tenant_provisioning_service.GetTenantUserHandlerFunc(func(params tenant_provisioning_service.GetTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetTenantUser has not yet been implemented")
-	})
-	api.TenantProvisioningServiceGetAllTenantUsersHandler = tenant_provisioning_service.GetAllTenantUsersHandlerFunc(func(params tenant_provisioning_service.GetAllTenantUsersParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.GetAllTenantUsers has not yet been implemented")
-	})
-	api.TenantProvisioningServiceDeleteTenantUserHandler = tenant_provisioning_service.DeleteTenantUserHandlerFunc(func(params tenant_provisioning_service.DeleteTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.DeleteTenantUser has not yet been implemented")
-	})
-	api.TenantProvisioningServiceCreateTenantUserHandler = tenant_provisioning_service.CreateTenantUserHandlerFunc(func(params tenant_provisioning_service.CreateTenantUserParams) middleware.Responder {
-		return middleware.NotImplemented("operation tenant_provisioning_service.CreateTenantUser has not yet been implemented")
-	})
+
 }

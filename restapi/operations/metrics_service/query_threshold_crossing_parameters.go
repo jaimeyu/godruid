@@ -58,7 +58,6 @@ func (o *QueryThresholdCrossingParams) BindRequest(r *http.Request, route *middl
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)

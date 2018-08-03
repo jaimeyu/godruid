@@ -67,6 +67,7 @@ func (o *GetTenantMonitoredObjectParams) BindRequest(r *http.Request, route *mid
 	return nil
 }
 
+// bindMonObjID binds and validates parameter MonObjID from path.
 func (o *GetTenantMonitoredObjectParams) bindMonObjID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -81,6 +82,7 @@ func (o *GetTenantMonitoredObjectParams) bindMonObjID(rawData []string, hasKey b
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetTenantMonitoredObjectParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

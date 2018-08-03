@@ -57,6 +57,7 @@ func (o *GetAllTenantConnectorInstancesParams) BindRequest(r *http.Request, rout
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetAllTenantConnectorInstancesParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

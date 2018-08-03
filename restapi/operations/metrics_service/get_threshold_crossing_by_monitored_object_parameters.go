@@ -145,6 +145,9 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) BindRequest(r *http.Reques
 	return nil
 }
 
+// bindDirection binds and validates array parameter Direction from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvDirection string
@@ -170,6 +173,7 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindDirection(rawData []st
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -187,6 +191,7 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindGranularity(rawData []
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("interval", "query")
@@ -207,6 +212,9 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindInterval(rawData []str
 	return nil
 }
 
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMeta string
@@ -232,6 +240,9 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindMeta(rawData []string,
 	return nil
 }
 
+// bindMetric binds and validates array parameter Metric from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMetric string
@@ -257,6 +268,9 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindMetric(rawData []strin
 	return nil
 }
 
+// bindObjectType binds and validates array parameter ObjectType from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindObjectType(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvObjectType string
@@ -282,6 +296,7 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindObjectType(rawData []s
 	return nil
 }
 
+// bindTenant binds and validates parameter Tenant from query.
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("tenant", "query")
@@ -302,6 +317,7 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindTenant(rawData []strin
 	return nil
 }
 
+// bindThresholdProfileID binds and validates parameter ThresholdProfileID from query.
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindThresholdProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("thresholdProfileId", "query")
@@ -322,6 +338,7 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindThresholdProfileID(raw
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -343,6 +360,9 @@ func (o *GetThresholdCrossingByMonitoredObjectParams) bindTimeout(rawData []stri
 	return nil
 }
 
+// bindVendor binds and validates array parameter Vendor from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvVendor string

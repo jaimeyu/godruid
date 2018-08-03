@@ -42,10 +42,6 @@ func (m *TenantIngestionProfileVendorMapMonitoredObjectTypeMap) validateMonitore
 
 	for k := range m.MonitoredObjectTypeMap {
 
-		if swag.IsZero(m.MonitoredObjectTypeMap[k]) { // not required
-			continue
-		}
-
 		if val, ok := m.MonitoredObjectTypeMap[k]; ok {
 			if err := val.Validate(formats); err != nil {
 				return err

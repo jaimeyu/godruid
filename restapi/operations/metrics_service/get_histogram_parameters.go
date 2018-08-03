@@ -141,6 +141,7 @@ func (o *GetHistogramParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindDirection binds and validates parameter Direction from query.
 func (o *GetHistogramParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -158,6 +159,7 @@ func (o *GetHistogramParams) bindDirection(rawData []string, hasKey bool, format
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GetHistogramParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -175,6 +177,7 @@ func (o *GetHistogramParams) bindGranularity(rawData []string, hasKey bool, form
 	return nil
 }
 
+// bindGranularityBuckets binds and validates parameter GranularityBuckets from query.
 func (o *GetHistogramParams) bindGranularityBuckets(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -196,6 +199,7 @@ func (o *GetHistogramParams) bindGranularityBuckets(rawData []string, hasKey boo
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GetHistogramParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -213,6 +217,9 @@ func (o *GetHistogramParams) bindInterval(rawData []string, hasKey bool, formats
 	return nil
 }
 
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetHistogramParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMeta string
@@ -238,6 +245,7 @@ func (o *GetHistogramParams) bindMeta(rawData []string, hasKey bool, formats str
 	return nil
 }
 
+// bindMetric binds and validates parameter Metric from query.
 func (o *GetHistogramParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -255,6 +263,7 @@ func (o *GetHistogramParams) bindMetric(rawData []string, hasKey bool, formats s
 	return nil
 }
 
+// bindResolution binds and validates parameter Resolution from query.
 func (o *GetHistogramParams) bindResolution(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -276,6 +285,7 @@ func (o *GetHistogramParams) bindResolution(rawData []string, hasKey bool, forma
 	return nil
 }
 
+// bindTenant binds and validates parameter Tenant from query.
 func (o *GetHistogramParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -293,6 +303,7 @@ func (o *GetHistogramParams) bindTenant(rawData []string, hasKey bool, formats s
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GetHistogramParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -314,6 +325,7 @@ func (o *GetHistogramParams) bindTimeout(rawData []string, hasKey bool, formats 
 	return nil
 }
 
+// bindVendor binds and validates parameter Vendor from query.
 func (o *GetHistogramParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

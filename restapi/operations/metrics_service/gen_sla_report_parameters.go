@@ -127,6 +127,7 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GenSLAReportParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -145,6 +146,7 @@ func (o *GenSLAReportParams) bindGranularity(rawData []string, hasKey bool, form
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GenSLAReportParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("interval", "query")
@@ -165,6 +167,9 @@ func (o *GenSLAReportParams) bindInterval(rawData []string, hasKey bool, formats
 	return nil
 }
 
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GenSLAReportParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMeta string
@@ -190,6 +195,7 @@ func (o *GenSLAReportParams) bindMeta(rawData []string, hasKey bool, formats str
 	return nil
 }
 
+// bindTenant binds and validates parameter Tenant from query.
 func (o *GenSLAReportParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("tenant", "query")
@@ -210,6 +216,7 @@ func (o *GenSLAReportParams) bindTenant(rawData []string, hasKey bool, formats s
 	return nil
 }
 
+// bindThresholdProfileID binds and validates parameter ThresholdProfileID from query.
 func (o *GenSLAReportParams) bindThresholdProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("thresholdProfileId", "query")
@@ -230,6 +237,7 @@ func (o *GenSLAReportParams) bindThresholdProfileID(rawData []string, hasKey boo
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GenSLAReportParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -251,6 +259,7 @@ func (o *GenSLAReportParams) bindTimeout(rawData []string, hasKey bool, formats 
 	return nil
 }
 
+// bindTimezone binds and validates parameter Timezone from query.
 func (o *GenSLAReportParams) bindTimezone(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

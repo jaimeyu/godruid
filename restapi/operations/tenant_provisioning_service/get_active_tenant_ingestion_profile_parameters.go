@@ -57,6 +57,7 @@ func (o *GetActiveTenantIngestionProfileParams) BindRequest(r *http.Request, rou
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *GetActiveTenantIngestionProfileParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

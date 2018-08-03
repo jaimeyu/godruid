@@ -57,6 +57,7 @@ func (o *GetTenantSummaryByAliasParams) BindRequest(r *http.Request, route *midd
 	return nil
 }
 
+// bindValue binds and validates parameter Value from path.
 func (o *GetTenantSummaryByAliasParams) bindValue(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -149,3 +149,34 @@ func (m *AggregateMetricsAPIRequestObject) UnmarshalBinary(b []byte) error {
 	*m = res
 	return nil
 }
+
+// AggregateMetricsAPIRequestObjectAggregation the aggregation function
+// swagger:model AggregateMetricsAPIRequestObjectAggregation
+type AggregateMetricsAPIRequestObjectAggregation struct {
+
+	// name
+	Name string `json:"name,omitempty"`
+}
+
+// Validate validates this aggregate metrics API request object aggregation
+func (m *AggregateMetricsAPIRequestObjectAggregation) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *AggregateMetricsAPIRequestObjectAggregation) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *AggregateMetricsAPIRequestObjectAggregation) UnmarshalBinary(b []byte) error {
+	var res AggregateMetricsAPIRequestObjectAggregation
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}

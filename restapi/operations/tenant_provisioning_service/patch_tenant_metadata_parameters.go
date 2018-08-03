@@ -65,7 +65,6 @@ func (o *PatchTenantMetadataParams) BindRequest(r *http.Request, route *middlewa
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -89,6 +88,7 @@ func (o *PatchTenantMetadataParams) BindRequest(r *http.Request, route *middlewa
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *PatchTenantMetadataParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap tenant threshold profile monitored object type map metric map direction map
@@ -17,7 +18,7 @@ import (
 type TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap struct {
 
 	// direction map
-	DirectionMap TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapDirectionMap `json:"directionMap,omitempty"`
+	DirectionMap map[string]TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMapEventMap `json:"directionMap,omitempty"`
 }
 
 // Validate validates this tenant threshold profile monitored object type map metric map direction map
@@ -40,11 +41,17 @@ func (m *TenantThresholdProfileMonitoredObjectTypeMapMetricMapDirectionMap) vali
 		return nil
 	}
 
-	if err := m.DirectionMap.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("directionMap")
+	for k := range m.DirectionMap {
+
+		if err := validate.Required("directionMap"+"."+k, "body", m.DirectionMap[k]); err != nil {
+			return err
 		}
-		return err
+		if val, ok := m.DirectionMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

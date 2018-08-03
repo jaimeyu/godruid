@@ -157,6 +157,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) BindRequest(r *http.Re
 	return nil
 }
 
+// bindDirection binds and validates parameter Direction from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -174,6 +175,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindDirection(rawData 
 	return nil
 }
 
+// bindGranularity binds and validates parameter Granularity from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -191,6 +193,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindGranularity(rawDat
 	return nil
 }
 
+// bindInterval binds and validates parameter Interval from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("interval", "query")
@@ -211,6 +214,9 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindInterval(rawData [
 	return nil
 }
 
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	var qvMeta string
@@ -236,6 +242,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMeta(rawData []str
 	return nil
 }
 
+// bindMetric binds and validates parameter Metric from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("metric", "query")
@@ -256,6 +263,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMetric(rawData []s
 	return nil
 }
 
+// bindNumResults binds and validates parameter NumResults from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindNumResults(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -277,6 +285,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindNumResults(rawData
 	return nil
 }
 
+// bindObjectType binds and validates parameter ObjectType from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindObjectType(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("objectType", "query")
@@ -297,6 +306,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindObjectType(rawData
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("tenantId", "query")
@@ -317,6 +327,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTenantID(rawData [
 	return nil
 }
 
+// bindThresholdProfileID binds and validates parameter ThresholdProfileID from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindThresholdProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("thresholdProfileId", "query")
@@ -337,6 +348,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindThresholdProfileID
 	return nil
 }
 
+// bindTimeout binds and validates parameter Timeout from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -358,6 +370,7 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTimeout(rawData []
 	return nil
 }
 
+// bindVendor binds and validates parameter Vendor from query.
 func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("vendor", "query")

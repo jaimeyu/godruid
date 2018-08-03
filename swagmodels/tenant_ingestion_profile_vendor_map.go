@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // TenantIngestionProfileVendorMap tenant ingestion profile vendor map
@@ -17,7 +18,7 @@ import (
 type TenantIngestionProfileVendorMap struct {
 
 	// vendor map
-	VendorMap TenantIngestionProfileVendorMapVendorMap `json:"vendorMap,omitempty"`
+	VendorMap map[string]TenantIngestionProfileVendorMapMonitoredObjectTypeMap `json:"vendorMap,omitempty"`
 }
 
 // Validate validates this tenant ingestion profile vendor map
@@ -40,11 +41,17 @@ func (m *TenantIngestionProfileVendorMap) validateVendorMap(formats strfmt.Regis
 		return nil
 	}
 
-	if err := m.VendorMap.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("vendorMap")
+	for k := range m.VendorMap {
+
+		if err := validate.Required("vendorMap"+"."+k, "body", m.VendorMap[k]); err != nil {
+			return err
 		}
-		return err
+		if val, ok := m.VendorMap[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

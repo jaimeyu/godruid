@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/accedian/adh-gather/handlers"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/icrowley/fake"
@@ -17,17 +19,27 @@ import (
 
 const (
 	adminDBName = "adh-admin"
+
+	linksPrev  = "prev"
+	linksFirst = "first"
+	linksSelf  = "self"
+	linksNext  = "next"
 )
 
 var (
 	adminDB  datastore.AdminServiceDatastore
 	tenantDB datastore.TenantServiceDatastore
+
+	objectTypes = []string{string(tenmod.TwampPE), string(tenmod.TwampSF), string(tenmod.TwampSL), string(tenmod.Flowmeter)}
+	deviceTypes = []string{string(tenmod.AccedianVNID), string(tenmod.AccedianNID)}
 )
 
 func setupTestDatastore() error {
 	// Setup Test Env
-	gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
+	cfg := gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
 	monitoring.InitMetrics()
+
+	cfg.Set("ingDict", "../files/defaultIngestionDictionary.json")
 
 	var err error
 	adminDB, err = handlers.GetAdminServiceDatastore()
@@ -43,6 +55,15 @@ func setupTestDatastore() error {
 	adminDB.DeleteDatabase(adminDBName)
 
 	_, err = adminDB.CreateDatabase(adminDBName)
+	if err != nil {
+		return fmt.Errorf("Unable to create Admin DB: %s", err.Error())
+	}
+
+	err = adminDB.AddAdminViews()
+	if err != nil {
+		return fmt.Errorf("Unable to add Admin Views to Admin DB: %s", err.Error())
+	}
+
 	return err
 }
 
@@ -93,10 +114,21 @@ func createRandomDataCleaningProfileRuleCondition() *swagmodels.DataCleaningCond
 }
 
 func createHttpRequest(tenantID string, roles string) *http.Request {
-	req := http.Request{
-		Header: make(http.Header),
+	return createHttpRequestWithParams(tenantID, roles, "", "")
+}
+
+func createHttpRequestWithParams(tenantID string, roles string, url string, method string) *http.Request {
+	if len(url) == 0 {
+		url = "/i/am/made/up"
 	}
+
+	if len(method) == 0 {
+		method = "GET"
+	}
+
+	req, _ := http.NewRequest(method, url, bytes.NewBufferString("whatever cause it was already read"))
+
 	req.Header.Add(handlers.XFwdTenantId, tenantID)
 	req.Header.Add(handlers.XFwdUserRoles, roles)
-	return &req
+	return req
 }

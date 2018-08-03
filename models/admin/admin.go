@@ -136,10 +136,15 @@ func (dict *IngestionDictionary) SetID(s string) error {
 	return nil
 }
 
+// GetName - required implementation for jsonapi unmarshalling
+func (dict *IngestionDictionary) GetName() string {
+	return "ingestionDictionaries"
+}
+
 // Validate - used during validation of incoming REST requests for this object
 func (dict *IngestionDictionary) Validate(isUpdate bool) error {
 	if !isUpdate && len(dict.REV) != 0 {
-		return errors.New("Invalid Ingestion Dictionaryrequest: must not provide a revision value in a creation request")
+		return errors.New("Invalid Ingestion Dictionary request: must not provide a revision value in a creation request")
 	}
 	if isUpdate && (len(dict.REV) == 0) {
 		return errors.New("Invalid Ingestion Dictionary request: must provide a revision (_rev) for an update")

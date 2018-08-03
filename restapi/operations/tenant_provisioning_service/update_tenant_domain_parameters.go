@@ -70,7 +70,6 @@ func (o *UpdateTenantDomainParams) BindRequest(r *http.Request, route *middlewar
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -99,6 +98,7 @@ func (o *UpdateTenantDomainParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindDomainID binds and validates parameter DomainID from path.
 func (o *UpdateTenantDomainParams) bindDomainID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -113,6 +113,7 @@ func (o *UpdateTenantDomainParams) bindDomainID(rawData []string, hasKey bool, f
 	return nil
 }
 
+// bindTenantID binds and validates parameter TenantID from path.
 func (o *UpdateTenantDomainParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

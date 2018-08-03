@@ -11,7 +11,9 @@ import (
 )
 
 var (
-	NotFoundStr = "status 404 - not found"
+	NotFoundStr      = "status 404 - not found"
+	ConflictStr      = "already exists"
+	ConflictErrorStr = "status 409 - conflict"
 )
 
 const (

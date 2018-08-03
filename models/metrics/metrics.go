@@ -218,17 +218,13 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 }
 
 type ThresholdCrossingRequest struct {
-	TenantID            string              `json:"tenantId"`
-	Meta                map[string][]string `json:"meta,omitempty"`
-	Interval            string              `json:"interval,omitempty"`
-	Granularity         string              `json:"granularity,omitempty"`
-	ThresholdProfileID  string              `json:"thresholdProfileId,omitempty"`
-	MetricWhitelist     []MetricIdentifier  `json:"metricWhitelist,omitempty"`
-	MetricNameWhiteList []string            `json:"metricNameWhitelist,omitempty"`
-	ObjectTypeWhiteList []string            `json:"objectTypeWhitelist,omitempty"`
-	DirectionWhiteList  []string            `json:"directionWhitelist,omitempty"`
-	VendorWhiteList     []string            `json:"vendorWhitelist,omitempty"`
-	Timeout             int32               `json:"timeout,omitempty"`
+	TenantID           string              `json:"tenantId"`
+	Meta               map[string][]string `json:"meta,omitempty"`
+	Interval           string              `json:"interval,omitempty"`
+	Granularity        string              `json:"granularity,omitempty"`
+	ThresholdProfileID string              `json:"thresholdProfileId,omitempty"`
+	MetricWhitelist    []MetricIdentifier  `json:"metricWhitelist,omitempty"`
+	Timeout            int32               `json:"timeout,omitempty"`
 }
 
 type AggregateMetricsAPIRequest struct {

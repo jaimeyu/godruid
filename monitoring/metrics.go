@@ -134,7 +134,6 @@ const (
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
 
 	GetThrCrossStr             = ThrCrossStr + metricNameDelimiter + OPGetStr
-	GetThrCrossByMonObjStr     = ThrCrossStrTopN + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetThrCrossByMonObjTopNStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr

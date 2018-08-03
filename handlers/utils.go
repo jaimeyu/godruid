@@ -628,16 +628,6 @@ func incrementAPICounters(counterMetrics ...mon.MetricCounterType) {
 	}
 }
 
-// setMonitoredObjectCount - Sets the current monitored object count
-func setMonitoredObjectCount(count int) {
-	mon.MonitoredObjectCounter.Set(float64(count))
-}
-
-// setMonitoredObjectCount - Sets the current monitored object count
-func setMetadataKeyCount(count int) {
-	mon.MetadataKeysCounter.Set(float64(count))
-}
-
 // trackAPIMetrics - updates API call durations in the metric service
 func trackAPIMetricsByHttpCode(startTime time.Time, code int, objType string) {
 	codeStr := strconv.Itoa(code)

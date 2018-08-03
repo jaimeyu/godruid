@@ -371,7 +371,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		//monitoredObjects = debugAddFakeMonitoredObjects()
 
 		// Update counters
-		setMonitoredObjectCount(len(monitoredObjects))
+		//setMonitoredObjectCount(len(monitoredObjects))
 
 		if fullRefresh {
 			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)

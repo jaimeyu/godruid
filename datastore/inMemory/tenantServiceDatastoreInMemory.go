@@ -1490,10 +1490,10 @@ func doesSliceContainString(container []string, value string) bool {
 	return false
 }
 
-func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObjectMetadataViews(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
+func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObjectMetadataViews(tenantID string, metas map[string]string) error {
 	return nil
 }
-func (tsd *TenantServiceDatastoreInMemory) CheckAndAddMetadataView(tenantID string, monitoredObject *tenmod.MonitoredObject) error {
+func (tsd *TenantServiceDatastoreInMemory) CheckAndAddMetadataView(tenantID string, metas map[string]string) error {
 	return nil
 }
 func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {

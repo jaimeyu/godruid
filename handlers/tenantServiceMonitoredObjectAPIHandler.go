@@ -62,7 +62,7 @@ func HandleCreateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		}
 
 		// Done, now generate the couchdb views
-		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, &data)
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, data.Meta)
 		if err != nil {
 			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
@@ -107,7 +107,7 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		}
 
 		// Done, now generate the couchdb views
-		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, &data)
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, data.Meta)
 		if err != nil {
 			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
@@ -189,7 +189,7 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		}
 
 		// Done, now generate the couchdb views
-		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject)
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject.Meta)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(meta))
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, msg), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -516,7 +516,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 			}
 
-			err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, existingMonitoredObject)
+			err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, existingMonitoredObject.Meta)
 			if err != nil {
 				msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject))
 				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))

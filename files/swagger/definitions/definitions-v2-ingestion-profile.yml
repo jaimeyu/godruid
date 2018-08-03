@@ -1,0 +1,132 @@
+  IngestionProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["metrics"]
+            properties:
+              metrics:
+                type: "object"
+                properties:
+                  vendorMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        monitoredObjectTypeMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              metricMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "boolean"
+                    
+  IngestionProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev", "metrics"]
+            properties:
+              _rev:
+                type: "string"
+              metrics:
+                type: "object"
+                properties:
+                  vendorMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        monitoredObjectTypeMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              metricMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "boolean"
+            
+             
+  IngestionProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/IngestionProfile'
+
+  IngestionProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/IngestionProfile'
+
+  IngestionProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionProfiles]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_id", "_rev", "tenantId", "dataType", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          metrics:
+            type: "object"
+            properties:
+              vendorMap:
+                type: "object"
+                additionalProperties:
+                  type: "object"
+                  properties:
+                    monitoredObjectTypeMap:
+                      type: "object"
+                      additionalProperties:
+                        type: "object"
+                        properties:
+                          metricMap:
+                            type: "object"
+                            additionalProperties:
+                              type: "boolean"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+            

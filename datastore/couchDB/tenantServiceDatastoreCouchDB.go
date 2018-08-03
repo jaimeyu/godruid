@@ -952,7 +952,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 			return nil, err
 		}
 	} else {
-		return nil, fmt.Errorf("%s not found", tenmod.TenantIngestionProfileStr)
+		return nil, fmt.Errorf(ds.NotFoundStr)
 	}
 
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(res))

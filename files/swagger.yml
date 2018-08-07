@@ -3399,6 +3399,170 @@ paths:
           description: "The maximum number of records to return for a single page"
       tags:
         - TenantProvisioningServiceV2
+  /v2/threshold-profiles:
+    post:
+      summary: Create a Threshold Profile for a Tenant.
+      operationId: CreateThresholdProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The record is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ThresholdProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Threshold Profiles for the specified Tenant.
+      operationId: GetAllThresholdProfilesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There are no Threshold Profiles provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/threshold-profiles/{thrPrfId}:
+    get:
+      summary: Retrieve a Tenant Threshold Profile by id.
+      operationId: GetThresholdProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Threshold Profile
+      operationId: UpdateThresholdProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided in Threshold Profile update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ThresholdProfileUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Threshold Profile specified by the provided id.
+      operationId: DeleteThresholdProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
 definitions:
   JsonApiTenant:
     type: "object"
@@ -5250,7 +5414,6 @@ definitions:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
-            
 
   MonitoredObjectList:
     type: "object"
@@ -5310,4 +5473,138 @@ definitions:
             properties:
               domains:
                 $ref: '#/definitions/JsonApiRelationship'
- 
+  ThresholdProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "thresholds"]
+            properties:
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+                    
+  ThresholdProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+  
+  ThresholdProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [thresholdProfiles]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["tenantId", "_id", "_rev", "datatype", "name", "createdTimestamp", "lastModifiedTimestamp", "thresholds"]
+        properties:
+          tenantId:
+            type: "string"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          name:
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          thresholds:
+            $ref: '#/definitions/ThresholdsObject'
+
+  ThresholdsObject:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            metricMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  eventAttrMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "string"
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        directionMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              eventMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "object"
+                                  properties:
+                                    eventAttrMap:
+                                      type: "object"
+                                      additionalProperties:
+                                        type: "string"

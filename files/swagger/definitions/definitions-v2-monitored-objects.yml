@@ -57,4 +57,3 @@
             properties:
               domains:
                 $ref: '#/definitions/JsonApiRelationship'
- 

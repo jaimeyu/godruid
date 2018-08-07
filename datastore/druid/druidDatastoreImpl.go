@@ -378,7 +378,12 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 	}
 	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
 
-	query, pp, err := AggMetricsQuery(request.TenantID, table, request.Interval, metaMOs, request.Aggregation, request.Metrics, request.Timeout, request.Granularity)
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 30000
+	}
+
+	query, pp, err := AggMetricsQuery(request.TenantID, table, request.Interval, metaMOs, request.Aggregation, request.Metrics, timeout, request.Granularity)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.QueryAggregatedMetricsStr)
 		return nil, err

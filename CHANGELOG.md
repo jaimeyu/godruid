@@ -1,3 +1,4 @@
+* Feature - V2 API support for Threshold Profiles
 ## Current Release 
 ### 0.184.0 
 **Release Date:** Wed Aug  1 16:36:22 UTC 2018     

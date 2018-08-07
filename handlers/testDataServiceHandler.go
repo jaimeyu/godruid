@@ -893,7 +893,7 @@ func generateRandomString(length int) string {
 
 // Generate a string that uses a simulated BYT enode name.
 func generateRandomEnodeB() string {
-	offset := rand.Int() % 99999
+	offset := rand.Int() % 99999999999999999
 	//generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
 	// Enode B template
 	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18

@@ -72,9 +72,12 @@ const (
 
 	mapFnName = "map"
 
+	viewTemplateStr  = "_design/indexOf%s/_view/by%s"
+	indexTemplateStr = "_design/viewOf%s/_view/by%s"
+
 	metaFieldPrefix              = "meta"
 	metakeysViewDdocName         = "metaViews"
-	MetakeysViewUniqueKeysURI    = "uniqueKeys"
+	MetakeysViewUniqueKeysURI    = "_design/metaViews/_view/uniqueKeys"
 	metakeysViewUniqueValuessURI = "uniqueValues"
 	metaViewAllValuesPerKey      = "allValuesByKeyWithCounts"
 	metaViewLookupWords          = "lookupWords"

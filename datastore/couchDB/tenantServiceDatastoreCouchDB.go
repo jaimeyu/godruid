@@ -698,7 +698,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 
 // GetAllMonitoredObjectsByPage - CouchDB implementation of GetAllMonitoredObjectsByPage
 func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
-	logger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
+	//logger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
@@ -774,7 +774,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID 
 		}
 	}
 
-	logger.Log.Debugf("Retrieved %d %ss from startKey %s\n", len(res), tenmod.TenantMonitoredObjectStr, startKey)
+	// logger.Log.Debugf("Retrieved %d %ss from startKey %s\n", len(res), tenmod.TenantMonitoredObjectStr, startKey)
 	return res, &paginationOffsets, nil
 }
 
@@ -860,8 +860,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
+// createNewTenantMetadataViews - Create an index based on metadata keys
 func createNewTenantMetadataViews(dbName string, key string) error {
-	// Create an index based on metadata keys
 	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
 	if err != nil {
 		msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", dbName, key, err.Error())
@@ -876,32 +876,18 @@ func createNewTenantMetadataViews(dbName string, key string) error {
 	return nil
 }
 
-// CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata
+// CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata and then create it
 func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string) error {
 
-	// _, err := tsd.GetMetadataKeys(tenantID)
-	// if err != nil {
-	// 	return err
-	// }
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	for key := range meta {
-
-		// Check if metadata key is old/new
-		/*if _, ok := newKeys[key]; ok {
-			// Already in database
-			continue
-		}*/
-		//if err := tsd.CheckMetaDdocExist(tenantID, key); err != nil {
-		//logger.Log.Debugf("DDoc for %s does not exist, creating it,%s", key, err.Error())
-
 		// Create an index based on metadata keys
 		err := createNewTenantMetadataViews(dbNameKeys, key)
 		if err != nil {
 			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
-			//return errors.New(msg)
 			// This isn't critical error but log it
-			logger.Log.Debug(msg)
+			logger.Log.Warning(msg)
 		}
 		//}
 	}
@@ -936,9 +922,8 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 
 // GetMetadataKeys - Gets all the known metadata keys from the couchdb view
 func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[string]int, error) {
-	//https://megatron.npav.accedian.net/couchdb/tenant_2_b4772641-c19b-45fb-ad0e-848de0cfb862_monitored-objects/_design/metaViews/_view/uniqueKeys?group=true
 
-	// model
+	// Model for Extracting Couchdb data
 	type couchViewItem struct {
 		Key   string `json:"key"`
 		Value int    `json:"value"`
@@ -954,8 +939,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 	v := url.Values{}
 	v.Set("group", "true")
 
-	//doc, err := db.Get("_design/"+metakeysViewDdocName+"/_view/"+MetakeysViewUniqueKeysURI, v)
-	url := "_design/metaViews/_view/uniqueKeys"
+	url := MetakeysViewUniqueKeysURI
 	doc, err := db.Get(url, v)
 	if err != nil {
 		return nil, fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
@@ -985,7 +969,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 
 // CheckMetaDdocExist - Gets all the known metadata keys from the couchdb view
 func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, docname string) error {
-	//https://megatron.npav.accedian.net/couchdb/tenant_2_b4772641-c19b-45fb-ad0e-848de0cfb862_monitored-objects/_design/metaViews/_view/uniqueKeys?group=true
 
 	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
@@ -993,14 +976,15 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, do
 		return err
 	}
 
-	//doc, err := db.Get("_design/"+metakeysViewDdocName+"/_view/"+MetakeysViewUniqueKeysURI, v)
-	url := fmt.Sprintf("_design/indexOf%s/_view/by%s", docname, docname)
+	// Check if the view exist
+	url := fmt.Sprintf(viewTemplateStr, docname, docname)
 	err = db.Contains(url)
 	if err != nil {
 		return fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
 	}
 
-	url = fmt.Sprintf("_design/viewOf%s/_view/by%s", docname, docname)
+	// Check in the index exist
+	url = fmt.Sprintf(indexTemplateStr, docname, docname)
 	err = db.Contains(url)
 	if err != nil {
 		return fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
@@ -1021,7 +1005,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, err
 	}
 
-	index := "indexOfobjectName"
+	index := monitoredObjectIndex
 	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
 	// Expect only 1 return
 	const expectOnly1Result = 1
@@ -1034,7 +1018,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 	id, found := fetchedData[0]["_id"]
 
 	if !found {
-		return nil, errors.New(fmt.Sprintf("Could not find mapping of monitored object with name %s to id %s", name, id))
+		return nil, fmt.Errorf(fmt.Sprintf("Could not find mapping of monitored object with name %s to id %s", name, id))
 	}
 
 	if logger.IsDebugEnabled() {

@@ -1,0 +1,230 @@
+  ConnectorConfigCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
+            properties:
+              name:
+                type: "string"
+              url: 
+                type: "string"
+              port:
+                type: "integer"
+              pollingFrequency:
+                type: "integer"
+              username:
+                type: "string"
+              password:
+                type: "string"
+              exportGroup:
+                type: "string"
+              datahubHeartbeatFrequency:
+                type: "integer"
+              datahubConnectionRetryFrequency:
+                type: "integer"
+              type:
+                type: "string"
+              
+  ConnectorConfigUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              url: 
+                type: "string"
+              port:
+                type: "integer"
+              pollingFrequency:
+                type: "integer"
+              username:
+                type: "string"
+              password:
+                type: "string"
+              exportGroup:
+                type: "string"
+              datahubHeartbeatFrequency:
+                type: "integer"
+              datahubConnectionRetryFrequency:
+                type: "integer"
+              type:
+                type: "string"
+  
+  ConnectorConfigResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ConnectorConfig'
+  ConnectorConfigListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/ConnectorConfig'
+  
+  ConnectorConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          url: 
+            type: "string"
+          port:
+            type: "integer"
+          pollingFrequency:
+            type: "integer"
+          username:
+            type: "string"
+          password:
+            type: "string"
+          exportGroup:
+            type: "string"
+          datahubHeartbeatFrequency:
+            type: "integer"
+          datahubConnectionRetryFrequency:
+            type: "integer"
+          type:
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  ConnectorInstanceCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorInstances]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["status", "hostname"]
+            properties:
+              status:
+                type: "string"
+              hostname: 
+                type: "string"
+
+  ConnectorInstanceUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorInstances]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              status:
+                type: "string"
+              hostname: 
+                type: "string"
+              createdTimestamp:
+                type: "integer"
+              lastModifiedTimestamp:
+                type: "integer"
+
+  ConnectorInstanceResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ConnectorInstance'
+
+  ConnectorInstanceListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/ConnectorInstance'
+
+  ConnectorInstance:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorInstances]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "tenantId", "status", "hostname", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          status:
+            type: "string"
+          hostname: 
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"

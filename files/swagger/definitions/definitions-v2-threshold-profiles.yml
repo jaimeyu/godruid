@@ -1,0 +1,135 @@
+  ThresholdProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "thresholds"]
+            properties:
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+                    
+  ThresholdProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+  
+  ThresholdProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [thresholdProfiles]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["tenantId", "_id", "_rev", "datatype", "name", "createdTimestamp", "lastModifiedTimestamp", "thresholds"]
+        properties:
+          tenantId:
+            type: "string"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          name:
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          thresholds:
+            $ref: '#/definitions/ThresholdsObject'
+
+  ThresholdsObject:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            metricMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  eventAttrMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "string"
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        directionMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              eventMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "object"
+                                  properties:
+                                    eventAttrMap:
+                                      type: "object"
+                                      additionalProperties:
+                                        type: "string"

@@ -916,6 +916,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup)
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewLookupWords)
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey)
+	go indexViewTriggerBuild(dbNameKeys, moIndexDdoc, moIndexView)
+	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountByNameView)
+	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountView)
 
 	return nil
 }

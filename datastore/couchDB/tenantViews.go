@@ -89,6 +89,13 @@ const (
 	metaKeyName  = "{{KeyName}}"
 	metaKeyField = "{{KeyField}}"
 
+	moIndexDdoc = "moIndex"
+	moIndexView = "byName"
+
+	objectCountDdoc       = "monitoredObjectCount"
+	objectCountByNameView = "byName"
+	objectCountView       = "count"
+
 	metaViews = `{
 		"_id": "_design/metaViews",
 		"language": "javascript",
@@ -277,7 +284,7 @@ func indexViewTriggerBuild(dbName string, ddoc string, key string) {
 	if err != nil {
 		logger.Log.Errorf("Could not load db %s", dbName)
 	}
-	uri := fmt.Sprintf("_design/%s/_view/%s", ddoc, key)
+	uri := fmt.Sprintf(viewTemplateStr, ddoc, key)
 	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
 	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
 	_, err = db.Get(uri, nil)

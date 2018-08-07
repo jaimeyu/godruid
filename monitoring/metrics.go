@@ -91,6 +91,7 @@ const (
 	PatchIngPrfStr     = IngestionProfileStr + metricNameDelimiter + OPPatchStr
 	GetActiveIngPrfStr = IngestionProfileStr + metricNameDelimiter + OPGetActiveStr
 	DeleteIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPDeleteStr
+	GetAllIngPrfStr    = IngestionProfileStr + metricNameDelimiter + OPGetAllStr
 
 	CreateTenantUserStr = TenantUserStr + metricNameDelimiter + OPCreateStr
 	UpdateTenantUserStr = TenantUserStr + metricNameDelimiter + OPUpdateStr

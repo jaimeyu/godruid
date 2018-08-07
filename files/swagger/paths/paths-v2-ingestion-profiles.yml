@@ -1,0 +1,171 @@
+  /v2/ingestion-profiles:
+    post:
+      summary: Create an Ingestion Profile for a Tenant.
+      operationId: CreateIngestionProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The ingestion profile already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IngestionProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Ingestion Profiles
+      operationId: GetAllIngestionProfilesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Ingestion Profile is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/ingestion-profiles/{ingestionProfileId}:
+    get:
+      summary: Retrieve a Tenant Ingestion Profile by id.
+      operationId: GetIngestionProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Ingestion Profile
+      operationId: UpdateIngestionProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IngestionProfileUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Ingestion Profile specified by the provided Ingestion Profile Id.
+      operationId: DeleteIngestionProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2

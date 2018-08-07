@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	common "github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
@@ -495,12 +497,28 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		for _, item := range data.Items {
+		response := make([]*common.BulkOperationResult, len(data.Items))
+
+		// Internal function responsible for managing error scenarios for individual result items
+		itemError := func(position int, itemResponse *common.BulkOperationResult, reason int, itemErr string) {
+			itemResponse.OK = false
+			itemResponse.REASON = strconv.Itoa(reason)
+			itemResponse.ERROR = itemErr
+
+			logger.Log.Errorf(generateErrorMessage(reason, itemErr))
+
+			response[position] = itemResponse
+		}
+
+		for i, item := range data.Items {
+			itemResponse := common.BulkOperationResult{
+				ID: item.MetadataKey,
+			}
 			// Issue request to DAO Layer
 			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
 			if err != nil {
-				msg := fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusNotFound, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
 			}
 
 			logger.Log.Infof("Patching metadata for %s with name %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName)
@@ -510,25 +528,39 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			existingMonitoredObject.ID = existingMonitoredObject.MonitoredObjectID
 
 			// Issue request to DAO Layer
-			_, err = tenantDB.UpdateMonitoredObject(existingMonitoredObject)
+			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
 			if err != nil {
-				msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
-				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
 			}
 
 			err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, existingMonitoredObject.Meta)
 			if err != nil {
-				msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject))
-				return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(reportAPIError(generateErrorMessage(http.StatusInternalServerError, msg), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to update monitored object views %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject)))
+				continue
 			}
 
 			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMonitoredObject.ObjectName)
 			NotifyMonitoredObjectUpdated(existingMonitoredObject.TenantID, existingMonitoredObject)
 
+			itemResponse.OK = true
+			itemResponse.REV = updatedMonitoredObject.REV
+			response[i] = &itemResponse
+		}
+
+		res, err := json.Marshal(response)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to serialize bulk upsert response %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := make(swagmodels.BulkOperationResponse, len(data.Items))
+		err = json.Unmarshal(res, &converted)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to format bulk upsert %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
-		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK()
+		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK().WithPayload(converted)
 	}
 }

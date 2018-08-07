@@ -145,11 +145,8 @@ type ThresholdCrossingMetricResult struct {
 }
 
 type ThresholdCrossingTopNRequest struct {
-	ObjectType string `json:"objectType"`
-	Direction  string `json:"direction"`
-	Metric     string `json:"metric"`
-	Vendor     string `json:"vendor"`
-	TenantID   string `json:"tenantId"`
+	Metric   MetricIdentifier `json:"metric"`
+	TenantID string           `json:"tenantId"`
 	// ISO-8601 Intervals
 	Interval string              `json:"interval,omitempty"`
 	Meta     map[string][]string `json:"meta,omitempty"`
@@ -178,7 +175,7 @@ type TopNForMetric struct {
 	// Operation - 'avg', 'min', 'max'
 	Aggregator string `json:"aggregator,omitempty"`
 	// Metric that we are apply Aggregation to
-	Metric []MetricIdentifier `json:"metrics,omitempty"`
+	Metric MetricIdentifier `json:"metric,omitempty"`
 
 	// Metrics that are related and interesting BUT are NOT part of the post aggregation
 	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
@@ -199,9 +196,6 @@ func (tpn *TopNForMetric) Validate() (*TopNForMetric, error) {
 		req.Timeout = 5000
 	}
 
-	if len(tpn.Metric) == 0 {
-		return nil, errors.New("Metric must not be empty")
-	}
 	if tpn.NumResult == 0 {
 		tpn.NumResult = 10
 	}
@@ -223,7 +217,7 @@ type ThresholdCrossingRequest struct {
 	Interval           string              `json:"interval,omitempty"`
 	Granularity        string              `json:"granularity,omitempty"`
 	ThresholdProfileID string              `json:"thresholdProfileId,omitempty"`
-	MetricWhitelist    []MetricIdentifier  `json:"metricWhitelist,omitempty"`
+	Metrics            []MetricIdentifier  `json:"metrics,omitempty"`
 	Timeout            int32               `json:"timeout,omitempty"`
 }
 

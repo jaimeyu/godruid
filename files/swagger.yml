@@ -613,7 +613,7 @@ paths:
       tags:
         - MetricsService
   /v1/threshold-crossing-by-monitored-object-top-n:
-    get:
+    post:
       operationId: GetThresholdCrossingByMonitoredObjectTopN
       produces:
         - application/vnd.api+json
@@ -639,57 +639,11 @@ paths:
           schema:
             type: string
       parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
+        - name: body
+          in: body
           required: true
-          type: string
-        - name: tenantId
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          in: query
-          required: true
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: true
-          type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: true
-          type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: numResults
-          in: query
-          required: false
-          type: integer
-          format: int32
+          schema:
+            $ref: '#/definitions/ThresholdCrossingByMOTopNAPIRequestObject'
       tags:
         - MetricsService
   '/v1/aggregated-metrics':
@@ -4330,7 +4284,7 @@ definitions:
       - tenantId
       - interval
       - aggregator
-      - metrics
+      - metric
     properties:
       tenantId:
         type: string
@@ -4364,10 +4318,8 @@ definitions:
       numResults:
         type: integer
         description: Number of results to return
-      metrics:
-        type: array
-        items:
-          $ref: '#/definitions/MetricIdentifierObject'
+      metric:
+        $ref: '#/definitions/MetricIdentifierObject'
       metricsView:
         type: array
         items:
@@ -4461,12 +4413,52 @@ definitions:
         type: integer
         description: query timeout in milliseconds
         example: 30000
-      metricWhitelist:
+      metrics:
         type: array
         description: limits the results to include only metrics in the whitelist
         items:
           $ref: '#/definitions/MetricIdentifierObject'
-
+  ThresholdCrossingByMOTopNAPIRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: array
+          items:
+            type: string
+      thresholdProfileId:
+        type: string
+        description: ID of the threshold profile that is used to select metrics and events
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      numResults:
+        type: integer
+        format: int32
+        description: query timeout in milliseconds
+        example: 30000
+      metric:
+        $ref: '#/definitions/MetricIdentifierObject'
+        description: the metric to be used for the top N query
   MetricIdentifierObject:
     type: object
     required:

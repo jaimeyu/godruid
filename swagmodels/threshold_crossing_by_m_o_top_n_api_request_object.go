@@ -6,8 +6,6 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -15,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ThresholdCrossingAPIRequestObject threshold crossing API request object
-// swagger:model ThresholdCrossingAPIRequestObject
-type ThresholdCrossingAPIRequestObject struct {
+// ThresholdCrossingByMOTopNAPIRequestObject threshold crossing by m o top n API request object
+// swagger:model ThresholdCrossingByMOTopNAPIRequestObject
+type ThresholdCrossingByMOTopNAPIRequestObject struct {
 
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
@@ -27,10 +25,13 @@ type ThresholdCrossingAPIRequestObject struct {
 	Interval *string `json:"interval"`
 
 	// set of domains identifiers to use for filtering
-	Meta map[string]string `json:"meta,omitempty"`
+	Meta map[string][]string `json:"meta,omitempty"`
 
-	// limits the results to include only metrics in the whitelist
-	Metrics []*MetricIdentifierObject `json:"metrics"`
+	// the metric to be used for the top N query
+	Metric *MetricIdentifierObject `json:"metric,omitempty"`
+
+	// query timeout in milliseconds
+	NumResults int32 `json:"numResults,omitempty"`
 
 	// the tenant identifier
 	// Required: true
@@ -43,15 +44,15 @@ type ThresholdCrossingAPIRequestObject struct {
 	Timeout int64 `json:"timeout,omitempty"`
 }
 
-// Validate validates this threshold crossing API request object
-func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) error {
+// Validate validates this threshold crossing by m o top n API request object
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInterval(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateMetrics(formats); err != nil {
+	if err := m.validateMetric(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -65,7 +66,7 @@ func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) er
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Registry) error {
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) validateInterval(formats strfmt.Registry) error {
 
 	if err := validate.Required("interval", "body", m.Interval); err != nil {
 		return err
@@ -74,32 +75,25 @@ func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Regi
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateMetrics(formats strfmt.Registry) error {
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) validateMetric(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Metrics) { // not required
+	if swag.IsZero(m.Metric) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.Metrics); i++ {
-		if swag.IsZero(m.Metrics[i]) { // not required
-			continue
-		}
-
-		if m.Metrics[i] != nil {
-			if err := m.Metrics[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("metrics" + "." + strconv.Itoa(i))
-				}
-				return err
+	if m.Metric != nil {
+		if err := m.Metric.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("metric")
 			}
+			return err
 		}
-
 	}
 
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateTenantID(formats strfmt.Registry) error {
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("tenantId", "body", m.TenantID); err != nil {
 		return err
@@ -109,7 +103,7 @@ func (m *ThresholdCrossingAPIRequestObject) validateTenantID(formats strfmt.Regi
 }
 
 // MarshalBinary interface implementation
-func (m *ThresholdCrossingAPIRequestObject) MarshalBinary() ([]byte, error) {
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -117,8 +111,8 @@ func (m *ThresholdCrossingAPIRequestObject) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ThresholdCrossingAPIRequestObject) UnmarshalBinary(b []byte) error {
-	var res ThresholdCrossingAPIRequestObject
+func (m *ThresholdCrossingByMOTopNAPIRequestObject) UnmarshalBinary(b []byte) error {
+	var res ThresholdCrossingByMOTopNAPIRequestObject
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -332,7 +332,7 @@
       tags:
         - MetricsService
   /v1/threshold-crossing-by-monitored-object-top-n:
-    get:
+    post:
       operationId: GetThresholdCrossingByMonitoredObjectTopN
       produces:
         - application/vnd.api+json
@@ -358,57 +358,11 @@
           schema:
             type: string
       parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
+        - name: body
+          in: body
           required: true
-          type: string
-        - name: tenantId
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          in: query
-          required: true
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: true
-          type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: true
-          type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: numResults
-          in: query
-          required: false
-          type: integer
-          format: int32
+          schema:
+            $ref: '#/definitions/ThresholdCrossingByMOTopNAPIRequestObject'
       tags:
         - MetricsService
   '/v1/aggregated-metrics':

@@ -9,27 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
 )
 
 // GetThresholdCrossingByMonitoredObjectTopNURL generates an URL for the get threshold crossing by monitored object top n operation
 type GetThresholdCrossingByMonitoredObjectTopNURL struct {
-	Direction          *string
-	Granularity        *string
-	Interval           string
-	Meta               []string
-	Metric             string
-	NumResults         *int32
-	ObjectType         string
-	TenantID           string
-	ThresholdProfileID string
-	Timeout            *int32
-	Vendor             string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -58,89 +42,6 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNURL) Build() (*url.URL, error)
 		_basePath = "/api"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
-
-	qs := make(url.Values)
-
-	var direction string
-	if o.Direction != nil {
-		direction = *o.Direction
-	}
-	if direction != "" {
-		qs.Set("direction", direction)
-	}
-
-	var granularity string
-	if o.Granularity != nil {
-		granularity = *o.Granularity
-	}
-	if granularity != "" {
-		qs.Set("granularity", granularity)
-	}
-
-	interval := o.Interval
-	if interval != "" {
-		qs.Set("interval", interval)
-	}
-
-	var metaIR []string
-	for _, metaI := range o.Meta {
-		metaIS := metaI
-		if metaIS != "" {
-			metaIR = append(metaIR, metaIS)
-		}
-	}
-
-	meta := swag.JoinByFormat(metaIR, "")
-
-	if len(meta) > 0 {
-		qsv := meta[0]
-		if qsv != "" {
-			qs.Set("meta", qsv)
-		}
-	}
-
-	metric := o.Metric
-	if metric != "" {
-		qs.Set("metric", metric)
-	}
-
-	var numResults string
-	if o.NumResults != nil {
-		numResults = swag.FormatInt32(*o.NumResults)
-	}
-	if numResults != "" {
-		qs.Set("numResults", numResults)
-	}
-
-	objectType := o.ObjectType
-	if objectType != "" {
-		qs.Set("objectType", objectType)
-	}
-
-	tenantID := o.TenantID
-	if tenantID != "" {
-		qs.Set("tenantId", tenantID)
-	}
-
-	thresholdProfileID := o.ThresholdProfileID
-	if thresholdProfileID != "" {
-		qs.Set("thresholdProfileId", thresholdProfileID)
-	}
-
-	var timeout string
-	if o.Timeout != nil {
-		timeout = swag.FormatInt32(*o.Timeout)
-	}
-	if timeout != "" {
-		qs.Set("timeout", timeout)
-	}
-
-	vendor := o.Vendor
-	if vendor != "" {
-		qs.Set("vendor", vendor)
-	}
-
-	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

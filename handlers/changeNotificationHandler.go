@@ -332,14 +332,15 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	tenants, err := (*c.adminDB).GetAllTenantDescriptors()
 	if err != nil {
 		logger.Log.Error("Unable to fetch list of tenants: %s", err.Error())
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "500", mon.PollChanges)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.PollChanges)
 
 		return err
 	}
 
 	if len(tenants) < 1 {
 		logger.Log.Warning("No tenants found")
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "500", mon.PollChanges)
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.PollChanges)
+
 		return nil
 	}
 
@@ -359,8 +360,6 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	var lastError error
 	for _, t := range tenants {
 
-		// changeDetected := false
-
 		monitoredObjects, err := c.getAllMonitoredObjects(t.ID)
 		if err != nil {
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
@@ -370,39 +369,20 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		// Enable this to add arbitary number of items into the druid look ups
 		//monitoredObjects = debugAddFakeMonitoredObjects()
 
-		// Update counters
-		//setMonitoredObjectCount(len(monitoredObjects))
-
 		if fullRefresh {
 			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
 		} else {
 			//TODO at a later time we could use change notification mechanism from DB rather than query all
 			for _, mo := range monitoredObjects {
 				if mo.CreatedTimestamp > lastSyncTimestamp || mo.LastModifiedTimestamp > lastSyncTimestamp {
-					// changeDetected = true
 					sendMonitoredObject(kafkaProducer, mo)
 				}
 			}
 
 		}
-		// Obsolete
-		// if fullRefresh || changeDetected {
-
-		// 	// For metadata, we need to build a list of known qualifiers
-		// 	logger.Log.Infof("Dumping Updating metadata from poll change")
-
-		// 	if err = c.metricsDB.AddMonitoredObjectToLookup(t.ID, monitoredObjects, "meta"); err != nil {
-		// 		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
-		// 		lastError = err
-		// 		continue
-		// 	} else {
-		// 		logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
-		// 	}
-
-		// }
 
 	}
-	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, startTime, "200", mon.PollChanges)
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.PollChanges)
 
 	return lastError
 }

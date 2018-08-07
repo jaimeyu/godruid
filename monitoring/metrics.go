@@ -186,7 +186,7 @@ const (
 	UpdateDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPUpdateStr
 	DeleteDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPDeleteStr
 	AddDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPCreateStr
-	PollChanges            = DruidStr + metricNameDelimiter + "pollchanges" + OPUpdateStr
+	PollChanges            = DruidStr + metricNameDelimiter + "pollchanges" + metricNameDelimiter + OPUpdateStr
 
 	// Data Cleaning
 	GetDataCleaningProfileStr    = DataCleaningProfileStr + metricNameDelimiter + OPGetStr

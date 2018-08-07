@@ -1008,7 +1008,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, metaMOs
 
 	typeInvertedLbl := "inverted"
 	// Only operate on the first item
-	metric := request.Metric[0]
+	metric := request.Metric
 
 	// Metric order and sort on
 	selectedMetric := map[string]interface{}{metricLbl: opLbl}

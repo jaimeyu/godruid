@@ -331,13 +331,13 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		thresholdCrossingReq.Granularity = "PT1H"
 	}
 
-	if len(thresholdCrossingReq.Vendor) == 0 {
+	if thresholdCrossingReq.Metric.Vendor == "" {
 		msg := generateErrorMessage(http.StatusBadRequest, "vendor is required")
 		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	if len(thresholdCrossingReq.ObjectType) == 0 {
+	if thresholdCrossingReq.Metric.ObjectType == "" {
 		msg := generateErrorMessage(http.StatusBadRequest, "object type is required")
 		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
 		return
@@ -366,7 +366,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		return
 	}
 
-	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Vendor, thresholdCrossingReq.ObjectType, thresholdCrossingReq.Metric, &pbTP); err != nil {
+	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Metric.Vendor, thresholdCrossingReq.Metric.ObjectType, thresholdCrossingReq.Metric.Name, &pbTP); err != nil {
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, err.Error(), http.StatusNotFound)
 		return
 	}

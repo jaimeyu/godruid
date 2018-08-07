@@ -6,15 +6,14 @@ package metrics_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 
-	strfmt "github.com/go-openapi/strfmt"
+	swagmodels "github.com/accedian/adh-gather/swagmodels"
 )
 
 // NewGetThresholdCrossingByMonitoredObjectTopNParams creates a new GetThresholdCrossingByMonitoredObjectTopNParams object
@@ -34,55 +33,10 @@ type GetThresholdCrossingByMonitoredObjectTopNParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
-	  In: query
-	*/
-	Direction *string
-	/*ISO-8601 period combination.
-	  In: query
-	*/
-	Granularity *string
-	/*ISO-8601 Intervals.
 	  Required: true
-	  In: query
+	  In: body
 	*/
-	Interval string
-	/*
-	  In: query
-	*/
-	Meta []string
-	/*
-	  Required: true
-	  In: query
-	*/
-	Metric string
-	/*
-	  In: query
-	*/
-	NumResults *int32
-	/*
-	  Required: true
-	  In: query
-	*/
-	ObjectType string
-	/*Tenant ID
-	  Required: true
-	  In: query
-	*/
-	TenantID string
-	/*
-	  Required: true
-	  In: query
-	*/
-	ThresholdProfileID string
-	/*
-	  In: query
-	*/
-	Timeout *int32
-	/*
-	  Required: true
-	  In: query
-	*/
-	Vendor string
+	Body *swagmodels.ThresholdCrossingByMOTopNAPIRequestObject
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -94,299 +48,30 @@ func (o *GetThresholdCrossingByMonitoredObjectTopNParams) BindRequest(r *http.Re
 
 	o.HTTPRequest = r
 
-	qs := runtime.Values(r.URL.Query())
+	if runtime.HasBody(r) {
+		defer r.Body.Close()
+		var body swagmodels.ThresholdCrossingByMOTopNAPIRequestObject
+		if err := route.Consumer.Consume(r.Body, &body); err != nil {
+			if err == io.EOF {
+				res = append(res, errors.Required("body", "body"))
+			} else {
+				res = append(res, errors.NewParseError("body", "body", "", err))
+			}
+		} else {
+			// validate body object
+			if err := body.Validate(route.Formats); err != nil {
+				res = append(res, err)
+			}
 
-	qDirection, qhkDirection, _ := qs.GetOK("direction")
-	if err := o.bindDirection(qDirection, qhkDirection, route.Formats); err != nil {
-		res = append(res, err)
+			if len(res) == 0 {
+				o.Body = &body
+			}
+		}
+	} else {
+		res = append(res, errors.Required("body", "body"))
 	}
-
-	qGranularity, qhkGranularity, _ := qs.GetOK("granularity")
-	if err := o.bindGranularity(qGranularity, qhkGranularity, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qInterval, qhkInterval, _ := qs.GetOK("interval")
-	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qMeta, qhkMeta, _ := qs.GetOK("meta")
-	if err := o.bindMeta(qMeta, qhkMeta, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qMetric, qhkMetric, _ := qs.GetOK("metric")
-	if err := o.bindMetric(qMetric, qhkMetric, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qNumResults, qhkNumResults, _ := qs.GetOK("numResults")
-	if err := o.bindNumResults(qNumResults, qhkNumResults, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qObjectType, qhkObjectType, _ := qs.GetOK("objectType")
-	if err := o.bindObjectType(qObjectType, qhkObjectType, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qTenantID, qhkTenantID, _ := qs.GetOK("tenantId")
-	if err := o.bindTenantID(qTenantID, qhkTenantID, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qThresholdProfileID, qhkThresholdProfileID, _ := qs.GetOK("thresholdProfileId")
-	if err := o.bindThresholdProfileID(qThresholdProfileID, qhkThresholdProfileID, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qTimeout, qhkTimeout, _ := qs.GetOK("timeout")
-	if err := o.bindTimeout(qTimeout, qhkTimeout, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qVendor, qhkVendor, _ := qs.GetOK("vendor")
-	if err := o.bindVendor(qVendor, qhkVendor, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindDirection binds and validates parameter Direction from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Direction = &raw
-
-	return nil
-}
-
-// bindGranularity binds and validates parameter Granularity from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Granularity = &raw
-
-	return nil
-}
-
-// bindInterval binds and validates parameter Interval from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("interval", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("interval", "query", raw); err != nil {
-		return err
-	}
-
-	o.Interval = raw
-
-	return nil
-}
-
-// bindMeta binds and validates array parameter Meta from query.
-//
-// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
-
-	var qvMeta string
-	if len(rawData) > 0 {
-		qvMeta = rawData[len(rawData)-1]
-	}
-
-	// CollectionFormat:
-	metaIC := swag.SplitByFormat(qvMeta, "")
-	if len(metaIC) == 0 {
-		return nil
-	}
-
-	var metaIR []string
-	for _, metaIV := range metaIC {
-		metaI := metaIV
-
-		metaIR = append(metaIR, metaI)
-	}
-
-	o.Meta = metaIR
-
-	return nil
-}
-
-// bindMetric binds and validates parameter Metric from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("metric", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("metric", "query", raw); err != nil {
-		return err
-	}
-
-	o.Metric = raw
-
-	return nil
-}
-
-// bindNumResults binds and validates parameter NumResults from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindNumResults(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	value, err := swag.ConvertInt32(raw)
-	if err != nil {
-		return errors.InvalidType("numResults", "query", "int32", raw)
-	}
-	o.NumResults = &value
-
-	return nil
-}
-
-// bindObjectType binds and validates parameter ObjectType from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindObjectType(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("objectType", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("objectType", "query", raw); err != nil {
-		return err
-	}
-
-	o.ObjectType = raw
-
-	return nil
-}
-
-// bindTenantID binds and validates parameter TenantID from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTenantID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("tenantId", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("tenantId", "query", raw); err != nil {
-		return err
-	}
-
-	o.TenantID = raw
-
-	return nil
-}
-
-// bindThresholdProfileID binds and validates parameter ThresholdProfileID from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindThresholdProfileID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("thresholdProfileId", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("thresholdProfileId", "query", raw); err != nil {
-		return err
-	}
-
-	o.ThresholdProfileID = raw
-
-	return nil
-}
-
-// bindTimeout binds and validates parameter Timeout from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	value, err := swag.ConvertInt32(raw)
-	if err != nil {
-		return errors.InvalidType("timeout", "query", "int32", raw)
-	}
-	o.Timeout = &value
-
-	return nil
-}
-
-// bindVendor binds and validates parameter Vendor from query.
-func (o *GetThresholdCrossingByMonitoredObjectTopNParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("vendor", "query")
-	}
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// AllowEmptyValue: false
-	if err := validate.RequiredString("vendor", "query", raw); err != nil {
-		return err
-	}
-
-	o.Vendor = raw
-
 	return nil
 }

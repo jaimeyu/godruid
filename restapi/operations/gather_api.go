@@ -675,6 +675,7 @@ func (o *GatherAPI) Validate() error {
 	if o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
+
 	if o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateConnectorConfigV2Handler")
 	}
@@ -1200,6 +1201,10 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/bulk/upsert/monitored-objects/meta"] = tenant_provisioning_service.NewBulkUpsertMonitoredObjectMeta(o.context, o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/connector-configs"] = tenant_provisioning_service_v2.NewCreateConnectorConfigV2(o.context, o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1562,10 +1567,10 @@ func (o *GatherAPI) initHandlerCache() {
 	}
 	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object"] = metrics_service.NewGetThresholdCrossingByMonitoredObject(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
+	o.handlers["POST"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

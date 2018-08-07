@@ -323,6 +323,10 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		thresholdCrossingReq.NumResults = 10 // default value
 	}
 
+	if thresholdCrossingReq.Timeout == 0 {
+		thresholdCrossingReq.Timeout = 30000
+	}
+
 	if len(thresholdCrossingReq.Granularity) == 0 {
 		thresholdCrossingReq.Granularity = "PT1H"
 	}
@@ -458,7 +462,6 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 		logger.Log.Infof("DEBUG! GEtting 25,000k monitored objects for test")
 		mojbs, err := msh.tenantDB.GetAllMonitoredObjectsIDs(rawMetricReq.Tenant)
 		if err != nil {
-			logger.Log.Errorf("ERROR! GEtting 25,000k monitored objects for test")
 
 			msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 			reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
@@ -585,10 +588,8 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if len(request.MonitoredObjects) == 1 {
-		logger.Log.Infof("DEBUG! GEtting 25,000k monitored objects for test")
 		mojbs, err := msh.tenantDB.GetAllMonitoredObjectsIDs(request.TenantID)
 		if err != nil {
-			logger.Log.Errorf("ERROR! GEtting 25,000k monitored objects for test")
 
 			msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 			reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)

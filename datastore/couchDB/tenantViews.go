@@ -22,6 +22,31 @@ const (
 	monitoredObjectsByObjectNameIndex = "byObjectName"
 	monitoredObjectsByObjectNameKey   = "objectName"
 	monitoredObjectIndex              = "indexOfObjectName"
+	mapFnName                         = "map"
+
+	viewTemplateStr  = "_design/indexOf%s/_view/by%s"
+	indexTemplateStr = "_design/viewOf%s/_view/by%s"
+
+	metaFieldPrefix              = "meta"
+	metakeysViewDdocName         = "metaViews"
+	MetakeysViewUniqueKeysURI    = "_design/metaViews/_view/uniqueKeys"
+	metakeysViewUniqueValuessURI = "uniqueValues"
+	metaViewAllValuesPerKey      = "allValuesByKeyWithCounts"
+	metaViewLookupWords          = "lookupWords"
+	metaViewSearchLookup         = "searchLookup"
+
+	MetaKeyIndexOf = "indexOf"
+	MetaKeyViewOf  = "indexOf"
+
+	metaKeyName  = "{{KeyName}}"
+	metaKeyField = "{{KeyField}}"
+
+	moIndexDdoc = "moIndex"
+	moIndexView = "byName"
+
+	objectCountDdoc       = "monitoredObjectCount"
+	objectCountByNameView = "byName"
+	objectCountView       = "count"
 
 	monitoredObjectCountIndexBytes = `{
 	"_id": "_design/monitoredObjectCount",
@@ -69,25 +94,6 @@ const (
 				emit(doc.data.datatype, doc.id)
 			}
 		}`
-
-	mapFnName = "map"
-
-	viewTemplateStr  = "_design/indexOf%s/_view/by%s"
-	indexTemplateStr = "_design/viewOf%s/_view/by%s"
-
-	metaFieldPrefix              = "meta"
-	metakeysViewDdocName         = "metaViews"
-	MetakeysViewUniqueKeysURI    = "_design/metaViews/_view/uniqueKeys"
-	metakeysViewUniqueValuessURI = "uniqueValues"
-	metaViewAllValuesPerKey      = "allValuesByKeyWithCounts"
-	metaViewLookupWords          = "lookupWords"
-	metaViewSearchLookup         = "searchLookup"
-
-	MetaKeyIndexOf = "indexOf"
-	MetaKeyViewOf  = "indexOf"
-
-	metaKeyName  = "{{KeyName}}"
-	metaKeyField = "{{KeyField}}"
 
 	metaViews = `{
 		"_id": "_design/metaViews",
@@ -277,7 +283,7 @@ func indexViewTriggerBuild(dbName string, ddoc string, key string) {
 	if err != nil {
 		logger.Log.Errorf("Could not load db %s", dbName)
 	}
-	uri := fmt.Sprintf("_design/%s/_view/%s", ddoc, key)
+	uri := fmt.Sprintf(viewTemplateStr, ddoc, key)
 	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
 	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
 	_, err = db.Get(uri, nil)

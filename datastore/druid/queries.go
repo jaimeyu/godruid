@@ -896,6 +896,7 @@ func buildMetricAggregation(aggType string, metric *metrics.MetricIdentifier, na
 
 }
 
+// BuildMonitoredObjectFilter - Builds a monitored object filter for druid
 func BuildMonitoredObjectFilter(tenantID string, mos []string) *godruid.Filter {
 	// It is important to draw a distinction between a nil set of monitored objects and an empty set of monitored objects. A nil
 	// set means that the query does not care which monitored object it belongs to. An empty set means that no monitored objects

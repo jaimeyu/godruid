@@ -630,7 +630,9 @@ func getDesignDocumentFromCouch(dbName string, idToRetrieve string, dataContaine
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error {
@@ -641,7 +643,9 @@ func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interfac
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 
@@ -660,7 +664,9 @@ func deleteDataFromCouch(dbName string, idToDelete string, dataContainer interfa
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleted %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 
@@ -718,23 +724,6 @@ func GenerateMonitoredObjectURL(tenantID string, uri string) string {
 	return dbName
 }
 
-// updateTenantMetadataMetadata - Updates the metadata in the TenantMetadata object' metakeys
-func updateTenantMetadataMetadata(meta map[string]string, tenantMeta *tenmod.Metadata) ([]string, error) {
-	keys := make([]string, 0)
-	// Go thru a list of KV pairs and add the keys to the Metadata.
-	// The idea is to cache all the known monitored  Metadata keys so the UI can do word completion
-	for key, _ := range meta {
-
-		if len(tenantMeta.MonitorObjectMetaKeys[key]) == 0 {
-			logger.Log.Debugf("\"%s\" is a new key", key)
-			keys = append(keys, key)
-			// Stop being meta, Ahbed
-			tenantMeta.MonitorObjectMetaKeys[key] = key
-		}
-	}
-
-	return keys, nil
-}
 func generatePaginationQueryParams(startKey string, limit int64, includeDocs bool, descending bool) url.Values {
 	params := url.Values{}
 

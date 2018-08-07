@@ -916,6 +916,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup)
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewLookupWords)
 	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey)
+	go indexViewTriggerBuild(dbNameKeys, moIndexDdoc, moIndexView)
+	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountByNameView)
+	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountView)
 
 	return nil
 }
@@ -1268,12 +1271,15 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 // BulkUpdateMonitoredObjects - CouchDB implementation of BulkUpdateMonitoredObjects
 func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
 	logger.Log.Debugf("Bulk updating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
+	origTenantID := tenantID
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
 	resource, err := couchdb.NewResource(dbName, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	metas := make(map[string]string)
 
 	// Iterate over the collection and populate necessary fields
 	data := make([]map[string]interface{}, 0)
@@ -1291,6 +1297,11 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID st
 		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
 
 		data = append(data, genericMO)
+
+		// We want to generate a list of metakeys for processing later
+		for key := range mo.Meta {
+			metas[key] = key
+		}
 	}
 	body := map[string]interface{}{
 		"docs": data}
@@ -1323,11 +1334,17 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID st
 		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
 		res = append(res, &newObj)
 	}
+	// Now that we've done the bulk update, refresh the views
+	err = tsd.UpdateMonitoredObjectMetadataViews(origTenantID, metas)
+	if err != nil {
+		logger.Log.Errorf("Couldn't update metadata. Views may be out of sync, continuing with bulk update. %s", err.Error)
+	}
 
 	logger.Log.Debugf("Bulk update of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
 	return res, nil
 }
 
+// CreateReportScheduleConfig -- Creates a SLA report schedule
 func (tsd *TenantServiceDatastoreCouchDB) CreateReportScheduleConfig(slaConfig *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Creating %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	slaConfig.ID = ds.GenerateID(slaConfig, string(metmod.ReportScheduleConfigType))
@@ -1342,6 +1359,8 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateReportScheduleConfig(slaConfig *
 	return dataContainer, nil
 
 }
+
+// UpdateReportScheduleConfig -  Updates a SLA Report Schedule
 func (tsd *TenantServiceDatastoreCouchDB) UpdateReportScheduleConfig(slaConfig *metmod.ReportScheduleConfig) (*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Updating %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	slaConfig.ID = ds.PrependToDataID(slaConfig.ID, string(metmod.ReportScheduleConfigType))
@@ -1355,6 +1374,8 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateReportScheduleConfig(slaConfig *
 	logger.Log.Debugf("Updated %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(slaConfig))
 	return dataContainer, nil
 }
+
+// DeleteReportScheduleConfig - Deletes a SLA Report schedule
 func (tsd *TenantServiceDatastoreCouchDB) DeleteReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Deleting %s %s\n", metmod.ReportScheduleConfigStr, configID)
 	configID = ds.PrependToDataID(configID, string(metmod.ReportScheduleConfigType))
@@ -1368,6 +1389,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteReportScheduleConfig(tenantID st
 	logger.Log.Debugf("Deleted %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+
+// GetReportScheduleConfig - Gets SLA Report Schedule
 func (tsd *TenantServiceDatastoreCouchDB) GetReportScheduleConfig(tenantID string, configID string) (*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", metmod.ReportScheduleConfigStr, configID)
 	configID = ds.PrependToDataID(configID, string(metmod.ReportScheduleConfigType))
@@ -1381,6 +1404,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetReportScheduleConfig(tenantID strin
 	logger.Log.Debugf("Retrieved %s: %v\n", metmod.ReportScheduleConfigStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+
+// GetAllReportScheduleConfigs - Get all SLA report scheudles
 func (tsd *TenantServiceDatastoreCouchDB) GetAllReportScheduleConfigs(tenantID string) ([]*metmod.ReportScheduleConfig, error) {
 	logger.Log.Debugf("Fetching all %s\n", metmod.ReportScheduleConfigStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
@@ -1395,6 +1420,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllReportScheduleConfigs(tenantID s
 	return res, nil
 }
 
+// CreateSLAReport - Creates SLA Report
 func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAReport) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(slaReport))
 	slaReport.ID = ds.GenerateID(slaReport, string(tenmod.TenantReportType))
@@ -1408,6 +1434,8 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateSLAReport(slaReport *metmod.SLAR
 	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+
+// DeleteSLAReport - Deletes SLA Report
 func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
 	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantReportType))
@@ -1421,6 +1449,8 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteSLAReport(tenantID string, slaRe
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+
+// GetSLAReport - Gets  SLA Report
 func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantSLAReportStr, slaReportID)
 	slaReportID = ds.PrependToDataID(slaReportID, string(tenmod.TenantReportType))
@@ -1434,6 +1464,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetSLAReport(tenantID string, slaRepor
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantSLAReportStr, models.AsJSONString(dataContainer))
 	return dataContainer, nil
 }
+
+// GetAllSLAReports - Gets all SLA Reports
 func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error) {
 	logger.Log.Debugf("Fetching all %s\n", tenmod.TenantSLAReportStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
@@ -1447,6 +1479,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*
 	logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantSLAReportStr)
 	return res, nil
 }
+
+// CreateDashboard - Creates a dashboard
 func (tsd *TenantServiceDatastoreCouchDB) CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
 	dashboard.ID = ds.GenerateID(dashboard, string(tenmod.TenantDashboardType))
 	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
@@ -1480,6 +1514,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateDashboard(dashboard *tenmod.Dash
 
 }
 
+// DeleteDashboard - Deletes dashboard
 func (tsd *TenantServiceDatastoreCouchDB) DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDashboardStr, dataID)
 	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDashboardType))
@@ -1494,6 +1529,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteDashboard(tenantID string, dataI
 	return &dataContainer, nil
 }
 
+// HasDashboardsWithDomain
 func (tsd *TenantServiceDatastoreCouchDB) HasDashboardsWithDomain(tenantID string, domainID string) (bool, error) {
 	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantMetaStr, tenantID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))

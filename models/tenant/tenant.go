@@ -575,14 +575,13 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 
 // Metadata - defines a Tenant Metadata.
 type Metadata struct {
-	ID                    string            `json:"_id"`
-	REV                   string            `json:"_rev"`
-	Datatype              string            `json:"datatype"`
-	TenantID              string            `json:"tenantId"`
-	TenantName            string            `json:"tenantName"`
-	CreatedTimestamp      int64             `json:"createdTimestamp"`
-	LastModifiedTimestamp int64             `json:"lastModifiedTimestamp"`
-	MonitorObjectMetaKeys map[string]string `json:"monitoredObjectMetaKeys"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	TenantName            string `json:"tenantName"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling

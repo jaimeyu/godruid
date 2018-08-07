@@ -34,7 +34,7 @@ type ChangeEvent struct {
 	payload   interface{}
 }
 
-const defaultPollingFrequency = 45 * time.Second // How often to poll tenantDB for recent changes
+const defaultPollingFrequency = 15 * time.Second // How often to poll tenantDB for recent changes
 //const refreshFrequencyMillis = int64(gather. * time.Second / time.Millisecond) // How often to push a full refresh of tenantDB
 const defaultKafkaTopic = "monitored-object" // The topic where changes are pushed.
 

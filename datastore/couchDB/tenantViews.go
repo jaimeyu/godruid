@@ -21,7 +21,7 @@ const (
 	// Indexer for monitored objects by name
 	monitoredObjectsByObjectNameIndex = "byObjectName"
 	monitoredObjectsByObjectNameKey   = "objectName"
-	monitoredObjectIndex              = "indexOfObjectName"
+	monitoredObjectIndex              = "indexOfobjectName"
 	mapFnName                         = "map"
 
 	viewTemplateStr  = "_design/indexOf%s/_view/by%s"

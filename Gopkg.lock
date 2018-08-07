@@ -19,6 +19,44 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  name = "github.com/accedian/adh-gather"
+  packages = [
+    "config",
+    "datastore",
+    "datastore/couchDB",
+    "datastore/druid",
+    "datastore/inMemory",
+    "datastore/test",
+    "datastore/test/admin",
+    "datastore/test/tenant",
+    "gather",
+    "gathergrpc",
+    "handlers",
+    "logger",
+    "models",
+    "models/admin",
+    "models/common",
+    "models/metrics",
+    "models/tenant",
+    "models/test",
+    "monitoring",
+    "profile",
+    "restapi",
+    "restapi/operations",
+    "restapi/operations/admin_provisioning_service",
+    "restapi/operations/admin_provisioning_service_v2",
+    "restapi/operations/metrics_service",
+    "restapi/operations/tenant_provisioning_service",
+    "restapi/operations/tenant_provisioning_service_v2",
+    "scheduler",
+    "server",
+    "swagmodels",
+    "websocket"
+  ]
+  revision = "687329001886c92b44f392f898e878040f4ffbe5"
+  version = "0.184.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/accedian/godruid"
   packages = ["."]
@@ -382,12 +420,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/tylerb/graceful"
-  packages = ["."]
-  revision = "d72b0151351a13d0421b763b88f791469c4f5dc7"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -396,6 +428,7 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
+    "netutil",
     "trace"
   ]
   revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
@@ -485,6 +518,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a5128c826008221a940026120b1b7588844a0c5a97f66fe14ee03299ddb8068"
+  inputs-digest = "6cdf82ea771f593449e007a41c767e0f5da04e2cdfdeb1894a5d319faff2976c"
   solver-name = "gps-cdcl"
   solver-version = 1

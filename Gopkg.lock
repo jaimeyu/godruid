@@ -388,12 +388,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/tylerb/graceful"
-  packages = ["."]
-  revision = "d72b0151351a13d0421b763b88f791469c4f5dc7"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -402,6 +396,7 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
+    "netutil",
     "trace"
   ]
   revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
@@ -491,6 +486,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6bb110fa98482d6c044332570cd3bb6e7814cf3b87b10c82001b14c63b932fc4"
+  inputs-digest = "c0ced5a4a55a621be6043a8f57365d9d48a07c4a0e4089f171636f0794f48408"
   solver-name = "gps-cdcl"
   solver-version = 1

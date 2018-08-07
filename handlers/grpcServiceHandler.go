@@ -8,7 +8,6 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
-	admmod "github.com/accedian/adh-gather/models/admin"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
@@ -28,30 +27,13 @@ const (
 	Minor                  = "minor"
 )
 
-var (
-	// ValidMonitoredObjectTypes - known Monitored Object types in the system.
-	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
-		"pe": tenmod.TwampPE,
-		"sf": tenmod.TwampSF,
-		"sl": tenmod.TwampSL,
-		string(tenmod.TwampPE): tenmod.TwampPE,
-		string(tenmod.TwampSF): tenmod.TwampSF,
-		string(tenmod.TwampSL): tenmod.TwampSL}
-
-	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
-	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
-		string(tenmod.AccedianNID):  tenmod.AccedianNID,
-		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
-)
-
 // GRPCServiceHandler - implementer of all gRPC Services. Offloads
 // implementation details to each unique service handler. When new
 // gRPC services are added, a new Service Handler should be created,
 // and a pointer to that object should be added to this wrapper.
 type GRPCServiceHandler struct {
-	ash               *AdminServiceHandler
-	Tsh               *TenantServiceHandler
-	DefaultValidTypes *admmod.ValidTypes
+	ash *AdminServiceHandler
+	Tsh *TenantServiceHandler
 }
 
 // CreateCoordinator - used to create a gRPC service handler wrapper
@@ -63,97 +45,11 @@ func CreateCoordinator() *GRPCServiceHandler {
 	result.ash = CreateAdminServiceHandler()
 	result.Tsh = CreateTenantServiceHandler()
 
-	// Setup the known values of the Valid Types for the system
-	// by using the enumerated protobuf values
-	validMonObjTypes := make(map[string]string, 0)
-	validMonObjDevTypes := make(map[string]string, 0)
-
-	for key, val := range ValidMonitoredObjectTypes {
-		validMonObjTypes[key] = string(val)
-	}
-	for key, val := range ValidMonitoredObjectDeviceTypes {
-		validMonObjDevTypes[key] = string(val)
-	}
-
-	result.DefaultValidTypes = &admmod.ValidTypes{
-		MonitoredObjectTypes:       validMonObjTypes,
-		MonitoredObjectDeviceTypes: validMonObjDevTypes}
-
 	return result
 }
 
 func trackAPIMetrics(startTime time.Time, code string, objType string) {
 	mon.TrackAPITimeMetricInSeconds(startTime, code, objType)
-}
-
-// CreateAdminUser - Create an Administrative User.
-func (gsh *GRPCServiceHandler) CreateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateAdminUser(ctx, user)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateAdminUserStr)
-	return res, nil
-}
-
-// UpdateAdminUser - Update an Administrative User.
-func (gsh *GRPCServiceHandler) UpdateAdminUser(ctx context.Context, user *pb.AdminUser) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateAdminUser(ctx, user)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateAdminUserStr)
-	return res, nil
-}
-
-// DeleteAdminUser - Delete an Administrative User.
-func (gsh *GRPCServiceHandler) DeleteAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteAdminUser(ctx, userID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteAdminUserStr)
-	return res, nil
-}
-
-// GetAdminUser - Retrieve an Administrative User by the ID.
-func (gsh *GRPCServiceHandler) GetAdminUser(ctx context.Context, userID *wr.StringValue) (*pb.AdminUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetAdminUser(ctx, userID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAdminUserStr)
-	return res, nil
-}
-
-// GetAllAdminUsers -  Retrieve all Administrative Users.
-func (gsh *GRPCServiceHandler) GetAllAdminUsers(ctx context.Context, noValue *emp.Empty) (*pb.AdminUserList, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetAllAdminUsers(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAllAdminUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAllAdminUserStr)
-	return res, nil
 }
 
 // CreateTenant - Create a Tenant. This will store the identification details for the Tenant,
@@ -304,130 +200,26 @@ func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noVa
 	return nil, nil
 }
 
-// CreateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) CreateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateIngestionDictionary(ctx, ingDictionary)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetTenantStr)
-	return res, nil
-}
-
-// UpdateIngestionDictionary - Update an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) UpdateIngestionDictionary(ctx context.Context, ingDictionary *pb.IngestionDictionary) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateIngestionDictionary(ctx, ingDictionary)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateIngDictStr)
-	return res, nil
-}
-
-// DeleteIngestionDictionary - Delete an IngestionDictionary used for the entire deployment.
-func (gsh *GRPCServiceHandler) DeleteIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteIngestionDictionary(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteIngDictStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteIngDictStr)
-	return res, nil
-}
-
 // GetIngestionDictionary - Retrieve an IngestionDictionary used for the entire deployment.
 func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
 	startTime := time.Now()
 
-	res, err := gsh.ash.GetIngestionDictionary(ctx, noValue)
+	ingDict, err := getIngestionDictionaryFromFile()
 	if err != nil {
 		trackAPIMetrics(startTime, "500", mon.GetIngDictStr)
 		return nil, err
 	}
 
+	// Convert to PB object
+	converted := pb.IngestionDictionary{}
+	if err := pb.ConvertToPBObject(ingDict, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", "Ingestion Dictionary", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	trackAPIMetrics(startTime, "200", mon.GetIngDictStr)
-	return res, nil
-}
-
-// CreateTenantUser - creates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) CreateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.CreateTenantUser(ctx, tenantUserReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateTenantUserStr)
-	return res, nil
-}
-
-// UpdateTenantUser - updates a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) UpdateTenantUser(ctx context.Context, tenantUserReq *pb.TenantUser) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.UpdateTenantUser(ctx, tenantUserReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateTenantUserStr)
-	return res, nil
-}
-
-// DeleteTenantUser - deletes a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) DeleteTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.DeleteTenantUser(ctx, tenantUserIDReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.DeleteTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.DeleteTenantUserStr)
-	return res, nil
-}
-
-// GetTenantUser - retrieves a user scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetTenantUser(ctx context.Context, tenantUserIDReq *pb.TenantUserIdRequest) (*pb.TenantUser, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.GetTenantUser(ctx, tenantUserIDReq)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetTenantUserStr)
-	return res, nil
-}
-
-// GetAllTenantUsers - retrieves all users scoped to a single Tenant.
-func (gsh *GRPCServiceHandler) GetAllTenantUsers(ctx context.Context, tenantID *wr.StringValue) (*pb.TenantUserList, error) {
-	startTime := time.Now()
-
-	res, err := gsh.Tsh.GetAllTenantUsers(ctx, tenantID)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetAllTenantUserStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetAllTenantUserStr)
-	return res, nil
+	return &converted, nil
 }
 
 // CreateTenantDomain - creates a Domain scoped to a single Tenant.
@@ -576,6 +368,7 @@ func (gsh *GRPCServiceHandler) CreateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.CreateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateThrPrfStr)
 		return nil, err
 	}
@@ -590,6 +383,7 @@ func (gsh *GRPCServiceHandler) UpdateTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.UpdateTenantThresholdProfile(ctx, tenantThreshPrfReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Tenant ThresholdProfile for Tenant %s: %s", tenantThreshPrfReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateThrPrfStr)
 		return nil, err
 	}
@@ -604,6 +398,7 @@ func (gsh *GRPCServiceHandler) GetTenantThresholdProfile(ctx context.Context, te
 
 	res, err := gsh.Tsh.GetTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetThrPrfStr)
 		return nil, err
 	}
@@ -618,6 +413,7 @@ func (gsh *GRPCServiceHandler) DeleteTenantThresholdProfile(ctx context.Context,
 
 	res, err := gsh.Tsh.DeleteTenantThresholdProfile(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Tenant ThresholdProfile %s for Tenant %s: %s", tenantID.GetTenantId(), tenantID.GetThresholdProfileId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteThrPrfStr)
 		return nil, err
 	}
@@ -632,6 +428,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantThresholdProfiles(ctx context.Context
 
 	res, err := gsh.Tsh.GetAllTenantThresholdProfiles(ctx, tenantID)
 	if err != nil {
+		logger.Log.Errorf("Could not retrieve all Tenant ThresholdProfiles for Tenant %s: %s", tenantID, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetAllThrPrfStr)
 		return nil, err
 	}
@@ -646,6 +443,7 @@ func (gsh *GRPCServiceHandler) CreateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.CreateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not create Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.CreateMonObjStr)
 		return nil, err
 	}
@@ -660,6 +458,7 @@ func (gsh *GRPCServiceHandler) UpdateMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.UpdateMonitoredObject(ctx, monitoredObjectReq)
 	if err != nil {
+		logger.Log.Errorf("Could not update Monitored Object for Tenant %s: %s", monitoredObjectReq.Data.GetTenantId(), err.Error())
 		trackAPIMetrics(startTime, "500", mon.UpdateMonObjStr)
 		return nil, err
 	}
@@ -674,6 +473,7 @@ func (gsh *GRPCServiceHandler) GetMonitoredObject(ctx context.Context, monitored
 
 	res, err := gsh.Tsh.GetMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not Get Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.GetMonObjStr)
 		return nil, err
 	}
@@ -688,6 +488,7 @@ func (gsh *GRPCServiceHandler) DeleteMonitoredObject(ctx context.Context, monito
 
 	res, err := gsh.Tsh.DeleteMonitoredObject(ctx, monitoredObjectIDReq)
 	if err != nil {
+		logger.Log.Errorf("Could not delete Monitored Object %s for Tenant %s: %s", monitoredObjectIDReq.MonitoredObjectId, monitoredObjectIDReq.TenantId, err.Error())
 		trackAPIMetrics(startTime, "500", mon.DeleteMonObjStr)
 		return nil, err
 	}
@@ -824,74 +625,22 @@ func (gsh *GRPCServiceHandler) AddAdminViews() error {
 	return nil
 }
 
-// CreateValidTypes - Create the valid type definition in the system.
-func (gsh *GRPCServiceHandler) CreateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.CreateValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.CreateValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.CreateValidTypesStr)
-	return res, nil
-}
-
-// UpdateValidTypes - Update the valid type definition in the system.
-func (gsh *GRPCServiceHandler) UpdateValidTypes(ctx context.Context, value *pb.ValidTypes) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.UpdateValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.UpdateValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.UpdateValidTypesStr)
-	return res, nil
-}
-
 // GetValidTypes - retrieve the enire list of ValidTypes in the system.
 func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
 	startTime := time.Now()
 
-	res, err := gsh.ash.GetValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetValidTypesStr)
-		return nil, err
+	validTypes := getValidTypes()
+
+	// Convert to PB object
+	converted := pb.ValidTypes{}
+	if err := pb.ConvertToPBObject(validTypes, &converted); err != nil {
+		msg := fmt.Sprintf("Unable to convert request to store %s: %s", "Valid Types", err.Error())
+		logger.Log.Error(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	trackAPIMetrics(startTime, "200", mon.GetValidTypesStr)
-	return res, nil
-}
-
-// GetSpecificValidTypes - retrieve a subset of the known ValidTypes in the system.
-func (gsh *GRPCServiceHandler) GetSpecificValidTypes(ctx context.Context, value *pb.ValidTypesRequest) (*pb.ValidTypesData, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.GetSpecificValidTypes(ctx, value)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetSpecificValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.GetSpecificValidTypesStr)
-	return res, nil
-}
-
-// DeleteValidTypes - Delete valid types used for the entire deployment.
-func (gsh *GRPCServiceHandler) DeleteValidTypes(ctx context.Context, noValue *emp.Empty) (*pb.ValidTypes, error) {
-	startTime := time.Now()
-
-	res, err := gsh.ash.DeleteValidTypes(ctx, noValue)
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.ValidTypesStr)
-		return nil, err
-	}
-
-	trackAPIMetrics(startTime, "200", mon.ValidTypesStr)
-	return res, nil
+	return &converted, nil
 }
 
 // BulkInsertMonitoredObjects - perform a bulk operation on a set of Monitored Objects.

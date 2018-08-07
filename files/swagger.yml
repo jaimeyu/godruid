@@ -16,107 +16,6 @@ produces:
   - application/json
   - application/vnd.api+json
 paths:
-  /v1/admin:
-    post:
-      summary: Create a User with Administrative access.
-      operationId: CreateAdminUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update a User with Administrative access.
-      operationId: UpdateAdminUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-      tags:
-        - AdminProvisioningService
-  /v1/admin-user-list:
-    get:
-      summary: Retrieve all Administrative Users.
-      operationId: GetAllAdminUsers
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUserList'
-      tags:
-        - AdminProvisioningService
-  '/v1/admin/{value}':
-    get:
-      summary: Retrieve an Administrative User by id.
-      operationId: GetAdminUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: value
-          in: path
-          required: true
-          type: string
-      tags:
-        - AdminProvisioningService
-    delete:
-      summary: Delete a User with Administrative access.
-      operationId: DeleteAdminUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiAdminUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: value
-          in: path
-          required: true
-          type: string
-      tags:
-        - AdminProvisioningService
   /v1/tenants:
     post:
       summary: Create a Tenant.
@@ -132,10 +31,20 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '409':
           description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -158,8 +67,16 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -179,11 +96,17 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenantList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
-  '/v1/tenants/{value}':
+  '/v1/tenants/{tenantId}':
     get:
       summary: Retrieve a Tenant by id.
       operationId: GetTenant
@@ -194,10 +117,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -213,10 +142,16 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiTenant'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -236,10 +171,18 @@ paths:
             $ref: '#/definitions/JsonApiTenant'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
-        - name: value
+        - name: tenantId
           in: path
           required: true
           type: string
@@ -253,16 +196,18 @@ paths:
   '/v1/tenant-by-alias/{value}':
     get:
       summary: Returns the Id of a Tenant that matches the provided alias.
-      operationId: GettenantIdByAlias
+      operationId: GetTenantIdByAlias
       produces:
         - text/plain
       responses:
         '200':
           description: ''
           schema:
-                type: "string"
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path
@@ -283,6 +228,8 @@ paths:
             $ref: "#/definitions/TenantSummary"
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: value
           in: path
@@ -291,54 +238,6 @@ paths:
       tags:
         - AdminProvisioningService
   /v1/ingestion-dictionaries:
-    post:
-      summary: Create an Ingestion Dictionary. 
-      operationId: CreateIngestionDictionary
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update an Ingestion Dictionary. 
-      operationId: UpdateIngestionDictionary
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
-      tags:
-        - AdminProvisioningService
     get:
       summary: Retrieve an Ingestion Dictionary.
       operationId: GetIngestionDictionary
@@ -349,73 +248,17 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiIngestionDictionary'
-        '500':
-          description: "Unexpected error processing request"
-      tags:
-        - AdminProvisioningService
-    delete:
-      summary: Delete an Ingestion Dictionary.
-      operationId: DeleteIngestionDictionary
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
+        '403':
+          description: "Requestor does not have authorization to perform this action"
           schema:
-            $ref: '#/definitions/JsonApiIngestionDictionary'
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
   /v1/valid-types:
-    post:
-      summary: Create a Valid Types object. 
-      operationId: CreateValidTypes
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-      tags:
-        - AdminProvisioningService
-    put:
-      summary: Update a Valid Types object. 
-      operationId: UpdateValidTypes
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-      tags:
-        - AdminProvisioningService
     get:
       summary: Retrieve a Valid Types object.
       operationId: GetValidTypes
@@ -426,1427 +269,19 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/JsonApiValidTypes'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       tags:
         - AdminProvisioningService
-    delete:
-      summary: Delete a Valid Types object.
-      operationId: DeleteValidTypes
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiValidTypes'
-        '500':
-          description: "Unexpected error processing request"
-      tags:
-        - AdminProvisioningService
-  /v1/tenants/{tenantId}/users:
-    post:
-      summary: Create a User for a Tenant.
-      operationId: CreateTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Update a Tenant User
-      operationId: PatchTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant User
-      operationId: UpdateTenantUser
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/user-list:
-    get:
-      summary: Retrieve all Users for the specified Tenant.
-      operationId: GetAllTenantUsers
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUserList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/users/{userId}':
-    get:
-      summary: Retrieve a Tenant User by id.
-      operationId: GetTenantUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant User specified by the provided userId.
-      operationId: DeleteTenantUser
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantUser'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/connector-configs:
-    post:
-      summary: Create a ConnectorConfig for a Tenant.
-      operationId: CreateTenantConnectorConfig
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant ConnectorConfig
-      operationId: UpdateTenantConnectorConfig
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/connector-configs/{connectorId}':
-    get:
-      summary: Retrieve a Tenant ConnectorConfig by Id.
-      operationId: GetTenantConnectorConfig
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: connectorId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
-      operationId: DeleteTenantConnectorConfig
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfig'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: connectorId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/connector-config-list:
-    get:
-      summary: Retrieve all ConnectorConfigs for the specified Tenant.
-      operationId: GetAllTenantConnectorConfigs
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorConfigList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: zone
-          in: query
-          required: false
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/connector-instances:
-    post:
-      summary: Create a ConnectorInstance for a Tenant.
-      operationId: CreateTenantConnectorInstance
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant ConnectorInstance
-      operationId: UpdateTenantConnectorInstance
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/connector-instances/{connectorId}':
-    get:
-      summary: Retrieve a Tenant ConnectorInstance by Id.
-      operationId: GetTenantConnectorInstance
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: connectorInstanceId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant ConnectorInstance specified by the provided Connector Instance Id.
-      operationId: DeleteTenantConnectorInstance
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstance'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: connectorInstanceId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/connector-instance-list:
-    get:
-      summary: Retrieve all ConnectorInstances for the specified Tenant.
-      operationId: GetAllTenantConnectorInstances
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantConnectorInstanceList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/domains:
-    post:
-      summary: Create a Domain for a Tenant.
-      operationId: CreateTenantDomain
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/report-schedule-configs:
-    post:
-      summary: Create a report schedule configuration for a Tenant.
-      operationId: CreateReportScheduleConfig
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a report schedule configuration for a Tenant.
-      operationId: UpdateReportScheduleConfig
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/report-schedule-configs/{configId}':
-    get:
-      summary: Retrieve a report schedule configuration for a Tenant by configuration Id.
-      operationId: GetReportScheduleConfig
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: configId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a report schedule configuration for a Tenant by configuration Id.
-      operationId: DeleteReportScheduleConfig
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: configId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/report-schedule-config-list':
-    get:
-      summary: Retrieve all report schedule configs for the specified Tenant.
-      operationId: GetAllReportScheduleConfig
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantReportScheduleConfigList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/domain-list:
-    get:
-      summary: Retrieve all Domains for the specified Tenant.
-      operationId: GetAllTenantDomains
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomainList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/domains/{domainId}':
-    get:
-      summary: Retrieve a Tenant Domain by Id.
-      operationId: GetTenantDomain
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: domainId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant Domain
-      operationId: UpdateTenantDomain
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: domainId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Patch update a Tenant Domain
-      operationId: PatchTenantDomain
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: 'Successfully patched tenant domain.'
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: domainId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant Domain specified by the provided Domain Id.
-      operationId: DeleteTenantDomain
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantDomain'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: domainId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/ingestion-profiles:
-    post:
-      summary: Create an Ingestion Profile for a Tenant.
-      operationId: CreateIngestionProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Update a Tenant Ingestion Profile
-      operationId: PatchTenantIngestionProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant Ingestion Profile
-      operationId: UpdateTenantIngestionProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/active-ingestion-profile:
-    get:
-      summary: Retrieve the active Ingestion Profile for the specified Tenant.
-      operationId: GetActiveIngestionProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}':
-    get:
-      summary: Retrieve a Tenant Ingestion Profile by id.
-      operationId: GetTenantIngestionProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: ingestionProfileId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant Ingestion Profile specified by the provided Ingestion Profile Id.
-      operationId: DeleteTenantIngestionProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: ingestionProfileId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/threshold-profiles:
-    post:
-      summary: Create a Threshold Profile for a Tenant.
-      operationId: CreateTenantThresholdProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Update a Tenant Threshold Profile
-      operationId: PatchTenantThresholdProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant Threshold Profile
-      operationId: UpdateTenantThresholdProfile
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/threshold-profile-list:
-    get:
-      summary: Retrieve all Threshold Profiles for the specified Tenant.
-      operationId: GetAllTenantThresholdProfiles
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfileList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/threshold-profiles/{thrPrfId}':
-    get:
-      summary: Retrieve a Tenant Threshold Profile by id.
-      operationId: GetTenantThresholdProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: thrPrfId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant Threshold Profile specified by the provided id.
-      operationId: DeleteTenantThresholdProfile
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantThresholdProfile'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: thrPrfId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/monitored-objects:
-    post:
-      summary: Create a Monitored Object for a Tenant.
-      operationId: CreateTenantMonitoredObject
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Patch a Tenant Monitored Object
-      operationId: PatchTenantMonitoredObject
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update a Tenant Monitored Object
-      operationId: UpdateTenantMonitoredObject
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/monitored-object-list:
-    get:
-      summary: Retrieve all Monitored Objects for the specified Tenant.
-      operationId: GetAllTenantMonitoredObjects
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObjectList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/monitored-objects/{monObjId}':
-    get:
-      summary: Retrieve a Tenant Monitored Object by id.
-      operationId: GetTenantMonitoredObject
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: monObjId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant Monitored Object specified by the provided id.
-      operationId: DeleteTenantMonitoredObject
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMonitoredObject'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: monObjId
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/monitored-object-domain-map':
-    post:
-      summary: Retrieve a mapping of Monitored Objects that are associated with each Domain.
-      operationId: GetDomainToMonitoredObjectMap
-      produces:
-        - application/json        
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MonitoredObjectCountByDomainResponse'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/MonitoredObjectCountByDomainRequest'
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/bulk/insert/monitored-objects':
-    post:
-      summary: Create one or more Monitored Objects in a single API request.
-      operationId: BulkInsertMonitoredObject
-      produces:
-        - application/json        
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/BulkOperationResult'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
-      tags:
-        - TenantProvisioningService
-    put:
-      summary: Update one or more Monitored Objects in a single API request.
-      operationId: BulkUpdateMonitoredObject
-      produces:
-        - application/json        
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/BulkOperationResult'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            type: "array"
-            items: 
-              - $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
-      tags:
-        - TenantProvisioningService
-
-  /v1/tenants/{tenantId}/meta:
-    post:
-      summary: Create a Metadata record for a Tenant.
-      operationId: CreateTenantMetadata
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-      tags:
-        - TenantProvisioningService
-    patch:
-      summary: Patch a Tenant Metadata record
-      operationId: Patch TenantMetadata
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-      tags:
-        - TenantProvisioningService
-
-    put:
-      summary: Update a Tenant Metadata record
-      operationId: UpdateTenantMetadata
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-        '400':
-          description: "Request data does not pass validation"
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonApiTenantIngestionProfile'
-      tags:
-        - TenantProvisioningService
-    get:
-      summary: Retrieve a Tenant Metadata record
-      operationId: GetTenantMetadata
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-    delete:
-      summary: Delete a Tenant Metadata record
-      operationId: DeleteTenantMetadata
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/JsonApiTenantMetadata'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  '/v1/tenants/{tenantId}/reports/{reportID}':
-    get:
-      summary: Retrieve a Tenant SLA report by id.
-      operationId: GetSLAReport
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: reportID
-          in: path
-          required: true
-          type: string
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-  /v1/tenants/{tenantId}/report-list:
-    get:
-      summary: Retrieve all SLA reports for the specified Tenant.
-      operationId: GetAllSLAReports
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObjectList'
-        '500':
-          description: "Unexpected error processing request"
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningService
-
-# All API definitions below here are for the MetricsService and will need to be modified
-# when the MetricsService is altered to use the jsonapi implementation.
   /v1/histogram:
     get:
-      summary: Retrieve a histogram of measurements for given time range and metric
+      summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
       operationId: GetHistogram
       produces:
         - application/vnd.api+json
@@ -1855,10 +290,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -1918,10 +357,14 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -1976,10 +419,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2053,8 +506,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2075,10 +540,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2149,10 +624,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Threshold profile not found"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2223,8 +708,20 @@ paths:
             $ref: '#/definitions/MetricResultsResponseObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
@@ -2247,15 +744,27 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing proviosned data"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: body
           in: body
           required: true
           schema:
             $ref: '#/definitions/TopNMetricsAPIRequestObject'
-    tags:
+      tags:
         - MetricsService
  
   /v1/generate-sla-report:
@@ -2271,10 +780,20 @@ paths:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
         '400':
           description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
         '404':
-          description: "Unable to find Threshold Profile for provided id"
+          description: "Components of the request parameters were not in the provisioning database"
+          schema:
+            type: string
         '500':
           description: "Unexpected error processing request"
+          schema:
+            type: string
       parameters:
         - name: interval
           description: ISO-8601 Intervals.
@@ -2318,59 +837,2066 @@ paths:
 
       tags:
         - MetricsService
+  /v1/tenants/{tenantId}/connector-configs:
+    post:
+      summary: Create a ConnectorConfig for a Tenant.
+      operationId: CreateTenantConnectorConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant ConnectorConfig
+      operationId: UpdateTenantConnectorConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/connector-configs/{connectorId}':
+    get:
+      summary: Retrieve a Tenant ConnectorConfig by Id.
+      operationId: GetTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: DeleteTenantConnectorConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-config-list:
+    get:
+      summary: Retrieve all ConnectorConfigs for the specified Tenant.
+      operationId: GetAllTenantConnectorConfigs
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorConfigList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-instances:
+    post:
+      summary: Create a ConnectorInstance for a Tenant.
+      operationId: CreateTenantConnectorInstance
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant ConnectorInstance
+      operationId: UpdateTenantConnectorInstance
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/connector-instances/{connectorInstanceId}':
+    get:
+      summary: Retrieve a Tenant ConnectorInstance by Id.
+      operationId: GetTenantConnectorInstance
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant ConnectorInstance specified by the provided Connector Instance Id.
+      operationId: DeleteTenantConnectorInstance
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstance'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/connector-instance-list:
+    get:
+      summary: Retrieve all ConnectorInstances for the specified Tenant.
+      operationId: GetAllTenantConnectorInstances
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantConnectorInstanceList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/domains:
+    post:
+      summary: Create a Domain for a Tenant.
+      operationId: CreateTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/report-schedule-configs:
+    post:
+      summary: Create a report schedule configuration for a Tenant.
+      operationId: CreateReportScheduleConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a report schedule configuration for a Tenant.
+      operationId: UpdateReportScheduleConfig
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/report-schedule-configs/{configId}':
+    get:
+      summary: Retrieve a report schedule configuration for a Tenant by configuration Id.
+      operationId: GetReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a report schedule configuration for a Tenant by configuration Id.
+      operationId: DeleteReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfig'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/report-schedule-config-list':
+    get:
+      summary: Retrieve all report schedule configs for the specified Tenant.
+      operationId: GetAllReportScheduleConfig
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantReportScheduleConfigList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/domain-list:
+    get:
+      summary: Retrieve all Domains for the specified Tenant.
+      operationId: GetAllTenantDomains
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomainList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/domains/{domainId}':
+    get:
+      summary: Retrieve a Tenant Domain by Id.
+      operationId: GetTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Domain
+      operationId: UpdateTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch update a Tenant Domain
+      operationId: PatchTenantDomain
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'Successfully patched tenant domain.'
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Domain specified by the provided Domain Id.
+      operationId: DeleteTenantDomain
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantDomain'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/ingestion-profiles:
+    post:
+      summary: Create an Ingestion Profile for a Tenant.
+      operationId: CreateTenantIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Ingestion Profile
+      operationId: PatchTenantIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Ingestion Profile
+      operationId: UpdateTenantIngestionProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/active-ingestion-profile:
+    get:
+      summary: Retrieve the active Ingestion Profile for the specified Tenant.
+      operationId: GetActiveTenantIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/ingestion-profiles/{ingestionProfileId}':
+    get:
+      summary: Retrieve a Tenant Ingestion Profile by id.
+      operationId: GetTenantIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Ingestion Profile specified by the provided Ingestion Profile Id.
+      operationId: DeleteTenantIngestionProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/threshold-profiles:
+    post:
+      summary: Create a Threshold Profile for a Tenant.
+      operationId: CreateTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Update a Tenant Threshold Profile
+      operationId: PatchTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Threshold Profile
+      operationId: UpdateTenantThresholdProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/threshold-profile-list:
+    get:
+      summary: Retrieve all Threshold Profiles for the specified Tenant.
+      operationId: GetAllTenantThresholdProfiles
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfileList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/threshold-profiles/{thrPrfId}':
+    get:
+      summary: Retrieve a Tenant Threshold Profile by id.
+      operationId: GetTenantThresholdProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Threshold Profile specified by the provided id.
+      operationId: DeleteTenantThresholdProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantThresholdProfile'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/monitored-objects:
+    post:
+      summary: Create a Monitored Object for a Tenant.
+      operationId: CreateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Monitored Object
+      operationId: PatchTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update a Tenant Monitored Object
+      operationId: UpdateTenantMonitoredObject
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/monitored-object-list:
+    get:
+      summary: Retrieve all Monitored Objects for the specified Tenant.
+      operationId: GetAllTenantMonitoredObjects
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/monitored-objects/{monObjId}':
+    get:
+      summary: Retrieve a Tenant Monitored Object by id.
+      operationId: GetTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Monitored Object specified by the provided id.
+      operationId: DeleteTenantMonitoredObject
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMonitoredObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/monitored-object-domain-map':
+    post:
+      summary: Retrieve a mapping of Monitored Objects that are associated with each Domain.
+      operationId: GetDomainToMonitoredObjectMap
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectCountByDomainResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectCountByDomainRequest'
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/bulk/insert/monitored-objects':
+    post:
+      summary: Create one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObject
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+    put:
+      summary: Update one or more Monitored Objects in a single API request.
+      operationId: BulkUpdateMonitoredObject
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectRequest'
+      tags:
+        - TenantProvisioningService
+
+  /v1/tenants/{tenantId}/meta:
+    post:
+      summary: Create a Metadata record for a Tenant.
+      operationId: CreateTenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+      tags:
+        - TenantProvisioningService
+    patch:
+      summary: Patch a Tenant Metadata record
+      operationId: PatchTenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+
+    put:
+      summary: Update a Tenant Metadata record
+      operationId: UpdateTenantMetadata
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTenantIngestionProfile'
+      tags:
+        - TenantProvisioningService
+    get:
+      summary: Retrieve a Tenant Metadata record
+      operationId: GetTenantMetadata
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+    delete:
+      summary: Delete a Tenant Metadata record
+      operationId: DeleteTenantMetadata
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/JsonApiTenantMetadata'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  '/v1/tenants/{tenantId}/reports/{reportID}':
+    get:
+      summary: Retrieve a Tenant SLA report by id.
+      operationId: GetSLAReport
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          type: string
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v1/tenants/{tenantId}/report-list:
+    get:
+      summary: Retrieve all SLA reports for the specified Tenant.
+      operationId: GetAllSLAReports
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningService
+  /v2/tenants:
+    post:
+      summary: Create a Tenant.
+      operationId: CreateTenantV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Tenant being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TenantCreationRequest'
+      tags:
+        - AdminProvisioningServiceV2
+    get:
+      summary: Retrieve all Tenants.
+      operationId: GetAllTenantsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There are no Tenants provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenants/{tenantId}:
+    get:
+      summary: Retrieve a Tenant by id.
+      operationId: GetTenantV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant
+      operationId: DeleteTenantV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+    patch:
+      summary: Patch a Tenant
+      operationId: PatchTenantV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for the update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TenantUpdateRequest'
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenant-by-alias/{value}:
+    get:
+      summary: Returns the Id of a Tenant that matches the provided alias.
+      operationId: GetTenantIdByAliasV2
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/tenant-summary-by-alias/{value}:
+    get:
+      summary: Returns a summary of the Tenant that matches the provided alias.
+      operationId: GetTenantSummaryByAliasV2
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: "#/definitions/TenantSummaryResponse"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There requested Tenant is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: value
+          in: path
+          required: true
+          type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/ingestion-dictionaries:
+    get:
+      summary: Retrieve an Ingestion Dictionary.
+      operationId: GetIngestionDictionaryV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionDictionaryListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/valid-types:
+    get:
+      summary: Retrieve a Valid Types object.
+      operationId: GetValidTypesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ValidTypesListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - AdminProvisioningServiceV2
+  /v2/data-cleaning-profiles:
+    post:
+      summary: Provides ability to Create a Tenant Data Cleaning Profile
+      operationId: CreateDataCleaningProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: "Profile creation completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "There was a conflict when creating the record"
+          schema:
+            type: string
+        '422':
+          description: "The provided request did not pass validation"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DataCleaningProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Data Cleaning Profiles for a Tenant.
+      operationId: GetDataCleaningProfiles
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Record not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/data-cleaning-profiles/{profileId}:
+    get:
+      summary: Retrieve a Data Cleaning Profiles for a Tenant.
+      operationId: GetDataCleaningProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Provides ability to Update a Tenant Data Cleaning Profile
+      operationId: UpdateDataCleaningProfile
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Update completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
+          schema:
+            type: string
+        '409':
+          description: "There was a conflict when updating the record"
+          schema:
+            type: string
+        '422':
+          description: "The provided request did not pass validation"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DataCleaningProfileUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Data Cleaning Profile for a Tenant.
+      operationId: DeleteDataCleaningProfile
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Deletion completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/monitored-objects:
+    get:
+      summary: Retrieve all Monitored Objects for a Tenant.
+      operationId: GetAllMonitoredObjectsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/MonitoredObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Record not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: start_key
+          in: query
+          type: string
+          description: "The name of the Monitored Object from which the result set will begin"
+        - name: limit
+          in: query
+          type: integer
+          description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2
 definitions:
-
-  JsonApiAdminUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/AdminUser'
-  JsonApiAdminUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/AdminUser'
-
-  AdminUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [adminUsers]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/AdminUserAttr'
-
-  AdminUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
   JsonApiTenant:
     type: "object"
     properties:
@@ -2418,82 +2944,69 @@ definitions:
     type: "object"
     properties:
       data:
-        $ref: '#/definitions/IngestionDictionary'
-  IngestionDictionary:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [ingestionDictionaries]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/IngestionDictionaryAttr'
-  IngestionDictionaryAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      metrics:
         type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetrics'
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-  IngestionDictionaryMetrics:
-    type: "object"
-    additionalProperties:
-      $ref: '#/definitions/IngestionDictionaryMetricMap'
-  IngestionDictionaryMetricMap:
-    type: "object"
-    properties:
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapUI'
-      metricMap:
-        type: "object"
-        additionalProperties:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinition'
-  IngestionDictionaryMetricMapUI:
-    type: "array"
-    items:
-      type: "string"
-  IngestionDictionaryMetricMapMetricDefinition:
-    type: "object"
-    properties:
-      monitoredObjectTypes:
-        type: "array"
-        items:
-          $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType'
-      ui:
-        $ref: '#/definitions/IngestionDictionaryMetricMapMetricDefinitionUIData'
-  IngestionDictionaryMetricMapMetricDefinitionMonitoredObjectType:
-    type: "object"
-    properties:
-      key:
-        type: "string"
-      rawMetricId:
-        type: "string"
-      units:
-        type: "array"
-        items:
-          type: "string"
-      directions:
-        type: "array"
-        items:
-          type: "string"
-  IngestionDictionaryMetricMapMetricDefinitionUIData:
-    type: "object"
-    properties:
-      group:
-        type: "string"
-      position:
-        type: "string"
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionDictionaries]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              _id:
+                type: "string"
+              _rev:
+                type: "string"
+              datatype:
+                type: "string"
+              createdTimestamp:
+                type: "integer"
+              lastModifiedTimestamp:
+                type: "integer"
+              metrics:
+                type: "object"
+                additionalProperties:               
+                  type: "object"
+                  properties:
+                    ui:
+                      type: "object"
+                      properties:
+                        metricGroups:
+                          type: "array"
+                          items: 
+                              type: "string"
+                    metricMap:
+                      type: "object"
+                      additionalProperties:
+                        type: "object"
+                        properties:
+                          monitoredObjectTypes:
+                            type: "array"
+                            items:
+                              type: "object"
+                              properties:
+                                key:
+                                  type: "string"
+                                rawMetricId:
+                                  type: "string"
+                                units:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                                directions:
+                                  type: "array"
+                                  items:
+                                    type: "string"
+                          ui:
+                            type: "object"
+                            properties:
+                              group:
+                                type: "string"
+                              position:
+                                type: "string"
+
+
   TenantSummary:
     type: "object"
     properties:
@@ -2533,61 +3046,6 @@ definitions:
       monitoredObjectDeviceTypes:
         type: "object"
         additionalProperties:
-          type: "string"
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
-
-  JsonApiTenantUser:
-    type: "object"
-    properties:
-      data:
-        $ref: '#/definitions/TenantUser'
-  JsonApiTenantUserList:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-           $ref: '#/definitions/TenantUser'
-  TenantUser:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [users]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/TenantUserAttr'  
-  TenantUserAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      tenantId:
-        type: "string"
-      username:
-        type: "string"
-      password: 
-        type: "string"
-      sendOnboardingEmail:
-        type: "boolean"
-      onboardingToken:
-        type: "string"
-      userVerified:
-        type: "boolean"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      domains:
-        type: "array"
-        items: 
           type: "string"
       createdTimestamp:
         type: "integer"
@@ -2785,7 +3243,7 @@ definitions:
         type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -2816,12 +3274,21 @@ definitions:
       domains:
         $ref: '#/definitions/JsonApiRelationship'
 
+  BulkMonitoredObjectRequest:
+    type: array
+    items:
+      $ref: '#/definitions/CreateTenantMonitoredObjectRequest'
+
   CreateTenantMonitoredObjectRequest:
     type: "object"
     properties:
+      _id:
+        type: "string"
+      _rev:
+        type: "string"
       tenantId:
         type: "string"
-      id:
+      objectId:
         type: "string"
       actuatorName: 
         type: "string"
@@ -2865,6 +3332,11 @@ definitions:
           type: "array"
           items: 
             type: "string"
+
+  BulkOperationResponse:
+    type: "array"
+    items:
+      $ref: '#/definitions/BulkOperationResult'
 
   BulkOperationResult:
     type: "object"
@@ -3030,6 +3502,8 @@ definitions:
         type: "string"
       datatype:
         type: "string"
+      name:
+        type: "string"
       thresholds:
         $ref: '#/definitions/TenantThresholdProfileVendorMap'
       createdTimestamp:
@@ -3120,8 +3594,6 @@ definitions:
         type: "string"
       tenantName:
         type: "string"
-      # defaultThresholdProfile:
-      #   type: "string"
       createdTimestamp:
         type: "integer"
       lastModifiedTimestamp:
@@ -3139,7 +3611,7 @@ definitions:
       - aggregator
       - metrics
     properties:
-      tenant:
+      tenantId:
         type: string
         description: the tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
@@ -3170,7 +3642,7 @@ definitions:
       aggregator:
         type: string
         description: The type of aggregation (avg/min/max)
-        xample: "avg"
+        example: "avg"
       numResults:
         type: integer
         description: Number of results to return
@@ -3248,7 +3720,6 @@ definitions:
     required:
       - tenantId
       - interval
-      - metrics
     properties:
       tenantId:
         type: string
@@ -3428,7 +3899,7 @@ definitions:
             breaking changes.)
 
           Schemes other than `http`, `https` (or the empty scheme) might be
-          used with implementation specific semantics.
+          used with implementation et semantics.
       value:
         type: string
         format: byte
@@ -3552,3 +4023,426 @@ definitions:
         type: "array"
         items:
            $ref: '#/definitions/gathergrpcJSONAPIObject'
+  TenantCreationRequest:
+    type: "object"
+    required: ["data"]
+    description: "The request used when creating a new Tenant in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/TenantCreationObject'
+
+  TenantUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "The request used when updating an existing Tenant in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/TenantUpdateObject'
+
+  TenantResponse:
+    type: "object"
+    required: ["data"]
+    description: "The response returned for a single Tenant from Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/Tenant'
+  
+  TenantListResponse:
+    type: "object"
+    required: ["data"]
+    description: "The response returned for multiple Tenants from Datahub"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/Tenant'
+
+  TenantCreationObject:
+    type: "object"
+    required: ["type", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [tenants]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["name", "urlSubdomain", "state"]
+        properties:
+          name:
+            type: "string"
+            description: "The name of the Tenant"
+          urlSubdomain:
+            type: "string"
+            description: "The subdomain used in the URL for accessing the Tenant's portal in Datahub"
+          state:
+            type: "string"
+            enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+            description: "The current state of the Tenant"
+
+  TenantUpdateObject:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [tenants]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev"]
+        properties:
+          _rev:
+            type: "string"
+            description: "The current version of this record. Used to guarantee updates are made in the proper order"
+          name:
+            type: "string"
+            description: "The name of the Tenant"
+          urlSubdomain:
+            type: "string"
+            description: "The subdomain used in the URL for accessing the Tenant's portal in Datahub"
+          state:
+            type: "string"
+            enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+            description: "The current state of the Tenant"
+  
+  Tenant:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [tenants]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "urlSubdomain", "state", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+            description: "The current version of this record. Used to guarantee updates are made in the proper order"
+          name:
+            type: "string"
+            description: "The name of the Tenant"
+          urlSubdomain:
+            type: "string"
+            description: "The subdomain used in the URL for accessing the Tenant's portal in Datahub"
+          state:
+            type: "string"
+            enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
+            description: "The current state of the Tenant"
+          createdTimestamp:
+            type: "integer"
+            description: "The timestamp at which this record was created in Datahub"
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "The timestamp of the last update to this record in Datahub"
+
+  IngestionDictionaryListResponse:
+    type: "object"
+    description: "Provides a listing of all metric values supported by Datahub"
+    properties:
+      data:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            type: 
+              type: "string"
+              enum: [ingestionDictionaries]
+            id:
+              type: "string"
+            attributes:
+              type: "object"
+              required: ["metrics"]
+              properties:
+                metrics:
+                  type: "object"
+                  additionalProperties:               
+                    type: "object"
+                    properties:
+                      ui:
+                        type: "object"
+                        properties:
+                          metricGroups:
+                            type: "array"
+                            items: 
+                                type: "string"
+                      metricMap:
+                        type: "object"
+                        additionalProperties:
+                          type: "object"
+                          properties:
+                            monitoredObjectTypes:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  key:
+                                    type: "string"
+                                  rawMetricId:
+                                    type: "string"
+                                  units:
+                                    type: "array"
+                                    items:
+                                      type: "string"
+                                  directions:
+                                    type: "array"
+                                    items:
+                                      type: "string"
+                            ui:
+                              type: "object"
+                              properties:
+                                group:
+                                  type: "string"
+                                position:
+                                  type: "string"
+
+  ValidTypesListResponse:
+    type: "object"
+    description: "Provides known values mappings for Datahub"
+    properties:
+      data:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            type: 
+              type: "string"
+              enum: [validTypes]
+            id:
+              type: "string"
+            attributes:
+              type: "object"
+              required: ["monitoredObjectTypes", "monitoredObjectDeviceTypes"]
+              properties:
+                monitoredObjectTypes:
+                  type: "object"
+                  description: "Lists the known Monitored Object Types as well as known alias values for Monitored Object types"
+                  additionalProperties:
+                    type: "string"
+                monitoredObjectDeviceTypes:
+                  type: "object"
+                  description: "Lists the known Monitored Object Device Types as well as known alias values for Monitored Object Device types"
+                  additionalProperties:
+                    type: "string"
+
+  TenantSummaryResponse:
+    type: "object"
+    description: "Contains the mapping of an alias to a Tenant ID"
+    properties:
+      data:
+        type: "object"
+        properties:
+          type: 
+            type: "string"
+            enum: [tenantSummaries]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              id: 
+                type: "string"
+                description: "The unique identifier of the Tenant in Datahub"
+              alias:
+                type: "string"
+                description: "A known alias for the Tenant in Datahub"
+  DataCleaningProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dataCleaningProfiles]
+            default: "dataCleaningProfiles"
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["rules"]
+            properties:
+              rules:
+                type: "array"
+                items: 
+                  $ref: '#/definitions/DataCleaningRule'
+                description: "List of all the rules to evaluate for Data Cleaning"
+
+  DataCleaningProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dataCleaningProfiles]
+            default: "dataCleaningProfiles"
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev", "rules"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              rules:
+                type: "array"
+                items: 
+                  $ref: '#/definitions/DataCleaningRule'
+                description: "List of all the rules to evaluate for Data Cleaning"
+
+  DataCleaningRule:
+    type: "object"
+    required: ["metricVendor","metricLabel","triggerCondition","clearCondition"]
+    properties:
+      metricVendor:
+        type: "string"
+        enum: [accedian-twamp,accedian-flowmeter]
+        description: "The name of the vendor which provides the metric used in the rule."
+      metricLabel:
+        type: "string"
+        description: "The name of the metric used in the rule."
+      triggerCondition:
+        $ref: '#/definitions/DataCleaningCondition'
+        description: "Object which determines when a rule will be triggered/applied"
+      clearCondition:
+        $ref: '#/definitions/DataCleaningCondition'
+        description: "Object which determines when a rule will be cleared"
+
+  DataCleaningCondition:
+    type: "object"
+    required: ["comparator", "value", "valueAggregate", "duration"]
+    description: "A condition used to evalutate when a data cleaning rule should be triggered or cleared."
+    properties:
+      comparator:
+        type: "string"
+        enum: [gt,lt,gte,lte,eq]
+        description: "Operand to use when evaluating the condition. [gt=greaterThan, lt=lessThan, gte=greaterThanOrEqual, lte=lessThanOrEqual, eq=equal]"
+      value:
+        type: "string"
+        description: "The value against which the selected metric will be compared."
+      valueAggregate:
+        type: "string"
+        enum: [min,max,avg]
+        description: "The method of aggregation by which the selected metric will be aggregateds. [min=minimum, max=maximum, avg=average]"
+      duration: 
+        type: "string"
+        description: "ISO-8601 interval over which this codition will be evaluated."
+
+  DataCleaningProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/DataCleaningProfile'
+  
+  DataCleaningProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/DataCleaningProfile'
+
+  DataCleaningProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [dataCleaningProfiles]
+        default: "dataCleaningProfiles"
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "rules", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          rules:
+            type: "array"
+            items: 
+              $ref: '#/definitions/DataCleaningRule'
+            description: "List of all the rules to evaluate for Data Cleaning"
+          createdTimestamp:
+            type: "integer"
+            format: "int64"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            format: "int64"
+            description: "Time since epoch at which this object was last altered."
+
+  MonitoredObjectList:
+    type: "object"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObject'
+
+  MonitoredObject:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        properties:
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          relationships:
+            type: "object"
+            properties:
+              domains:
+                $ref: '#/definitions/JsonApiRelationship'
+ 

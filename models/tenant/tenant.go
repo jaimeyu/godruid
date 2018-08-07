@@ -40,8 +40,11 @@ const (
 	// TenantReportType - datatype string used to identify a Tenant Report in the datastore record
 	TenantReportType TenantDataType = "report"
 
-	// DashboardType - datatype string used to identify a Tenant Meta in the datastore record
+	// TenantDashboardType - datatype string used to identify a Tenant Dashboard in the datastore record
 	TenantDashboardType TenantDataType = "dashboard"
+
+	// TenantDataCleaningProfileType - datatype string used to identify a Tenant Data Cleaning Profile in the datastore record
+	TenantDataCleaningProfileType TenantDataType = "dataCleaningProfile"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -126,6 +129,9 @@ const (
 
 	// TenantDashboardStr - common name for the Dashboard for use in logs.
 	TenantDashboardStr = "Tenant Dashboard"
+
+	// TenantDataCleaningProfileStr - common name for the Tenant Cleaning Profile for use in logs.
+	TenantDataCleaningProfileStr = "Tenant Data Cleaning Profile"
 )
 
 // User - defines a Tenant user.
@@ -428,21 +434,20 @@ type MonitoredObjectGroup struct {
 
 // MonitoredObject - defines a Tenant Monitored Object.
 type MonitoredObject struct {
-	ID                    string            `json:"_id"`
-	REV                   string            `json:"_rev"`
-	Datatype              string            `json:"datatype"`
-	TenantID              string            `json:"tenantId"`
-	MonitoredObjectID     string            `json:"id"`
-	ActuatorType          string            `json:"actuatorType"`
-	ActuatorName          string            `json:"actuatorName"`
-	ReflectorType         string            `json:"reflectorType"`
-	ReflectorName         string            `json:"reflectorName"`
-	ObjectType            string            `json:"objectType"`
-	ObjectName            string            `json:"objectName"`
-	DomainSet             []string          `json:"domainSet"`
-	CreatedTimestamp      int64             `json:"createdTimestamp"`
-	LastModifiedTimestamp int64             `json:"lastModifiedTimestamp"`
-	Meta                  map[string]string `json:"meta"`
+	ID                    string   `json:"_id"`
+	REV                   string   `json:"_rev"`
+	Datatype              string   `json:"datatype"`
+	TenantID              string   `json:"tenantId"`
+	MonitoredObjectID     string   `json:"objectId"`
+	ActuatorType          string   `json:"actuatorType"`
+	ActuatorName          string   `json:"actuatorName"`
+	ReflectorType         string   `json:"reflectorType"`
+	ReflectorName         string   `json:"reflectorName"`
+	ObjectType            string   `json:"objectType"`
+	ObjectName            string   `json:"objectName"`
+	DomainSet             []string `json:"domainSet"`
+	CreatedTimestamp      int64    `json:"createdTimestamp"`
+	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -538,14 +543,13 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 
 // Metadata - defines a Tenant Metadata.
 type Metadata struct {
-	ID                      string `json:"_id"`
-	REV                     string `json:"_rev"`
-	Datatype                string `json:"datatype"`
-	TenantID                string `json:"tenantId"`
-	TenantName              string `json:"tenantName"`
-	DefaultThresholdProfile string `json:"defaultThresholdProfile"`
-	CreatedTimestamp        int64  `json:"createdTimestamp"`
-	LastModifiedTimestamp   int64  `json:"lastModifiedTimestamp"`
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	TenantName            string `json:"tenantName"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -562,38 +566,6 @@ func (meta *Metadata) SetID(s string) error {
 // GetName - required implementation for renaming the type in jsonapi payload
 func (meta *Metadata) GetName() string {
 	return string(TenantMetaType)
-}
-
-// GetReferences to satisfy the jsonapi.MarshalReferences interface
-func (meta *Metadata) GetReferences() []jsonapi.Reference {
-	return []jsonapi.Reference{
-		{
-			Type: "defaultThresholdProfile",
-			Name: "defaultThresholdProfile",
-		},
-	}
-}
-
-// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
-func (meta *Metadata) GetReferencedIDs() []jsonapi.ReferenceID {
-	result := []jsonapi.ReferenceID{}
-	result = append(result, jsonapi.ReferenceID{
-		ID:   meta.DefaultThresholdProfile,
-		Type: "defaultThresholdProfile",
-		Name: "defaultThresholdProfile",
-	})
-
-	return result
-}
-
-// SetToOneReferenceID sets domain reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (meta *Metadata) SetToOneReferenceID(name string, ID string) error {
-	if name == "defaultThresholdProfile" {
-		meta.DefaultThresholdProfile = ID
-		return nil
-	}
-
-	return errors.New("There is no to-many relationship with the name " + name)
 }
 
 // Validate - used during validation of incoming REST requests for this object
@@ -644,4 +616,40 @@ type Dashboard struct {
 	TenantID  string   `json:"-"` // UI does not write this property
 	Name      string   `json:"name"`
 	DomainSet []string `json:"domainSet"`
+}
+
+// DataCleaningProfile - defines a Tenant Data Cleaning Profile.
+type DataCleaningProfile struct {
+	ID                    string              `json:"_id"`
+	REV                   string              `json:"_rev"`
+	Datatype              string              `json:"datatype"`
+	TenantID              string              `json:"tenantId"`
+	Rules                 []*DataCleaningRule `json:"rules"`
+	CreatedTimestamp      int64               `json:"createdTimestamp"`
+	LastModifiedTimestamp int64               `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (dcp *DataCleaningProfile) GetID() string {
+	return dcp.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (dcp *DataCleaningProfile) SetID(s string) error {
+	dcp.ID = s
+	return nil
+}
+
+type DataCleaningRule struct {
+	MetricVendor     string                     `json:"metricVendor"`
+	MetricLabel      string                     `json:"metricLabel"`
+	TriggerCondition *DataCleaningRuleCondition `json:"triggerCondition"`
+	ClearCondition   *DataCleaningRuleCondition `json:"clearCondition"`
+}
+
+type DataCleaningRuleCondition struct {
+	Comparator     string `json:"comparator"`
+	Value          string `json:"value"`
+	ValueAggregate string `json:"valueAggregate"`
+	Duration       string `json:"duration"`
 }

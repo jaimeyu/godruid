@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -21,6 +24,7 @@ type httpErrorString string
 const (
 	// Error search strings
 	notFound httpErrorString = "status 404 - not found"
+	conflict httpErrorString = "already exists"
 
 	// Custom Error types
 	errorMarshal = -100
@@ -28,6 +32,16 @@ const (
 	// API Prefix values
 	apiV1Prefix      = "/api/v1/"
 	tenantsAPIPrefix = "tenants/{tenantID}/"
+
+	startKeyQueryParamStr   = "start_key"
+	limitQueryParamStr      = "limit"
+	descendingQueryParamStr = "descending"
+
+	linkFirstStr = "first"
+	linkLastStr  = "last"
+	linkPrevStr  = "prev"
+	linkNextStr  = "next"
+	linkSelfStr  = "self"
 )
 
 var (
@@ -354,7 +368,6 @@ func createDefaultTenantMeta(tenantID string, defaultThresholdProfile string, te
 
 	result.TenantID = tenantID
 	result.Datatype = string(tenmod.TenantMetaType)
-	result.DefaultThresholdProfile = defaultThresholdProfile
 	result.TenantName = tenantName
 
 	result.CreatedTimestamp = db.MakeTimestamp()
@@ -444,11 +457,11 @@ User roles as defined by Skylight AAA
     UnknownRole   UserRole = "unknown"
 */
 const (
-	userRoleSkylight    = "skylight-admin"
-	userRoleTenantAdmin = "tenant-admin"
-	userRoleTenantUser  = "tenant-user"
-	userRoleSystem      = "system"
-	userRoleUnknown     = "unknown"
+	UserRoleSkylight    = "skylight-admin"
+	UserRoleTenantAdmin = "tenant-admin"
+	UserRoleTenantUser  = "tenant-user"
+	UserRoleSystem      = "system"
+	UserRoleUnknown     = "unknown"
 )
 
 // X-Forward strings that will come from skylight AAA
@@ -459,10 +472,10 @@ X-Forwarded-User-Roles   (format string)
 X-Forwarded-Tenant-Id   (format string)
 */
 const (
-	xFwdUserId    = "X-Forwarded-User-Id"
-	xFwdUserName  = "X-Forwarded-Username"
-	xFwdUserRoles = "X-Forwarded-User-Roles"
-	xFwdTenantId  = "X-Forwarded-Tenant-Id"
+	XFwdUserId    = "X-Forwarded-User-Id"
+	XFwdUserName  = "X-Forwarded-Username"
+	XFwdUserRoles = "X-Forwarded-User-Roles"
+	XFwdTenantId  = "X-Forwarded-Tenant-Id"
 )
 
 // RequestUserAuth - AAA will forward us information about the requester and this struct will hold the info
@@ -477,13 +490,13 @@ type RequestUserAuth struct {
 // ExtractHeaderToUserAuthRequest - Converts a header into a requestUserAuth struct
 func ExtractHeaderToUserAuthRequest(h http.Header) (*RequestUserAuth, error) {
 	logger.Log.Debugf("Received Headers: %s", models.AsJSONString(h))
-	roles := h.Get(xFwdUserRoles)
+	roles := h.Get(XFwdUserRoles)
 	lRoles := strings.Split(roles, ",")
 	req := RequestUserAuth{
-		UserID:    h.Get(xFwdUserId),
+		UserID:    h.Get(XFwdUserId),
 		UserRoles: lRoles,
-		UserName:  h.Get(xFwdUserName),
-		TenantID:  h.Get(xFwdTenantId),
+		UserName:  h.Get(XFwdUserName),
+		TenantID:  h.Get(XFwdTenantId),
 	}
 
 	return &req, nil
@@ -496,6 +509,15 @@ func GetAuthorizationToggle() bool {
 	logger.Log.Debugf("AAA Auth is enabled? %t", authAAA)
 
 	return authAAA
+}
+
+// GetChangeNotificationsToggle - Check if we need to send notifications for certain model changes
+func GetChangeNotificationsToggle() bool {
+	cfg := gather.GetConfig()
+	chgNtf := cfg.GetBool("changeNotifications")
+	logger.Log.Debugf("Change Notifications are enabled? %t", chgNtf)
+
+	return chgNtf
 }
 
 // RoleAccessControl - Checks if the user-role from AAA is allowed to access this endpoint
@@ -523,20 +545,25 @@ func RoleAccessControl(header http.Header, allowedRoles []string) bool {
 
 	// We currenly only support 1 allowed role, this may change in the future
 	allowedRole := allowedRoles[0]
-	if allowedRole == userRoleSystem {
+	if allowedRole == UserRoleSystem {
 		// Always allow the "system" level auth access to the APIs
 		logger.Log.Debugf("Access role %s provided. Access Granted", allowedRole)
 		return true
 	}
 
 	// Otherwise, handle the roles
-	for _, role := range user.UserRoles {
-		if role == allowedRole {
-			logger.Log.Debugf("Request from %s matches allowed access: %s", role, allowedRole)
-			return true
+	for _, userRole := range user.UserRoles {
+		for _, provisionnedRole := range allowedRoles {
+			if userRole == provisionnedRole {
+				logger.Log.Debugf("Request from %s matches allowed access: %s", userRole, provisionnedRole)
+				return true
+			}
 		}
 	}
 
+	logger.Log.Debugf("Request from %s doesn't match any allowed access roles: User Roles{%s}, Provisionned Access Roles {%s}",
+		user.UserRoles,
+		allowedRoles)
 	return false
 }
 
@@ -578,4 +605,101 @@ func BuildRouteHandlerWithRACSystemCall(allow []string, fn func(w http.ResponseW
 	}
 
 	return functor
+}
+
+// reportAPIError - Used to document API errors both in logging and in the Metrics reporting tool.
+func reportAPIError(msg string, startTime time.Time, code int, objType string, counterMetrics ...mon.MetricCounterType) string {
+	logger.Log.Errorf(msg)
+	reportAPICompletionState(startTime, code, objType, counterMetrics...)
+	return msg
+}
+
+// reportAPICompletionState - Used to document API completion state both in logging and in the Metrics reporting tool.
+func reportAPICompletionState(startTime time.Time, code int, objType string, counterMetrics ...mon.MetricCounterType) {
+	incrementAPICounters(counterMetrics...)
+	trackAPIMetricsByHttpCode(startTime, code, objType)
+}
+
+// incrementAPICounters - updates API call counters in the metric service
+func incrementAPICounters(counterMetrics ...mon.MetricCounterType) {
+	for _, counter := range counterMetrics {
+		mon.IncrementCounter(counter)
+	}
+}
+
+// trackAPIMetrics - updates API call durations in the metric service
+func trackAPIMetricsByHttpCode(startTime time.Time, code int, objType string) {
+	codeStr := strconv.Itoa(code)
+	mon.TrackAPITimeMetricInSeconds(startTime, codeStr, objType)
+}
+
+func convertToJsonapiObject(obj interface{}, dataContainer interface{}) error {
+
+	// Marshal this object into the appropriate format
+	jsonapiBytes, err := jsonapi.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonapiBytes, dataContainer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// authorizeRequest - Does the initial setup of a REST handler function, including logging, incrementing API counters for monitoring and tracking the
+// initialization time of the call.
+// Returns:
+//  - isAuthorized (bool) -> indicates if the request was authorized based on the logged in userr's role.
+//  - startTime -> the time at which this API call was initiated
+func authorizeRequest(initMsg string, req *http.Request, allowedRoles []string, countersToIncrement ...mon.MetricCounterType) (bool, time.Time) {
+	startTime := time.Now()
+	incrementAPICounters(countersToIncrement...)
+
+	logger.Log.Info(initMsg)
+
+	return isRequestAuthorized(req, allowedRoles), startTime
+}
+
+// convertRequestBodyToDBModel - converts a generic object into a know type. Useful for converting a REST request body into a DB model.
+func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interface{}) error {
+	requestBytes, err := json.Marshal(requestBody)
+	if err != nil {
+		return err
+	}
+
+	err = jsonapi.Unmarshal(requestBytes, dataContainer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func checkForNotFound(s string) bool {
+	return strings.Contains(s, string(notFound))
+}
+
+// generateLinks - creates the "links" section to be used in a jsonapi response object
+func generateLinks(urlBase string, paginationOffsets *common.PaginationOffsets, limit int64) map[string]string {
+	links := map[string]string{}
+
+	links[linkFirstStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
+	links[linkSelfStr] = fmt.Sprintf("%s?%s=%d", urlBase, limitQueryParamStr, limit)
+
+	if len(paginationOffsets.Self) != 0 {
+		links[linkSelfStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Self, limitQueryParamStr, limit)
+	}
+
+	if len(paginationOffsets.Next) != 0 {
+		links[linkNextStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Next, limitQueryParamStr, limit)
+	}
+
+	if len(paginationOffsets.Prev) != 0 {
+		links[linkPrevStr] = fmt.Sprintf("%s?%s=%s&%s=%d", urlBase, startKeyQueryParamStr, paginationOffsets.Prev, limitQueryParamStr, limit)
+	}
+
+	return links
 }

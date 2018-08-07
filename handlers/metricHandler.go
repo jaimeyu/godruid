@@ -32,13 +32,13 @@ type MetricServiceHandler struct {
 	routes   []server.Route
 }
 
-func CreateMetricServiceHandler(grpcServiceHandler *GRPCServiceHandler) *MetricServiceHandler {
+func CreateMetricServiceHandler() *MetricServiceHandler {
 	result := new(MetricServiceHandler)
 
 	ddb := druid.NewDruidDatasctoreClient()
 	result.druidDB = ddb
 
-	tdb, err := getTenantServiceDatastore()
+	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate AdminServiceRESTHandler: %s", err.Error())
 	}
@@ -277,7 +277,7 @@ func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
 
 func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
-		Direction:         queryParams.Get("direction"),
+		Direction:         toStringSplice(queryParams.Get("direction")),
 		Interval:          queryParams.Get("interval"),
 		Metric:            toStringSplice(queryParams.Get("metric")),
 		Tenant:            queryParams.Get("tenant"),

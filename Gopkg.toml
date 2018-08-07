@@ -103,3 +103,19 @@
 [[constraint]]
   branch = "master"
   name = "github.com/robfig/cron"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/openapi/runtime"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/openapi/loads"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/openapi/errors"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/tylerb/graceful"

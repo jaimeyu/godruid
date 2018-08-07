@@ -52,6 +52,7 @@ const (
 	purgeDBStr                          = "purge_db"
 	generateSLAReportStr                = "gen_sla_report"
 	getDocsByTypeStr                    = "get_docs_by_type"
+	insertTenViewsStr                   = "insert_tenant_views"
 
 	stringGeneratorCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
@@ -83,35 +84,42 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Name:        "PopulateTestData",
 			Method:      "POST",
 			Pattern:     "/test-data",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PopulateTestData),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PopulateTestData),
 		},
 
 		server.Route{
 			Name:        "PopulateTestDataBulkRandomizedMO",
 			Method:      "POST",
 			Pattern:     "/test-data/bulkRandomizedMO",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PopulateTestDataBulkRandomizedMO),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PopulateTestDataBulkRandomizedMO),
 		},
 
 		server.Route{
 			Name:        "PurgeDB",
 			Method:      "DELETE",
 			Pattern:     "/test-data/{dbname}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.PurgeDB),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.PurgeDB),
 		},
 
 		server.Route{
 			Name:        "GenerateHistoricalDomainSLAReports",
 			Method:      "POST",
 			Pattern:     "/test-data/domain-sla-reports",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GenerateHistoricalDomainSLAReports),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.GenerateHistoricalDomainSLAReports),
 		},
 
 		server.Route{
 			Name:        "GetAllDocsByType",
 			Method:      "GET",
 			Pattern:     "/test-data/{dbname}/{datatype}",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{userRoleSkylight}, result.GetAllDocsByType),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.GetAllDocsByType),
+		},
+
+		server.Route{
+			Name:        "InsertTenantViews",
+			Method:      "PUT",
+			Pattern:     "/test-data/tenant-views/{dbname}",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.InsertTenantViews),
 		},
 	}
 
@@ -122,7 +130,7 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 	// }
 	// result.adminDB = admindb
 
-	tenantdb, err := getTenantServiceDatastore()
+	tenantdb, err := GetTenantServiceDatastore()
 	if err != nil {
 		logger.Log.Fatalf("Unable to instantiate TestDataServiceHandler: %s", err.Error())
 	}
@@ -207,20 +215,7 @@ func (tsh *TestDataServiceHandler) PopulateTestData(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// Now the TenantDB exisits....add a default user.
 	dataIDForTenant := tenantDescriptor.GetXId()
-	user, err := generateTenantUser(tenantName, dataIDForTenant)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
-		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
-		return
-	}
-	_, err = tsh.grpcSH.CreateTenantUser(nil, user)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to provision Tenant %s content: %s", tenantName, err.Error())
-		reportError(w, startTime, "500", populateTestDataStr, msg, http.StatusInternalServerError)
-		return
-	}
 
 	// Fetch the tenant Meta so that teh default threshold profile id is available:
 	tenantMeta, err := tsh.grpcSH.GetTenantMeta(nil, &wr.StringValue{Value: tenantDescriptor.GetXId()})
@@ -470,6 +465,24 @@ func (tsh *TestDataServiceHandler) GetAllDocsByType(w http.ResponseWriter, r *ht
 	}
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", getDocsByTypeStr)
 	fmt.Fprintf(w, string(response))
+}
+
+// InsertTenantViews - inserts tenant views.
+func (tsh *TestDataServiceHandler) InsertTenantViews(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	dbName := getDBFieldFromRequest(r, 3)
+
+	if len(dbName) == 0 {
+		msg := fmt.Sprintf("Unable to insert documents without a DB name")
+		reportError(w, startTime, "500", insertTenViewsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result := tsh.testDB.InsertTenantViews(dbName)
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", insertTenViewsStr)
+	fmt.Fprintf(w, string(result))
 }
 
 // Generates a set of monitored objects with randomized values according to query parameters provided in the incoming rest request
@@ -771,10 +784,7 @@ func generateMonitoredObject(id string, tenantID string, actuatorName string, re
 func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.MonitoredObject {
 	result := tenmod.MonitoredObject{DomainSet: generateRandomStringArray(domainSet)}
 
-	tenantMonObjStr := string(tenmod.TenantMonitoredObjectType)
-
 	// Generate basic field values randomly and associate the appropriate tenant with the MO
-	result.MonitoredObjectID = db.GenerateID(result, tenantMonObjStr)
 	result.TenantID = tenantID
 	result.ActuatorName = generateRandomString(10)
 	result.ActuatorType = string(tenmod.AccedianVNID)
@@ -782,6 +792,7 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	result.ReflectorType = string(tenmod.AccedianVNID)
 	result.ObjectName = generateRandomString(10)
 	result.ObjectType = string(tenmod.TwampPE)
+	result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
 
 	return &result
 }

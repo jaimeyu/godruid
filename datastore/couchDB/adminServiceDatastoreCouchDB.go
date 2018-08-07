@@ -197,7 +197,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "reports", err.Error())
 		return nil, err
 	}
-	err = asd.deleteDatabase(reportDBID)
+	err = asd.DeleteDatabase(reportDBID)
 	if err != nil {
 		logger.Log.Debugf("Unable to delete report database for Tenant %s: %s", tenantID, err.Error())
 		return nil, err
@@ -209,7 +209,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 		logger.Log.Debugf("Unable to purge DB contents for %s %s: %s", admmod.TenantStr, "monitored objects", err.Error())
 		return nil, err
 	}
-	err = asd.deleteDatabase(moDBID)
+	err = asd.DeleteDatabase(moDBID)
 	if err != nil {
 		logger.Log.Debugf("Unable to delete monitored object database for Tenant %s: %s", tenantID, err.Error())
 		return nil, err
@@ -222,7 +222,7 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteTenant(tenantID string) (*admmod.
 	}
 
 	// Try to delete the DB for the tenant
-	if err := asd.deleteDatabase(tenantIDWithPrefix); err != nil {
+	if err := asd.DeleteDatabase(tenantIDWithPrefix); err != nil {
 		logger.Log.Debugf("Unable to delete %s: %s", admmod.TenantStr, err.Error())
 		return nil, err
 	}
@@ -293,25 +293,14 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 
 	logger.Log.Debugf("Adding Tenant Views to DB %s", dbName)
 
-	db, err := getDatabase(createDBPathStr(asd.couchHost, dbName))
-	if err != nil {
-		return err
-	}
-
 	moDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, monitoredObjectDBSuffix)))
 	if err != nil {
 		return err
 	}
 
-	// Store the sync checkpoint in CouchDB
-	for _, viewPayload := range generateTenantViews() {
-
-		viewDB := db
-
-		if viewPayload["_id"] == monitoredObjectCountByDomainIndex {
-			viewDB = moDB
-		}
-		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", viewDB, nil)
+	// Store the views related to Monitored Objects
+	for _, viewPayload := range getTenantViews() {
+		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", moDB, nil)
 		if err != nil {
 			return err
 		}
@@ -321,8 +310,8 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 	return nil
 }
 
-// deleteDatabase - deletes a database in CouchDB identified by the provided name.
-func (asd *AdminServiceDatastoreCouchDB) deleteDatabase(dbName string) error {
+// DeleteDatabase - deletes a database in CouchDB identified by the provided name.
+func (asd *AdminServiceDatastoreCouchDB) DeleteDatabase(dbName string) error {
 	if len(dbName) == 0 {
 		logger.Log.Debug("No database identifier provided, nothing to delete")
 		return nil
@@ -575,23 +564,6 @@ func (asd *AdminServiceDatastoreCouchDB) DeleteValidTypes() (*admmod.ValidTypes,
 	logger.Log.Debugf("Deleted %s: %v\n", admmod.ValidTypesStr, models.AsJSONString(existing))
 	return existing, nil
 
-}
-
-// Produces all of the views/indicies necessary for the Tenant DB
-func generateTenantViews() []map[string]interface{} {
-	result := make([]map[string]interface{}, 0)
-
-	monitoredObjectCountByDomain := map[string]interface{}{}
-	monitoredObjectCountByDomain["_id"] = monitoredObjectCountByDomainIndex
-	monitoredObjectCountByDomain["language"] = "javascript"
-	byDomain := map[string]interface{}{}
-	byDomain["map"] = "function(doc) {\n    if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject' && doc.data.domainSet) {\n      for (var i in doc.data.domainSet) {\n        emit(doc.data.domainSet[i], doc._id);\n      }\n    }\n}"
-	views := map[string]interface{}{}
-	views["byDomain"] = byDomain
-	monitoredObjectCountByDomain["views"] = views
-
-	logger.Log.Debug("Adding view for monitoredObjectCountByDomain")
-	return append(result, monitoredObjectCountByDomain)
 }
 
 func generateAdminViews() []map[string]interface{} {

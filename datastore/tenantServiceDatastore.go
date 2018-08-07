@@ -57,6 +57,7 @@ type TenantServiceDatastore interface {
 	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
+	GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error)
 
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
 	UpdateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
@@ -79,4 +80,10 @@ type TenantServiceDatastore interface {
 	// For testing
 	DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error)
 	HasDashboardsWithDomain(tenantID string, domainID string) (bool, error)
+
+	CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
+	UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
+	GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
+	DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
+	GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error)
 }

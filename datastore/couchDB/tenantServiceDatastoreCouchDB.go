@@ -19,6 +19,7 @@ import (
 
 const (
 	monitoredObjectsByDomainIndex = "_design/monitoredObjectCount/_view/byDomain"
+	monitoredObjectsByNameIndex   = "_design/moIndex/_view/byName"
 )
 
 // TenantServiceDatastoreCouchDB - struct responsible for handling
@@ -28,6 +29,7 @@ type TenantServiceDatastoreCouchDB struct {
 	server              string
 	cfg                 config.Provider
 	connectorUpdateChan chan *tenmod.ConnectorConfig
+	batchSize           int64
 }
 
 // CreateTenantServiceDAO - instantiates a CouchDB implementation of the
@@ -42,6 +44,8 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreCouchDB, error) {
 		result.cfg.GetInt(gather.CK_server_datastore_port.String()))
 	logger.Log.Debugf("Tenant Service CouchDB URL is: %s, %v", provDBURL, result.connectorUpdateChan)
 	result.server = provDBURL
+
+	result.batchSize = int64(result.cfg.GetInt(gather.CK_server_datastore_batchsize.String()))
 
 	return result, nil
 }
@@ -669,6 +673,88 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjects(tenantID string
 	return res, nil
 }
 
+// GetAllMonitoredObjectsByPage - CouchDB implementation of GetAllMonitoredObjectsByPage
+func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error) {
+	logger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, monitoredObjectDBSuffix))
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	res := make([]*tenmod.MonitoredObject, 0)
+
+	// Need to retrieve 1 more than the asking size to be able to give back a startKey for the next page
+	var batchSize int64
+	if limit <= 0 || limit > int64(tsd.batchSize) {
+		batchSize = tsd.batchSize
+		logger.Log.Warningf("Provided limit %d is outside of range [1 - %d]. Using value %d in query", limit, batchSize, batchSize)
+	} else {
+		batchSize = limit
+	}
+
+	// Get 1 more object than the real response so that we can have the start key of the next page
+	batchPlus1 := batchSize + 1
+
+	params := generatePaginationQueryParams(startKey, batchPlus1, true, false)
+	fetchResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, &params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if fetchResponse["rows"] == nil {
+		return nil, nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	castedRows := fetchResponse["rows"].([]interface{})
+	if len(castedRows) == 0 {
+		return nil, nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	// Convert interface results to map results
+	rows := []map[string]interface{}{}
+	for _, obj := range castedRows {
+		castedObj := obj.(map[string]interface{})
+		genericDoc := castedObj["doc"].(map[string]interface{})
+		rows = append(rows, genericDoc)
+	}
+
+	convertCouchDataArrayToFlattenedArray(rows, &res, tenmod.TenantMonitoredObjectStr)
+
+	nextPageStartKey := ""
+	if int64(len(res)) == batchPlus1 {
+		// Have an extra item, need to remove it and store the key for the next page
+		nextPageStartKey = res[batchSize].ObjectName
+		res = res[:batchSize]
+	}
+
+	paginationOffsets := common.PaginationOffsets{
+		Self: startKey,
+		Next: nextPageStartKey,
+	}
+
+	// Try to retrieve the previous page as well to get the previous start key
+	prevPageParams := generatePaginationQueryParams(res[0].ObjectName, batchPlus1, true, true)
+	prevPageResponse, err := getByDocIDWithQueryParams(monitoredObjectsByNameIndex, tenmod.TenantMonitoredObjectStr, db, &prevPageParams)
+	if err == nil {
+		// Try to get previous page details
+		if prevPageResponse["rows"] != nil {
+			prevPageRows := prevPageResponse["rows"].([]interface{})
+
+			// There will always be 1 result at this point for the start of the current page, only add previous page key if there are actually records on the prev page
+			if len(prevPageRows) > 1 {
+				lastRow := prevPageRows[len(prevPageRows)-1].(map[string]interface{})
+				paginationOffsets.Prev = lastRow["key"].(string)
+			}
+		}
+	}
+
+	logger.Log.Debugf("Retrieved %d %ss from startKey %s\n", len(res), tenmod.TenantMonitoredObjectStr, startKey)
+	return res, &paginationOffsets, nil
+}
+
 // GetAllMonitoredObjectsInIDList - couchdb implementation of GetAllMonitoredObjectsInIDList
 func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Fetching all %s\n from list of %d IDs", tenmod.TenantMonitoredObjectStr, len(idList))
@@ -1217,4 +1303,103 @@ func (tsd *TenantServiceDatastoreCouchDB) HasDashboardsWithDomain(tenantID strin
 		}
 	}
 	return false, nil
+}
+
+// CreateTenantDataCleaningProfile - CouchDB implementation of CreateTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dcp))
+	dcp.ID = ds.GenerateID(dcp, string(tenmod.TenantDataCleaningProfileType))
+	tenantID := ds.PrependToDataID(dcp.TenantID, string(admmod.TenantType))
+
+	// Only create one if one does not already exist:
+	existing, _ := tsd.GetAllTenantDataCleaningProfiles(dcp.TenantID)
+	if len(existing) != 0 {
+		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantDataCleaningProfileStr)
+	}
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.DataCleaningProfile{}
+	if err := createDataInCouch(tenantDBName, dcp, dataContainer, string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Created %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// UpdateTenantDataCleaningProfile - CouchDB implementation of UpdateTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dcp))
+	dcp.ID = ds.PrependToDataID(dcp.ID, string(tenmod.TenantDataCleaningProfileType))
+	tenantID := ds.PrependToDataID(dcp.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.DataCleaningProfile{}
+	if err := updateDataInCouch(tenantDBName, dcp, dataContainer, string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dataContainer))
+	return dataContainer, nil
+}
+
+// DeleteTenantDataCleaningProfile - CouchDB implementation of DeleteTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDataCleaningProfileStr, tenantID)
+
+	// Obtain the value of the existing record for a return value.
+	existing, err := tsd.GetAllTenantDataCleaningProfiles(tenantID)
+	if err != nil || len(existing) == 0 {
+		return nil, fmt.Errorf("Unable to fetch %s to delete: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+	}
+
+	existingObject := existing[0]
+
+	if existingObject.ID != dataID {
+		return nil, fmt.Errorf("%s %s: %s", tenmod.TenantDataCleaningProfileStr, dataID, ds.NotFoundStr)
+	}
+
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	objectID := ds.PrependToDataID(existingObject.ID, string(tenmod.TenantDataCleaningProfileType))
+	if err := deleteData(tenantDBName, objectID, tenmod.TenantDataCleaningProfileStr); err != nil {
+		logger.Log.Debugf("Unable to delete %s: %s", tenmod.TenantDataCleaningProfileStr, err.Error())
+		return nil, err
+	}
+
+	// Return the deleted object.
+	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(existingObject))
+	return existingObject, nil
+}
+
+// GetTenantDataCleaningProfile - CouchDB implementation of GetTenantDataCleaningProfile
+func (tsd *TenantServiceDatastoreCouchDB) GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantDataCleaningProfileStr, dataID)
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDataCleaningProfileType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.DataCleaningProfile{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDataCleaningProfileStr); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(dataContainer))
+	return &dataContainer, nil
+}
+
+// GetAllTenantDataCleaningProfiles - CouchDB implementation of GetAllTenantDataCleaningProfiles
+func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error) {
+	logger.Log.Debugf("Fetching all %ss for Tenant %s\n", tenmod.TenantDataCleaningProfileStr, tenantID)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.DataCleaningProfile, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr, &res); err != nil {
+		return nil, err
+	}
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf("%ss: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+	}
+
+	logger.Log.Debugf("Retrieved %d %ss\n", len(res), tenmod.TenantDataCleaningProfileStr)
+	return res, nil
 }

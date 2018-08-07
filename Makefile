@@ -4,9 +4,19 @@ GO_REPOSITORY_PATH := github.com/accedian/$(DOCKER_IMAGE_NAME)
 DOCKER_VER := $(if $(DOCKER_VER),$(DOCKER_VER),$(shell whoami)-dev)  
 BIN_NAME := bin/alpine-$(DOCKER_IMAGE_NAME)
 GO_SDK_IMAGE := gcr.io/npav-172917/docker-go-sdk
-GO_SDK_VERSION := 1.0.1-alpine
-    
+GO_SDK_VERSION := 1.0.1-alpine   
 GOPATH := $(GOPATH)
+
+SWAGGER_PATH := $(PWD)/files/swagger
+SWAGGER_TMP_FILE := __swagger.yml
+GENERATED_MODELS_DIR := $(PWD)/swagmodels
+GENERATED_OPERATIONS_DIR := $(PWD)/restapi/operations
+SWAGGER_TEMP := $(SWAGGER_PATH)/$(SWAGGER_TMP_FILE)
+SWAGGER_FILES := $(SWAGGER_PATH)/header.yml \
+    $(SWAGGER_PATH)/paths/paths-*.yml \
+    $(SWAGGER_PATH)/definitions/header.yml \
+    $(SWAGGER_PATH)/definitions/definitions-*.yml
+
 all: docker
 
 dockerbin: .FORCE
@@ -22,6 +32,22 @@ docker: dockerbin
 
 push: docker
 	docker push $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER)
+
+
+swagger: $(SWAGGER_FILES)
+	echo "Generating code from swagger files"
+	rm -f $(SWAGGER_TEMP)
+	rm -rf $(GENERATED_MODELS_DIR)
+	rm -rf $(GENERATED_OPERATIONS_DIR)
+	cat $^ > $(SWAGGER_TEMP)
+	docker run --rm -it -e GOPATH=$(GOPATH):/go -v$(HOME):$(HOME) -w $(PWD) quay.io/goswagger/swagger:0.15.0 generate server \
+		 -f $(SWAGGER_TEMP) \
+		 --exclude-main \
+		 --exclude-spec \
+		 -m swagmodels \
+		 -A gather
+	mv $(SWAGGER_TEMP) $(PWD)/files/swagger.yml
+        
 
 circleci-binaries:
 	go build -o $(BIN_NAME) .

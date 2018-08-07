@@ -10,6 +10,12 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+var (
+	NotFoundStr      = "status 404 - not found"
+	ConflictStr      = "already exists"
+	ConflictErrorStr = "status 409 - conflict"
+)
+
 const (
 
 	// PouchDBIdBridgeStr - value required for pouchDB to properly identify a an item. Used in the
@@ -27,10 +33,10 @@ func GenerateID(obj interface{}, dataType string) string {
 	switch obj.(type) {
 	case *pb.MonitoredObjectData:
 		cast := obj.(*pb.MonitoredObjectData)
-		return PrependToDataID(trimAndLowercase(cast.GetId()), dataType)
+		return PrependToDataID(strings.TrimSpace(cast.GetId()), dataType)
 	case *tenmod.MonitoredObject:
 		cast := obj.(*tenmod.MonitoredObject)
-		return PrependToDataID(trimAndLowercase(cast.MonitoredObjectID), dataType)
+		return PrependToDataID(strings.TrimSpace(cast.MonitoredObjectID), dataType)
 	default:
 		uuid := uuid.NewV4()
 		return PrependToDataID(uuid.String(), dataType)

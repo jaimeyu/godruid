@@ -1,7 +1,75 @@
 ## Current Release 
+### 0.184.0 
+**Release Date:** Wed Aug  1 16:36:22 UTC 2018     
+## Previous Releases 
+* Feature - V2 APIs for Admin Service 
+### 0.183.0 
+**Release Date:** Wed Aug  1 00:32:06 UTC 2018     
+### 0.182.0 
+**Release Date:** Tue Jul 31 13:45:47 UTC 2018     
+### 0.181.0 
+**Release Date:** Mon Jul 30 19:17:50 UTC 2018     
+### 0.180.0 
+**Release Date:** Fri Jul 27 19:28:38 UTC 2018     
+### 0.179.0 
+**Release Date:** Fri Jul 27 14:27:31 UTC 2018     
+### 0.178.0 
+**Release Date:** Thu Jul 26 18:59:59 UTC 2018     
+### 0.177.0 
+**Release Date:** Thu Jul 26 15:18:15 UTC 2018     
+* Feature - pagination for v2 GetAllMonitoredObjects API
+### 0.176.0 
+**Release Date:** Wed Jul 25 14:09:56 UTC 2018     
+* Fix raw metrics api to include unclean by default
+### 0.175.0 
+**Release Date:** Mon Jul 23 20:29:41 UTC 2018     
+### 0.174.0 
+**Release Date:** Fri Jul 20 17:57:47 UTC 2018     
+### 0.173.0 
+**Release Date:** Fri Jul 20 16:43:39 UTC 2018     
+### 0.172.0 
+**Release Date:** Fri Jul 20 14:29:20 UTC 2018     
+### 0.171.0 
+**Release Date:** Fri Jul 20 13:59:02 UTC 2018     
+### 0.170.0 
+**Release Date:** Thu Jul 19 19:50:34 UTC 2018     
+### 0.169.0 
+**Release Date:** Thu Jul 19 14:00:31 UTC 2018     
+### 0.168.0 
+**Release Date:** Tue Jul 17 16:40:38 UTC 2018     
+### 0.167.0 
+**Release Date:** Tue Jul 17 15:21:47 UTC 2018     
+### 0.166.0 
+**Release Date:** Tue Jul 17 15:04:37 UTC 2018     
+### 0.165.0 
+**Release Date:** Mon Jul 16 15:43:02 UTC 2018     
+### 0.164.0 
+**Release Date:** Sat Jul 14 14:23:34 UTC 2018     
+* Feat - include a query filter to query only clean metrics
+### 0.163.0 
+**Release Date:** Thu Jul 12 14:52:46 UTC 2018     
+### 0.162.0 
+**Release Date:** Thu Jul 12 00:41:01 UTC 2018     
+* Refactor - now using swagger file to generate the server
+### 0.161.0 
+**Release Date:** Wed Jul  4 15:49:24 UTC 2018     
+* Fix - Cannot create domains for other tenant admin users that are not skylight admin. We did provisionned the roles properly, but the for loop that checked for the roles wasn't really looping. [Fixes Issue 47](https://app.trackduck.com/project/5af4415b55b8b593751d5527/issue/5b3bd4b994cf14512d43feb7?utm_source=integration&utm_medium=app_slack&utm_content=task)
+### 0.160.0 
+**Release Date:** Wed Jun 27 18:23:46 UTC 2018     
+### 0.159.0 
+**Release Date:** Wed Jun 27 18:02:30 UTC 2018     
+* Feature - adding metric instrumentation for Druid queries to track individual time of query from the entire API time.
+### 0.158.0 
+**Release Date:** Mon Jun 25 18:58:20 UTC 2018     
+* Fix - Changed default log level on gather to turn off debug logs
+### 0.157.0 
+**Release Date:** Mon Jun 25 12:52:02 UTC 2018     
+### 0.156.0 
+**Release Date:** Mon Jun 25 12:45:42 UTC 2018     
+Feature - Developer feature. Develerper's local gather can now access remote druid with real datasets and avoid setting up GCE instances.
+Fix - GRP calls to tenant thresholdprofiles did not log tenant ID which made it difficult to debug, https://app.asana.com/0/682255795640582/716246867279196
 ### 0.155.0 
 **Release Date:** Wed Jun 20 21:21:57 UTC 2018     
-## Previous Releases 
 * Fix - batching Monitored Object name updates to reduce API strain.
 ### 0.154.0 
 **Release Date:** Wed Jun 20 19:15:16 UTC 2018     

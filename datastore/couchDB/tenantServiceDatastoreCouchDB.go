@@ -1015,10 +1015,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, err
 	}
 
+	if len(fetchedData) == 0 {
+		return nil, fmt.Errorf("Could not find mapping of monitored object with name %s to id", name)
+	}
+
 	id, found := fetchedData[0]["_id"]
 
 	if !found {
-		return nil, fmt.Errorf(fmt.Sprintf("Could not find mapping of monitored object with name %s to id %s", name, id))
+		return nil, fmt.Errorf("Could not find mapping of monitored object with name %s to id", name)
 	}
 
 	if logger.IsDebugEnabled() {

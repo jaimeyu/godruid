@@ -181,10 +181,10 @@ const (
 	}`
 
 	indexMonObjectNames = `{
-		"_id": "_design/indexOfobjectName",
+		"_id": "_design/indexOfObjectName",
 		"language": "query",
 		"views": {
-			"byobjectName": {
+			"byObjectName": {
 				"map": {
 					"fields": {
 						"data.objectName": "asc"

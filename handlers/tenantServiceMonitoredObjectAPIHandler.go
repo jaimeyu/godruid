@@ -510,6 +510,8 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			response[position] = itemResponse
 		}
 
+		metaKeys := make(map[string]string)
+
 		for i, item := range data.Items {
 			itemResponse := common.BulkOperationResult{
 				ID: item.MetadataKey,
@@ -534,10 +536,9 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 				continue
 			}
 
-			err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, existingMonitoredObject.Meta)
-			if err != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to update monitored object views %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(existingMonitoredObject)))
-				continue
+			// Track all distinct metadata items to be index processed after all are items are worked through
+			for k, _ := range item.Metadata {
+				metaKeys[k] = ""
 			}
 
 			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMonitoredObject.ObjectName)
@@ -546,6 +547,12 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			itemResponse.OK = true
 			itemResponse.REV = updatedMonitoredObject.REV
 			response[i] = &itemResponse
+		}
+
+		// Build up the monitored object indices
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update monitored object views %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		res, err := json.Marshal(response)

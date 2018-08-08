@@ -8,13 +8,13 @@
         '200':
           description: "Fetch completed successfully"
           schema:
-            $ref: '#/definitions/MonitoredObjectList'
+            $ref: '#/definitions/MonitoredObjectListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
             type: string
         '404':
-          description: "Record not found"
+          description: "No Monitored objects are provisioned"
           schema:
             type: string
         '500':
@@ -30,5 +30,205 @@
           in: query
           type: integer
           description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2
+    post:
+      summary: Create a Monitored Object for a Tenant.
+      operationId: CreateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "A Monitored Object with this objectId is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/monitored-objects/{monObjId}:
+    get:
+      summary: Retrieve a Tenant Monitored Object by id.
+      operationId: GetMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Monitored Object
+      operationId: UpdateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for the update request to the Monitored Object"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Monitored Object specified by the provided id.
+      operationId: DeleteMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/bulk/insert/monitored-objects:
+    post:
+      summary: Create one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    put:
+      summary: Update one or more Monitored Objects in a single API request. Note that this is a PUT operation for each Monitored Object. This means that all properties must be explicitly provided
+      operationId: BulkUpdateMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
       tags:
         - TenantProvisioningServiceV2

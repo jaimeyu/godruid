@@ -496,6 +496,12 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 	}
 	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
 
+	if request.TenantID == "" {
+		msg := fmt.Sprintf("Tenant ID is required to retrieved aggregate metrics")
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
 	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())

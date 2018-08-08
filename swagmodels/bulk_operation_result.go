@@ -8,7 +8,9 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // BulkOperationResult bulk operation result
@@ -22,7 +24,8 @@ type BulkOperationResult struct {
 	ID string `json:"id,omitempty"`
 
 	// ok
-	Ok bool `json:"ok,omitempty"`
+	// Required: true
+	Ok *bool `json:"ok"`
 
 	// reason
 	Reason string `json:"reason,omitempty"`
@@ -33,6 +36,24 @@ type BulkOperationResult struct {
 
 // Validate validates this bulk operation result
 func (m *BulkOperationResult) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateOk(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *BulkOperationResult) validateOk(formats strfmt.Registry) error {
+
+	if err := validate.Required("ok", "body", m.Ok); err != nil {
+		return err
+	}
+
 	return nil
 }
 

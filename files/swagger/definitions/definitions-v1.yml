@@ -472,7 +472,8 @@
         type: "string"
       reason:
         type: "string"
-
+    required:
+      - ok
   JsonApiTenantIngestionProfile:
     type: "object"
     properties:

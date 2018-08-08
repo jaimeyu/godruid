@@ -926,14 +926,6 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 // GetMetadataKeys - Gets all the known metadata keys from the couchdb view
 func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[string]int, error) {
 
-	// Model for Extracting Couchdb data
-	type couchViewItem struct {
-		Key   string `json:"key"`
-		Value int    `json:"value"`
-	}
-	type couchView struct {
-		Rows []couchViewItem `json:"rows"`
-	}
 	dbName := GenerateMonitoredObjectURL(tenantId, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
@@ -952,14 +944,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 		logger.Log.Debugf("Getting metadata keys from %s -> %s", dbName+url, models.AsJSONString(doc))
 	}
 
-	var resp couchView
+	var resp ViewResults
 	raw, err := json.Marshal(doc)
 	if err != nil {
 		return nil, fmt.Errorf("Could not marshal (%s) %s, %s", dbName+url, models.AsJSONString(doc), err.Error())
 	}
 	err = json.Unmarshal(raw, &resp)
 	if err != nil {
-		return nil, fmt.Errorf("Could not unmarshal (%s) %s into couchView, %s", dbName+url, string(raw), err.Error())
+		return nil, fmt.Errorf("Could not unmarshal (%s) %s into CouchdbViewResults, %s", dbName+url, string(raw), err.Error())
 	}
 
 	rows := make(map[string]int, 0)
@@ -1002,6 +994,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, do
 // Assumption right now is that most clients monitored object objectName will be unique.
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
 
+	mo := &tenmod.MonitoredObject{}
 	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
@@ -1012,42 +1005,28 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
 	// Expect only 1 return
 	const expectOnly1Result = 1
-	fetchedData, err := db.Query([]string{"_id"}, selector, nil, expectOnly1Result, nil, index)
 
+	// This returns a LIST of objects but we're only going to check for 1 object
+	fetchedData, err := db.Query(nil, selector, nil, expectOnly1Result, nil, index)
 	if err != nil {
 		return nil, err
 	}
+	//	logger.Log.Debugf("Fetched data for %s to id %+v", name, fetchedData)
 
+	/* Example Result
+	[map[_rev:7-9df01cb57be64bd2343d22283604d447 data:map[actuatorType:accedian-vnid createdTimestamp:1.533065848095e+12 datatype:monitoredObject domainSet:[] objectId:debug_mo_failure_0000 objectType:twamp-pe reflectorName:V0mB77rUpT reflectorType:accedian-vnid actuatorName:FziOn6iXAn lastModifiedTimestamp:1.533236965141e+12 meta:map[debug:true] objectName:debug_mo_failure_0000 tenantId:b4772641-c19b-45fb-ad0e-848de0cfb862] _id:monitoredObject_2_debug_mo_failure_0000]]
+	*/
 	if len(fetchedData) == 0 {
 		return nil, fmt.Errorf("Could not find mapping of monitored object with name %s to id", name)
 	}
 
-	id, found := fetchedData[0]["_id"]
-
-	if !found {
-		return nil, fmt.Errorf("Could not find mapping of monitored object with name %s to id", name)
+	err = convertGenericCouchDataToObject(fetchedData[0], mo, "Index Search by Name")
+	if err != nil {
+		return nil, err
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Found mapping of monitored object with name %s to id %s", name, id)
-	}
-
-	mo := &tenmod.MonitoredObject{}
-
-	fetchedMonObject, err := getByDocID(id.(string), "by objectname", db)
-
-	// Flatten the map so that the unmarshaller can properly build the object
-	flatMO := fetchedMonObject["data"].(map[string]interface{})
-	flatMO["_id"] = id.(string)
-	flatMO["_rev"] = fetchedMonObject["_rev"].(string)
-
-	if err != nil {
-		return nil, err
-	}
-	raw, _ := json.Marshal(flatMO)
-	err = json.Unmarshal(raw, mo)
-	if err != nil {
-		return nil, err
+		logger.Log.Debugf("Found mapping of monitored object with name %s to mo %s", name, models.AsJSONString(mo))
 	}
 
 	return mo, nil

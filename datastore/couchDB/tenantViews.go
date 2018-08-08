@@ -271,8 +271,9 @@ func createCouchDBViewIndex(dbName string, template string, ddocName string, key
 	return nil
 }
 
+// TriggerBuildCouchView - Couchviews are not auto generated so this function makes couchdb start the build process
 func TriggerBuildCouchView(dbName string, ddoc string, key string, legacy bool) {
-
+	//http://docs.couchdb.org/en/latest/api/ddoc/views.html#querying-views-and-indexes
 	// When we do a bulk update on monitored objects, we'll be issuing
 	// a lot of view queries so instead. So now we check if there is already
 	// generating a view and if so, then just quit. There's no point in hammering
@@ -301,14 +302,16 @@ func TriggerBuildCouchView(dbName string, ddoc string, key string, legacy bool) 
 		return
 	}
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully buiklt view %s -> %s", uri, "") //models.AsJSONString(v))
+		logger.Log.Debugf("Successfully built view %s -> %s", uri, "") //models.AsJSONString(v))
 	}
 
 	couchdbViewBuilderBusyMap.Delete(ddoc)
 }
 
+// TriggerBuildCouchIndex - Couchviews are not auto generated so this function makes couchdb start the build process
 func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName bool) {
 
+	//http://docs.couchdb.org/en/latest/api/ddoc/views.html#querying-views-and-indexes
 	// When we do a bulk update on monitored objects, we'll be issuing
 	// a lot of view queries so instead. So now we check if there is already
 	// generating a view and if so, then just quit. There's no point in hammering

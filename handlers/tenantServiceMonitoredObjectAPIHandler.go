@@ -184,15 +184,6 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		// DEBUG
-		// Issue request to DAO Layer
-		x := oldMonitoredObject.ObjectName
-		existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(x, data.TenantID)
-		if err != nil {
-			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
-		}
-		logger.Log.Debugf("Recieved MO: %+v", existingMonitoredObject)
-
 		// Issue request to DAO Layer
 		result, err := tenantDB.UpdateMonitoredObject(oldMonitoredObject)
 		if err != nil {

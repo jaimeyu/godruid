@@ -23,12 +23,14 @@ const (
 	monitoredObjectsByObjectNameKey   = "objectName"
 	monitoredObjectIndex              = "indexOfobjectName"
 	mapFnName                         = "map"
-
-	viewTemplateStr  = "_design/indexOf%s/_view/by%s"
-	indexTemplateStr = "_design/viewOf%s/_view/by%s"
+	legacyIndexTemplateStr            = "_design/%s/_view/%s"
+	indexTemplateStr                  = "_design/indexOf%s/_view/by%s"
+	viewTemplateStr                   = "_design/viewOf%s/_view/by%s"
+	legacyViewTemplateStr             = "_design/%s/_view/%s"
 
 	metaFieldPrefix              = "meta"
 	metakeysViewDdocName         = "metaViews"
+	metaViewUniqueKeys           = "uniqueKeys"
 	MetakeysViewUniqueKeysURI    = "_design/metaViews/_view/uniqueKeys"
 	metakeysViewUniqueValuessURI = "uniqueValues"
 	metaViewAllValuesPerKey      = "allValuesByKeyWithCounts"
@@ -46,7 +48,7 @@ const (
 
 	objectCountDdoc       = "monitoredObjectCount"
 	objectCountByNameView = "byName"
-	objectCountView       = "count"
+	objectCountView       = "byCount"
 
 	monitoredObjectCountIndexBytes = `{
 	"_id": "_design/monitoredObjectCount",
@@ -62,7 +64,10 @@ const (
 		"map": "function(doc) {  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') { emit(doc.id, 1) } }",
 		"reduce": "_count"
 	  }
-	}
+	}, "byCount": {
+		"map": "function(doc) {  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') { emit(doc.id, 1) } }",
+		"reduce": "_count"
+	  }
   }`
 
 	monitoredObjectMetaIndexBytes = `{
@@ -266,7 +271,7 @@ func createCouchDBViewIndex(dbName string, template string, ddocName string, key
 	return nil
 }
 
-func indexViewTriggerBuild(dbName string, ddoc string, key string) {
+func TriggerBuildCouchView(dbName string, ddoc string, key string, legacy bool) {
 
 	// When we do a bulk update on monitored objects, we'll be issuing
 	// a lot of view queries so instead. So now we check if there is already
@@ -283,7 +288,47 @@ func indexViewTriggerBuild(dbName string, ddoc string, key string) {
 	if err != nil {
 		logger.Log.Errorf("Could not load db %s", dbName)
 	}
-	uri := fmt.Sprintf(viewTemplateStr, ddoc, key)
+	var uri string
+	uri = fmt.Sprintf(viewTemplateStr, ddoc, key)
+	if legacy {
+		uri = fmt.Sprintf(legacyViewTemplateStr, ddoc, key)
+	}
+	logger.Log.Debugf("Starting to build view %s%s", dbName, uri)
+	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
+	_, err = db.Get(uri, nil)
+	if err != nil {
+		logger.Log.Errorf("Unsuccessfully built view: %s because %s", uri, err.Error())
+		return
+	}
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Successfully buiklt view %s -> %s", uri, "") //models.AsJSONString(v))
+	}
+
+	couchdbViewBuilderBusyMap.Delete(ddoc)
+}
+
+func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName bool) {
+
+	// When we do a bulk update on monitored objects, we'll be issuing
+	// a lot of view queries so instead. So now we check if there is already
+	// generating a view and if so, then just quit. There's no point in hammering
+	// couch to update the views.
+	_, stored := couchdbViewBuilderBusyMap.LoadOrStore(ddoc, true)
+	// Should we defer for 5 seconds to let the system settle?
+	if stored == true {
+		// We're already building the index, don't interrupt it.
+		return
+	}
+
+	db, err := getDatabase(dbName)
+	if err != nil {
+		logger.Log.Errorf("Could not load db %s", dbName)
+	}
+	var uri string
+	uri = fmt.Sprintf(indexTemplateStr, ddoc, key)
+	if legacyName {
+		uri = fmt.Sprintf(legacyIndexTemplateStr, ddoc, key)
+	}
 	logger.Log.Debugf("Starting to Index %s%s", dbName, uri)
 	// Now go get the view (we don't actually look at it, we just want couch to start the indexer)
 	_, err = db.Get(uri, nil)

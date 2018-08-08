@@ -906,19 +906,19 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 		// Do not wait for this to finish, it will certainly take tens of minutes
 		// Create/update the couchDB views
 		for key := range meta {
-			go indexViewTriggerBuild(dbNameKeys, MetaKeyIndexOf+key, "by"+key)
-			go indexViewTriggerBuild(dbNameKeys, MetaKeyViewOf+key, "by"+key)
+			go TriggerBuildCouchView(dbNameKeys, key, key, false)
+			go TriggerBuildCouchIndex(dbNameKeys, key, key, false)
 		}
 	}
 
-	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, MetakeysViewUniqueKeysURI)
-	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metakeysViewUniqueValuessURI)
-	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup)
-	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewLookupWords)
-	go indexViewTriggerBuild(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey)
-	go indexViewTriggerBuild(dbNameKeys, moIndexDdoc, moIndexView)
-	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountByNameView)
-	go indexViewTriggerBuild(dbNameKeys, objectCountDdoc, objectCountView)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metakeysViewUniqueValuessURI, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
+	// Indexes
+	go TriggerBuildCouchIndex(dbNameKeys, moIndexDdoc, moIndexView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountByNameView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountView, true)
 
 	return nil
 }

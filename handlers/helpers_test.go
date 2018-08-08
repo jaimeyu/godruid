@@ -40,6 +40,10 @@ func setupTestDatastore() error {
 	monitoring.InitMetrics()
 
 	cfg.Set("ingDict", "../files/defaultIngestionDictionary.json")
+	cfg.Set("changeNotifications", "false")
+	cfg.Set(gather.CK_args_authorizationAAA.String(), "true")
+
+	handlers.InitializeAuthHelper()
 
 	var err error
 	adminDB, err = handlers.GetAdminServiceDatastore()

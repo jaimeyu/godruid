@@ -3375,13 +3375,13 @@ paths:
         '200':
           description: "Fetch completed successfully"
           schema:
-            $ref: '#/definitions/MonitoredObjectList'
+            $ref: '#/definitions/MonitoredObjectListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
             type: string
         '404':
-          description: "Record not found"
+          description: "No Monitored objects are provisioned"
           schema:
             type: string
         '500':
@@ -3397,6 +3397,206 @@ paths:
           in: query
           type: integer
           description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2
+    post:
+      summary: Create a Monitored Object for a Tenant.
+      operationId: CreateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "A Monitored Object with this objectId is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/monitored-objects/{monObjId}:
+    get:
+      summary: Retrieve a Tenant Monitored Object by id.
+      operationId: GetMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Monitored Object
+      operationId: UpdateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for the update request to the Monitored Object"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Monitored Object specified by the provided id.
+      operationId: DeleteMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/bulk/insert/monitored-objects:
+    post:
+      summary: Create one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    put:
+      summary: Update one or more Monitored Objects in a single API request. Note that this is a PUT operation for each Monitored Object. This means that all properties must be explicitly provided
+      operationId: BulkUpdateMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
       tags:
         - TenantProvisioningServiceV2
   /v2/threshold-profiles:
@@ -5414,8 +5614,24 @@ definitions:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+  MonitoredObjectCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Monitored Object in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/MonitoredObjectCreate'
+                    
+  MonitoredObjectUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Monitored Object in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/MonitoredObjectUpdate'
 
-  MonitoredObjectList:
+
+  MonitoredObjectListResponse:
     type: "object"
     required: ["data"]
     properties:
@@ -5428,8 +5644,20 @@ definitions:
         items:
           $ref: '#/definitions/MonitoredObject'
 
+  MonitoredObjectResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        $ref: '#/definitions/MonitoredObject'
+
   MonitoredObject:
     type: "object"
+    required: ["type", "id", "attributes"]
     properties:
       type: 
         type: "string"
@@ -5438,9 +5666,8 @@ definitions:
         type: "string"
       attributes:
         type: "object"
+        required: ["_rev", "attributes"]
         properties:
-          _id:
-            type: "string"
           _rev:
             type: "string"
           datatype:
@@ -5468,11 +5695,121 @@ definitions:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
-          relationships:
-            type: "object"
-            properties:
-              domains:
-                $ref: '#/definitions/JsonApiRelationship'
+
+  BulkOperationResponseV2:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          type: "object"
+          required: ["type", "id", "attributes"]
+          properties:
+            type: 
+              type: "string"
+              enum: [bulkOperationResponses]
+            id:
+              type: "string"
+            attributes:
+              description: "Provides the result of multiple operations that were issued in a single request to Datahub"
+              type: "object"
+              properties:
+                ok:
+                  type: "boolean"
+                id:
+                  type: "string"
+                rev:
+                  type: "string"
+                error:
+                  type: "string"
+                reason:
+                  type: "string"
+
+  BulkMonitoredObjectCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Monitored Object in Datahub"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectCreate'
+
+  MonitoredObjectCreate:
+    type: "object"
+    required: ["type", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["objectId"]
+        properties:
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+
+  BulkMonitoredObjectUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectUpdate'
+
+  MonitoredObjectUpdate:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "objectId", "actuatorName", "actuatorType", "reflectorName", "reflectorType", "objectName", "objectType", "createdTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          createdTimestamp:
+            type: "integer"
   ThresholdProfileCreateRequest:
     type: "object"
     required: ["data"]

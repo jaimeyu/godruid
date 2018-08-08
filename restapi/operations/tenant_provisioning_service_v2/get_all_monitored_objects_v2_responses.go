@@ -25,7 +25,7 @@ type GetAllMonitoredObjectsV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.MonitoredObjectList `json:"body,omitempty"`
+	Payload *swagmodels.MonitoredObjectListResponse `json:"body,omitempty"`
 }
 
 // NewGetAllMonitoredObjectsV2OK creates GetAllMonitoredObjectsV2OK with default headers values
@@ -35,13 +35,13 @@ func NewGetAllMonitoredObjectsV2OK() *GetAllMonitoredObjectsV2OK {
 }
 
 // WithPayload adds the payload to the get all monitored objects v2 o k response
-func (o *GetAllMonitoredObjectsV2OK) WithPayload(payload *swagmodels.MonitoredObjectList) *GetAllMonitoredObjectsV2OK {
+func (o *GetAllMonitoredObjectsV2OK) WithPayload(payload *swagmodels.MonitoredObjectListResponse) *GetAllMonitoredObjectsV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get all monitored objects v2 o k response
-func (o *GetAllMonitoredObjectsV2OK) SetPayload(payload *swagmodels.MonitoredObjectList) {
+func (o *GetAllMonitoredObjectsV2OK) SetPayload(payload *swagmodels.MonitoredObjectListResponse) {
 	o.Payload = payload
 }
 
@@ -103,7 +103,7 @@ func (o *GetAllMonitoredObjectsV2Forbidden) WriteResponse(rw http.ResponseWriter
 // GetAllMonitoredObjectsV2NotFoundCode is the HTTP code returned for type GetAllMonitoredObjectsV2NotFound
 const GetAllMonitoredObjectsV2NotFoundCode int = 404
 
-/*GetAllMonitoredObjectsV2NotFound Record not found
+/*GetAllMonitoredObjectsV2NotFound No Monitored objects are provisioned
 
 swagger:response getAllMonitoredObjectsV2NotFound
 */

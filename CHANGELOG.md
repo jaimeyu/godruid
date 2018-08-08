@@ -1,3 +1,4 @@
+* Feature - Monitored Object V2 APIs
 ## Current Release 
 ### 0.185.0 
 **Release Date:** Tue Aug  7 15:10:44 UTC 2018     

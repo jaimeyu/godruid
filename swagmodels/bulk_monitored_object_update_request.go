@@ -15,20 +15,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// MonitoredObjectList monitored object list
-// swagger:model MonitoredObjectList
-type MonitoredObjectList struct {
+// BulkMonitoredObjectUpdateRequest bulk monitored object update request
+// swagger:model BulkMonitoredObjectUpdateRequest
+type BulkMonitoredObjectUpdateRequest struct {
 
 	// data
 	// Required: true
-	Data []*MonitoredObject `json:"data"`
-
-	// links
-	Links map[string]string `json:"links,omitempty"`
+	Data []*MonitoredObjectUpdate `json:"data"`
 }
 
-// Validate validates this monitored object list
-func (m *MonitoredObjectList) Validate(formats strfmt.Registry) error {
+// Validate validates this bulk monitored object update request
+func (m *BulkMonitoredObjectUpdateRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateData(formats); err != nil {
@@ -41,7 +38,7 @@ func (m *MonitoredObjectList) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *MonitoredObjectList) validateData(formats strfmt.Registry) error {
+func (m *BulkMonitoredObjectUpdateRequest) validateData(formats strfmt.Registry) error {
 
 	if err := validate.Required("data", "body", m.Data); err != nil {
 		return err
@@ -67,7 +64,7 @@ func (m *MonitoredObjectList) validateData(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *MonitoredObjectList) MarshalBinary() ([]byte, error) {
+func (m *BulkMonitoredObjectUpdateRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -75,8 +72,8 @@ func (m *MonitoredObjectList) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *MonitoredObjectList) UnmarshalBinary(b []byte) error {
-	var res MonitoredObjectList
+func (m *BulkMonitoredObjectUpdateRequest) UnmarshalBinary(b []byte) error {
+	var res BulkMonitoredObjectUpdateRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

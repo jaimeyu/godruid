@@ -1195,7 +1195,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkInsertMonitoredObjects(tenantID st
 		dataProp := genericMO["data"].(map[string]interface{})
 		dataProp["datatype"] = dataType
 		dataProp["createdTimestamp"] = ds.MakeTimestamp()
-		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
+		dataProp["lastModifiedTimestamp"] = dataProp["createdTimestamp"]
 
 		data = append(data, genericMO)
 
@@ -1272,8 +1272,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID st
 		dataType := string(tenmod.TenantMonitoredObjectType)
 		dataProp := genericMO["data"].(map[string]interface{})
 		dataProp["datatype"] = dataType
-		dataProp["createdTimestamp"] = ds.MakeTimestamp()
-		dataProp["lastModifiedTimestamp"] = genericMO["createdTimestamp"]
+		dataProp["lastModifiedTimestamp"] = ds.MakeTimestamp()
 
 		data = append(data, genericMO)
 

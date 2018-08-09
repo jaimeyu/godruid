@@ -12,23 +12,18 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
-// MonitoredObjectList monitored object list
-// swagger:model MonitoredObjectList
-type MonitoredObjectList struct {
+// ReportScheduleConfigListResponse report schedule config list response
+// swagger:model ReportScheduleConfigListResponse
+type ReportScheduleConfigListResponse struct {
 
 	// data
-	// Required: true
-	Data []*MonitoredObject `json:"data"`
-
-	// links
-	Links map[string]string `json:"links,omitempty"`
+	Data []*TenantReportScheduleConfig `json:"data"`
 }
 
-// Validate validates this monitored object list
-func (m *MonitoredObjectList) Validate(formats strfmt.Registry) error {
+// Validate validates this report schedule config list response
+func (m *ReportScheduleConfigListResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateData(formats); err != nil {
@@ -41,10 +36,10 @@ func (m *MonitoredObjectList) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *MonitoredObjectList) validateData(formats strfmt.Registry) error {
+func (m *ReportScheduleConfigListResponse) validateData(formats strfmt.Registry) error {
 
-	if err := validate.Required("data", "body", m.Data); err != nil {
-		return err
+	if swag.IsZero(m.Data) { // not required
+		return nil
 	}
 
 	for i := 0; i < len(m.Data); i++ {
@@ -67,7 +62,7 @@ func (m *MonitoredObjectList) validateData(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *MonitoredObjectList) MarshalBinary() ([]byte, error) {
+func (m *ReportScheduleConfigListResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -75,8 +70,8 @@ func (m *MonitoredObjectList) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *MonitoredObjectList) UnmarshalBinary(b []byte) error {
-	var res MonitoredObjectList
+func (m *ReportScheduleConfigListResponse) UnmarshalBinary(b []byte) error {
+	var res ReportScheduleConfigListResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

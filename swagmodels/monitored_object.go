@@ -20,14 +20,17 @@ import (
 type MonitoredObject struct {
 
 	// attributes
-	Attributes *MonitoredObjectAttributes `json:"attributes,omitempty"`
+	// Required: true
+	Attributes *MonitoredObjectAttributes `json:"attributes"`
 
 	// id
-	ID string `json:"id,omitempty"`
+	// Required: true
+	ID *string `json:"id"`
 
 	// type
+	// Required: true
 	// Enum: [monitoredObjects]
-	Type string `json:"type,omitempty"`
+	Type *string `json:"type"`
 }
 
 // Validate validates this monitored object
@@ -35,6 +38,10 @@ func (m *MonitoredObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -50,8 +57,8 @@ func (m *MonitoredObject) Validate(formats strfmt.Registry) error {
 
 func (m *MonitoredObject) validateAttributes(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Attributes) { // not required
-		return nil
+	if err := validate.Required("attributes", "body", m.Attributes); err != nil {
+		return err
 	}
 
 	if m.Attributes != nil {
@@ -61,6 +68,15 @@ func (m *MonitoredObject) validateAttributes(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *MonitoredObject) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
+		return err
 	}
 
 	return nil
@@ -94,12 +110,12 @@ func (m *MonitoredObject) validateTypeEnum(path, location string, value string) 
 
 func (m *MonitoredObject) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) { // not required
-		return nil
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
 		return err
 	}
 
@@ -128,11 +144,9 @@ func (m *MonitoredObject) UnmarshalBinary(b []byte) error {
 // swagger:model MonitoredObjectAttributes
 type MonitoredObjectAttributes struct {
 
-	// id
-	ID string `json:"_id,omitempty"`
-
 	// rev
-	Rev string `json:"_rev,omitempty"`
+	// Required: true
+	Rev *string `json:"_rev"`
 
 	// actuator name
 	ActuatorName string `json:"actuatorName,omitempty"`
@@ -167,9 +181,6 @@ type MonitoredObjectAttributes struct {
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType string `json:"reflectorType,omitempty"`
 
-	// relationships
-	Relationships *MonitoredObjectAttributesRelationships `json:"relationships,omitempty"`
-
 	// tenant Id
 	TenantID string `json:"tenantId,omitempty"`
 }
@@ -177,6 +188,10 @@ type MonitoredObjectAttributes struct {
 // Validate validates this monitored object attributes
 func (m *MonitoredObjectAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateActuatorType(formats); err != nil {
 		res = append(res, err)
@@ -190,13 +205,18 @@ func (m *MonitoredObjectAttributes) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateRelationships(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *MonitoredObjectAttributes) validateRev(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"_rev", "body", m.Rev); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -344,24 +364,6 @@ func (m *MonitoredObjectAttributes) validateReflectorType(formats strfmt.Registr
 	return nil
 }
 
-func (m *MonitoredObjectAttributes) validateRelationships(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Relationships) { // not required
-		return nil
-	}
-
-	if m.Relationships != nil {
-		if err := m.Relationships.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("attributes" + "." + "relationships")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 // MarshalBinary interface implementation
 func (m *MonitoredObjectAttributes) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -373,64 +375,6 @@ func (m *MonitoredObjectAttributes) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *MonitoredObjectAttributes) UnmarshalBinary(b []byte) error {
 	var res MonitoredObjectAttributes
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// MonitoredObjectAttributesRelationships monitored object attributes relationships
-// swagger:model MonitoredObjectAttributesRelationships
-type MonitoredObjectAttributesRelationships struct {
-
-	// domains
-	Domains *JSONAPIRelationship `json:"domains,omitempty"`
-}
-
-// Validate validates this monitored object attributes relationships
-func (m *MonitoredObjectAttributesRelationships) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateDomains(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *MonitoredObjectAttributesRelationships) validateDomains(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Domains) { // not required
-		return nil
-	}
-
-	if m.Domains != nil {
-		if err := m.Domains.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("attributes" + "." + "relationships" + "." + "domains")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *MonitoredObjectAttributesRelationships) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *MonitoredObjectAttributesRelationships) UnmarshalBinary(b []byte) error {
-	var res MonitoredObjectAttributesRelationships
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

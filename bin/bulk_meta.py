@@ -8,39 +8,51 @@ import os
 import sys
 import time
 
+# Builds up a basic console logger configuration
 def conf_logging():
     logging.basicConfig(format='%(asctime)s:%(levelname)s: %(message)s', level=logging.INFO)
     logging.info("Logging configured...")
 
+# Initializes a processing file that indicates the status of each monitored object that we attempt to attach metadata to
 def open_processed_file():
     processed_headers = ["key","status"]
     processed_filename = "/tmp/processed.csv"
     logging.info("Generating processed log at %s", processed_filename)
     f = open(processed_filename,"w+")
-    f.write(",".join(processed_headers))
+    f.write(",".join(processed_headers)+"\n")
     return f
 
+# Returns a configured function that knows how to take the headers from the csv file 
+# and build up a bulk metadata entry that the API expects
 def construct_entry_func(headers, metadatakey):
+    # Returns a json representations of the metadata structure for a single entry
     def construct_entry(entry): 
         metadata = {k: v for k, v in dict(zip(headers,entry)).items() if v}
         entry_struct = { "keyName":metadatakey,"metadataKey":metadata[metadatakey],"metadata":metadata}
         return json.dumps(entry_struct)
     return construct_entry
 
+# Returns a configured function that knows how to send a batch of monitoredobjects->metadata to the handler
 def envoy_func(conn, auth, host, tenantid, processfile):
     def envoy(b_id, batch):
         batchlist = list(batch)
         logging.info("Sending batch %s of size %d to %s", b_id, len(batchlist), host)
+        # Build up the batch and send
         payload = "{\"items\":[%s]}" % ",".join(batchlist)
-        print(payload)
         conn.request("POST","/api/v1/tenants/%s/bulk/upsert/monitored-objects/meta" % tenantid, payload, {"Content-Type":"application/json","X-Forwarded-User-Roles":"skylight-admin"})
         bulk_response = conn.getresponse()
         if bulk_response.status != 200:
             logging.error("Batch with id %s failed to properly apply" % b_id)
             return
-        bulk_response.read()
+        
+        # Convert the response to json and process each individual response entry to track in the process file
+        responseEntries = json.loads(bulk_response.read().decode("utf-8"))
+        for entry in responseEntries:
+            status = "200" if entry.get("ok") == True else entry.get("reason")
+            processfile.write("%s,%s\n" % (entry.get("id"), status))
     return envoy
 
+# Processes login so that the script can use the bulk API
 def login(conn, host, username, password):
     conn.request("POST","/api/v1/auth/login",urllib.parse.urlencode({"username":username,"password":password}),{"Content-Type":"application/x-www-form-urlencoded"})
     login_response = conn.getresponse()
@@ -50,6 +62,7 @@ def login(conn, host, username, password):
     login_response.read()
     return login_response.getheader("Authorization")
 
+# Retrieves the internal tenant ID based off of the tenant name 
 def tenant_id(conn, auth, host, tenantname):
     logging.info("Retrieving tenant ID for %s", tenantname)
     conn.request("GET","/api/v1/tenant-by-alias/" + tenantname, body=None, headers={"Authorization":auth})
@@ -59,6 +72,7 @@ def tenant_id(conn, auth, host, tenantname):
         return
     return alias_response.read().decode("utf-8")
 
+# Processes the CSV file and sends the metadata contained within to the mapped monitored object name
 def process(file, batchsize, keyname, f_envoy):
     with open(file) as csvfile:
         bulkmetareader = csv.reader(csvfile, delimiter=',')
@@ -76,6 +90,7 @@ def process(file, batchsize, keyname, f_envoy):
                 f_envoy(i//batchsize, map(f_entry, batch))
                 batch = []
         
+        # Process the remaining records in their own batch
         if len(batch) > 0:
             f_envoy((i//batchsize)+1, map(f_entry, batch))
 
@@ -89,6 +104,7 @@ parser.add_argument("-s", "--host", help="Host to send the metadata information 
 parser.add_argument("-u", "--username", help="Username to be used for logging into datahub")
 parser.add_argument("-p", "--password", help="Password to be used for logging into datahub")
 parser.add_argument("-t", "--tenantname", help="Name of the tenant that the monitored objects to be enriched are associated with")
+parser.add_argument("-k", "--keyname", help="Name of the column in the csv that corresponds with the monitored object name")
 
 args = parser.parse_args()
 
@@ -98,7 +114,7 @@ host = args.host
 username = args.username
 password = args.password
 tenant = args.tenant
-keyname = "Enode B"
+keyname = args.keyname
 
 conf_logging()
 
@@ -121,4 +137,4 @@ try:
 finally:
     pf.close()
 
-logging.info("Finishing processing %s in %s seconds", metafile, (time.time() - start))
+logging.info("Finished processing %s in %s seconds", metafile, (time.time() - start))

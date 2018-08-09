@@ -1,7 +1,18 @@
 ## Current Release 
+### 0.189.0 
+**Release Date:** Thu Aug  9 19:03:00 UTC 2018     
+## Previous Releases 
+* Feature - SLA Report V2 APIs
+### 0.188.0 
+**Release Date:** Thu Aug  9 17:38:04 UTC 2018     
+### 0.187.0 
+**Release Date:** Thu Aug  9 14:41:00 UTC 2018     
+* Feature - Report Schedule Configuration V2 APIs
+### 0.186.0 
+**Release Date:** Wed Aug  8 20:02:07 UTC 2018     
+* Feature - Monitored Object V2 APIs
 ### 0.185.0 
 **Release Date:** Tue Aug  7 15:10:44 UTC 2018     
-## Previous Releases 
 * Feature - V2 API support for Threshold Profiles
 ### 0.184.0 
 **Release Date:** Wed Aug  1 16:36:22 UTC 2018     

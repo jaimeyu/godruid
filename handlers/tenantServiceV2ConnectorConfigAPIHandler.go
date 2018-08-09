@@ -339,7 +339,7 @@ func doGetAllConnectorConfigsV2(allowedRoles []string, tenantDB datastore.Tenant
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantConnectorConfigStr, err.Error())
 	}
 
-	reportAPICompletionState(startTime, http.StatusOK, mon.GetAllTenantConnectorInstanceStr, mon.APICompleted, mon.TenantAPICompleted)
+	reportAPICompletionState(startTime, http.StatusOK, mon.GetAllTenantConnectorConfigStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Retrieved %d %ss", len(result), tenmod.TenantConnectorConfigStr)
 	return startTime, http.StatusOK, &converted, nil
 }

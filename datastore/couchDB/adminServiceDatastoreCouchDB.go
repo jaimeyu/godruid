@@ -17,14 +17,6 @@ import (
 	admmod "github.com/accedian/adh-gather/models/admin"
 )
 
-const (
-	tenantIDByNameIndex               = "_design/tenant/_view/byAlias"
-	monitoredObjectCountByDomainIndex = "_design/monitoredObjectCount"
-
-	monitoredObjectDBSuffix = "_monitored-objects"
-	reportObjectDBSuffix    = "_reports"
-)
-
 // AdminServiceDatastoreCouchDB - struct responsible for handling
 // database operations for the Admin Service when using CouchDB
 // as the storage option.

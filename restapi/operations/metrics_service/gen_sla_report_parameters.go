@@ -41,10 +41,6 @@ type GenSLAReportParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Domain ID
-	  In: query
-	*/
-	Domain []string
 	/*the granularity for timeseries in ISO-8601 Duration format
 	  In: query
 	  Default: "PT1H"
@@ -55,6 +51,10 @@ type GenSLAReportParams struct {
 	  In: query
 	*/
 	Interval string
+	/*
+	  In: query
+	*/
+	Meta []string
 	/*Tenant ID
 	  Required: true
 	  In: query
@@ -86,11 +86,6 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qs := runtime.Values(r.URL.Query())
 
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	qGranularity, qhkGranularity, _ := qs.GetOK("granularity")
 	if err := o.bindGranularity(qGranularity, qhkGranularity, route.Formats); err != nil {
 		res = append(res, err)
@@ -98,6 +93,11 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qInterval, qhkInterval, _ := qs.GetOK("interval")
 	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMeta, qhkMeta, _ := qs.GetOK("meta")
+	if err := o.bindMeta(qMeta, qhkMeta, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -124,34 +124,6 @@ func (o *GenSLAReportParams) BindRequest(r *http.Request, route *middleware.Matc
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindDomain binds and validates array parameter Domain from query.
-//
-// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
-func (o *GenSLAReportParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-
-	var qvDomain string
-	if len(rawData) > 0 {
-		qvDomain = rawData[len(rawData)-1]
-	}
-
-	// CollectionFormat:
-	domainIC := swag.SplitByFormat(qvDomain, "")
-	if len(domainIC) == 0 {
-		return nil
-	}
-
-	var domainIR []string
-	for _, domainIV := range domainIC {
-		domainI := domainIV
-
-		domainIR = append(domainIR, domainI)
-	}
-
-	o.Domain = domainIR
-
 	return nil
 }
 
@@ -191,6 +163,34 @@ func (o *GenSLAReportParams) bindInterval(rawData []string, hasKey bool, formats
 	}
 
 	o.Interval = raw
+
+	return nil
+}
+
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
+func (o *GenSLAReportParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	var qvMeta string
+	if len(rawData) > 0 {
+		qvMeta = rawData[len(rawData)-1]
+	}
+
+	// CollectionFormat:
+	metaIC := swag.SplitByFormat(qvMeta, "")
+	if len(metaIC) == 0 {
+		return nil
+	}
+
+	var metaIR []string
+	for _, metaIV := range metaIC {
+		metaI := metaIV
+
+		metaIR = append(metaIR, metaI)
+	}
+
+	o.Meta = metaIR
 
 	return nil
 }

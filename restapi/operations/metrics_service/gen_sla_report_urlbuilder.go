@@ -15,9 +15,9 @@ import (
 
 // GenSLAReportURL generates an URL for the gen SLA report operation
 type GenSLAReportURL struct {
-	Domain             []string
 	Granularity        *string
 	Interval           string
+	Meta               []string
 	Tenant             string
 	ThresholdProfileID string
 	Timeout            *int32
@@ -57,23 +57,6 @@ func (o *GenSLAReportURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	var domainIR []string
-	for _, domainI := range o.Domain {
-		domainIS := domainI
-		if domainIS != "" {
-			domainIR = append(domainIR, domainIS)
-		}
-	}
-
-	domain := swag.JoinByFormat(domainIR, "")
-
-	if len(domain) > 0 {
-		qsv := domain[0]
-		if qsv != "" {
-			qs.Set("domain", qsv)
-		}
-	}
-
 	var granularity string
 	if o.Granularity != nil {
 		granularity = *o.Granularity
@@ -85,6 +68,23 @@ func (o *GenSLAReportURL) Build() (*url.URL, error) {
 	interval := o.Interval
 	if interval != "" {
 		qs.Set("interval", interval)
+	}
+
+	var metaIR []string
+	for _, metaI := range o.Meta {
+		metaIS := metaI
+		if metaIS != "" {
+			metaIR = append(metaIR, metaIS)
+		}
+	}
+
+	meta := swag.JoinByFormat(metaIR, "")
+
+	if len(meta) > 0 {
+		qsv := meta[0]
+		if qsv != "" {
+			qs.Set("meta", qsv)
+		}
 	}
 
 	tenant := o.Tenant

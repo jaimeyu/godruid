@@ -16,10 +16,10 @@ import (
 // GetHistogramURL generates an URL for the get histogram operation
 type GetHistogramURL struct {
 	Direction          *string
-	Domain             *string
 	Granularity        *string
 	GranularityBuckets *int32
 	Interval           *string
+	Meta               []string
 	Metric             *string
 	Resolution         *int32
 	Tenant             *string
@@ -68,14 +68,6 @@ func (o *GetHistogramURL) Build() (*url.URL, error) {
 		qs.Set("direction", direction)
 	}
 
-	var domain string
-	if o.Domain != nil {
-		domain = *o.Domain
-	}
-	if domain != "" {
-		qs.Set("domain", domain)
-	}
-
 	var granularity string
 	if o.Granularity != nil {
 		granularity = *o.Granularity
@@ -98,6 +90,23 @@ func (o *GetHistogramURL) Build() (*url.URL, error) {
 	}
 	if interval != "" {
 		qs.Set("interval", interval)
+	}
+
+	var metaIR []string
+	for _, metaI := range o.Meta {
+		metaIS := metaI
+		if metaIS != "" {
+			metaIR = append(metaIR, metaIS)
+		}
+	}
+
+	meta := swag.JoinByFormat(metaIR, "")
+
+	if len(meta) > 0 {
+		qsv := meta[0]
+		if qsv != "" {
+			qs.Set("meta", qsv)
+		}
 	}
 
 	var metric string

@@ -47,14 +47,14 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return dataContainer, nil
 }
 
-func convertHistogramCustomResponse(tenantId string, domainIds []string, interval string, rawResponse string) (map[string]interface{}, error) {
+func convertHistogramResponse(tenantId string, meta map[string][]string, interval string, rawResponse string) (map[string]interface{}, error) {
 
 	const (
-		HistogramCustomReport = "customHistogramReports"
-		AttrData              = "data"
-		AttrTimestamp         = "timestamp"
-		AttrResult            = "result"
-		KeyDelim              = "."
+		HistogramReport = "histogramReports"
+		AttrData        = "data"
+		AttrTimestamp   = "timestamp"
+		AttrResult      = "result"
+		KeyDelim        = "."
 
 		IndexVendor      = 1
 		IndexObjectType  = 2
@@ -72,14 +72,14 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 		return nil, err
 	}
 
-	hcReport := metrics.HistogramCustomReport{}
-	timeSlices := make([]metrics.HistogramCustomTimeSeriesEntry, 0)
+	hcReport := metrics.HistogramReport{}
+	timeSlices := make([]metrics.HistogramTimeSeriesEntry, 0)
 
 	// Process each time slice in the raw druid response
 	rawTimeslices, _ := jsonResponse.S(AttrData).Children()
 	for _, rawTimeslice := range rawTimeslices {
 		// Create a new timeslice for the current set of time that we are processing from the druid response
-		timeslice := metrics.HistogramCustomTimeSeriesEntry{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
+		timeslice := metrics.HistogramTimeSeriesEntry{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
 
 		// Process each bucket response for each metric in the time slice
 		rawResultMap, _ := rawTimeslice.S(AttrResult).ChildrenMap()
@@ -117,7 +117,7 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 
 	hcReport.TimeSeriesResult = timeSlices
 	hcReport.TenantID = tenantId
-	hcReport.DomainIds = domainIds
+	hcReport.Meta = meta
 	hcReport.ReportTimeRange = interval
 	hcReport.ReportCompletionTime = time.Now().UTC().String()
 
@@ -125,7 +125,7 @@ func convertHistogramCustomResponse(tenantId string, domainIds []string, interva
 	rr := map[string]interface{}{
 		"data": map[string]interface{}{
 			"id":         uuid.String(),
-			"type":       HistogramCustomReport,
+			"type":       HistogramReport,
 			"attributes": hcReport,
 		},
 	}

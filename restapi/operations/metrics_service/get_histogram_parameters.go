@@ -36,10 +36,6 @@ type GetHistogramParams struct {
 	  In: query
 	*/
 	Direction *string
-	/*
-	  In: query
-	*/
-	Domain *string
 	/*ISO-8601 period combination.
 	  In: query
 	*/
@@ -52,6 +48,10 @@ type GetHistogramParams struct {
 	  In: query
 	*/
 	Interval *string
+	/*
+	  In: query
+	*/
+	Meta []string
 	/*
 	  In: query
 	*/
@@ -90,11 +90,6 @@ func (o *GetHistogramParams) BindRequest(r *http.Request, route *middleware.Matc
 		res = append(res, err)
 	}
 
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	qGranularity, qhkGranularity, _ := qs.GetOK("granularity")
 	if err := o.bindGranularity(qGranularity, qhkGranularity, route.Formats); err != nil {
 		res = append(res, err)
@@ -107,6 +102,11 @@ func (o *GetHistogramParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qInterval, qhkInterval, _ := qs.GetOK("interval")
 	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMeta, qhkMeta, _ := qs.GetOK("meta")
+	if err := o.bindMeta(qMeta, qhkMeta, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -155,24 +155,6 @@ func (o *GetHistogramParams) bindDirection(rawData []string, hasKey bool, format
 	}
 
 	o.Direction = &raw
-
-	return nil
-}
-
-// bindDomain binds and validates parameter Domain from query.
-func (o *GetHistogramParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Domain = &raw
 
 	return nil
 }
@@ -231,6 +213,34 @@ func (o *GetHistogramParams) bindInterval(rawData []string, hasKey bool, formats
 	}
 
 	o.Interval = &raw
+
+	return nil
+}
+
+// bindMeta binds and validates array parameter Meta from query.
+//
+// Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
+func (o *GetHistogramParams) bindMeta(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	var qvMeta string
+	if len(rawData) > 0 {
+		qvMeta = rawData[len(rawData)-1]
+	}
+
+	// CollectionFormat:
+	metaIC := swag.SplitByFormat(qvMeta, "")
+	if len(metaIC) == 0 {
+		return nil
+	}
+
+	var metaIR []string
+	for _, metaIV := range metaIC {
+		metaI := metaIV
+
+		metaIR = append(metaIR, metaI)
+	}
+
+	o.Meta = metaIR
 
 	return nil
 }

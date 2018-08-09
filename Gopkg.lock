@@ -22,7 +22,13 @@
   branch = "master"
   name = "github.com/accedian/godruid"
   packages = ["."]
-  revision = "9e21d6be0420b132c9e594a2cec059350ffd977a"
+  revision = "5e7487b7b8ec225c3ce4bd41ac7bad213276c939"
+
+[[projects]]
+  name = "github.com/adam-hanna/arrayOperations"
+  packages = ["."]
+  revision = "9b263904c31db75ed5ee915ecb256682433bf099"
+  version = "v0.2.5"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -324,10 +330,10 @@
   revision = "282c8707aa210456a825798969cc27edda34992a"
 
 [[projects]]
+  branch = "master"
   name = "github.com/robfig/cron"
   packages = ["."]
   revision = "b41be1df696709bb6395fe435af20370037c0b4c"
-  version = "v1.1"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -382,12 +388,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/tylerb/graceful"
-  packages = ["."]
-  revision = "d72b0151351a13d0421b763b88f791469c4f5dc7"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -396,6 +396,7 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
+    "netutil",
     "trace"
   ]
   revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
@@ -485,6 +486,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a5128c826008221a940026120b1b7588844a0c5a97f66fe14ee03299ddb8068"
+  inputs-digest = "c0ced5a4a55a621be6043a8f57365d9d48a07c4a0e4089f171636f0794f48408"
   solver-name = "gps-cdcl"
   solver-version = 1

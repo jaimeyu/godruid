@@ -91,7 +91,7 @@ func convertScheduleConfigToRequest(s metrics.ReportScheduleConfig) (*metrics.SL
 	request := metrics.SLAReportRequest{}
 	request.TenantID = s.TenantID
 	request.ThresholdProfileID = s.ThresholdProfile
-	request.Domain = s.Domains
+	request.Meta = s.Meta
 	request.Granularity = s.Granularity
 	request.Timeout = s.Timeout
 	request.Timezone = "UTC"

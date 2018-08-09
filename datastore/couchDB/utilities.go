@@ -6,10 +6,12 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
@@ -21,6 +23,12 @@ const (
 	includeDocsQueryParamStr = "include_docs"
 	descendingQueryParamStr  = "descending"
 )
+
+// When metadata is being updated in monitored objects, we want to issue a request to the view
+// so couchdb would start to build/update the view. Since the builds function is asynchronous,
+// we don't want overlapping calls to the build since it makes no sense to start/stop a build
+// while it is functioning.
+var couchdbViewBuilderBusyMap sync.Map
 
 // ConvertDataToCouchDbSupportedModel - Turns any object into a CouchDB ready entry
 // that can be stored. Changes the provided object into a map[string]interface{} generic
@@ -273,7 +281,7 @@ func convertGenericCouchDataToObject(genericData map[string]interface{}, dataCon
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -297,7 +305,7 @@ func convertCouchDataArrayToFlattenedArray(genericData []map[string]interface{},
 		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
 		return err
 	}
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -314,7 +322,7 @@ func convertGenericArrayToObject(genericData []map[string]interface{}, dataConta
 		return err
 	}
 
-	logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
 
 	return nil
 }
@@ -386,6 +394,76 @@ func storeData(dbName string, data interface{}, dataType string, dataTypeLogStr 
 	return nil
 }
 
+// updateCouchDBDocWithStringDoc - Updates a couchdb design document in coucdb.
+func updateCouchDBDocWithStringDoc(dbName string, data string, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	genericFormat := make(map[string]interface{})
+
+	err = json.Unmarshal([]byte(data), &genericFormat)
+	if err != nil {
+		return err
+	}
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(genericFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Populate the response
+	if err = convertCouchDesignDocumentToObject(genericFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %+v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	}
+	return nil
+}
+
+// updateDesignDoc - encapsulates logic required for basic data updates for objects that follow the basic data format.
+func updateDesignDoc(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	genericFormat := make(map[string]interface{})
+
+	var dataToBytes []byte
+
+	dataToBytes, err = json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(dataToBytes, &genericFormat)
+	if err != nil {
+		return err
+	}
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDB(genericFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	// Populate the response
+	if err = convertCouchDesignDocumentToObject(genericFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %+v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	}
+	return nil
+}
+
 // updateData - encapsulates logic required for basic data updates for objects that follow the basic data format.
 func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
@@ -422,6 +500,26 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 	return nil
 }
 
+// ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
+// that object with the generic data.
+func convertCouchDesignDocumentToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
+
+	genericDataInBytes, err := convertGenericObjectToBytesWithCouchDbFields(genericData)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(genericDataInBytes, &dataContainer)
+	if err != nil {
+		logger.Log.Debugf("Error converting generic data to %s type: %s", dataTypeStr, err.Error())
+		return err
+	}
+
+	//logger.Log.Debugf("Converted generic data to %s: %v\n", dataTypeStr, models.AsJSONString(dataContainer))
+
+	return nil
+}
+
 // getData - encapsulates logic required for basic data retrieval for objects that follow the basic data format.
 func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer interface{}) error {
 	db, err := getDatabase(dbName)
@@ -435,13 +533,20 @@ func getData(dbName string, dataID string, dataTypeLogStr string, dataContainer 
 		return err
 	}
 
-	// Strip prefix from the ID
-	stripPrefixFromID(fetchedObject)
+	if dataTypeLogStr == tenmod.TenantMonitoredObjectKeysStr {
+		if err = convertCouchDesignDocumentToObject(fetchedObject, &dataContainer, dataTypeLogStr); err != nil {
+			return err
+		}
+	} else {
 
-	// Marshal the response from the datastore to bytes so that it
-	// can be Marshalled back to the proper type.
-	if err = convertGenericCouchDataToObject(fetchedObject, &dataContainer, dataTypeLogStr); err != nil {
-		return err
+		// Strip prefix from the ID
+		stripPrefixFromID(fetchedObject)
+
+		// Marshal the response from the datastore to bytes so that it
+		// can be Marshalled back to the proper type.
+		if err = convertGenericCouchDataToObject(fetchedObject, &dataContainer, dataTypeLogStr); err != nil {
+			return err
+		}
 	}
 
 	logger.Log.Debugf("Retrieved %s: %v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
@@ -476,6 +581,35 @@ func createDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 	return nil
 }
 
+// Retrieve IDs from a particular view based on a key criteria
+func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
+	db, err := getDatabase(dbName)
+	view := createDBPathStr("_design", designDocName, "_view", viewName)
+
+	qp := url.Values{}
+	qp.Set("key", fmt.Sprintf("[\"%s\"]", key))
+
+	vr, err := db.Get(view, qp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// If no rows are returned then immediately return an empty list
+	moList := make([]string, 0)
+	rows, found := vr["rows"]
+	if !found {
+		return moList, nil
+	}
+
+	for _, r := range rows.([]interface{}) {
+		rMap := r.(map[string]interface{})
+		moList = append(moList, ds.GetDataIDFromFullID(rMap["id"].(string)))
+	}
+
+	return moList, nil
+}
+
 func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
 	logger.Log.Debugf("Updating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
 
@@ -488,6 +622,19 @@ func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 	return nil
 }
 
+func getDesignDocumentFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error {
+	logger.Log.Debugf("Retrieving %s for %s\n", loggingStr, idToRetrieve)
+
+	if err := getData(dbName, idToRetrieve, loggingStr, &dataContainer); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
+	return nil
+}
 func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interface{}, loggingStr string) error {
 	logger.Log.Debugf("Retrieving %s for %s\n", loggingStr, idToRetrieve)
 
@@ -496,7 +643,9 @@ func getDataFromCouch(dbName string, idToRetrieve string, dataContainer interfac
 	}
 
 	// Return the provisioned object.
-	logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 
@@ -515,7 +664,9 @@ func deleteDataFromCouch(dbName string, idToDelete string, dataContainer interfa
 	}
 
 	// Return the deleted object.
-	logger.Log.Debugf("Deleted %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleted %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	}
 	return nil
 }
 
@@ -565,6 +716,12 @@ func getAllInIDListFromCouchAndFlatten(dbName string, idList []string, dataType 
 	// Marshal the response from the datastore to bytes so that it
 	// can be Marshalled back to the proper type.
 	return convertCouchDataArrayToFlattenedArray(fetchedList, dataContainer, loggingStr)
+}
+
+// GenerateMonitoredObjectURL - Generates a Monitored Object URL
+func GenerateMonitoredObjectURL(tenantID string, uri string) string {
+	dbName := createDBPathStr(uri, fmt.Sprintf("tenant_2_%s%s/", tenantID, monitoredObjectDBSuffix))
+	return dbName
 }
 
 func generatePaginationQueryParams(startKey string, limit int64, includeDocs bool, descending bool) url.Values {

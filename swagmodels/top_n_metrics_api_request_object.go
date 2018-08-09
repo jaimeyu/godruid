@@ -23,16 +23,16 @@ type TopNMetricsAPIRequestObject struct {
 	// Required: true
 	Aggregator *string `json:"aggregator"`
 
-	// set of domains identifiers to use for filtering
-	Domains []string `json:"domains"`
-
 	// ISO-8601 interval
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// metrics
+	// set of domains identifiers to use for filtering
+	Meta map[string]string `json:"meta,omitempty"`
+
+	// metric
 	// Required: true
-	Metrics []*MetricIdentifierObject `json:"metrics"`
+	Metric *MetricIdentifierObject `json:"metric"`
 
 	// metrics view
 	MetricsView []*MetricViewObject `json:"metricsView"`
@@ -63,7 +63,7 @@ func (m *TopNMetricsAPIRequestObject) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateMetrics(formats); err != nil {
+	if err := m.validateMetric(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -99,26 +99,19 @@ func (m *TopNMetricsAPIRequestObject) validateInterval(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *TopNMetricsAPIRequestObject) validateMetrics(formats strfmt.Registry) error {
+func (m *TopNMetricsAPIRequestObject) validateMetric(formats strfmt.Registry) error {
 
-	if err := validate.Required("metrics", "body", m.Metrics); err != nil {
+	if err := validate.Required("metric", "body", m.Metric); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.Metrics); i++ {
-		if swag.IsZero(m.Metrics[i]) { // not required
-			continue
-		}
-
-		if m.Metrics[i] != nil {
-			if err := m.Metrics[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("metrics" + "." + strconv.Itoa(i))
-				}
-				return err
+	if m.Metric != nil {
+		if err := m.Metric.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("metric")
 			}
+			return err
 		}
-
 	}
 
 	return nil

@@ -56,6 +56,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler: tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpsertMonitoredObjectMeta has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateConnectorConfigV2Handler: tenant_provisioning_service_v2.CreateConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateConnectorConfigV2 has not yet been implemented")
 		}),
@@ -433,6 +436,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceBulkUpdateMonitoredObjectHandler tenant_provisioning_service.BulkUpdateMonitoredObjectHandler
 	// TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler sets the operation handler for the bulk update monitored objects v2 operation
 	TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler
+	// TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler sets the operation handler for the bulk upsert monitored object meta operation
+	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
 	// TenantProvisioningServiceV2CreateConnectorConfigV2Handler sets the operation handler for the create connector config v2 operation
 	TenantProvisioningServiceV2CreateConnectorConfigV2Handler tenant_provisioning_service_v2.CreateConnectorConfigV2Handler
 	// TenantProvisioningServiceV2CreateConnectorInstanceV2Handler sets the operation handler for the create connector instance v2 operation
@@ -738,6 +743,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
 
 	if o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler == nil {
@@ -1318,6 +1327,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v1/tenants/{tenantId}/bulk/upsert/monitored-objects/meta"] = tenant_provisioning_service.NewBulkUpsertMonitoredObjectMeta(o.context, o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/connector-configs"] = tenant_provisioning_service_v2.NewCreateConnectorConfigV2(o.context, o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1725,10 +1739,10 @@ func (o *GatherAPI) initHandlerCache() {
 	}
 	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object"] = metrics_service.NewGetThresholdCrossingByMonitoredObject(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
+	o.handlers["POST"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

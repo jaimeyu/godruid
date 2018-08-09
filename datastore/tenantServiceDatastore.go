@@ -57,6 +57,7 @@ type TenantServiceDatastore interface {
 	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
+	GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error)
 	GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error)
 
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
@@ -75,6 +76,12 @@ type TenantServiceDatastore interface {
 	GetSLAReport(tenantID string, slaReportID string) (*metmod.SLAReport, error)
 	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
 
+	// For Monitored Objects Meta fields
+	CheckAndAddMetadataView(tenantID string, metas map[string]string) error
+	UpdateMonitoredObjectMetadataViews(tenantID string, metas map[string]string) error
+	GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error)
+	GetMetadataKeys(tenantId string) (map[string]int, error)
+
 	// For testing
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
 	// For testing
@@ -86,4 +93,5 @@ type TenantServiceDatastore interface {
 	GetTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
 	DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
 	GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error)
+	GetAllMonitoredObjectsIDs(tenantID string) ([]string, error)
 }

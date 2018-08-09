@@ -28,6 +28,9 @@ const (
 	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
 	TenantMonitoredObjectType TenantDataType = "monitoredObject"
 
+	// TenantMonitoredObjectType - datatype string used to identify a Tenant MonitoredObject in the datastore record
+	TenantMonitoredObjectKeysType TenantDataType = "monitoredObjectKeys"
+
 	// TenantThresholdProfileType - datatype string used to identify a Tenant Ingestion Profile in the datastore record
 	TenantThresholdProfileType TenantDataType = "thresholdProfile"
 
@@ -111,6 +114,9 @@ const (
 
 	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
 	TenantMonitoredObjectStr = "Tenant Monitored Object"
+
+	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object Keys data type for use in logs.
+	TenantMonitoredObjectKeysStr = "Tenant Monitored Object Keys"
 
 	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
 	TenantThresholdProfileStr = "Tenant Threshold Profile"
@@ -432,22 +438,48 @@ type MonitoredObjectGroup struct {
 	MetricMap              map[string]map[string]map[string]string                                                                   `json:"metricMap"`
 }
 
+/*MonitoredObjectMetaDesignDocument - used to get an abstract set of views based on metadata
+Here is a sample document
+`{
+  "_id": "_design/metadataColumns",
+  "_rev": "21-2c06d0a5cf7d42d08ad021b43e42c105",
+  "views": {
+    "regionCount": {
+      "map": "function (doc) {\n  \n if (doc.data.meta[\"region\"]) {  \n    emit(doc.data.meta[\"region\"],1);\n  }\n}",
+      "reduce": "_count"
+    },
+    "regionView": {
+      "map": "function (doc) {\n  if (doc.data.meta[\"region\"]) {\n    emit(doc.data.datatype, doc)\n  }\n}"
+    }
+  },
+  "language": "javascript"
+}`
+*/
+type MonitoredObjectMetaDesignDocument struct {
+	ID       string                       `json:"_id"`
+	REV      string                       `json:"_rev"`
+	Views    map[string]map[string]string `json:"views"`
+	Language string                       `json:"language"`
+}
+type CouchdbDesignDocMetaView map[string]string
+
 // MonitoredObject - defines a Tenant Monitored Object.
 type MonitoredObject struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	MonitoredObjectID     string   `json:"objectId"`
-	ActuatorType          string   `json:"actuatorType"`
-	ActuatorName          string   `json:"actuatorName"`
-	ReflectorType         string   `json:"reflectorType"`
-	ReflectorName         string   `json:"reflectorName"`
-	ObjectType            string   `json:"objectType"`
-	ObjectName            string   `json:"objectName"`
-	DomainSet             []string `json:"domainSet"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string            `json:"_id"`
+	REV                   string            `json:"_rev"`
+	Datatype              string            `json:"datatype"`
+	TenantID              string            `json:"tenantId"`
+	MonitoredObjectID     string            `json:"objectId"`
+	ActuatorType          string            `json:"actuatorType"`
+	ActuatorName          string            `json:"actuatorName"`
+	ReflectorType         string            `json:"reflectorType"`
+	ReflectorName         string            `json:"reflectorName"`
+	ObjectType            string            `json:"objectType"`
+	ObjectName            string            `json:"objectName"`
+	DomainSet             []string          `json:"domainSet"`
+	CreatedTimestamp      int64             `json:"createdTimestamp"`
+	LastModifiedTimestamp int64             `json:"lastModifiedTimestamp"`
+	Meta                  map[string]string `json:"meta"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -616,6 +648,48 @@ type Dashboard struct {
 	TenantID  string   `json:"-"` // UI does not write this property
 	Name      string   `json:"name"`
 	DomainSet []string `json:"domainSet"`
+}
+
+type MonitoredObjectBulkMetadataItem struct {
+	// Relates to which property in the monitoredbjects
+	// Tells gather that MetadataKey in the Metadata should match
+	// the key in monitored object.
+	// Eg:
+	// Keyname     -> "objectName"
+	// MetadataKey -> "Enode B"
+	// Metadata    -> {"Enode B": "E1000", "region":"Paris","Voip":"true"}
+	//
+	KeyName string `json:"keyName"`
+
+	// Mandatory
+	MetadataKey string `json:"metadataKey"`
+
+	// Mandatory
+	Metadata map[string]string `json:"metadata"`
+}
+
+type MonitoredObjectBulkMetadata struct {
+	Items []MonitoredObjectBulkMetadataItem `json:"items"`
+}
+
+func (meta *MonitoredObjectBulkMetadata) Validate(isUpdate bool) error {
+	if len(meta.Items) == 0 {
+		return errors.New("Monitored Object List cannot be empty")
+	}
+	return nil
+}
+
+// Error models
+type RequestErrorItem struct {
+	Reason string                          `json:"reason"`
+	Item   MonitoredObjectBulkMetadataItem `json:"item"`
+}
+
+// On a non-200 response, the body will contain a
+// JSON object describing the failure,
+// especially which monitored object failed to get inserted.
+type RequestError struct {
+	Issues []RequestErrorItem `json:"issues"`
 }
 
 // DataCleaningProfile - defines a Tenant Data Cleaning Profile.

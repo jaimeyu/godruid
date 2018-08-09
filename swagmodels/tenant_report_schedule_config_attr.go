@@ -36,9 +36,6 @@ type TenantReportScheduleConfigAttr struct {
 	// day week
 	DayWeek string `json:"dayWeek,omitempty"`
 
-	// domains
-	Domains []string `json:"domains"`
-
 	// granularity
 	Granularity string `json:"granularity,omitempty"`
 
@@ -47,6 +44,9 @@ type TenantReportScheduleConfigAttr struct {
 
 	// last modified timestamp
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
+
+	// meta
+	Meta map[string][]string `json:"meta,omitempty"`
 
 	// minute
 	Minute string `json:"minute,omitempty"`

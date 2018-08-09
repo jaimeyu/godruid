@@ -23,15 +23,15 @@ type AggregateMetricsAPIRequestObject struct {
 	// Required: true
 	Aggregation *AggregateMetricsAPIRequestObjectAggregation `json:"aggregation"`
 
-	// set of domains identifiers to use for filtering
-	DomainIds []string `json:"domainIds"`
-
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
 
 	// ISO-8601 interval
 	// Required: true
 	Interval *string `json:"interval"`
+
+	// set of domains identifiers to use for filtering
+	Meta map[string]string `json:"meta,omitempty"`
 
 	// metrics
 	// Required: true

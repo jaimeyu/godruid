@@ -5,6 +5,7 @@ import (
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service_v2"
+	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service_v2"
 )
 
@@ -28,6 +29,7 @@ func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.T
 	api.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler = tenant_provisioning_service_v2.DeleteDataCleaningProfileHandlerFunc(handlers.HandleDeleteDataCleaningProfileV2(handlers.SkylightAdminRoleOnly, tenantDB))
 	api.TenantProvisioningServiceV2CreateDataCleaningProfileHandler = tenant_provisioning_service_v2.CreateDataCleaningProfileHandlerFunc(handlers.HandleCreateDataCleaningProfileV2(handlers.SkylightAdminRoleOnly, tenantDB))
 	api.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler = tenant_provisioning_service_v2.UpdateDataCleaningProfileHandlerFunc(handlers.HandleUpdateDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB))
+	api.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler = tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(handlers.HandleBulkUpsertMonitoredObjectsMeta(handlers.SkylightAndTenantAdminRoles, tenantDB))
 
 	api.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler = tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(handlers.HandleGetAllMonitoredObjectsV2(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceV2GetMonitoredObjectV2Handler = tenant_provisioning_service_v2.GetMonitoredObjectV2HandlerFunc(handlers.HandleGetMonitoredObjectV2(handlers.AllRoles, tenantDB))

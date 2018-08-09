@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -10,6 +12,7 @@ import (
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	mon "github.com/accedian/adh-gather/monitoring"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -50,6 +53,8 @@ type ChangeNotificationHandler struct {
 	tenantDB           *datastore.TenantServiceDatastore
 	metricsDB          datastore.DruidDatastore
 	batchSize          int64
+	// To block pollChanges from overlapping
+	locker uint32
 }
 
 // ChangeNotificationHandler singleton
@@ -93,6 +98,7 @@ func CreateChangeNotificationHandler() *ChangeNotificationHandler {
 		provisioningEvents: make(chan *ChangeEvent, 20),
 		metricsDB:          druid.NewDruidDatasctoreClient(),
 		batchSize:          batchSize,
+		locker:             0,
 	}
 
 	//	go changeNotifH.readFromKafka(broker, defaultKafkaTopic)
@@ -209,7 +215,12 @@ func NotifyDomainDeleted(tenantID string, obj ...*tenmod.Domain) {
 }
 
 func NotifyEvent(event *ChangeEvent) {
-	changeNotifH.provisioningEvents <- event
+	// Found a potential bug if change notification is disabled
+	// and someone tries to send an event, the goroutine will lock and never exit.
+	// This is problem for dev loads rather than production.
+	if changeNotifH.provisioningEvents != nil {
+		changeNotifH.provisioningEvents <- event
+	}
 }
 
 func (c *ChangeNotificationHandler) processEvents(events []*ChangeEvent) {
@@ -256,20 +267,32 @@ func (c *ChangeNotificationHandler) sendToKafka(tenantID string, monitoredObject
 
 }
 
+func debugAddFakeMonitoredObjects() []*tenmod.MonitoredObject {
+	var monitoredObjects []*tenmod.MonitoredObject
+	// For metadata, we need to build a list of known qualifiers
+	logger.Log.Infof("Dumping Updating metadata from poll change")
+	//debugging
+	//colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
+
+	testNodes := 50000 // change this for testing!
+	for i := 0; i < testNodes; i++ {
+		mo := tenmod.MonitoredObject{
+			ID:                fmt.Sprintf("debug_%d", i),
+			ObjectName:        fmt.Sprintf("debug_%d", i),
+			MonitoredObjectID: fmt.Sprintf("debug_%d", i),
+			// Meta:              map[string]string{"colors": colors[i%len(colors)]},
+			Meta:             map[string]string{"colors": "paris"},
+			CreatedTimestamp: 10,
+		}
+
+		monitoredObjects = append(monitoredObjects, &mo)
+	}
+	return monitoredObjects
+}
+
+// Obsolete!
 func (c *ChangeNotificationHandler) updateMetricsDatastoreMetadata(tenantID string) {
-	monitoredObjects, err := c.getAllMonitoredObjects(tenantID)
-	if err != nil {
-		logger.Log.Error("Failed to get objects", err.Error())
-		return
-	}
-	domains, err := (*c.tenantDB).GetAllTenantDomains(tenantID)
-	if err != nil {
-		logger.Log.Error("Failed to get domains", err.Error())
-		return
-	}
-	if err = c.metricsDB.UpdateMonitoredObjectMetadata(tenantID, monitoredObjects, domains, true); err != nil {
-		logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", tenantID, err.Error())
-	}
+
 }
 
 // getAllMonitoredObjects - uses the paginated DB call to acquire all monitored objects
@@ -297,15 +320,27 @@ func (c *ChangeNotificationHandler) getAllMonitoredObjects(tenantID string) ([]*
 }
 
 func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRefresh bool) error {
+	// Avoid running overlapping pollChanges
+	if !atomic.CompareAndSwapUint32(&c.locker, 0, 1) {
+		return nil
+	}
+	defer atomic.StoreUint32(&c.locker, 0)
+
+	startTime := time.Now()
+
 	logger.Log.Debugf("pollChanges fullRefresh=%v, lastSuccess=%d", fullRefresh, lastSyncTimestamp)
 	tenants, err := (*c.adminDB).GetAllTenantDescriptors()
 	if err != nil {
 		logger.Log.Error("Unable to fetch list of tenants: %s", err.Error())
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.PollChanges)
+
 		return err
 	}
 
 	if len(tenants) < 1 {
 		logger.Log.Warning("No tenants found")
+		mon.TrackAPITimeMetricInSeconds(startTime, "500", mon.PollChanges)
+
 		return nil
 	}
 
@@ -325,53 +360,29 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 	var lastError error
 	for _, t := range tenants {
 
-		changeDetected := false
-
-		domains, err := (*c.tenantDB).GetAllTenantDomains(t.ID)
-		if err != nil {
-			logger.Log.Warningf("Failed to fetch Domains for tenant %s: %s", t.ID, err.Error())
-			continue
-		}
-
 		monitoredObjects, err := c.getAllMonitoredObjects(t.ID)
 		if err != nil {
 			logger.Log.Warningf("Failed to fetch Monitored Objects for tenant %s: %s", t.ID, err.Error())
 			continue
 		}
+
+		// Enable this to add arbitary number of items into the druid look ups
+		//monitoredObjects = debugAddFakeMonitoredObjects()
+
 		if fullRefresh {
 			sendMonitoredObjects(kafkaProducer, t.ID, monitoredObjects)
 		} else {
 			//TODO at a later time we could use change notification mechanism from DB rather than query all
 			for _, mo := range monitoredObjects {
 				if mo.CreatedTimestamp > lastSyncTimestamp || mo.LastModifiedTimestamp > lastSyncTimestamp {
-					changeDetected = true
 					sendMonitoredObject(kafkaProducer, mo)
 				}
 			}
 
-			for i := 0; !changeDetected && i < len(domains); i++ {
-				if domains[i].CreatedTimestamp > lastSyncTimestamp || domains[i].LastModifiedTimestamp > lastSyncTimestamp {
-					changeDetected = true
-				}
-			}
-		}
-
-		if fullRefresh || changeDetected {
-			// Update the metrics DB so we can do queries by domain or other metadata
-			// Currently any metadataChange is handled by resynchronizing all metadata for the tenant so we
-			// don't really care what the nature of the change was.
-			// This approach is nice and simple but is also effectively similar to dropping a table
-			// and re-populating it.
-			if err = c.metricsDB.UpdateMonitoredObjectMetadata(t.ID, monitoredObjects, domains, true); err != nil {
-				logger.Log.Errorf("Failed to update metrics metadata for tenant %s: %s", t.ID, err.Error())
-				lastError = err
-				continue
-			} else {
-				logger.Log.Infof("Updated metadata in metric DB for tenant %s", t.ID)
-			}
 		}
 
 	}
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.PollChanges)
 
 	return lastError
 }

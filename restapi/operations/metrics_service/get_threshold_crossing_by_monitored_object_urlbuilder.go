@@ -16,9 +16,9 @@ import (
 // GetThresholdCrossingByMonitoredObjectURL generates an URL for the get threshold crossing by monitored object operation
 type GetThresholdCrossingByMonitoredObjectURL struct {
 	Direction          []string
-	Domain             []string
 	Granularity        *string
 	Interval           string
+	Meta               []string
 	Metric             []string
 	ObjectType         []string
 	Tenant             string
@@ -77,23 +77,6 @@ func (o *GetThresholdCrossingByMonitoredObjectURL) Build() (*url.URL, error) {
 		}
 	}
 
-	var domainIR []string
-	for _, domainI := range o.Domain {
-		domainIS := domainI
-		if domainIS != "" {
-			domainIR = append(domainIR, domainIS)
-		}
-	}
-
-	domain := swag.JoinByFormat(domainIR, "")
-
-	if len(domain) > 0 {
-		qsv := domain[0]
-		if qsv != "" {
-			qs.Set("domain", qsv)
-		}
-	}
-
 	var granularity string
 	if o.Granularity != nil {
 		granularity = *o.Granularity
@@ -105,6 +88,23 @@ func (o *GetThresholdCrossingByMonitoredObjectURL) Build() (*url.URL, error) {
 	interval := o.Interval
 	if interval != "" {
 		qs.Set("interval", interval)
+	}
+
+	var metaIR []string
+	for _, metaI := range o.Meta {
+		metaIS := metaI
+		if metaIS != "" {
+			metaIR = append(metaIR, metaIS)
+		}
+	}
+
+	meta := swag.JoinByFormat(metaIR, "")
+
+	if len(meta) > 0 {
+		qsv := meta[0]
+		if qsv != "" {
+			qs.Set("meta", qsv)
+		}
 	}
 
 	var metricIR []string

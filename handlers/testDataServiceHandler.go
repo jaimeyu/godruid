@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"github.com/accedian/adh-gather/server"
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/gorilla/mux"
+	"github.com/segmentio/kafka-go"
 )
 
 const (
@@ -49,6 +51,7 @@ const (
 
 	populateTestDataStr                 = "populate_test_data"
 	populateTestDataBulkRandomizedMOStr = "populate_test_data_bulk_randomize_MO"
+	populateTestDataIntoDruidStr        = "populate_test_data_into_druid"
 	purgeDBStr                          = "purge_db"
 	generateSLAReportStr                = "gen_sla_report"
 	getDocsByTypeStr                    = "get_docs_by_type"
@@ -120,6 +123,13 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Method:      "PUT",
 			Pattern:     "/test-data/tenant-views/{dbname}",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.InsertTenantViews),
+		},
+		server.Route{
+			Name:    "PopulateTestDataIntoDruid",
+			Method:  "POST",
+			Pattern: "/test-data/populate-druid",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.
+				PopulateTestDataIntoDruid),
 		},
 	}
 
@@ -485,7 +495,7 @@ func (tsh *TestDataServiceHandler) InsertTenantViews(w http.ResponseWriter, r *h
 	fmt.Fprintf(w, string(result))
 }
 
-// Generates a set of monitored objects with randomized values according to query parameters provided in the incoming rest request
+// PopulateTestDataBulkRandomizedMO - Generates a set of monitored objects with randomized values according to query parameters provided in the incoming rest request
 // Supported query parameters are:
 //			count: the number of desires monitored objects to be generated. Defaults to 1
 //			batchSize: the number of monitored objects that should be placed in a batch to be sent to the db. Defaults to 1000
@@ -790,11 +800,43 @@ func generateRandomMonitoredObject(tenantID string, domainSet []string) *tenmod.
 	result.ActuatorType = string(tenmod.AccedianVNID)
 	result.ReflectorName = generateRandomString(10)
 	result.ReflectorType = string(tenmod.AccedianVNID)
-	result.ObjectName = generateRandomString(10)
+	result.ObjectName = generateRandomEnodeB()
 	result.ObjectType = string(tenmod.TwampPE)
-	result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
+	//result.MonitoredObjectID = strings.Join([]string{result.ObjectName, result.ActuatorName, result.ReflectorName, generateRandomString(10)}, "-")
+	result.MonitoredObjectID = strings.Join([]string{result.ObjectName}, "-")
+
+	// Generate random meta data
+	result.Meta = generateRandomMeta()
 
 	return &result
+}
+
+// Generates random meta data for monitored objects
+func generateRandomMeta() map[string]string {
+	num := rand.Intn(8)
+	// Generate random meta data
+	regions := []string{"london", "tokyo", "toronto", "montreal", "vancouver", "calgary", "regina", "new york", "las vegas", "boston", "chicago", "winnepeg", "washington", "hamilton", "paris", "lyon"}
+	colors := []string{"black", "white", "orange", "blue", "green", "red", "purple", "gold", "yellow", "brown", "aqua"}
+	superheroes := []string{"superman", "batman", "ironman", "spider-man", "ant-man", "aquaman", "wonderwoman", "batwoman", "birdman", "catwoman", "invisible woman"}
+	meta := make(map[string]string)
+
+	// The following inserts monitored objects with blanks, so schemas are not always the same across all objects.
+	rI := num % len(regions)
+	if rI != 0 {
+		meta["region"] = regions[rI]
+	}
+
+	rI = num % len(colors)
+	if rI != 0 {
+		meta["colors"] = colors[num%len(colors)]
+	}
+
+	rI = num % len(superheroes)
+	if rI != 0 {
+		meta["superheroes"] = superheroes[num%len(superheroes)]
+	}
+
+	return meta
 }
 
 // Compares two uint64 and returns the smallest one
@@ -847,4 +889,152 @@ func generateRandomString(length int) string {
 		generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
 	}
 	return string(generated)
+}
+
+// Generate a string that uses a simulated BYT enode name.
+func generateRandomEnodeB() string {
+	offset := rand.Int() % 99999999999999999
+	//generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
+	// Enode B template
+	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
+	regions := []string{"WST", "EST", "NOE", "SWT", "CTA"}
+	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
+	objname_template := "E%d_%s_H_ENB_MON_ZIPEC_AF22_admin_%s"
+	t := time.Now()
+	generatedName := fmt.Sprintf(objname_template, offset, regions[offset%len(regions)], t.Format("2006-01-02"))
+	return generatedName
+}
+
+// Constants for the kafka simulator
+const (
+	kafkaTopic     = "npav-ts-metrics"
+	broker         = "kafka:9092"
+	timestampWord  = "{{TIMESTAMP}}"
+	tenantWord     = "{{TENANTID}}"
+	monObjIDWord   = "{{MONOBJID}}"
+	monObjNameWord = "{{MONOBJNAME}}"
+	// {"timestamp":1532979563973,"tenantId":"fc76af94-5804-450a-a922-d8957146321b","monitoredObjectId":"1473880047000-2026","sessionId":"2026","delayMin":7153,"delayMax":7385,"delayAvg":7222,"delayStdDevAvg":61,"delayP25":7175,"delayP50":7192,"delayP75":7282,"delayP95":7339,"delayPLo":7343,"delayPMi":7357,"delayPHi":7382,"delayVarMax":232,"delayVarAvg":69,"delayVarP25":22,"delayVarP50":39,"delayVarP75":129,"delayVarP95":186,"delayVarPLo":190,"delayVarPMi":204,"delayVarPHi":229,"jitterMin":0,"jitterMax":208,"jitterAvg":43,"jitterStdDev":48,"jitterP25":9,"jitterP50":23,"jitterP75":63,"jitterP95":140,"jitterPLo":154,"jitterPMi":166,"jitterPHi":181,"packetsLost":0,"packetsLostPct":0.0,"packetsMisordered":0,"packetsDuplicated":0,"packetsTooLate":0,"periodsLost":0,"lostBurstMin":0,"lostBurstMax":0,"packetsReceived":300,"bytesReceived":38400,"ipTOSMax":0,"ipTOSMin":0,"ttlMin":241,"ttlMax":241,"vlanPBitMin":0,"vlanPBitMax":0,"mos":4.409286022186279,"rValue":9.32E7,"deviceId":"demo1VCX-e5","direction":1,"objectType":"twamp-sf","throughputMin":0,"throughputMax":0,"throughputAvg":0,"duration":30000,"packetsSent":0,"domains":[],"monitoredObjectName":"1473880047000-2026","cleanStatus":1,"failedRules":[],"errorCode":0,"objectVendor":"accedian-twamp"}
+	fauxDatatemplate     = `{"timestamp":{{TIMESTAMP}},"tenantId":"{{TENANTID}}","monitoredObjectId":"{{MONOBJID}}","sessionId":"2026","delayMin":7153,"delayMax":7385,"delayAvg":7222,"delayStdDevAvg":61,"delayP25":7175,"delayP50":7192,"delayP75":7282,"delayP95":7339,"delayPLo":7343,"delayPMi":7357,"delayPHi":7382,"delayVarMax":232,"delayVarAvg":69,"delayVarP25":22,"delayVarP50":39,"delayVarP75":129,"delayVarP95":186,"delayVarPLo":190,"delayVarPMi":204,"delayVarPHi":229,"jitterMin":0,"jitterMax":208,"jitterAvg":43,"jitterStdDev":48,"jitterP25":9,"jitterP50":23,"jitterP75":63,"jitterP95":140,"jitterPLo":154,"jitterPMi":166,"jitterPHi":181,"packetsLost":0,"packetsLostPct":0,"packetsMisordered":0,"packetsDuplicated":0,"packetsTooLate":0,"periodsLost":0,"lostBurstMin":0,"lostBurstMax":0,"packetsReceived":300,"bytesReceived":38400,"ipTOSMax":0,"ipTOSMin":0,"ttlMin":241,"ttlMax":241,"vlanPBitMin":0,"vlanPBitMax":0,"mos":4.409286022186279,"rValue":93200000,"deviceId":"demo1VCX-e5","direction":1,"objectType":"twamp-sf","throughputMin":0,"throughputMax":0,"throughputAvg":0,"duration":30000,"packetsSent":0,"domains":[],"monitoredObjectName":"{{MONOBJNAME}}","cleanStatus":1,"failedRules":[],"errorCode":0,"objectVendor":"accedian-twamp"}`
+	fauxDataFailtemplate = `{"timestamp":{{TIMESTAMP}},"tenantId":"{{TENANTID}}","monitoredObjectId":"{{MONOBJID}}","sessionId":"2026","delayMin":60000,"delayMax":60000,"delayAvg":60000,"delayStdDevAvg":61,"delayP25":60000,"delayP50":60000,"delayP75":60000,"delayP95":60000,"delayPLo":60000,"delayPMi":60000,"delayPHi":60000,"delayVarMax":60000,"delayVarAvg":60000,"delayVarP25":60000,"delayVarP50":60000,"delayVarP75":60000,"delayVarP95":60000,"delayVarPLo":60000,"delayVarPMi":60000,"delayVarPHi":60000,"jitterMin":60000,"jitterMax":60000,"jitterAvg":60000,"jitterStdDev":60000,"jitterP25":60000,"jitterP50":60000,"jitterP75":60000,"jitterP95":60000,"jitterPLo":60000,"jitterPMi":60000,"jitterPHi":60000,"packetsLost":60000,"packetsLostPct":90,"packetsMisordered":0,"packetsDuplicated":0,"packetsTooLate":0,"periodsLost":0,"lostBurstMin":0,"lostBurstMax":0,"packetsReceived":60000,"bytesReceived":3840000,"ipTOSMax":0,"ipTOSMin":0,"ttlMin":241,"ttlMax":241,"vlanPBitMin":0,"vlanPBitMax":0,"mos":4.409286022186279,"rValue":93200000,"deviceId":"demo1VCX-e5","direction":1,"objectType":"twamp-sf","throughputMin":0,"throughputMax":0,"throughputAvg":0,"duration":30000,"packetsSent":0,"domains":[],"monitoredObjectName":"{{MONOBJNAME}}","cleanStatus":1,"failedRules":[],"errorCode":0,"objectVendor":"accedian-twamp"}`
+)
+
+// PopulateTestDataIntoDruid - Populate Test data produces data but druid does not contain any corresponding
+// data. So this endpoint allows us to populate druid with some test data so we can make queries to it
+// Supported query parameters are:
+//			minutes: the number of desires minutes
+//			tenant: the ID of the tenant to associate the monitored objects with
+// Params:
+//		w - the writer responsible for marshalling the response to the incoming http request
+//		r - the initiating http request
+func (tsh *TestDataServiceHandler) PopulateTestDataIntoDruid(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	queryParams := r.URL.Query()
+
+	var (
+		moRequestTenant string
+		minutes         uint64 = 60
+		err             error
+	)
+
+	// Defines the number of monitored objects that we want to create. Defaults to 1
+	if queryParams["minutes"] != nil {
+		minutes, err = strconv.ParseUint(queryParams["minutes"][0], 10, 64)
+		if err != nil {
+			msg := fmt.Sprintf("Unacceptable value provided for monitored object count: %s", err.Error())
+			reportError(w, startTime, "400", populateTestDataIntoDruidStr, msg, http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Defines the tenant to place the monitored objects against. This is a required field
+	if len(queryParams["tenant"]) == 0 {
+		msg := fmt.Sprintf("Tenant ID must be provided")
+		reportError(w, startTime, "400", populateTestDataIntoDruidStr, msg, http.StatusBadRequest)
+		return
+	} else {
+		moRequestTenant = queryParams["tenant"][0]
+	}
+
+	err = tsh.PopulateDruidWithFauxData(moRequestTenant, minutes)
+	if err != nil {
+		msg := fmt.Sprintf("Could not populate with fake data. %s", err.Error())
+		reportError(w, startTime, "400", populateTestDataIntoDruidStr, msg, http.StatusBadRequest)
+	}
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", populateTestDataIntoDruidStr)
+	fmt.Fprintf(w, "Success")
+}
+
+// PopulateDruidWithFauxData - Populates druid with data so we can query it
+func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, minutes uint64) error {
+
+	kafkaProducer := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:      []string{broker},
+		Topic:        kafkaTopic,
+		RequiredAcks: 0,
+		Async:        true,
+		Balancer:     &kafka.LeastBytes{},
+	})
+	defer func() {
+		kafkaProducer.Close()
+	}()
+
+	listOfMonObjs, err := tsh.tenantDB.GetAllMonitoredObjectsIDs(tenantID)
+	if err != nil {
+		return fmt.Errorf("Could not get all monitored objects :%s", err.Error())
+	}
+
+	// for debugging!
+	//istOfMonObjs = listOfMonObjs[0:2]
+
+	ts := db.MakeTimestamp()
+	ts = ts - ((60 * 1000) * int64(minutes)) - 24000
+
+	logger.Log.Debugf("Sending FAKED OUT MO that has failure data")
+	faux := "debug_mo_failure_0000"
+	logger.Log.Debugf("Sending data populating for MO: %s", faux)
+	_, err = generateAndSendKafkaMsg(kafkaProducer, ts, tenantID, faux, fauxDataFailtemplate)
+	if err != nil {
+		logger.Log.Errorf("Could not send to kafka %s", err.Error())
+		return err
+	}
+
+	logger.Log.Debugf("Starting loop to send data over kafka to druid")
+	for _, mo := range listOfMonObjs {
+
+		ts = db.MakeTimestamp()
+		ts = ts - ((60 * 1000) * int64(minutes)) - 24000
+		logger.Log.Debugf("Starting data populating for MO: %s", mo)
+		// Make sure to send one for the defined number of minutes
+		for i := uint64(0); i < minutes; i++ {
+			ts = ts + (60 * 1000) // Add a minute
+			_, err = generateAndSendKafkaMsg(kafkaProducer, ts, tenantID, mo, fauxDatatemplate)
+			if err != nil {
+				logger.Log.Errorf("Could not send to kafka %s", err.Error())
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.
+func generateAndSendKafkaMsg(kafkaProducer *kafka.Writer, ts int64, tenantID string, moName, faux string) (string, error) {
+	nts := fmt.Sprintf("%d", ts)
+	payload := strings.Replace(faux, tenantWord, tenantID, -1)
+	payload = strings.Replace(payload, monObjIDWord, moName, -1)
+	payload = strings.Replace(payload, monObjNameWord, moName, -1)
+	payload = strings.Replace(payload, timestampWord, nts, -1)
+	logger.Log.Debugf("Kafka sending: %s", payload)
+
+	err := kafkaProducer.WriteMessages(context.Background(), kafka.Message{
+		Topic: kafkaTopic,
+		Value: []byte(payload),
+	})
+	if err != nil {
+		return "", err
+	}
+	return "", nil
 }

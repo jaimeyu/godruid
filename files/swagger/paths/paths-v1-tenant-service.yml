@@ -1368,7 +1368,41 @@
               $ref: '#/definitions/BulkMonitoredObjectRequest'
       tags:
         - TenantProvisioningService
-
+  '/v1/tenants/{tenantId}/bulk/upsert/monitored-objects/meta':
+    post:
+      summary: Upsert metadata for one or more Monitored Objects in a single API request.
+      operationId: BulkUpsertMonitoredObjectMeta
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectMetaRequest'
+      tags:
+        - TenantProvisioningService
   /v1/tenants/{tenantId}/meta:
     post:
       summary: Create a Metadata record for a Tenant.

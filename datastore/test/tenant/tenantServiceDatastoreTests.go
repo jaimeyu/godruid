@@ -1798,7 +1798,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 		Active:            true,
 		TimeRangeDuration: "P1Y",
 		Granularity:       "PT1H",
-		Domains:           []string{"hello", "World"},
 		Datatype:          string(metmod.ReportScheduleConfigType),
 	}
 

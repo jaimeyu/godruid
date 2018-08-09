@@ -185,6 +185,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetAllSLAReportsHandler: tenant_provisioning_service.GetAllSLAReportsHandlerFunc(func(params tenant_provisioning_service.GetAllSLAReportsParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllSLAReports has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetAllSLAReportsV2Handler: tenant_provisioning_service_v2.GetAllSLAReportsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllSLAReportsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllSLAReportsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceGetAllTenantConnectorConfigsHandler: tenant_provisioning_service.GetAllTenantConnectorConfigsHandlerFunc(func(params tenant_provisioning_service.GetAllTenantConnectorConfigsParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllTenantConnectorConfigs has not yet been implemented")
 		}),
@@ -250,6 +253,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceGetSLAReportHandler: tenant_provisioning_service.GetSLAReportHandlerFunc(func(params tenant_provisioning_service.GetSLAReportParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetSLAReport has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetSLAReportV2Handler: tenant_provisioning_service_v2.GetSLAReportV2HandlerFunc(func(params tenant_provisioning_service_v2.GetSLAReportV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetSLAReportV2 has not yet been implemented")
 		}),
 		AdminProvisioningServiceGetTenantHandler: admin_provisioning_service.GetTenantHandlerFunc(func(params admin_provisioning_service.GetTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetTenant has not yet been implemented")
@@ -414,7 +420,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
+	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -513,6 +519,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Handler
 	// TenantProvisioningServiceGetAllSLAReportsHandler sets the operation handler for the get all SLA reports operation
 	TenantProvisioningServiceGetAllSLAReportsHandler tenant_provisioning_service.GetAllSLAReportsHandler
+	// TenantProvisioningServiceV2GetAllSLAReportsV2Handler sets the operation handler for the get all SLA reports v2 operation
+	TenantProvisioningServiceV2GetAllSLAReportsV2Handler tenant_provisioning_service_v2.GetAllSLAReportsV2Handler
 	// TenantProvisioningServiceGetAllTenantConnectorConfigsHandler sets the operation handler for the get all tenant connector configs operation
 	TenantProvisioningServiceGetAllTenantConnectorConfigsHandler tenant_provisioning_service.GetAllTenantConnectorConfigsHandler
 	// TenantProvisioningServiceGetAllTenantConnectorInstancesHandler sets the operation handler for the get all tenant connector instances operation
@@ -557,6 +565,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetReportScheduleConfigV2Handler tenant_provisioning_service_v2.GetReportScheduleConfigV2Handler
 	// TenantProvisioningServiceGetSLAReportHandler sets the operation handler for the get SLA report operation
 	TenantProvisioningServiceGetSLAReportHandler tenant_provisioning_service.GetSLAReportHandler
+	// TenantProvisioningServiceV2GetSLAReportV2Handler sets the operation handler for the get SLA report v2 operation
+	TenantProvisioningServiceV2GetSLAReportV2Handler tenant_provisioning_service_v2.GetSLAReportV2Handler
 	// AdminProvisioningServiceGetTenantHandler sets the operation handler for the get tenant operation
 	AdminProvisioningServiceGetTenantHandler admin_provisioning_service.GetTenantHandler
 	// TenantProvisioningServiceGetTenantConnectorConfigHandler sets the operation handler for the get tenant connector config operation
@@ -902,6 +912,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetAllSLAReportsHandler")
 	}
 
+	if o.TenantProvisioningServiceV2GetAllSLAReportsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllSLAReportsV2Handler")
+	}
+
 	if o.TenantProvisioningServiceGetAllTenantConnectorConfigsHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetAllTenantConnectorConfigsHandler")
 	}
@@ -988,6 +1002,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceGetSLAReportHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetSLAReportHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetSLAReportV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetSLAReportV2Handler")
 	}
 
 	if o.AdminProvisioningServiceGetTenantHandler == nil {
@@ -1515,6 +1533,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/v2/reports"] = tenant_provisioning_service_v2.NewGetAllSLAReportsV2(o.context, o.TenantProvisioningServiceV2GetAllSLAReportsV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/connector-config-list"] = tenant_provisioning_service.NewGetAllTenantConnectorConfigs(o.context, o.TenantProvisioningServiceGetAllTenantConnectorConfigsHandler)
 
 	if o.handlers["GET"] == nil {
@@ -1621,6 +1644,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/reports/{reportID}"] = tenant_provisioning_service.NewGetSLAReport(o.context, o.TenantProvisioningServiceGetSLAReportHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/reports/{reportID}"] = tenant_provisioning_service_v2.NewGetSLAReportV2(o.context, o.TenantProvisioningServiceV2GetSLAReportV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

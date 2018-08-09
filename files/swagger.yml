@@ -3599,6 +3599,61 @@ paths:
               $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
       tags:
         - TenantProvisioningServiceV2
+  /v2/reports/{reportID}:
+    get:
+      summary: Retrieve a Tenant SLA report by id.
+      operationId: GetSLAReportV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObject'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Report is not provisioned in Datahub"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/reports:
+    get:
+      summary: Retrieve all SLA reports for the specified Tenant.
+      operationId: GetAllSLAReportsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/gathergrpcJSONAPIObjectList'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Reports are provisioned in Datahub"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/report-schedule-configs:
     post:
       summary: Create a report schedule configuration for a Tenant.
@@ -5989,7 +6044,7 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["thresholdProfile"]
+            required: ["thresholdProfile", "name"]
             properties:
               timeRangeDuration: 
                 type: "string"
@@ -6040,10 +6095,6 @@ definitions:
                 type: "string"
               timeRangeDuration: 
                 type: "string"
-              domains: 
-                type: "array"
-                items: 
-                  type: "string"
               thresholdProfile: 
                 type: "string"
               granularity: 

@@ -226,7 +226,7 @@ func generateRandomTenantReportScheduleConfigCreationRequest() *swagmodels.Repor
 		Data: &swagmodels.ReportScheduleConfigCreateRequestData{
 			Type: &reportScehduleConfigTypeString,
 			Attributes: &swagmodels.ReportScheduleConfigCreateRequestDataAttributes{
-				Name:             name,
+				Name:             &name,
 				ThresholdProfile: &thresh,
 				DayMonth:         dayMonth,
 				DayWeek:          dayWeek,

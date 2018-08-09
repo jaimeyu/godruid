@@ -1799,6 +1799,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 		TimeRangeDuration: "P1Y",
 		Granularity:       "PT1H",
 		Domains:           []string{"hello", "World"},
+		Datatype:          string(metmod.ReportScheduleConfigType),
 	}
 
 	configs, err := tdb.GetAllReportScheduleConfigs(TENANT)

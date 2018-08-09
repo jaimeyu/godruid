@@ -2690,6 +2690,338 @@ paths:
             type: string
       tags:
         - AdminProvisioningServiceV2
+  /v2/connector-configs:
+    post:
+      summary: Create a ConnectorConfig for a Tenant.
+      operationId: CreateConnectorConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Connector being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ConnectorConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all ConnectorConfigs for the specified Tenant.
+      operationId: GetAllConnectorConfigsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorConfigListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No connector configurations are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/connector-configs/{connectorId}:
+    get:
+      summary: Retrieve a Tenant ConnectorConfig by Id.
+      operationId: GetConnectorConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified connector configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: UpdateConnectorConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Connector Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the Connector Configuration being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ConnectorConfigUpdateRequest'
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant ConnectorConfig specified by the provided Connector Id.
+      operationId: DeleteConnectorConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Connector Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/connector-instances:
+    post:
+      summary: Create a ConnectorInstance for a Tenant.
+      operationId: CreateConnectorInstanceV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorInstanceResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Connector Instance being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ConnectorInstanceCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all ConnectorInstances for the specified Tenant.
+      operationId: GetAllConnectorInstancesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorInstanceListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Connector Instances are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/connector-instances/{connectorInstanceId}:
+    get:
+      summary: Retrieve a Tenant ConnectorInstance by Id.
+      operationId: GetConnectorInstanceV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorInstanceResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Connector Instance is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a ConnectorInstance for a Tenant.
+      operationId: UpdateConnectorInstanceV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorInstanceResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Connector Instance is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the Connector Instance being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ConnectorInstanceUpdateRequest'
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant ConnectorInstance specified by the provided Connector Instance Id.
+      operationId: DeleteConnectorInstanceV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ConnectorInstanceResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Connector Instance is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: connectorInstanceId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/data-cleaning-profiles:
     post:
       summary: Provides ability to Create a Tenant Data Cleaning Profile
@@ -2862,6 +3194,177 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/ingestion-profiles:
+    post:
+      summary: Create an Ingestion Profile for a Tenant.
+      operationId: CreateIngestionProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The ingestion profile already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IngestionProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Ingestion Profiles
+      operationId: GetAllIngestionProfilesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Ingestion Profile is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/ingestion-profiles/{ingestionProfileId}:
+    get:
+      summary: Retrieve a Tenant Ingestion Profile by id.
+      operationId: GetIngestionProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Ingestion Profile
+      operationId: UpdateIngestionProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IngestionProfileUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Ingestion Profile specified by the provided Ingestion Profile Id.
+      operationId: DeleteIngestionProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/IngestionProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Ingestion Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: ingestionProfileId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/monitored-objects:
     get:
       summary: Retrieve all Monitored Objects for a Tenant.
@@ -2872,13 +3375,13 @@ paths:
         '200':
           description: "Fetch completed successfully"
           schema:
-            $ref: '#/definitions/MonitoredObjectList'
+            $ref: '#/definitions/MonitoredObjectListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
             type: string
         '404':
-          description: "Record not found"
+          description: "No Monitored objects are provisioned"
           schema:
             type: string
         '500':
@@ -2894,6 +3397,533 @@ paths:
           in: query
           type: integer
           description: "The maximum number of records to return for a single page"
+      tags:
+        - TenantProvisioningServiceV2
+    post:
+      summary: Create a Monitored Object for a Tenant.
+      operationId: CreateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "A Monitored Object with this objectId is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/monitored-objects/{monObjId}:
+    get:
+      summary: Retrieve a Tenant Monitored Object by id.
+      operationId: GetMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Monitored Object
+      operationId: UpdateMonitoredObjectV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for the update request to the Monitored Object"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Monitored Object specified by the provided id.
+      operationId: DeleteMonitoredObjectV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MonitoredObjectResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Monitored Object is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monObjId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/bulk/insert/monitored-objects:
+    post:
+      summary: Create one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    put:
+      summary: Update one or more Monitored Objects in a single API request. Note that this is a PUT operation for each Monitored Object. This means that all properties must be explicitly provided
+      operationId: BulkUpdateMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/report-schedule-configs:
+    post:
+      summary: Create a report schedule configuration for a Tenant.
+      operationId: CreateReportScheduleConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Report Schedule Configuration is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all report schedule configs for the specified Tenant.
+      operationId: GetAllReportScheduleConfigsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Report Schedule Configurations are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/report-schedule-configs/{configId}:
+    get:
+      summary: Retrieve a report schedule configuration for a Tenant by configuration Id.
+      operationId: GetReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Report Schedule Configuration for a Tenant.
+      operationId: UpdateReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for this update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a report schedule configuration for a Tenant by configuration Id.
+      operationId: DeleteReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/threshold-profiles:
+    post:
+      summary: Create a Threshold Profile for a Tenant.
+      operationId: CreateThresholdProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The record is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ThresholdProfileCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Threshold Profiles for the specified Tenant.
+      operationId: GetAllThresholdProfilesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "There are no Threshold Profiles provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/threshold-profiles/{thrPrfId}:
+    get:
+      summary: Retrieve a Tenant Threshold Profile by id.
+      operationId: GetThresholdProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Threshold Profile
+      operationId: UpdateThresholdProfileV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided in Threshold Profile update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ThresholdProfileUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Threshold Profile specified by the provided id.
+      operationId: DeleteThresholdProfileV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ThresholdProfileResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Threshold Profile is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: thrPrfId
+          in: path
+          required: true
+          type: string
       tags:
         - TenantProvisioningServiceV2
 definitions:
@@ -4251,6 +5281,236 @@ definitions:
               alias:
                 type: "string"
                 description: "A known alias for the Tenant in Datahub"
+  ConnectorConfigCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
+            properties:
+              name:
+                type: "string"
+              url: 
+                type: "string"
+              port:
+                type: "integer"
+              pollingFrequency:
+                type: "integer"
+              username:
+                type: "string"
+              password:
+                type: "string"
+              exportGroup:
+                type: "string"
+              datahubHeartbeatFrequency:
+                type: "integer"
+              datahubConnectionRetryFrequency:
+                type: "integer"
+              type:
+                type: "string"
+              
+  ConnectorConfigUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              url: 
+                type: "string"
+              port:
+                type: "integer"
+              pollingFrequency:
+                type: "integer"
+              username:
+                type: "string"
+              password:
+                type: "string"
+              exportGroup:
+                type: "string"
+              datahubHeartbeatFrequency:
+                type: "integer"
+              datahubConnectionRetryFrequency:
+                type: "integer"
+              type:
+                type: "string"
+  
+  ConnectorConfigResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ConnectorConfig'
+  ConnectorConfigListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/ConnectorConfig'
+  
+  ConnectorConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          url: 
+            type: "string"
+          port:
+            type: "integer"
+          pollingFrequency:
+            type: "integer"
+          username:
+            type: "string"
+          password:
+            type: "string"
+          exportGroup:
+            type: "string"
+          datahubHeartbeatFrequency:
+            type: "integer"
+          datahubConnectionRetryFrequency:
+            type: "integer"
+          type:
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  ConnectorInstanceCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorInstances]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["status", "hostname"]
+            properties:
+              status:
+                type: "string"
+              hostname: 
+                type: "string"
+
+  ConnectorInstanceUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [connectorInstances]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              status:
+                type: "string"
+              hostname: 
+                type: "string"
+              createdTimestamp:
+                type: "integer"
+              lastModifiedTimestamp:
+                type: "integer"
+
+  ConnectorInstanceResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ConnectorInstance'
+
+  ConnectorInstanceListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/ConnectorInstance'
+
+  ConnectorInstance:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [connectorInstances]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "tenantId", "status", "hostname", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          status:
+            type: "string"
+          hostname: 
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
   DataCleaningProfileCreateRequest:
     type: "object"
     required: ["data"]
@@ -4386,8 +5646,155 @@ definitions:
             type: "integer"
             format: "int64"
             description: "Time since epoch at which this object was last altered."
+  IngestionProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["metrics"]
+            properties:
+              metrics:
+                type: "object"
+                properties:
+                  vendorMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        monitoredObjectTypeMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              metricMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "boolean"
+                    
+  IngestionProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [ingestionProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev", "metrics"]
+            properties:
+              _rev:
+                type: "string"
+              metrics:
+                type: "object"
+                properties:
+                  vendorMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        monitoredObjectTypeMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              metricMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "boolean"
+            
+             
+  IngestionProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/IngestionProfile'
 
-  MonitoredObjectList:
+  IngestionProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/IngestionProfile'
+
+  IngestionProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [ingestionProfiles]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_id", "_rev", "tenantId", "dataType", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          metrics:
+            type: "object"
+            properties:
+              vendorMap:
+                type: "object"
+                additionalProperties:
+                  type: "object"
+                  properties:
+                    monitoredObjectTypeMap:
+                      type: "object"
+                      additionalProperties:
+                        type: "object"
+                        properties:
+                          metricMap:
+                            type: "object"
+                            additionalProperties:
+                              type: "boolean"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+  MonitoredObjectCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Monitored Object in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/MonitoredObjectCreate'
+                    
+  MonitoredObjectUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Monitored Object in Datahub"
+    properties:
+      data:
+        $ref: '#/definitions/MonitoredObjectUpdate'
+
+
+  MonitoredObjectListResponse:
     type: "object"
     required: ["data"]
     properties:
@@ -4400,8 +5807,20 @@ definitions:
         items:
           $ref: '#/definitions/MonitoredObject'
 
+  MonitoredObjectResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        $ref: '#/definitions/MonitoredObject'
+
   MonitoredObject:
     type: "object"
+    required: ["type", "id", "attributes"]
     properties:
       type: 
         type: "string"
@@ -4410,9 +5829,8 @@ definitions:
         type: "string"
       attributes:
         type: "object"
+        required: ["_rev", "attributes"]
         properties:
-          _id:
-            type: "string"
           _rev:
             type: "string"
           datatype:
@@ -4440,9 +5858,412 @@ definitions:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
-          relationships:
+
+  BulkOperationResponseV2:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          type: "object"
+          required: ["type", "id", "attributes"]
+          properties:
+            type: 
+              type: "string"
+              enum: [bulkOperationResponses]
+            id:
+              type: "string"
+            attributes:
+              description: "Provides the result of multiple operations that were issued in a single request to Datahub"
+              type: "object"
+              properties:
+                ok:
+                  type: "boolean"
+                id:
+                  type: "string"
+                rev:
+                  type: "string"
+                error:
+                  type: "string"
+                reason:
+                  type: "string"
+
+  BulkMonitoredObjectCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Monitored Object in Datahub"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectCreate'
+
+  MonitoredObjectCreate:
+    type: "object"
+    required: ["type", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["objectId"]
+        properties:
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+
+  BulkMonitoredObjectUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectUpdate'
+
+  MonitoredObjectUpdate:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "objectId", "actuatorName", "actuatorType", "reflectorName", "reflectorType", "objectName", "objectType", "createdTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          objectId:
+            type: "string"
+          actuatorName: 
+            type: "string"
+          actuatorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          reflectorName: 
+            type: "string"
+          reflectorType: 
+            type: "string"
+            enum: [unknown, accedian-nid, accedian-vnid]
+          objectName: 
+            type: "string"
+          objectType: 
+            type: "string"
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          createdTimestamp:
+            type: "integer"
+  ReportScheduleConfigCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
             type: "object"
+            required: ["thresholdProfile"]
             properties:
-              domains:
-                $ref: '#/definitions/JsonApiRelationship'
- 
+              timeRangeDuration: 
+                type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+                    
+  ReportScheduleConfigUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              timeRangeDuration: 
+                type: "string"
+              domains: 
+                type: "array"
+                items: 
+                  type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+
+  ReportScheduleConfigResponse:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfigListResponse:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [reportScheduleConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "thresholdProfile", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          timeRangeDuration: 
+            type: "string"
+          thresholdProfile: 
+            type: "string"
+          granularity: 
+            type: "string"
+          timeout: 
+            type: "integer"
+          timezone: 
+            type: "string"
+          name: 
+            type: "string"
+          reportType:
+            type: "string"
+          minute: 
+            type: "string"
+          hour: 
+            type: "string"
+          dayMonth: 
+            type: "string"
+          month: 
+            type: "string"
+          dayWeek: 
+            type: "string"
+          active:
+            type: "boolean"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+  ThresholdProfileCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "thresholds"]
+            properties:
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+                    
+  ThresholdProfileUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Threshold Profile in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [thresholdProfiles]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              thresholds:
+                $ref: '#/definitions/ThresholdsObject'
+  
+  ThresholdProfileListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfileResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/ThresholdProfile'
+
+  ThresholdProfile:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [thresholdProfiles]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["tenantId", "_id", "_rev", "datatype", "name", "createdTimestamp", "lastModifiedTimestamp", "thresholds"]
+        properties:
+          tenantId:
+            type: "string"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          name:
+            type: "string"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+          thresholds:
+            $ref: '#/definitions/ThresholdsObject'
+
+  ThresholdsObject:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            metricMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  eventAttrMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "string"
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "object"
+                      properties:
+                        directionMap:
+                          type: "object"
+                          additionalProperties:
+                            type: "object"
+                            properties:
+                              eventMap:
+                                type: "object"
+                                additionalProperties:
+                                  type: "object"
+                                  properties:
+                                    eventAttrMap:
+                                      type: "object"
+                                      additionalProperties:
+                                        type: "string"

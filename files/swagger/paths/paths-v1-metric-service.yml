@@ -248,89 +248,6 @@
             $ref: '#/definitions/ThresholdCrossingAPIRequestObject'
       tags:
         - MetricsService
-  /v1/threshold-crossing-by-monitored-object:
-    get:
-      operationId: GetThresholdCrossingByMonitoredObject
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: direction
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: metric
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
-      tags:
-        - MetricsService
   /v1/threshold-crossing-by-monitored-object-top-n:
     post:
       operationId: GetThresholdCrossingByMonitoredObjectTopN
@@ -365,7 +282,7 @@
             $ref: '#/definitions/ThresholdCrossingByMOTopNAPIRequestObject'
       tags:
         - MetricsService
-  '/v1/aggregated-metrics':
+  /v1/aggregated-metrics:
     post:
       summary: Query metrics and perform aggregations
       operationId: QueryAggregatedMetrics
@@ -402,7 +319,6 @@
             $ref: '#/definitions/AggregateMetricsAPIRequestObject'
       tags:
         - MetricsService
-
   /v1/topn-metrics:
     post:
       summary: Retrieve a Top-N for a given sets of metrics
@@ -438,7 +354,6 @@
             $ref: '#/definitions/TopNMetricsAPIRequestObject'
       tags:
         - MetricsService
- 
   /v1/generate-sla-report:
     get:
       summary: Generate an SLA Report.

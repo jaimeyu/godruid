@@ -216,9 +216,6 @@ type ReportScheduleConfigUpdateRequestDataAttributes struct {
 	// day week
 	DayWeek string `json:"dayWeek,omitempty"`
 
-	// domains
-	Domains []string `json:"domains"`
-
 	// granularity
 	Granularity string `json:"granularity,omitempty"`
 

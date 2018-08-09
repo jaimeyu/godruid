@@ -3599,6 +3599,169 @@ paths:
               $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
       tags:
         - TenantProvisioningServiceV2
+  /v2/report-schedule-configs:
+    post:
+      summary: Create a report schedule configuration for a Tenant.
+      operationId: CreateReportScheduleConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Report Schedule Configuration is already provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all report schedule configs for the specified Tenant.
+      operationId: GetAllReportScheduleConfigsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Report Schedule Configurations are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/report-schedule-configs/{configId}:
+    get:
+      summary: Retrieve a report schedule configuration for a Tenant by configuration Id.
+      operationId: GetReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Report Schedule Configuration for a Tenant.
+      operationId: UpdateReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for this update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a report schedule configuration for a Tenant by configuration Id.
+      operationId: DeleteReportScheduleConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ReportScheduleConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Requested Report Schedule Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
   /v2/threshold-profiles:
     post:
       summary: Create a Threshold Profile for a Tenant.
@@ -5809,6 +5972,165 @@ definitions:
             type: "string"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           createdTimestamp:
+            type: "integer"
+  ReportScheduleConfigCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["thresholdProfile"]
+            properties:
+              timeRangeDuration: 
+                type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+                    
+  ReportScheduleConfigUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              timeRangeDuration: 
+                type: "string"
+              domains: 
+                type: "array"
+                items: 
+                  type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+
+  ReportScheduleConfigResponse:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfigListResponse:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [reportScheduleConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "thresholdProfile", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          timeRangeDuration: 
+            type: "string"
+          thresholdProfile: 
+            type: "string"
+          granularity: 
+            type: "string"
+          timeout: 
+            type: "integer"
+          timezone: 
+            type: "string"
+          name: 
+            type: "string"
+          reportType:
+            type: "string"
+          minute: 
+            type: "string"
+          hour: 
+            type: "string"
+          dayMonth: 
+            type: "string"
+          month: 
+            type: "string"
+          dayWeek: 
+            type: "string"
+          active:
+            type: "boolean"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
             type: "integer"
   ThresholdProfileCreateRequest:
     type: "object"

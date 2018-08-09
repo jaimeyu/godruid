@@ -165,7 +165,7 @@ func HandleBulkCreateMonitoredObjectsV2(allowedRoles []string, tenantDB datastor
 		}
 
 		// Error Responses
-		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetAllMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		switch responseCode {
 		case http.StatusForbidden:
 			return tenant_provisioning_service_v2.NewBulkInsertMonitoredObjectsV2Forbidden().WithPayload(errorMessage)
@@ -190,7 +190,7 @@ func HandleBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastor
 		}
 
 		// Error Responses
-		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetAllMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		switch responseCode {
 		case http.StatusForbidden:
 			return tenant_provisioning_service_v2.NewBulkUpdateMonitoredObjectsV2Forbidden().WithPayload(errorMessage)
@@ -232,6 +232,10 @@ func doCreateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 			return startTime, http.StatusConflict, nil, err
 		}
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	if changeNotificationEnabled {
+		NotifyMonitoredObjectUpdated(tenantID, &data)
 	}
 
 	converted := swagmodels.MonitoredObjectResponse{}
@@ -315,6 +319,10 @@ func doUpdateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 		return startTime, http.StatusInternalServerError, nil, err
 	}
 
+	if changeNotificationEnabled {
+		NotifyMonitoredObjectUpdated(tenantID, fetched)
+	}
+
 	converted := swagmodels.MonitoredObjectResponse{}
 	err = convertToJsonapiObject(result, &converted)
 	if err != nil {
@@ -342,6 +350,10 @@ func doDeleteMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 		}
 
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	if changeNotificationEnabled {
+		NotifyMonitoredObjectDeleted(tenantID, result)
 	}
 
 	converted := swagmodels.MonitoredObjectResponse{}

@@ -74,6 +74,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceCreateReportScheduleConfigHandler: tenant_provisioning_service.CreateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.CreateReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceCreateReportScheduleConfig has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2CreateReportScheduleConfigV2Handler: tenant_provisioning_service_v2.CreateReportScheduleConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateReportScheduleConfigV2 has not yet been implemented")
+		}),
 		AdminProvisioningServiceCreateTenantHandler: admin_provisioning_service.CreateTenantHandlerFunc(func(params admin_provisioning_service.CreateTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceCreateTenant has not yet been implemented")
 		}),
@@ -121,6 +124,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceDeleteReportScheduleConfigHandler: tenant_provisioning_service.DeleteReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.DeleteReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceDeleteReportScheduleConfig has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteReportScheduleConfigV2Handler: tenant_provisioning_service_v2.DeleteReportScheduleConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteReportScheduleConfigV2 has not yet been implemented")
 		}),
 		AdminProvisioningServiceDeleteTenantHandler: admin_provisioning_service.DeleteTenantHandlerFunc(func(params admin_provisioning_service.DeleteTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceDeleteTenant has not yet been implemented")
@@ -172,6 +178,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceGetAllReportScheduleConfigHandler: tenant_provisioning_service.GetAllReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.GetAllReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllReportScheduleConfig has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler: tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllReportScheduleConfigsV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceGetAllSLAReportsHandler: tenant_provisioning_service.GetAllSLAReportsHandlerFunc(func(params tenant_provisioning_service.GetAllSLAReportsParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllSLAReports has not yet been implemented")
@@ -235,6 +244,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceGetReportScheduleConfigHandler: tenant_provisioning_service.GetReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.GetReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetReportScheduleConfig has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetReportScheduleConfigV2Handler: tenant_provisioning_service_v2.GetReportScheduleConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.GetReportScheduleConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetReportScheduleConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceGetSLAReportHandler: tenant_provisioning_service.GetSLAReportHandlerFunc(func(params tenant_provisioning_service.GetSLAReportParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetSLAReport has not yet been implemented")
@@ -344,6 +356,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceUpdateReportScheduleConfigHandler: tenant_provisioning_service.UpdateReportScheduleConfigHandlerFunc(func(params tenant_provisioning_service.UpdateReportScheduleConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceUpdateReportScheduleConfig has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateReportScheduleConfigV2Handler: tenant_provisioning_service_v2.UpdateReportScheduleConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateReportScheduleConfigV2 has not yet been implemented")
+		}),
 		AdminProvisioningServiceUpdateTenantHandler: admin_provisioning_service.UpdateTenantHandlerFunc(func(params admin_provisioning_service.UpdateTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceUpdateTenant has not yet been implemented")
 		}),
@@ -396,7 +411,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
@@ -424,6 +439,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2CreateMonitoredObjectV2Handler tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
 	TenantProvisioningServiceCreateReportScheduleConfigHandler tenant_provisioning_service.CreateReportScheduleConfigHandler
+	// TenantProvisioningServiceV2CreateReportScheduleConfigV2Handler sets the operation handler for the create report schedule config v2 operation
+	TenantProvisioningServiceV2CreateReportScheduleConfigV2Handler tenant_provisioning_service_v2.CreateReportScheduleConfigV2Handler
 	// AdminProvisioningServiceCreateTenantHandler sets the operation handler for the create tenant operation
 	AdminProvisioningServiceCreateTenantHandler admin_provisioning_service.CreateTenantHandler
 	// TenantProvisioningServiceCreateTenantConnectorConfigHandler sets the operation handler for the create tenant connector config operation
@@ -456,6 +473,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler tenant_provisioning_service_v2.DeleteMonitoredObjectV2Handler
 	// TenantProvisioningServiceDeleteReportScheduleConfigHandler sets the operation handler for the delete report schedule config operation
 	TenantProvisioningServiceDeleteReportScheduleConfigHandler tenant_provisioning_service.DeleteReportScheduleConfigHandler
+	// TenantProvisioningServiceV2DeleteReportScheduleConfigV2Handler sets the operation handler for the delete report schedule config v2 operation
+	TenantProvisioningServiceV2DeleteReportScheduleConfigV2Handler tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Handler
 	// AdminProvisioningServiceDeleteTenantHandler sets the operation handler for the delete tenant operation
 	AdminProvisioningServiceDeleteTenantHandler admin_provisioning_service.DeleteTenantHandler
 	// TenantProvisioningServiceDeleteTenantConnectorConfigHandler sets the operation handler for the delete tenant connector config operation
@@ -490,6 +509,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler
 	// TenantProvisioningServiceGetAllReportScheduleConfigHandler sets the operation handler for the get all report schedule config operation
 	TenantProvisioningServiceGetAllReportScheduleConfigHandler tenant_provisioning_service.GetAllReportScheduleConfigHandler
+	// TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler sets the operation handler for the get all report schedule configs v2 operation
+	TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Handler
 	// TenantProvisioningServiceGetAllSLAReportsHandler sets the operation handler for the get all SLA reports operation
 	TenantProvisioningServiceGetAllSLAReportsHandler tenant_provisioning_service.GetAllSLAReportsHandler
 	// TenantProvisioningServiceGetAllTenantConnectorConfigsHandler sets the operation handler for the get all tenant connector configs operation
@@ -532,6 +553,8 @@ type GatherAPI struct {
 	MetricsServiceGetRawMetricsHandler metrics_service.GetRawMetricsHandler
 	// TenantProvisioningServiceGetReportScheduleConfigHandler sets the operation handler for the get report schedule config operation
 	TenantProvisioningServiceGetReportScheduleConfigHandler tenant_provisioning_service.GetReportScheduleConfigHandler
+	// TenantProvisioningServiceV2GetReportScheduleConfigV2Handler sets the operation handler for the get report schedule config v2 operation
+	TenantProvisioningServiceV2GetReportScheduleConfigV2Handler tenant_provisioning_service_v2.GetReportScheduleConfigV2Handler
 	// TenantProvisioningServiceGetSLAReportHandler sets the operation handler for the get SLA report operation
 	TenantProvisioningServiceGetSLAReportHandler tenant_provisioning_service.GetSLAReportHandler
 	// AdminProvisioningServiceGetTenantHandler sets the operation handler for the get tenant operation
@@ -604,6 +627,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler tenant_provisioning_service_v2.UpdateMonitoredObjectV2Handler
 	// TenantProvisioningServiceUpdateReportScheduleConfigHandler sets the operation handler for the update report schedule config operation
 	TenantProvisioningServiceUpdateReportScheduleConfigHandler tenant_provisioning_service.UpdateReportScheduleConfigHandler
+	// TenantProvisioningServiceV2UpdateReportScheduleConfigV2Handler sets the operation handler for the update report schedule config v2 operation
+	TenantProvisioningServiceV2UpdateReportScheduleConfigV2Handler tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Handler
 	// AdminProvisioningServiceUpdateTenantHandler sets the operation handler for the update tenant operation
 	AdminProvisioningServiceUpdateTenantHandler admin_provisioning_service.UpdateTenantHandler
 	// TenantProvisioningServiceUpdateTenantConnectorConfigHandler sets the operation handler for the update tenant connector config operation
@@ -729,6 +754,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.CreateReportScheduleConfigHandler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateReportScheduleConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateReportScheduleConfigV2Handler")
+	}
+
 	if o.AdminProvisioningServiceCreateTenantHandler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service.CreateTenantHandler")
 	}
@@ -791,6 +820,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceDeleteReportScheduleConfigHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.DeleteReportScheduleConfigHandler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteReportScheduleConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Handler")
 	}
 
 	if o.AdminProvisioningServiceDeleteTenantHandler == nil {
@@ -859,6 +892,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceGetAllReportScheduleConfigHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetAllReportScheduleConfigHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceGetAllSLAReportsHandler == nil {
@@ -943,6 +980,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceGetReportScheduleConfigHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetReportScheduleConfigHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetReportScheduleConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetReportScheduleConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceGetSLAReportHandler == nil {
@@ -1087,6 +1128,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceUpdateReportScheduleConfigHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.UpdateReportScheduleConfigHandler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateReportScheduleConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Handler")
 	}
 
 	if o.AdminProvisioningServiceUpdateTenantHandler == nil {
@@ -1285,6 +1330,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/report-schedule-configs"] = tenant_provisioning_service_v2.NewCreateReportScheduleConfigV2(o.context, o.TenantProvisioningServiceV2CreateReportScheduleConfigV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v1/tenants"] = admin_provisioning_service.NewCreateTenant(o.context, o.AdminProvisioningServiceCreateTenantHandler)
 
 	if o.handlers["POST"] == nil {
@@ -1361,6 +1411,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v1/tenants/{tenantId}/report-schedule-configs/{configId}"] = tenant_provisioning_service.NewDeleteReportScheduleConfig(o.context, o.TenantProvisioningServiceDeleteReportScheduleConfigHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/report-schedule-configs/{configId}"] = tenant_provisioning_service_v2.NewDeleteReportScheduleConfigV2(o.context, o.TenantProvisioningServiceV2DeleteReportScheduleConfigV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1446,6 +1501,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/report-schedule-config-list"] = tenant_provisioning_service.NewGetAllReportScheduleConfig(o.context, o.TenantProvisioningServiceGetAllReportScheduleConfigHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/report-schedule-configs"] = tenant_provisioning_service_v2.NewGetAllReportScheduleConfigsV2(o.context, o.TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1551,6 +1611,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/report-schedule-configs/{configId}"] = tenant_provisioning_service.NewGetReportScheduleConfig(o.context, o.TenantProvisioningServiceGetReportScheduleConfigHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/report-schedule-configs/{configId}"] = tenant_provisioning_service_v2.NewGetReportScheduleConfigV2(o.context, o.TenantProvisioningServiceV2GetReportScheduleConfigV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1731,6 +1796,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/v1/tenants/{tenantId}/report-schedule-configs"] = tenant_provisioning_service.NewUpdateReportScheduleConfig(o.context, o.TenantProvisioningServiceUpdateReportScheduleConfigHandler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/report-schedule-configs/{configId}"] = tenant_provisioning_service_v2.NewUpdateReportScheduleConfigV2(o.context, o.TenantProvisioningServiceV2UpdateReportScheduleConfigV2Handler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

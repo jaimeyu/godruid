@@ -1,3 +1,4 @@
+* Feature - Report Schedule Configuration V2 APIs
 ## Current Release 
 ### 0.186.0 
 **Release Date:** Wed Aug  8 20:02:07 UTC 2018     

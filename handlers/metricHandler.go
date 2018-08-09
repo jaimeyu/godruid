@@ -581,16 +581,6 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		reportError(w, startTime, "400", mon.GetTopNReqStr, msg, http.StatusBadRequest)
 		return
 	}
-	if len(request.MonitoredObjects) == 1 {
-		mojbs, err := msh.tenantDB.GetAllMonitoredObjectsIDs(request.TenantID)
-		if err != nil {
-
-			msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-			reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
-			return
-		}
-		request.MonitoredObjects = mojbs
-	}
 
 	topNreq := request
 	//logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)

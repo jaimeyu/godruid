@@ -1662,8 +1662,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenan
 	return res, nil
 }
 
-// GetAllMonitoredObjectsIDs - uses the paginated DB call to acquire all monitored objects' ID
-// Becarefully calling this function, it may take a long time to process
+// GetAllMonitoredObjectsIDs - Returns a list of all the monitored objects in couchdb
 func (tsd *TenantServiceDatastoreCouchDB) GetAllMonitoredObjectsIDs(tenantID string) ([]string, error) {
 	timeStart := time.Now()
 	//ogger.Log.Debugf("Fetching next %d %ss from startKey %s\n", limit, tenmod.TenantMonitoredObjectStr, startKey)

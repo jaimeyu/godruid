@@ -277,7 +277,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Querying Druid for %s with query: %+v", db.TopNForMetricString, models.AsJSONString(query))
+		logger.Log.Debugf("Querying Druid for %s with query: %s", db.TopNForMetricString, models.AsJSONString(query))
 	}
 
 	queryStartTime := time.Now()

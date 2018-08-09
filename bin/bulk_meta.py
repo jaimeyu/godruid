@@ -113,7 +113,7 @@ metafile = args.file
 host = args.host
 username = args.username
 password = args.password
-tenant = args.tenant
+tenant = args.tenantname
 keyname = args.keyname
 
 conf_logging()

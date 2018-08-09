@@ -44,6 +44,7 @@ type ConnectorMessage struct {
 	DataType    string
 	MsgType     string
 	ErrorMsg    string
+	ObjectType  string
 	MsgID       int
 	ErrorCode   int
 	Data        []byte

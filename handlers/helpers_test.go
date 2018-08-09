@@ -12,6 +12,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/adh-gather/monitoring"
+	"github.com/accedian/adh-gather/scheduler"
 	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/icrowley/fake"
 	"github.com/spf13/viper"
@@ -44,6 +45,8 @@ func setupTestDatastore() error {
 	cfg.Set(gather.CK_args_authorizationAAA.String(), "true")
 
 	handlers.InitializeAuthHelper()
+
+	scheduler.Initialize(handlers.CreateMetricServiceHandler(), nil, nil, 5)
 
 	var err error
 	adminDB, err = handlers.GetAdminServiceDatastore()

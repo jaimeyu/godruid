@@ -14,6 +14,7 @@ type ReportScheduleConfig struct {
 	// Meta information
 	ID                    string `json:"_id"`
 	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
 	CreatedTimestamp      int64  `json:"createdTimestamp"`
 	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
 	TenantID              string `json:"tenantId"`

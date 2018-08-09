@@ -1,0 +1,155 @@
+  ReportScheduleConfigCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["thresholdProfile", "name"]
+            properties:
+              timeRangeDuration: 
+                type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+                    
+  ReportScheduleConfigUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Report Genaration Schedule in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [reportScheduleConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              timeRangeDuration: 
+                type: "string"
+              thresholdProfile: 
+                type: "string"
+              granularity: 
+                type: "string"
+              timeout: 
+                type: "integer"
+              timezone: 
+                type: "string"
+              name: 
+                type: "string"
+              reportType:
+                type: "string"
+              minute: 
+                type: "string"
+              hour: 
+                type: "string"
+              dayMonth: 
+                type: "string"
+              month: 
+                type: "string"
+              dayWeek: 
+                type: "string"
+              active:
+                type: "boolean"
+
+  ReportScheduleConfigResponse:
+    type: "object"
+    properties:
+      data:
+        $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfigListResponse:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/TenantReportScheduleConfig'
+
+  ReportScheduleConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [reportScheduleConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "thresholdProfile", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          timeRangeDuration: 
+            type: "string"
+          thresholdProfile: 
+            type: "string"
+          granularity: 
+            type: "string"
+          timeout: 
+            type: "integer"
+          timezone: 
+            type: "string"
+          name: 
+            type: "string"
+          reportType:
+            type: "string"
+          minute: 
+            type: "string"
+          hour: 
+            type: "string"
+          dayMonth: 
+            type: "string"
+          month: 
+            type: "string"
+          dayWeek: 
+            type: "string"
+          active:
+            type: "boolean"
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"

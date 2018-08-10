@@ -57,15 +57,15 @@ const (
 	  },
     "byName": {
       "map": "function(doc) {\n        emit(doc.data.objectName, null);\n\n}"
-    },
+     },
 	  "count": {
 		"map": "function(doc) {  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') { emit(doc.id, 1) } }",
 		"reduce": "_count"
-	  }
-	}, "byCount": {
+	  }, "byCount": {
 		"map": "function(doc) {  if (doc.data && doc.data.datatype && doc.data.datatype === 'monitoredObject') { emit(doc.id, 1) } }",
 		"reduce": "_count"
 	  }
+	}
   }`
 
 	monitoredObjectMetaIndexBytes = `{
@@ -335,10 +335,10 @@ func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName b
 	_, err = db.Get(uri, nil)
 	if err != nil {
 		logger.Log.Errorf("Unsuccessfully Indexed view: %s because %s", uri, err.Error())
-		return
-	}
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Successfully Indexed %s -> %s", uri, "") //models.AsJSONString(v))
+	} else {
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Successfully Indexed %s -> %s", uri, "") //models.AsJSONString(v))
+		}
 	}
 
 	couchdbViewBuilderBusyMap.Delete(ddoc)

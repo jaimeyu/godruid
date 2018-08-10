@@ -2,6 +2,7 @@ package tenant
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/manyminds/api2go/jsonapi"
@@ -9,6 +10,8 @@ import (
 
 // TenantDataType - enumeration of the types of data stored in the Tenant Datastore
 type TenantDataType string
+
+const illegalWords = "!,@#$%^&*?/"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
@@ -554,6 +557,15 @@ func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
+func isStringSterile(str string) bool {
+
+	if strings.ContainsAny(str, illegalWords) {
+		return false
+	}
+
+	return true
+}
+
 // Validate - used during validation of incoming REST requests for this object
 func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	if len(mo.TenantID) == 0 {
@@ -569,9 +581,14 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)
 	for k, v := range mo.Meta {
+		// Stop
+		if isStringSterile(k) == false {
+			return fmt.Errorf("Metadata key (%s) contains an invalid character (%s). Please reformat your keys.", k, illegalWords)
+		}
 		key := strings.ToLower(k)
 		val := strings.ToLower(v)
 		newMeta[key] = val
+
 	}
 
 	mo.Meta = newMeta

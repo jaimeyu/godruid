@@ -499,11 +499,16 @@ func TestTenantMonitoredObjectSerialization(t *testing.T) {
 		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
 		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"UpperCase": "Should Convert to Lower Case",
+			"Hello":     "Key",
+			"pet":       "dog",
+		},
 	}
 
 	attrKeys := []string{"_rev", "datatype", "tenantId", "actuatorName", "actuatorType",
 		"reflectorName", "reflectorType", "objectName", "objectType", "domainSet",
-		"objectId", "createdTimestamp", "lastModifiedTimestamp"}
+		"objectId", "createdTimestamp", "lastModifiedTimestamp", "meta"}
 
 	testUtil.RunSerializationTest(t, original, &MonitoredObject{}, original.ID, attrKeys)
 }

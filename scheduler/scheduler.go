@@ -95,6 +95,7 @@ func convertScheduleConfigToRequest(s metrics.ReportScheduleConfig) (*metrics.SL
 	request.Granularity = s.Granularity
 	request.Timeout = s.Timeout
 	request.Timezone = "UTC"
+	request.SlaScheduleConfig = s.ID
 
 	// iso interval yyyymmddThhmmssfff/yyyymmddThhmmssfff
 	// see http://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/viewer.htm#a003169814.htm

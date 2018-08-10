@@ -884,7 +884,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	for key := range meta {
 		// Create an index based on metadata keys
-		err := createNewTenantMetadataViews(dbNameKeys, key)
+		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
 		if err != nil {
 			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
 			// This isn't critical error but log it
@@ -912,7 +912,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 		}
 	}
 
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metakeysViewUniqueValuessURI, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
@@ -1006,6 +1006,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
 	// Expect only 1 return
 	const expectOnly1Result = 1
+
+	logger.Log.Debugf("Fetching monitored object for tenant %s by object name %s in index %s using selector %s", tenantID, name, index, selector)
 
 	// This returns a LIST of objects but we're only going to check for 1 object
 	fetchedData, err := db.Query(nil, selector, nil, expectOnly1Result, nil, index)

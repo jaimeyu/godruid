@@ -52,6 +52,7 @@ const (
 	populateTestDataStr                 = "populate_test_data"
 	populateTestDataBulkRandomizedMOStr = "populate_test_data_bulk_randomize_MO"
 	populateTestDataIntoDruidStr        = "populate_test_data_into_druid"
+	migrateMOMetadatadStr               = "migrate_mo_metadata"
 	purgeDBStr                          = "purge_db"
 	generateSLAReportStr                = "gen_sla_report"
 	getDocsByTypeStr                    = "get_docs_by_type"
@@ -130,6 +131,13 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Pattern: "/test-data/populate-druid",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.
 				PopulateTestDataIntoDruid),
+		},
+		server.Route{
+			Name:    "MigrateMetadata",
+			Method:  "POST",
+			Pattern: "/test-data/MigrateMetadata",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.
+				MigrateMetadata),
 		},
 	}
 
@@ -917,6 +925,59 @@ const (
 	fauxDatatemplate     = `{"timestamp":{{TIMESTAMP}},"tenantId":"{{TENANTID}}","monitoredObjectId":"{{MONOBJID}}","sessionId":"2026","delayMin":7153,"delayMax":7385,"delayAvg":7222,"delayStdDevAvg":61,"delayP25":7175,"delayP50":7192,"delayP75":7282,"delayP95":7339,"delayPLo":7343,"delayPMi":7357,"delayPHi":7382,"delayVarMax":232,"delayVarAvg":69,"delayVarP25":22,"delayVarP50":39,"delayVarP75":129,"delayVarP95":186,"delayVarPLo":190,"delayVarPMi":204,"delayVarPHi":229,"jitterMin":0,"jitterMax":208,"jitterAvg":43,"jitterStdDev":48,"jitterP25":9,"jitterP50":23,"jitterP75":63,"jitterP95":140,"jitterPLo":154,"jitterPMi":166,"jitterPHi":181,"packetsLost":0,"packetsLostPct":0,"packetsMisordered":0,"packetsDuplicated":0,"packetsTooLate":0,"periodsLost":0,"lostBurstMin":0,"lostBurstMax":0,"packetsReceived":300,"bytesReceived":38400,"ipTOSMax":0,"ipTOSMin":0,"ttlMin":241,"ttlMax":241,"vlanPBitMin":0,"vlanPBitMax":0,"mos":4.409286022186279,"rValue":93200000,"deviceId":"demo1VCX-e5","direction":1,"objectType":"twamp-sf","throughputMin":0,"throughputMax":0,"throughputAvg":0,"duration":30000,"packetsSent":0,"domains":[],"monitoredObjectName":"{{MONOBJNAME}}","cleanStatus":1,"failedRules":[],"errorCode":0,"objectVendor":"accedian-twamp"}`
 	fauxDataFailtemplate = `{"timestamp":{{TIMESTAMP}},"tenantId":"{{TENANTID}}","monitoredObjectId":"{{MONOBJID}}","sessionId":"2026","delayMin":60000,"delayMax":60000,"delayAvg":60000,"delayStdDevAvg":61,"delayP25":60000,"delayP50":60000,"delayP75":60000,"delayP95":60000,"delayPLo":60000,"delayPMi":60000,"delayPHi":60000,"delayVarMax":60000,"delayVarAvg":60000,"delayVarP25":60000,"delayVarP50":60000,"delayVarP75":60000,"delayVarP95":60000,"delayVarPLo":60000,"delayVarPMi":60000,"delayVarPHi":60000,"jitterMin":60000,"jitterMax":60000,"jitterAvg":60000,"jitterStdDev":60000,"jitterP25":60000,"jitterP50":60000,"jitterP75":60000,"jitterP95":60000,"jitterPLo":60000,"jitterPMi":60000,"jitterPHi":60000,"packetsLost":60000,"packetsLostPct":90,"packetsMisordered":0,"packetsDuplicated":0,"packetsTooLate":0,"periodsLost":0,"lostBurstMin":0,"lostBurstMax":0,"packetsReceived":60000,"bytesReceived":3840000,"ipTOSMax":0,"ipTOSMin":0,"ttlMin":241,"ttlMax":241,"vlanPBitMin":0,"vlanPBitMax":0,"mos":4.409286022186279,"rValue":93200000,"deviceId":"demo1VCX-e5","direction":1,"objectType":"twamp-sf","throughputMin":0,"throughputMax":0,"throughputAvg":0,"duration":30000,"packetsSent":0,"domains":[],"monitoredObjectName":"{{MONOBJNAME}}","cleanStatus":1,"failedRules":[],"errorCode":0,"objectVendor":"accedian-twamp"}`
 )
+
+// MigrateMetadata - Bulk operation to fix issues with metadata or to force new rules on metadata
+func (tsh *TestDataServiceHandler) MigrateMetadata(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	queryParams := r.URL.Query()
+
+	var (
+		moRequestTenant string
+		err             error
+	)
+
+	// Defines the tenant to place the monitored objects against. This is a required field
+	if len(queryParams["tenant"]) == 0 {
+		msg := fmt.Sprintf("Tenant ID must be provided")
+		reportError(w, startTime, "400", migrateMOMetadatadStr, msg, http.StatusBadRequest)
+		return
+	} else {
+		moRequestTenant = queryParams["tenant"][0]
+	}
+
+	mos, err := tsh.tenantDB.GetAllMonitoredObjectsIDs(moRequestTenant)
+	if err != nil {
+		msg := fmt.Sprintf("Could not get all MOs. %s", err.Error())
+		reportError(w, startTime, "400", migrateMOMetadatadStr, msg, http.StatusBadRequest)
+	}
+
+	metas := make(map[string]string)
+	for _, name := range mos {
+		mo, err := tsh.tenantDB.GetMonitoredObject(moRequestTenant, name)
+		if err != nil {
+			msg := fmt.Sprintf("Could not get MO %s %s. %s", moRequestTenant, name, err.Error())
+			reportError(w, startTime, "400", migrateMOMetadatadStr, msg, http.StatusBadRequest)
+		}
+		mo.Validate(true)
+		_, err = tsh.tenantDB.UpdateMonitoredObject(mo)
+		if err != nil {
+			msg := fmt.Sprintf("Could not update MO %s %s. %s", moRequestTenant, mo.ID, err.Error())
+			reportError(w, startTime, "400", migrateMOMetadatadStr, msg, http.StatusBadRequest)
+		}
+		for k, v := range mo.Meta {
+			metas[k] = v
+		}
+	}
+	err = tsh.tenantDB.UpdateMonitoredObjectMetadataViews(moRequestTenant, metas)
+	if err != nil {
+		msg := fmt.Sprintf("Could not update metadata views %s %v. %s", moRequestTenant, metas, err.Error())
+		reportError(w, startTime, "400", migrateMOMetadatadStr, msg, http.StatusBadRequest)
+	}
+
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", migrateMOMetadatadStr)
+	fmt.Fprintf(w, "Success")
+}
 
 // PopulateTestDataIntoDruid - Populate Test data produces data but druid does not contain any corresponding
 // data. So this endpoint allows us to populate druid with some test data so we can make queries to it

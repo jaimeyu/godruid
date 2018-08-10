@@ -499,13 +499,53 @@ func TestTenantMonitoredObjectSerialization(t *testing.T) {
 		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
 		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"UpperCase": "Should Convert to Lower Case",
+			"Hello":     "Key",
+			"pet":       "dog",
+		},
 	}
 
 	attrKeys := []string{"_rev", "datatype", "tenantId", "actuatorName", "actuatorType",
 		"reflectorName", "reflectorType", "objectName", "objectType", "domainSet",
-		"objectId", "createdTimestamp", "lastModifiedTimestamp"}
+		"objectId", "createdTimestamp", "lastModifiedTimestamp", "meta"}
 
 	testUtil.RunSerializationTest(t, original, &MonitoredObject{}, original.ID, attrKeys)
+}
+
+func TestTenantMonitoredObjectMetada(t *testing.T) {
+	actName := fake.City()
+	refName := fake.City()
+	original := &MonitoredObject{
+		ID:                    uuid.NewV4().String(),
+		REV:                   uuid.NewV4().String(),
+		Datatype:              string(TenantMonitoredObjectType),
+		TenantID:              fake.CharactersN(12),
+		ActuatorType:          fake.Company(),
+		ActuatorName:          actName,
+		ReflectorType:         fake.Company(),
+		ReflectorName:         refName,
+		ObjectType:            fake.Brand(),
+		ObjectName:            fake.City(),
+		MonitoredObjectID:     strings.Join([]string{actName, refName}, "-"),
+		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"UpperCase": "Should Convert to Lower Case",
+			"Hello":     "Key",
+			"pet":       "dog",
+		},
+	}
+	original.Validate(true)
+
+	assert.Equal(t, original.Meta["NonExistant"], "")
+	assert.Equal(t, original.Meta["UpperCase"], "")
+	assert.Equal(t, original.Meta["Hello"], "")
+	assert.Equal(t, original.Meta["pet"], "dog")
+
+	assert.Equal(t, original.Meta["uppercase"], "should convert to lower case")
+	assert.Equal(t, original.Meta["hello"], "key")
 }
 
 func TestTenantMonitoredObjectValidation(t *testing.T) {

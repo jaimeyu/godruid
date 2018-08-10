@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -511,6 +512,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 		}
 
 		metaKeys := make(map[string]string)
+		const idSep = "_"
 
 		for i, item := range data.Items {
 			itemResponse := common.BulkOperationResult{
@@ -519,15 +521,16 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			// Issue request to DAO Layer
 			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
 			if err != nil {
-				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s %s", tenmod.TenantMonitoredObjectStr, err.Error()))
 				continue
 			}
 
-			logger.Log.Infof("Patching metadata for %s with name %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName)
+			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
 
 			existingMonitoredObject.Meta = item.Metadata
 			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			existingMonitoredObject.ID = existingMonitoredObject.ObjectName
+			splitID := strings.Split(existingMonitoredObject.ID, idSep)
+			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
@@ -537,7 +540,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			}
 
 			// Track all distinct metadata items to be index processed after all are items are worked through
-			for k, _ := range item.Metadata {
+			for k := range item.Metadata {
 				metaKeys[k] = ""
 			}
 

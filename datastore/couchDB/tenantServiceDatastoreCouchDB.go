@@ -912,7 +912,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 		}
 	}
 
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metakeysViewUniqueValuessURI, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)

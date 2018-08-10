@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/config"
@@ -1634,11 +1635,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	res := make([]*tenmod.DataCleaningProfile, 0)
 	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantDataCleaningProfileType), tenmod.TenantDataCleaningProfileStr, &res); err != nil {
-		return nil, err
-	}
+		if strings.Contains(err.Error(), "404") {
+			// FYI, 404 is valid on startup and no one has created a cleaning profile yet.
+			return res, nil
+		}
 
-	if len(res) == 0 {
-		return nil, fmt.Errorf("%ss: %s", tenmod.TenantDataCleaningProfileStr, ds.NotFoundStr)
+		return nil, err
 	}
 
 	logger.Log.Debugf("Retrieved %d %ss\n", len(res), tenmod.TenantDataCleaningProfileStr)

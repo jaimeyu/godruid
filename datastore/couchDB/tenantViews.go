@@ -19,14 +19,12 @@ const (
 	reportObjectDBSuffix    = "_reports"
 
 	// Indexer for monitored objects by name
-	monitoredObjectsByObjectNameIndex = "byObjectName"
-	monitoredObjectsByObjectNameKey   = "objectName"
-	monitoredObjectIndex              = "indexOfobjectName"
-	mapFnName                         = "map"
-	legacyIndexTemplateStr            = "_design/%s/_view/%s"
-	indexTemplateStr                  = "_design/indexOf%s/_view/by%s"
-	viewTemplateStr                   = "_design/viewOf%s/_view/by%s"
-	legacyViewTemplateStr             = "_design/%s/_view/%s"
+	monitoredObjectIndex   = "indexOfObjectName"
+	mapFnName              = "map"
+	legacyIndexTemplateStr = "_design/%s/_view/%s"
+	indexTemplateStr       = "_design/indexOf%s/_view/by%s"
+	viewTemplateStr        = "_design/viewOf%s/_view/by%s"
+	legacyViewTemplateStr  = "_design/%s/_view/%s"
 
 	metaFieldPrefix              = "meta"
 	metakeysViewDdocName         = "metaViews"

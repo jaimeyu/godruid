@@ -1647,7 +1647,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 
 // GetMonitoredObjectIDsToMetaEntry - CouchDB implementation to retrieve all monitored object Ids associated with a specific metadata key/value pair
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error) {
-	logger.Log.Debugf("Fetching all %ss for Tenant %s with meta kay %s and value %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, metakey, metavalue)
+	logger.Log.Debugf("Fetching all %ss for Tenant %s with meta key %s and value %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, metakey, metavalue)
 
 	timeStart := time.Now()
 	tenantMODB := createDBPathStr(tsd.server, fmt.Sprintf("%s_monitored-objects", ds.PrependToDataID(tenantID, string(admmod.TenantType))))

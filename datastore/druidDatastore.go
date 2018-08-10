@@ -53,6 +53,9 @@ type DruidDatastore interface {
 	// Returns raw metrics from druid
 	GetRawMetrics(request *pb.RawMetricsRequest) (map[string]interface{}, error)
 
+	// Returns filtered raw metrics from druid
+	GetFilteredRawMetrics(request *metrics.RawMetricsRequest, metaMOs []string) (map[string]interface{}, error)
+
 	// Get aggregated metrics from druid
 	GetAggregatedMetrics(request *metrics.AggregateMetricsAPIRequest, metaMOs []string) (map[string]interface{}, error)
 	GetTopNForMetric(metric *metrics.TopNForMetric, metaMOs []string) (map[string]interface{}, error)

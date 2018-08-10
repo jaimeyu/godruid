@@ -8,8 +8,7 @@ const (
 )
 
 type SLAReportRequest struct {
-	SlaScheduleConfig string `json:"slaScheduleConfigId"`
-	TenantID          string `json:"tenantId"`
+	TenantID string `json:"tenantId"`
 	// ISO-8601 Intervals
 	Interval string              `json:"interval,omitempty"`
 	Meta     map[string][]string `json:"meta,omitempty"`
@@ -21,6 +20,17 @@ type SLAReportRequest struct {
 	Timezone string `json:"timezone,omitempty"`
 }
 
+type RawMetricsRequest struct {
+	Tenant string `json:"tenantId"`
+	// ISO-8601 Intervals
+	Interval    string              `json:"interval,omitempty"`
+	Granularity string              `json:"granularity,omitempty"`
+	Directions  []string            `json:"directions,omitempty"`
+	Metrics     []string            `json:"metrics,omitempty"`
+	ObjectType  string              `json:"objectType,omitempty"`
+	Meta        map[string][]string `json:"meta,omitempty"`
+	Timeout     int32               `json:"timeout,omitempty"`
+}
 type HistogramRequest struct {
 	TenantID string              `json:"tenantId"`
 	Meta     map[string][]string `json:"meta,omitempty"`

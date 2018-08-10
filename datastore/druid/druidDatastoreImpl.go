@@ -572,7 +572,6 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 		TimeSeriesResult:     slaTimeSeries,
 		ByHourOfDayResult:    hourOfDayBucketMap,
 		ByDayOfWeekResult:    dayOfWeekBucketMap,
-		ReportScheduleConfig: request.SlaScheduleConfig,
 	}
 
 	/*
@@ -611,6 +610,81 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	}
 
 	query, err := RawMetricsQuery(request.GetTenant(), table, request.Metric, request.GetInterval(), request.GetObjectType(), request.GetDirection(), request.GetMonitoredObjectId(), timeout, granularity, request.GetCleanOnly())
+
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)
+		return nil, err
+	}
+
+	queryStartTime := time.Now()
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: '' %s ''", db.RawMetricStr, models.AsJSONString(query))
+	}
+	response, err := dc.executeQuery(query)
+
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetRawMetricStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)
+		return nil, err
+	}
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetRawMetricStr)
+
+	resp := make([]RawMetricsResponse, 0)
+
+	err = json.Unmarshal(response, &resp)
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Response from druid for %s: %v", db.RawMetricStr, models.AsJSONString(resp))
+	}
+
+	formattedJSON := map[string]interface{}{}
+	if len(resp) != 0 {
+		formattedJSON, err = reformatRawMetricsResponse(resp)
+	}
+
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)
+		return nil, err
+	}
+
+	uuid := uuid.NewV4()
+	data := []map[string]interface{}{}
+	data = append(data, map[string]interface{}{
+		"id":         uuid.String(),
+		"type":       RawMetrics,
+		"attributes": formattedJSON,
+	})
+	rr := map[string]interface{}{
+		"data": data,
+	}
+
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetRawMetricStr)
+	return rr, nil
+}
+
+func (dc *DruidDatastoreClient) GetFilteredRawMetrics(request *metrics.RawMetricsRequest, metaMOs []string) (map[string]interface{}, error) {
+	methodStartTime := time.Now()
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetFilteredRawMetrics for request: %v", models.AsJSONString(request))
+	}
+
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	timeout := request.Timeout
+	if timeout == 0 {
+		timeout = 30000
+	}
+
+	granularity := request.Granularity
+	if granularity == "" {
+		granularity = "PT1M"
+	}
+
+	query, err := RawMetricsQuery(request.Tenant, table, request.Metrics, request.Interval, request.ObjectType, request.Directions, metaMOs, timeout, granularity, false)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetRawMetricStr)

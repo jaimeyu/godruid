@@ -82,6 +82,13 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 		},
 
 		server.Route{
+			Name:        "GetRawMetrics",
+			Method:      "POST",
+			Pattern:     "/api/v2/raw-metrics",
+			HandlerFunc: result.GetRawMetricsV2,
+		},
+
+		server.Route{
 			Name:        "QueryAggregatedMetrics",
 			Method:      "POST",
 			Pattern:     "/api/v1/aggregated-metrics",
@@ -230,7 +237,6 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report.ReportScheduleConfig = slaReportRequest.SlaScheduleConfig
 	report.TenantID = slaReportRequest.TenantID
 	logger.Log.Debugf("Completed %s fetch for: %+v, report %+v", db.SLAReportStr, models.AsJSONString(slaReportRequest), report)
 
@@ -475,6 +481,56 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 
 	w.Header().Set(contentType, jsonAPIContentType)
 	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, rawMetricReq)
+	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
+	fmt.Fprintf(w, string(res))
+}
+
+// GetRawMetrics - Retrieve raw metric data from druid
+func (msh *MetricServiceHandler) GetRawMetricsV2(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetRawMetricStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Turn the query Params into the request object:
+	request := &metrics.RawMetricsRequest{}
+	err = json.Unmarshal(requestBytes, request)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve raw metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, request)
+
+	metaMOs, err := msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetFilteredRawMetrics(request, metaMOs)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, request)
 	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
 	fmt.Fprintf(w, string(res))
 }

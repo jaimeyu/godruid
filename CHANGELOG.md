@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.190.0 
+**Release Date:** Thu Aug  9 20:02:16 UTC 2018     
+## Previous Releases 
 ### 0.189.0 
 **Release Date:** Thu Aug  9 19:03:00 UTC 2018     
-## Previous Releases 
 * Feature - SLA Report V2 APIs
 ### 0.188.0 
 **Release Date:** Thu Aug  9 17:38:04 UTC 2018     

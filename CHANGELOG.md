@@ -1,3 +1,4 @@
+* Fix - Removed pollChanges() function from firing periodically. This eats up performance when deployment is scaled up. 
 ## Current Release 
 ### 0.193.0 
 **Release Date:** Fri Aug 10 16:50:26 UTC 2018     

@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ThresholdCrossingAPIRequestObject threshold crossing API request object
-// swagger:model ThresholdCrossingAPIRequestObject
-type ThresholdCrossingAPIRequestObject struct {
+// HistogramRequestObject histogram request object
+// swagger:model HistogramRequestObject
+type HistogramRequestObject struct {
 
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
@@ -27,27 +27,29 @@ type ThresholdCrossingAPIRequestObject struct {
 	Interval *string `json:"interval"`
 
 	// set of meta keys and list of values for the purposes of filtering
-	Meta map[string][]string `json:"meta,omitempty"`
+	// Required: true
+	Meta map[string][]string `json:"meta"`
 
-	// limits the results to include only metrics in the whitelist
-	Metrics []*MetricIdentifierObject `json:"metrics"`
+	// metrics
+	Metrics []*MetricBucketRequest `json:"metrics"`
 
 	// the tenant identifier
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// ID of the threshold profile that is used to select metrics and events
-	ThresholdProfileID string `json:"thresholdProfileId,omitempty"`
-
 	// query timeout in milliseconds
 	Timeout int64 `json:"timeout,omitempty"`
 }
 
-// Validate validates this threshold crossing API request object
-func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) error {
+// Validate validates this histogram request object
+func (m *HistogramRequestObject) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInterval(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMeta(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -65,7 +67,7 @@ func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) er
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Registry) error {
+func (m *HistogramRequestObject) validateInterval(formats strfmt.Registry) error {
 
 	if err := validate.Required("interval", "body", m.Interval); err != nil {
 		return err
@@ -74,7 +76,12 @@ func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Regi
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateMetrics(formats strfmt.Registry) error {
+func (m *HistogramRequestObject) validateMeta(formats strfmt.Registry) error {
+
+	return nil
+}
+
+func (m *HistogramRequestObject) validateMetrics(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Metrics) { // not required
 		return nil
@@ -99,7 +106,7 @@ func (m *ThresholdCrossingAPIRequestObject) validateMetrics(formats strfmt.Regis
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateTenantID(formats strfmt.Registry) error {
+func (m *HistogramRequestObject) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("tenantId", "body", m.TenantID); err != nil {
 		return err
@@ -109,7 +116,7 @@ func (m *ThresholdCrossingAPIRequestObject) validateTenantID(formats strfmt.Regi
 }
 
 // MarshalBinary interface implementation
-func (m *ThresholdCrossingAPIRequestObject) MarshalBinary() ([]byte, error) {
+func (m *HistogramRequestObject) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -117,8 +124,8 @@ func (m *ThresholdCrossingAPIRequestObject) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *ThresholdCrossingAPIRequestObject) UnmarshalBinary(b []byte) error {
-	var res ThresholdCrossingAPIRequestObject
+func (m *HistogramRequestObject) UnmarshalBinary(b []byte) error {
+	var res HistogramRequestObject
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

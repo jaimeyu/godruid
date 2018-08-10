@@ -9,23 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
 )
 
 // GenSLAReportURL generates an URL for the gen SLA report operation
 type GenSLAReportURL struct {
-	Granularity        *string
-	Interval           string
-	Meta               []string
-	Tenant             string
-	ThresholdProfileID string
-	Timeout            *int32
-	Timezone           *string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -54,66 +42,6 @@ func (o *GenSLAReportURL) Build() (*url.URL, error) {
 		_basePath = "/api"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
-
-	qs := make(url.Values)
-
-	var granularity string
-	if o.Granularity != nil {
-		granularity = *o.Granularity
-	}
-	if granularity != "" {
-		qs.Set("granularity", granularity)
-	}
-
-	interval := o.Interval
-	if interval != "" {
-		qs.Set("interval", interval)
-	}
-
-	var metaIR []string
-	for _, metaI := range o.Meta {
-		metaIS := metaI
-		if metaIS != "" {
-			metaIR = append(metaIR, metaIS)
-		}
-	}
-
-	meta := swag.JoinByFormat(metaIR, "")
-
-	if len(meta) > 0 {
-		qsv := meta[0]
-		if qsv != "" {
-			qs.Set("meta", qsv)
-		}
-	}
-
-	tenant := o.Tenant
-	if tenant != "" {
-		qs.Set("tenant", tenant)
-	}
-
-	thresholdProfileID := o.ThresholdProfileID
-	if thresholdProfileID != "" {
-		qs.Set("thresholdProfileId", thresholdProfileID)
-	}
-
-	var timeout string
-	if o.Timeout != nil {
-		timeout = swag.FormatInt32(*o.Timeout)
-	}
-	if timeout != "" {
-		qs.Set("timeout", timeout)
-	}
-
-	var timezone string
-	if o.Timezone != nil {
-		timezone = *o.Timezone
-	}
-	if timezone != "" {
-		qs.Set("timezone", timezone)
-	}
-
-	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

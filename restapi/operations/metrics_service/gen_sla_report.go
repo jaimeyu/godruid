@@ -29,7 +29,7 @@ func NewGenSLAReport(ctx *middleware.Context, handler GenSLAReportHandler) *GenS
 	return &GenSLAReport{Context: ctx, Handler: handler}
 }
 
-/*GenSLAReport swagger:route GET /v1/generate-sla-report MetricsService genSlaReport
+/*GenSLAReport swagger:route POST /v1/generate-sla-report MetricsService genSlaReport
 
 Generate an SLA Report.
 

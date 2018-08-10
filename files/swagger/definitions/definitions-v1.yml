@@ -773,6 +773,111 @@
         type: array
         items:
           $ref: '#/definitions/MetricViewObject'
+  FilteredRawMetricsRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - objectType
+      - metrics
+      - directions
+      - meta
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      meta:
+        type: object
+        description: set of meta keys and list of values for the purposes of filtering
+        additionalProperties:
+          type: array
+          items:
+            type: string
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      metrics:
+        type: array
+        items:
+          type: string
+      directions:
+        type: array
+        items:
+          type: string
+      objectType:
+        type: string
+        description: the type of monitored object
+        example: twamp-sf
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+  MetricBucketObject:
+    type: object
+    properties:
+      index:
+        type: string
+      lower:
+        type: number
+        format: float
+      upper:
+        type: number
+        format: float
+  MetricBucketRequest:
+    type: object
+    properties:
+      vendor:
+        type: string
+      objectType:
+        type: string
+      direction:
+        type: string
+      name:
+        type: string
+      buckets:
+        type: array
+        items:
+          $ref: '#/definitions/MetricBucketObject'
+  HistogramRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+      - meta
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      meta:
+        type: object
+        description: set of meta keys and list of values for the purposes of filtering
+        additionalProperties:
+          type: array
+          items:
+            type: string
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/MetricBucketRequest'
   MetricViewObject:
     type: object
     required:
@@ -804,9 +909,11 @@
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
       meta:
         type: object
-        description: set of domains identifiers to use for filtering
+        description: set of meta keys and list of values for the purposes of filtering
         additionalProperties:
-          type: string
+          type: array
+          items:
+            type: string
       interval:
         type: string
         description: ISO-8601 interval
@@ -843,9 +950,11 @@
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
       meta:
         type: object
-        description: set of domains identifiers to use for filtering
+        description: set of meta keys and list of values for the purposes of filtering
         additionalProperties:
-          type: string
+          type: array
+          items:
+            type: string
       interval:
         type: string
         description: ISO-8601 interval
@@ -908,6 +1017,42 @@
       metric:
         $ref: '#/definitions/MetricIdentifierObject'
         description: the metric to be used for the top N query
+  SLAReportRequestObject:
+    type: object
+    required:
+      - tenantId
+      - interval
+    properties:
+      tenantId:
+        type: string
+        description: the tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      interval:
+        type: string
+        description: ISO-8601 interval
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      meta:
+        type: object
+        description: set of domains identifiers to use for filtering
+        additionalProperties:
+          type: array
+          items:
+            type: string
+      thresholdProfileId:
+        type: string
+        description: ID of the threshold profile that is used to select metrics and events
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      granularity:
+        type: string
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        example: PT1H
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      timezone: 
+        type: "string"
+        description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
   MetricIdentifierObject:
     type: object
     required:

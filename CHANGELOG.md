@@ -1,3 +1,4 @@
+* Fix - Raw metrics API with filtering
 ## Current Release 
 ### 0.190.0 
 **Release Date:** Thu Aug  9 20:02:16 UTC 2018     

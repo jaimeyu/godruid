@@ -111,34 +111,16 @@ The main loop
 */
 func (c *ChangeNotificationHandler) SendChangeNotifications() {
 
-	lastFullRefresh := time.Time{}
-	lastSuccess := time.Time{}
 	refreshFrequency := (time.Duration)(gather.GetConfig().GetInt(gather.CK_server_changenotif_refreshFreqSeconds.String())) * time.Second
 	pollingFrequency := defaultPollingFrequency
 	if refreshFrequency < pollingFrequency {
 		pollingFrequency = refreshFrequency
 	}
 	// Run an auditer to do a refresh at regular intervals
-	ticker := time.NewTicker(pollingFrequency)
 	quit := make(chan struct{})
 
 	for {
 		select {
-		case <-ticker.C:
-
-			// Time to run the audit to push changes we may have missed through the channel.
-			// If needsRefresh is false, just push changes detected since last push; otherwise
-			// push all provisioning data that others are interested in.
-			// Note: right now, this is a synchronous operation. If needed it could be handled in
-			// a separate dedicated thread.
-			startTime := time.Now().Truncate(time.Second)
-			needsRefresh := !lastFullRefresh.Add(refreshFrequency).After(startTime)
-			if err := c.pollChanges(lastSuccess.UnixNano()/int64(1000), needsRefresh); err == nil {
-				lastSuccess = startTime
-				if needsRefresh {
-					lastFullRefresh = startTime
-				}
-			}
 
 		case event := <-c.provisioningEvents:
 			// Something changed, lets batch the events if we can.  This helps to
@@ -159,7 +141,6 @@ func (c *ChangeNotificationHandler) SendChangeNotifications() {
 			c.processEvents(bufferedEvents)
 
 		case <-quit:
-			ticker.Stop()
 			return
 
 		}
@@ -382,6 +363,7 @@ func (c *ChangeNotificationHandler) pollChanges(lastSyncTimestamp int64, fullRef
 		}
 
 	}
+
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", mon.PollChanges)
 
 	return lastError

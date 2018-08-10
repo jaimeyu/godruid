@@ -24,7 +24,7 @@ func TestGetDataCleaningProfile(t *testing.T) {
 
 	// Make sure there are no existing Data Cleaning Profiles
 	existing := handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	// Create a record
@@ -76,7 +76,7 @@ func TestUpdateDataCleaningProfile(t *testing.T) {
 
 	// Make sure there are no existing Data Cleaning Profiles
 	existing := handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	// Create a record
@@ -163,7 +163,7 @@ func TestCreateDataCleaningProfile(t *testing.T) {
 
 	// Make sure there are no existing Data Cleaning Profiles
 	existing := handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	// Make sure Tenant User is not able to make this call
@@ -227,7 +227,7 @@ func TestDeleteDataCleaningProfile(t *testing.T) {
 
 	// Make sure there are no existing Data Cleaning Profiles
 	existing := handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	// Create a record
@@ -273,7 +273,7 @@ func TestDeleteDataCleaningProfile(t *testing.T) {
 
 	// Make sure the record no longer exists
 	existing = handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse = existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse = existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	adminDB.DeleteTenant(createdTenant.ID)
@@ -292,7 +292,7 @@ func TestGetDataCleaningProfiles(t *testing.T) {
 
 	// Make sure there are no existing Data Cleaning Profiles
 	existing := handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.GetDataCleaningProfilesParams{HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleSkylight)})
-	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesNotFound)
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetDataCleaningProfilesOK)
 	assert.NotNil(t, castedResponse)
 
 	// Create a record

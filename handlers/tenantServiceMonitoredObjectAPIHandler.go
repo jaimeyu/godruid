@@ -527,7 +527,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 			existingMonitoredObject.Meta = item.Metadata
 			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			existingMonitoredObject.ID = existingMonitoredObject.ID
+			existingMonitoredObject.ID = existingMonitoredObject.ObjectName
 
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)

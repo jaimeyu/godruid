@@ -1,8 +1,11 @@
 * Fix - Raw metrics API with filtering
 ## Current Release 
+### 0.191.0 
+**Release Date:** Fri Aug 10 01:01:41 UTC 2018     
+## Previous Releases 
+* Fix - Raw metrics API with filtering
 ### 0.190.0 
 **Release Date:** Thu Aug  9 20:02:16 UTC 2018     
-## Previous Releases 
 ### 0.189.0 
 **Release Date:** Thu Aug  9 19:03:00 UTC 2018     
 * Feature - SLA Report V2 APIs

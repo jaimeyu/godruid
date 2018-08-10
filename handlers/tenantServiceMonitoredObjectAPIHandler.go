@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -511,6 +512,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 		}
 
 		metaKeys := make(map[string]string)
+		const ID_SEP = "_"
 
 		for i, item := range data.Items {
 			itemResponse := common.BulkOperationResult{
@@ -527,7 +529,8 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 			existingMonitoredObject.Meta = item.Metadata
 			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			existingMonitoredObject.ID = existingMonitoredObject.ObjectName
+			splitID := strings.Split(existingMonitoredObject.ID, ID_SEP)
+			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
@@ -537,7 +540,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			}
 
 			// Track all distinct metadata items to be index processed after all are items are worked through
-			for k, _ := range item.Metadata {
+			for k := range item.Metadata {
 				metaKeys[k] = ""
 			}
 

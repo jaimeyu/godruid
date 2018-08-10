@@ -1,3 +1,5 @@
+* Fix - Bug in TriggerBuildCouchIndex that wasn't properly handling error
+* Fix - Added better validator for monitored object metadata
 ## Current Release 
 ### 0.192.0 
 **Release Date:** Fri Aug 10 05:57:39 UTC 2018     

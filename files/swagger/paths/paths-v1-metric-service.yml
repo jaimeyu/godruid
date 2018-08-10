@@ -1,5 +1,5 @@
   /v1/histogram:
-    get:
+    post:
       summary: Retrieve a histogram of measurements for given time range and metric/v1/histogramcustom
       operationId: GetHistogram
       produces:
@@ -18,53 +18,11 @@
           schema:
             type: string
       parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
-          required: false
-          type: string
-        - name: tenant
-          in: query
-          required: false
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: direction
-          in: query
-          required: false
-          type: string
-        - name: metric
-          in: query
-          required: false
-          type: string
-        - name: granularityBuckets
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: resolution
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: vendor
-          in: query
-          required: false
-          type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/HistogramRequestObject'
       tags:
         - MetricsService
   /v1/raw-metrics:
@@ -127,10 +85,10 @@
           type: string
       tags:
         - MetricsService
-  /v1/threshold-crossing:
-    get:
-      summary: Retrieve threshold crossing for given metric.
-      operationId: GetThresholdCrossing
+  /v2/raw-metrics:
+    post:
+      summary: Returns raw metrics from druid
+      operationId: GetFilteredRawMetrics
       produces:
         - application/vnd.api+json
       responses:
@@ -138,16 +96,8 @@
           description: ''
           schema:
             $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
         '403':
           description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "Threshold profile not found"
           schema:
             type: string
         '500':
@@ -155,63 +105,14 @@
           schema:
             type: string
       parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
+        - name: body
+          in: body
           required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: granularity
-          description: ISO-8601 period combination.
-          in: query
-          required: false
-          type: string
-        - name: objectType
-          description: the type of object (e.g. twamp-pe)
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: direction
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: metric
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          in: query
-          required: true
-          type: string
-        - name: vendor
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: timeout
-          in: query
-          required: false
-          type: integer
-          format: int32
+          schema:
+            $ref: '#/definitions/FilteredRawMetricsRequestObject'
       tags:
         - MetricsService
+  /v1/threshold-crossing:
     post:
       summary: Retrieve threshold crossings
       operationId: QueryThresholdCrossing
@@ -355,7 +256,7 @@
       tags:
         - MetricsService
   /v1/generate-sla-report:
-    get:
+    post:
       summary: Generate an SLA Report.
       operationId: GenSLAReport
       produces:
@@ -382,44 +283,11 @@
           schema:
             type: string
       parameters:
-        - name: interval
-          description: ISO-8601 Intervals.
-          in: query
+        - name: body
+          in: body
           required: true
-          type: string
-        - name: tenant
-          description: Tenant ID
-          in: query
-          required: true
-          type: string
-        - name: meta
-          in: query
-          required: false
-          type: array
-          items:
-            type: string
-        - name: thresholdProfileId
-          description: ID of the ThresholdProfile to use for the report
-          in: query
-          required: true
-          type: string
-        - name: granularity
-          description: the granularity for timeseries in ISO-8601 Duration format
-          in: query
-          required: false
-          type: string
-          default: PT1H
-        - name: timeout
-          description: database query timeout in milliseconds
-          in: query
-          required: false
-          type: integer
-          format: int32
-        - name: timezone
-          description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
-          in: query
-          required: false
-          type: string
+          schema:
+            $ref: '#/definitions/SLAReportRequestObject'
 
       tags:
         - MetricsService

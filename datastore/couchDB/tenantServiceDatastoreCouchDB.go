@@ -884,7 +884,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	for key := range meta {
 		// Create an index based on metadata keys
-		err := createNewTenantMetadataViews(dbNameKeys, key)
+		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
 		if err != nil {
 			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
 			// This isn't critical error but log it

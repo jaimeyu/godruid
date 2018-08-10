@@ -2,6 +2,7 @@ package tenant
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/manyminds/api2go/jsonapi"
 )
@@ -563,8 +564,17 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	}
 	if len(mo.MonitoredObjectID) == 0 {
 		return errors.New("Invalid Tenant Monitored Object request: must provide a Monitored Object ID")
-
 	}
+
+	// Enforce lower case to Meta
+	newMeta := make(map[string]string)
+	for k, v := range mo.Meta {
+		key := strings.ToLower(k)
+		val := strings.ToLower(v)
+		newMeta[key] = val
+	}
+
+	mo.Meta = newMeta
 
 	if isUpdate && (len(mo.REV) == 0) {
 		return errors.New("Invalid Tenant Monitored object request: must provide a revision (_rev) for an update")

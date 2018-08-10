@@ -1007,6 +1007,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 	// Expect only 1 return
 	const expectOnly1Result = 1
 
+	logger.Log.Debugf("Fetching monitored object for tenant %s by object name %s in index %s using selector %s", tenantID, name, index, selector)
+
 	// This returns a LIST of objects but we're only going to check for 1 object
 	fetchedData, err := db.Query(nil, selector, nil, expectOnly1Result, nil, index)
 	if err != nil {

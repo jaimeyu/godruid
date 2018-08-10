@@ -512,7 +512,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 		}
 
 		metaKeys := make(map[string]string)
-		const ID_SEP = "_"
+		const idSep = "_"
 
 		for i, item := range data.Items {
 			itemResponse := common.BulkOperationResult{
@@ -521,15 +521,15 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			// Issue request to DAO Layer
 			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
 			if err != nil {
-				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s %s", tenmod.TenantMonitoredObjectStr, err.Error()))
 				continue
 			}
 
-			logger.Log.Infof("Patching metadata for %s with name %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName)
+			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
 
 			existingMonitoredObject.Meta = item.Metadata
 			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			splitID := strings.Split(existingMonitoredObject.ID, ID_SEP)
+			splitID := strings.Split(existingMonitoredObject.ID, idSep)
 			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
 			// Issue request to DAO Layer

@@ -2093,6 +2093,172 @@
           "unknown"
         ]
       }
+    },
+    "accedian-paa": {
+      "metricMap": {
+        "delayAvg": {
+          "ui": {
+            "group": "delay",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayMax": {
+          "ui": {
+            "group": "delay",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayMin": {
+          "ui": {
+            "group": "delay",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarAvg": {
+          "ui": {
+            "group": "delayVar",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarMax": {
+          "ui": {
+            "group": "delayVar",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "delayVarMin": {
+          "ui": {
+            "group": "delayVar",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "\u03bcs",
+                "pct"
+              ],
+              "directions": [
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "packetsLost": {
+          "ui": {
+            "group": "packets",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "value",
+                "pct"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "packetsLostPct": {
+          "ui": {
+            "group": "packets",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "paa",
+              "rawMetricId": "",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+          "delay", "delayVar", "jitter", "packets", "unknown"
+        ]
+      }
     }
   }
 }

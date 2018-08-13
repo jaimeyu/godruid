@@ -19,6 +19,44 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  name = "github.com/accedian/adh-gather"
+  packages = [
+    "config",
+    "datastore",
+    "datastore/couchDB",
+    "datastore/druid",
+    "datastore/inMemory",
+    "datastore/test",
+    "datastore/test/admin",
+    "datastore/test/tenant",
+    "gather",
+    "gathergrpc",
+    "handlers",
+    "logger",
+    "models",
+    "models/admin",
+    "models/common",
+    "models/metrics",
+    "models/tenant",
+    "models/test",
+    "monitoring",
+    "profile",
+    "restapi",
+    "restapi/operations",
+    "restapi/operations/admin_provisioning_service",
+    "restapi/operations/admin_provisioning_service_v2",
+    "restapi/operations/metrics_service",
+    "restapi/operations/tenant_provisioning_service",
+    "restapi/operations/tenant_provisioning_service_v2",
+    "scheduler",
+    "server",
+    "swagmodels",
+    "websocket"
+  ]
+  revision = "687329001886c92b44f392f898e878040f4ffbe5"
+  version = "0.184.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/accedian/godruid"
   packages = ["."]
@@ -486,6 +524,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c0ced5a4a55a621be6043a8f57365d9d48a07c4a0e4089f171636f0794f48408"
+  inputs-digest = "6cdf82ea771f593449e007a41c767e0f5da04e2cdfdeb1894a5d319faff2976c"
   solver-name = "gps-cdcl"
   solver-version = 1

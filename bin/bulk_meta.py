@@ -36,13 +36,13 @@ def construct_entry_func(headers, metadatakey):
 def envoy_func(conn, auth, host, tenantid, processfile):
     def envoy(b_id, batch):
         batchlist = list(batch)
-        logging.info("Sending batch %s of size %d to %s", b_id, len(batchlist), host)
+        logging.info("Sending batch %s of size %d to %s for tenant %s", b_id, len(batchlist), host, tenantid)
         # Build up the batch and send
         payload = "{\"items\":[%s]}" % ",".join(batchlist)
-        conn.request("POST","/api/v1/tenants/%s/bulk/upsert/monitored-objects/meta" % tenantid, payload, {"Content-Type":"application/json","X-Forwarded-User-Roles":"skylight-admin"})
+        conn.request("POST","/api/v1/tenants/%s/bulk/upsert/monitored-objects/meta" % tenantid, payload, {"Content-Type":"application/json","X-Forwarded-User-Roles":"skylight-admin","Authorization":auth})
         bulk_response = conn.getresponse()
         if bulk_response.status != 200:
-            logging.error("Batch with id %s failed to properly apply" % b_id)
+            logging.error("Batch with id %s failed to properly apply due to response code %s: %s" % (b_id,bulk_response.status, bulk_response.reason))
             return
         
         # Convert the response to json and process each individual response entry to track in the process file

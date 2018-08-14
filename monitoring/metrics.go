@@ -168,8 +168,8 @@ const (
 	GetSpecificValidTypesStr = ValidTypesStr + metricNameDelimiter + OPGetStr + "_spec"
 	DeleteValidTypesStr      = ValidTypesStr + metricNameDelimiter + OPDeleteStr
 
-	GetTenantIDByAliasStr      = IDStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
-	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
+	GetTenantIDByAliasStr      = IDStr + metricNameDelimiter + "by_alias" + metricNameDelimiter + OPGetStr
+	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "by_alias" + metricNameDelimiter + OPGetStr
 	AddAdminViewsStr           = AdminViewsStr + metricNameDelimiter + OPAddStr
 
 	BulkInsertMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert

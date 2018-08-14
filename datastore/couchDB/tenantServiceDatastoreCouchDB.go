@@ -382,14 +382,14 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantConnectorConfigsByInstance
 }
 
 // CreateTenantDomain - CouchDB implementation of CreateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest *tenmod.Domain) (*tenmod.Domain, error) {
-	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
-	tenantDomainRequest.ID = ds.GenerateID(tenantDomainRequest, string(tenmod.TenantDomainType))
-	tenantID := ds.PrependToDataID(tenantDomainRequest.TenantID, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(dashboard *tenmod.Domain) (*tenmod.Domain, error) {
+	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dashboard))
+	dashboard.ID = ds.GenerateID(dashboard, string(tenmod.TenantDomainType))
+	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.Domain{}
-	if err := createDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
+	if err := createDataInCouch(tenantDBName, dashboard, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
 
@@ -398,14 +398,14 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantDomain(tenantDomainRequest
 }
 
 // UpdateTenantDomain - CouchDB implementation of UpdateTenantDomain
-func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(tenantDomainRequest *tenmod.Domain) (*tenmod.Domain, error) {
-	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(tenantDomainRequest))
-	tenantDomainRequest.ID = ds.PrependToDataID(tenantDomainRequest.ID, string(tenmod.TenantDomainType))
-	tenantID := ds.PrependToDataID(tenantDomainRequest.TenantID, string(admmod.TenantType))
+func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantDomain(dashboard *tenmod.Domain) (*tenmod.Domain, error) {
+	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dashboard))
+	dashboard.ID = ds.PrependToDataID(dashboard.ID, string(tenmod.TenantDomainType))
+	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.Domain{}
-	if err := updateDataInCouch(tenantDBName, tenantDomainRequest, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
+	if err := updateDataInCouch(tenantDBName, dashboard, dataContainer, string(tenmod.TenantDomainType), tenmod.TenantDomainStr); err != nil {
 		return nil, err
 	}
 	logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantDomainStr, models.AsJSONString(dataContainer))
@@ -1461,43 +1461,55 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllSLAReports(tenantID string) ([]*
 	return res, nil
 }
 
-// CreateDashboard - Creates a dashboard
+// CreateDashboard - CouchDB implementation of CreateDashboard
 func (tsd *TenantServiceDatastoreCouchDB) CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dashboard))
+	}
+
 	dashboard.ID = ds.GenerateID(dashboard, string(tenmod.TenantDashboardType))
 	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert to generic object
-	storeFormat, err := convertDataToCouchDbSupportedModel(dashboard)
-	if err != nil {
-		return nil, err
-	}
-
-	_, _, err = storeDataInCouchDB(storeFormat, tenmod.TenantDashboardStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	stripPrefixFromID(storeFormat)
-
-	// Populate the response
 	dataContainer := &tenmod.Dashboard{}
-	if err = convertGenericCouchDataToObject(storeFormat, dataContainer, tenmod.TenantDashboardStr); err != nil {
+	if err := createDataInCouch(tenantDBName, dashboard, dataContainer, string(tenmod.TenantDashboardType), tenmod.TenantDashboardStr); err != nil {
 		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Created %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
 	}
 
 	return dataContainer, nil
-
 }
 
-// DeleteDashboard - Deletes dashboard
+// UpdateDashboard - CouchDB implementation of UpdateDashboard
+func (tsd *TenantServiceDatastoreCouchDB) UpdateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dashboard))
+	}
+	dashboard.ID = ds.PrependToDataID(dashboard.ID, string(tenmod.TenantDashboardType))
+	tenantID := ds.PrependToDataID(dashboard.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.Dashboard{}
+	if err := updateDataInCouch(tenantDBName, dashboard, dataContainer, string(tenmod.TenantDashboardType), tenmod.TenantDashboardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
+	}
+
+	return dataContainer, nil
+}
+
+// DeleteDashboard - CouchDB implementation of DeleteDashboard
 func (tsd *TenantServiceDatastoreCouchDB) DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
-	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDashboardStr, dataID)
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantDashboardStr, dataID)
+	}
+
 	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDashboardType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -1506,47 +1518,190 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteDashboard(tenantID string, dataI
 	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDashboardStr); err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
+	}
+
 	return &dataContainer, nil
 }
 
-// HasDashboardsWithDomain
-func (tsd *TenantServiceDatastoreCouchDB) HasDashboardsWithDomain(tenantID string, domainID string) (bool, error) {
-	logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantMetaStr, tenantID)
+// GetDashboard - CouchDB implementation of GetDashboard
+func (tsd *TenantServiceDatastoreCouchDB) GetDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantDashboardStr, dataID)
+	}
+
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantDashboardType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
-	db, err := getDatabase(tenantDBName)
+	dataContainer := tenmod.Dashboard{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantDashboardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantDashboardStr, models.AsJSONString(dataContainer))
+	}
+
+	return &dataContainer, nil
+}
+
+// GetAllDashboards - CouchDB implementation of GetAllDashboards
+func (tsd *TenantServiceDatastoreCouchDB) GetAllDashboards(tenantID string) ([]*tenmod.Dashboard, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Fetching all %s\n", tenmod.TenantDashboardStr)
+	}
+
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.Dashboard, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantDashboardType), tenmod.TenantDashboardStr, &res); err != nil {
+		return nil, err
+	}
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantDashboardStr)
+	}
+
+	return res, nil
+}
+
+// CreateCard - CouchDB implementation of CreateCard
+func (tsd *TenantServiceDatastoreCouchDB) CreateCard(card *tenmod.Card) (*tenmod.Card, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(card))
+	}
+
+	card.ID = ds.GenerateID(card, string(tenmod.TenantCardType))
+	tenantID := ds.PrependToDataID(card.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.Card{}
+	if err := createDataInCouch(tenantDBName, card, dataContainer, string(tenmod.TenantCardType), tenmod.TenantCardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Created %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(dataContainer))
+	}
+
+	return dataContainer, nil
+}
+
+// UpdateCard - CouchDB implementation of UpdateCard
+func (tsd *TenantServiceDatastoreCouchDB) UpdateCard(card *tenmod.Card) (*tenmod.Card, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(card))
+	}
+	card.ID = ds.PrependToDataID(card.ID, string(tenmod.TenantCardType))
+	tenantID := ds.PrependToDataID(card.TenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := &tenmod.Card{}
+	if err := updateDataInCouch(tenantDBName, card, dataContainer, string(tenmod.TenantCardType), tenmod.TenantCardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updated %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(dataContainer))
+	}
+
+	return dataContainer, nil
+}
+
+// DeleteCard - CouchDB implementation of DeleteCard
+func (tsd *TenantServiceDatastoreCouchDB) DeleteCard(tenantID string, dataID string) (*tenmod.Card, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantCardStr, dataID)
+	}
+
+	//Make sure this card is not being used by any Dashboards
+	dashboards, err := tsd.GetAllDashboards(tenantID)
 	if err != nil {
-		return false, err
-	}
-
-	fetchedData, err := getAllOfTypeByIDPrefix(string(tenmod.TenantDashboardType), tenmod.TenantDashboardStr, db)
-	if err != nil {
-		return false, err
-	}
-
-	logger.Log.Debugf("fetched %s", models.AsJSONString(fetchedData))
-	for _, d := range fetchedData {
-		data, ok := d["data"]
-		if !ok {
-			continue
-		}
-		if _, hasDomainIDs := data.(map[string]interface{})["domainSet"]; hasDomainIDs {
-			dataContainer := tenmod.Dashboard{}
-			if err = convertGenericCouchDataToObject(d, &dataContainer, tenmod.TenantDashboardStr); err != nil {
-				return false, err
-			}
-
-			for _, v := range dataContainer.DomainSet {
-				if v == domainID {
-					return true, nil
-				}
-			}
-
+		if !strings.Contains(ds.NotFoundStr, err.Error()) {
+			// This is a real error not just no provisioned Dashboards
+			return nil, fmt.Errorf("Unable to check if Card was used on any Dashboard before deleting the card: %s", err.Error())
 		}
 	}
-	return false, nil
+
+	dashboardReferencesToCard := []string{}
+	for _, dash := range dashboards {
+		if gather.DoesSliceContainString(dash.Cards, dataID) {
+			dashboardReferencesToCard = append(dashboardReferencesToCard, dash.ID)
+		}
+	}
+	if len(dashboardReferencesToCard) != 0 {
+		return nil, fmt.Errorf("Unable to delete %s %s as it is used in the following %ss: [ %s ]", tenmod.TenantCardStr, dataID, tenmod.TenantDashboardStr, strings.Join(dashboardReferencesToCard, " "))
+	}
+
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantCardType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Card{}
+	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantCardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(dataContainer))
+	}
+
+	return &dataContainer, nil
+}
+
+// GetCard - CouchDB implementation of GetCard
+func (tsd *TenantServiceDatastoreCouchDB) GetCard(tenantID string, dataID string) (*tenmod.Card, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Fetching %s: %s\n", tenmod.TenantCardStr, dataID)
+	}
+
+	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantCardType))
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	dataContainer := tenmod.Card{}
+	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantCardStr); err != nil {
+		return nil, err
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantCardStr, models.AsJSONString(dataContainer))
+	}
+
+	return &dataContainer, nil
+}
+
+// GetAllCards - CouchDB implementation of GetAllCards
+func (tsd *TenantServiceDatastoreCouchDB) GetAllCards(tenantID string) ([]*tenmod.Card, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Fetching all %s\n", tenmod.TenantCardStr)
+	}
+
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+
+	tenantDBName := createDBPathStr(tsd.server, tenantID)
+	res := make([]*tenmod.Card, 0)
+	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantCardType), tenmod.TenantCardStr, &res); err != nil {
+		return nil, err
+	}
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %d %s\n", len(res), tenmod.TenantCardStr)
+	}
+
+	return res, nil
 }
 
 // CreateTenantDataCleaningProfile - CouchDB implementation of CreateTenantDataCleaningProfile

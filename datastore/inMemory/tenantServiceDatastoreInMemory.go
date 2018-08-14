@@ -3,8 +3,10 @@ package inMemory
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	"github.com/getlantern/deepcopy"
@@ -28,6 +30,7 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantReportScheduleConfigMap map[string]map[string]*metmod.ReportScheduleConfig
 	tenantToIDtoTenantSLAReportMap            map[string]map[string]*metmod.SLAReport
 	tenantToIDtoDashboardMap                  map[string]map[string]*tenmod.Dashboard
+	tenantToIDtoCardMap                       map[string]map[string]*tenmod.Card
 
 	tenantIDtoMetaSlice                map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice              map[string][]*tenmod.IngestionProfile
@@ -46,6 +49,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantThrPrfMap = map[string]map[string]*tenmod.ThresholdProfile{}
 	res.tenantToIDtoTenantSLAReportMap = map[string]map[string]*metmod.SLAReport{}
 	res.tenantToIDtoDashboardMap = map[string]map[string]*tenmod.Dashboard{}
+	res.tenantToIDtoCardMap = map[string]map[string]*tenmod.Card{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
@@ -104,6 +108,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantDashboardType:
 		if tsd.tenantToIDtoDashboardMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantCardType:
+		if tsd.tenantToIDtoCardMap[tenantID] == nil {
 			return tenantDNE
 		}
 	case tenmod.TenantDataCleaningProfileType:
@@ -1331,6 +1339,9 @@ func (tsd *TenantServiceDatastoreInMemory) CreateDashboard(dashboard *tenmod.Das
 	deepcopy.Copy(&recCopy, dashboard)
 	recCopy.ID = uuid.NewV4().String()
 	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantDashboardType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
 
 	tsd.tenantToIDtoDashboardMap[dashboard.TenantID][recCopy.ID] = &recCopy
 
@@ -1363,24 +1374,200 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteDashboard(tenantID string, data
 	return nil, fmt.Errorf("%s not found", tenmod.TenantReportScheduleConfigStr)
 }
 
-func (tsd *TenantServiceDatastoreInMemory) HasDashboardsWithDomain(tenantID string, domainID string) (bool, error) {
+// UpdateDashboard - InMemory implementation of UpdateDashboard
+func (tsd *TenantServiceDatastoreInMemory) UpdateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error) {
+	if len(dashboard.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantDashboardStr)
+	}
+	if len(dashboard.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantDashboardStr)
+	}
+	if err := tsd.DoesTenantExist(dashboard.TenantID, tenmod.TenantDashboardType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDashboardStr)
+	}
+	if tsd.tenantToIDtoDashboardMap[dashboard.TenantID][dashboard.ID] == nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recCopy := tenmod.Dashboard{}
+	deepcopy.Copy(&recCopy, dashboard)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantDashboardType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoDashboardMap[dashboard.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetDashboard - InMemory implementation of GetDashboard
+func (tsd *TenantServiceDatastoreInMemory) GetDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Domain ID", tenmod.TenantDashboardStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantDashboardStr)
+	}
 	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantDashboardType); err != nil {
-		return false, nil
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantDashboardStr)
 	}
 
-	for _, dashboard := range tsd.tenantToIDtoDashboardMap[tenantID] {
-		if dashboard == nil {
-			continue
-		}
-		logger.Log.Debugf("Processing tenantID %s dashboard %s", tenantID, models.AsJSONString(dashboard))
-		for _, v := range dashboard.DomainSet {
-			if v == domainID {
-				return true, nil
-			}
+	rec, ok := tsd.tenantToIDtoDashboardMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// GetAllDashboards - InMemory implementation of GetAllDashboards
+func (tsd *TenantServiceDatastoreInMemory) GetAllDashboards(tenantID string) ([]*tenmod.Dashboard, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantDashboardType)
+	if err != nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recList := make([]*tenmod.Dashboard, 0)
+
+	for _, rec := range tsd.tenantToIDtoDashboardMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	if len(recList) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	return recList, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateCard(card *tenmod.Card) (*tenmod.Card, error) {
+	if err := tsd.DoesTenantExist(card.TenantID, tenmod.TenantCardType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoCardMap[card.TenantID] = map[string]*tenmod.Card{}
+	}
+
+	recCopy := tenmod.Card{}
+	deepcopy.Copy(&recCopy, card)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantCardType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoCardMap[card.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) DeleteCard(tenantID string, dataID string) (*tenmod.Card, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Card ID", tenmod.TenantCardStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantCardStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantCardType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantCardStr)
+	}
+
+	// Make sure the card is not used on a dashboard
+	dashList, err := tsd.GetAllDashboards(tenantID)
+	if err != nil {
+		if !strings.Contains(ds.NotFoundStr, err.Error()) {
+			// This is a real error not just no provisioned Dashboards
+			return nil, fmt.Errorf("Unable to check if Card was used on any Dashboard before deleting the card: %s", err.Error())
 		}
 	}
-	return false, nil
 
+	dashboardReferencesToCard := []string{}
+	for _, dash := range dashList {
+		if gather.DoesSliceContainString(dash.Cards, dataID) {
+			dashboardReferencesToCard = append(dashboardReferencesToCard, dash.ID)
+		}
+	}
+	if len(dashboardReferencesToCard) != 0 {
+		return nil, fmt.Errorf("Unable to delete %s %s as it is used in the following %ss: [ %s ]", tenmod.TenantCardStr, dataID, tenmod.TenantDashboardStr, strings.Join(dashboardReferencesToCard, " "))
+	}
+
+	rec, ok := tsd.tenantToIDtoCardMap[tenantID][dataID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoCardMap))
+	if ok {
+		delete(tsd.tenantToIDtoCardMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoCardMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoCardMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// UpdateCard - InMemory implementation of UpdateCard
+func (tsd *TenantServiceDatastoreInMemory) UpdateCard(card *tenmod.Card) (*tenmod.Card, error) {
+	if len(card.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantCardStr)
+	}
+	if len(card.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantCardStr)
+	}
+	if err := tsd.DoesTenantExist(card.TenantID, tenmod.TenantCardType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantCardStr)
+	}
+	if tsd.tenantToIDtoCardMap[card.TenantID][card.ID] == nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recCopy := tenmod.Card{}
+	deepcopy.Copy(&recCopy, card)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantCardType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoCardMap[card.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetCard - InMemory implementation of GetCard
+func (tsd *TenantServiceDatastoreInMemory) GetCard(tenantID string, dataID string) (*tenmod.Card, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Card ID", tenmod.TenantCardStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantCardStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantCardType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantCardStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoCardMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// GetAllCards - InMemory implementation of GetAllCards
+func (tsd *TenantServiceDatastoreInMemory) GetAllCards(tenantID string) ([]*tenmod.Card, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantCardType)
+	if err != nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recList := make([]*tenmod.Card, 0)
+
+	for _, rec := range tsd.tenantToIDtoCardMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	if len(recList) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	return recList, nil
 }
 
 // CreateTenantDataCleaningProfile - InMemory implementation of CreateTenantDataCleaningProfile

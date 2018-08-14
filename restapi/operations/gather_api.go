@@ -59,11 +59,17 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler: tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpsertMonitoredObjectMeta has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2CreateCardV2Handler: tenant_provisioning_service_v2.CreateCardV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateCardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateCardV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateConnectorConfigV2Handler: tenant_provisioning_service_v2.CreateConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateConnectorConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2CreateConnectorInstanceV2Handler: tenant_provisioning_service_v2.CreateConnectorInstanceV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateConnectorInstanceV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateConnectorInstanceV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2CreateDashboardV2Handler: tenant_provisioning_service_v2.CreateDashboardV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateDashboardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateDashboardV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2CreateDataCleaningProfileHandler: tenant_provisioning_service_v2.CreateDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.CreateDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateDataCleaningProfile has not yet been implemented")
@@ -110,11 +116,17 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2CreateThresholdProfileV2Handler: tenant_provisioning_service_v2.CreateThresholdProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateThresholdProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateThresholdProfileV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2DeleteCardV2Handler: tenant_provisioning_service_v2.DeleteCardV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteCardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteCardV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2DeleteConnectorConfigV2Handler: tenant_provisioning_service_v2.DeleteConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteConnectorConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2DeleteConnectorInstanceV2Handler: tenant_provisioning_service_v2.DeleteConnectorInstanceV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteConnectorInstanceV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteConnectorInstanceV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteDashboardV2Handler: tenant_provisioning_service_v2.DeleteDashboardV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteDashboardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteDashboardV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2DeleteDataCleaningProfileHandler: tenant_provisioning_service_v2.DeleteDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.DeleteDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteDataCleaningProfile has not yet been implemented")
@@ -167,11 +179,17 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetActiveTenantIngestionProfileHandler: tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveTenantIngestionProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetActiveTenantIngestionProfile has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetAllCardsV2Handler: tenant_provisioning_service_v2.GetAllCardsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllCardsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllCardsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler: tenant_provisioning_service_v2.GetAllConnectorConfigsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllConnectorConfigsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllConnectorConfigsV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetAllConnectorInstancesV2Handler: tenant_provisioning_service_v2.GetAllConnectorInstancesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllConnectorInstancesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllConnectorInstancesV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetAllDashboardsV2Handler: tenant_provisioning_service_v2.GetAllDashboardsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllDashboardsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllDashboardsV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler: tenant_provisioning_service_v2.GetAllIngestionProfilesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllIngestionProfilesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllIngestionProfilesV2 has not yet been implemented")
@@ -215,11 +233,17 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler: tenant_provisioning_service_v2.GetAllThresholdProfilesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllThresholdProfilesV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetCardV2Handler: tenant_provisioning_service_v2.GetCardV2HandlerFunc(func(params tenant_provisioning_service_v2.GetCardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetCardV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2GetConnectorConfigV2Handler: tenant_provisioning_service_v2.GetConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.GetConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetConnectorConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetConnectorInstanceV2Handler: tenant_provisioning_service_v2.GetConnectorInstanceV2HandlerFunc(func(params tenant_provisioning_service_v2.GetConnectorInstanceV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetConnectorInstanceV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetDashboardV2Handler: tenant_provisioning_service_v2.GetDashboardV2HandlerFunc(func(params tenant_provisioning_service_v2.GetDashboardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDashboardV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetDataCleaningProfileHandler: tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfile has not yet been implemented")
@@ -344,11 +368,17 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		MetricsServiceQueryThresholdCrossingHandler: metrics_service.QueryThresholdCrossingHandlerFunc(func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceQueryThresholdCrossing has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateCardV2Handler: tenant_provisioning_service_v2.UpdateCardV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateCardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateCardV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2UpdateConnectorConfigV2Handler: tenant_provisioning_service_v2.UpdateConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateConnectorConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2UpdateConnectorInstanceV2Handler: tenant_provisioning_service_v2.UpdateConnectorInstanceV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateConnectorInstanceV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateConnectorInstanceV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2UpdateDashboardV2Handler: tenant_provisioning_service_v2.UpdateDashboardV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateDashboardV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateDashboardV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2UpdateDataCleaningProfileHandler: tenant_provisioning_service_v2.UpdateDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.UpdateDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateDataCleaningProfile has not yet been implemented")
@@ -435,10 +465,14 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler
 	// TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler sets the operation handler for the bulk upsert monitored object meta operation
 	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
+	// TenantProvisioningServiceV2CreateCardV2Handler sets the operation handler for the create card v2 operation
+	TenantProvisioningServiceV2CreateCardV2Handler tenant_provisioning_service_v2.CreateCardV2Handler
 	// TenantProvisioningServiceV2CreateConnectorConfigV2Handler sets the operation handler for the create connector config v2 operation
 	TenantProvisioningServiceV2CreateConnectorConfigV2Handler tenant_provisioning_service_v2.CreateConnectorConfigV2Handler
 	// TenantProvisioningServiceV2CreateConnectorInstanceV2Handler sets the operation handler for the create connector instance v2 operation
 	TenantProvisioningServiceV2CreateConnectorInstanceV2Handler tenant_provisioning_service_v2.CreateConnectorInstanceV2Handler
+	// TenantProvisioningServiceV2CreateDashboardV2Handler sets the operation handler for the create dashboard v2 operation
+	TenantProvisioningServiceV2CreateDashboardV2Handler tenant_provisioning_service_v2.CreateDashboardV2Handler
 	// TenantProvisioningServiceV2CreateDataCleaningProfileHandler sets the operation handler for the create data cleaning profile operation
 	TenantProvisioningServiceV2CreateDataCleaningProfileHandler tenant_provisioning_service_v2.CreateDataCleaningProfileHandler
 	// TenantProvisioningServiceV2CreateIngestionProfileV2Handler sets the operation handler for the create ingestion profile v2 operation
@@ -469,10 +503,14 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2CreateTenantV2Handler admin_provisioning_service_v2.CreateTenantV2Handler
 	// TenantProvisioningServiceV2CreateThresholdProfileV2Handler sets the operation handler for the create threshold profile v2 operation
 	TenantProvisioningServiceV2CreateThresholdProfileV2Handler tenant_provisioning_service_v2.CreateThresholdProfileV2Handler
+	// TenantProvisioningServiceV2DeleteCardV2Handler sets the operation handler for the delete card v2 operation
+	TenantProvisioningServiceV2DeleteCardV2Handler tenant_provisioning_service_v2.DeleteCardV2Handler
 	// TenantProvisioningServiceV2DeleteConnectorConfigV2Handler sets the operation handler for the delete connector config v2 operation
 	TenantProvisioningServiceV2DeleteConnectorConfigV2Handler tenant_provisioning_service_v2.DeleteConnectorConfigV2Handler
 	// TenantProvisioningServiceV2DeleteConnectorInstanceV2Handler sets the operation handler for the delete connector instance v2 operation
 	TenantProvisioningServiceV2DeleteConnectorInstanceV2Handler tenant_provisioning_service_v2.DeleteConnectorInstanceV2Handler
+	// TenantProvisioningServiceV2DeleteDashboardV2Handler sets the operation handler for the delete dashboard v2 operation
+	TenantProvisioningServiceV2DeleteDashboardV2Handler tenant_provisioning_service_v2.DeleteDashboardV2Handler
 	// TenantProvisioningServiceV2DeleteDataCleaningProfileHandler sets the operation handler for the delete data cleaning profile operation
 	TenantProvisioningServiceV2DeleteDataCleaningProfileHandler tenant_provisioning_service_v2.DeleteDataCleaningProfileHandler
 	// TenantProvisioningServiceV2DeleteIngestionProfileV2Handler sets the operation handler for the delete ingestion profile v2 operation
@@ -507,10 +545,14 @@ type GatherAPI struct {
 	MetricsServiceGenSLAReportHandler metrics_service.GenSLAReportHandler
 	// TenantProvisioningServiceGetActiveTenantIngestionProfileHandler sets the operation handler for the get active tenant ingestion profile operation
 	TenantProvisioningServiceGetActiveTenantIngestionProfileHandler tenant_provisioning_service.GetActiveTenantIngestionProfileHandler
+	// TenantProvisioningServiceV2GetAllCardsV2Handler sets the operation handler for the get all cards v2 operation
+	TenantProvisioningServiceV2GetAllCardsV2Handler tenant_provisioning_service_v2.GetAllCardsV2Handler
 	// TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler sets the operation handler for the get all connector configs v2 operation
 	TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler tenant_provisioning_service_v2.GetAllConnectorConfigsV2Handler
 	// TenantProvisioningServiceV2GetAllConnectorInstancesV2Handler sets the operation handler for the get all connector instances v2 operation
 	TenantProvisioningServiceV2GetAllConnectorInstancesV2Handler tenant_provisioning_service_v2.GetAllConnectorInstancesV2Handler
+	// TenantProvisioningServiceV2GetAllDashboardsV2Handler sets the operation handler for the get all dashboards v2 operation
+	TenantProvisioningServiceV2GetAllDashboardsV2Handler tenant_provisioning_service_v2.GetAllDashboardsV2Handler
 	// TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler sets the operation handler for the get all ingestion profiles v2 operation
 	TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler tenant_provisioning_service_v2.GetAllIngestionProfilesV2Handler
 	// TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler sets the operation handler for the get all monitored objects v2 operation
@@ -539,10 +581,14 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2GetAllTenantsV2Handler admin_provisioning_service_v2.GetAllTenantsV2Handler
 	// TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler sets the operation handler for the get all threshold profiles v2 operation
 	TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler tenant_provisioning_service_v2.GetAllThresholdProfilesV2Handler
+	// TenantProvisioningServiceV2GetCardV2Handler sets the operation handler for the get card v2 operation
+	TenantProvisioningServiceV2GetCardV2Handler tenant_provisioning_service_v2.GetCardV2Handler
 	// TenantProvisioningServiceV2GetConnectorConfigV2Handler sets the operation handler for the get connector config v2 operation
 	TenantProvisioningServiceV2GetConnectorConfigV2Handler tenant_provisioning_service_v2.GetConnectorConfigV2Handler
 	// TenantProvisioningServiceV2GetConnectorInstanceV2Handler sets the operation handler for the get connector instance v2 operation
 	TenantProvisioningServiceV2GetConnectorInstanceV2Handler tenant_provisioning_service_v2.GetConnectorInstanceV2Handler
+	// TenantProvisioningServiceV2GetDashboardV2Handler sets the operation handler for the get dashboard v2 operation
+	TenantProvisioningServiceV2GetDashboardV2Handler tenant_provisioning_service_v2.GetDashboardV2Handler
 	// TenantProvisioningServiceV2GetDataCleaningProfileHandler sets the operation handler for the get data cleaning profile operation
 	TenantProvisioningServiceV2GetDataCleaningProfileHandler tenant_provisioning_service_v2.GetDataCleaningProfileHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfilesHandler sets the operation handler for the get data cleaning profiles operation
@@ -625,10 +671,14 @@ type GatherAPI struct {
 	MetricsServiceQueryAggregatedMetricsHandler metrics_service.QueryAggregatedMetricsHandler
 	// MetricsServiceQueryThresholdCrossingHandler sets the operation handler for the query threshold crossing operation
 	MetricsServiceQueryThresholdCrossingHandler metrics_service.QueryThresholdCrossingHandler
+	// TenantProvisioningServiceV2UpdateCardV2Handler sets the operation handler for the update card v2 operation
+	TenantProvisioningServiceV2UpdateCardV2Handler tenant_provisioning_service_v2.UpdateCardV2Handler
 	// TenantProvisioningServiceV2UpdateConnectorConfigV2Handler sets the operation handler for the update connector config v2 operation
 	TenantProvisioningServiceV2UpdateConnectorConfigV2Handler tenant_provisioning_service_v2.UpdateConnectorConfigV2Handler
 	// TenantProvisioningServiceV2UpdateConnectorInstanceV2Handler sets the operation handler for the update connector instance v2 operation
 	TenantProvisioningServiceV2UpdateConnectorInstanceV2Handler tenant_provisioning_service_v2.UpdateConnectorInstanceV2Handler
+	// TenantProvisioningServiceV2UpdateDashboardV2Handler sets the operation handler for the update dashboard v2 operation
+	TenantProvisioningServiceV2UpdateDashboardV2Handler tenant_provisioning_service_v2.UpdateDashboardV2Handler
 	// TenantProvisioningServiceV2UpdateDataCleaningProfileHandler sets the operation handler for the update data cleaning profile operation
 	TenantProvisioningServiceV2UpdateDataCleaningProfileHandler tenant_provisioning_service_v2.UpdateDataCleaningProfileHandler
 	// TenantProvisioningServiceV2UpdateIngestionProfileV2Handler sets the operation handler for the update ingestion profile v2 operation
@@ -744,12 +794,20 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateCardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateCardV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateConnectorConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2CreateConnectorInstanceV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateConnectorInstanceV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2CreateDashboardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateDashboardV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2CreateDataCleaningProfileHandler == nil {
@@ -812,12 +870,20 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateThresholdProfileV2Handler")
 	}
 
+	if o.TenantProvisioningServiceV2DeleteCardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteCardV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2DeleteConnectorConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteConnectorConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteConnectorInstanceV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteConnectorInstanceV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteDashboardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteDashboardV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler == nil {
@@ -888,12 +954,20 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetActiveTenantIngestionProfileHandler")
 	}
 
+	if o.TenantProvisioningServiceV2GetAllCardsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllCardsV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllConnectorConfigsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetAllConnectorInstancesV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllConnectorInstancesV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllDashboardsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllDashboardsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler == nil {
@@ -952,12 +1026,20 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllThresholdProfilesV2Handler")
 	}
 
+	if o.TenantProvisioningServiceV2GetCardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetCardV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2GetConnectorConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetConnectorConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetConnectorInstanceV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetConnectorInstanceV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDashboardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDashboardV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetDataCleaningProfileHandler == nil {
@@ -1124,12 +1206,20 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "metrics_service.QueryThresholdCrossingHandler")
 	}
 
+	if o.TenantProvisioningServiceV2UpdateCardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateCardV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2UpdateConnectorConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateConnectorConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2UpdateConnectorInstanceV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateConnectorInstanceV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateDashboardV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateDashboardV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler == nil {
@@ -1323,12 +1413,22 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/cards"] = tenant_provisioning_service_v2.NewCreateCardV2(o.context, o.TenantProvisioningServiceV2CreateCardV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/connector-configs"] = tenant_provisioning_service_v2.NewCreateConnectorConfigV2(o.context, o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v2/connector-instances"] = tenant_provisioning_service_v2.NewCreateConnectorInstanceV2(o.context, o.TenantProvisioningServiceV2CreateConnectorInstanceV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v2/dashboards"] = tenant_provisioning_service_v2.NewCreateDashboardV2(o.context, o.TenantProvisioningServiceV2CreateDashboardV2Handler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -1408,12 +1508,22 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
+	o.handlers["DELETE"]["/v2/cards/{cardId}"] = tenant_provisioning_service_v2.NewDeleteCardV2(o.context, o.TenantProvisioningServiceV2DeleteCardV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
 	o.handlers["DELETE"]["/v2/connector-configs/{connectorId}"] = tenant_provisioning_service_v2.NewDeleteConnectorConfigV2(o.context, o.TenantProvisioningServiceV2DeleteConnectorConfigV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/connector-instances/{connectorInstanceId}"] = tenant_provisioning_service_v2.NewDeleteConnectorInstanceV2(o.context, o.TenantProvisioningServiceV2DeleteConnectorInstanceV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/dashboards/{dashboardId}"] = tenant_provisioning_service_v2.NewDeleteDashboardV2(o.context, o.TenantProvisioningServiceV2DeleteDashboardV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1503,12 +1613,22 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/v2/cards"] = tenant_provisioning_service_v2.NewGetAllCardsV2(o.context, o.TenantProvisioningServiceV2GetAllCardsV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/v2/connector-configs"] = tenant_provisioning_service_v2.NewGetAllConnectorConfigsV2(o.context, o.TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/connector-instances"] = tenant_provisioning_service_v2.NewGetAllConnectorInstancesV2(o.context, o.TenantProvisioningServiceV2GetAllConnectorInstancesV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/dashboards"] = tenant_provisioning_service_v2.NewGetAllDashboardsV2(o.context, o.TenantProvisioningServiceV2GetAllDashboardsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1583,12 +1703,22 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/v2/cards/{cardId}"] = tenant_provisioning_service_v2.NewGetCardV2(o.context, o.TenantProvisioningServiceV2GetCardV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/v2/connector-configs/{connectorId}"] = tenant_provisioning_service_v2.NewGetConnectorConfigV2(o.context, o.TenantProvisioningServiceV2GetConnectorConfigV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/connector-instances/{connectorInstanceId}"] = tenant_provisioning_service_v2.NewGetConnectorInstanceV2(o.context, o.TenantProvisioningServiceV2GetConnectorInstanceV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/dashboards/{dashboardId}"] = tenant_provisioning_service_v2.NewGetDashboardV2(o.context, o.TenantProvisioningServiceV2GetDashboardV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1798,12 +1928,22 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
+	o.handlers["PATCH"]["/v2/cards/{cardId}"] = tenant_provisioning_service_v2.NewUpdateCardV2(o.context, o.TenantProvisioningServiceV2UpdateCardV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
 	o.handlers["PATCH"]["/v2/connector-configs/{connectorId}"] = tenant_provisioning_service_v2.NewUpdateConnectorConfigV2(o.context, o.TenantProvisioningServiceV2UpdateConnectorConfigV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/v2/connector-instances/{connectorInstanceId}"] = tenant_provisioning_service_v2.NewUpdateConnectorInstanceV2(o.context, o.TenantProvisioningServiceV2UpdateConnectorInstanceV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/dashboards/{dashboardId}"] = tenant_provisioning_service_v2.NewUpdateDashboardV2(o.context, o.TenantProvisioningServiceV2UpdateDashboardV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

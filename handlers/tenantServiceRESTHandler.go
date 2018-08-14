@@ -1099,19 +1099,6 @@ func (tsh *TenantServiceRESTHandler) DeleteTenantDomain(w http.ResponseWriter, r
 		}
 	}
 
-	// Integrity Check - Dashboards
-	dashboardUsesDomain, err := tsh.TenantDB.HasDashboardsWithDomain(tenantID, domainID)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error())
-		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
-		return
-	}
-	if dashboardUsesDomain {
-		msg := fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantDashboardStr)
-		reportError(w, startTime, "500", mon.DeleteTenantDomainStr, msg, http.StatusInternalServerError)
-		return
-	}
-
 	logger.Log.Infof("Deleting %s: %s", tenmod.TenantDomainStr, domainID)
 
 	// Issue request to DAO Layer

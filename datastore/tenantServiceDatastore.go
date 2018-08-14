@@ -82,11 +82,17 @@ type TenantServiceDatastore interface {
 	GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error)
 	GetMetadataKeys(tenantId string) (map[string]int, error)
 
-	// For testing
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
-	// For testing
+	UpdateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
+	GetDashboard(tenantID string, configID string) (*tenmod.Dashboard, error)
+	GetAllDashboards(tenantID string) ([]*tenmod.Dashboard, error)
 	DeleteDashboard(tenantID string, dataID string) (*tenmod.Dashboard, error)
-	HasDashboardsWithDomain(tenantID string, domainID string) (bool, error)
+
+	CreateCard(card *tenmod.Card) (*tenmod.Card, error)
+	UpdateCard(card *tenmod.Card) (*tenmod.Card, error)
+	GetCard(tenantID string, configID string) (*tenmod.Card, error)
+	GetAllCards(tenantID string) ([]*tenmod.Card, error)
+	DeleteCard(tenantID string, dataID string) (*tenmod.Card, error)
 
 	CreateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)
 	UpdateTenantDataCleaningProfile(dcp *tenmod.DataCleaningProfile) (*tenmod.DataCleaningProfile, error)

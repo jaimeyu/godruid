@@ -1,3 +1,4 @@
+* Feature - dashboard and Card API support
 ## Current Release 
 ### 0.195.0 
 **Release Date:** Tue Aug 14 15:48:43 UTC 2018     

@@ -56,6 +56,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler: tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpsertMonitoredObjectMeta has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateConnectorConfigV2Handler: tenant_provisioning_service_v2.CreateConnectorConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateConnectorConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateConnectorConfigV2 has not yet been implemented")
 		}),
@@ -185,6 +188,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetAllSLAReportsHandler: tenant_provisioning_service.GetAllSLAReportsHandlerFunc(func(params tenant_provisioning_service.GetAllSLAReportsParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllSLAReports has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetAllSLAReportsV2Handler: tenant_provisioning_service_v2.GetAllSLAReportsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllSLAReportsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllSLAReportsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceGetAllTenantConnectorConfigsHandler: tenant_provisioning_service.GetAllTenantConnectorConfigsHandlerFunc(func(params tenant_provisioning_service.GetAllTenantConnectorConfigsParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetAllTenantConnectorConfigs has not yet been implemented")
 		}),
@@ -224,6 +230,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler: tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetDomainToMonitoredObjectMap has not yet been implemented")
 		}),
+		MetricsServiceGetFilteredRawMetricsHandler: metrics_service.GetFilteredRawMetricsHandlerFunc(func(params metrics_service.GetFilteredRawMetricsParams) middleware.Responder {
+			return middleware.NotImplemented("operation MetricsServiceGetFilteredRawMetrics has not yet been implemented")
+		}),
 		MetricsServiceGetHistogramHandler: metrics_service.GetHistogramHandlerFunc(func(params metrics_service.GetHistogramParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceGetHistogram has not yet been implemented")
 		}),
@@ -250,6 +259,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceGetSLAReportHandler: tenant_provisioning_service.GetSLAReportHandlerFunc(func(params tenant_provisioning_service.GetSLAReportParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetSLAReport has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetSLAReportV2Handler: tenant_provisioning_service_v2.GetSLAReportV2HandlerFunc(func(params tenant_provisioning_service_v2.GetSLAReportV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetSLAReportV2 has not yet been implemented")
 		}),
 		AdminProvisioningServiceGetTenantHandler: admin_provisioning_service.GetTenantHandlerFunc(func(params admin_provisioning_service.GetTenantParams) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceGetTenant has not yet been implemented")
@@ -289,12 +301,6 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		AdminProvisioningServiceV2GetTenantV2Handler: admin_provisioning_service_v2.GetTenantV2HandlerFunc(func(params admin_provisioning_service_v2.GetTenantV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation AdminProvisioningServiceV2GetTenantV2 has not yet been implemented")
-		}),
-		MetricsServiceGetThresholdCrossingHandler: metrics_service.GetThresholdCrossingHandlerFunc(func(params metrics_service.GetThresholdCrossingParams) middleware.Responder {
-			return middleware.NotImplemented("operation MetricsServiceGetThresholdCrossing has not yet been implemented")
-		}),
-		MetricsServiceGetThresholdCrossingByMonitoredObjectHandler: metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(func(params metrics_service.GetThresholdCrossingByMonitoredObjectParams) middleware.Responder {
-			return middleware.NotImplemented("operation MetricsServiceGetThresholdCrossingByMonitoredObject has not yet been implemented")
 		}),
 		MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler: metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(func(params metrics_service.GetThresholdCrossingByMonitoredObjectTopNParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceGetThresholdCrossingByMonitoredObjectTopN has not yet been implemented")
@@ -411,7 +417,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/json" mime type
+	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
@@ -427,6 +433,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceBulkUpdateMonitoredObjectHandler tenant_provisioning_service.BulkUpdateMonitoredObjectHandler
 	// TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler sets the operation handler for the bulk update monitored objects v2 operation
 	TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler
+	// TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler sets the operation handler for the bulk upsert monitored object meta operation
+	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
 	// TenantProvisioningServiceV2CreateConnectorConfigV2Handler sets the operation handler for the create connector config v2 operation
 	TenantProvisioningServiceV2CreateConnectorConfigV2Handler tenant_provisioning_service_v2.CreateConnectorConfigV2Handler
 	// TenantProvisioningServiceV2CreateConnectorInstanceV2Handler sets the operation handler for the create connector instance v2 operation
@@ -513,6 +521,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllReportScheduleConfigsV2Handler tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Handler
 	// TenantProvisioningServiceGetAllSLAReportsHandler sets the operation handler for the get all SLA reports operation
 	TenantProvisioningServiceGetAllSLAReportsHandler tenant_provisioning_service.GetAllSLAReportsHandler
+	// TenantProvisioningServiceV2GetAllSLAReportsV2Handler sets the operation handler for the get all SLA reports v2 operation
+	TenantProvisioningServiceV2GetAllSLAReportsV2Handler tenant_provisioning_service_v2.GetAllSLAReportsV2Handler
 	// TenantProvisioningServiceGetAllTenantConnectorConfigsHandler sets the operation handler for the get all tenant connector configs operation
 	TenantProvisioningServiceGetAllTenantConnectorConfigsHandler tenant_provisioning_service.GetAllTenantConnectorConfigsHandler
 	// TenantProvisioningServiceGetAllTenantConnectorInstancesHandler sets the operation handler for the get all tenant connector instances operation
@@ -539,6 +549,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetDataCleaningProfilesHandler tenant_provisioning_service_v2.GetDataCleaningProfilesHandler
 	// TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler sets the operation handler for the get domain to monitored object map operation
 	TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler
+	// MetricsServiceGetFilteredRawMetricsHandler sets the operation handler for the get filtered raw metrics operation
+	MetricsServiceGetFilteredRawMetricsHandler metrics_service.GetFilteredRawMetricsHandler
 	// MetricsServiceGetHistogramHandler sets the operation handler for the get histogram operation
 	MetricsServiceGetHistogramHandler metrics_service.GetHistogramHandler
 	// AdminProvisioningServiceGetIngestionDictionaryHandler sets the operation handler for the get ingestion dictionary operation
@@ -557,6 +569,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetReportScheduleConfigV2Handler tenant_provisioning_service_v2.GetReportScheduleConfigV2Handler
 	// TenantProvisioningServiceGetSLAReportHandler sets the operation handler for the get SLA report operation
 	TenantProvisioningServiceGetSLAReportHandler tenant_provisioning_service.GetSLAReportHandler
+	// TenantProvisioningServiceV2GetSLAReportV2Handler sets the operation handler for the get SLA report v2 operation
+	TenantProvisioningServiceV2GetSLAReportV2Handler tenant_provisioning_service_v2.GetSLAReportV2Handler
 	// AdminProvisioningServiceGetTenantHandler sets the operation handler for the get tenant operation
 	AdminProvisioningServiceGetTenantHandler admin_provisioning_service.GetTenantHandler
 	// TenantProvisioningServiceGetTenantConnectorConfigHandler sets the operation handler for the get tenant connector config operation
@@ -583,10 +597,6 @@ type GatherAPI struct {
 	TenantProvisioningServiceGetTenantThresholdProfileHandler tenant_provisioning_service.GetTenantThresholdProfileHandler
 	// AdminProvisioningServiceV2GetTenantV2Handler sets the operation handler for the get tenant v2 operation
 	AdminProvisioningServiceV2GetTenantV2Handler admin_provisioning_service_v2.GetTenantV2Handler
-	// MetricsServiceGetThresholdCrossingHandler sets the operation handler for the get threshold crossing operation
-	MetricsServiceGetThresholdCrossingHandler metrics_service.GetThresholdCrossingHandler
-	// MetricsServiceGetThresholdCrossingByMonitoredObjectHandler sets the operation handler for the get threshold crossing by monitored object operation
-	MetricsServiceGetThresholdCrossingByMonitoredObjectHandler metrics_service.GetThresholdCrossingByMonitoredObjectHandler
 	// MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler sets the operation handler for the get threshold crossing by monitored object top n operation
 	MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandler
 	// TenantProvisioningServiceV2GetThresholdProfileV2Handler sets the operation handler for the get threshold profile v2 operation
@@ -728,6 +738,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
 
 	if o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler == nil {
@@ -902,6 +916,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetAllSLAReportsHandler")
 	}
 
+	if o.TenantProvisioningServiceV2GetAllSLAReportsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllSLAReportsV2Handler")
+	}
+
 	if o.TenantProvisioningServiceGetAllTenantConnectorConfigsHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetAllTenantConnectorConfigsHandler")
 	}
@@ -954,6 +972,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler")
 	}
 
+	if o.MetricsServiceGetFilteredRawMetricsHandler == nil {
+		unregistered = append(unregistered, "metrics_service.GetFilteredRawMetricsHandler")
+	}
+
 	if o.MetricsServiceGetHistogramHandler == nil {
 		unregistered = append(unregistered, "metrics_service.GetHistogramHandler")
 	}
@@ -988,6 +1010,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceGetSLAReportHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetSLAReportHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetSLAReportV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetSLAReportV2Handler")
 	}
 
 	if o.AdminProvisioningServiceGetTenantHandler == nil {
@@ -1040,14 +1066,6 @@ func (o *GatherAPI) Validate() error {
 
 	if o.AdminProvisioningServiceV2GetTenantV2Handler == nil {
 		unregistered = append(unregistered, "admin_provisioning_service_v2.GetTenantV2Handler")
-	}
-
-	if o.MetricsServiceGetThresholdCrossingHandler == nil {
-		unregistered = append(unregistered, "metrics_service.GetThresholdCrossingHandler")
-	}
-
-	if o.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler == nil {
-		unregistered = append(unregistered, "metrics_service.GetThresholdCrossingByMonitoredObjectHandler")
 	}
 
 	if o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler == nil {
@@ -1300,6 +1318,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v1/tenants/{tenantId}/bulk/upsert/monitored-objects/meta"] = tenant_provisioning_service.NewBulkUpsertMonitoredObjectMeta(o.context, o.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/connector-configs"] = tenant_provisioning_service_v2.NewCreateConnectorConfigV2(o.context, o.TenantProvisioningServiceV2CreateConnectorConfigV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1467,10 +1490,10 @@ func (o *GatherAPI) initHandlerCache() {
 	}
 	o.handlers["DELETE"]["/v2/threshold-profiles/{thrPrfId}"] = tenant_provisioning_service_v2.NewDeleteThresholdProfileV2(o.context, o.TenantProvisioningServiceV2DeleteThresholdProfileV2Handler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/generate-sla-report"] = metrics_service.NewGenSLAReport(o.context, o.MetricsServiceGenSLAReportHandler)
+	o.handlers["POST"]["/v1/generate-sla-report"] = metrics_service.NewGenSLAReport(o.context, o.MetricsServiceGenSLAReportHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1511,6 +1534,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/report-list"] = tenant_provisioning_service.NewGetAllSLAReports(o.context, o.TenantProvisioningServiceGetAllSLAReportsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/reports"] = tenant_provisioning_service_v2.NewGetAllSLAReportsV2(o.context, o.TenantProvisioningServiceV2GetAllSLAReportsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1577,10 +1605,15 @@ func (o *GatherAPI) initHandlerCache() {
 	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/monitored-object-domain-map"] = tenant_provisioning_service.NewGetDomainToMonitoredObjectMap(o.context, o.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/histogram"] = metrics_service.NewGetHistogram(o.context, o.MetricsServiceGetHistogramHandler)
+	o.handlers["POST"]["/v2/raw-metrics"] = metrics_service.NewGetFilteredRawMetrics(o.context, o.MetricsServiceGetFilteredRawMetricsHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v1/histogram"] = metrics_service.NewGetHistogram(o.context, o.MetricsServiceGetHistogramHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1621,6 +1654,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/tenants/{tenantId}/reports/{reportID}"] = tenant_provisioning_service.NewGetSLAReport(o.context, o.TenantProvisioningServiceGetSLAReportHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/reports/{reportID}"] = tenant_provisioning_service_v2.NewGetSLAReportV2(o.context, o.TenantProvisioningServiceV2GetSLAReportV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1687,20 +1725,10 @@ func (o *GatherAPI) initHandlerCache() {
 	}
 	o.handlers["GET"]["/v2/tenants/{tenantId}"] = admin_provisioning_service_v2.NewGetTenantV2(o.context, o.AdminProvisioningServiceV2GetTenantV2Handler)
 
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/threshold-crossing"] = metrics_service.NewGetThresholdCrossing(o.context, o.MetricsServiceGetThresholdCrossingHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object"] = metrics_service.NewGetThresholdCrossingByMonitoredObject(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
+	o.handlers["POST"]["/v1/threshold-crossing-by-monitored-object-top-n"] = metrics_service.NewGetThresholdCrossingByMonitoredObjectTopN(o.context, o.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

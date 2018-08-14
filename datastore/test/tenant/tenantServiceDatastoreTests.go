@@ -1798,7 +1798,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 		Active:            true,
 		TimeRangeDuration: "P1Y",
 		Granularity:       "PT1H",
-		Domains:           []string{"hello", "World"},
 		Datatype:          string(metmod.ReportScheduleConfigType),
 	}
 
@@ -2987,7 +2986,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 
 	// Validate that there are currently no records
 	record, err := runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
-	assert.NotNil(t, err)
+	assert.Equal(t, len(record), 0)
 	assert.Empty(t, record)
 
 	// Try to Update a record that does not exist:
@@ -3060,6 +3059,5 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantDataCleaningProfileCRUD
 	assert.Nil(t, deleteDNE)
 
 	allRecords, err = runner.tenantDB.GetAllTenantDataCleaningProfiles(TENANT)
-	assert.NotNil(t, err)
-	assert.Nil(t, allRecords)
+	assert.Equal(t, len(allRecords), 0)
 }

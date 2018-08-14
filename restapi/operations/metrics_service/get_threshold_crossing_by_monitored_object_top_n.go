@@ -29,7 +29,7 @@ func NewGetThresholdCrossingByMonitoredObjectTopN(ctx *middleware.Context, handl
 	return &GetThresholdCrossingByMonitoredObjectTopN{Context: ctx, Handler: handler}
 }
 
-/*GetThresholdCrossingByMonitoredObjectTopN swagger:route GET /v1/threshold-crossing-by-monitored-object-top-n MetricsService getThresholdCrossingByMonitoredObjectTopN
+/*GetThresholdCrossingByMonitoredObjectTopN swagger:route POST /v1/threshold-crossing-by-monitored-object-top-n MetricsService getThresholdCrossingByMonitoredObjectTopN
 
 GetThresholdCrossingByMonitoredObjectTopN get threshold crossing by monitored object top n API
 

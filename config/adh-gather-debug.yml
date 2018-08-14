@@ -34,11 +34,18 @@ kafka:
   broker: kafka:9092
 
 druid:
-  auth: "https://accedian-dh2.npav.accedian.net/api/v1/auth/login/"
+    #auth: "https://accedian-dh2.npav.accedian.net/api/v1/auth/login/"
+  #auth: "https://abatos.npav.accedian.net/api/v1/auth/login/"
+  auth: "https://megatron.npav.accedian.net/api/v1/auth/login/"
   username: "admin@datahub.com"
   password: "AccedianPass"
   cookieName: "skylight-aaa"
   broker:
-    server: "https://accedian-dh2.npav.accedian.net/broker"
+      #server: "https://accedian-dh2.npav.accedian.net/broker"
+    server: "https://megatron.npav.accedian.net/broker"
     table: "npav-ts-metrics"
 
+
+  coordinator:
+    server: "https://megatron.npav.accedian.net/coordinator"
+    port: -1

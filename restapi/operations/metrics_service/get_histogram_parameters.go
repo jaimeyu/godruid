@@ -6,14 +6,14 @@ package metrics_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/swag"
 
-	strfmt "github.com/go-openapi/strfmt"
+	swagmodels "github.com/accedian/adh-gather/swagmodels"
 )
 
 // NewGetHistogramParams creates a new GetHistogramParams object
@@ -33,45 +33,10 @@ type GetHistogramParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
-	  In: query
+	  Required: true
+	  In: body
 	*/
-	Direction *string
-	/*
-	  In: query
-	*/
-	Domain *string
-	/*ISO-8601 period combination.
-	  In: query
-	*/
-	Granularity *string
-	/*
-	  In: query
-	*/
-	GranularityBuckets *int32
-	/*ISO-8601 Intervals.
-	  In: query
-	*/
-	Interval *string
-	/*
-	  In: query
-	*/
-	Metric *string
-	/*
-	  In: query
-	*/
-	Resolution *int32
-	/*
-	  In: query
-	*/
-	Tenant *string
-	/*
-	  In: query
-	*/
-	Timeout *int32
-	/*
-	  In: query
-	*/
-	Vendor *string
+	Body *swagmodels.HistogramRequestObject
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -83,252 +48,30 @@ func (o *GetHistogramParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	o.HTTPRequest = r
 
-	qs := runtime.Values(r.URL.Query())
+	if runtime.HasBody(r) {
+		defer r.Body.Close()
+		var body swagmodels.HistogramRequestObject
+		if err := route.Consumer.Consume(r.Body, &body); err != nil {
+			if err == io.EOF {
+				res = append(res, errors.Required("body", "body"))
+			} else {
+				res = append(res, errors.NewParseError("body", "body", "", err))
+			}
+		} else {
+			// validate body object
+			if err := body.Validate(route.Formats); err != nil {
+				res = append(res, err)
+			}
 
-	qDirection, qhkDirection, _ := qs.GetOK("direction")
-	if err := o.bindDirection(qDirection, qhkDirection, route.Formats); err != nil {
-		res = append(res, err)
+			if len(res) == 0 {
+				o.Body = &body
+			}
+		}
+	} else {
+		res = append(res, errors.Required("body", "body"))
 	}
-
-	qDomain, qhkDomain, _ := qs.GetOK("domain")
-	if err := o.bindDomain(qDomain, qhkDomain, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qGranularity, qhkGranularity, _ := qs.GetOK("granularity")
-	if err := o.bindGranularity(qGranularity, qhkGranularity, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qGranularityBuckets, qhkGranularityBuckets, _ := qs.GetOK("granularityBuckets")
-	if err := o.bindGranularityBuckets(qGranularityBuckets, qhkGranularityBuckets, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qInterval, qhkInterval, _ := qs.GetOK("interval")
-	if err := o.bindInterval(qInterval, qhkInterval, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qMetric, qhkMetric, _ := qs.GetOK("metric")
-	if err := o.bindMetric(qMetric, qhkMetric, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qResolution, qhkResolution, _ := qs.GetOK("resolution")
-	if err := o.bindResolution(qResolution, qhkResolution, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qTenant, qhkTenant, _ := qs.GetOK("tenant")
-	if err := o.bindTenant(qTenant, qhkTenant, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qTimeout, qhkTimeout, _ := qs.GetOK("timeout")
-	if err := o.bindTimeout(qTimeout, qhkTimeout, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qVendor, qhkVendor, _ := qs.GetOK("vendor")
-	if err := o.bindVendor(qVendor, qhkVendor, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindDirection binds and validates parameter Direction from query.
-func (o *GetHistogramParams) bindDirection(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Direction = &raw
-
-	return nil
-}
-
-// bindDomain binds and validates parameter Domain from query.
-func (o *GetHistogramParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Domain = &raw
-
-	return nil
-}
-
-// bindGranularity binds and validates parameter Granularity from query.
-func (o *GetHistogramParams) bindGranularity(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Granularity = &raw
-
-	return nil
-}
-
-// bindGranularityBuckets binds and validates parameter GranularityBuckets from query.
-func (o *GetHistogramParams) bindGranularityBuckets(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	value, err := swag.ConvertInt32(raw)
-	if err != nil {
-		return errors.InvalidType("granularityBuckets", "query", "int32", raw)
-	}
-	o.GranularityBuckets = &value
-
-	return nil
-}
-
-// bindInterval binds and validates parameter Interval from query.
-func (o *GetHistogramParams) bindInterval(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Interval = &raw
-
-	return nil
-}
-
-// bindMetric binds and validates parameter Metric from query.
-func (o *GetHistogramParams) bindMetric(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Metric = &raw
-
-	return nil
-}
-
-// bindResolution binds and validates parameter Resolution from query.
-func (o *GetHistogramParams) bindResolution(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	value, err := swag.ConvertInt32(raw)
-	if err != nil {
-		return errors.InvalidType("resolution", "query", "int32", raw)
-	}
-	o.Resolution = &value
-
-	return nil
-}
-
-// bindTenant binds and validates parameter Tenant from query.
-func (o *GetHistogramParams) bindTenant(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Tenant = &raw
-
-	return nil
-}
-
-// bindTimeout binds and validates parameter Timeout from query.
-func (o *GetHistogramParams) bindTimeout(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	value, err := swag.ConvertInt32(raw)
-	if err != nil {
-		return errors.InvalidType("timeout", "query", "int32", raw)
-	}
-	o.Timeout = &value
-
-	return nil
-}
-
-// bindVendor binds and validates parameter Vendor from query.
-func (o *GetHistogramParams) bindVendor(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Vendor = &raw
-
 	return nil
 }

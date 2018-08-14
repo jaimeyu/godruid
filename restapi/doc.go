@@ -13,7 +13,7 @@ Gather API Documentation
     Contact: <mpreston@accedian.com>
 
     Consumes:
-    - application/json
+    - application/vnd.api+json
 
     Produces:
     - application/vnd.api+json

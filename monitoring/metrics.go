@@ -23,7 +23,6 @@ const (
 	TopNReqStr                 = "top_n"
 	ThrCrossStrTopN            = "thr_cross_topn"
 	HistogramStr               = "histogram"
-	HistogramCustomStr         = "histogram_custom"
 	RawMetricStr               = "raw_metric"
 	GenSLAReportStr            = "gen_sla_report"
 	SLAReportStr               = "sla_report"
@@ -35,6 +34,8 @@ const (
 	TenantConnectorConfigStr   = "connector_config"
 	TenantConnectorInstanceStr = "connector_instance"
 	DataCleaningProfileStr     = "data_cln_prf"
+	DbGetIDByViewStr           = "db_get_id_by_view_get"
+	DbGetAllMoIDStr            = "db_get_all_mo_id_get"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -53,6 +54,7 @@ const (
 	OPAddStr       = "add"
 	OPBulkInsert   = "bulk_insert"
 	OPBulkUpdate   = "bulk_update"
+	OPBulkUpsert   = "bulk_upsert"
 
 	// TimeStr - metric constant for a time metric
 	TimeStr    = "time"
@@ -133,10 +135,8 @@ const (
 	GetMonObjToDomMapStr = MonitoredObjectStr + metricNameDelimiter + TenantDomainStr + metricNameDelimiter + MapStr + metricNameDelimiter + OPGetStr
 
 	GetThrCrossStr             = ThrCrossStr + metricNameDelimiter + OPGetStr
-	GetThrCrossByMonObjStr     = ThrCrossStrTopN + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetThrCrossByMonObjTopNStr = ThrCrossStr + metricNameDelimiter + MonitoredObjectStr + metricNameDelimiter + OPGetStr
 	GetHistogramObjStr         = HistogramStr + metricNameDelimiter + OPGetStr
-	GetHistogramCustomObjStr   = HistogramCustomStr + metricNameDelimiter + OPGetStr
 	GetRawMetricStr            = RawMetricStr + metricNameDelimiter + OPGetStr
 	GenerateSLAReportStr       = GenSLAReportStr + metricNameDelimiter + OPGetStr
 
@@ -170,12 +170,25 @@ const (
 	GetTenantSummaryByAliasStr = SummaryStr + metricNameDelimiter + "by_alais" + metricNameDelimiter + OPGetStr
 	AddAdminViewsStr           = AdminViewsStr + metricNameDelimiter + OPAddStr
 
-	BulkInsertMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
-	BulkUpdateMonObjStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+	BulkInsertMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
+	BulkUpdateMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+	BulkUpsertMonObjMetaStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
 
 	SLATimeBucketQueryStr = SLAReportStr + metricNameDelimiter + "time_bucket" + metricNameDelimiter + OPGetStr
 	SLAViolationsQueryStr = SLAReportStr + metricNameDelimiter + "violations" + metricNameDelimiter + OPGetStr
 
+	DruidStr           = "druid"
+	GetDruidLookups    = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPGetStr
+	UpdateDruidLookups = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPUpdateStr
+	DeleteLookups      = DruidStr + metricNameDelimiter + "lookups" + metricNameDelimiter + OPDeleteStr
+
+	GetDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPGetStr
+	UpdateDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPUpdateStr
+	DeleteDruidMetaLookups = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPDeleteStr
+	AddDruidMetaLookups    = DruidStr + metricNameDelimiter + "meta_lookups" + metricNameDelimiter + OPCreateStr
+	PollChanges            = DruidStr + metricNameDelimiter + "pollchanges" + metricNameDelimiter + OPUpdateStr
+
+	// Data Cleaning
 	GetDataCleaningProfileStr    = DataCleaningProfileStr + metricNameDelimiter + OPGetStr
 	GetAllDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPGetAllStr
 	DeleteDataCleaningProfileStr = DataCleaningProfileStr + metricNameDelimiter + OPDeleteStr
@@ -250,8 +263,14 @@ var (
 	// DruidQueryDuration - Time it takes to complete a query to druid.
 	DruidQueryDuration prometheus.SummaryVec
 
-	// DruidAPIMethodDuration - Time it takes to complete a Druid API metyhod (includes query time, encoding time, etc.)
+	// DruidAPIMethodDuration - Time it takes to complete a Druid API method (includes query time, encoding time, etc.)
 	DruidAPIMethodDuration prometheus.SummaryVec
+
+	// MonitoredObjectCounter - the number of monitored objects during a pollChange call
+	MonitoredObjectCounter prometheus.Counter
+
+	// MonitoredObjectCounter - the number of monitored objects during a pollChange call
+	MetadataKeysCounter prometheus.Counter
 )
 
 // InitMetrics - registers all metrics to be collected for Gather.
@@ -273,6 +292,14 @@ func InitMetrics() {
 		Help:       "Time taken to execute a Driud calling method. Includes query time, encoding time, etc.",
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	}, []string{"code", "name"})
+
+	MonitoredObjectCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_metric_service_monitoredObjectCounter",
+		Help: "Number of monitored objects that is being accessed by pollChanges"})
+
+	MetadataKeysCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "gather_metric_service_metadata_keys",
+		Help: "Number of metadata keys accessed by pollChanges"})
 
 	RecievedAPICalls = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "gather_api_call_received_since_startup",
@@ -337,6 +364,8 @@ func InitMetrics() {
 	prometheus.MustRegister(CompletedMetricServiceAPICalls)
 	prometheus.MustRegister(DruidAPIMethodDuration)
 	prometheus.MustRegister(DruidQueryDuration)
+	prometheus.MustRegister(MonitoredObjectCounter)
+	prometheus.MustRegister(MetadataKeysCounter)
 }
 
 // TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.

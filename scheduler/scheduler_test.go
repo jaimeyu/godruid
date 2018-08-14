@@ -325,7 +325,6 @@ func TestSchedulerMultiples(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		config := metrics.ReportScheduleConfig{
 			TimeRangeDuration: "P1",
-			Domains:           []string{"hello", "world"},
 			ThresholdProfile:  "1000",
 			Granularity:       "1000",
 			Timeout:           1000,

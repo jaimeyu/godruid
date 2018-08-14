@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
+	common "github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
@@ -61,6 +64,11 @@ func HandleCreateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, data.Meta)
+		if err != nil {
+			return tenant_provisioning_service.NewCreateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views for %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
 		reportAPICompletionState(startTime, http.StatusOK, mon.CreateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Created %s %s", tenmod.TenantMonitoredObjectStr, models.AsJSONString(converted))
 		return tenant_provisioning_service.NewCreateTenantMonitoredObjectOK().WithPayload(&converted)
@@ -72,7 +80,7 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 	return func(params tenant_provisioning_service.UpdateTenantMonitoredObjectParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
-		logger.Log.Infof("Updating %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
+		logger.Log.Infof("Updating %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.Body.Data.Attributes.ObjectID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
 			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Update %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -101,6 +109,12 @@ func HandleUpdateTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, data.Meta)
+		if err != nil {
+			return tenant_provisioning_service.NewUpdateTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.UpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
 		if changeNotificationEnabled {
 			NotifyMonitoredObjectUpdated(data.TenantID, &data)
 		}
@@ -122,7 +136,7 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 	return func(params tenant_provisioning_service.PatchTenantMonitoredObjectParams) middleware.Responder {
 		startTime := time.Now()
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
-		logger.Log.Infof("Patching %s %s for Tenant", tenmod.TenantMonitoredObjectStr, params.Body.Data.ID, params.TenantID)
+		logger.Log.Infof("Patching %s %s for Tenant %s", tenmod.TenantMonitoredObjectStr, params.Body.Data.ID, params.TenantID)
 
 		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectForbidden().WithPayload(reportAPIError(fmt.Sprintf("Patch %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
@@ -153,10 +167,17 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
+		meta := data.Meta
+		if meta == nil {
+			meta = make(map[string]string)
+		}
+
 		errMerge := models.MergeObjWithMap(oldMonitoredObject, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
+
+		oldMonitoredObject.Meta = meta
 
 		// This only checks if the ID&REV is set.
 		err = oldMonitoredObject.Validate(true)
@@ -168,6 +189,13 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		result, err := tenantDB.UpdateMonitoredObject(oldMonitoredObject)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject.Meta)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(meta))
+			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, msg), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
@@ -269,6 +297,12 @@ func HandleDeleteTenantMonitoredObject(allowedRoles []string, tenantDB datastore
 		err = convertToJsonapiObject(result, &converted)
 		if err != nil {
 			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s list data to jsonapi return format: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Done, now generate the couchdb views
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(params.TenantID, nil)
+		if err != nil {
+			return tenant_provisioning_service.NewDeleteTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update metadata views for %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
@@ -436,5 +470,107 @@ func HandleBulkUpdateMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
 		return tenant_provisioning_service.NewBulkUpdateMonitoredObjectOK().WithPayload(converted)
+	}
+}
+
+func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+	return func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
+
+		startTime := time.Now()
+		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+		logger.Log.Infof("Updating %s meta data in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
+
+		tenantID := params.TenantID
+
+		if !isRequestAuthorized(params.HTTPRequest, allowedRoles) {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaForbidden().WithPayload(reportAPIError(fmt.Sprintf("Bulk upsert %s meta operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles)), startTime, http.StatusForbidden, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		requestBytes, err := json.Marshal(params.Body)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		// Unmarshal the request
+		data := tenmod.MonitoredObjectBulkMetadata{}
+		err = json.Unmarshal(requestBytes, &data)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		response := make([]*common.BulkOperationResult, len(data.Items))
+
+		// Internal function responsible for managing error scenarios for individual result items
+		itemError := func(position int, itemResponse *common.BulkOperationResult, reason int, itemErr string) {
+			itemResponse.OK = false
+			itemResponse.REASON = strconv.Itoa(reason)
+			itemResponse.ERROR = itemErr
+
+			logger.Log.Errorf(generateErrorMessage(reason, itemErr))
+
+			response[position] = itemResponse
+		}
+
+		metaKeys := make(map[string]string)
+		const idSep = "_"
+
+		for i, item := range data.Items {
+			itemResponse := common.BulkOperationResult{
+				ID: item.MetadataKey,
+			}
+			// Issue request to DAO Layer
+			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
+			if err != nil {
+				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
+			}
+
+			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
+
+			existingMonitoredObject.Meta = item.Metadata
+			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
+			splitID := strings.Split(existingMonitoredObject.ID, idSep)
+			existingMonitoredObject.ID = splitID[len(splitID)-1]
+
+			// Issue request to DAO Layer
+			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
+			if err != nil {
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
+			}
+
+			// Track all distinct metadata items to be index processed after all are items are worked through
+			for k := range item.Metadata {
+				metaKeys[k] = ""
+			}
+
+			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMonitoredObject.ObjectName)
+			NotifyMonitoredObjectUpdated(existingMonitoredObject.TenantID, existingMonitoredObject)
+
+			itemResponse.OK = true
+			itemResponse.REV = updatedMonitoredObject.REV
+			response[i] = &itemResponse
+		}
+
+		// Build up the monitored object indices
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to update monitored object views %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		res, err := json.Marshal(response)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to serialize bulk upsert response %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		converted := make(swagmodels.BulkOperationResponse, len(data.Items))
+		err = json.Unmarshal(res, &converted)
+		if err != nil {
+			return tenant_provisioning_service.NewBulkUpdateMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to format bulk upsert %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted))
+		}
+
+		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
+		logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
+		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK().WithPayload(converted)
 	}
 }

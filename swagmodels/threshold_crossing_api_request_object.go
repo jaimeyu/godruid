@@ -19,9 +19,6 @@ import (
 // swagger:model ThresholdCrossingAPIRequestObject
 type ThresholdCrossingAPIRequestObject struct {
 
-	// set of domains identifiers to use for filtering
-	DomainIds []string `json:"domainIds"`
-
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
 
@@ -29,8 +26,11 @@ type ThresholdCrossingAPIRequestObject struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
+	// set of meta keys and list of values for the purposes of filtering
+	Meta map[string][]string `json:"meta,omitempty"`
+
 	// limits the results to include only metrics in the whitelist
-	MetricWhitelist []*MetricIdentifierObject `json:"metricWhitelist"`
+	Metrics []*MetricIdentifierObject `json:"metrics"`
 
 	// the tenant identifier
 	// Required: true
@@ -51,7 +51,7 @@ func (m *ThresholdCrossingAPIRequestObject) Validate(formats strfmt.Registry) er
 		res = append(res, err)
 	}
 
-	if err := m.validateMetricWhitelist(formats); err != nil {
+	if err := m.validateMetrics(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,21 +74,21 @@ func (m *ThresholdCrossingAPIRequestObject) validateInterval(formats strfmt.Regi
 	return nil
 }
 
-func (m *ThresholdCrossingAPIRequestObject) validateMetricWhitelist(formats strfmt.Registry) error {
+func (m *ThresholdCrossingAPIRequestObject) validateMetrics(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.MetricWhitelist) { // not required
+	if swag.IsZero(m.Metrics) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.MetricWhitelist); i++ {
-		if swag.IsZero(m.MetricWhitelist[i]) { // not required
+	for i := 0; i < len(m.Metrics); i++ {
+		if swag.IsZero(m.Metrics[i]) { // not required
 			continue
 		}
 
-		if m.MetricWhitelist[i] != nil {
-			if err := m.MetricWhitelist[i].Validate(formats); err != nil {
+		if m.Metrics[i] != nil {
+			if err := m.Metrics[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("metricWhitelist" + "." + strconv.Itoa(i))
+					return ve.ValidateName("metrics" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

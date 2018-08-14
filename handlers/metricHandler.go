@@ -45,12 +45,6 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 	result.tenantDB = tdb
 
 	result.routes = []server.Route{
-		server.Route{
-			Name:        "GetThresholdCrossing",
-			Method:      "GET",
-			Pattern:     "/api/v1/threshold-crossing",
-			HandlerFunc: result.GetThresholdCrossing,
-		},
 
 		server.Route{
 			Name:        "QueryThresholdCrossing",
@@ -60,38 +54,24 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 		},
 
 		server.Route{
-			Name:        "GetThresholdCrossingByMonitoredObject",
-			Method:      "GET",
-			Pattern:     "/api/v1/threshold-crossing-by-monitored-object",
-			HandlerFunc: result.GetThresholdCrossingByMonitoredObject,
-		},
-
-		server.Route{
 			Name:        "GetThresholdCrossingByMonitoredObjectTopN",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/threshold-crossing-by-monitored-object-top-n",
 			HandlerFunc: result.GetThresholdCrossingByMonitoredObjectTopN,
 		},
 
 		server.Route{
 			Name:        "GenSLAReport",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/generate-sla-report",
 			HandlerFunc: result.GetSLAReport,
 		},
 
 		server.Route{
 			Name:        "GetHistogram",
-			Method:      "GET",
+			Method:      "POST",
 			Pattern:     "/api/v1/histogram",
 			HandlerFunc: result.GetHistogram,
-		},
-
-		server.Route{
-			Name:        "GetHistogramCustom",
-			Method:      "POST",
-			Pattern:     "/api/v1/histogram-custom",
-			HandlerFunc: result.GetHistogramCustom,
 		},
 
 		server.Route{
@@ -99,6 +79,13 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 			Method:      "GET",
 			Pattern:     "/api/v1/raw-metrics",
 			HandlerFunc: result.GetRawMetrics,
+		},
+
+		server.Route{
+			Name:        "GetRawMetrics",
+			Method:      "POST",
+			Pattern:     "/api/v2/raw-metrics",
+			HandlerFunc: result.GetRawMetricsV2,
 		},
 
 		server.Route{
@@ -132,149 +119,6 @@ func (msh *MetricServiceHandler) RegisterAPIHandlers(router *mux.Router) {
 	}
 }
 
-func populateThresholdCrossingRequest(queryParams url.Values) *pb.ThresholdCrossingRequest {
-
-	thresholdCrossingReq := pb.ThresholdCrossingRequest{
-		Direction:          toStringSplice(queryParams.Get("direction")),
-		Domain:             toStringSplice(queryParams.Get("domain")),
-		Granularity:        queryParams.Get("granularity"),
-		Interval:           queryParams.Get("interval"),
-		Metric:             toStringSplice(queryParams.Get("metric")),
-		ObjectType:         toStringSplice(queryParams.Get("objectType")),
-		Tenant:             queryParams.Get("tenant"),
-		ThresholdProfileId: queryParams.Get("thresholdProfileId"),
-		Vendor:             toStringSplice(queryParams.Get("vendor")),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		thresholdCrossingReq.Timeout = int32(timeout)
-	} else {
-		thresholdCrossingReq.Timeout = 0
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-
-	return &thresholdCrossingReq
-}
-
-func populateThresholdCrossingTopNRequest(queryParams url.Values) (*metrics.ThresholdCrossingTopNRequest, error) {
-
-	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{
-		Direction:          queryParams.Get("direction"),
-		Domain:             toStringSplice(queryParams.Get("domain")),
-		Granularity:        queryParams.Get("granularity"),
-		Interval:           queryParams.Get("interval"),
-		Metric:             queryParams.Get("metric"),
-		ObjectType:         queryParams.Get("objectType"),
-		TenantID:           queryParams.Get("tenantId"),
-		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
-		Vendor:             queryParams.Get("vendor"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		thresholdCrossingReq.Timeout = int32(timeout)
-	} else {
-		thresholdCrossingReq.Timeout = 5000 // default value
-	}
-
-	numResults, err := strconv.Atoi(queryParams.Get("numResults"))
-	if err == nil {
-		thresholdCrossingReq.NumResults = int32(numResults)
-	} else {
-		thresholdCrossingReq.NumResults = 10 // default value
-	}
-
-	if len(thresholdCrossingReq.Granularity) == 0 {
-		thresholdCrossingReq.Granularity = "PT1H"
-	}
-
-	if len(thresholdCrossingReq.Vendor) == 0 {
-		err = fmt.Errorf("vendor is required")
-		return nil, err
-	}
-
-	if len(thresholdCrossingReq.ObjectType) == 0 {
-		err = fmt.Errorf("objectType is required")
-		return nil, err
-	}
-
-	return &thresholdCrossingReq, nil
-}
-
-func populateSLAReportRequest(queryParams url.Values) *metrics.SLAReportRequest {
-
-	request := metrics.SLAReportRequest{
-		TenantID:           queryParams.Get("tenant"),
-		Interval:           queryParams.Get("interval"),
-		Domain:             toStringSplice(queryParams.Get("domains")),
-		ThresholdProfileID: queryParams.Get("thresholdProfileId"),
-		Granularity:        queryParams.Get("granularity"),
-		Timezone:           queryParams.Get("timezone"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		request.Timeout = int32(timeout)
-	} else {
-		request.Timeout = 0
-	}
-
-	if len(request.Granularity) == 0 {
-		request.Granularity = "PT1H"
-	}
-
-	return &request
-}
-
-func populateHistogramRequest(queryParams url.Values) *pb.HistogramRequest {
-
-	histogramRequest := pb.HistogramRequest{
-		Direction:   queryParams.Get("direction"),
-		Domain:      queryParams.Get("domain"),
-		Granularity: queryParams.Get("granularity"),
-		Interval:    queryParams.Get("interval"),
-		Metric:      queryParams.Get("metric"),
-		Tenant:      queryParams.Get("tenant"),
-		Vendor:      queryParams.Get("vendor"),
-	}
-
-	timeout, err := strconv.Atoi(queryParams.Get("timeout"))
-	if err == nil {
-		histogramRequest.Timeout = int32(timeout)
-	} else {
-		histogramRequest.Timeout = 0
-	}
-
-	resolution, err := strconv.Atoi(queryParams.Get("resolution"))
-	if err == nil {
-		histogramRequest.Resolution = int32(resolution)
-	} else {
-		histogramRequest.Resolution = 0
-	}
-
-	granularityBuckets, err := strconv.Atoi(queryParams.Get("granularityBuckets"))
-	if err == nil {
-		histogramRequest.GranularityBuckets = int32(granularityBuckets)
-	} else {
-		histogramRequest.GranularityBuckets = 0
-	}
-
-	return &histogramRequest
-}
-
-// string interval = 1;
-// string tenant = 2;
-// string direction = 3;
-// string metric = 4;
-// string objectType = 5;
-// string monitoredObjectId = 6;
-// int32  timeout = 10;
-// string  granularity = 11;
-
 func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	rmr := pb.RawMetricsRequest{
 		Direction:         toStringSplice(queryParams.Get("direction")),
@@ -294,60 +138,6 @@ func populateRawMetricsRequest(queryParams url.Values) *pb.RawMetricsRequest {
 	}
 
 	return &rmr
-}
-
-// GetThresholdCrossing - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain
-func (msh *MetricServiceHandler) GetThresholdCrossing(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
-	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
-
-	tenantID := thresholdCrossingReq.Tenant
-
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
-	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
-		return
-	}
-
-	result, err := msh.druidDB.GetThresholdCrossing(thresholdCrossingReq, &pbTP)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Threshold Crossing. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, thresholdCrossingReq)
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossStr)
-	fmt.Fprintf(w, string(res))
 }
 
 func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r *http.Request) {
@@ -380,14 +170,16 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 		return
 	}
 
-	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
-		reportError(w, startTime, "404", mon.QueryThresholdCrossingStr, msg, http.StatusNotFound)
-		return
-	}
 	logger.Log.Infof("Retrieving %s for: %v", db.QueryThresholdCrossingStr, request)
 
-	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve  Threshold Crossing Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryThresholdCrossingStr, msg, http.StatusInternalServerError)
@@ -423,12 +215,6 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	if err := msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportInternalError(startTime, "404", mon.GetSLAReportStr, msg)
-		return nil, err
-	}
-
 	// Convert to PB type...will remove this when we remove the PB handling
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
@@ -437,14 +223,20 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
 		return nil, err
 	}
 
-	report.ReportScheduleConfig = slaReportRequest.SlaScheduleConfig
+	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP, metaMOs)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
+		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
+		return nil, err
+	}
+
 	report.TenantID = slaReportRequest.TenantID
 	logger.Log.Debugf("Completed %s fetch for: %+v, report %+v", db.SLAReportStr, models.AsJSONString(slaReportRequest), report)
 
@@ -456,9 +248,18 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	slaReportRequest := populateSLAReportRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GenerateSLAReportStr, msg, http.StatusBadRequest)
+		return
+	}
+	slaReportRequest := metrics.SLAReportRequest{}
+	if err := json.Unmarshal(requestBytes, &slaReportRequest); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GenerateSLAReportStr, msg, http.StatusBadRequest)
+		return
+	}
 	logger.Log.Infof("Retrieving %s for: %v", db.SLAReportStr, models.AsJSONString(slaReportRequest))
 
 	tenantID := slaReportRequest.TenantID
@@ -466,12 +267,6 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, slaReportRequest.ThresholdProfileID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
-		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
-		return
-	}
-
-	if err = msh.validateDomains(slaReportRequest.TenantID, slaReportRequest.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", models.AsJSONString(slaReportRequest), err.Error())
 		reportError(w, startTime, "404", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
 		return
 	}
@@ -484,7 +279,14 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetSLAReport(&slaReportRequest, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
@@ -505,68 +307,48 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 	fmt.Fprintf(w, string(res))
 }
 
-// GetThresholdCrossingByMonitoredObject - Retrieves the Threshold crossings for a given threshold profile,
-// interval, tenant, domain, and groups by monitoredObjectID
-func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObject(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq := populateThresholdCrossingRequest(queryParams)
-	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
-
-	tenantID := thresholdCrossingReq.Tenant
-
-	thresholdProfile, err := msh.tenantDB.GetTenantThresholdProfile(tenantID, thresholdCrossingReq.ThresholdProfileId)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find threshold profile for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
-	if err = msh.validateDomains(thresholdCrossingReq.Tenant, thresholdCrossingReq.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %s. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjStr, msg, http.StatusNotFound)
-		return
-	}
-
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObject(thresholdCrossingReq, &pbTP)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Threshold Crossing by Monitored Object. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetThrCrossByMonObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingByMonitoredObjectStr, thresholdCrossingReq)
-	trackAPIMetrics(startTime, "200", mon.GetThrCrossByMonObjStr)
-	fmt.Fprintf(w, string(res))
-}
-
 // GetThresholdCrossingByMonitoredObjectTopN - Retrieves the TopN Threshold crossings for a given threshold profile,
 // interval, tenant, domain, and groups by monitoredObjectID
 func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	thresholdCrossingReq, err := populateThresholdCrossingTopNRequest(queryParams)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{}
+	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if thresholdCrossingReq.NumResults == 0 {
+		thresholdCrossingReq.NumResults = 10 // default value
+	}
+
+	if thresholdCrossingReq.Timeout == 0 {
+		thresholdCrossingReq.Timeout = 30000
+	}
+
+	if len(thresholdCrossingReq.Granularity) == 0 {
+		thresholdCrossingReq.Granularity = "PT1H"
+	}
+
+	if thresholdCrossingReq.Metric.Vendor == "" {
+		msg := generateErrorMessage(http.StatusBadRequest, "vendor is required")
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	if thresholdCrossingReq.Metric.ObjectType == "" {
+		msg := generateErrorMessage(http.StatusBadRequest, "object type is required")
+		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
+		return
+	}
+
 	if err != nil {
 		reportError(w, startTime, "602", mon.GetThrCrossByMonObjTopNStr, err.Error(), 602)
 		return
@@ -590,18 +372,19 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		return
 	}
 
-	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Vendor, thresholdCrossingReq.ObjectType, thresholdCrossingReq.Metric, &pbTP); err != nil {
+	if err = validateMetricForThresholdProfile(thresholdCrossingReq.Metric.Vendor, thresholdCrossingReq.Metric.ObjectType, thresholdCrossingReq.Metric.Name, &pbTP); err != nil {
 		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	if err = msh.validateDomains(thresholdCrossingReq.TenantID, thresholdCrossingReq.Domain); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", thresholdCrossingReq, err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
+	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, thresholdCrossingReq.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(thresholdCrossingReq, &pbTP)
+	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(&thresholdCrossingReq, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
@@ -626,12 +409,32 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	// Turn the query Params into the request object:
-	queryParams := r.URL.Query()
-	histogramReq := populateHistogramRequest(queryParams)
-	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, histogramReq)
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetHistogramObjStr, msg, http.StatusBadRequest)
+		return
+	}
 
-	result, err := msh.druidDB.GetHistogram(histogramReq)
+	// Turn the query Params into the request object:
+	hcRequest := &metrics.HistogramRequest{}
+	err = json.Unmarshal(requestBytes, hcRequest)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Retrieving %s for: %v", db.HistogramStr, hcRequest)
+
+	metaMOs, err := msh.MetaToMonitoredObjects(hcRequest.TenantID, hcRequest.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetHistogram(hcRequest, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
@@ -647,51 +450,8 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, histogramReq)
+	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramStr, hcRequest)
 	trackAPIMetrics(startTime, "200", mon.GetHistogramObjStr)
-	fmt.Fprintf(w, string(res))
-}
-
-// GetHistogram - Retrieve bucket data from druid
-func (msh *MetricServiceHandler) GetHistogramCustom(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetHistogramCustomObjStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	// Turn the query Params into the request object:
-	hcRequest := &metrics.HistogramCustomRequest{}
-	err = json.Unmarshal(requestBytes, hcRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	logger.Log.Infof("Retrieving %s for: %v", db.HistogramCustomStr, hcRequest)
-
-	result, err := msh.druidDB.GetHistogramCustom(hcRequest)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Custom Histogram. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Custom Histogram response. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetHistogramCustomObjStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.HistogramCustomStr, hcRequest)
-	trackAPIMetrics(startTime, "200", mon.GetHistogramCustomObjStr)
 	fmt.Fprintf(w, string(res))
 }
 
@@ -725,6 +485,56 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	fmt.Fprintf(w, string(res))
 }
 
+// GetRawMetrics - Retrieve raw metric data from druid
+func (msh *MetricServiceHandler) GetRawMetricsV2(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	requestBytes, err := getRequestBytes(r)
+	if err != nil {
+		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
+		reportError(w, startTime, "400", mon.GetRawMetricStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Turn the query Params into the request object:
+	request := &metrics.RawMetricsRequest{}
+	err = json.Unmarshal(requestBytes, request)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve raw metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, request)
+
+	metaMOs, err := msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetFilteredRawMetrics(request, metaMOs)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the res to byte[]
+	res, err := json.Marshal(result)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set(contentType, jsonAPIContentType)
+	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, request)
+	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
+	fmt.Fprintf(w, string(res))
+}
+
 func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
@@ -742,13 +552,20 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 	}
 	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
 
-	if err = msh.validateDomains(request.TenantID, request.DomainIDs); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given request: %s. Error: %s", models.AsJSONString(request), err.Error())
-		reportError(w, startTime, "404", mon.GetThrCrossStr, msg, http.StatusNotFound)
+	if request.TenantID == "" {
+		msg := fmt.Sprintf("Tenant ID is required to retrieved aggregate metrics")
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	result, err := msh.druidDB.GetAggregatedMetrics(&request)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	result, err := msh.druidDB.GetAggregatedMetrics(&request, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Aggregated Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
@@ -775,18 +592,6 @@ func toStringSplice(paramCSV string) []string {
 	}
 
 	return strings.Split(paramCSV, ",")
-}
-
-func (msh *MetricServiceHandler) validateDomains(tenantId string, domains []string) error {
-	if domains == nil || len(domains) == 0 {
-		return nil
-	}
-	for _, dom := range domains {
-		if _, err := msh.tenantDB.GetTenantDomain(tenantId, dom); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func validateMetricForThresholdProfile(vendor, objectType, metric string, thresholdProfile *pb.TenantThresholdProfile) error {
@@ -834,15 +639,16 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	}
 
 	topNreq := request
-	logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
+	//logger.Log.Infof("Fetching data for TopN request: %+v", topNreq)
 
-	if err = msh.validateDomains(topNreq.TenantID, topNreq.Domains); err != nil {
-		msg := fmt.Sprintf("Unable find domain for given query parameters: %+v. Error: %s", topNreq, err.Error())
-		reportError(w, startTime, "404", mon.GetTopNReqStr, msg, http.StatusNotFound)
+	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	result, err := msh.druidDB.GetTopNForMetric(&topNreq)
+	result, err := msh.druidDB.GetTopNForMetric(&topNreq, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
@@ -862,4 +668,63 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
 	fmt.Fprintf(w, string(res))
 
+}
+
+//MetaToMonitoredObjects - Retrieve a set of monitored object IDs based on the passed in metadata criteria
+func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta map[string][]string) ([]string, error) {
+
+	// Return nil since our query does not care about metadata
+	if len(meta) == 0 {
+		return nil, nil
+	}
+
+	mos := make([]string, 0)
+
+	firstMeta := true
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieving monitored object IDs for tenant %s based on metadata criteria %v", tenantId, meta)
+	}
+
+	// Loop over all the metadata types
+	for mkey, mvalue := range meta {
+
+		mosForKey := make([]string, 0)
+		// Loop over all the metadata values associated with the current type
+		for _, valueItem := range mvalue {
+
+			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
+
+			if err != nil {
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
+			}
+
+			// Union all the IDs together since we need a conditional OR for all values of a particular key
+			mosForKey = listUnion(mosForKey, rMetaMOs)
+		}
+		if !firstMeta {
+			// Intersect all the IDs since monitored objects should contain at least one of the metadata values for each of the metadata keys in a conditional AND
+			mos = listIntersection(mos, mosForKey)
+		} else {
+			// We do this since we don't want to run an intersection against an initially empty list otherwise there will never be an intersection
+			firstMeta = false
+			mos = mosForKey
+		}
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following %d monitored object IDs for tenant %s based on metadata criteria %v", len(mos), tenantId, meta)
+	}
+
+	return mos, nil
+}
+
+// MetaToMonitoredObjectsKV - Retrieve a set of monitored object IDs based on the provided key/value pair
+func (msh *MetricServiceHandler) MetaToMonitoredObjectsKV(tenantId string, key string, value string) ([]string, error) {
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata with key %s and value %s", tenantId, key, value)
+	}
+
+	return msh.tenantDB.GetMonitoredObjectIDsToMetaEntry(tenantId, key, value)
 }

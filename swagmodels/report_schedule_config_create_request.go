@@ -211,7 +211,8 @@ type ReportScheduleConfigCreateRequestDataAttributes struct {
 	Month string `json:"month,omitempty"`
 
 	// name
-	Name string `json:"name,omitempty"`
+	// Required: true
+	Name *string `json:"name"`
 
 	// report type
 	ReportType string `json:"reportType,omitempty"`
@@ -234,6 +235,10 @@ type ReportScheduleConfigCreateRequestDataAttributes struct {
 func (m *ReportScheduleConfigCreateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateThresholdProfile(formats); err != nil {
 		res = append(res, err)
 	}
@@ -241,6 +246,15 @@ func (m *ReportScheduleConfigCreateRequestDataAttributes) Validate(formats strfm
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ReportScheduleConfigCreateRequestDataAttributes) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes"+"."+"name", "body", m.Name); err != nil {
+		return err
+	}
+
 	return nil
 }
 

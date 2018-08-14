@@ -9,26 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
 )
 
 // GetHistogramURL generates an URL for the get histogram operation
 type GetHistogramURL struct {
-	Direction          *string
-	Domain             *string
-	Granularity        *string
-	GranularityBuckets *int32
-	Interval           *string
-	Metric             *string
-	Resolution         *int32
-	Tenant             *string
-	Timeout            *int32
-	Vendor             *string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -57,90 +42,6 @@ func (o *GetHistogramURL) Build() (*url.URL, error) {
 		_basePath = "/api"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
-
-	qs := make(url.Values)
-
-	var direction string
-	if o.Direction != nil {
-		direction = *o.Direction
-	}
-	if direction != "" {
-		qs.Set("direction", direction)
-	}
-
-	var domain string
-	if o.Domain != nil {
-		domain = *o.Domain
-	}
-	if domain != "" {
-		qs.Set("domain", domain)
-	}
-
-	var granularity string
-	if o.Granularity != nil {
-		granularity = *o.Granularity
-	}
-	if granularity != "" {
-		qs.Set("granularity", granularity)
-	}
-
-	var granularityBuckets string
-	if o.GranularityBuckets != nil {
-		granularityBuckets = swag.FormatInt32(*o.GranularityBuckets)
-	}
-	if granularityBuckets != "" {
-		qs.Set("granularityBuckets", granularityBuckets)
-	}
-
-	var interval string
-	if o.Interval != nil {
-		interval = *o.Interval
-	}
-	if interval != "" {
-		qs.Set("interval", interval)
-	}
-
-	var metric string
-	if o.Metric != nil {
-		metric = *o.Metric
-	}
-	if metric != "" {
-		qs.Set("metric", metric)
-	}
-
-	var resolution string
-	if o.Resolution != nil {
-		resolution = swag.FormatInt32(*o.Resolution)
-	}
-	if resolution != "" {
-		qs.Set("resolution", resolution)
-	}
-
-	var tenant string
-	if o.Tenant != nil {
-		tenant = *o.Tenant
-	}
-	if tenant != "" {
-		qs.Set("tenant", tenant)
-	}
-
-	var timeout string
-	if o.Timeout != nil {
-		timeout = swag.FormatInt32(*o.Timeout)
-	}
-	if timeout != "" {
-		qs.Set("timeout", timeout)
-	}
-
-	var vendor string
-	if o.Vendor != nil {
-		vendor = *o.Vendor
-	}
-	if vendor != "" {
-		qs.Set("vendor", vendor)
-	}
-
-	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

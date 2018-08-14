@@ -1,5 +1,6 @@
 * Fix - Added auth headers to bulk request
 * Fix - Removed pollChanges() function from firing periodically. This eats up performance when deployment is scaled up. 
+* Fix - Monitored Object swagger definition was missing metadata
 ## Current Release 
 ### 0.194.0 
 **Release Date:** Fri Aug 10 20:25:52 UTC 2018     

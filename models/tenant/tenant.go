@@ -50,6 +50,9 @@ const (
 	// TenantDashboardType - datatype string used to identify a Tenant Dashboard in the datastore record
 	TenantDashboardType TenantDataType = "dashboard"
 
+	// TenantCardType - datatype string used to identify a Tenant Card in the datastore record
+	TenantCardType TenantDataType = "card"
+
 	// TenantDataCleaningProfileType - datatype string used to identify a Tenant Data Cleaning Profile in the datastore record
 	TenantDataCleaningProfileType TenantDataType = "dataCleaningProfile"
 )
@@ -119,7 +122,7 @@ const (
 	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object data type for use in logs.
 	TenantMonitoredObjectStr = "Tenant Monitored Object"
 
-	// TenantMonitoredObjectStr - common name of the Tenant Monitored Object Keys data type for use in logs.
+	// TenantMonitoredObjectKeysStr - common name of the Tenant Monitored Object Keys data type for use in logs.
 	TenantMonitoredObjectKeysStr = "Tenant Monitored Object Keys"
 
 	// TenantThresholdProfileStr - common name of the Tenant Ingestion Profile data type for use in logs.
@@ -139,6 +142,9 @@ const (
 
 	// TenantDashboardStr - common name for the Dashboard for use in logs.
 	TenantDashboardStr = "Tenant Dashboard"
+
+	// TenantDTenantCardStrashboardStr - common name for the Card for use in logs.
+	TenantCardStr = "Tenant Card"
 
 	// TenantDataCleaningProfileStr - common name for the Tenant Cleaning Profile for use in logs.
 	TenantDataCleaningProfileStr = "Tenant Data Cleaning Profile"
@@ -670,11 +676,187 @@ type BulkMonitoredObjectRequest struct {
 }
 
 type Dashboard struct {
-	ID        string   `json:"_id"`
-	REV       string   `json:"_rev"`
-	TenantID  string   `json:"-"` // UI does not write this property
-	Name      string   `json:"name"`
-	DomainSet []string `json:"domainSet"`
+	ID                    string                   `json:"_id"`
+	REV                   string                   `json:"_rev"`
+	Datatype              string                   `json:"datatype"`
+	TenantID              string                   `json:"tenantId"` // UI does not write this property
+	Name                  string                   `json:"name"`
+	Category              string                   `json:"category"`
+	ThresholdProfile      string                   `json:"thresholdProfile"`
+	Cards                 []string                 `json:"cards"`
+	MetadataFilters       []*MetadataFilter        `json:"metadataFilters"`
+	CardPositions         map[string]*CardPosition `json:"cardPositions"`
+	CreatedTimestamp      int64                    `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                    `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (d *Dashboard) GetID() string {
+	return d.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (d *Dashboard) SetID(s string) error {
+	d.ID = s
+	return nil
+}
+
+var (
+	dashboardCardRelationshipName = "cards"
+	dashboardTPRelationshipName   = "thresholdProfile"
+)
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (d *Dashboard) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: dashboardCardRelationshipName,
+			Name: dashboardCardRelationshipName,
+		},
+		{
+			Type: dashboardTPRelationshipName,
+			Name: dashboardTPRelationshipName,
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (d *Dashboard) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	for _, cardID := range d.Cards {
+		result = append(result, jsonapi.ReferenceID{
+			ID:   cardID,
+			Type: dashboardCardRelationshipName,
+			Name: dashboardCardRelationshipName,
+		})
+	}
+
+	result = append(result, jsonapi.ReferenceID{
+		ID:   d.ThresholdProfile,
+		Type: dashboardTPRelationshipName,
+		Name: dashboardTPRelationshipName,
+	})
+
+	return result
+}
+
+// SetToManyReferenceIDs sets domain reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (d *Dashboard) SetToManyReferenceIDs(name string, IDs []string) error {
+	if name == dashboardCardRelationshipName {
+		d.Cards = IDs
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// SetToOneReferenceID - satisfy the unmarshalling of relationships that point to only one reference ID
+func (d *Dashboard) SetToOneReferenceID(name, ID string) error {
+	if name == dashboardTPRelationshipName {
+		d.ThresholdProfile = ID
+		return nil
+	}
+
+	return errors.New("There is no to-one relationship with the name " + name)
+}
+
+// AddToManyIDs adds new cards to the reference list
+func (d *Dashboard) AddToManyIDs(name string, IDs []string) error {
+	if name == dashboardCardRelationshipName {
+		d.Cards = append(d.Cards, IDs...)
+		return nil
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// DeleteToManyIDs removes cards from the reference list
+func (d *Dashboard) DeleteToManyIDs(name string, IDs []string) error {
+	if name == dashboardCardRelationshipName {
+		for _, ID := range IDs {
+			for pos, oldID := range d.Cards {
+				if ID == oldID {
+					// match, this ID must be removed
+					d.Cards = append(d.Cards[:pos], d.Cards[pos+1:]...)
+				}
+			}
+		}
+	}
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+type MetadataFilter struct {
+	Key    string   `json:"key"`
+	Values []string `json:"values"`
+}
+
+type CardPosition struct {
+	Position   int        `json:"position"`
+	Dimensions *Dimension `json:"dimensions"`
+}
+
+type Dimension struct {
+	Columns int `json:"columns"`
+	Rows    int `json:"rows"`
+}
+
+type Card struct {
+	ID                    string             `json:"_id"`
+	REV                   string             `json:"_rev"`
+	Datatype              string             `json:"datatype"`
+	TenantID              string             `json:"tenantId"`
+	Name                  string             `json:"name"`
+	Description           string             `json:"description"`
+	State                 string             `json:"state"`
+	Visualization         *CardVisualization `json:"visualization"`
+	Metrics               []*CardMetric      `json:"metrics"`
+	CreatedTimestamp      int64              `json:"createdTimestamp"`
+	LastModifiedTimestamp int64              `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (c *Card) GetID() string {
+	return c.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (c *Card) SetID(s string) error {
+	c.ID = s
+	return nil
+}
+
+type CardVisualization struct {
+	Key               string                         `json:"key"`
+	Label             string                         `json:"label"`
+	Category          string                         `json:"category"`
+	Icon              string                         `json:"icon"`
+	Component         string                         `json:"component"`
+	DefaultDimensions *Dimension                     `json:"defaultDimensions"`
+	Availability      *CardVisualizationAvailability `json:"availability"`
+}
+
+type CardVisualizationAvailability struct {
+	Type []string `json:"type"`
+}
+
+type CardMetric struct {
+	Key         string             `json:"key"`
+	Label       string             `json:"label"`
+	VendorLabel string             `json:"vendorLabel"`
+	VendorKey   string             `json:"vendorKey"`
+	ObjectType  string             `json:"objectType"`
+	Type        string             `json:"type"`
+	Options     *CardMetricOptions `json:"options"`
+	Units       []string           `json:"units"`
+}
+
+type CardMetricOptions struct {
+	UseBins           bool      `json:"useBins"`
+	FormatUnit        string    `json:"formatUnit"`
+	UseExplicitSeries bool      `json:"useExplicitSeries"`
+	Series            []string  `json:"series"`
+	Bins              []float64 `json:"bins"`
 }
 
 type MonitoredObjectBulkMetadataItem struct {

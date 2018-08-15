@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/icrowley/fake"
+
 	"github.com/getlantern/deepcopy"
 
 	"github.com/stretchr/testify/assert"
@@ -1490,34 +1492,13 @@ func (runner *TenantServiceDatastoreTestRunner) RunGetMonitoredObjectByDomainMap
 	assert.Empty(t, moList)
 }
 
-func (runner *TenantServiceDatastoreTestRunner) RunHasDashboardWithDomainTest(t *testing.T) {
+func (runner *TenantServiceDatastoreTestRunner) RunDashboardCRUD(t *testing.T) {
 
-	const COMPANY1 = "DomainCompany"
+	const COMPANY1 = "DashCompany"
 	const SUBDOMAIN1 = "subdom1"
 	const NAME1 = "name1"
 	const NAME2 = "name2"
-	const DOM1 = "domain1"
-	const DOM2 = "domain2"
-	const DOM3 = "domain3"
-	const COLOR1 = "color1"
-	const COLOR2 = "color2"
-	const THRPRF = "ThresholdPrf"
-	const DASHBOARD_NODOMAINS = "dash1"
-	const DASHBOARD_DOM1 = "dash2"
-	const DASHBOARD_DOM1_DOM2 = "dash3"
-
-	const OBJNAME1 = "obj1"
-	const OBJID1 = "object1"
-	const OBJNAME2 = "obj2"
-	const OBJID2 = "object2"
-	const OBJNAME3 = "obj3"
-	const OBJID3 = "object3"
-	const ACTNAME1 = "actName1"
-	const ACTTYPE1 = string(tenmod.AccedianVNID)
-	const ACTNAME2 = "actName2"
-	const ACTTYPE2 = string(tenmod.AccedianNID)
-	const REFNAME1 = "refname1"
-	const REFTYPE1 = string(tenmod.AccedianNID)
+	const THRPRF1 = "ThresholdPrf1"
 
 	// Create a tenant
 	data := admmod.Tenant{
@@ -1531,80 +1512,307 @@ func (runner *TenantServiceDatastoreTestRunner) RunHasDashboardWithDomainTest(t 
 
 	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
-	// Create a couple Domains
-	// Create a record
-	tenantDomain := tenmod.Domain{
-		Name:     DOM1,
-		TenantID: TENANT,
-		Color:    COLOR1}
-	res, err := runner.tenantDB.CreateTenantDomain(&tenantDomain)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
-	tenantDomain = tenmod.Domain{
-		Name:     DOM2,
-		TenantID: TENANT,
-		Color:    COLOR2}
-	res, err = runner.tenantDB.CreateTenantDomain(&tenantDomain)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
-	tenantDomain = tenmod.Domain{
-		Name:     DOM3,
-		TenantID: TENANT,
-		Color:    COLOR2}
-	res, err = runner.tenantDB.CreateTenantDomain(&tenantDomain)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	// Make sure there are not records to start
+	fetchList, err := runner.tenantDB.GetAllDashboards(TENANT)
+	assert.NotNil(t, err)
+	assert.Empty(t, fetchList)
 
-	// Validate they were created
-	recList, err := runner.tenantDB.GetAllTenantDomains(TENANT)
+	// Create a Dashboard
+	dash := tenmod.Dashboard{
+		Category:         fake.CharactersN(12),
+		TenantID:         TENANT,
+		ThresholdProfile: fake.CharactersN(20),
+		Name:             fake.CharactersN(8),
+		Cards:            []string{fake.CharactersN(20), fake.CharactersN(20), fake.CharactersN(20)},
+	}
+	created, err := runner.tenantDB.CreateDashboard(&dash)
 	assert.Nil(t, err)
-	assert.NotEmpty(t, recList)
-	assert.Equal(t, 3, len(recList))
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, dash.Name, created.Name)
+	assert.Equal(t, TENANT, created.TenantID)
+	assert.Equal(t, dash.Name, created.Name)
+	assert.Equal(t, dash.ThresholdProfile, created.ThresholdProfile)
+	assert.ElementsMatch(t, dash.Cards, created.Cards)
+	assert.Equal(t, string(tenmod.TenantDashboardType), created.Datatype)
+	assert.True(t, created.CreatedTimestamp > 0)
+	assert.True(t, created.CreatedTimestamp == created.LastModifiedTimestamp)
 
-	res2, err := runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
+	// Fetch by ID - unknown ID should fail
+	fetched, err := runner.tenantDB.GetDashboard(TENANT, "notreal")
+	assert.NotNil(t, err)
+
+	// Fetch by ID - success
+	fetched, err = runner.tenantDB.GetDashboard(TENANT, created.ID)
 	assert.Nil(t, err)
-	assert.False(t, res2)
+	assert.NotNil(t, fetched)
+	assert.Equal(t, created.REV, fetched.REV)
+	assert.Equal(t, created.Name, fetched.Name)
+	assert.Equal(t, created.ThresholdProfile, fetched.ThresholdProfile)
+	assert.ElementsMatch(t, created.Cards, fetched.Cards)
 
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
+	// Update a record that does not exist
+	dne := tenmod.Dashboard{
+		ID:               fake.CharactersN(12),
+		REV:              fake.CharactersN(12),
+		Category:         fake.CharactersN(12),
+		TenantID:         TENANT,
+		ThresholdProfile: fake.CharactersN(20),
+		Name:             fake.CharactersN(8),
+		Cards:            []string{fake.CharactersN(20), fake.CharactersN(20), fake.CharactersN(20)},
+	}
+	_, err = runner.tenantDB.UpdateDashboard(&dne)
+	assert.NotNil(t, err)
+
+	// Update that does work:
+	updateRecord := tenmod.Dashboard{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.ThresholdProfile = fake.CharactersN(15)
+	updated, err := runner.tenantDB.UpdateDashboard(&updateRecord)
 	assert.Nil(t, err)
-	assert.False(t, res2)
+	assert.NotNil(t, fetched)
+	assert.NotEqual(t, fetched.REV, updated.REV)
+	assert.Equal(t, fetched.Name, updated.Name)
+	assert.NotEqual(t, fetched.ThresholdProfile, updated.ThresholdProfile)
+	assert.ElementsMatch(t, fetched.Cards, updated.Cards)
+	assert.Equal(t, updateRecord.ThresholdProfile, updated.ThresholdProfile)
+	assert.Equal(t, fetched.CreatedTimestamp, updated.CreatedTimestamp)
 
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
+	// Create additional records
+	numAdditionalRecords := 4
+	for i := 0; i < numAdditionalRecords; i++ {
+		newOne := tenmod.Dashboard{
+			Category:         fake.CharactersN(12),
+			TenantID:         TENANT,
+			ThresholdProfile: fake.CharactersN(20),
+			Name:             fake.CharactersN(8),
+			Cards:            []string{fake.CharactersN(20), fake.CharactersN(20), fake.CharactersN(20)},
+		}
+		createdNew, err := runner.tenantDB.CreateDashboard(&newOne)
+		assert.Nil(t, err)
+		assert.NotNil(t, createdNew)
+		assert.NotEmpty(t, createdNew.ID)
+		assert.NotEmpty(t, createdNew.REV)
+		assert.Equal(t, newOne.Name, createdNew.Name)
+		assert.Equal(t, TENANT, createdNew.TenantID)
+		assert.Equal(t, newOne.Name, createdNew.Name)
+		assert.Equal(t, newOne.ThresholdProfile, createdNew.ThresholdProfile)
+		assert.ElementsMatch(t, newOne.Cards, createdNew.Cards)
+		assert.Equal(t, string(tenmod.TenantDashboardType), createdNew.Datatype)
+		assert.True(t, createdNew.CreatedTimestamp > 0)
+		assert.True(t, createdNew.CreatedTimestamp == createdNew.LastModifiedTimestamp)
+	}
+
+	// Get All records
+	fetchList, err = runner.tenantDB.GetAllDashboards(TENANT)
 	assert.Nil(t, err)
-	assert.False(t, res2)
+	assert.NotEmpty(t, fetchList)
+	assert.Equal(t, numAdditionalRecords+1, len(fetchList))
 
-	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_NODOMAINS, TenantID: TENANT})
+	// Delete a record that DNE
+	deleted, err := runner.tenantDB.DeleteDashboard(TENANT, "notReal")
+	assert.NotNil(t, err)
+	assert.Nil(t, deleted)
+
+	// Delete a record that does exist
+	deleted, err = runner.tenantDB.DeleteDashboard(TENANT, updated.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.Equal(t, fetched.Name, deleted.Name)
+
+	// Get All records - should have 1 less
+	fetchList, err = runner.tenantDB.GetAllDashboards(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchList)
+	assert.Equal(t, numAdditionalRecords, len(fetchList))
+
+	// Delete the remaining records
+	for _, rec := range fetchList {
+		gone, err := runner.tenantDB.DeleteDashboard(TENANT, rec.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, gone)
+	}
+}
+
+func (runner *TenantServiceDatastoreTestRunner) RunCardCRUD(t *testing.T) {
+	const COMPANY1 = "CardCompany"
+	const SUBDOMAIN1 = "subdom1"
+	const NAME1 = "name1"
+	const NAME2 = "name2"
+	const THRPRF1 = "ThresholdPrf1"
+
+	// Create a tenant
+	data := admmod.Tenant{
+		Name:         COMPANY1,
+		URLSubdomain: SUBDOMAIN1,
+		State:        string(common.UserActive)}
+	tenantDescriptor, err := runner.adminDB.CreateTenant(&data)
+	assert.Nil(t, err)
+	assert.NotNil(t, tenantDescriptor)
+	assert.Equal(t, COMPANY1, tenantDescriptor.Name)
+
+	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
+
+	// Make sure there are not records to start
+	fetchList, err := runner.tenantDB.GetAllCards(TENANT)
+	assert.NotNil(t, err)
+	assert.Empty(t, fetchList)
+
+	// Create a Card
+	card := tenmod.Card{
+		Description: fake.CharactersN(12),
+		TenantID:    TENANT,
+		Name:        fake.CharactersN(8),
+		Visualization: &tenmod.CardVisualization{
+			Category: fake.CharactersN(12),
+			Label:    fake.CharactersN(13),
+		},
+	}
+	created, err := runner.tenantDB.CreateCard(&card)
+	assert.Nil(t, err)
+	assert.NotNil(t, created)
+	assert.NotEmpty(t, created.ID)
+	assert.NotEmpty(t, created.REV)
+	assert.Equal(t, card.Name, created.Name)
+	assert.Equal(t, TENANT, created.TenantID)
+	assert.Equal(t, card.Visualization, created.Visualization)
+	assert.Equal(t, string(tenmod.TenantCardType), created.Datatype)
+	assert.True(t, created.CreatedTimestamp > 0)
+	assert.True(t, created.CreatedTimestamp == created.LastModifiedTimestamp)
+
+	// Fetch by ID - unknown ID should fail
+	fetched, err := runner.tenantDB.GetCard(TENANT, "notreal")
+	assert.NotNil(t, err)
+
+	// Fetch by ID - success
+	fetched, err = runner.tenantDB.GetCard(TENANT, created.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetched)
+	assert.Equal(t, created.REV, fetched.REV)
+	assert.Equal(t, created, fetched)
+
+	// Update a record that does not exist
+	dne := tenmod.Card{
+		ID:          fake.CharactersN(12),
+		REV:         fake.CharactersN(15),
+		Description: fake.CharactersN(12),
+		TenantID:    TENANT,
+		Name:        fake.CharactersN(8),
+		Visualization: &tenmod.CardVisualization{
+			Category: fake.CharactersN(12),
+			Label:    fake.CharactersN(13),
+		},
+	}
+	_, err = runner.tenantDB.UpdateCard(&dne)
+	assert.NotNil(t, err)
+
+	// Update that does work:
+	updateRecord := tenmod.Card{}
+	deepcopy.Copy(&updateRecord, fetched)
+	updateRecord.Name = fake.CharactersN(15)
+	updated, err := runner.tenantDB.UpdateCard(&updateRecord)
+	assert.Nil(t, err)
+	assert.NotNil(t, fetched)
+	assert.NotEqual(t, fetched.REV, updated.REV)
+	assert.NotEqual(t, fetched.Name, updated.Name)
+	assert.Equal(t, updateRecord.Name, updated.Name)
+	assert.Equal(t, fetched.CreatedTimestamp, updated.CreatedTimestamp)
+
+	// Create additional records
+	numAdditionalRecords := 4
+	for i := 0; i < numAdditionalRecords; i++ {
+		newOne := tenmod.Card{
+			Description: fake.CharactersN(12),
+			TenantID:    TENANT,
+			Name:        fake.CharactersN(8),
+			Visualization: &tenmod.CardVisualization{
+				Category: fake.CharactersN(12),
+				Label:    fake.CharactersN(13),
+			},
+		}
+		createdNew, err := runner.tenantDB.CreateCard(&newOne)
+		assert.Nil(t, err)
+		assert.NotNil(t, createdNew)
+		assert.NotEmpty(t, createdNew.ID)
+		assert.NotEmpty(t, createdNew.REV)
+		assert.Equal(t, newOne.Name, createdNew.Name)
+		assert.Equal(t, TENANT, createdNew.TenantID)
+		assert.Equal(t, newOne.Name, createdNew.Name)
+		assert.Equal(t, string(tenmod.TenantCardType), createdNew.Datatype)
+		assert.True(t, createdNew.CreatedTimestamp > 0)
+		assert.True(t, createdNew.CreatedTimestamp == createdNew.LastModifiedTimestamp)
+	}
+
+	// Get All records
+	fetchList, err = runner.tenantDB.GetAllCards(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchList)
+	assert.Equal(t, numAdditionalRecords+1, len(fetchList))
+
+	// Delete a record that DNE
+	deleted, err := runner.tenantDB.DeleteCard(TENANT, "notReal")
+	assert.NotNil(t, err)
+	assert.Nil(t, deleted)
+
+	// Delete a record that does exist
+	deleted, err = runner.tenantDB.DeleteCard(TENANT, updated.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+	assert.Equal(t, updated.Name, deleted.Name)
+
+	// Get All records - should have 1 less
+	fetchList, err = runner.tenantDB.GetAllCards(TENANT)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fetchList)
+	assert.Equal(t, numAdditionalRecords, len(fetchList))
+
+	// Create Dashboard that uses some the cards
+	dash := tenmod.Dashboard{
+		Category:         fake.CharactersN(12),
+		TenantID:         TENANT,
+		ThresholdProfile: fake.CharactersN(20),
+		Name:             fake.CharactersN(8),
+		Cards:            []string{fetchList[0].ID, fetchList[1].ID},
+	}
+	createdDash, err := runner.tenantDB.CreateDashboard(&dash)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdDash)
+	assert.NotEmpty(t, createdDash.ID)
+	assert.NotEmpty(t, createdDash.REV)
+	assert.Equal(t, dash.Name, createdDash.Name)
+	assert.Equal(t, TENANT, createdDash.TenantID)
+	assert.Equal(t, dash.Name, createdDash.Name)
+	assert.Equal(t, dash.ThresholdProfile, createdDash.ThresholdProfile)
+	assert.ElementsMatch(t, dash.Cards, createdDash.Cards)
+	assert.Equal(t, string(tenmod.TenantDashboardType), createdDash.Datatype)
+	assert.True(t, createdDash.CreatedTimestamp > 0)
+	assert.True(t, createdDash.CreatedTimestamp == createdDash.LastModifiedTimestamp)
+
+	// Try to delete a card used by a dashboard...should fail
+	deleted, err = runner.tenantDB.DeleteCard(TENANT, fetchList[0].ID)
+	assert.NotNil(t, err)
+	assert.Nil(t, deleted)
+
+	// Now delete the dashboard
+	deletedDash, err := runner.tenantDB.DeleteDashboard(TENANT, createdDash.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deletedDash)
+
+	// Try to delete the card the was used by a dashboard...should succeed
+	deleted, err = runner.tenantDB.DeleteCard(TENANT, fetchList[0].ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, deleted)
+
+	fetchList, err = runner.tenantDB.GetAllCards(TENANT)
 	assert.Nil(t, err)
 
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
-	assert.Nil(t, err)
-	assert.False(t, res2)
-
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
-	assert.Nil(t, err)
-	assert.False(t, res2)
-
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
-	assert.Nil(t, err)
-
-	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_DOM1, TenantID: TENANT, DomainSet: []string{DOM1}})
-	assert.Nil(t, err)
-
-	_, err = runner.tenantDB.CreateDashboard(&tenmod.Dashboard{Name: DASHBOARD_DOM1_DOM2, TenantID: TENANT, DomainSet: []string{DOM2, DOM1}})
-	assert.Nil(t, err)
-
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM1)
-	assert.Nil(t, err)
-	assert.True(t, res2)
-
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM2)
-	assert.Nil(t, err)
-	assert.True(t, res2)
-
-	res2, err = runner.tenantDB.HasDashboardsWithDomain(TENANT, DOM3)
-	assert.Nil(t, err)
-	assert.False(t, res2)
-
+	// Delete the remaining records
+	for _, rec := range fetchList {
+		gone, err := runner.tenantDB.DeleteCard(TENANT, rec.ID)
+		assert.Nil(t, err)
+		assert.NotNil(t, gone)
+	}
 }
 
 func (runner *TenantServiceDatastoreTestRunner) RunMonitoredObjectGetAllInList(t *testing.T) {

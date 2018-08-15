@@ -1,9 +1,11 @@
+## Current Release 
+### 0.198.0 
+**Release Date:** Wed Aug 15 16:16:21 UTC 2018     
+## Previous Releases 
 * Feature - Adding configurable druid timeouts
 
-## Current Release 
 ### 0.196.0 
 **Release Date:** Tue Aug 14 17:20:09 UTC 2018     
-## Previous Releases 
 * Feature - dashboard and Card API support
 ### 0.195.0 
 **Release Date:** Tue Aug 14 15:48:43 UTC 2018     

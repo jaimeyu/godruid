@@ -273,15 +273,6 @@ func HandleDeleteTenantDomain(allowedRoles []string, tenantDB datastore.TenantSe
 			}
 		}
 
-		// Integrity Check - Dashboards
-		dashboardUsesDomain, err := tenantDB.HasDashboardsWithDomain(params.TenantID, params.DomainID)
-		if err != nil {
-			return tenant_provisioning_service.NewDeleteTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to perform integrity check for %s deletion: %s", tenmod.TenantDomainStr, err.Error()), startTime, http.StatusInternalServerError, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
-		}
-		if dashboardUsesDomain {
-			return tenant_provisioning_service.NewDeleteTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("%s deletion failed integrity check: in use by at least one %s", tenmod.TenantDomainStr, tenmod.TenantDashboardStr), startTime, http.StatusInternalServerError, mon.DeleteTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
-		}
-
 		// Issue request to DAO Layer
 		result, err := tenantDB.DeleteTenantDomain(params.TenantID, params.DomainID)
 		if err != nil {

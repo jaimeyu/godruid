@@ -104,8 +104,10 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	//TODO: re-enable this test when the threshold profile model is fixed to no include UI details or UI uses the API to provision them
 	// tester.RunTenantThresholdProfileCRUD(t)
 	tester.RunGetMonitoredObjectByDomainMapTest(t)
-	tester.RunHasDashboardWithDomainTest(t)
 	tester.RunTenantReportScheduleCRUD(t)
+
+	tester.RunDashboardCRUD(t)
+	tester.RunCardCRUD(t)
 
 	tester.RunMonitoredObjectGetAllInList(t)
 	tester.RunTenantDataCleaningProfileCRUD(t)

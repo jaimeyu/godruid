@@ -10,36 +10,6 @@
         type: "array"
         items:
            $ref: '#/definitions/Tenant'
-  Tenant:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [tenants]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/TenantAttr'
-  TenantAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      name:
-        type: "string"
-      urlSubdomain:
-        type: "string"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
 
   JsonApiIngestionDictionary:
     type: "object"
@@ -160,6 +130,13 @@
         type: "array"
         items:
           $ref: '#/definitions/JsonApiRelationshipData'
+  JsonApiSingleRelationship:
+    type: "object"
+    properties:
+      data: 
+        $ref: '#/definitions/JsonApiRelationshipData'
+
+          
   JsonApiRelationshipData:
     type: "object"
     properties:

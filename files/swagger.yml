@@ -2791,6 +2791,341 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/dashboards:
+    post:
+      summary: Create a Dashboard for a Tenant.
+      operationId: CreateDashboardV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/DashboardResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Dashboard being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DashboardCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Dashboards for the specified Tenant.
+      operationId: GetAllDashboardsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DashboardListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Dashboards are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/dashboards/{dashboardId}:
+    get:
+      summary: Retrieve a Tenant Dashboard by Id.
+      operationId: GetDashboardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DashboardResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Dashboard is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: dashboardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Dashboard specified by the provided Dashboard Id.
+      operationId: UpdateDashboardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DashboardResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Dashboard is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the Dashboard being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DashboardUpdateRequest'
+        - name: dashboardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Dashboard specified by the provided Dashboard Id.
+      operationId: DeleteDashboardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/DashboardResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Dashboard is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: dashboardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+
+  /v2/cards:
+    post:
+      summary: Create a Card for a Tenant.
+      operationId: CreateCardV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/CardResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Card being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CardCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Cards for the specified Tenant.
+      operationId: GetAllCardsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CardListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Cardss are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/cards/{cardId}:
+    get:
+      summary: Retrieve a Tenant Card by Id.
+      operationId: GetCardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CardResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Cards is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Card specified by the provided Card Id.
+      operationId: UpdateCardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CardResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Cards is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the Cards being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CardUpdateRequest'
+        - name: cardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Card specified by the provided Card Id.
+      operationId: DeleteCardV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CardResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Cards is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/data-cleaning-profiles:
     post:
       summary: Provides ability to Create a Tenant Data Cleaning Profile
@@ -3763,36 +4098,6 @@ definitions:
         type: "array"
         items:
            $ref: '#/definitions/Tenant'
-  Tenant:
-    type: "object"
-    properties:
-      type: 
-        type: "string"
-        enum: [tenants]
-      id:
-        type: "string"
-      attributes:
-        $ref: '#/definitions/TenantAttr'
-  TenantAttr:
-    type: "object"
-    properties:
-      _id:
-        type: "string"
-      _rev:
-        type: "string"
-      datatype:
-        type: "string"
-      name:
-        type: "string"
-      urlSubdomain:
-        type: "string"
-      state:
-        type: "string"
-        enum: [USER_UNKNOWN, INVITED, ACTIVE, SUSPENDED, PENDING_DELETE]
-      createdTimestamp:
-        type: "integer"
-      lastModifiedTimestamp:
-        type: "integer"
 
   JsonApiIngestionDictionary:
     type: "object"
@@ -3913,6 +4218,13 @@ definitions:
         type: "array"
         items:
           $ref: '#/definitions/JsonApiRelationshipData'
+  JsonApiSingleRelationship:
+    type: "object"
+    properties:
+      data: 
+        $ref: '#/definitions/JsonApiRelationshipData'
+
+          
   JsonApiRelationshipData:
     type: "object"
     properties:
@@ -5532,6 +5844,329 @@ definitions:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+  DashboardCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dashboards]
+          id:
+            type: "string"
+          relationships:
+            $ref: '#/definitions/DashboardRelationships'
+          attributes:
+            type: "object"
+            required: ["name"]
+            properties:
+              name:
+                type: "string"
+              category: 
+                type: "string"
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
+              cardPositions:
+                $ref: '#/definitions/CardPositions'
+              
+  DashboardUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dashboards]
+          id:
+            type: "string"
+          relationships:
+            $ref: '#/definitions/DashboardRelationships'
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              category: 
+                type: "string"
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
+              cardPositions:
+                $ref: '#/definitions/CardPositions'
+  
+  DashboardResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Dashboard'
+  DashboardListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Dashboard'
+  
+  Dashboard:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [dashboards]
+      id:
+        type: "string"
+      relationships:
+        $ref: '#/definitions/DashboardRelationships'
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "datatype", "port", "tenantId", "category", "metadataFilters", "cardPositions", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          category: 
+            type: "string"
+          metadataFilters:
+            type: "array"
+            items:
+              $ref: '#/definitions/MetadataFilter'
+          cardPositions:
+            $ref: '#/definitions/CardPositions'
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  CardPositions:
+    type: "object"
+    additionalProperties:
+      type: "object"
+      required: ["position"]
+      properties:
+        position: 
+          type: "integer"
+        dimensions:
+          type: "object"
+          properties:
+            columns: 
+              type: "integer"
+            rows: 
+              type: "integer"
+
+  MetadataFilter:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      values:
+        type: "array"
+        items: 
+          type: "string"
+
+  DashboardRelationships:
+    type: "object"
+    properties:
+      cards:
+        $ref: '#/definitions/JsonApiRelationship'
+      thresholdProfile:
+        $ref: '#/definitions/JsonApiSingleRelationship'
+
+  CardCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [cards]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "state"]
+            properties:
+              name:
+                type: "string"
+              description: 
+                type: "string"
+              state: 
+                type: "string"
+                enum: [active, pending]
+              visualization:
+                $ref: '#/definitions/CardVisualization'
+              metrics:
+                type: "array"
+                items:
+                  $ref: '#/definitions/CardMetric'
+              
+  CardUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [cards]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              description: 
+                type: "string"
+              state: 
+                type: "string"
+                enum: [active, pending]
+              visualization:
+                $ref: '#/definitions/CardVisualization'
+              metrics:
+                type: "array"
+                items:
+                  $ref: '#/definitions/CardMetric'
+  
+  CardResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Card'
+  CardListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Card'
+  
+  Card:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [cards]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          description: 
+            type: "string"
+          state: 
+            type: "string"
+            enum: [active, pending]
+          visualization:
+            $ref: '#/definitions/CardVisualization'
+          metrics:
+            type: "array"
+            items:
+              $ref: '#/definitions/CardMetric'
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  CardVisualization:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      label:
+        type: "string"
+      category:
+        type: "string"
+      icon:
+        type: "string"
+      component:
+        type: "string"
+      availability:
+        type: "object"
+        properties:
+          count: 
+            type: "integer"
+          type:
+            type: "array"
+            items:
+              type: "string"
+      defaultDimensions:
+        type: "object"
+        properties:
+          columns: 
+            type: "integer"
+          rows: 
+            type: "integer"
+  
+  CardMetric:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      label:
+        type: "string"
+      vendorLabel:
+        type: "string"
+      vendorKey:
+        type: "string"
+      objectType:
+        type: "string"
+      type:
+        type: "string"
+      units:
+        type: "array"
+        items:
+          type: "string"
+      options:
+        type: "object"
+        properties:
+          useBins:
+            type: "boolean"
+          formatUnit:
+            type: "string"
+          bins: 
+            type: "array"
+            items:
+              type: "number"
   DataCleaningProfileCreateRequest:
     type: "object"
     required: ["data"]
@@ -5875,6 +6510,14 @@ definitions:
           objectType: 
             type: "string"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "string"
+            example:
+              "region": "paris"
+              "wgs87_x": "-45.7123912"
+              "wgs87_y": "-74.2130912"
           createdTimestamp:
             type: "integer"
           lastModifiedTimestamp:

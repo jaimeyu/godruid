@@ -1,0 +1,323 @@
+  DashboardCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dashboards]
+          id:
+            type: "string"
+          relationships:
+            $ref: '#/definitions/DashboardRelationships'
+          attributes:
+            type: "object"
+            required: ["name"]
+            properties:
+              name:
+                type: "string"
+              category: 
+                type: "string"
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
+              cardPositions:
+                $ref: '#/definitions/CardPositions'
+              
+  DashboardUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [dashboards]
+          id:
+            type: "string"
+          relationships:
+            $ref: '#/definitions/DashboardRelationships'
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              category: 
+                type: "string"
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
+              cardPositions:
+                $ref: '#/definitions/CardPositions'
+  
+  DashboardResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Dashboard'
+  DashboardListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Dashboard'
+  
+  Dashboard:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [dashboards]
+      id:
+        type: "string"
+      relationships:
+        $ref: '#/definitions/DashboardRelationships'
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "datatype", "port", "tenantId", "category", "metadataFilters", "cardPositions", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          category: 
+            type: "string"
+          metadataFilters:
+            type: "array"
+            items:
+              $ref: '#/definitions/MetadataFilter'
+          cardPositions:
+            $ref: '#/definitions/CardPositions'
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  CardPositions:
+    type: "object"
+    additionalProperties:
+      type: "object"
+      required: ["position"]
+      properties:
+        position: 
+          type: "integer"
+        dimensions:
+          type: "object"
+          properties:
+            columns: 
+              type: "integer"
+            rows: 
+              type: "integer"
+
+  MetadataFilter:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      values:
+        type: "array"
+        items: 
+          type: "string"
+
+  DashboardRelationships:
+    type: "object"
+    properties:
+      cards:
+        $ref: '#/definitions/JsonApiRelationship'
+      thresholdProfile:
+        $ref: '#/definitions/JsonApiSingleRelationship'
+
+  CardCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [cards]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["name", "state"]
+            properties:
+              name:
+                type: "string"
+              description: 
+                type: "string"
+              state: 
+                type: "string"
+                enum: [active, pending]
+              visualization:
+                $ref: '#/definitions/CardVisualization'
+              metrics:
+                type: "array"
+                items:
+                  $ref: '#/definitions/CardMetric'
+              
+  CardUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [cards]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+              name:
+                type: "string"
+              description: 
+                type: "string"
+              state: 
+                type: "string"
+                enum: [active, pending]
+              visualization:
+                $ref: '#/definitions/CardVisualization'
+              metrics:
+                type: "array"
+                items:
+                  $ref: '#/definitions/CardMetric'
+  
+  CardResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Card'
+  CardListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Card'
+  
+  Card:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [cards]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          name:
+            type: "string"
+          description: 
+            type: "string"
+          state: 
+            type: "string"
+            enum: [active, pending]
+          visualization:
+            $ref: '#/definitions/CardVisualization'
+          metrics:
+            type: "array"
+            items:
+              $ref: '#/definitions/CardMetric'
+          createdTimestamp:
+            type: "integer"
+          lastModifiedTimestamp:
+            type: "integer"
+
+  CardVisualization:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      label:
+        type: "string"
+      category:
+        type: "string"
+      icon:
+        type: "string"
+      component:
+        type: "string"
+      availability:
+        type: "object"
+        properties:
+          count: 
+            type: "integer"
+          type:
+            type: "array"
+            items:
+              type: "string"
+      defaultDimensions:
+        type: "object"
+        properties:
+          columns: 
+            type: "integer"
+          rows: 
+            type: "integer"
+  
+  CardMetric:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      label:
+        type: "string"
+      vendorLabel:
+        type: "string"
+      vendorKey:
+        type: "string"
+      objectType:
+        type: "string"
+      type:
+        type: "string"
+      units:
+        type: "array"
+        items:
+          type: "string"
+      options:
+        type: "object"
+        properties:
+          useBins:
+            type: "boolean"
+          formatUnit:
+            type: "string"
+          bins: 
+            type: "array"
+            items:
+              type: "number"

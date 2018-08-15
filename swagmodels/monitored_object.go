@@ -164,6 +164,9 @@ type MonitoredObjectAttributes struct {
 	// last modified timestamp
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
 
+	// meta
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// object Id
 	ObjectID string `json:"objectId,omitempty"`
 

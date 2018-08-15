@@ -47,6 +47,12 @@ druid:
   coordinator:
     server: http://aod_coordinator
     port: 8081
+  timeoutsms:
+    slareports: 45000
+    histogram: 45000
+    thresholdcrossing: 45000
+    aggregatedmetrics: 45000
+  
 
 kafka:
   broker: kafka:9092

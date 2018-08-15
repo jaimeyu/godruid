@@ -117,4 +117,11 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_maxConcurrentProvAPICalls.String(), 1000)
 	v.SetDefault(CK_args_maxConcurrentPouchAPICalls.String(), 1000)
 	v.SetDefault(CK_kafka_broker.String(), "kafka:9092")
+	v.SetDefault(CK_druid_timeoutsms_histogram.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_slareports.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_thresholdcrossing.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_aggregatedmetrics.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_rawmetrics.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_filteredrawmetrics.String(), 45000)
+
 }

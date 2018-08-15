@@ -155,7 +155,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *metrics.HistogramRequest, 
 
 	timeout := request.Timeout
 	if timeout == 0 {
-		timeout = 5000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_histogram.String()))
 	}
 
 	// Split out the request into a set of request metrics keyed off of the metric vendor, objectType, name, and direction
@@ -215,7 +215,7 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 
 	timeout := request.Timeout
 	if timeout == 0 {
-		timeout = 5000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossing.String()))
 	}
 
 	query, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.Metrics, thresholdProfile.Data, timeout)
@@ -382,7 +382,7 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 
 	timeout := request.Timeout
 	if timeout == 0 {
-		timeout = 30000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_aggregatedmetrics.String()))
 	}
 
 	query, pp, err := AggMetricsQuery(request.TenantID, table, request.Interval, metaMOs, request.Aggregation, request.Metrics, timeout, request.Granularity)
@@ -442,7 +442,7 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 
 	timeout := request.Timeout
 	if timeout == 0 {
-		timeout = 5000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
 	query, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
@@ -602,7 +602,7 @@ func (dc *DruidDatastoreClient) GetRawMetrics(request *pb.RawMetricsRequest) (ma
 	// peyo TODO we should have a better way to handle default query params
 	timeout := request.GetTimeout()
 	if timeout == 0 {
-		timeout = 30000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_rawmetrics.String()))
 	}
 
 	granularity := request.GetGranularity()
@@ -677,7 +677,7 @@ func (dc *DruidDatastoreClient) GetFilteredRawMetrics(request *metrics.RawMetric
 
 	timeout := request.Timeout
 	if timeout == 0 {
-		timeout = 30000
+		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_filteredrawmetrics.String()))
 	}
 
 	granularity := request.Granularity

@@ -1,3 +1,5 @@
+* Feature - Adding configurable druid timeouts
+
 ## Current Release 
 ### 0.196.0 
 **Release Date:** Tue Aug 14 17:20:09 UTC 2018     

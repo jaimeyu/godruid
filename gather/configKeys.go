@@ -33,6 +33,12 @@ const (
 	CK_druid_broker_table                    ConfigKey = "druid.broker.table"
 	CK_druid_coordinator_server              ConfigKey = "druid.coordinator.server"
 	CK_druid_coordinator_port                ConfigKey = "druid.coordinator.port"
+	CK_druid_timeoutsms_histogram            ConfigKey = "druid.timeoutsms.histogram"
+	CK_druid_timeoutsms_slareports           ConfigKey = "druid.timeoutsms.slareports"
+	CK_druid_timeoutsms_thresholdcrossing    ConfigKey = "druid.timeoutsms.thresholdcrossing"
+	CK_druid_timeoutsms_aggregatedmetrics    ConfigKey = "druid.timeoutsms.aggregatedmetrics"
+	CK_druid_timeoutsms_rawmetrics           ConfigKey = "druid.timeoutsms.rawmetrics"
+	CK_druid_timeoutsms_filteredrawmetrics   ConfigKey = "druid.timeoutsms.filteredrawmetrics"
 	CK_kafka_broker                          ConfigKey = "kafka.broker"
 	CK_args_authorizationAAA                 ConfigKey = "args.AuthorizationAAA"
 )

@@ -225,6 +225,11 @@ func doCreateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 
 	data.TenantID = tenantID
 
+	err = data.Validate(false)
+	if err != nil {
+		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Validation failed due to %s", err.Error())
+	}
+
 	// Issue request to DAO Layer to Create Record
 	result, err := tenantDB.CreateMonitoredObject(&data)
 	if err != nil {
@@ -232,6 +237,12 @@ func doCreateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 			return startTime, http.StatusConflict, nil, err
 		}
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	// Build up the monitored object indices
+	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, result.Meta)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to update metadata views %s %s", tenmod.TenantMonitoredObjectStr, err.Error())
 	}
 
 	if changeNotificationEnabled {
@@ -309,6 +320,11 @@ func doUpdateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 	}
 	patched = fetched
 
+	err = patched.Validate(true)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantMonitoredObjectStr, params.MonObjID, err.Error())
+	}
+
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateMonitoredObject(patched)
 	if err != nil {
@@ -317,6 +333,12 @@ func doUpdateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 		}
 
 		return startTime, http.StatusInternalServerError, nil, err
+	}
+
+	// Build up the monitored object indices
+	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, result.Meta)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to update metadata views %s %s", tenmod.TenantMonitoredObjectStr, err.Error())
 	}
 
 	if changeNotificationEnabled {
@@ -351,6 +373,9 @@ func doDeleteMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to delete %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 	}
+
+	//Clean up the views now that a monitored object is deleted.
+	tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, result.Meta)
 
 	if changeNotificationEnabled {
 		NotifyMonitoredObjectDeleted(tenantID, result)
@@ -425,7 +450,6 @@ func doBulkInsertMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 		return startTime, http.StatusForbidden, nil, err
 	}
 
-	
 	metaKeys := make(map[string]string)
 
 	// Unmarshal the request
@@ -438,7 +462,7 @@ func doBulkInsertMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 
 		err = addItem.Validate(false)
 		if err != nil {
-			return startTime, http.StatusBadRequest, nil, fmt.Errorf("Validation failure of %s because: %s", models.AsJSONString(addItem),err.Error())
+			return startTime, http.StatusBadRequest, nil, fmt.Errorf("Validation failure of %s because: %s", models.AsJSONString(addItem), err.Error())
 		}
 
 		// Track all distinct metadata items to be index processed after all are items are worked through
@@ -446,8 +470,8 @@ func doBulkInsertMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 			metaKeys[k] = ""
 		}
 
-			data = append(data, addItem)
-		}
+		data = append(data, addItem)
+	}
 
 	if len(data) == 0 {
 		return startTime, http.StatusBadRequest, nil, fmt.Errorf("No Monitored Objects in provided in the request")
@@ -458,12 +482,10 @@ func doBulkInsertMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 	}
-	
 
 	if changeNotificationEnabled {
 		NotifyMonitoredObjectCreated(tenantID, data...)
 	}
-
 
 	// Build up the monitored object indices
 	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
@@ -500,11 +522,10 @@ func doBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 		if err != nil {
 			return startTime, http.StatusBadRequest, nil, err
 		}
-		
 
 		err = addItem.Validate(true)
 		if err != nil {
-			return startTime, http.StatusBadRequest, nil, fmt.Errorf("Validation failure of %s because: %s", models.AsJSONString(addItem),err.Error())
+			return startTime, http.StatusBadRequest, nil, fmt.Errorf("Validation failure of %s because: %s", models.AsJSONString(addItem), err.Error())
 		}
 
 		// Track all distinct metadata items to be index processed after all are items are worked through
@@ -529,13 +550,11 @@ func doBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 		NotifyMonitoredObjectUpdated(tenantID, data...)
 	}
 
-
 	// Build up the monitored object indices
 	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to update metadata views %s %s", tenmod.TenantMonitoredObjectStr, err.Error())
 	}
-
 
 	converted, err := convertToBulkMOResponse(result)
 	// err = json.Unmarshal(res, &converted)

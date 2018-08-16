@@ -594,7 +594,6 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 		key := strings.ToLower(k)
 		val := strings.ToLower(v)
 		newMeta[key] = val
-
 	}
 
 	mo.Meta = newMeta

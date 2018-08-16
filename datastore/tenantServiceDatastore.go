@@ -51,6 +51,7 @@ type TenantServiceDatastore interface {
 	CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
 	UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
 	GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+
 	DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
 	GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error)
 	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)

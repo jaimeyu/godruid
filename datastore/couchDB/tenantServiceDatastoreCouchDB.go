@@ -1002,6 +1002,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, err
 	}
 
+	name = strings.ToLower(name)
+
 	index := monitoredObjectIndex
 	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
 	// Expect only 1 return

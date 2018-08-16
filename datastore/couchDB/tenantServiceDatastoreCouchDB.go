@@ -1279,6 +1279,11 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID st
 
 		data = append(data, genericMO)
 
+		err = mo.Validate(true)
+		if err != nil {
+			return nil, err
+		}
+
 		// We want to generate a list of metakeys for processing later
 		for key := range mo.Meta {
 			metas[key] = key

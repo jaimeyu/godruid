@@ -532,6 +532,8 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			splitID := strings.Split(existingMonitoredObject.ID, idSep)
 			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
+			existingMonitoredObject.Validate(true)
+
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
 			if err != nil {

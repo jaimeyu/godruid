@@ -254,6 +254,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler: tenant_provisioning_service.GetDomainToMonitoredObjectMapHandlerFunc(func(params tenant_provisioning_service.GetDomainToMonitoredObjectMapParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetDomainToMonitoredObjectMap has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler: tenant_provisioning_service_v2.GetFilteredMonitoredObjectListV2HandlerFunc(func(params tenant_provisioning_service_v2.GetFilteredMonitoredObjectListV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2 has not yet been implemented")
+		}),
 		MetricsServiceGetFilteredRawMetricsHandler: metrics_service.GetFilteredRawMetricsHandlerFunc(func(params metrics_service.GetFilteredRawMetricsParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceGetFilteredRawMetrics has not yet been implemented")
 		}),
@@ -447,7 +450,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/json" mime type
@@ -595,6 +598,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetDataCleaningProfilesHandler tenant_provisioning_service_v2.GetDataCleaningProfilesHandler
 	// TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler sets the operation handler for the get domain to monitored object map operation
 	TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler
+	// TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler sets the operation handler for the get filtered monitored object list v2 operation
+	TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler tenant_provisioning_service_v2.GetFilteredMonitoredObjectListV2Handler
 	// MetricsServiceGetFilteredRawMetricsHandler sets the operation handler for the get filtered raw metrics operation
 	MetricsServiceGetFilteredRawMetricsHandler metrics_service.GetFilteredRawMetricsHandler
 	// MetricsServiceGetHistogramHandler sets the operation handler for the get histogram operation
@@ -1052,6 +1057,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetDomainToMonitoredObjectMapHandler")
+	}
+
+	if o.TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetFilteredMonitoredObjectListV2Handler")
 	}
 
 	if o.MetricsServiceGetFilteredRawMetricsHandler == nil {
@@ -1734,6 +1743,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/monitored-object-domain-map"] = tenant_provisioning_service.NewGetDomainToMonitoredObjectMap(o.context, o.TenantProvisioningServiceGetDomainToMonitoredObjectMapHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v2/monitored-objects/id-list"] = tenant_provisioning_service_v2.NewGetFilteredMonitoredObjectListV2(o.context, o.TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

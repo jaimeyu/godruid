@@ -1,3 +1,4 @@
+* Feature - Adding endpoint to query monitored objects by metadata
 ## Current Release 
 ### 0.198.0 
 **Release Date:** Wed Aug 15 16:16:21 UTC 2018     

@@ -16,7 +16,6 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
-	setops "github.com/adam-hanna/arrayOperations"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -650,6 +649,15 @@ func convertToJsonapiObject(obj interface{}, dataContainer interface{}) error {
 	return nil
 }
 
+func wrapJsonAPIObject(obj interface{}, id string, otype string) map[string]interface{} {
+
+	return map[string]interface{}{
+		"data": map[string]interface{}{
+			"id":         id,
+			"type":       otype,
+			"attributes": obj}}
+}
+
 // authorizeRequest - Does the initial setup of a REST handler function, including logging, incrementing API counters for monitoring and tracking the
 // initialization time of the call.
 // Returns:
@@ -681,16 +689,6 @@ func convertRequestBodyToDBModel(requestBody interface{}, dataContainer interfac
 
 func checkForNotFound(s string) bool {
 	return strings.Contains(s, string(notFound))
-}
-
-// Return the string union between the provided arrays
-func listUnion(listA []string, listB []string) []string {
-	return setops.UnionString(listA, listB)
-}
-
-// return the string intersection between the provided arrays
-func listIntersection(listA []string, listB []string) []string {
-	return setops.IntersectString(listA, listB)
 }
 
 // generateLinks - creates the "links" section to be used in a jsonapi response object

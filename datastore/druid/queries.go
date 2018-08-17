@@ -2,6 +2,8 @@ package druid
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -136,22 +138,42 @@ func ThresholdCrossingQuery(tenant string, dataSource string, metaMOs []string, 
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
+	for _, vendorKey := range sortedVendorMapKeys {
+		vk := vendorKey
+		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
+		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
 		// if no vendors have been provided, use all of them, otherwise
 		// only include the provided ones
 
 		if vendors == nil || contains(vendors, vk) {
-			for tk, t := range v.GetMonitoredObjectTypeMap() {
+			sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
+			for _, typeKey := range sortedMOTypeMapKeys {
+				tk := typeKey
+				t := v.GetMonitoredObjectTypeMap()[tk]
+				// for tk, t := range v.GetMonitoredObjectTypeMap() {
 				// if no objectTypes have been provided, use all of them, otherwise
 				// only include the provided ones
 				if objectTypes == nil || contains(objectTypes, tk) {
-					for mk, m := range t.GetMetricMap() {
+					sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
+					for _, metricTypeKey := range sortedMetricTypeMapKeys {
+						mk := metricTypeKey
+						m := t.GetMetricMap()[mk]
+						// for mk, m := range t.GetMetricMap() {
 						// if no metrics have been provided, use all of them, otherwise
 						// only include the provided ones
 						if metrics == nil || contains(metrics, mk) {
-							for dk, d := range m.GetDirectionMap() {
+							sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
+							for _, directionTypeKey := range sortedDirectionTypeMapKeys {
+								dk := directionTypeKey
+								d := m.GetDirectionMap()[dk]
+								// for dk, d := range m.GetDirectionMap() {
 								if directions == nil || contains(directions, dk) {
-									for ek, e := range d.GetEventMap() {
+									sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
+									for _, eventTypeKey := range sortedEventTypeMapKeys {
+										ek := eventTypeKey
+										e := d.GetEventMap()[ek]
+										// for ek, e := range d.GetEventMap() {
 										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
 										filter, err := FilterHelper(mk, e)
 										if err != nil {
@@ -215,13 +237,29 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 		ThresholdFilterList     []*godruid.Filter
 	}
 
-	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
+	for _, vendorKey := range sortedVendorMapKeys {
+		vk := vendorKey
+		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
+		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
+		for _, typeKey := range sortedMOTypeMapKeys {
+			tk := typeKey
+			t := v.GetMonitoredObjectTypeMap()[tk]
+			// for tk, t := range v.GetMonitoredObjectTypeMap() {
 			// This is for de-duping violation duration for metrics that are violated at the same time for the same object.
 			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
+			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
+			for _, metricTypeKey := range sortedMetricTypeMapKeys {
+				mk := metricTypeKey
+				m := t.GetMetricMap()[mk]
+				// for mk, m := range t.GetMetricMap() {
+				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
+				for _, directionTypeKey := range sortedDirectionTypeMapKeys {
+					dk := directionTypeKey
+					d := m.GetDirectionMap()[dk]
+					// for dk, d := range m.GetDirectionMap() {
 
 					// skip metrics that are not on the whitelist (if one was provided)
 					if !inWhitelist(metricWhitelist, vk, tk, mk, dk) {
@@ -246,7 +284,11 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 					))
 
 					// process the provisioned events (severities) and create aggregations
-					for ek, e := range d.GetEventMap() {
+					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
+					for _, eventTypeKey := range sortedEventTypeMapKeys {
+						ek := eventTypeKey
+						e := d.GetEventMap()[ek]
+						// for ek, e := range d.GetEventMap() {
 
 						thresholdFilter, err := FilterHelper(mk, e)
 						if err != nil {
@@ -469,13 +511,40 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 		BaseFilter       *godruid.Filter
 		ThresholdFilters []*godruid.Filter
 	}
-	for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+
+	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
+	for _, vendorKey := range sortedVendorMapKeys {
+		vk := vendorKey
+		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
+		// }
+		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+
+		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
+		for _, typeKey := range sortedMOTypeMapKeys {
+			tk := typeKey
+			t := v.GetMonitoredObjectTypeMap()[tk]
+			// for tk, t := range v.GetMonitoredObjectTypeMap() {
+			if tk != "twamp-sf" {
+				continue
+			}
+
 			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
+			for _, metricTypeKey := range sortedMetricTypeMapKeys {
+				mk := metricTypeKey
+				m := t.GetMetricMap()[mk]
+				// for mk, m := range t.GetMetricMap() {
+				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
+				for _, directionTypeKey := range sortedDirectionTypeMapKeys {
+					dk := directionTypeKey
+					d := m.GetDirectionMap()[dk]
+					// for dk, d := range m.GetDirectionMap() {
+					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
+					for _, eventTypeKey := range sortedEventTypeMapKeys {
+						ek := eventTypeKey
+						e := d.GetEventMap()[ek]
+						// for ek, e := range d.GetEventMap() {
 						if ek != "sla" {
 							continue
 						}
@@ -676,6 +745,10 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 		Name: countName,
 	})
 
+	sort.Slice(aggregations, func(i, j int) bool {
+		return aggregations[i].Aggregator.Name < aggregations[j].Aggregator.Name
+	})
+
 	return &godruid.QueryTopN{
 		DataSource:  dataSource,
 		Granularity: toGranularity(granularity),
@@ -714,7 +787,11 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 	vendorMap := thresholdProfile.GetThresholds().GetVendorMap()
 	events := vendorMap[vendor].GetMonitoredObjectTypeMap()[objectType].GetMetricMap()[metric].GetDirectionMap()[direction].GetEventMap()
 
-	for ek, e := range events {
+	sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(events).MapKeys())
+	for _, eventTypeKey := range sortedEventTypeMapKeys {
+		ek := eventTypeKey
+		e := events[ek]
+		// for ek, e := range events {
 		name := ek
 		filter, err := FilterHelper(metric, e)
 		if err != nil {
@@ -1122,4 +1199,20 @@ func cleanFilter() *godruid.Filter {
 		godruid.FilterSelector("cleanStatus", ""),
 		godruid.FilterLowerBound("cleanStatus", godruid.NUMERIC, -1, true),
 	)
+}
+
+// getSortedKeySlice - fucntion used to make sure our keys are sorted before we bukild druid queries which prevents us from ending up with different
+// queries for the same data which results in us missing the cache on subsequent requests
+func getSortedKeySlice(originalSlice []reflect.Value) []string {
+
+	keys := make([]string, len(originalSlice))
+	for i, val := range originalSlice {
+		keys[i] = val.String()
+	}
+
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
+	return keys
 }

@@ -568,9 +568,6 @@ func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
 
 func isStringSterile(str string) bool {
 
-	if strings.ContainsAny(str, illegalWords) {
-		return false
-	}
 	isAlpha := regexp.MustCompile(`^[a-z_]+$`).MatchString
 
 	if !isAlpha(str) {

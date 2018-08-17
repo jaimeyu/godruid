@@ -1,3 +1,4 @@
+* Fix - making sure Druid queries are built using sorted keys to ensure cache hits on subsequent queries
 ## Current Release 
 ### 0.199.0 
 **Release Date:** Fri Aug 17 19:23:12 UTC 2018     

@@ -75,7 +75,7 @@ type BaseDruidResponse struct {
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
-	clientTimeout := 60 * time.Second
+	clientTimeout := 600 * time.Second
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -502,6 +502,10 @@ func (dc *DruidDatastoreClient) GetSLAReport(request *metrics.SLAReportRequest, 
 
 	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
 		for tk, t := range v.GetMonitoredObjectTypeMap() {
+			if tk != "twamp-sf" {
+				continue
+			}
+
 			for mk, m := range t.GetMetricMap() {
 				for dk, d := range m.GetDirectionMap() {
 					for ek, e := range d.GetEventMap() {

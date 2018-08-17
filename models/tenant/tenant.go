@@ -14,7 +14,7 @@ import (
 type TenantDataType string
 
 const illegalWords = "!,@#$%^&*?/"
-const legalCharacters = "1234567890qwertyuiopasdfghjklzxcvbnm_"
+const legalCharacters = "qwertyuiopasdfghjklzxcvbnm_"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
@@ -597,9 +597,9 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 		if isStringSterile(k) == false {
 			return fmt.Errorf("Metadata key (%s) contains an invalid character (Valid characters:%s). Please reformat your keys", k, legalCharacters)
 		}
+		// ensure lower case
 		key := strings.ToLower(k)
-		val := strings.ToLower(v)
-		newMeta[key] = val
+		newMeta[key] = v
 		logger.Log.Debugf("Converted to {%s:%s} -> {%s,%s}", k, v, key, newMeta[key])
 
 	}

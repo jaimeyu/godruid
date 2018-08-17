@@ -137,6 +137,9 @@ type MonitoredObjectCreateAttributes struct {
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType string `json:"actuatorType,omitempty"`
 
+	// meta
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// object Id
 	// Required: true
 	ObjectID *string `json:"objectId"`

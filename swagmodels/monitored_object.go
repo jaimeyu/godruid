@@ -165,6 +165,7 @@ type MonitoredObjectAttributes struct {
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
 
 	// meta
+	// Pattern: ^[a-z_]+$
 	Meta map[string]string `json:"meta,omitempty"`
 
 	// object Id
@@ -197,6 +198,10 @@ func (m *MonitoredObjectAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateActuatorType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMeta(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -264,6 +269,15 @@ func (m *MonitoredObjectAttributes) validateActuatorType(formats strfmt.Registry
 	// value enum
 	if err := m.validateActuatorTypeEnum("attributes"+"."+"actuatorType", "body", m.ActuatorType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *MonitoredObjectAttributes) validateMeta(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Meta) { // not required
+		return nil
 	}
 
 	return nil

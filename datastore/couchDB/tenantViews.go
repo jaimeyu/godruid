@@ -144,7 +144,7 @@ const (
 		}
 	}`
 	metaUniqueValuesViewsURI          = "{{KeyName}}/{{KeyField}}"
-	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
+	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.meta) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
 
 	metaDdocTemplate  = "%s"
 	metaIndexTemplate = `{

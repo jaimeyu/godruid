@@ -3,8 +3,10 @@ package tenant
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
+	"github.com/accedian/adh-gather/logger"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -12,6 +14,7 @@ import (
 type TenantDataType string
 
 const illegalWords = "!,@#$%^&*?/"
+const legalCharacters = "1234567890qwertyuiopasdfghjklzxcvbnm_"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
@@ -568,6 +571,12 @@ func isStringSterile(str string) bool {
 	if strings.ContainsAny(str, illegalWords) {
 		return false
 	}
+	isAlpha := regexp.MustCompile(`^[a-z_]+$`).MatchString
+
+	if !isAlpha(str) {
+		logger.Log.Debugf("%q is not valid\n", str)
+		return false
+	}
 
 	return true
 }
@@ -589,7 +598,7 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	for k, v := range mo.Meta {
 		// Stop
 		if isStringSterile(k) == false {
-			return fmt.Errorf("Metadata key (%s) contains an invalid character (%s). Please reformat your keys.", k, illegalWords)
+			return fmt.Errorf("Metadata key (%s) contains an invalid character (Valid characters:%s). Please reformat your keys", k, legalCharacters)
 		}
 		key := strings.ToLower(k)
 		val := strings.ToLower(v)

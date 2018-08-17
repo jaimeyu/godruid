@@ -1809,6 +1809,59 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 	return res, nil
 }
 
+//GetFilteredMonitoredObjectList - Retrieve a set of monitored object IDs based on the passed in metadata criteria
+func (tsd *TenantServiceDatastoreCouchDB) GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error) {
+
+	// Return nil since our query does not care about metadata
+	if len(meta) == 0 {
+		return nil, nil
+	}
+
+	mos := make([]string, 0)
+
+	firstMeta := true
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieving monitored object IDs for tenant %s based on metadata criteria %v", tenantId, meta)
+	}
+
+	// Loop over all the metadata types
+	for mkey, mvalue := range meta {
+
+		mosForKey := make([]string, 0)
+		// Loop over all the metadata values associated with the current type
+		for _, valueItem := range mvalue {
+
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata with key %s and value %s", tenantId, mkey, mvalue)
+			}
+
+			rMetaMOs, err := tsd.GetMonitoredObjectIDsToMetaEntry(tenantId, mkey, valueItem)
+
+			if err != nil {
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
+			}
+
+			// Union all the IDs together since we need a conditional OR for all values of a particular key
+			mosForKey = listUnion(mosForKey, rMetaMOs)
+		}
+		if !firstMeta {
+			// Intersect all the IDs since monitored objects should contain at least one of the metadata values for each of the metadata keys in a conditional AND
+			mos = listIntersection(mos, mosForKey)
+		} else {
+			// We do this since we don't want to run an intersection against an initially empty list otherwise there will never be an intersection
+			firstMeta = false
+			mos = mosForKey
+		}
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following %d monitored object IDs for tenant %s based on metadata criteria %v", len(mos), tenantId, meta)
+	}
+
+	return mos, nil
+}
+
 // GetMonitoredObjectIDsToMetaEntry - CouchDB implementation to retrieve all monitored object Ids associated with a specific metadata key/value pair
 func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error) {
 	logger.Log.Debugf("Fetching all %ss for Tenant %s with meta key %s and value %s\n", tenmod.TenantMonitoredObjectKeysStr, tenantID, metakey, metavalue)

@@ -1,8 +1,11 @@
 * Fix - Adding metadata validators to CRUID APIs
 ## Current Release 
+### 0.199.0 
+**Release Date:** Fri Aug 17 19:23:12 UTC 2018     
+## Previous Releases 
+* Feature - Adding endpoint to query monitored objects by metadata
 ### 0.198.0 
 **Release Date:** Wed Aug 15 16:16:21 UTC 2018     
-## Previous Releases 
 * Feature - Adding configurable druid timeouts
 
 ### 0.196.0 

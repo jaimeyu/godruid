@@ -177,6 +177,35 @@
         items:
           $ref: '#/definitions/MonitoredObjectUpdate'
 
+  MonitoredObjectFilteredListRequest:
+    type: "object"
+    properties:
+      meta:
+        $ref: '#/definitions/MetaFilter'
+  MonitoredObjectFilteredListResponse:
+      type: "object"
+      required: ["data"]
+      properties:
+        data:
+          $ref: '#/definitions/MonitoredObjectFilteredList'
+  MonitoredObjectFilteredList:
+      type: "object"
+      required: ["type", "attributes"]
+      properties:
+        id:
+          type: "string"
+        type: 
+          type: "string"
+          enum: ["filteredResourceIdentifierList"]
+          default: "filteredResourceIdentifierList"
+        attributes:
+          type: "object"
+          properties:
+            resourceIdentifiers:
+              type: "array"
+              items:
+                type: "string"
+
   MonitoredObjectUpdate:
     type: "object"
     required: ["type", "id", "attributes"]

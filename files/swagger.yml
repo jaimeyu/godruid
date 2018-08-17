@@ -3539,6 +3539,39 @@ paths:
             $ref: '#/definitions/MonitoredObjectCreateRequest'
       tags:
         - TenantProvisioningServiceV2
+  /v2/monitored-objects/id-list:
+    post:
+      summary: Retrieve a list of monitored objects based on the provided filter criteria
+      operationId: GetFilteredMonitoredObjectListV2
+      consumes:
+        - application/json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'Response list containing all monitored object IDs that match the provided meta filter criteria'
+          schema:
+            $ref: '#/definitions/MonitoredObjectFilteredListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MonitoredObjectFilteredListRequest'
+      tags:
+        - TenantProvisioningServiceV2
   /v2/monitored-objects/{monObjId}:
     get:
       summary: Retrieve a Tenant Monitored Object by id.
@@ -5622,6 +5655,12 @@ definitions:
               alias:
                 type: "string"
                 description: "A known alias for the Tenant in Datahub"
+  MetaFilter:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        type: string
   ConnectorConfigCreateRequest:
     type: "object"
     required: ["data"]
@@ -6619,6 +6658,35 @@ definitions:
         type: "array"
         items:
           $ref: '#/definitions/MonitoredObjectUpdate'
+
+  MonitoredObjectFilteredListRequest:
+    type: "object"
+    properties:
+      meta:
+        $ref: '#/definitions/MetaFilter'
+  MonitoredObjectFilteredListResponse:
+      type: "object"
+      required: ["data"]
+      properties:
+        data:
+          $ref: '#/definitions/MonitoredObjectFilteredList'
+  MonitoredObjectFilteredList:
+      type: "object"
+      required: ["type", "attributes"]
+      properties:
+        id:
+          type: "string"
+        type: 
+          type: "string"
+          enum: ["filteredResourceIdentifierList"]
+          default: "filteredResourceIdentifierList"
+        attributes:
+          type: "object"
+          properties:
+            resourceIdentifiers:
+              type: "array"
+              items:
+                type: "string"
 
   MonitoredObjectUpdate:
     type: "object"

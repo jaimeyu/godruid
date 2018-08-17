@@ -534,20 +534,11 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 			existingMonitoredObject.ID = splitID
 
-			if logger.IsDebugEnabled() {
-				logger.Log.Debugf("Before Validate Patching payload: %s", models.AsJSONString(existingMonitoredObject))
-			}
-
 			err = existingMonitoredObject.Validate(true)
 			if err != nil {
 				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate%s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
 				continue
 			}
-
-			if logger.IsDebugEnabled() {
-				logger.Log.Debugf("After Validate Patching payload: %s", models.AsJSONString(existingMonitoredObject))
-			}
-
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
 			if err != nil {

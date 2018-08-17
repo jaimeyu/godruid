@@ -600,6 +600,8 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 		key := strings.ToLower(k)
 		val := strings.ToLower(v)
 		newMeta[key] = val
+		logger.Log.Debugf("Converted to {%s:%s} -> {%s,%s}", k, v, key, newMeta[key])
+
 	}
 
 	mo.Meta = newMeta

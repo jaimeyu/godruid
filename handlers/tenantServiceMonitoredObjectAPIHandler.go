@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -377,7 +376,7 @@ func HandleBulkInsertMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		// Validate the request data
 		for _, obj := range data {
 			if err = obj.Validate(false); err != nil {
-
+				return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, "Monitored Object did not validate:"+err.Error()), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 			}
 
 			if obj.TenantID != params.TenantID {
@@ -528,11 +527,24 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
 
 			existingMonitoredObject.Meta = item.Metadata
-			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			splitID := strings.Split(existingMonitoredObject.ID, idSep)
-			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
-			existingMonitoredObject.Validate(true)
+			splitID := datastore.GetDataIDFromFullID(existingMonitoredObject.ID)
+
+			existingMonitoredObject.ID = splitID
+
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("Before Validate Patching payload: %s", models.AsJSONString(existingMonitoredObject))
+			}
+
+			err = existingMonitoredObject.Validate(true)
+			if err != nil {
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate%s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
+			}
+
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("After Validate Patching payload: %s", models.AsJSONString(existingMonitoredObject))
+			}
 
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)

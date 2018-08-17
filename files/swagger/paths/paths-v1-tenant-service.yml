@@ -1390,7 +1390,7 @@
         '500':
           description: "Unexpected error processing request"
           schema:
-            type: string
+            $ref: '#/definitions/BulkOperationResponse'
       parameters:
         - name: tenantId
           in: path

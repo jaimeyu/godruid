@@ -476,6 +476,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 	return func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
 
 		startTime := time.Now()
+		errFlag := false
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
 		logger.Log.Infof("Updating %s meta data in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
 
@@ -501,6 +502,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 		// Internal function responsible for managing error scenarios for individual result items
 		itemError := func(position int, itemResponse *common.BulkOperationResult, reason int, itemErr string) {
+			errFlag = true
 			itemResponse.OK = false
 			itemResponse.REASON = strconv.Itoa(reason)
 			itemResponse.ERROR = itemErr
@@ -585,6 +587,11 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
+
+		if errFlag {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(converted)
+		}
 		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK().WithPayload(converted)
+
 	}
 }

@@ -1,8 +1,10 @@
-* Fix - making sure Druid queries are built using sorted keys to ensure cache hits on subsequent queries
 ## Current Release 
+### 0.200.0 
+**Release Date:** Fri Aug 17 20:34:29 UTC 2018     
+## Previous Releases 
+* Fix - making sure Druid queries are built using sorted keys to ensure cache hits on subsequent queries
 ### 0.199.0 
 **Release Date:** Fri Aug 17 19:23:12 UTC 2018     
-## Previous Releases 
 * Feature - Adding endpoint to query monitored objects by metadata
 ### 0.198.0 
 **Release Date:** Wed Aug 15 16:16:21 UTC 2018     

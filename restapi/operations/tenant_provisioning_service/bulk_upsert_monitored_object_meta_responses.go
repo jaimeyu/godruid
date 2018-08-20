@@ -149,7 +149,7 @@ func (o *BulkUpsertMonitoredObjectMetaForbidden) WriteResponse(rw http.ResponseW
 // BulkUpsertMonitoredObjectMetaInternalServerErrorCode is the HTTP code returned for type BulkUpsertMonitoredObjectMetaInternalServerError
 const BulkUpsertMonitoredObjectMetaInternalServerErrorCode int = 500
 
-/*BulkUpsertMonitoredObjectMetaInternalServerError Unexpected error processing request
+/*BulkUpsertMonitoredObjectMetaInternalServerError Unexpected error processing request. Please check response payload for error description as multiple errors can be reported back.
 
 swagger:response bulkUpsertMonitoredObjectMetaInternalServerError
 */

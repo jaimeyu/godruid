@@ -77,6 +77,7 @@
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            pattern: '^[a-z_]+$'
             additionalProperties:
               type: "string"
             example:
@@ -158,6 +159,14 @@
           objectType: 
             type: "string"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "string"
+            example:
+              "region": "paris"
+              "wgs87_x": "-45.7123912"
+              "wgs87_y": "-74.2130912"
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
@@ -231,3 +240,11 @@
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           createdTimestamp:
             type: "integer"
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "string"
+            example:
+              "region": "paris"
+              "wgs87_x": "-45.7123912"
+              "wgs87_y": "-74.2130912"

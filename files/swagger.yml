@@ -1962,9 +1962,9 @@ paths:
           schema:
             type: string
         '500':
-          description: "Unexpected error processing request"
+          description: "Unexpected error processing request. Please check response payload for error description as multiple errors can be reported back."
           schema:
-            type: string
+            $ref: '#/definitions/BulkOperationResponse'
       parameters:
         - name: tenantId
           in: path
@@ -4504,6 +4504,14 @@ definitions:
       objectType: 
         type: "string"
         enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+      meta:
+        type: "object"
+        additionalProperties:
+          type: "string"
+        example:
+          "region": "paris"
+          "wgs87_x": "-45.7123912"
+          "wgs87_y": "-74.2130912"
       domainSet:
         type: "array"
         items: 
@@ -6551,6 +6559,7 @@ definitions:
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           meta:
             type: "object"
+            pattern: '^[a-z_]+$'
             additionalProperties:
               type: "string"
             example:
@@ -6632,6 +6641,14 @@ definitions:
           objectType: 
             type: "string"
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "string"
+            example:
+              "region": "paris"
+              "wgs87_x": "-45.7123912"
+              "wgs87_y": "-74.2130912"
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
@@ -6705,6 +6722,14 @@ definitions:
             enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
           createdTimestamp:
             type: "integer"
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "string"
+            example:
+              "region": "paris"
+              "wgs87_x": "-45.7123912"
+              "wgs87_y": "-74.2130912"
   ReportScheduleConfigCreateRequest:
     type: "object"
     required: ["data"]

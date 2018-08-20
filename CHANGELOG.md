@@ -1,3 +1,6 @@
+* Fix - Adding metadata validators to CRUID APIs
+* Fix - Updated views to be handle lowercase and uppercase values the same
+* Fix - Changed metadata validators to only use lowercase letters a...z and the _
 ## Current Release 
 ### 0.200.0 
 **Release Date:** Fri Aug 17 20:34:29 UTC 2018     

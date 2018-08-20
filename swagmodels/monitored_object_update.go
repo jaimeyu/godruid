@@ -161,6 +161,9 @@ type MonitoredObjectUpdateAttributes struct {
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
+	// meta
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// object Id
 	// Required: true
 	ObjectID *string `json:"objectId"`

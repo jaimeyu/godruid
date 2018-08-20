@@ -3,8 +3,10 @@ package tenant
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
+	"github.com/accedian/adh-gather/logger"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -12,6 +14,7 @@ import (
 type TenantDataType string
 
 const illegalWords = "!,@#$%^&*?/"
+const legalCharacters = "qwertyuiopasdfghjklzxcvbnm_"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
@@ -565,7 +568,10 @@ func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
 
 func isStringSterile(str string) bool {
 
-	if strings.ContainsAny(str, illegalWords) {
+	isAlpha := regexp.MustCompile(`^[a-z_]+$`).MatchString
+
+	if !isAlpha(str) {
+		logger.Log.Debugf("%q is not valid\n", str)
 		return false
 	}
 
@@ -587,13 +593,20 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)
 	for k, v := range mo.Meta {
+		
 		// Stop
 		if isStringSterile(k) == false {
-			return fmt.Errorf("Metadata key (%s) contains an invalid character (%s). Please reformat your keys.", k, illegalWords)
+			return fmt.Errorf("Metadata key (%s) contains an invalid character (Valid characters:%s). Please reformat your keys", k, legalCharacters)
 		}
+
+		if len(k) == 0 {
+			return fmt.Errorf("Keys cannot be empty strings")
+		}
+
+		// ensure lower case
 		key := strings.ToLower(k)
-		val := strings.ToLower(v)
-		newMeta[key] = val
+		newMeta[key] = v
+		logger.Log.Debugf("Converted to {%s:%s} -> {%s,%s}", k, v, key, newMeta[key])
 
 	}
 

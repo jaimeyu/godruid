@@ -35,6 +35,9 @@ type CreateTenantMonitoredObjectRequest struct {
 	// domain set
 	DomainSet []string `json:"domainSet"`
 
+	// meta
+	Meta map[string]string `json:"meta,omitempty"`
+
 	// object Id
 	ObjectID string `json:"objectId,omitempty"`
 

@@ -536,6 +536,7 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 		},
 	}
 	assert.NotNil(t, original.Validate(true))
+	
 
 	original = &MonitoredObject{
 		ID:                    uuid.NewV4().String(),
@@ -575,6 +576,86 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
 		Meta: map[string]string{
 			"pet123": "dog",
+		},
+	}
+	assert.NotNil(t, original.Validate(true))
+
+	original = &MonitoredObject{
+		ID:                    uuid.NewV4().String(),
+		Datatype:              string(TenantMonitoredObjectType),
+		TenantID:              fake.CharactersN(12),
+		ActuatorType:          fake.Company(),
+		ActuatorName:          actName,
+		ReflectorType:         fake.Company(),
+		ReflectorName:         refName,
+		ObjectType:            fake.Brand(),
+		ObjectName:            fake.City(),
+		MonitoredObjectID:     strings.Join([]string{actName, refName}, "-"),
+		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"pet123": "dog",
+		},
+	}
+	assert.NotNil(t, original.Validate(true))
+
+	original = &MonitoredObject{
+		Datatype:              string(TenantMonitoredObjectType),
+		TenantID:              fake.CharactersN(12),
+		ActuatorType:          fake.Company(),
+		ActuatorName:          actName,
+		ReflectorType:         fake.Company(),
+		ReflectorName:         refName,
+		ObjectType:            fake.Brand(),
+		ObjectName:            fake.City(),
+		MonitoredObjectID:     strings.Join([]string{actName, refName}, "-"),
+		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"pet123": "dog",
+		},
+	}
+	assert.NotNil(t, original.Validate(false))
+
+	original = &MonitoredObject{
+		REV:                   uuid.NewV4().String(),
+		Datatype:              string(TenantMonitoredObjectType),
+		TenantID:              fake.CharactersN(12),
+		ActuatorType:          fake.Company(),
+		ActuatorName:          actName,
+		ReflectorType:         fake.Company(),
+		ReflectorName:         refName,
+		ObjectType:            fake.Brand(),
+		ObjectName:            fake.City(),
+		MonitoredObjectID:     strings.Join([]string{actName, refName}, "-"),
+		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"pet123": "dog",
+		},
+	}
+	assert.NotNil(t, original.Validate(false))
+
+	original = &MonitoredObject{
+		ID:                    uuid.NewV4().String(),
+		REV:                   uuid.NewV4().String(),
+		Datatype:              string(TenantMonitoredObjectType),
+		TenantID:              fake.CharactersN(12),
+		ActuatorType:          fake.Company(),
+		ActuatorName:          actName,
+		ReflectorType:         fake.Company(),
+		ReflectorName:         refName,
+		ObjectType:            fake.Brand(),
+		ObjectName:            fake.City(),
+		MonitoredObjectID:     strings.Join([]string{actName, refName}, "-"),
+		DomainSet:             []string{uuid.NewV4().String(), uuid.NewV4().String()},
+		CreatedTimestamp:      time.Now().UnixNano() / int64(time.Millisecond),
+		LastModifiedTimestamp: time.Now().UnixNano() / int64(time.Millisecond),
+		Meta: map[string]string{
+			"": "empty string should fail",
 		},
 	}
 	assert.NotNil(t, original.Validate(true))

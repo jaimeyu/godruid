@@ -593,10 +593,16 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)
 	for k, v := range mo.Meta {
+		
 		// Stop
 		if isStringSterile(k) == false {
 			return fmt.Errorf("Metadata key (%s) contains an invalid character (Valid characters:%s). Please reformat your keys", k, legalCharacters)
 		}
+
+		if len(k) == 0 {
+			return fmt.Errorf("Keys cannot be empty strings")
+		}
+
 		// ensure lower case
 		key := strings.ToLower(k)
 		newMeta[key] = v

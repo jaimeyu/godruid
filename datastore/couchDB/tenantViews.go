@@ -116,7 +116,7 @@ const (
 		  },
 		  "lookupWords": {
 			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n        var sentence = doc.data.meta[key];\n        \n        // split on space\n        var words = sentence.split(\" \");\n        \n        for (var word in words) {\n            emit(key + \"__\" + words[word].toLowerCase(), {\"sentence\":sentence.toLowerCase()});\n        }\n      }\n    }\n}",
-			"reduce": "function(keys, values, rereduce) {\n    function flatten(arr) {\n      return arr.reduce(function (flat, toFlatten) {\n        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);\n      }, []);\n    }\n    \n    var sentences = []\n    \n    if (!rereduce) {\n      log(\"reducing:\" + JSON.stringify(keys) + \" || val:\" + JSON.stringify(values).toLowerCase())\n      \n      return flatten(values)\n    }\n\n    if (rereduce) {\n      if (!keys) {\n        keys = \"unknown\"\n      }\n      log(\"rereducing:\" + JSON.stringify(keys) + \" || val:\" + JSON.stringify(values).toLowerCase())\n\n      var flat = flatten(values)\n      log(\"rereducing:\" + JSON.stringify(keys) + \" || flattened:\" + JSON.stringify(flat).toLowerCase())\n    \n      for (var v in flat) {\n        sentences.push(flat[v][\"sentence\"])\n      }      \n\n      var filtered = sentences.filter(function(item, pos){\n            return sentences.indexOf(item)== pos; \n        });\n      \n      var ls = []\n      for (var d in filtered) {\n        var item = {\n          \"sentence\": filtered[d]\n        }\n        ls.push(item)\n      }\n      \n      \n      return ls\n    }\n\n}\n"
+			"reduce": "function(keys, values, rereduce) {\n    function flatten(arr) {\n      return arr.reduce(function (flat, toFlatten) {\n        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);\n      }, []);\n    }\n    \n    var sentences = []\n    \n    if (!rereduce) {\n      log(\"reducing:\" + JSON.stringify(keys) + \" || val:\" + JSON.stringify(values).toLowerCase())\n      \n      return flatten(values)\n    }\n\n    if (rereduce) {\n      if (!keys) {\n        keys = \"unknown\"\n      }\n     /* log(\"rereducing:\" + JSON.stringify(keys) + \" || val:\" + JSON.stringify(values).toLowerCase())*/\n\n      var flat = flatten(values)\n      /*log(\"rereducing:\" + JSON.stringify(keys) + \" || flattened:\" + JSON.stringify(flat).toLowerCase())*/\n    \n      for (var v in flat) {\n        sentences.push(flat[v][\"sentence\"])\n      }      \n\n      var filtered = sentences.filter(function(item, pos){\n            return sentences.indexOf(item)== pos; \n        });\n      \n      var ls = []\n      for (var d in filtered) {\n        var item = {\n          \"sentence\": filtered[d]\n        }\n        ls.push(item)\n      }\n      \n      \n      return ls\n    }\n\n}\n"
 		  },
 		  "uniqueKeys": {
 			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n          emit(key, doc.data.meta[key].toLowerCase());\n      }\n    }\n}",
@@ -338,14 +338,18 @@ func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName b
 func createNewTenantMetadataViews(dbName string, key string) error {
 	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
 	if err != nil {
-		msg := fmt.Sprintf("Index failed db:%s key:%s Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
+		if !strings.Contains(err.Error(), "status 409 - conflict") {
+			msg := fmt.Sprintf("Index failed db:%s key:%s Error: %s", dbName, key, err.Error())
+			return errors.New(msg)
+		}
 	}
 	// Create a view based on unique values per new value
 	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
 	if err != nil {
-		msg := fmt.Sprintf("View failed db:%s key:%s Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
+		if !strings.Contains(err.Error(), "status 409 - conflict") {
+			msg := fmt.Sprintf("View failed db:%s key:%s Error: %s", dbName, key, err.Error())
+			return errors.New(msg)
+		}
 	}
 	return nil
 }

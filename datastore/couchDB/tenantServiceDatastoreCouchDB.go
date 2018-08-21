@@ -901,9 +901,10 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 		}
 	}
 
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
+	go TriggerBuildCouchView(dbNameKeys, objectNameDelimitedDdoc, objectNameDelimitedByKeyView, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
 	// Indexes
 	go TriggerBuildCouchIndex(dbNameKeys, moIndexDdoc, moIndexView, true)
 	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountByNameView, true)

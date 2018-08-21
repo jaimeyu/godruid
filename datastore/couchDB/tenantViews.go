@@ -48,6 +48,9 @@ const (
 	objectCountByNameView = "byName"
 	objectCountView       = "byCount"
 
+	objectNameDelimitedDdoc      = "viewOfDelimitedKeys"
+	objectNameDelimitedByKeyView = "byKey"
+
 	monitoredObjectCountIndexBytes = `{
 	"_id": "_design/monitoredObjectCount",
 	"language": "javascript",
@@ -189,6 +192,16 @@ const (
 			}
 		}
 	}`
+
+	ddocObjectNameDelimiterSplit = `{
+		"_id": "_design/viewOfDelimitedKeys",
+		"views": {
+			"byKey": {
+				"map": "function (doc) {\n    var dict = {};\n    if(doc.data.objectName) {\n      var words = doc.data.objectName.split(\"_\");\n      //words = words.slice(1);\n      for (var i in words) {\n        // emit(words[i], doc.data.objectId);\n        //if (word[i] == null) continue; \n        dict[words[i]] = doc.data.objectName\n      }\n    }\n    for (var key in dict)\n    emit(key, dict[key]);\n\n}\n"
+			}
+		},
+		"language": "javascript"
+	}`
 )
 
 func getTenantViews() []map[string]interface{} {
@@ -197,24 +210,28 @@ func getTenantViews() []map[string]interface{} {
 	monitoredObjectMetaIndexObject := map[string]interface{}{}
 	monitoredObjectCountIndexObject := map[string]interface{}{}
 	moIndexObject := map[string]interface{}{}
+	monObjNameSplitter := map[string]interface{}{}
 
+	if err := json.Unmarshal([]byte(ddocObjectNameDelimiterSplit), &monObjNameSplitter); err != nil {
+		logger.Log.Errorf("Unable to generate Object Names splitter: %s", err.Error())
+	}
 	if err := json.Unmarshal([]byte(indexMonObjectNames), &indexMonObjectNamesObject); err != nil {
-		logger.Log.Errorf("Unable to generate Meta View Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate Object Names View: %s", err.Error())
 	}
 	if err := json.Unmarshal([]byte(metaViews), &metaViewObject); err != nil {
-		logger.Log.Errorf("Unable to generate Meta View Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MetaViews: %s", err.Error())
 	}
 	if err := json.Unmarshal([]byte(monitoredObjectMetaIndexBytes), &monitoredObjectMetaIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate Unique Meta Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate Meta Name Index: %s", err.Error())
 	}
 	if err := json.Unmarshal([]byte(moIndexBytes), &moIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate MO Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MO Name Index: %s", err.Error())
 	}
 	if err := json.Unmarshal([]byte(monitoredObjectCountIndexBytes), &monitoredObjectCountIndexObject); err != nil {
-		logger.Log.Errorf("Unable to generate MO Index: %s", err.Error())
+		logger.Log.Errorf("Unable to generate MO Count Index: %s", err.Error())
 	}
 
-	return []map[string]interface{}{metaViewObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject, moIndexObject, indexMonObjectNamesObject}
+	return []map[string]interface{}{monObjNameSplitter, metaViewObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject, moIndexObject, indexMonObjectNamesObject}
 }
 
 /*

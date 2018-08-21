@@ -1,3 +1,4 @@
+* Fix - Issue where couchdb views were not getting generated anymore.
 ## Current Release 
 ### 0.201.0 
 **Release Date:** Mon Aug 20 16:24:35 UTC 2018     

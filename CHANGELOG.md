@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.203.0 
+**Release Date:** Tue Aug 21 18:21:04 UTC 2018     
+## Previous Releases 
 ### 0.202.0 
 **Release Date:** Tue Aug 21 17:29:36 UTC 2018     
-## Previous Releases 
 * Fix - Issue where couchdb views were not getting generated anymore.
 ### 0.201.0 
 **Release Date:** Mon Aug 20 16:24:35 UTC 2018     

@@ -129,7 +129,7 @@ const (
 		"_id": "_design/viewOf{{KeyName}}",
 		"language": "javascript",
 		"views": {
-			" by{{KeyName}}": {
+			"by{{KeyName}}": {
 				"reduce": "function(keys, values) {\n    return sum(values);\n}",
 				"map": "function(doc) {\n    if (doc.data.meta) {\n        if (doc.data.{{KeyField}}) {\n            emit(doc.data.{{KeyField}}, 1);\n        }\n    }\n}"
 			}

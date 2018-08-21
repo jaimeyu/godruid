@@ -905,11 +905,12 @@ func generateRandomEnodeB() string {
 	//generated[i] = stringGeneratorCharset[rand.Int63()%int64(len(stringGeneratorCharset))]
 	// Enode B template
 	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
-	regions := []string{"WST", "EST", "NOE", "SWT", "CTA"}
+	regions := []string{"WST", "EST", "NOE", "SWT", "CTA", "IDF","MED"}
+	vendors := []string{"H", "E","C"}
 	// E84717_WST_H_ENB_MON_ZIPEC_AF22_admin_17-01-18
-	objname_template := "E%d_%s_H_ENB_MON_ZIPEC_AF22_admin_%s"
+	objname_template := "E%d_%s_%s_ENB_MON_ZIPEC_AF22_admin_%s"
 	t := time.Now()
-	generatedName := fmt.Sprintf(objname_template, offset, regions[offset%len(regions)], t.Format("2006-01-02"))
+	generatedName := fmt.Sprintf(objname_template, offset, regions[offset%len(regions)], vendors[offset%len(vendors)],t.Format("2006-01-02"))
 	return generatedName
 }
 

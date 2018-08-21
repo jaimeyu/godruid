@@ -125,7 +125,16 @@ const (
 		}
 	  }`
 	metaUniqueValuesViewsURI          = "{{KeyName}}/{{KeyField}}"
-	metaUniqueValuesViewsDdocTemplate = `{"_id": "_design/viewOf{{KeyName}}","views": {"by{{KeyName}}": {"reduce": "function(keys, values) {return sum(values);}","map": "function(doc) {if (doc.data.meta) {if (doc.data.{{KeyField}}) {emit(doc.data.{{KeyField}}, 1);}}"}},"language": "javascript"}`
+	metaUniqueValuesViewsDdocTemplate = `{
+		"_id": "_design/viewOf{{KeyName}}",
+		"language": "javascript",
+		"views": {
+			" by{{KeyName}}": {
+				"reduce": "function(keys, values) {\n    return sum(values);\n}",
+				"map": "function(doc) {\n    if (doc.data.meta) {\n        if (doc.data.{{KeyField}}) {\n            emit(doc.data.{{KeyField}}, 1);\n        }\n    }\n}"
+			}
+		}
+	}`
 
 	metaDdocTemplate  = "%s"
 	metaIndexTemplate = `{
@@ -323,4 +332,20 @@ func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName b
 	}
 
 	couchdbViewBuilderBusyMap.Delete(ddoc)
+}
+
+// createNewTenantMetadataViews - Create an index based on metadata keys
+func createNewTenantMetadataViews(dbName string, key string) error {
+	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
+	if err != nil {
+		msg := fmt.Sprintf("Index failed db:%s key:%s Error: %s", dbName, key, err.Error())
+		return errors.New(msg)
+	}
+	// Create a view based on unique values per new value
+	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
+	if err != nil {
+		msg := fmt.Sprintf("View failed db:%s key:%s Error: %s", dbName, key, err.Error())
+		return errors.New(msg)
+	}
+	return nil
 }

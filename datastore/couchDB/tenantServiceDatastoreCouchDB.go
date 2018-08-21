@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -861,22 +860,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
-// createNewTenantMetadataViews - Create an index based on metadata keys
-func createNewTenantMetadataViews(dbName string, key string) error {
-	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
-	if err != nil {
-		msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
-	}
-	// Create a view based on unique values per new value
-	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
-	if err != nil {
-		msg := fmt.Sprintf("Could not create metadata View for tenant %s, key %s. Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
-	}
-	return nil
-}
-
 // CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata and then create it
 func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string) error {
 
@@ -886,9 +869,15 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 		// Create an index based on metadata keys
 		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
 		if err != nil {
-			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
-			// This isn't critical error but log it
-			logger.Log.Warning(msg)
+			if strings.Contains(err.Error(), "status 409 - conflict") {
+				msg := fmt.Sprintf("Duplicate view for not metadata view for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				// This isn't critical error but log it
+				logger.Log.Debugf(msg)
+			} else {
+				msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				// This isn't critical error but log it
+				logger.Log.Errorf(msg)
+			}
 		}
 		//}
 	}

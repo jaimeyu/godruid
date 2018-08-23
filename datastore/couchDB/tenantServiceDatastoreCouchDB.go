@@ -468,6 +468,9 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantIngestionProfileStr)
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(tenantIngPrfReq)
+
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.IngestionProfile{}
 	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
@@ -482,6 +485,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIng
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.ID = ds.PrependToDataID(tenantIngPrfReq.ID, string(tenmod.TenantIngestionProfileType))
 	tenantID := ds.PrependToDataID(tenantIngPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(tenantIngPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.IngestionProfile{}
@@ -503,6 +509,10 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantID str
 	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -518,6 +528,10 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantID 
 	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -527,6 +541,9 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThr
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ID = ds.GenerateID(tenantThreshPrfReq, string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(tenantThreshPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.ThresholdProfile{}
@@ -542,6 +559,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThr
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ID = ds.PrependToDataID(tenantThreshPrfReq.ID, string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(tenantThreshPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.ThresholdProfile{}
@@ -588,6 +608,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantID str
 		return nil, err
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&finalDataContainer)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	// return &dataContainer, nil
 	return &finalDataContainer, nil
@@ -604,6 +627,10 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantID 
 	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -1142,6 +1169,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 		return nil, fmt.Errorf(ds.NotFoundStr)
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&res)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(res))
 	return &res, nil
 }
@@ -1155,6 +1185,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	res := make([]*tenmod.ThresholdProfile, 0)
 	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res); err != nil {
 		return nil, err
+	}
+
+	for _, item := range res {
+		// TODO: Remove this when the hierarchical model is no longer supported
+		ds.EnsureThresholdProfileHasBothModels(item)
 	}
 
 	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(res))

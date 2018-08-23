@@ -8,6 +8,7 @@ import (
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	admmod "github.com/accedian/adh-gather/models/admin"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	emp "github.com/golang/protobuf/ptypes/empty"
@@ -204,11 +205,7 @@ func (gsh *GRPCServiceHandler) GetAllTenantDescriptors(ctx context.Context, noVa
 func (gsh *GRPCServiceHandler) GetIngestionDictionary(ctx context.Context, noValue *emp.Empty) (*pb.IngestionDictionary, error) {
 	startTime := time.Now()
 
-	ingDict, err := getIngestionDictionaryFromFile()
-	if err != nil {
-		trackAPIMetrics(startTime, "500", mon.GetIngDictStr)
-		return nil, err
-	}
+	ingDict := admmod.GetIngestionDictionaryFromFile()
 
 	// Convert to PB object
 	converted := pb.IngestionDictionary{}
@@ -629,7 +626,7 @@ func (gsh *GRPCServiceHandler) AddAdminViews() error {
 func (gsh *GRPCServiceHandler) GetValidTypes(ctx context.Context, value *emp.Empty) (*pb.ValidTypes, error) {
 	startTime := time.Now()
 
-	validTypes := getValidTypes()
+	validTypes := admmod.GetValidTypes()
 
 	// Convert to PB object
 	converted := pb.ValidTypes{}

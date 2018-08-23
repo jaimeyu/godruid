@@ -19,7 +19,10 @@
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
                     
   ThresholdProfileUpdateRequest:
     type: "object"
@@ -37,14 +40,17 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev"]
+            required: ["_rev", "thresholds"]
             properties:
               _rev:
                 type: "string"
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
   
   ThresholdProfileListResponse:
     type: "object"
@@ -90,7 +96,33 @@
           lastModifiedTimestamp:
             type: "integer"
           thresholds:
+            description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
             $ref: '#/definitions/ThresholdsObject'
+          thresholdList:
+            $ref: '#/definitions/ThresholdList'
+
+  ThresholdList:
+    description: "Contains ann array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+        monitoredObjectType:
+          type: "string"
+        metric:
+          type: "string"
+        direction:
+          type: "string"
+        enabled:
+          type: "string"
+        events:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "string"
 
   ThresholdsObject:
     type: "object"

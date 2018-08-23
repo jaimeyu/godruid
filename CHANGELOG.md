@@ -1,3 +1,4 @@
+* Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
 ## Current Release 
 ### 0.203.0 
 **Release Date:** Tue Aug 21 18:21:04 UTC 2018     

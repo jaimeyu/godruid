@@ -578,6 +578,9 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantIngestionProfile(tenantIn
 	recCopy.CreatedTimestamp = ds.MakeTimestamp()
 	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&recCopy)
+
 	tsd.tenantIDtoIngPrfSlice[tenantIngPrfReq.TenantID][0] = &recCopy
 
 	return &recCopy, nil
@@ -601,6 +604,9 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateTenantIngestionProfile(tenantIn
 	recCopy.Datatype = string(tenmod.TenantIngestionProfileType)
 	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&recCopy)
+
 	tsd.tenantIDtoIngPrfSlice[tenantIngPrfReq.TenantID][0] = &recCopy
 
 	return &recCopy, nil
@@ -621,6 +627,9 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantIngestionProfile(tenantID st
 	if dataID != existing.ID {
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(existing)
 
 	return existing, nil
 }
@@ -646,6 +655,9 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantIngestionProfile(tenantID
 
 	tsd.tenantIDtoIngPrfSlice[tenantID][0] = nil
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(existing)
+
 	return existing, nil
 }
 
@@ -663,6 +675,9 @@ func (tsd *TenantServiceDatastoreInMemory) CreateTenantThresholdProfile(tenantTh
 	recCopy.Datatype = string(tenmod.TenantThresholdProfileType)
 	recCopy.CreatedTimestamp = ds.MakeTimestamp()
 	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&recCopy)
 
 	tsd.tenantToIDtoTenantThrPrfMap[tenantThreshPrfReq.TenantID][recCopy.ID] = &recCopy
 
@@ -687,6 +702,9 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateTenantThresholdProfile(tenantTh
 	recCopy.Datatype = string(tenmod.TenantThresholdProfileType)
 	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&recCopy)
+
 	tsd.tenantToIDtoTenantThrPrfMap[tenantThreshPrfReq.TenantID][recCopy.ID] = &recCopy
 
 	return &recCopy, nil
@@ -706,6 +724,8 @@ func (tsd *TenantServiceDatastoreInMemory) GetTenantThresholdProfile(tenantID st
 
 	rec, ok := tsd.tenantToIDtoTenantThrPrfMap[tenantID][dataID]
 	if ok {
+		// TODO: Remove this when the hierarchical model is no longer supported
+		ds.EnsureThresholdProfileHasBothModels(rec)
 		return rec, nil
 	}
 
@@ -732,6 +752,10 @@ func (tsd *TenantServiceDatastoreInMemory) DeleteTenantThresholdProfile(tenantID
 		if len(tsd.tenantToIDtoTenantThrPrfMap[tenantID]) == 0 {
 			delete(tsd.tenantToIDtoTenantThrPrfMap, tenantID)
 		}
+
+		// TODO: Remove this when the hierarchical model is no longer supported
+		ds.EnsureThresholdProfileHasBothModels(rec)
+
 		return rec, nil
 	}
 
@@ -1088,11 +1112,15 @@ func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantIngestionProfile(tenan
 		return nil, fmt.Errorf("%s does not exist", tenmod.TenantIngestionProfileStr)
 	}
 
-	if tsd.tenantIDtoIngPrfSlice[tenantID][0] == nil {
+	existing := tsd.tenantIDtoIngPrfSlice[tenantID][0]
+	if existing == nil {
 		return nil, fmt.Errorf("%s not found", tenmod.TenantIngestionProfileStr)
 	}
 
-	return tsd.tenantIDtoIngPrfSlice[tenantID][0], nil
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(existing)
+
+	return existing, nil
 }
 
 // GetAllTenantThresholdProfile - InMemory implementation of GetAllTenantThresholdProfile
@@ -1105,6 +1133,8 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantThresholdProfile(tenantID
 	recList := make([]*tenmod.ThresholdProfile, 0)
 
 	for _, rec := range tsd.tenantToIDtoTenantThrPrfMap[tenantID] {
+		// TODO: Remove this when the hierarchical model is no longer supported
+		ds.EnsureThresholdProfileHasBothModels(rec)
 		recList = append(recList, rec)
 	}
 

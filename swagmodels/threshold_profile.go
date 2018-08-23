@@ -172,7 +172,10 @@ type ThresholdProfileAttributes struct {
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// thresholds
+	// threshold list
+	ThresholdList ThresholdList `json:"thresholdList"`
+
+	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead
 	// Required: true
 	Thresholds *ThresholdsObject `json:"thresholds"`
 }
@@ -206,6 +209,10 @@ func (m *ThresholdProfileAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateTenantID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateThresholdList(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -276,6 +283,22 @@ func (m *ThresholdProfileAttributes) validateName(formats strfmt.Registry) error
 func (m *ThresholdProfileAttributes) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"tenantId", "body", m.TenantID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ThresholdProfileAttributes) validateThresholdList(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ThresholdList) { // not required
+		return nil
+	}
+
+	if err := m.ThresholdList.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("attributes" + "." + "thresholdList")
+		}
 		return err
 	}
 

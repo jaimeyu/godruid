@@ -193,7 +193,10 @@ type ThresholdProfileCreateRequestDataAttributes struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// thresholds
+	// threshold list
+	ThresholdList ThresholdList `json:"thresholdList"`
+
+	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead
 	// Required: true
 	Thresholds *ThresholdsObject `json:"thresholds"`
 }
@@ -203,6 +206,10 @@ func (m *ThresholdProfileCreateRequestDataAttributes) Validate(formats strfmt.Re
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateThresholdList(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -219,6 +226,22 @@ func (m *ThresholdProfileCreateRequestDataAttributes) Validate(formats strfmt.Re
 func (m *ThresholdProfileCreateRequestDataAttributes) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ThresholdProfileCreateRequestDataAttributes) validateThresholdList(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ThresholdList) { // not required
+		return nil
+	}
+
+	if err := m.ThresholdList.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("data" + "." + "attributes" + "." + "thresholdList")
+		}
 		return err
 	}
 

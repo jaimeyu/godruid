@@ -194,7 +194,13 @@ func (m *IngestionDictionaryListResponseDataItems0) UnmarshalBinary(b []byte) er
 // swagger:model IngestionDictionaryListResponseDataItems0Attributes
 type IngestionDictionaryListResponseDataItems0Attributes struct {
 
-	// metrics
+	// This property will be deprecated in the next API version.
+	MetricGroups []*IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0 `json:"metricGroups"`
+
+	// Provides an array of objects that describe the possible metric combinations that may be retained by Datahub
+	MetricList []*IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 `json:"metricList"`
+
+	// Metrics will be deprecated in the next API version. Please use the 'metricList' property instead
 	// Required: true
 	Metrics map[string]IngestionDictionaryListResponseDataItems0AttributesMetricsAnon `json:"metrics"`
 }
@@ -203,6 +209,14 @@ type IngestionDictionaryListResponseDataItems0Attributes struct {
 func (m *IngestionDictionaryListResponseDataItems0Attributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetricGroups(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetricList(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMetrics(formats); err != nil {
 		res = append(res, err)
 	}
@@ -210,6 +224,56 @@ func (m *IngestionDictionaryListResponseDataItems0Attributes) Validate(formats s
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *IngestionDictionaryListResponseDataItems0Attributes) validateMetricGroups(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricGroups) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MetricGroups); i++ {
+		if swag.IsZero(m.MetricGroups[i]) { // not required
+			continue
+		}
+
+		if m.MetricGroups[i] != nil {
+			if err := m.MetricGroups[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("attributes" + "." + "metricGroups" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *IngestionDictionaryListResponseDataItems0Attributes) validateMetricList(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetricList) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MetricList); i++ {
+		if swag.IsZero(m.MetricList[i]) { // not required
+			continue
+		}
+
+		if m.MetricList[i] != nil {
+			if err := m.MetricList[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("attributes" + "." + "metricList" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -242,6 +306,150 @@ func (m *IngestionDictionaryListResponseDataItems0Attributes) MarshalBinary() ([
 // UnmarshalBinary interface implementation
 func (m *IngestionDictionaryListResponseDataItems0Attributes) UnmarshalBinary(b []byte) error {
 	var res IngestionDictionaryListResponseDataItems0Attributes
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0 ingestion dictionary list response data items0 attributes metric groups items0
+// swagger:model IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0
+type IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0 struct {
+
+	// groups
+	Groups []string `json:"groups"`
+
+	// vendor
+	Vendor string `json:"vendor,omitempty"`
+}
+
+// Validate validates this ingestion dictionary list response data items0 attributes metric groups items0
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0) UnmarshalBinary(b []byte) error {
+	var res IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 ingestion dictionary list response data items0 attributes metric list items0
+// swagger:model IngestionDictionaryListResponseDataItems0AttributesMetricListItems0
+type IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 struct {
+
+	// dimensions
+	Dimensions []map[string][]string `json:"dimensions"`
+
+	// metric
+	Metric string `json:"metric,omitempty"`
+
+	// monitored object type
+	MonitoredObjectType string `json:"monitoredObjectType,omitempty"`
+
+	// raw metric Id
+	RawMetricID string `json:"rawMetricId,omitempty"`
+
+	// ui
+	UI *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI `json:"ui,omitempty"`
+
+	// unit
+	Unit string `json:"unit,omitempty"`
+
+	// vendor
+	Vendor string `json:"vendor,omitempty"`
+}
+
+// Validate validates this ingestion dictionary list response data items0 attributes metric list items0
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateUI(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0) validateUI(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.UI) { // not required
+		return nil
+	}
+
+	if m.UI != nil {
+		if err := m.UI.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("ui")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0) UnmarshalBinary(b []byte) error {
+	var res IngestionDictionaryListResponseDataItems0AttributesMetricListItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI This property will be deprecated in the next API version.
+// swagger:model IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI
+type IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI struct {
+
+	// group
+	Group string `json:"group,omitempty"`
+
+	// position
+	Position string `json:"position,omitempty"`
+}
+
+// Validate validates this ingestion dictionary list response data items0 attributes metric list items0 UI
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI) UnmarshalBinary(b []byte) error {
+	var res IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

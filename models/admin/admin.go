@@ -1,8 +1,13 @@
 package admin
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 
+	"github.com/accedian/adh-gather/gather"
+	"github.com/accedian/adh-gather/logger"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -35,6 +40,28 @@ const (
 
 	// ValidTypesStr - common name of the ValidTypes data type for use in logs.
 	ValidTypesStr = "Valid Types object"
+)
+
+var (
+	// ValidMonitoredObjectTypes - known Monitored Object types in the system
+	ValidMonitoredObjectTypes = map[string]tenmod.MonitoredObjectType{
+		"pe": tenmod.TwampPE,
+		"sf": tenmod.TwampSF,
+		"sl": tenmod.TwampSL,
+		string(tenmod.TwampPE): tenmod.TwampPE,
+		string(tenmod.TwampSF): tenmod.TwampSF,
+		string(tenmod.TwampSL): tenmod.TwampSL}
+
+	// ValidMonitoredObjectDeviceTypes - known Monitored Object Device types in the system.
+	ValidMonitoredObjectDeviceTypes = map[string]tenmod.MonitoredObjectDeviceType{
+		string(tenmod.AccedianNID):  tenmod.AccedianNID,
+		string(tenmod.AccedianVNID): tenmod.AccedianVNID}
+
+	// defaultValidTypes - default values for the valid types supported by datahub
+	defaultValidTypes = &ValidTypes{}
+
+	// defaultIngestionDictionary - default values for the Ingestion Dictionary
+	defaultIngestionDictionary = &IngestionDictionary{}
 )
 
 // Tenant - defines a tenant
@@ -117,12 +144,14 @@ func (u *User) Validate(isUpdate bool) error {
 
 // IngestionDictionary - defines an IngestionDictionary.
 type IngestionDictionary struct {
-	ID                    string                `json:"_id"`
-	REV                   string                `json:"_rev"`
-	Datatype              string                `json:"datatype"`
-	Metrics               map[string]*MetricMap `json:"metrics"`
-	CreatedTimestamp      int64                 `json:"createdTimestamp"`
-	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
+	ID                    string                            `json:"_id"`
+	REV                   string                            `json:"_rev"`
+	Datatype              string                            `json:"datatype"`
+	Metrics               map[string]*MetricMap             `json:"metrics"`
+	MetricList            []*IngestionDictionaryMetric      `json:"metricList"`
+	MetricGroups          []*IngestionDictionaryMetricGroup `json:"metricGroups"`
+	CreatedTimestamp      int64                             `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                             `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -179,6 +208,26 @@ type MonitoredObjectType struct {
 	Directions  []string `json:"directions"`
 }
 
+type IngestionDictionaryMetric struct {
+	Dimensions          []map[string][]string      `json:"dimensions"`
+	Metric              string                     `json:"metric"`
+	MonitoredObjectType string                     `json:"monitoredObjectType"`
+	RawMetricID         string                     `json:"rawMetricId"`
+	UI                  *IngestionDictionaryUIItem `json:"ui"`
+	Unit                string                     `json:"unit"`
+	Vendor              string                     `json:"vendor"`
+}
+
+type IngestionDictionaryUIItem struct {
+	Group    string `json:"group"`
+	Position string `json:"position"`
+}
+
+type IngestionDictionaryMetricGroup struct {
+	Groups []string `json:"groups"`
+	Vendor string   `json:"vendor"`
+}
+
 // ValidTypes - defines the ValidTypes data
 type ValidTypes struct {
 	ID                         string            `json:"_id"`
@@ -223,4 +272,89 @@ type TenantSummary struct {
 type ValidTypesRequest struct {
 	MonitoredObjectTypes       bool `json:"monitoredObjectTypes"`
 	MonitoredObjectDeviceTypes bool `json:"monitoredObjectDeviceTypes"`
+}
+
+// GetIngestionDictionaryFromFile - retrieves the contents of the IngestionDictionary.
+func GetIngestionDictionaryFromFile() *IngestionDictionary {
+	if defaultIngestionDictionary == nil || defaultIngestionDictionary.ID == "" {
+		cfg := gather.GetConfig()
+		ingDictFilePath := cfg.GetString("ingDict")
+		defaultDictionaryBytes, err := ioutil.ReadFile(ingDictFilePath)
+		if err != nil {
+			logger.Log.Fatalf("Unable to read Default Ingestion Dictionary from file: %s", err.Error())
+		}
+
+		defaultIngestionDictionary = &IngestionDictionary{}
+		if err = json.Unmarshal(defaultDictionaryBytes, defaultIngestionDictionary); err != nil {
+			logger.Log.Fatalf("Unable to construct Default Ingestion Dictionary from file: %s", err.Error())
+		}
+
+		defaultIngestionDictionary.ID = "1"
+		defaultIngestionDictionary.REV = "1"
+		defaultIngestionDictionary.Datatype = "ingestionDictionary"
+
+		// Add the flattened structure format to the model.
+		// TODO: remove this once we only use the flattened model
+		flattenedStructure := []*IngestionDictionaryMetric{}
+		metricGroups := []*IngestionDictionaryMetricGroup{}
+		for vk, v := range defaultIngestionDictionary.Metrics {
+			for mk, m := range v.MetricMap {
+				for _, moType := range m.MonitoredObjectTypes {
+
+					dimensionItemDirections := map[string][]string{
+						"directions": moType.Directions,
+					}
+					dimensions := []map[string][]string{dimensionItemDirections}
+					addItem := IngestionDictionaryMetric{
+						Dimensions:          dimensions,
+						Metric:              mk,
+						MonitoredObjectType: moType.Key,
+						RawMetricID:         moType.RawMetricID,
+						Unit:                moType.Units[0],
+						Vendor:              vk,
+						UI: &IngestionDictionaryUIItem{
+							Group:    m.UIData.Group,
+							Position: m.UIData.Position,
+						},
+					}
+					flattenedStructure = append(flattenedStructure, &addItem)
+				}
+			}
+			addMG := IngestionDictionaryMetricGroup{
+				Groups: v.UI.MetricGroups,
+				Vendor: vk,
+			}
+			metricGroups = append(metricGroups, &addMG)
+		}
+
+		defaultIngestionDictionary.MetricGroups = metricGroups
+		defaultIngestionDictionary.MetricList = flattenedStructure
+	}
+
+	return defaultIngestionDictionary
+}
+
+// GetValidTypes - retrieves the known valid types
+func GetValidTypes() *ValidTypes {
+	if defaultValidTypes == nil || defaultValidTypes.ID == "" {
+		validMonObjTypes := make(map[string]string, 0)
+		validMonObjDevTypes := make(map[string]string, 0)
+
+		for key, val := range ValidMonitoredObjectTypes {
+			validMonObjTypes[key] = string(val)
+		}
+		for key, val := range ValidMonitoredObjectDeviceTypes {
+			validMonObjDevTypes[key] = string(val)
+		}
+
+		defaultValidTypes = &ValidTypes{
+			ID:       "1",
+			REV:      "1",
+			Datatype: "validTypes",
+
+			MonitoredObjectTypes:       validMonObjTypes,
+			MonitoredObjectDeviceTypes: validMonObjDevTypes}
+	}
+
+	return defaultValidTypes
 }

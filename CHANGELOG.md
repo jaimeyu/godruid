@@ -1,8 +1,10 @@
-* Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
 ## Current Release 
+### 0.204.0 
+**Release Date:** Thu Aug 23 15:32:47 UTC 2018     
+## Previous Releases 
+* Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
 ### 0.203.0 
 **Release Date:** Tue Aug 21 18:21:04 UTC 2018     
-## Previous Releases 
 ### 0.202.0 
 **Release Date:** Tue Aug 21 17:29:36 UTC 2018     
 * Fix - Issue where couchdb views were not getting generated anymore.

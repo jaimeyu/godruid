@@ -1,8 +1,10 @@
-* Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
 ## Current Release 
+### 0.205.0 
+**Release Date:** Thu Aug 23 20:12:31 UTC 2018     
+## Previous Releases 
+* Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
 ### 0.204.0 
 **Release Date:** Thu Aug 23 15:32:47 UTC 2018     
-## Previous Releases 
 * Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
 ### 0.203.0 
 **Release Date:** Tue Aug 21 18:21:04 UTC 2018     

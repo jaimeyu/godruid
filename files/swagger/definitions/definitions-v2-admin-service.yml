@@ -134,7 +134,52 @@
               type: "object"
               required: ["metrics"]
               properties:
+                metricGroups:
+                  description: "This property will be deprecated in the next API version."
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      vendor:
+                        type: "string"
+                      groups:
+                        type: "array"
+                        items:
+                            type: "string"
+                metricList:
+                  description: "Provides an array of objects that describe the possible metric combinations that may be retained by Datahub"
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      vendor:
+                        type: "string"
+                      monitoredObjectType:
+                        type: "string"
+                      metric:
+                        type: "string"
+                      rawMetricId:
+                        type: "string"
+                      dimensions:
+                        type: "array"
+                        items:
+                          type: "object"
+                          additionalProperties:
+                            type: "array"
+                            items:
+                              type: "string"
+                      unit:
+                        type: "string"
+                      ui:
+                        type: "object"
+                        description: "This property will be deprecated in the next API version."
+                        properties:
+                          group:
+                            type: "string"
+                          position:
+                            type: "string"
                 metrics:
+                  description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
                   type: "object"
                   additionalProperties:               
                     type: "object"

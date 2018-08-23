@@ -5563,7 +5563,52 @@ definitions:
               type: "object"
               required: ["metrics"]
               properties:
+                metricGroups:
+                  description: "This property will be deprecated in the next API version."
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      vendor:
+                        type: "string"
+                      groups:
+                        type: "array"
+                        items:
+                            type: "string"
+                metricList:
+                  description: "Provides an array of objects that describe the possible metric combinations that may be retained by Datahub"
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      vendor:
+                        type: "string"
+                      monitoredObjectType:
+                        type: "string"
+                      metric:
+                        type: "string"
+                      rawMetricId:
+                        type: "string"
+                      dimensions:
+                        type: "array"
+                        items:
+                          type: "object"
+                          additionalProperties:
+                            type: "array"
+                            items:
+                              type: "string"
+                      unit:
+                        type: "string"
+                      ui:
+                        type: "object"
+                        description: "This property will be deprecated in the next API version."
+                        properties:
+                          group:
+                            type: "string"
+                          position:
+                            type: "string"
                 metrics:
+                  description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
                   type: "object"
                   additionalProperties:               
                     type: "object"
@@ -6367,22 +6412,10 @@ definitions:
             required: ["metrics"]
             properties:
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
                     
   IngestionProfileUpdateRequest:
     type: "object"
@@ -6404,22 +6437,10 @@ definitions:
               _rev:
                 type: "string"
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
             
              
   IngestionProfileListResponse:
@@ -6460,26 +6481,55 @@ definitions:
           datatype:
             type: "string"
           metrics:
-            type: "object"
-            properties:
-              vendorMap:
-                type: "object"
-                additionalProperties:
-                  type: "object"
-                  properties:
-                    monitoredObjectTypeMap:
-                      type: "object"
-                      additionalProperties:
-                        type: "object"
-                        properties:
-                          metricMap:
-                            type: "object"
-                            additionalProperties:
-                              type: "boolean"
+            description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+            $ref: '#/definitions/IngestionProfileMetrics'
+          metricList:
+            $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+
+  IngestionProfileMetrics:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "boolean"
+
+  IngestionProfileMetricList:
+    description: "Provides ann arry of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+        monitoredObjectType:
+          type: "string"
+        metric:
+          type: "string"
+        enabled:
+          type: "boolean"
+        dimensions:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"
   MonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
@@ -6906,7 +6956,10 @@ definitions:
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
                     
   ThresholdProfileUpdateRequest:
     type: "object"
@@ -6924,14 +6977,17 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev"]
+            required: ["_rev", "thresholds"]
             properties:
               _rev:
                 type: "string"
               name:
                 type: "string"
               thresholds:
+                description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
                 $ref: '#/definitions/ThresholdsObject'
+              thresholdList:
+                $ref: '#/definitions/ThresholdList'
   
   ThresholdProfileListResponse:
     type: "object"
@@ -6977,7 +7033,33 @@ definitions:
           lastModifiedTimestamp:
             type: "integer"
           thresholds:
+            description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"
             $ref: '#/definitions/ThresholdsObject'
+          thresholdList:
+            $ref: '#/definitions/ThresholdList'
+
+  ThresholdList:
+    description: "Contains ann array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+        monitoredObjectType:
+          type: "string"
+        metric:
+          type: "string"
+        direction:
+          type: "string"
+        enabled:
+          type: "string"
+        events:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "string"
 
   ThresholdsObject:
     type: "object"

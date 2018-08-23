@@ -30,6 +30,7 @@ var (
 func setupCouchDB() *couchdb.Server {
 	// Configure the test AdminService DAO to use the newly started couch docker image
 	cfg := gather.LoadConfig("../../config/adh-gather-test.yml", viper.New())
+	cfg.Set("ingDict", "../../files/defaultIngestionDictionary.json")
 
 	// Before the tests run, setup the adh-admin db
 	couchHost := cfg.GetString(gather.CK_server_datastore_ip.String())

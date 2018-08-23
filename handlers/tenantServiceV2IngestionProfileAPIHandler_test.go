@@ -49,14 +49,16 @@ func TestIngestionProfileCRUDV2(t *testing.T) {
 	fetched := handlers.HandleGetIngestionProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetIngestionProfileV2Params{IngestionProfileID: *existingRecord.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, IngestionProfileUrl, "GET")})
 	castedFetch := fetched.(*tenant_provisioning_service_v2.GetIngestionProfileV2OK)
 	assert.NotNil(t, castedFetch)
-	assert.Equal(t, existingRecord, castedFetch.Payload.Data)
+	assert.Equal(t, existingRecord.Attributes.Metrics, castedFetch.Payload.Data.Attributes.Metrics)
+	assert.NotEmpty(t, castedFetch.Payload.Data.Attributes.MetricList)
 
 	// Also retrieve the record as part of an array
 	fetchList := handlers.HandleGetAllIngestionProfilesV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllIngestionProfilesV2Params{HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, IngestionProfileUrl, "GET")})
 	castedFetchList := fetchList.(*tenant_provisioning_service_v2.GetAllIngestionProfilesV2OK)
 	assert.NotNil(t, castedFetchList)
 	assert.Equal(t, 1, len(castedFetchList.Payload.Data))
-	assert.Equal(t, existingRecord, castedFetchList.Payload.Data[0])
+	assert.Equal(t, existingRecord.Attributes.Metrics, castedFetchList.Payload.Data[0].Attributes.Metrics)
+	assert.NotEmpty(t, castedFetchList.Payload.Data[0].Attributes.MetricList)
 
 	// Make an update to the Record
 	updateRequestBody := generateIngestionProfileUpdateRequest(*existingRecord.ID, *existingRecord.Attributes.Rev)

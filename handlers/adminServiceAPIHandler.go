@@ -296,14 +296,10 @@ func HandleGetIngestionDictionary(allowedRoles []string, adminDB datastore.Admin
 		}
 
 		// Issue request to DAO Layer
-		result, err := getIngestionDictionaryFromFile()
-		if err != nil {
-			return admin_provisioning_service.NewGetIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
-		}
+		result := admmod.GetIngestionDictionaryFromFile()
 
 		converted := swagmodels.JSONAPIIngestionDictionary{}
-		err = convertToJsonapiObject(result, &converted)
-		if err != nil {
+		if err := convertToJsonapiObject(result, &converted); err != nil {
 			return admin_provisioning_service.NewGetIngestionDictionaryInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to convert %s data to jsonapi return format: %s", admmod.IngestionDictionaryStr, err.Error()), startTime, http.StatusInternalServerError, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
 
@@ -325,7 +321,7 @@ func HandleGetValidTypes(allowedRoles []string, adminDB datastore.AdminServiceDa
 		}
 
 		// Issue request to DAO Layer
-		result := getValidTypes()
+		result := admmod.GetValidTypes()
 
 		converted := swagmodels.JSONAPIValidTypes{}
 		err := convertToJsonapiObject(result, &converted)

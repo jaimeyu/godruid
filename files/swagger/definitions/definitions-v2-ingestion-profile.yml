@@ -16,22 +16,10 @@
             required: ["metrics"]
             properties:
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
                     
   IngestionProfileUpdateRequest:
     type: "object"
@@ -53,22 +41,10 @@
               _rev:
                 type: "string"
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
             
              
   IngestionProfileListResponse:
@@ -109,23 +85,52 @@
           datatype:
             type: "string"
           metrics:
-            type: "object"
-            properties:
-              vendorMap:
-                type: "object"
-                additionalProperties:
-                  type: "object"
-                  properties:
-                    monitoredObjectTypeMap:
-                      type: "object"
-                      additionalProperties:
-                        type: "object"
-                        properties:
-                          metricMap:
-                            type: "object"
-                            additionalProperties:
-                              type: "boolean"
+            description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+            $ref: '#/definitions/IngestionProfileMetrics'
+          metricList:
+            $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
           lastModifiedTimestamp:
             type: "integer"
+
+  IngestionProfileMetrics:
+    type: "object"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "boolean"
+
+  IngestionProfileMetricList:
+    description: "Provides ann arry of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          type: "string"
+        monitoredObjectType:
+          type: "string"
+        metric:
+          type: "string"
+        enabled:
+          type: "boolean"
+        dimensions:
+          type: "array"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"

@@ -1,3 +1,4 @@
+* Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
 ## Current Release 
 ### 0.204.0 
 **Release Date:** Thu Aug 23 15:32:47 UTC 2018     

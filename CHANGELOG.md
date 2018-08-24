@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.206.0 
+**Release Date:** Fri Aug 24 19:55:36 UTC 2018     
+## Previous Releases 
 ### 0.205.0 
 **Release Date:** Thu Aug 23 20:12:31 UTC 2018     
-## Previous Releases 
 * Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
 ### 0.204.0 
 **Release Date:** Thu Aug 23 15:32:47 UTC 2018     

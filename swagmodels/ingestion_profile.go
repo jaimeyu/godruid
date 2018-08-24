@@ -148,29 +148,29 @@ type IngestionProfileAttributes struct {
 	// Required: true
 	ID *string `json:"_id"`
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	Datatype string `json:"datatype,omitempty"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
-	// metric list
+	// A collection of Metric descriptors that determine which metrics will be recorded by Datahub
 	MetricList IngestionProfileMetricList `json:"metricList"`
 
 	// Metrics will be deprecated in the next API version. Please use the 'metricList' property instead
 	// Required: true
 	Metrics *IngestionProfileMetrics `json:"metrics"`
 
-	// tenant Id
+	// Unique identifier of the Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Card card
+// Card Models a single Card used by Dashboards in the Datahub UI
 // swagger:model Card
 type Card struct {
 
@@ -145,31 +145,31 @@ func (m *Card) UnmarshalBinary(b []byte) error {
 // swagger:model CardAttributes
 type CardAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	// Required: true
 	Datatype *string `json:"datatype"`
 
-	// description
+	// User provided description for a Card
 	// Required: true
 	Description *string `json:"description"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
-	// metrics
+	// A list of the data which will be displayed in the Card visualization
 	// Required: true
 	Metrics []*CardMetric `json:"metrics"`
 
-	// name
+	// User provided identifier for a Card
 	// Required: true
 	Name *string `json:"name"`
 
@@ -178,11 +178,11 @@ type CardAttributes struct {
 	// Enum: [active pending]
 	State *string `json:"state"`
 
-	// tenant Id
+	// Unique identifier of a Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// visualization
+	// Object which contains the components to display on this Card
 	// Required: true
 	Visualization *CardVisualization `json:"visualization"`
 }

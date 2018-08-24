@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ReportScheduleConfigListResponse report schedule config list response
+// ReportScheduleConfigListResponse Report Schedule Configuration response including one or more values
 // swagger:model ReportScheduleConfigListResponse
 type ReportScheduleConfigListResponse struct {
 

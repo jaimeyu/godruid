@@ -18,30 +18,43 @@
             properties:
               timeRangeDuration: 
                 type: "string"
+                description: "Period of time for which the report will be generated"
               thresholdProfile: 
                 type: "string"
+                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
+                description: "Time period for which individual results should be aggregated"
               timeout: 
                 type: "integer"
+                description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
               timezone: 
                 type: "string"
+                description: "Timezone used to display the results in the generated report"
               name: 
                 type: "string"
+                description: "Identifying name for the report to be generated"
               reportType:
                 type: "string"
+                description: "The type of report this config will generate"
               minute: 
                 type: "string"
+                description: "Recurring minute when this report should be generated"
               hour: 
                 type: "string"
+                description: "Recurring hour when this report should be generated"
               dayMonth: 
                 type: "string"
+                description: "Recurring day of the month when this report should be generated"
               month: 
                 type: "string"
+                description: "Recurring month when this report should be generated"
               dayWeek: 
                 type: "string"
+                description: "Recurring day of the week when this report should be generated"
               active:
                 type: "boolean"
+                description: "When true, the report will be generated. When false, the report will not be generated"
                     
   ReportScheduleConfigUpdateRequest:
     type: "object"
@@ -63,41 +76,57 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               timeRangeDuration: 
                 type: "string"
+                description: "Period of time for which the report will be generated"
               thresholdProfile: 
                 type: "string"
+                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
+                description: "Time period for which individual results should be aggregated"
               timeout: 
                 type: "integer"
+                description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
               timezone: 
                 type: "string"
+                description: "Timezone used to display the results in the generated report"
               name: 
                 type: "string"
+                description: "Identifying name for the report to be generated"
               reportType:
                 type: "string"
+                description: "The type of report this config will generate"
               minute: 
                 type: "string"
+                description: "Recurring minute when this report should be generated"
               hour: 
                 type: "string"
+                description: "Recurring hour when this report should be generated"
               dayMonth: 
                 type: "string"
+                description: "Recurring day of the month when this report should be generated"
               month: 
                 type: "string"
+                description: "Recurring month when this report should be generated"
               dayWeek: 
                 type: "string"
+                description: "Recurring day of the week when this report should be generated"
               active:
                 type: "boolean"
+                description: "When true, the report will be generated. When false, the report will not be generated"
 
   ReportScheduleConfigResponse:
     type: "object"
+    description: "A single object Report Schedule Configuration response from Datahub"
     properties:
       data:
         $ref: '#/definitions/TenantReportScheduleConfig'
 
   ReportScheduleConfigListResponse:
     type: "object"
+    description: "Report Schedule Configuration response including one or more values"
     properties:
       data:
         type: "array"
@@ -119,37 +148,55 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
+            description: "Name used to identify this type of record in Datahub"
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           timeRangeDuration: 
             type: "string"
+            description: "Period of time for which the report will be generated"
           thresholdProfile: 
             type: "string"
+            description: "The unique identifier of the Threshold Profile used to generate the report"
           granularity: 
             type: "string"
+            description: "Time period for which individual results should be aggregated"
           timeout: 
             type: "integer"
+            description: "Amount if time, in ms, before which the request to generate the report should be cancelled"
           timezone: 
             type: "string"
+            description: "Timezone used to display the results in the generated report"
           name: 
             type: "string"
+            description: "Identifying name for the report to be generated"
           reportType:
             type: "string"
+            description: "The type of report this config will generate"
           minute: 
             type: "string"
+            description: "Recurring minute when this report should be generated"
           hour: 
             type: "string"
+            description: "Recurring hour when this report should be generated"
           dayMonth: 
             type: "string"
+            description: "Recurring day of the month when this report should be generated"
           month: 
             type: "string"
+            description: "Recurring month when this report should be generated"
           dayWeek: 
             type: "string"
+            description: "Recurring day of the week when this report should be generated"
           active:
             type: "boolean"
+            description: "When true, the report will be generated. When false, the report will not be generated"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."

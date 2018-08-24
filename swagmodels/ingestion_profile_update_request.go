@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// IngestionProfileUpdateRequest ingestion profile update request
+// IngestionProfileUpdateRequest Object used to update an Ingestion Profile in Datahub
 // swagger:model IngestionProfileUpdateRequest
 type IngestionProfileUpdateRequest struct {
 
@@ -203,11 +203,11 @@ func (m *IngestionProfileUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model IngestionProfileUpdateRequestDataAttributes
 type IngestionProfileUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// metric list
+	// A list of objects that allow customization on which Metrics will be available to query from Datahub
 	MetricList IngestionProfileMetricList `json:"metricList"`
 
 	// Metrics will be deprecated in the next API version. Please use the 'metricList' property instead

@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningRule data cleaning rule
+// DataCleaningRule Provides the logic used to determine when data should be ommitted from queries
 // swagger:model DataCleaningRule
 type DataCleaningRule struct {
 

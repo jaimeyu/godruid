@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CardPositions card positions
+// CardPositions Describes the locations of the Cards on the Dashboard in the Datahub UI
 // swagger:model CardPositions
 type CardPositions map[string]CardPositionsAnon
 
@@ -47,7 +47,7 @@ type CardPositionsAnon struct {
 	// dimensions
 	Dimensions *CardPositionsAnonDimensions `json:"dimensions,omitempty"`
 
-	// position
+	// The placement order of this card on the Dashboard
 	// Required: true
 	Position *int64 `json:"position"`
 }
@@ -115,7 +115,7 @@ func (m *CardPositionsAnon) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-// CardPositionsAnonDimensions card positions anon dimensions
+// CardPositionsAnonDimensions The amount of columns and rows this card will occupy
 // swagger:model CardPositionsAnonDimensions
 type CardPositionsAnonDimensions struct {
 

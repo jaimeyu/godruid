@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Dashboard dashboard
+// Dashboard Represents a Dashboard used to display metric information on the Datahub UI
 // swagger:model Dashboard
 type Dashboard struct {
 
@@ -170,15 +170,15 @@ func (m *Dashboard) UnmarshalBinary(b []byte) error {
 // swagger:model DashboardAttributes
 type DashboardAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// card positions
+	// Describes the locations of the Cards on the Dashboard in the Datahub UI
 	// Required: true
 	CardPositions CardPositions `json:"cardPositions"`
 
-	// category
+	// Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub
 	// Required: true
 	Category *string `json:"category"`
 
@@ -186,23 +186,23 @@ type DashboardAttributes struct {
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	// Required: true
 	Datatype *string `json:"datatype"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
-	// metadata filters
+	// List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard
 	// Required: true
 	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
 
-	// name
+	// User provided identifier for a Dashboard
 	// Required: true
 	Name *string `json:"name"`
 
-	// tenant Id
+	// Unique identifier of a Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
 }

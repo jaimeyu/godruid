@@ -203,14 +203,14 @@ func (m *ThresholdProfileUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model ThresholdProfileUpdateRequestDataAttributes
 type ThresholdProfileUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
 	// name
 	Name string `json:"name,omitempty"`
 
-	// threshold list
+	// A collection of objects that describe Thresholds which when crossed will trigger events in Datahub
 	ThresholdList ThresholdList `json:"thresholdList"`
 
 	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead

@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// IngestionProfileMetrics ingestion profile metrics
+// IngestionProfileMetrics This object will be deprecated in a future version of the Datahub API
 // swagger:model IngestionProfileMetrics
 type IngestionProfileMetrics struct {
 

@@ -31,10 +31,10 @@ type CardVisualization struct {
 	// icon
 	Icon string `json:"icon,omitempty"`
 
-	// key
+	// Label referencing the type of visualization to be displayed
 	Key string `json:"key,omitempty"`
 
-	// label
+	// User provided identifier for a Visualization
 	Label string `json:"label,omitempty"`
 }
 

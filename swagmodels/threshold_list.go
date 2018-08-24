@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ThresholdList Contains ann array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events
+// ThresholdList Contains an array of objects that outline thresholds per vendor/monitoredObjectType/direction which, when crossed, will generate events
 // swagger:model ThresholdList
 type ThresholdList []*ThresholdListItems0
 
@@ -48,22 +48,22 @@ func (m ThresholdList) Validate(formats strfmt.Registry) error {
 // swagger:model ThresholdListItems0
 type ThresholdListItems0 struct {
 
-	// direction
+	// Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)
 	Direction string `json:"direction,omitempty"`
 
-	// enabled
+	// When true, Threshold Crossing for this Metric will be reported. When false, Threshold Crossings for this Metric are not reported.
 	Enabled string `json:"enabled,omitempty"`
 
-	// events
+	// A collection of objects that describe the properties of a Threshold for a Metric
 	Events []map[string]string `json:"events"`
 
-	// metric
+	// The name of the Metric
 	Metric string `json:"metric,omitempty"`
 
-	// monitored object type
+	// The name of the type of Monitored Object for which this Metric is applicable
 	MonitoredObjectType string `json:"monitoredObjectType,omitempty"`
 
-	// vendor
+	// The name of the Vendor from which this Metric originates
 	Vendor string `json:"vendor,omitempty"`
 }
 

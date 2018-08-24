@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// IngestionProfileMetricList Provides ann arry of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub
+// IngestionProfileMetricList Provides an array of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub
 // swagger:model IngestionProfileMetricList
 type IngestionProfileMetricList []*IngestionProfileMetricListItems0
 
@@ -48,19 +48,19 @@ func (m IngestionProfileMetricList) Validate(formats strfmt.Registry) error {
 // swagger:model IngestionProfileMetricListItems0
 type IngestionProfileMetricListItems0 struct {
 
-	// dimensions
+	// Provides data properties by which the Metric may be filtered and/or aggregated
 	Dimensions []map[string][]string `json:"dimensions"`
 
-	// enabled
+	// When true, this metric will be recorded by Datahub. When false, this metric is ommitted.
 	Enabled bool `json:"enabled,omitempty"`
 
-	// metric
+	// The name of the Metric
 	Metric string `json:"metric,omitempty"`
 
-	// monitored object type
+	// The name of the type of Monitored Object for which this Metric is applicable
 	MonitoredObjectType string `json:"monitoredObjectType,omitempty"`
 
-	// vendor
+	// The name of the Vendor from which this Metric originates
 	Vendor string `json:"vendor,omitempty"`
 }
 

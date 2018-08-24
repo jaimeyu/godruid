@@ -151,16 +151,22 @@
                   type: "array"
                   items:
                     type: "object"
+                    description: "Describes a single Metric available in Datahub"
                     properties:
                       vendor:
+                        description: "The name of the Vendor from which this Metric originates"
                         type: "string"
                       monitoredObjectType:
+                        description: "The name of the type of Monitored Object for which this Metric is applicable"
                         type: "string"
                       metric:
+                        description: "The name of the Metric"
                         type: "string"
                       rawMetricId:
+                        description: "The name of the Metric as it is reported during measurments"
                         type: "string"
                       dimensions:
+                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
                         type: "array"
                         items:
                           type: "object"
@@ -169,6 +175,7 @@
                             items:
                               type: "string"
                       unit:
+                        description: "The unit of measurement used when capturing the value for this Metric"
                         type: "string"
                       ui:
                         type: "object"

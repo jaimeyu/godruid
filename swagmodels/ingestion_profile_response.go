@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// IngestionProfileResponse ingestion profile response
+// IngestionProfileResponse A single object Ingestion Profile response from Datahub
 // swagger:model IngestionProfileResponse
 type IngestionProfileResponse struct {
 

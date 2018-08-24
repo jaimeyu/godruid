@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// MonitoredObjectResponse monitored object response
+// MonitoredObjectResponse A single object Monitored Object response from Datahub
 // swagger:model MonitoredObjectResponse
 type MonitoredObjectResponse struct {
 

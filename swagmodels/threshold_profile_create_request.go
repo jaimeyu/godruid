@@ -193,7 +193,7 @@ type ThresholdProfileCreateRequestDataAttributes struct {
 	// Required: true
 	Name *string `json:"name"`
 
-	// threshold list
+	// A collection of objects that describe Thresholds which when crossed will trigger events in Datahub
 	ThresholdList ThresholdList `json:"thresholdList"`
 
 	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead

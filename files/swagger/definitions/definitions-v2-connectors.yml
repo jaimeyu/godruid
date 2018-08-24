@@ -55,6 +55,7 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               name:
                 type: "string"
               url: 
@@ -106,6 +107,7 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
           tenantId:
@@ -132,8 +134,10 @@
             type: "string"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceCreateRequest:
     type: "object"
@@ -176,14 +180,17 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               status:
                 type: "string"
               hostname: 
                 type: "string"
               createdTimestamp:
                 type: "integer"
+                description: "Time since epoch at which this object was instantiated."
               lastModifiedTimestamp:
                 type: "integer"
+                description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceResponse:
     type: "object"
@@ -216,6 +223,7 @@
         properties:
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
             type: "string"
           tenantId:
@@ -226,5 +234,7 @@
             type: "string"
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."

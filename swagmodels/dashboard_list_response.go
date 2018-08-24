@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DashboardListResponse dashboard list response
+// DashboardListResponse Response for one ore more Dashboards from Datahub
 // swagger:model DashboardListResponse
 type DashboardListResponse struct {
 

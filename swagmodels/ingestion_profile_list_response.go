@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// IngestionProfileListResponse ingestion profile list response
+// IngestionProfileListResponse Ingestion Profile response including one or more values
 // swagger:model IngestionProfileListResponse
 type IngestionProfileListResponse struct {
 

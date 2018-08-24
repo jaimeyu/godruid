@@ -1,5 +1,6 @@
   DataCleaningProfileCreateRequest:
     type: "object"
+    description: "Object used to create a Data Cleaning Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -24,6 +25,7 @@
 
   DataCleaningProfileUpdateRequest:
     type: "object"
+    description: "Object used to update a Data Cleaning Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -51,6 +53,7 @@
 
   DataCleaningRule:
     type: "object"
+    description: "Provides the logic used to determine when data should be ommitted from queries"
     required: ["metricVendor","metricLabel","triggerCondition","clearCondition"]
     properties:
       metricVendor:
@@ -89,6 +92,7 @@
 
   DataCleaningProfileResponse:
     type: "object"
+    description: "A single object Data Cleaning Profile response from Datahub"
     required: ["data"]
     properties:
       data:
@@ -96,6 +100,7 @@
   
   DataCleaningProfileListResponse:
     type: "object"
+    description: "Response for one ore more Data Cleaning Profiles from Datahub"
     required: ["data"]
     properties:
       data:

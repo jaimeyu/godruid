@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// IngestionProfileCreateRequest ingestion profile create request
+// IngestionProfileCreateRequest Object used to create an Ingestion Profile in Datahub
 // swagger:model IngestionProfileCreateRequest
 type IngestionProfileCreateRequest struct {
 

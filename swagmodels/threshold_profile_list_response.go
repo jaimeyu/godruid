@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ThresholdProfileListResponse threshold profile list response
+// ThresholdProfileListResponse Threshold Profile response including one or more values
 // swagger:model ThresholdProfileListResponse
 type ThresholdProfileListResponse struct {
 

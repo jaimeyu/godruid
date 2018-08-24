@@ -148,27 +148,27 @@ type ThresholdProfileAttributes struct {
 	// Required: true
 	ID *string `json:"_id"`
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	// Required: true
 	Datatype *string `json:"datatype"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
-	// name
+	// Identifying name of a Threshold Profile
 	// Required: true
 	Name *string `json:"name"`
 
-	// tenant Id
+	// Unique identifier of the Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
 

@@ -189,45 +189,45 @@ func (m *ReportScheduleConfigCreateRequestData) UnmarshalBinary(b []byte) error 
 // swagger:model ReportScheduleConfigCreateRequestDataAttributes
 type ReportScheduleConfigCreateRequestDataAttributes struct {
 
-	// active
+	// When true, the report will be generated. When false, the report will not be generated
 	Active bool `json:"active,omitempty"`
 
-	// day month
+	// Recurring day of the month when this report should be generated
 	DayMonth string `json:"dayMonth,omitempty"`
 
-	// day week
+	// Recurring day of the week when this report should be generated
 	DayWeek string `json:"dayWeek,omitempty"`
 
-	// granularity
+	// Time period for which individual results should be aggregated
 	Granularity string `json:"granularity,omitempty"`
 
-	// hour
+	// Recurring hour when this report should be generated
 	Hour string `json:"hour,omitempty"`
 
-	// minute
+	// Recurring minute when this report should be generated
 	Minute string `json:"minute,omitempty"`
 
-	// month
+	// Recurring month when this report should be generated
 	Month string `json:"month,omitempty"`
 
-	// name
+	// Identifying name for the report to be generated
 	// Required: true
 	Name *string `json:"name"`
 
-	// report type
+	// The type of report this config will generate
 	ReportType string `json:"reportType,omitempty"`
 
-	// threshold profile
+	// The unique identifier of the Threshold Profile used to generate the report
 	// Required: true
 	ThresholdProfile *string `json:"thresholdProfile"`
 
-	// time range duration
+	// Period of time for which the report will be generated
 	TimeRangeDuration string `json:"timeRangeDuration,omitempty"`
 
-	// timeout
+	// Amount if time, in ms, before which the request to generate the report should be cancelled
 	Timeout int64 `json:"timeout,omitempty"`
 
-	// timezone
+	// Timezone used to display the results in the generated report
 	Timezone string `json:"timezone,omitempty"`
 }
 

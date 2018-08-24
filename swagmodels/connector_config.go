@@ -144,11 +144,11 @@ func (m *ConnectorConfig) UnmarshalBinary(b []byte) error {
 // swagger:model ConnectorConfigAttributes
 type ConnectorConfigAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
@@ -167,7 +167,7 @@ type ConnectorConfigAttributes struct {
 	// Required: true
 	ExportGroup *string `json:"exportGroup"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 

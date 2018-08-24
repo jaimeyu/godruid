@@ -347,29 +347,29 @@ func (m *IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0) 
 	return nil
 }
 
-// IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 ingestion dictionary list response data items0 attributes metric list items0
+// IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 Describes a single Metric available in Datahub
 // swagger:model IngestionDictionaryListResponseDataItems0AttributesMetricListItems0
 type IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 struct {
 
-	// dimensions
+	// Provides data properties by which the Metric may be filtered and/or aggregated
 	Dimensions []map[string][]string `json:"dimensions"`
 
-	// metric
+	// The name of the Metric
 	Metric string `json:"metric,omitempty"`
 
-	// monitored object type
+	// The name of the type of Monitored Object for which this Metric is applicable
 	MonitoredObjectType string `json:"monitoredObjectType,omitempty"`
 
-	// raw metric Id
+	// The name of the Metric as it is reported during measurments
 	RawMetricID string `json:"rawMetricId,omitempty"`
 
 	// ui
 	UI *IngestionDictionaryListResponseDataItems0AttributesMetricListItems0UI `json:"ui,omitempty"`
 
-	// unit
+	// The unit of measurement used when capturing the value for this Metric
 	Unit string `json:"unit,omitempty"`
 
-	// vendor
+	// The name of the Vendor from which this Metric originates
 	Vendor string `json:"vendor,omitempty"`
 }
 

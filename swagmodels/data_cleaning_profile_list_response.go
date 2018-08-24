@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningProfileListResponse data cleaning profile list response
+// DataCleaningProfileListResponse Response for one ore more Data Cleaning Profiles from Datahub
 // swagger:model DataCleaningProfileListResponse
 type DataCleaningProfileListResponse struct {
 

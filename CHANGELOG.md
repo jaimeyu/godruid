@@ -1,8 +1,10 @@
-* Fix - Resolve inconsistency issue for raw query when more than a single monitored object is requested
 ## Current Release 
+### 0.207.0 
+**Release Date:** Sat Aug 25 11:23:50 UTC 2018     
+## Previous Releases 
+* Fix - Resolve inconsistency issue for raw query when more than a single monitored object is requested
 ### 0.206.0 
 **Release Date:** Fri Aug 24 19:55:36 UTC 2018     
-## Previous Releases 
 ### 0.205.0 
 **Release Date:** Thu Aug 23 20:12:31 UTC 2018     
 * Fix - Modify raw query to retrieve all monitored objects if no metadata is specified

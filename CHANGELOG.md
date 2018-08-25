@@ -1,3 +1,4 @@
+* Fix - Resolve inconsistency issue for raw query when more than a single monitored object is requested
 ## Current Release 
 ### 0.206.0 
 **Release Date:** Fri Aug 24 19:55:36 UTC 2018     

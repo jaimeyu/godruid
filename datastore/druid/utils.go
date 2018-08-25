@@ -166,18 +166,25 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 }
 
 func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
-	res := gabs.New()
-	var hasData bool
-	for _, r := range rawMetrics {
 
-		obj := gabs.New()
-		var monObj string
-		for k, v := range r.Result {
+	// v1 response structure of monId->timestamp->direction->metricset
+	gatherMap := make(map[string]map[string]map[string]map[string]interface{})
 
+	for _, timeseriesEntry := range rawMetrics {
+		seriesTimestamp := timeseriesEntry.Timestamp
+
+		for k, v := range timeseriesEntry.Result {
+
+			hasData := false
 			parts := strings.Split(k, ".")
-			monObj = parts[0]
+			monObj := parts[0]
 			direction := parts[1]
-			lastParts := parts[len(parts)-1]
+			metric := parts[len(parts)-1]
+
+			// Initialize an empty map if one does not exist for the current monitored object
+			if _, ok := gatherMap[monObj]; !ok {
+				gatherMap[monObj] = make(map[string]map[string]map[string]interface{})
+			}
 
 			switch v.(type) {
 			case float32:
@@ -187,30 +194,50 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 			default:
 				hasData = true
 			}
-			if !strings.Contains(lastParts, "temporary") && hasData {
-				obj.SetP(v, direction+"."+lastParts)
+			if !strings.Contains(metric, "temporary") && hasData {
+				moMap := gatherMap[monObj]
+
+				moTimeMap, ok := moMap[seriesTimestamp]
+				if !ok {
+					moTimeMap = make(map[string]map[string]interface{})
+					moMap[seriesTimestamp] = moTimeMap
+				}
+
+				moDirMap, ok := moTimeMap[direction]
+				if !ok {
+					moDirMap = make(map[string]interface{})
+					moTimeMap[direction] = moDirMap
+				}
+
+				moDirMap[metric] = v
 			}
 		}
+	}
 
-		if !res.ExistsP("result." + monObj) {
-			_, err := res.ArrayP("result." + monObj)
-			if err != nil {
-				return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
+	responseMap := make(map[string][]interface{})
+
+	// Now that we have gathered all directions/metrics by timestamp, we have to transform
+	// the monitord object map into an array of map entries with timestamps embedded in them
+	// in order to align with the v1 metric structure
+	for moid, timeseries := range gatherMap {
+		timearray := make([]interface{}, len(timeseries))
+		i := 0
+		// This block transforms map entries keyed by timestamp into an array set that contains
+		// the timestamp along with the direction map in order to comply with the v1 response structure
+		for timestamp, entry := range timeseries {
+			txfTimeBlock := make(map[string]interface{})
+			txfTimeBlock["timestamp"] = timestamp
+			for k, v := range entry {
+				txfTimeBlock[k] = v
 			}
+			timearray[i] = txfTimeBlock
+			i++
 		}
-
-		if hasData {
-			obj.SetP(r.Timestamp, "timestamp")
-			res.ArrayAppendP(obj.Data(), "result."+monObj)
-		}
-
+		responseMap[moid] = timearray
 	}
 
-	dataContainer := map[string]interface{}{}
-	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
-		return nil, err
-	}
-	logger.Log.Debugf("Reformatted raw metrics data: %v", dataContainer)
+	dataContainer := map[string]interface{}{"result": responseMap}
+	logger.Log.Debugf("Reformatted raw metrics data: %v", responseMap)
 	return dataContainer, nil
 }
 

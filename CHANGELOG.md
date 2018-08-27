@@ -1,3 +1,4 @@
+* Fix - Adding ability to search monitored object name for partial matches based on underscore delimited words (this is how metadata was insert inserted into monitored objects)
 ## Current Release 
 ### 0.202.0 
 **Release Date:** Tue Aug 21 17:29:36 UTC 2018     

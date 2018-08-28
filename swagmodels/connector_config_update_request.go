@@ -203,7 +203,7 @@ func (m *ConnectorConfigUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model ConnectorConfigUpdateRequestDataAttributes
 type ConnectorConfigUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 

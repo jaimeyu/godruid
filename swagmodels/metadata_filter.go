@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// MetadataFilter metadata filter
+// MetadataFilter Used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard
 // swagger:model MetadataFilter
 type MetadataFilter struct {
 

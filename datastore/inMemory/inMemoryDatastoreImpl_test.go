@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/gather"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
 	dstestAdmin "github.com/accedian/adh-gather/datastore/test/admin"
@@ -22,6 +24,9 @@ const (
 )
 
 func setupInMemoryDB() {
+	cfg := gather.LoadConfig("../../config/adh-gather-test.yml", viper.New())
+	cfg.Set("ingDict", "../../files/defaultIngestionDictionary.json")
+
 	var err error
 	adminDB, err = CreateAdminServiceDAO()
 	if err != nil {

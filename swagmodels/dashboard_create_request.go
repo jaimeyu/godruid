@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DashboardCreateRequest dashboard create request
+// DashboardCreateRequest Object used to create a Dashboard in Datahub
 // swagger:model DashboardCreateRequest
 type DashboardCreateRequest struct {
 
@@ -215,16 +215,16 @@ func (m *DashboardCreateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model DashboardCreateRequestDataAttributes
 type DashboardCreateRequestDataAttributes struct {
 
-	// card positions
+	// Describes the locations of the Cards on the Dashboard in the Datahub UI
 	CardPositions CardPositions `json:"cardPositions,omitempty"`
 
-	// category
+	// Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub
 	Category string `json:"category,omitempty"`
 
-	// metadata filters
+	// List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard
 	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
 
-	// name
+	// User provided identifier for a Dashboard
 	// Required: true
 	Name *string `json:"name"`
 }

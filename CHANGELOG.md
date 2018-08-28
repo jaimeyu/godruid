@@ -1,7 +1,37 @@
 ## Current Release 
+### 0.208.0 
+**Release Date:** Tue Aug 28 00:34:21 UTC 2018     
+## Previous Releases 
+* Fix - Re-order timeseries data for raw query in chronological order
+### 0.207.0 
+**Release Date:** Sat Aug 25 11:23:50 UTC 2018     
+* Fix - Resolve inconsistency issue for raw query when more than a single monitored object is requested
+### 0.206.0 
+**Release Date:** Fri Aug 24 19:55:36 UTC 2018     
+### 0.205.0 
+**Release Date:** Thu Aug 23 20:12:31 UTC 2018     
+* Fix - Modify raw query to retrieve all monitored objects if no metadata is specified
+### 0.204.0 
+**Release Date:** Thu Aug 23 15:32:47 UTC 2018     
+* Refactor - adding flattened structure to metric related models in preparation of deprecation of the hierarchical models
+### 0.203.0 
+**Release Date:** Tue Aug 21 18:21:04 UTC 2018     
+### 0.202.0 
+**Release Date:** Tue Aug 21 17:29:36 UTC 2018     
+* Fix - Issue where couchdb views were not getting generated anymore.
+### 0.201.0 
+**Release Date:** Mon Aug 20 16:24:35 UTC 2018     
+* Fix - Adding metadata validators to CRUID APIs
+* Fix - Updated views to be handle lowercase and uppercase values the same
+* Fix - Changed metadata validators to only use lowercase letters a...z and the _
+### 0.200.0 
+**Release Date:** Fri Aug 17 20:34:29 UTC 2018     
+* Fix - making sure Druid queries are built using sorted keys to ensure cache hits on subsequent queries
+### 0.199.0 
+**Release Date:** Fri Aug 17 19:23:12 UTC 2018     
+* Feature - Adding endpoint to query monitored objects by metadata
 ### 0.198.0 
 **Release Date:** Wed Aug 15 16:16:21 UTC 2018     
-## Previous Releases 
 * Feature - Adding configurable druid timeouts
 
 ### 0.196.0 

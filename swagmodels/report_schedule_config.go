@@ -144,75 +144,75 @@ func (m *ReportScheduleConfig) UnmarshalBinary(b []byte) error {
 // swagger:model ReportScheduleConfigAttributes
 type ReportScheduleConfigAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// active
+	// When true, the report will be generated. When false, the report will not be generated
 	// Required: true
 	Active *bool `json:"active"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	// Required: true
 	Datatype *string `json:"datatype"`
 
-	// day month
+	// Recurring day of the month when this report should be generated
 	// Required: true
 	DayMonth *string `json:"dayMonth"`
 
-	// day week
+	// Recurring day of the week when this report should be generated
 	// Required: true
 	DayWeek *string `json:"dayWeek"`
 
-	// granularity
+	// Time period for which individual results should be aggregated
 	// Required: true
 	Granularity *string `json:"granularity"`
 
-	// hour
+	// Recurring hour when this report should be generated
 	// Required: true
 	Hour *string `json:"hour"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
-	// minute
+	// Recurring minute when this report should be generated
 	// Required: true
 	Minute *string `json:"minute"`
 
-	// month
+	// Recurring month when this report should be generated
 	// Required: true
 	Month *string `json:"month"`
 
-	// name
+	// Identifying name for the report to be generated
 	// Required: true
 	Name *string `json:"name"`
 
-	// report type
+	// The type of report this config will generate
 	// Required: true
 	ReportType *string `json:"reportType"`
 
-	// tenant Id
+	// Unique identifier of the Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// threshold profile
+	// The unique identifier of the Threshold Profile used to generate the report
 	// Required: true
 	ThresholdProfile *string `json:"thresholdProfile"`
 
-	// time range duration
+	// Period of time for which the report will be generated
 	// Required: true
 	TimeRangeDuration *string `json:"timeRangeDuration"`
 
-	// timeout
+	// Amount if time, in ms, before which the request to generate the report should be cancelled
 	// Required: true
 	Timeout *int64 `json:"timeout"`
 
-	// timezone
+	// Timezone used to display the results in the generated report
 	// Required: true
 	Timezone *string `json:"timezone"`
 }

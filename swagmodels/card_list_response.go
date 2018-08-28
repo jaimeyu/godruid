@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CardListResponse card list response
+// CardListResponse Response for one ore more Cards from Datahub
 // swagger:model CardListResponse
 type CardListResponse struct {
 

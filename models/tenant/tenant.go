@@ -3,8 +3,10 @@ package tenant
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
+	"github.com/accedian/adh-gather/logger"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -12,6 +14,7 @@ import (
 type TenantDataType string
 
 const illegalWords = "!,@#$%^&*?/"
+const legalCharacters = "qwertyuiopasdfghjklzxcvbnm_"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record
@@ -329,13 +332,14 @@ func (d *Domain) Validate(isUpdate bool) error {
 
 // IngestionProfile - defines a Tenant Ingestion Profile.
 type IngestionProfile struct {
-	ID                    string          `json:"_id"`
-	REV                   string          `json:"_rev"`
-	Datatype              string          `json:"datatype"`
-	TenantID              string          `json:"tenantId"`
-	Metrics               IngPrfVendorMap `json:"metrics"`
-	CreatedTimestamp      int64           `json:"createdTimestamp"`
-	LastModifiedTimestamp int64           `json:"lastModifiedTimestamp"`
+	ID                    string                    `json:"_id"`
+	REV                   string                    `json:"_rev"`
+	Datatype              string                    `json:"datatype"`
+	TenantID              string                    `json:"tenantId"`
+	Metrics               *IngPrfVendorMap          `json:"metrics"`
+	MetricList            []*IngestionProfileMetric `json:"metricList"`
+	CreatedTimestamp      int64                     `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                     `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -365,27 +369,36 @@ func (prf *IngestionProfile) Validate(isUpdate bool) error {
 }
 
 type IngPrfVendorMap struct {
-	VendorMap map[string]IngPrfMonitoredObjectTypeMap `json:"vendorMap"`
+	VendorMap map[string]*IngPrfMonitoredObjectTypeMap `json:"vendorMap"`
 }
 
 type IngPrfMonitoredObjectTypeMap struct {
-	MonitoredObjectTypeMap map[string]IngPrfMetricMap `json:"monitoredObjectTypeMap"`
+	MonitoredObjectTypeMap map[string]*IngPrfMetricMap `json:"monitoredObjectTypeMap"`
 }
 
 type IngPrfMetricMap struct {
 	MetricMap map[string]bool `json:"metricMap"`
 }
 
+type IngestionProfileMetric struct {
+	Enabled             bool                  `json:"enabled"`
+	Metric              string                `json:"metric"`
+	MonitoredObjectType string                `json:"monitoredObjectType"`
+	Vendor              string                `json:"vendor"`
+	Dimensions          []map[string][]string `json:"dimensions"`
+}
+
 // ThresholdProfile - defines a Tenant Threshold Profile.
 type ThresholdProfile struct {
-	ID                    string          `json:"_id"`
-	REV                   string          `json:"_rev"`
-	Datatype              string          `json:"datatype"`
-	TenantID              string          `json:"tenantId"`
-	Name                  string          `json:"name"`
-	Thresholds            ThrPrfVendorMap `json:"thresholds"`
-	CreatedTimestamp      int64           `json:"createdTimestamp"`
-	LastModifiedTimestamp int64           `json:"lastModifiedTimestamp"`
+	ID                    string                       `json:"_id"`
+	REV                   string                       `json:"_rev"`
+	Datatype              string                       `json:"datatype"`
+	TenantID              string                       `json:"tenantId"`
+	Name                  string                       `json:"name"`
+	Thresholds            *ThrPrfVendorMap             `json:"thresholds"`
+	ThresholdList         []*ThresholdProfileThreshold `json:"thresholdList"`
+	CreatedTimestamp      int64                        `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                        `json:"lastModifiedTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -400,12 +413,12 @@ func (prf *ThresholdProfile) SetID(s string) error {
 }
 
 type ThrPrfVendorMap struct {
-	VendorMap map[string]ThrPrfMetric `json:"vendorMap"`
+	VendorMap map[string]*ThrPrfMetric `json:"vendorMap"`
 }
 
 type ThrPrfMetric struct {
-	MetricMap              map[string]ThrPrfUIEvtAttrMap `json:"metricMap"`
-	MonitoredObjectTypeMap map[string]ThrPrfMetricMap    `json:"monitoredObjectTypeMap"`
+	MetricMap              map[string]*ThrPrfUIEvtAttrMap `json:"metricMap"`
+	MonitoredObjectTypeMap map[string]*ThrPrfMetricMap    `json:"monitoredObjectTypeMap"`
 }
 
 type ThrPrfUIEvtAttrMap struct {
@@ -413,15 +426,15 @@ type ThrPrfUIEvtAttrMap struct {
 }
 
 type ThrPrfMetricMap struct {
-	MetricMap map[string]ThrPrfDirectionMap `json:"metricMap"`
+	MetricMap map[string]*ThrPrfDirectionMap `json:"metricMap"`
 }
 
 type ThrPrfDirectionMap struct {
-	DirectionMap map[string]ThrPrfEventMap `json:"directionMap"`
+	DirectionMap map[string]*ThrPrfEventMap `json:"directionMap"`
 }
 
 type ThrPrfEventMap struct {
-	EventMap map[string]ThrPrfEventAttrMap `json:"eventMap"`
+	EventMap map[string]*ThrPrfEventAttrMap `json:"eventMap"`
 }
 
 type ThrPrfEventAttrMap struct {
@@ -441,6 +454,15 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 	}
 
 	return nil
+}
+
+type ThresholdProfileThreshold struct {
+	Direction           string              `json:"direction"`
+	Enabled             string              `json:"enabled"`
+	Events              []map[string]string `json:"events"`
+	Metric              string              `json:"metric"`
+	MonitoredObjectType string              `json:"monitoredObjectType"`
+	Vendor              string              `json:"vendor"`
 }
 
 type MonitoredObjectGroup struct {
@@ -565,7 +587,10 @@ func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
 
 func isStringSterile(str string) bool {
 
-	if strings.ContainsAny(str, illegalWords) {
+	isAlpha := regexp.MustCompile(`^[a-z_]+$`).MatchString
+
+	if !isAlpha(str) {
+		logger.Log.Debugf("%q is not valid\n", str)
 		return false
 	}
 
@@ -587,13 +612,20 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)
 	for k, v := range mo.Meta {
+
 		// Stop
 		if isStringSterile(k) == false {
-			return fmt.Errorf("Metadata key (%s) contains an invalid character (%s). Please reformat your keys.", k, illegalWords)
+			return fmt.Errorf("Metadata key (%s) contains an invalid character (Valid characters:%s). Please reformat your keys", k, legalCharacters)
 		}
+
+		if len(k) == 0 {
+			return fmt.Errorf("Keys cannot be empty strings")
+		}
+
+		// ensure lower case
 		key := strings.ToLower(k)
-		val := strings.ToLower(v)
-		newMeta[key] = val
+		newMeta[key] = v
+		logger.Log.Debugf("Converted to {%s:%s} -> {%s,%s}", k, v, key, newMeta[key])
 
 	}
 

@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CardUpdateRequest card update request
+// CardUpdateRequest Object used to update a Card in Datahub
 // swagger:model CardUpdateRequest
 type CardUpdateRequest struct {
 
@@ -204,7 +204,7 @@ func (m *CardUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model CardUpdateRequestDataAttributes
 type CardUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 

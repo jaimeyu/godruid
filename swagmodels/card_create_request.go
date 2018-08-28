@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CardCreateRequest card create request
+// CardCreateRequest Object used to create a Card in Datahub
 // swagger:model CardCreateRequest
 type CardCreateRequest struct {
 

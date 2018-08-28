@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/accedian/adh-gather/datastore"
@@ -377,7 +376,7 @@ func HandleBulkInsertMonitoredObjects(allowedRoles []string, tenantDB datastore.
 		// Validate the request data
 		for _, obj := range data {
 			if err = obj.Validate(false); err != nil {
-
+				return tenant_provisioning_service.NewBulkInsertMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, "Monitored Object did not validate:"+err.Error()), startTime, http.StatusBadRequest, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 			}
 
 			if obj.TenantID != params.TenantID {
@@ -477,6 +476,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 	return func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
 
 		startTime := time.Now()
+		errFlag := false
 		incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
 		logger.Log.Infof("Updating %s meta data in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, params.TenantID)
 
@@ -502,6 +502,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 		// Internal function responsible for managing error scenarios for individual result items
 		itemError := func(position int, itemResponse *common.BulkOperationResult, reason int, itemErr string) {
+			errFlag = true
 			itemResponse.OK = false
 			itemResponse.REASON = strconv.Itoa(reason)
 			itemResponse.ERROR = itemErr
@@ -528,10 +529,16 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
 
 			existingMonitoredObject.Meta = item.Metadata
-			// Hack to emulate an external request. If this is not done, then the monitored object prefix will be added again causing a 409 conflict
-			splitID := strings.Split(existingMonitoredObject.ID, idSep)
-			existingMonitoredObject.ID = splitID[len(splitID)-1]
 
+			splitID := datastore.GetDataIDFromFullID(existingMonitoredObject.ID)
+
+			existingMonitoredObject.ID = splitID
+
+			err = existingMonitoredObject.Validate(true)
+			if err != nil {
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate%s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				continue
+			}
 			// Issue request to DAO Layer
 			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
 			if err != nil {
@@ -571,6 +578,11 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 		reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
 		logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
+
+		if errFlag {
+			return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaInternalServerError().WithPayload(converted)
+		}
 		return tenant_provisioning_service.NewBulkUpsertMonitoredObjectMetaOK().WithPayload(converted)
+
 	}
 }

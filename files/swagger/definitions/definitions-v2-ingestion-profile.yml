@@ -1,5 +1,6 @@
   IngestionProfileCreateRequest:
     type: "object"
+    description: "Object used to create an Ingestion Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -16,25 +17,14 @@
             required: ["metrics"]
             properties:
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                $ref: '#/definitions/IngestionProfileMetricList'
                     
   IngestionProfileUpdateRequest:
     type: "object"
+    description: "Object used to update an Ingestion Profile in Datahub"
     required: ["data"]
     properties:
       data:
@@ -52,27 +42,18 @@
             properties:
               _rev:
                 type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               metrics:
-                type: "object"
-                properties:
-                  vendorMap:
-                    type: "object"
-                    additionalProperties:
-                      type: "object"
-                      properties:
-                        monitoredObjectTypeMap:
-                          type: "object"
-                          additionalProperties:
-                            type: "object"
-                            properties:
-                              metricMap:
-                                type: "object"
-                                additionalProperties:
-                                  type: "boolean"
+                description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+                $ref: '#/definitions/IngestionProfileMetrics'
+              metricList:
+                description: "A list of objects that allow customization on which Metrics will be available to query from Datahub"
+                $ref: '#/definitions/IngestionProfileMetricList'
             
              
   IngestionProfileListResponse:
     type: "object"
+    description: "Ingestion Profile response including one or more values"
     required: ["data"]
     properties:
       data:
@@ -82,6 +63,7 @@
 
   IngestionProfileResponse:
     type: "object"
+    description: "A single object Ingestion Profile response from Datahub"
     required: ["data"]
     properties:
       data:
@@ -102,30 +84,71 @@
         properties:
           tenantId:
             type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
           _id:
             type: "string"
           _rev:
             type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
           datatype:
+            description: "Name used to identify this type of record in Datahub"
             type: "string"
           metrics:
-            type: "object"
-            properties:
-              vendorMap:
-                type: "object"
-                additionalProperties:
-                  type: "object"
-                  properties:
-                    monitoredObjectTypeMap:
-                      type: "object"
-                      additionalProperties:
-                        type: "object"
-                        properties:
-                          metricMap:
-                            type: "object"
-                            additionalProperties:
-                              type: "boolean"
+            description: "Metrics will be deprecated in the next API version. Please use the 'metricList' property instead"
+            $ref: '#/definitions/IngestionProfileMetrics'
+          metricList:
+            description: "A collection of Metric descriptors that determine which metrics will be recorded by Datahub"
+            $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            description: "Time since epoch at which this object was last altered."
+
+  IngestionProfileMetrics:
+    type: "object"
+    description: "This object will be deprecated in a future version of the Datahub API"
+    properties:
+      vendorMap:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            monitoredObjectTypeMap:
+              type: "object"
+              additionalProperties:
+                type: "object"
+                properties:
+                  metricMap:
+                    type: "object"
+                    additionalProperties:
+                      type: "boolean"
+
+  IngestionProfileMetricList:
+    description: "Provides an array of objects which outline the vendor/monitoredObjectType/metrics that are actively being stroed in Datahub"
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        vendor:
+          description: "The name of the Vendor from which this Metric originates"
+          type: "string"
+        monitoredObjectType:
+          description: "The name of the type of Monitored Object for which this Metric is applicable"
+          type: "string"
+        metric:
+          type: "string"
+          description: "The name of the Metric"
+        enabled:
+          description: "When true, this metric will be recorded by Datahub. When false, this metric is ommitted."
+          type: "boolean"
+        dimensions:
+          type: "array"
+          description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+          items:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"

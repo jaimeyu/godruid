@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DataCleaningProfileUpdateRequest data cleaning profile update request
+// DataCleaningProfileUpdateRequest Object used to update a Data Cleaning Profile in Datahub
 // swagger:model DataCleaningProfileUpdateRequest
 type DataCleaningProfileUpdateRequest struct {
 

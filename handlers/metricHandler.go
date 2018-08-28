@@ -507,7 +507,16 @@ func (msh *MetricServiceHandler) GetRawMetricsV2(w http.ResponseWriter, r *http.
 
 	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, request)
 
-	metaMOs, err := msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	var metaMOs []string
+
+	if len(request.Meta) != 0 {
+		logger.Log.Debugf("Retrieving monitored objects by meta data for request: %v", request)
+		metaMOs, err = msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
+	} else {
+		logger.Log.Debugf("Retrieving all monitored objects for request: %v", request)
+		metaMOs, err = msh.tenantDB.GetAllMonitoredObjectsIDs(request.Tenant)
+	}
+
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
@@ -678,38 +687,14 @@ func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta ma
 		return nil, nil
 	}
 
-	mos := make([]string, 0)
-
-	firstMeta := true
-
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Retrieving monitored object IDs for tenant %s based on metadata criteria %v", tenantId, meta)
 	}
 
-	// Loop over all the metadata types
-	for mkey, mvalue := range meta {
+	mos, err := msh.tenantDB.GetFilteredMonitoredObjectList(tenantId, meta)
 
-		mosForKey := make([]string, 0)
-		// Loop over all the metadata values associated with the current type
-		for _, valueItem := range mvalue {
-
-			rMetaMOs, err := msh.MetaToMonitoredObjectsKV(tenantId, mkey, valueItem)
-
-			if err != nil {
-				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
-			}
-
-			// Union all the IDs together since we need a conditional OR for all values of a particular key
-			mosForKey = listUnion(mosForKey, rMetaMOs)
-		}
-		if !firstMeta {
-			// Intersect all the IDs since monitored objects should contain at least one of the metadata values for each of the metadata keys in a conditional AND
-			mos = listIntersection(mos, mosForKey)
-		} else {
-			// We do this since we don't want to run an intersection against an initially empty list otherwise there will never be an intersection
-			firstMeta = false
-			mos = mosForKey
-		}
+	if err != nil {
+		return nil, err
 	}
 
 	if logger.IsDebugEnabled() {
@@ -717,14 +702,4 @@ func (msh *MetricServiceHandler) MetaToMonitoredObjects(tenantId string, meta ma
 	}
 
 	return mos, nil
-}
-
-// MetaToMonitoredObjectsKV - Retrieve a set of monitored object IDs based on the provided key/value pair
-func (msh *MetricServiceHandler) MetaToMonitoredObjectsKV(tenantId string, key string, value string) ([]string, error) {
-
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata with key %s and value %s", tenantId, key, value)
-	}
-
-	return msh.tenantDB.GetMonitoredObjectIDsToMetaEntry(tenantId, key, value)
 }

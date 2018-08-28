@@ -130,28 +130,31 @@ func (m *MonitoredObjectCreate) UnmarshalBinary(b []byte) error {
 // swagger:model MonitoredObjectCreateAttributes
 type MonitoredObjectCreateAttributes struct {
 
-	// actuator name
+	// Name of the origin of the Monitored Object
 	ActuatorName string `json:"actuatorName,omitempty"`
 
-	// actuator type
+	// Type of the origin of the Monitored Object
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType string `json:"actuatorType,omitempty"`
 
-	// object Id
+	// Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties
+	Meta map[string]string `json:"meta,omitempty"`
+
+	// Unique identifier of the Monitored Object in Datahub
 	// Required: true
 	ObjectID *string `json:"objectId"`
 
-	// object name
+	// Name of the Monitored Object
 	ObjectName string `json:"objectName,omitempty"`
 
-	// object type
+	// Type of the Monitored Object
 	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType string `json:"objectType,omitempty"`
 
-	// reflector name
+	// Name of the target of the Monitored Object
 	ReflectorName string `json:"reflectorName,omitempty"`
 
-	// reflector type
+	// Type of the target of the Monitored Object
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType string `json:"reflectorType,omitempty"`
 }

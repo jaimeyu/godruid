@@ -12,6 +12,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	setops "github.com/adam-hanna/arrayOperations"
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
@@ -584,6 +585,8 @@ func createDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 // Retrieve IDs from a particular view based on a key criteria
 func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
 	db, err := getDatabase(dbName)
+	viewName = strings.ToLower(viewName)
+	key = strings.ToLower(key)
 	view := createDBPathStr("_design", designDocName, "_view", viewName)
 
 	qp := url.Values{}
@@ -737,4 +740,14 @@ func generatePaginationQueryParams(startKey string, limit int64, includeDocs boo
 	params.Add(descendingQueryParamStr, strconv.FormatBool(descending))
 
 	return params
+}
+
+// Return the string union between the provided arrays
+func listUnion(listA []string, listB []string) []string {
+	return setops.UnionString(listA, listB)
+}
+
+// return the string intersection between the provided arrays
+func listIntersection(listA []string, listB []string) []string {
+	return setops.IntersectString(listA, listB)
 }

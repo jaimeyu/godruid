@@ -149,7 +149,7 @@ func (o *BulkUpsertMonitoredObjectMetaForbidden) WriteResponse(rw http.ResponseW
 // BulkUpsertMonitoredObjectMetaInternalServerErrorCode is the HTTP code returned for type BulkUpsertMonitoredObjectMetaInternalServerError
 const BulkUpsertMonitoredObjectMetaInternalServerErrorCode int = 500
 
-/*BulkUpsertMonitoredObjectMetaInternalServerError Unexpected error processing request
+/*BulkUpsertMonitoredObjectMetaInternalServerError Unexpected error processing request. Please check response payload for error description as multiple errors can be reported back.
 
 swagger:response bulkUpsertMonitoredObjectMetaInternalServerError
 */
@@ -158,7 +158,7 @@ type BulkUpsertMonitoredObjectMetaInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload swagmodels.BulkOperationResponse `json:"body,omitempty"`
 }
 
 // NewBulkUpsertMonitoredObjectMetaInternalServerError creates BulkUpsertMonitoredObjectMetaInternalServerError with default headers values
@@ -168,13 +168,13 @@ func NewBulkUpsertMonitoredObjectMetaInternalServerError() *BulkUpsertMonitoredO
 }
 
 // WithPayload adds the payload to the bulk upsert monitored object meta internal server error response
-func (o *BulkUpsertMonitoredObjectMetaInternalServerError) WithPayload(payload string) *BulkUpsertMonitoredObjectMetaInternalServerError {
+func (o *BulkUpsertMonitoredObjectMetaInternalServerError) WithPayload(payload swagmodels.BulkOperationResponse) *BulkUpsertMonitoredObjectMetaInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the bulk upsert monitored object meta internal server error response
-func (o *BulkUpsertMonitoredObjectMetaInternalServerError) SetPayload(payload string) {
+func (o *BulkUpsertMonitoredObjectMetaInternalServerError) SetPayload(payload swagmodels.BulkOperationResponse) {
 	o.Payload = payload
 }
 
@@ -183,6 +183,10 @@ func (o *BulkUpsertMonitoredObjectMetaInternalServerError) WriteResponse(rw http
 
 	rw.WriteHeader(500)
 	payload := o.Payload
+	if payload == nil {
+		payload = make(swagmodels.BulkOperationResponse, 0, 50)
+	}
+
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}

@@ -1388,9 +1388,9 @@
           schema:
             type: string
         '500':
-          description: "Unexpected error processing request"
+          description: "Unexpected error processing request. Please check response payload for error description as multiple errors can be reported back."
           schema:
-            type: string
+            $ref: '#/definitions/BulkOperationResponse'
       parameters:
         - name: tenantId
           in: path

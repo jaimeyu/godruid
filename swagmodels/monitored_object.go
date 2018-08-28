@@ -144,47 +144,48 @@ func (m *MonitoredObject) UnmarshalBinary(b []byte) error {
 // swagger:model MonitoredObjectAttributes
 type MonitoredObjectAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// actuator name
+	// Name of the origin of the Monitored Object
 	ActuatorName string `json:"actuatorName,omitempty"`
 
-	// actuator type
+	// Type of the origin of the Monitored Object
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType string `json:"actuatorType,omitempty"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	CreatedTimestamp int64 `json:"createdTimestamp,omitempty"`
 
-	// datatype
+	// Name used to identify this type of record in Datahub
 	Datatype string `json:"datatype,omitempty"`
 
-	// last modified timestamp
+	// Time since epoch at which this object was last altered.
 	LastModifiedTimestamp int64 `json:"lastModifiedTimestamp,omitempty"`
 
-	// meta
+	// Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties
+	// Pattern: ^[a-z_]+$
 	Meta map[string]string `json:"meta,omitempty"`
 
-	// object Id
+	// Unique identifier of the Monitored Object in Datahub
 	ObjectID string `json:"objectId,omitempty"`
 
-	// object name
+	// Common name of the Monitored Object
 	ObjectName string `json:"objectName,omitempty"`
 
-	// object type
+	// Type of the Monitored Object
 	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType string `json:"objectType,omitempty"`
 
-	// reflector name
+	// Name of the target of the Monitored Object
 	ReflectorName string `json:"reflectorName,omitempty"`
 
-	// reflector type
+	// Type of the target of the Monitored Object
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType string `json:"reflectorType,omitempty"`
 
-	// tenant Id
+	// Unique identifier of the Tenant in Datahub
 	TenantID string `json:"tenantId,omitempty"`
 }
 
@@ -197,6 +198,10 @@ func (m *MonitoredObjectAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateActuatorType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMeta(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -264,6 +269,15 @@ func (m *MonitoredObjectAttributes) validateActuatorType(formats strfmt.Registry
 	// value enum
 	if err := m.validateActuatorTypeEnum("attributes"+"."+"actuatorType", "body", m.ActuatorType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *MonitoredObjectAttributes) validateMeta(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Meta) { // not required
+		return nil
 	}
 
 	return nil

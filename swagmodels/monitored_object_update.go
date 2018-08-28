@@ -144,41 +144,44 @@ func (m *MonitoredObjectUpdate) UnmarshalBinary(b []byte) error {
 // swagger:model MonitoredObjectUpdateAttributes
 type MonitoredObjectUpdateAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// actuator name
+	// Name of the origin of the Monitored Object
 	// Required: true
 	ActuatorName *string `json:"actuatorName"`
 
-	// actuator type
+	// Type of the origin of the Monitored Object
 	// Required: true
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ActuatorType *string `json:"actuatorType"`
 
-	// created timestamp
+	// Time since epoch at which this object was instantiated.
 	// Required: true
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
-	// object Id
+	// Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties
+	Meta map[string]string `json:"meta,omitempty"`
+
+	// Unique identifier of the Monitored Object in Datahub
 	// Required: true
 	ObjectID *string `json:"objectId"`
 
-	// object name
+	// Name of the Monitored Object
 	// Required: true
 	ObjectName *string `json:"objectName"`
 
-	// object type
+	// Type of the Monitored Object
 	// Required: true
 	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType *string `json:"objectType"`
 
-	// reflector name
+	// Name of the target of the Monitored Object
 	// Required: true
 	ReflectorName *string `json:"reflectorName"`
 
-	// reflector type
+	// Type of the target of the Monitored Object
 	// Required: true
 	// Enum: [unknown accedian-nid accedian-vnid]
 	ReflectorType *string `json:"reflectorType"`

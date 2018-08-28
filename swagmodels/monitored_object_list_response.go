@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// MonitoredObjectListResponse monitored object list response
+// MonitoredObjectListResponse Monitoerd Object response including one or more values
 // swagger:model MonitoredObjectListResponse
 type MonitoredObjectListResponse struct {
 

@@ -126,6 +126,7 @@ logging.info("Logging into datahub...")
 auth = login(conn, host, username, password)
 if auth is None:
     logging.error("Could not login. Exiting...")
+    sys.exit()
 
 tid = tenant_id(conn, auth, host, tenant)
 

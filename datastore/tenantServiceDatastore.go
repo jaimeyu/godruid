@@ -51,6 +51,7 @@ type TenantServiceDatastore interface {
 	CreateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
 	UpdateMonitoredObject(monitoredObjectReq *tenmod.MonitoredObject) (*tenmod.MonitoredObject, error)
 	GetMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
+
 	DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error)
 	GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error)
 	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)
@@ -79,7 +80,7 @@ type TenantServiceDatastore interface {
 	// For Monitored Objects Meta fields
 	CheckAndAddMetadataView(tenantID string, metas map[string]string) error
 	UpdateMonitoredObjectMetadataViews(tenantID string, metas map[string]string) error
-	GetMonitoredObjectIDsToMetaEntry(tenantID string, metakey string, metavalue string) ([]string, error)
+	GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error)
 	GetMetadataKeys(tenantId string) (map[string]int, error)
 
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)

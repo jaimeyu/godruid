@@ -16,7 +16,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DashboardUpdateRequest dashboard update request
+// DashboardUpdateRequest Object used to update a Dashboard in Datahub
 // swagger:model DashboardUpdateRequest
 type DashboardUpdateRequest struct {
 
@@ -229,20 +229,20 @@ func (m *DashboardUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model DashboardUpdateRequestDataAttributes
 type DashboardUpdateRequestDataAttributes struct {
 
-	// rev
+	// Value used to ensure updates to this object are handled in order.
 	// Required: true
 	Rev *string `json:"_rev"`
 
-	// card positions
+	// Describes the locations of the Cards on the Dashboard in the Datahub UI
 	CardPositions CardPositions `json:"cardPositions,omitempty"`
 
-	// category
+	// Name of the visual 'group' where this Dashboard will be displayed when looking at the list of all Dashboards in Datahub
 	Category string `json:"category,omitempty"`
 
-	// metadata filters
+	// List of filters used to obtain a list of Monitoreed Objects which will be useds to provide metric data to the Dashboard
 	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
 
-	// name
+	// User provided identifier for a Dashboard
 	Name string `json:"name,omitempty"`
 }
 

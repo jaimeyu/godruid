@@ -2,7 +2,6 @@ package couchDB
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -469,6 +468,9 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantIngestionProfile(tenantIng
 		return nil, fmt.Errorf("Can't create %s, it already exists", tenmod.TenantIngestionProfileStr)
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(tenantIngPrfReq)
+
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.IngestionProfile{}
 	if err := createDataInCouch(tenantDBName, tenantIngPrfReq, dataContainer, string(tenmod.TenantIngestionProfileType), tenmod.TenantIngestionProfileStr); err != nil {
@@ -483,6 +485,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantIngestionProfile(tenantIng
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(tenantIngPrfReq))
 	tenantIngPrfReq.ID = ds.PrependToDataID(tenantIngPrfReq.ID, string(tenmod.TenantIngestionProfileType))
 	tenantID := ds.PrependToDataID(tenantIngPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(tenantIngPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.IngestionProfile{}
@@ -504,6 +509,10 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantIngestionProfile(tenantID str
 	if err := getDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -519,6 +528,10 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantIngestionProfile(tenantID 
 	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantIngestionProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -528,6 +541,9 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateTenantThresholdProfile(tenantThr
 	logger.Log.Debugf("Creating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ID = ds.GenerateID(tenantThreshPrfReq, string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(tenantThreshPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.ThresholdProfile{}
@@ -543,6 +559,9 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateTenantThresholdProfile(tenantThr
 	logger.Log.Debugf("Updating %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(tenantThreshPrfReq))
 	tenantThreshPrfReq.ID = ds.PrependToDataID(tenantThreshPrfReq.ID, string(tenmod.TenantThresholdProfileType))
 	tenantID := ds.PrependToDataID(tenantThreshPrfReq.TenantID, string(admmod.TenantType))
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(tenantThreshPrfReq)
 
 	tenantDBName := createDBPathStr(tsd.server, tenantID)
 	dataContainer := &tenmod.ThresholdProfile{}
@@ -589,6 +608,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetTenantThresholdProfile(tenantID str
 		return nil, err
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&finalDataContainer)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	// return &dataContainer, nil
 	return &finalDataContainer, nil
@@ -605,6 +627,10 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteTenantThresholdProfile(tenantID 
 	if err := deleteDataFromCouch(tenantDBName, dataID, &dataContainer, tenmod.TenantThresholdProfileStr); err != nil {
 		return nil, err
 	}
+
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureThresholdProfileHasBothModels(&dataContainer)
+
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }
@@ -861,22 +887,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 	return &response, nil
 }
 
-// createNewTenantMetadataViews - Create an index based on metadata keys
-func createNewTenantMetadataViews(dbName string, key string) error {
-	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
-	if err != nil {
-		msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
-	}
-	// Create a view based on unique values per new value
-	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
-	if err != nil {
-		msg := fmt.Sprintf("Could not create metadata View for tenant %s, key %s. Error: %s", dbName, key, err.Error())
-		return errors.New(msg)
-	}
-	return nil
-}
-
 // CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata and then create it
 func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string) error {
 
@@ -886,9 +896,15 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 		// Create an index based on metadata keys
 		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
 		if err != nil {
-			msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
-			// This isn't critical error but log it
-			logger.Log.Warning(msg)
+			if strings.Contains(err.Error(), "status 409 - conflict") {
+				msg := fmt.Sprintf("Duplicate view for not metadata view for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				// This isn't critical error but log it
+				logger.Log.Debugf(msg)
+			} else {
+				msg := fmt.Sprintf("Could not create metadata Index for tenant %s, key %s. Error: %s", tenantID, key, err.Error())
+				// This isn't critical error but log it
+				logger.Log.Errorf(msg)
+			}
 		}
 		//}
 	}
@@ -912,10 +928,10 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(ten
 		}
 	}
 
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewSearchLookup, true)
-	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
 	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
+	go TriggerBuildCouchView(dbNameKeys, objectNameDelimitedDdoc, objectNameDelimitedByKeyView, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
 	// Indexes
 	go TriggerBuildCouchIndex(dbNameKeys, moIndexDdoc, moIndexView, true)
 	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountByNameView, true)
@@ -1153,6 +1169,9 @@ func (tsd *TenantServiceDatastoreCouchDB) GetActiveTenantIngestionProfile(tenant
 		return nil, fmt.Errorf(ds.NotFoundStr)
 	}
 
+	// TODO: Remove this when the hierarchical model is no longer supported
+	ds.EnsureIngestionProfileHasBothModels(&res)
+
 	logger.Log.Debugf("Retrieved %s: %v\n", tenmod.TenantIngestionProfileStr, models.AsJSONString(res))
 	return &res, nil
 }
@@ -1166,6 +1185,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	res := make([]*tenmod.ThresholdProfile, 0)
 	if err := getAllOfTypeFromCouchAndFlatten(tenantDBName, string(tenmod.TenantThresholdProfileType), tenmod.TenantThresholdProfileStr, &res); err != nil {
 		return nil, err
+	}
+
+	for _, item := range res {
+		// TODO: Remove this when the hierarchical model is no longer supported
+		ds.EnsureThresholdProfileHasBothModels(item)
 	}
 
 	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(res))
@@ -1278,6 +1302,11 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMonitoredObjects(tenantID st
 		dataProp["lastModifiedTimestamp"] = ds.MakeTimestamp()
 
 		data = append(data, genericMO)
+
+		err = mo.Validate(true)
+		if err != nil {
+			return nil, err
+		}
 
 		// We want to generate a list of metakeys for processing later
 		for key := range mo.Meta {
@@ -1802,6 +1831,59 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantDataCleaningProfiles(tenan
 
 	logger.Log.Debugf("Retrieved %d %ss\n", len(res), tenmod.TenantDataCleaningProfileStr)
 	return res, nil
+}
+
+//GetFilteredMonitoredObjectList - Retrieve a set of monitored object IDs based on the passed in metadata criteria
+func (tsd *TenantServiceDatastoreCouchDB) GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error) {
+
+	// Return nil since our query does not care about metadata
+	if len(meta) == 0 {
+		return nil, nil
+	}
+
+	mos := make([]string, 0)
+
+	firstMeta := true
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieving monitored object IDs for tenant %s based on metadata criteria %v", tenantId, meta)
+	}
+
+	// Loop over all the metadata types
+	for mkey, mvalue := range meta {
+
+		mosForKey := make([]string, 0)
+		// Loop over all the metadata values associated with the current type
+		for _, valueItem := range mvalue {
+
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("Retrieved the following monitored object IDs for tenant %s based on metadata with key %s and value %s", tenantId, mkey, mvalue)
+			}
+
+			rMetaMOs, err := tsd.GetMonitoredObjectIDsToMetaEntry(tenantId, mkey, valueItem)
+
+			if err != nil {
+				return nil, fmt.Errorf("Could not properly process metadata with key %s and value %s. Ensure that the metadata key is managed.", mkey, valueItem)
+			}
+
+			// Union all the IDs together since we need a conditional OR for all values of a particular key
+			mosForKey = listUnion(mosForKey, rMetaMOs)
+		}
+		if !firstMeta {
+			// Intersect all the IDs since monitored objects should contain at least one of the metadata values for each of the metadata keys in a conditional AND
+			mos = listIntersection(mos, mosForKey)
+		} else {
+			// We do this since we don't want to run an intersection against an initially empty list otherwise there will never be an intersection
+			firstMeta = false
+			mos = mosForKey
+		}
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved the following %d monitored object IDs for tenant %s based on metadata criteria %v", len(mos), tenantId, meta)
+	}
+
+	return mos, nil
 }
 
 // GetMonitoredObjectIDsToMetaEntry - CouchDB implementation to retrieve all monitored object Ids associated with a specific metadata key/value pair

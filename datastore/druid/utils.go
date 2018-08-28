@@ -167,8 +167,8 @@ func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []Thre
 
 func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
 
-	// v1 response structure of monId->timestamp->direction->metricset
-	gatherMap := make(map[string]map[string]map[string]map[string]interface{})
+	// v1 response structure of monId->timeseriesArray->direction->metricset
+	responseMap := make(map[string][]map[string]interface{})
 
 	for _, timeseriesEntry := range rawMetrics {
 		seriesTimestamp := timeseriesEntry.Timestamp
@@ -182,8 +182,10 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 			metric := parts[len(parts)-1]
 
 			// Initialize an empty map if one does not exist for the current monitored object
-			if _, ok := gatherMap[monObj]; !ok {
-				gatherMap[monObj] = make(map[string]map[string]map[string]interface{})
+			// We do this at this point since we still want an empty array for the monitored object
+			// even if there are no non-infinity metrics
+			if _, ok := responseMap[monObj]; !ok {
+				responseMap[monObj] = make([]map[string]interface{}, 0)
 			}
 
 			switch v.(type) {
@@ -195,45 +197,34 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 				hasData = true
 			}
 			if !strings.Contains(metric, "temporary") && hasData {
-				moMap := gatherMap[monObj]
+				timeseries := responseMap[monObj]
 
-				moTimeMap, ok := moMap[seriesTimestamp]
-				if !ok {
-					moTimeMap = make(map[string]map[string]interface{})
-					moMap[seriesTimestamp] = moTimeMap
+				var moTimeMap map[string]interface{}
+				// Retrieve the latest entry in the timeseries array to see if we are now processing a
+				// new timeblock or adding to an existing one
+				if len(timeseries) != 0 && timeseries[len(timeseries)-1]["timestamp"] == seriesTimestamp {
+					// We know we are working with the latest entry in the timeseries array
+					moTimeMap = timeseries[len(timeseries)-1]
+				} else {
+					// We know we are working now with a new time block so create a new entry with the associated timestamp
+					moTimeMap = make(map[string]interface{})
+					moTimeMap["timestamp"] = seriesTimestamp
+					timeseries = append(timeseries, moTimeMap)
 				}
 
-				moDirMap, ok := moTimeMap[direction]
-				if !ok {
-					moDirMap = make(map[string]interface{})
-					moTimeMap[direction] = moDirMap
+				// If the map for the specified direction did not exist before then add it in
+				if _, ok := moTimeMap[direction]; !ok {
+					moTimeMap[direction] = make(map[string]interface{})
 				}
 
+				// Retrieve the map for the specified direction and set the appropriate metric value
+				moDirMap := moTimeMap[direction].(map[string]interface{})
 				moDirMap[metric] = v
+
+				// Finally set the whole timeseries for the monitored object
+				responseMap[monObj] = timeseries
 			}
 		}
-	}
-
-	responseMap := make(map[string][]interface{})
-
-	// Now that we have gathered all directions/metrics by timestamp, we have to transform
-	// the monitord object map into an array of map entries with timestamps embedded in them
-	// in order to align with the v1 metric structure
-	for moid, timeseries := range gatherMap {
-		timearray := make([]interface{}, len(timeseries))
-		i := 0
-		// This block transforms map entries keyed by timestamp into an array set that contains
-		// the timestamp along with the direction map in order to comply with the v1 response structure
-		for timestamp, entry := range timeseries {
-			txfTimeBlock := make(map[string]interface{})
-			txfTimeBlock["timestamp"] = timestamp
-			for k, v := range entry {
-				txfTimeBlock[k] = v
-			}
-			timearray[i] = txfTimeBlock
-			i++
-		}
-		responseMap[moid] = timearray
 	}
 
 	dataContainer := map[string]interface{}{"result": responseMap}

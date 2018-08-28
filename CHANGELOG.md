@@ -1,3 +1,4 @@
+* Fix - Re-order timeseries data for raw query in chronological order
 ## Current Release 
 ### 0.207.0 
 **Release Date:** Sat Aug 25 11:23:50 UTC 2018     

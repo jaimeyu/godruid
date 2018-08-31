@@ -1,3 +1,4 @@
+* Fix - Adding numbers to the allowed metadata key validation.
 ## Current Release 
 ### 0.208.0 
 **Release Date:** Tue Aug 28 00:34:21 UTC 2018     

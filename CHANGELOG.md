@@ -1,8 +1,10 @@
-* Fix - Adding numbers to the allowed metadata key validation.
 ## Current Release 
+### 0.209.0 
+**Release Date:** Fri Aug 31 02:33:32 UTC 2018     
+## Previous Releases 
+* Fix - Adding numbers to the allowed metadata key validation.
 ### 0.208.0 
 **Release Date:** Tue Aug 28 00:34:21 UTC 2018     
-## Previous Releases 
 * Fix - Re-order timeseries data for raw query in chronological order
 ### 0.207.0 
 **Release Date:** Sat Aug 25 11:23:50 UTC 2018     

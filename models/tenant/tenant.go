@@ -587,7 +587,7 @@ func (mo *MonitoredObject) DeleteToManyIDs(name string, IDs []string) error {
 
 func isStringSterile(str string) bool {
 
-	isAlpha := regexp.MustCompile(`^[a-z_]+$`).MatchString
+	isAlpha := regexp.MustCompile(`^[a-z_0-9]+$`).MatchString
 
 	if !isAlpha(str) {
 		logger.Log.Debugf("%q is not valid\n", str)

@@ -138,3 +138,70 @@
             type: "integer"
             format: "int64"
             description: "Time since epoch at which this object was last altered."
+            
+  DataCleaningHistoryResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/DataCleaningHistory'
+  
+  DataCleaningHistory:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [dataCleaningHistory]
+        default: "dataCleaningHistory"
+      id:
+        type: "string"
+      attributes:  
+        type: "object"
+        required: ["events"]
+        properties:
+          transitions:
+            type: "array"
+            items: 
+              $ref: '#/definitions/DataCleaningTransition'
+            description: "List of data cleaning events"
+
+  DataCleaningTransition:
+    type: object
+    properties:
+      timestamp:
+        type: "integer"
+        format: "int64"
+        description: "Time since epoch at which these transitions occurred."
+      rulesRaised:
+        type: array
+        items:
+          $ref: '#/definitions/DataCleaningTransitionRule'
+      rulesCleared:
+        type: array
+        items:
+          $ref: '#/definitions/DataCleaningTransitionRule'
+      errorsRaised:
+        type: array
+        items:
+          $ref: '#/definitions/DataCleaningTransitionError'
+      errorsCleared:
+        type: array
+        items:
+          $ref: '#/definitions/DataCleaningTransitionError'
+
+  DataCleaningTransitionRule:
+    type: object
+    properties:
+      direction:
+        type: string
+      rule:
+        $ref: '#/definitions/DataCleaningRule'
+
+  DataCleaningTransitionError:
+    type: object
+    properties:
+      direction:
+        type: string
+      errorCode:
+        type: string

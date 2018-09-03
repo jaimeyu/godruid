@@ -170,3 +170,39 @@
           type: string
       tags:
         - TenantProvisioningServiceV2
+
+  /v2/data-cleaning-history:
+    get:
+      summary: Retrieve data cleaning event history for a given monitored object and time period.
+      operationId: GetDataCleaningHistory
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Fetch completed successfully"
+          schema:
+            $ref: '#/definitions/DataCleaningHistoryResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No records found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: query
+          required: true
+          type: string
+        - name: interval
+          description: "ISO-8601 Interval"
+          in: query
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2

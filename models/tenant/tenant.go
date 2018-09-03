@@ -151,6 +151,9 @@ const (
 
 	// TenantDataCleaningProfileStr - common name for the Tenant Cleaning Profile for use in logs.
 	TenantDataCleaningProfileStr = "Tenant Data Cleaning Profile"
+
+	// TenantDataCleaningHistoryStr - common name for the Tenant Cleaning History for use in logs.
+	TenantDataCleaningHistoryStr = "Tenant Data Cleaning History"
 )
 
 // User - defines a Tenant user.

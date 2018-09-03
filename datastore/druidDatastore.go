@@ -4,6 +4,7 @@ import (
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/accedian/adh-gather/swagmodels"
 )
 
 const (
@@ -32,6 +33,8 @@ const (
 
 	// TopNForMetricString - common name for use in logs
 	TopNForMetricString = "Top-N report"
+
+	DataCleaningStr = "Data Cleaning History"
 )
 
 type DruidDatastore interface {
@@ -62,4 +65,6 @@ type DruidDatastore interface {
 
 	// Adds a monitored object to a druid look up
 	AddMonitoredObjectToLookup(tenantID string, monitoredObjects []*tenmod.MonitoredObject, datatype string) error
+
+	GetDataCleaningHistory(tenantID string, monitoredObjectID string, interval string) ([]*swagmodels.DataCleaningTransition, error)
 }

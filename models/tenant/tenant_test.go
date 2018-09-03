@@ -536,7 +536,6 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 		},
 	}
 	assert.NotNil(t, original.Validate(true))
-	
 
 	original = &MonitoredObject{
 		ID:                    uuid.NewV4().String(),
@@ -578,7 +577,7 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 			"pet123": "dog",
 		},
 	}
-	assert.NotNil(t, original.Validate(true))
+	assert.Nil(t, original.Validate(true))
 
 	original = &MonitoredObject{
 		ID:                    uuid.NewV4().String(),
@@ -617,7 +616,7 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 			"pet123": "dog",
 		},
 	}
-	assert.NotNil(t, original.Validate(false))
+	assert.Nil(t, original.Validate(false))
 
 	original = &MonitoredObject{
 		REV:                   uuid.NewV4().String(),
@@ -678,13 +677,15 @@ func TestTenantMonitoredObjectMetada(t *testing.T) {
 		Meta: map[string]string{
 			"lowercase": "Anything Can be Here",
 			"hello":     "Key",
-			"pet":       "dog",
+			"pet213":    "dog",
+			"pet_123":   "dog",
 		},
 	}
 
 	assert.Equal(t, original.Meta["lowercase"], "Anything Can be Here")
 	assert.Equal(t, original.Meta["hello"], "Key")
-	assert.Equal(t, original.Meta["pet"], "dog")
+	assert.Equal(t, original.Meta["pet213"], "dog")
+	assert.Equal(t, original.Meta["pet_123"], "dog")
 
 }
 

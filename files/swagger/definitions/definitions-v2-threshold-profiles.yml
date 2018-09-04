@@ -67,7 +67,7 @@
 
   ThresholdProfileResponse:
     type: "object"
-    description: "A single object Threshold Profileresponse from Datahub"
+    description: "A single object Threshold Profile response from Datahub"
     required: ["data"]
     properties:
       data:
@@ -182,3 +182,148 @@
                                       type: "object"
                                       additionalProperties:
                                         type: "string"
+
+  MetricBaselineCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Metric Baseline object in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselines]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
+                    
+  MetricBaselineUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Metric Baseline object in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselines]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev", "baselines"]
+            properties:
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineData:
+    type: "object"
+    properties:
+      metric:
+        description: "The name of the metric represented by this baseline"
+        type: "string"
+      dayOfWeek:
+        description: "Integer value of the day of the week for which this baseline is calculated. Values are 0-6 which corresponds to Sunday-Saturday"
+        type: "integer"
+        format: "int32"
+        minimum: 0
+        maximum: 6
+      direction:
+        description: "The direction of the metric baseline"
+        type: "string"
+      hourOfDay:
+        description: "Integer value of the hour of the day for which this baseline is calculated. Values are 0-23 which corresponds to 00:00-23:00"
+        type: "integer"
+        format: "int32"
+        minimum: 0
+        maximum: 23
+      sum:
+        description: "The total sumation of all values recorded for this metric in datahub"
+        type: "number"
+        format: "double"
+      count:
+        description: "The total number of values recorded for this metric in datahub"
+        type: "integer"
+        format: "int64"
+      average:
+        description: "The calculated average of the Metric obtained via (sum/count)"
+        type: "number"
+        format: "double"
+      unit:
+        description: "The unit of measurement for this metric"
+        type: "string"
+  
+  MetricBaseline:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [metricBaselines]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            type: "string"
+            description: "Name used to identify this type of record in Datahub"
+          objectId:
+            type: "string"
+            description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+          baselines:
+            description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+            type: "array"
+            items:
+              $ref: '#/definitions/MetricBaselineData'
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."
+      
+  MetricBaselineResponse:
+    type: "object"
+    description: "A Metric Baseline response from Datahub"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/MetricBaseline'
+
+  MetricBaselineListResponse:
+    type: "object"
+    description: "Metric Baseline response including one or more values"
+    required: ["data"]
+    properties:
+      links:
+        type: "object"
+        additionalProperties:
+          type: "string"
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MetricBaseline'

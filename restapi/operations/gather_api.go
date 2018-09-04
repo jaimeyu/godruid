@@ -245,6 +245,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2GetDashboardV2Handler: tenant_provisioning_service_v2.GetDashboardV2HandlerFunc(func(params tenant_provisioning_service_v2.GetDashboardV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDashboardV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetDataCleaningHistoryHandler: tenant_provisioning_service_v2.GetDataCleaningHistoryHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningHistory has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2GetDataCleaningProfileHandler: tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(func(params tenant_provisioning_service_v2.GetDataCleaningProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetDataCleaningProfile has not yet been implemented")
 		}),
@@ -453,7 +456,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -592,6 +595,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetConnectorInstanceV2Handler tenant_provisioning_service_v2.GetConnectorInstanceV2Handler
 	// TenantProvisioningServiceV2GetDashboardV2Handler sets the operation handler for the get dashboard v2 operation
 	TenantProvisioningServiceV2GetDashboardV2Handler tenant_provisioning_service_v2.GetDashboardV2Handler
+	// TenantProvisioningServiceV2GetDataCleaningHistoryHandler sets the operation handler for the get data cleaning history operation
+	TenantProvisioningServiceV2GetDataCleaningHistoryHandler tenant_provisioning_service_v2.GetDataCleaningHistoryHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfileHandler sets the operation handler for the get data cleaning profile operation
 	TenantProvisioningServiceV2GetDataCleaningProfileHandler tenant_provisioning_service_v2.GetDataCleaningProfileHandler
 	// TenantProvisioningServiceV2GetDataCleaningProfilesHandler sets the operation handler for the get data cleaning profiles operation
@@ -1045,6 +1050,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetDashboardV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDashboardV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetDataCleaningHistoryHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetDataCleaningHistoryHandler")
 	}
 
 	if o.TenantProvisioningServiceV2GetDataCleaningProfileHandler == nil {
@@ -1728,6 +1737,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/dashboards/{dashboardId}"] = tenant_provisioning_service_v2.NewGetDashboardV2(o.context, o.TenantProvisioningServiceV2GetDashboardV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/data-cleaning-history"] = tenant_provisioning_service_v2.NewGetDataCleaningHistory(o.context, o.TenantProvisioningServiceV2GetDataCleaningHistoryHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

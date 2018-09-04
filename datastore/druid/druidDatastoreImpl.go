@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/adh-gather/models/tenant"
+	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/accedian/godruid"
 
 	db "github.com/accedian/adh-gather/datastore"
@@ -744,6 +746,186 @@ func (dc *DruidDatastoreClient) GetFilteredRawMetrics(request *metrics.RawMetric
 
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetRawMetricStr)
 	return rr, nil
+}
+
+type ActiveRuleDetails struct {
+	startTime int64
+	endTime   int64
+	isError   bool
+}
+
+func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitoredObjectID string, interval string) ([]*swagmodels.DataCleaningTransition, error) {
+	methodStartTime := time.Now()
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Calling GetRaGetDataCleaningHistorywMetrics for tenant %s monitoredObject %s interval %s", tenantID, monitoredObjectID, interval)
+	}
+	table := dc.cfg.GetString(gather.CK_druid_broker_table.String())
+
+	query := &godruid.QueryScan{
+		DataSource:   table,
+		Intervals:    interval,
+		ResultFormat: "list",
+		Filter: godruid.FilterAnd(
+			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
+			godruid.FilterSelector("monitoredObjectId", strings.ToLower(monitoredObjectID)),
+			godruid.FilterSelector("cleanStatus", "-1"),
+		),
+		Columns: []string{"__time", "direction", "errorCode", "failedRules", "duration"},
+	}
+
+	queryStartTime := time.Now()
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Querying Druid for %s with query: '' %s ''", db.DataCleaningStr, models.AsJSONString(query))
+	}
+
+	_, err := dc.executeQuery(query)
+
+	if err != nil {
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetDataCleaningHistoryStr)
+		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetDataCleaningHistoryStr)
+		return nil, err
+	}
+	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetDataCleaningHistoryStr)
+
+	scanBlobs := query.QueryResult
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("got result %v", scanBlobs)
+	}
+
+	// The scan blobs have provided all the rows that were tagged for cleaning and the reason (failed rules or error code).
+	// To reduce this to a series of raise/clear events they are processed in chronological order.  When a rule/errorCode
+	// is first seen, this is a 'raise'.  When a rule/errorCode is seen immediately after the last time it was seen (i.e. continuous)
+	// the timestamp for the 'clear' is increased.  When a rule/erroCode is seen again after some time gap, the 'clear'
+	// for the previous occurance of the rule/errorCode is created and the 'raise' for the new occurance is created.
+	// Basically we are detecting start/end events of when a rule/erroCode was active.
+
+	// Make sure segments are processed chronologically.
+	sort.Slice(scanBlobs, func(i, j int) bool { return scanBlobs[i].SegmentID < scanBlobs[j].SegmentID })
+	activeRules := map[string]map[string]*ActiveRuleDetails{}
+	history := map[int64]*swagmodels.DataCleaningTransition{}
+	for _, b := range scanBlobs {
+
+		// Make sure events are processed chronologially.
+		sort.Slice(b.Events, func(i, j int) bool { return b.Events[i]["__time"].(float64) < b.Events[j]["__time"].(float64) })
+
+		for _, e := range b.Events {
+			logger.Log.Debugf("processing event %v", e)
+
+			// Coerse the properties into the appropriate data types.
+			timestamp := int64(e["__time"].(float64))
+			direction := e["direction"].(string)
+			duration := int64(e["duration"].(float64))
+			errCode := int32(e["errorCode"].(float64))
+
+			// Extract the failed rule(s) string. This will be the key for tracking active rules.
+			var failedRules []string
+			if errCode != 0 {
+				failedRules = []string{fmt.Sprintf("%d", errCode)}
+			} else {
+				// This is a multi-value dimension and Druid nicely sends us a string if there
+				// is only 1 value and an array when there is more than one.
+				failedRules = parseFailedRules(e["failedRules"])
+			}
+
+			if len(failedRules) == 0 && errCode == 0 {
+				// Really shouldn't happen.
+				continue
+			}
+
+			for _, failedRule := range failedRules {
+
+				if _, ok := activeRules[direction]; !ok {
+					// Add an entry for this direction
+					activeRules[direction] = map[string]*ActiveRuleDetails{}
+				}
+
+				if activeRule, ok := activeRules[direction][failedRule]; ok {
+					// We've seen this rule before. It's either a continuation or a new occurance
+					logger.Log.Debugf("entry found for for direction %v, ruleKey %v, value %v", direction, failedRule, *activeRule)
+					//TODO not 100% sure using duration is good enough in case there are small gaps of missing reports.
+					//Maybe we need to use the duration in the rule.
+					if timestamp-duration <= activeRule.endTime {
+						// It's a continuation. Extend the end time so we can keep track of when the clear happens.
+						activeRule.endTime = timestamp + duration
+					} else {
+						// It's a whole new trigger period for this rule.
+						// Add the clear event to history.
+						updateHistory(history, activeRule.endTime, direction, false, failedRule, errCode != 0)
+
+						// Reset the active rule for the new raise
+						activeRule.startTime = timestamp
+						activeRule.endTime = timestamp + duration
+
+						// Add the raise event to history
+						updateHistory(history, activeRule.startTime, direction, true, failedRule, errCode != 0)
+					}
+
+				} else {
+					// First time seeing this rule. Start an active rule and add the raise event to history.
+					activeRules[direction][failedRule] = &ActiveRuleDetails{
+						startTime: timestamp,
+						endTime:   timestamp + duration,
+						isError:   errCode != 0,
+					}
+					updateHistory(history, timestamp, direction, true, failedRule, errCode != 0)
+				}
+			}
+		}
+	}
+
+	// Extract array and sort by time.
+	res := make([]*swagmodels.DataCleaningTransition, len(history))
+	i := 0
+	for _, v := range history {
+		res[i] = v
+		i++
+	}
+	sort.Slice(res, func(i, j int) bool { return res[i].Timestamp < res[j].Timestamp })
+
+	return res, nil
+}
+
+func updateHistory(history map[int64]*swagmodels.DataCleaningTransition, timestamp int64, dir string, raised bool, rule string, isErrCode bool) {
+	var transition, ok = history[timestamp]
+	if !ok {
+		transition = &swagmodels.DataCleaningTransition{Timestamp: timestamp}
+		history[timestamp] = transition
+	}
+
+	if isErrCode {
+		errCodeTrans := &swagmodels.DataCleaningTransitionError{ErrorCode: rule, Direction: dir}
+		if raised {
+			transition.ErrorsRaised = append(transition.ErrorsRaised, errCodeTrans)
+		} else {
+			transition.ErrorsCleared = append(transition.ErrorsCleared, errCodeTrans)
+		}
+	} else {
+		parsedRule := swagmodels.DataCleaningRule{}
+		err := json.Unmarshal([]byte(rule), &parsedRule)
+		if err != nil {
+			logger.Log.Warningf("Failed to parse cleaning rule %s", rule)
+		}
+		ruleTrans := &swagmodels.DataCleaningTransitionRule{Rule: &parsedRule, Direction: dir}
+		if raised {
+			transition.RulesRaised = append(transition.RulesRaised, ruleTrans)
+		} else {
+			transition.RulesCleared = append(transition.RulesCleared, ruleTrans)
+		}
+	}
+
+}
+
+func parseFailedRules(input interface{}) []string {
+	if input != nil {
+		if singleRule, ok := input.(string); ok {
+			return []string{singleRule}
+		}
+		if multipleRules, ok := input.([]string); ok {
+			return multipleRules
+		}
+	}
+	return []string{}
 }
 
 type lookup struct {

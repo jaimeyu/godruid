@@ -133,6 +133,9 @@
         enabled:
           type: "string"
           description: "When true, Threshold Crossing for this Metric will be reported. When false, Threshold Crossings for this Metric are not reported."
+        dimensions:
+          type: "object"
+          description: "Provides data properties by which the Metric may be filtered and/or aggregated"
         events:
           description: "A collection of objects that describe the properties of a Threshold for a Metric"
           type: "array"

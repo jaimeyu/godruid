@@ -352,7 +352,10 @@ func (m *IngestionDictionaryListResponseDataItems0AttributesMetricGroupsItems0) 
 type IngestionDictionaryListResponseDataItems0AttributesMetricListItems0 struct {
 
 	// Provides data properties by which the Metric may be filtered and/or aggregated
-	Dimensions []map[string][]string `json:"dimensions"`
+	Dimensions map[string][]string `json:"dimensions,omitempty"`
+
+	// Describes the possible directions of the test (i.e. actuator to reflector) versus another (i.e. round trip)
+	Directions []string `json:"directions"`
 
 	// The name of the Metric
 	Metric string `json:"metric,omitempty"`

@@ -209,7 +209,8 @@ type MonitoredObjectType struct {
 }
 
 type IngestionDictionaryMetric struct {
-	Dimensions          []map[string][]string      `json:"dimensions"`
+	Dimensions          map[string][]string        `json:"dimensions"`
+	Directions          []string                   `json:"directions"`
 	Metric              string                     `json:"metric"`
 	MonitoredObjectType string                     `json:"monitoredObjectType"`
 	RawMetricID         string                     `json:"rawMetricId"`
@@ -301,12 +302,10 @@ func GetIngestionDictionaryFromFile() *IngestionDictionary {
 			for mk, m := range v.MetricMap {
 				for _, moType := range m.MonitoredObjectTypes {
 
-					dimensionItemDirections := map[string][]string{
-						"directions": moType.Directions,
-					}
-					dimensions := []map[string][]string{dimensionItemDirections}
+					dimensions := map[string][]string{}
 					addItem := IngestionDictionaryMetric{
 						Dimensions:          dimensions,
+						Directions:          moType.Directions,
 						Metric:              mk,
 						MonitoredObjectType: moType.Key,
 						RawMetricID:         moType.RawMetricID,

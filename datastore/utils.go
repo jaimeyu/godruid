@@ -140,16 +140,21 @@ func EnsureIngestionProfileHasBothModels(profile *tenmod.IngestionProfile) {
 			for moKey, mo := range v.MonitoredObjectTypeMap {
 				for m, enabled := range mo.MetricMap {
 					// Get the directions from the Ingestion dictionary:
-					directions := getDimensionValueForMetricFromIngestionDictionary("directions", m, ingestionDictionary)
-					dimensions := []map[string][]string{map[string][]string{"directions": directions}}
+					directions := getDirectionValuesForMetricFromIngestionDictionary(m, vk, moKey, ingestionDictionary)
 
-					flattened = append(flattened, &tenmod.IngestionProfileMetric{
-						Dimensions:          dimensions,
-						Enabled:             enabled,
-						Metric:              m,
-						MonitoredObjectType: moKey,
-						Vendor:              vk,
-					})
+					for _, d := range directions {
+						dimensions := map[string][]string{}
+
+						flattened = append(flattened, &tenmod.IngestionProfileMetric{
+							Dimensions:          dimensions,
+							Direction:           d,
+							Enabled:             enabled,
+							Metric:              m,
+							MonitoredObjectType: moKey,
+							Vendor:              vk,
+						})
+					}
+
 				}
 			}
 		}
@@ -160,16 +165,25 @@ func EnsureIngestionProfileHasBothModels(profile *tenmod.IngestionProfile) {
 	}
 }
 
-func getDimensionValueForMetricFromIngestionDictionary(dimensionKey string, metricName string, ingestionDictionary *admmod.IngestionDictionary) []string {
+func getDimensionValueForMetricFromIngestionDictionary(dimensionKey string, metricName string, vendorName string, moTypeName string, ingestionDictionary *admmod.IngestionDictionary) []string {
 	for _, dictItem := range ingestionDictionary.MetricList {
-		if dictItem.Metric == metricName {
-			for _, dim := range dictItem.Dimensions {
-				for dimKey, dimVal := range dim {
-					if dimKey == dimensionKey {
-						return dimVal
-					}
+		if dictItem.Metric == metricName && dictItem.MonitoredObjectType == moTypeName && dictItem.Vendor == vendorName {
+			for dimKey, dim := range dictItem.Dimensions {
+				if dimKey == dimensionKey {
+					return dim
 				}
 			}
+		}
+	}
+
+	return []string{}
+}
+
+func getDirectionValuesForMetricFromIngestionDictionary(metricName string, vendorName string, moTypeName string, ingestionDictionary *admmod.IngestionDictionary) []string {
+
+	for _, dictItem := range ingestionDictionary.MetricList {
+		if dictItem.Metric == metricName && dictItem.MonitoredObjectType == moTypeName && dictItem.Vendor == vendorName {
+			return dictItem.Directions
 		}
 	}
 
@@ -296,6 +310,7 @@ func EnsureThresholdProfileHasBothModels(profile *tenmod.ThresholdProfile) {
 							Vendor:              vk,
 							Direction:           dk,
 							Events:              events,
+							Dimensions:          map[string][]string{},
 						})
 					}
 				}

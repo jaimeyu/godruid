@@ -11,6 +11,7 @@ import (
 	runtime "github.com/go-openapi/runtime"
 
 	"github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/druid"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
@@ -32,6 +33,7 @@ var (
 	nonSwaggerMUX *mux.Router
 	adminDB       datastore.AdminServiceDatastore
 	tenantDB      datastore.TenantServiceDatastore
+	druidDB       datastore.DruidDatastore
 
 	metricServiceV1APIRouteRoots = []string{
 		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
@@ -73,8 +75,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
 
-	// TODO : druid db not used in V1 apis...re-enable this when the Metrics Servcei V2 APIs are in place.
-	// druidDB := druid.NewDruidDatasctoreClient()
+	druidDB := druid.NewDruidDatasctoreClient()
 
 	// Register the V1 APIs
 	configureAdminServiceV1API(api, adminDB, tenantDB)
@@ -84,7 +85,7 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	// Register the V2 APIs
 	configureAdminServiceV2API(api, adminDB, tenantDB)
-	configureTenantServiceV2API(api, tenantDB)
+	configureTenantServiceV2API(api, tenantDB, druidDB)
 	// configureMetricServiceV2API(api, druidDB)
 
 	api.ServerShutdown = func() {}

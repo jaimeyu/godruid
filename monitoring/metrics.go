@@ -38,6 +38,7 @@ const (
 	DbGetAllMoIDStr            = "db_get_all_mo_id_get"
 	DashboardStr               = "dashboard"
 	CardStr                    = "card"
+	DataCleaningHistoryStr     = "data_cln_hist"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -203,11 +204,12 @@ const (
 	GetAllDashboardStr = DashboardStr + metricNameDelimiter + OPGetAllStr
 	DeleteDashboardStr = DashboardStr + metricNameDelimiter + OPDeleteStr
 
-	CreateCardStr = CardStr + metricNameDelimiter + OPCreateStr
-	UpdateCardStr = CardStr + metricNameDelimiter + OPUpdateStr
-	GetCardStr    = CardStr + metricNameDelimiter + OPGetStr
-	GetAllCardStr = CardStr + metricNameDelimiter + OPGetAllStr
-	DeleteCardStr = CardStr + metricNameDelimiter + OPDeleteStr
+	CreateCardStr             = CardStr + metricNameDelimiter + OPCreateStr
+	UpdateCardStr             = CardStr + metricNameDelimiter + OPUpdateStr
+	GetCardStr                = CardStr + metricNameDelimiter + OPGetStr
+	GetAllCardStr             = CardStr + metricNameDelimiter + OPGetAllStr
+	DeleteCardStr             = CardStr + metricNameDelimiter + OPDeleteStr
+	GetDataCleaningHistoryStr = DataCleaningHistoryStr + metricNameDelimiter + OPGetStr
 )
 
 type MetricCounterType string

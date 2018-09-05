@@ -14,6 +14,7 @@ import (
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service_v2"
 	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/go-openapi/runtime/middleware"
+	uuid "github.com/satori/go.uuid"
 )
 
 // HandleGetDataCleaningProfileV2 - retrieve the Data Cleaning Profile for a Tenant
@@ -147,6 +148,31 @@ func HandleCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 	}
 }
 
+func HandleGetDataCleaningHistoryV2(allowedRoles []string, druidDB datastore.DruidDatastore) func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
+		// Do the work
+		startTime, responseCode, response, err := doGetDataCleaningHistoryV2(allowedRoles, druidDB, params)
+
+		// Success Response
+		if responseCode == http.StatusOK {
+			return tenant_provisioning_service_v2.NewGetDataCleaningHistoryOK().WithPayload(response)
+		}
+
+		// Error Responses
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetDataCleaningHistoryStr, mon.APICompleted, mon.TenantAPICompleted)
+		switch responseCode {
+		case http.StatusForbidden:
+			return tenant_provisioning_service_v2.NewGetDataCleaningHistoryForbidden().WithPayload(errorMessage)
+		case http.StatusNotFound:
+			return tenant_provisioning_service_v2.NewGetDataCleaningHistoryNotFound().WithPayload(errorMessage)
+		default:
+			return tenant_provisioning_service_v2.NewGetDataCleaningHistoryInternalServerError().WithPayload(errorMessage)
+
+		}
+	}
+
+}
+
 func doGetDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetDataCleaningProfileParams) (time.Time, int, *swagmodels.DataCleaningProfileResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s: %s", tenmod.TenantDataCleaningProfileStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
@@ -270,7 +296,7 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	}
 
 	if existing.REV != data.REV {
-		return startTime, http.StatusConflict, nil, fmt.Errorf("Attempting to update object rev %s but rev from request wwas %s", existing.REV, data.REV)
+		return startTime, http.StatusConflict, nil, fmt.Errorf("Attempting to update object rev %s but rev from request was %s", existing.REV, data.REV)
 	}
 
 	existing.Rules = data.Rules
@@ -334,4 +360,39 @@ func doCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	reportAPICompletionState(startTime, http.StatusOK, mon.CreateDataCleaningProfileStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Created %s %s", tenmod.TenantDataCleaningProfileStr, models.AsJSONString(converted))
 	return startTime, http.StatusCreated, &converted, nil
+}
+
+func doGetDataCleaningHistoryV2(allowedRoles []string, druidDB datastore.DruidDatastore, params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) (time.Time, int, *swagmodels.DataCleaningHistoryResponse, error) {
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching all %s: %s", tenmod.TenantDataCleaningHistoryStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
+
+	if !isAuthorized {
+		err := fmt.Errorf("Get all %s operation not authorized for role: %s", tenmod.TenantDataCleaningHistoryStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
+		return startTime, http.StatusForbidden, nil, err
+	}
+
+	// Issue request to DAO Layer
+	result, err := druidDB.GetDataCleaningHistory(tenantID, params.MonitoredObjectID, params.Interval)
+	if err != nil {
+		if checkForNotFound(err.Error()) {
+			return startTime, http.StatusNotFound, nil, err
+		}
+
+		errResp := fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantDataCleaningHistoryStr, err.Error())
+		return startTime, http.StatusInternalServerError, nil, errResp
+	}
+
+	dataType := swagmodels.DataCleaningHistoryTypeDataCleaningHistory
+	uuid := uuid.NewV4().String()
+	response := &swagmodels.DataCleaningHistoryResponse{
+		Data: &swagmodels.DataCleaningHistory{
+			Type: &dataType,
+			ID:   &uuid,
+			Attributes: &swagmodels.DataCleaningHistoryAttributes{
+				Transitions: result,
+			}}}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.GetDataCleaningHistoryStr, mon.APICompleted, mon.TenantAPICompleted)
+	logger.Log.Infof("Retrieved %d events for %s", len(response.Data.Attributes.Transitions), tenmod.TenantDataCleaningHistoryStr)
+	return startTime, http.StatusOK, response, nil
 }

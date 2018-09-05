@@ -5630,15 +5630,18 @@ definitions:
                       rawMetricId:
                         description: "The name of the Metric as it is reported during measurments"
                         type: "string"
-                      dimensions:
-                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+                      directions:
                         type: "array"
                         items:
-                          type: "object"
-                          additionalProperties:
-                            type: "array"
-                            items:
-                              type: "string"
+                          type: "string"
+                        description: "Describes the possible directions of the test (i.e. actuator to reflector) versus another (i.e. round trip)"
+                      dimensions:
+                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+                        type: "object"
+                        additionalProperties:
+                          type: "array"
+                          items:
+                            type: "string"
                       unit:
                         description: "The unit of measurement used when capturing the value for this Metric"
                         type: "string"
@@ -6709,15 +6712,13 @@ definitions:
         enabled:
           description: "When true, this metric will be recorded by Datahub. When false, this metric is ommitted."
           type: "boolean"
+        direction:
+          type: "string"
+          description: "Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)"
         dimensions:
-          type: "array"
+          type: "object"
           description: "Provides data properties by which the Metric may be filtered and/or aggregated"
-          items:
-            type: "object"
-            additionalProperties:
-              type: "array"
-              items:
-                type: "string"
+
   MonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
@@ -7339,6 +7340,9 @@ definitions:
         enabled:
           type: "string"
           description: "When true, Threshold Crossing for this Metric will be reported. When false, Threshold Crossings for this Metric are not reported."
+        dimensions:
+          type: "object"
+          description: "Provides data properties by which the Metric may be filtered and/or aggregated"
         events:
           description: "A collection of objects that describe the properties of a Threshold for a Metric"
           type: "array"

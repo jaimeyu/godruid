@@ -165,15 +165,18 @@
                       rawMetricId:
                         description: "The name of the Metric as it is reported during measurments"
                         type: "string"
-                      dimensions:
-                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+                      directions:
                         type: "array"
                         items:
-                          type: "object"
-                          additionalProperties:
-                            type: "array"
-                            items:
-                              type: "string"
+                          type: "string"
+                        description: "Describes the possible directions of the test (i.e. actuator to reflector) versus another (i.e. round trip)"
+                      dimensions:
+                        description: "Provides data properties by which the Metric may be filtered and/or aggregated"
+                        type: "object"
+                        additionalProperties:
+                          type: "array"
+                          items:
+                            type: "string"
                       unit:
                         description: "The unit of measurement used when capturing the value for this Metric"
                         type: "string"

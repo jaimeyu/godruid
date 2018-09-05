@@ -384,11 +384,12 @@ type IngPrfMetricMap struct {
 }
 
 type IngestionProfileMetric struct {
-	Enabled             bool                  `json:"enabled"`
-	Metric              string                `json:"metric"`
-	MonitoredObjectType string                `json:"monitoredObjectType"`
-	Vendor              string                `json:"vendor"`
-	Dimensions          []map[string][]string `json:"dimensions"`
+	Enabled             bool                `json:"enabled"`
+	Metric              string              `json:"metric"`
+	MonitoredObjectType string              `json:"monitoredObjectType"`
+	Vendor              string              `json:"vendor"`
+	Direction           string              `json:"direction"`
+	Dimensions          map[string][]string `json:"dimensions"`
 }
 
 // ThresholdProfile - defines a Tenant Threshold Profile.
@@ -461,6 +462,7 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 
 type ThresholdProfileThreshold struct {
 	Direction           string              `json:"direction"`
+	Dimensions          map[string][]string `json:"dimensions"`
 	Enabled             string              `json:"enabled"`
 	Events              []map[string]string `json:"events"`
 	Metric              string              `json:"metric"`

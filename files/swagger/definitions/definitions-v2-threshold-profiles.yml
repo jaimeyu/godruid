@@ -41,7 +41,7 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev", "thresholds"]
+            required: ["_rev"]
             properties:
               _rev:
                 type: "string"

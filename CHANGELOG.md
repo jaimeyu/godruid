@@ -1,3 +1,4 @@
+* Fix - sort monitored object ids before issuing a query when using metadata
 ## Current Release 
 ### 0.211.0 
 **Release Date:** Wed Sep  5 15:19:28 UTC 2018     

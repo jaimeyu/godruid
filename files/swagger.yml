@@ -6607,7 +6607,7 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev", "metrics"]
+            required: ["_rev"]
             properties:
               _rev:
                 type: "string"
@@ -7248,7 +7248,7 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev", "thresholds"]
+            required: ["_rev"]
             properties:
               _rev:
                 type: "string"

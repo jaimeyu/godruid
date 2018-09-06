@@ -38,7 +38,7 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev", "metrics"]
+            required: ["_rev"]
             properties:
               _rev:
                 type: "string"

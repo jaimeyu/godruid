@@ -93,11 +93,8 @@ func MakeTimestamp() int64 {
 func EnsureIngestionProfileHasBothModels(profile *tenmod.IngestionProfile) {
 	hasFlattenedModel := profile.MetricList != nil && len(profile.MetricList) != 0
 	hasHierarchicalModel := profile.Metrics != nil
-	if hasFlattenedModel && hasHierarchicalModel {
-		return
-	}
 
-	if hasFlattenedModel && !hasHierarchicalModel {
+	if hasFlattenedModel {
 		// using the flattened mode - add hierarchical model
 		newMetrics := tenmod.IngPrfVendorMap{}
 		for _, metric := range profile.MetricList {
@@ -196,11 +193,8 @@ func getDirectionValuesForMetricFromIngestionDictionary(metricName string, vendo
 func EnsureThresholdProfileHasBothModels(profile *tenmod.ThresholdProfile) {
 	hasFlattenedModel := profile.ThresholdList != nil && len(profile.ThresholdList) != 0
 	hasHierarchicalModel := profile.Thresholds != nil
-	if hasFlattenedModel && hasHierarchicalModel {
-		return
-	}
 
-	if hasFlattenedModel && !hasHierarchicalModel {
+	if hasFlattenedModel {
 		// using the flattened mode - add hierarchical model
 		newThresholds := tenmod.ThrPrfVendorMap{}
 		for _, thresh := range profile.ThresholdList {

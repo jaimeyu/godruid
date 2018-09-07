@@ -101,4 +101,16 @@ type TenantServiceDatastore interface {
 	DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
 	GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error)
 	GetAllMonitoredObjectsIDs(tenantID string) ([]string, error)
+
+	CreateTenantBranding(card *tenmod.Branding) (*tenmod.Branding, error)
+	UpdateTenantBranding(card *tenmod.Branding) (*tenmod.Branding, error)
+	GetTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error)
+	GetAllTenantBrandings(tenantID string) ([]*tenmod.Branding, error)
+	DeleteTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error)
+
+	CreateTenantLocale(card *tenmod.Locale) (*tenmod.Locale, error)
+	UpdateTenantLocale(card *tenmod.Locale) (*tenmod.Locale, error)
+	GetTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
+	GetAllTenantLocales(tenantID string) ([]*tenmod.Locale, error)
+	DeleteTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
 }

@@ -988,6 +988,10 @@ func BuildMonitoredObjectFilter(tenantID string, mos []string) *godruid.Filter {
 	if len(mos) == 0 {
 		fMOs = []string{"[\"\"]"}
 	} else {
+		// Sort the MOs to make sure we get the same ordering in the query
+		sort.Slice(mos, func(i, j int) bool {
+			return mos[i] < mos[j]
+		})
 		fMOs = mos
 	}
 

@@ -59,6 +59,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler: tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(func(params tenant_provisioning_service.BulkUpsertMonitoredObjectMetaParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpsertMonitoredObjectMeta has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2CreateBrandingV2Handler: tenant_provisioning_service_v2.CreateBrandingV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateBrandingV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateBrandingV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateCardV2Handler: tenant_provisioning_service_v2.CreateCardV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateCardV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateCardV2 has not yet been implemented")
 		}),
@@ -76,6 +79,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2CreateIngestionProfileV2Handler: tenant_provisioning_service_v2.CreateIngestionProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateIngestionProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateIngestionProfileV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2CreateLocaleV2Handler: tenant_provisioning_service_v2.CreateLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateLocaleV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateLocaleV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2CreateMonitoredObjectV2Handler: tenant_provisioning_service_v2.CreateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMonitoredObjectV2 has not yet been implemented")
@@ -116,6 +122,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2CreateThresholdProfileV2Handler: tenant_provisioning_service_v2.CreateThresholdProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateThresholdProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateThresholdProfileV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2DeleteBrandingV2Handler: tenant_provisioning_service_v2.DeleteBrandingV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteBrandingV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteBrandingV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2DeleteCardV2Handler: tenant_provisioning_service_v2.DeleteCardV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteCardV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteCardV2 has not yet been implemented")
 		}),
@@ -133,6 +142,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2DeleteIngestionProfileV2Handler: tenant_provisioning_service_v2.DeleteIngestionProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteIngestionProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteIngestionProfileV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteLocaleV2Handler: tenant_provisioning_service_v2.DeleteLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteLocaleV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteLocaleV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler: tenant_provisioning_service_v2.DeleteMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMonitoredObjectV2 has not yet been implemented")
@@ -179,6 +191,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceGetActiveTenantIngestionProfileHandler: tenant_provisioning_service.GetActiveTenantIngestionProfileHandlerFunc(func(params tenant_provisioning_service.GetActiveTenantIngestionProfileParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceGetActiveTenantIngestionProfile has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2GetAllBrandingsV2Handler: tenant_provisioning_service_v2.GetAllBrandingsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllBrandingsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllBrandingsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2GetAllCardsV2Handler: tenant_provisioning_service_v2.GetAllCardsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllCardsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllCardsV2 has not yet been implemented")
 		}),
@@ -193,6 +208,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler: tenant_provisioning_service_v2.GetAllIngestionProfilesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllIngestionProfilesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllIngestionProfilesV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetAllLocalesV2Handler: tenant_provisioning_service_v2.GetAllLocalesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllLocalesV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllLocalesV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler: tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMonitoredObjectsV2 has not yet been implemented")
@@ -232,6 +250,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler: tenant_provisioning_service_v2.GetAllThresholdProfilesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllThresholdProfilesV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetBrandingV2Handler: tenant_provisioning_service_v2.GetBrandingV2HandlerFunc(func(params tenant_provisioning_service_v2.GetBrandingV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetBrandingV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetCardV2Handler: tenant_provisioning_service_v2.GetCardV2HandlerFunc(func(params tenant_provisioning_service_v2.GetCardV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetCardV2 has not yet been implemented")
@@ -274,6 +295,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetIngestionProfileV2Handler: tenant_provisioning_service_v2.GetIngestionProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.GetIngestionProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetIngestionProfileV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetLocaleV2Handler: tenant_provisioning_service_v2.GetLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.GetLocaleV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetLocaleV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetMonitoredObjectV2Handler: tenant_provisioning_service_v2.GetMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMonitoredObjectV2 has not yet been implemented")
@@ -374,6 +398,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		MetricsServiceQueryThresholdCrossingHandler: metrics_service.QueryThresholdCrossingHandlerFunc(func(params metrics_service.QueryThresholdCrossingParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceQueryThresholdCrossing has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateBrandingV2Handler: tenant_provisioning_service_v2.UpdateBrandingV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateBrandingV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateBrandingV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2UpdateCardV2Handler: tenant_provisioning_service_v2.UpdateCardV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateCardV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateCardV2 has not yet been implemented")
 		}),
@@ -391,6 +418,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2UpdateIngestionProfileV2Handler: tenant_provisioning_service_v2.UpdateIngestionProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateIngestionProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateIngestionProfileV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2UpdateLocaleV2Handler: tenant_provisioning_service_v2.UpdateLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateLocaleV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateLocaleV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler: tenant_provisioning_service_v2.UpdateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMonitoredObjectV2 has not yet been implemented")
@@ -471,6 +501,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Handler
 	// TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler sets the operation handler for the bulk upsert monitored object meta operation
 	TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler
+	// TenantProvisioningServiceV2CreateBrandingV2Handler sets the operation handler for the create branding v2 operation
+	TenantProvisioningServiceV2CreateBrandingV2Handler tenant_provisioning_service_v2.CreateBrandingV2Handler
 	// TenantProvisioningServiceV2CreateCardV2Handler sets the operation handler for the create card v2 operation
 	TenantProvisioningServiceV2CreateCardV2Handler tenant_provisioning_service_v2.CreateCardV2Handler
 	// TenantProvisioningServiceV2CreateConnectorConfigV2Handler sets the operation handler for the create connector config v2 operation
@@ -483,6 +515,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2CreateDataCleaningProfileHandler tenant_provisioning_service_v2.CreateDataCleaningProfileHandler
 	// TenantProvisioningServiceV2CreateIngestionProfileV2Handler sets the operation handler for the create ingestion profile v2 operation
 	TenantProvisioningServiceV2CreateIngestionProfileV2Handler tenant_provisioning_service_v2.CreateIngestionProfileV2Handler
+	// TenantProvisioningServiceV2CreateLocaleV2Handler sets the operation handler for the create locale v2 operation
+	TenantProvisioningServiceV2CreateLocaleV2Handler tenant_provisioning_service_v2.CreateLocaleV2Handler
 	// TenantProvisioningServiceV2CreateMonitoredObjectV2Handler sets the operation handler for the create monitored object v2 operation
 	TenantProvisioningServiceV2CreateMonitoredObjectV2Handler tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
@@ -509,6 +543,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2CreateTenantV2Handler admin_provisioning_service_v2.CreateTenantV2Handler
 	// TenantProvisioningServiceV2CreateThresholdProfileV2Handler sets the operation handler for the create threshold profile v2 operation
 	TenantProvisioningServiceV2CreateThresholdProfileV2Handler tenant_provisioning_service_v2.CreateThresholdProfileV2Handler
+	// TenantProvisioningServiceV2DeleteBrandingV2Handler sets the operation handler for the delete branding v2 operation
+	TenantProvisioningServiceV2DeleteBrandingV2Handler tenant_provisioning_service_v2.DeleteBrandingV2Handler
 	// TenantProvisioningServiceV2DeleteCardV2Handler sets the operation handler for the delete card v2 operation
 	TenantProvisioningServiceV2DeleteCardV2Handler tenant_provisioning_service_v2.DeleteCardV2Handler
 	// TenantProvisioningServiceV2DeleteConnectorConfigV2Handler sets the operation handler for the delete connector config v2 operation
@@ -521,6 +557,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2DeleteDataCleaningProfileHandler tenant_provisioning_service_v2.DeleteDataCleaningProfileHandler
 	// TenantProvisioningServiceV2DeleteIngestionProfileV2Handler sets the operation handler for the delete ingestion profile v2 operation
 	TenantProvisioningServiceV2DeleteIngestionProfileV2Handler tenant_provisioning_service_v2.DeleteIngestionProfileV2Handler
+	// TenantProvisioningServiceV2DeleteLocaleV2Handler sets the operation handler for the delete locale v2 operation
+	TenantProvisioningServiceV2DeleteLocaleV2Handler tenant_provisioning_service_v2.DeleteLocaleV2Handler
 	// TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler sets the operation handler for the delete monitored object v2 operation
 	TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler tenant_provisioning_service_v2.DeleteMonitoredObjectV2Handler
 	// TenantProvisioningServiceDeleteReportScheduleConfigHandler sets the operation handler for the delete report schedule config operation
@@ -551,6 +589,8 @@ type GatherAPI struct {
 	MetricsServiceGenSLAReportHandler metrics_service.GenSLAReportHandler
 	// TenantProvisioningServiceGetActiveTenantIngestionProfileHandler sets the operation handler for the get active tenant ingestion profile operation
 	TenantProvisioningServiceGetActiveTenantIngestionProfileHandler tenant_provisioning_service.GetActiveTenantIngestionProfileHandler
+	// TenantProvisioningServiceV2GetAllBrandingsV2Handler sets the operation handler for the get all brandings v2 operation
+	TenantProvisioningServiceV2GetAllBrandingsV2Handler tenant_provisioning_service_v2.GetAllBrandingsV2Handler
 	// TenantProvisioningServiceV2GetAllCardsV2Handler sets the operation handler for the get all cards v2 operation
 	TenantProvisioningServiceV2GetAllCardsV2Handler tenant_provisioning_service_v2.GetAllCardsV2Handler
 	// TenantProvisioningServiceV2GetAllConnectorConfigsV2Handler sets the operation handler for the get all connector configs v2 operation
@@ -561,6 +601,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllDashboardsV2Handler tenant_provisioning_service_v2.GetAllDashboardsV2Handler
 	// TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler sets the operation handler for the get all ingestion profiles v2 operation
 	TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler tenant_provisioning_service_v2.GetAllIngestionProfilesV2Handler
+	// TenantProvisioningServiceV2GetAllLocalesV2Handler sets the operation handler for the get all locales v2 operation
+	TenantProvisioningServiceV2GetAllLocalesV2Handler tenant_provisioning_service_v2.GetAllLocalesV2Handler
 	// TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler sets the operation handler for the get all monitored objects v2 operation
 	TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler
 	// TenantProvisioningServiceGetAllReportScheduleConfigHandler sets the operation handler for the get all report schedule config operation
@@ -587,6 +629,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2GetAllTenantsV2Handler admin_provisioning_service_v2.GetAllTenantsV2Handler
 	// TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler sets the operation handler for the get all threshold profiles v2 operation
 	TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler tenant_provisioning_service_v2.GetAllThresholdProfilesV2Handler
+	// TenantProvisioningServiceV2GetBrandingV2Handler sets the operation handler for the get branding v2 operation
+	TenantProvisioningServiceV2GetBrandingV2Handler tenant_provisioning_service_v2.GetBrandingV2Handler
 	// TenantProvisioningServiceV2GetCardV2Handler sets the operation handler for the get card v2 operation
 	TenantProvisioningServiceV2GetCardV2Handler tenant_provisioning_service_v2.GetCardV2Handler
 	// TenantProvisioningServiceV2GetConnectorConfigV2Handler sets the operation handler for the get connector config v2 operation
@@ -615,6 +659,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2GetIngestionDictionaryV2Handler admin_provisioning_service_v2.GetIngestionDictionaryV2Handler
 	// TenantProvisioningServiceV2GetIngestionProfileV2Handler sets the operation handler for the get ingestion profile v2 operation
 	TenantProvisioningServiceV2GetIngestionProfileV2Handler tenant_provisioning_service_v2.GetIngestionProfileV2Handler
+	// TenantProvisioningServiceV2GetLocaleV2Handler sets the operation handler for the get locale v2 operation
+	TenantProvisioningServiceV2GetLocaleV2Handler tenant_provisioning_service_v2.GetLocaleV2Handler
 	// TenantProvisioningServiceV2GetMonitoredObjectV2Handler sets the operation handler for the get monitored object v2 operation
 	TenantProvisioningServiceV2GetMonitoredObjectV2Handler tenant_provisioning_service_v2.GetMonitoredObjectV2Handler
 	// MetricsServiceGetRawMetricsHandler sets the operation handler for the get raw metrics operation
@@ -681,6 +727,8 @@ type GatherAPI struct {
 	MetricsServiceQueryAggregatedMetricsHandler metrics_service.QueryAggregatedMetricsHandler
 	// MetricsServiceQueryThresholdCrossingHandler sets the operation handler for the query threshold crossing operation
 	MetricsServiceQueryThresholdCrossingHandler metrics_service.QueryThresholdCrossingHandler
+	// TenantProvisioningServiceV2UpdateBrandingV2Handler sets the operation handler for the update branding v2 operation
+	TenantProvisioningServiceV2UpdateBrandingV2Handler tenant_provisioning_service_v2.UpdateBrandingV2Handler
 	// TenantProvisioningServiceV2UpdateCardV2Handler sets the operation handler for the update card v2 operation
 	TenantProvisioningServiceV2UpdateCardV2Handler tenant_provisioning_service_v2.UpdateCardV2Handler
 	// TenantProvisioningServiceV2UpdateConnectorConfigV2Handler sets the operation handler for the update connector config v2 operation
@@ -693,6 +741,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2UpdateDataCleaningProfileHandler tenant_provisioning_service_v2.UpdateDataCleaningProfileHandler
 	// TenantProvisioningServiceV2UpdateIngestionProfileV2Handler sets the operation handler for the update ingestion profile v2 operation
 	TenantProvisioningServiceV2UpdateIngestionProfileV2Handler tenant_provisioning_service_v2.UpdateIngestionProfileV2Handler
+	// TenantProvisioningServiceV2UpdateLocaleV2Handler sets the operation handler for the update locale v2 operation
+	TenantProvisioningServiceV2UpdateLocaleV2Handler tenant_provisioning_service_v2.UpdateLocaleV2Handler
 	// TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler sets the operation handler for the update monitored object v2 operation
 	TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler tenant_provisioning_service_v2.UpdateMonitoredObjectV2Handler
 	// TenantProvisioningServiceUpdateReportScheduleConfigHandler sets the operation handler for the update report schedule config operation
@@ -804,6 +854,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateBrandingV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateBrandingV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2CreateCardV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateCardV2Handler")
 	}
@@ -826,6 +880,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2CreateIngestionProfileV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateIngestionProfileV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2CreateLocaleV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateLocaleV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2CreateMonitoredObjectV2Handler == nil {
@@ -880,6 +938,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateThresholdProfileV2Handler")
 	}
 
+	if o.TenantProvisioningServiceV2DeleteBrandingV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteBrandingV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2DeleteCardV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteCardV2Handler")
 	}
@@ -902,6 +964,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2DeleteIngestionProfileV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteIngestionProfileV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteLocaleV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteLocaleV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler == nil {
@@ -964,6 +1030,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service.GetActiveTenantIngestionProfileHandler")
 	}
 
+	if o.TenantProvisioningServiceV2GetAllBrandingsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllBrandingsV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2GetAllCardsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllCardsV2Handler")
 	}
@@ -982,6 +1052,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllIngestionProfilesV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllLocalesV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllLocalesV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler == nil {
@@ -1034,6 +1108,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllThresholdProfilesV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetBrandingV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetBrandingV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetCardV2Handler == nil {
@@ -1090,6 +1168,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetIngestionProfileV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetIngestionProfileV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetLocaleV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetLocaleV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetMonitoredObjectV2Handler == nil {
@@ -1224,6 +1306,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "metrics_service.QueryThresholdCrossingHandler")
 	}
 
+	if o.TenantProvisioningServiceV2UpdateBrandingV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateBrandingV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2UpdateCardV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateCardV2Handler")
 	}
@@ -1246,6 +1332,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2UpdateIngestionProfileV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateIngestionProfileV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateLocaleV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateLocaleV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler == nil {
@@ -1431,6 +1521,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/brandings"] = tenant_provisioning_service_v2.NewCreateBrandingV2(o.context, o.TenantProvisioningServiceV2CreateBrandingV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/cards"] = tenant_provisioning_service_v2.NewCreateCardV2(o.context, o.TenantProvisioningServiceV2CreateCardV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1457,6 +1552,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v2/ingestion-profiles"] = tenant_provisioning_service_v2.NewCreateIngestionProfileV2(o.context, o.TenantProvisioningServiceV2CreateIngestionProfileV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v2/locales"] = tenant_provisioning_service_v2.NewCreateLocaleV2(o.context, o.TenantProvisioningServiceV2CreateLocaleV2Handler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -1526,6 +1626,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
+	o.handlers["DELETE"]["/v2/brandings/{brandingId}"] = tenant_provisioning_service_v2.NewDeleteBrandingV2(o.context, o.TenantProvisioningServiceV2DeleteBrandingV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
 	o.handlers["DELETE"]["/v2/cards/{cardId}"] = tenant_provisioning_service_v2.NewDeleteCardV2(o.context, o.TenantProvisioningServiceV2DeleteCardV2Handler)
 
 	if o.handlers["DELETE"] == nil {
@@ -1552,6 +1657,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/ingestion-profiles/{ingestionProfileId}"] = tenant_provisioning_service_v2.NewDeleteIngestionProfileV2(o.context, o.TenantProvisioningServiceV2DeleteIngestionProfileV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewDeleteLocaleV2(o.context, o.TenantProvisioningServiceV2DeleteLocaleV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1631,6 +1741,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/v2/brandings"] = tenant_provisioning_service_v2.NewGetAllBrandingsV2(o.context, o.TenantProvisioningServiceV2GetAllBrandingsV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/v2/cards"] = tenant_provisioning_service_v2.NewGetAllCardsV2(o.context, o.TenantProvisioningServiceV2GetAllCardsV2Handler)
 
 	if o.handlers["GET"] == nil {
@@ -1652,6 +1767,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/ingestion-profiles"] = tenant_provisioning_service_v2.NewGetAllIngestionProfilesV2(o.context, o.TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/locales"] = tenant_provisioning_service_v2.NewGetAllLocalesV2(o.context, o.TenantProvisioningServiceV2GetAllLocalesV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1717,6 +1837,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/threshold-profiles"] = tenant_provisioning_service_v2.NewGetAllThresholdProfilesV2(o.context, o.TenantProvisioningServiceV2GetAllThresholdProfilesV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/brandings/{brandingId}"] = tenant_provisioning_service_v2.NewGetBrandingV2(o.context, o.TenantProvisioningServiceV2GetBrandingV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1787,6 +1912,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/ingestion-profiles/{ingestionProfileId}"] = tenant_provisioning_service_v2.NewGetIngestionProfileV2(o.context, o.TenantProvisioningServiceV2GetIngestionProfileV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewGetLocaleV2(o.context, o.TenantProvisioningServiceV2GetLocaleV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1956,6 +2086,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
+	o.handlers["PATCH"]["/v2/brandings/{brandingId}"] = tenant_provisioning_service_v2.NewUpdateBrandingV2(o.context, o.TenantProvisioningServiceV2UpdateBrandingV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
 	o.handlers["PATCH"]["/v2/cards/{cardId}"] = tenant_provisioning_service_v2.NewUpdateCardV2(o.context, o.TenantProvisioningServiceV2UpdateCardV2Handler)
 
 	if o.handlers["PATCH"] == nil {
@@ -1982,6 +2117,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/v2/ingestion-profiles/{ingestionProfileId}"] = tenant_provisioning_service_v2.NewUpdateIngestionProfileV2(o.context, o.TenantProvisioningServiceV2UpdateIngestionProfileV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewUpdateLocaleV2(o.context, o.TenantProvisioningServiceV2UpdateLocaleV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

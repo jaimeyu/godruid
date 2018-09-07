@@ -211,8 +211,7 @@ type IngestionProfileUpdateRequestDataAttributes struct {
 	MetricList IngestionProfileMetricList `json:"metricList"`
 
 	// Metrics will be deprecated in the next API version. Please use the 'metricList' property instead
-	// Required: true
-	Metrics *IngestionProfileMetrics `json:"metrics"`
+	Metrics *IngestionProfileMetrics `json:"metrics,omitempty"`
 }
 
 // Validate validates this ingestion profile update request data attributes
@@ -264,8 +263,8 @@ func (m *IngestionProfileUpdateRequestDataAttributes) validateMetricList(formats
 
 func (m *IngestionProfileUpdateRequestDataAttributes) validateMetrics(formats strfmt.Registry) error {
 
-	if err := validate.Required("data"+"."+"attributes"+"."+"metrics", "body", m.Metrics); err != nil {
-		return err
+	if swag.IsZero(m.Metrics) { // not required
+		return nil
 	}
 
 	if m.Metrics != nil {

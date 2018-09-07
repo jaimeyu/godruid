@@ -1893,6 +1893,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectIDsToMetaEntry(tenan
 	timeStart := time.Now()
 	tenantMODB := createDBPathStr(tsd.server, fmt.Sprintf("%s_monitored-objects", ds.PrependToDataID(tenantID, string(admmod.TenantType))))
 
+	res := []string{"D", "B", "Q", "R", "1"}
 	res, err := getIDsByView(tenantMODB, fmt.Sprintf("indexOf%s", metakey), fmt.Sprintf("by%s", metakey), metavalue)
 	if err != nil {
 		return nil, err

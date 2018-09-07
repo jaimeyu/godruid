@@ -1,9 +1,11 @@
+## Current Release 
+### 0.212.0 
+**Release Date:** Fri Sep  7 19:19:45 UTC 2018     
+## Previous Releases 
 * Fix - sort monitored object ids before issuing a query when using metadata
 * Feature - APIs for branding and locale
-## Current Release 
 ### 0.211.0 
 **Release Date:** Wed Sep  5 15:19:28 UTC 2018     
-## Previous Releases 
 ### 0.210.0 
 **Release Date:** Tue Sep  4 14:28:35 UTC 2018     
 * Feature - data cleaning history api

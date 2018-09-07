@@ -86,4 +86,7 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 
 	tester.RunDashboardCRUD(t)
 	tester.RunCardCRUD(t)
+
+	tester.RunBrandingCRUD(t)
+	tester.RunLocaleCRUD(t)
 }

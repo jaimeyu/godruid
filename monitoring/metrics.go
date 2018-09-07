@@ -39,6 +39,8 @@ const (
 	DashboardStr               = "dashboard"
 	CardStr                    = "card"
 	DataCleaningHistoryStr     = "data_cln_hist"
+	BrandingStr                = "branding"
+	LocaleStr                  = "locale"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -210,6 +212,18 @@ const (
 	GetAllCardStr             = CardStr + metricNameDelimiter + OPGetAllStr
 	DeleteCardStr             = CardStr + metricNameDelimiter + OPDeleteStr
 	GetDataCleaningHistoryStr = DataCleaningHistoryStr + metricNameDelimiter + OPGetStr
+
+	CreateTenantLocaleStr = LocaleStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantLocaleStr = LocaleStr + metricNameDelimiter + OPUpdateStr
+	GetTenantLocaleStr    = LocaleStr + metricNameDelimiter + OPGetStr
+	GetAllTenantLocaleStr = LocaleStr + metricNameDelimiter + OPGetAllStr
+	DeleteTenantLocaleStr = LocaleStr + metricNameDelimiter + OPDeleteStr
+
+	CreateTenantBrandingStr = BrandingStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantBrandingStr = BrandingStr + metricNameDelimiter + OPUpdateStr
+	GetTenantBrandingStr    = BrandingStr + metricNameDelimiter + OPGetStr
+	GetAllTenantBrandingStr = BrandingStr + metricNameDelimiter + OPGetAllStr
+	DeleteTenantBrandingStr = BrandingStr + metricNameDelimiter + OPDeleteStr
 )
 
 type MetricCounterType string

@@ -1,0 +1,216 @@
+  BrandingCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [brandings]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              color:
+                type: "string"
+                description: "The primary colour used for the Datahub UI"
+              logo: 
+                $ref: '#/definitions/BrandingLogo'
+                description: "The image used for the Branding logo"
+              
+  BrandingUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [brandings]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              color:
+                type: "string"
+                description: "The primary colour used for the Datahub UI"
+              logo: 
+                $ref: '#/definitions/BrandingLogo'
+                description: "The image used for the Branding logo"
+  
+  BrandingResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Branding'
+  BrandingListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Branding'
+  
+  Branding:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [brandings]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "color", "logo", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          color:
+            description: "The primary colour used for the Datahub UI"
+            type: "string"
+          logo: 
+            description: "The image used for the Branding logo"
+            $ref: '#/definitions/BrandingLogo'
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."
+
+  BrandingLogo:
+    type: "object"
+    description: "Describes the information used to display the branding logo image on the Datahub UI"
+    properties: 
+      file: 
+        type: "object"
+        properties:
+          content_type:
+            type: "string"
+            description: "Describes the media type of the document stored"
+          data:
+            type: "string"
+            description: "Contains the image data for the uploaded branding logo"
+
+  LocaleCreateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [locales]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["intl", "moment", "timezone"]
+            properties:
+              intl:
+                type: "string"
+                description: "The short-form code for the internationalization region"
+              moment:
+                type: "string"
+              timezone:
+                type: "string"
+                description: "Timezone used to coordinate timestamps for the specified region"
+              
+  LocaleUpdateRequest:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes", "id"]
+        properties:
+          type: 
+            type: "string"
+            enum: [locales]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              intl:
+                type: "string"
+                description: "The short-form code for the internationalization region"
+              moment:
+                type: "string"
+              timezone:
+                type: "string"
+                description: "Timezone used to coordinate timestamps for the specified region"
+  
+  LocaleResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/Locale'
+  LocaleListResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+           $ref: '#/definitions/Locale'
+  
+  Locale:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [locales]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_rev", "datatype", "intl", "moment", "timezone","createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            type: "string"
+          tenantId:
+            type: "string"
+          intl:
+            type: "string"
+            description: "The short-form code for the internationalization region"
+          moment:
+            type: "string"
+          timezone:
+            type: "string"
+            description: "Timezone used to coordinate timestamps for the specified region"
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."

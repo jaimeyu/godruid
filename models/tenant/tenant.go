@@ -58,6 +58,12 @@ const (
 
 	// TenantDataCleaningProfileType - datatype string used to identify a Tenant Data Cleaning Profile in the datastore record
 	TenantDataCleaningProfileType TenantDataType = "dataCleaningProfile"
+
+	// TenantBrandingType - datatype string used to identify a Tenant Branding in the datastore record
+	TenantBrandingType TenantDataType = "branding"
+
+	// TenantLocaleType - datatype string used to identify a Locale in the datastore record
+	TenantLocaleType TenantDataType = "locale"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -154,6 +160,12 @@ const (
 
 	// TenantDataCleaningHistoryStr - common name for the Tenant Cleaning History for use in logs.
 	TenantDataCleaningHistoryStr = "Tenant Data Cleaning History"
+
+	// TenantBrandingStr - common name for the Tenant Branding for use in logs.
+	TenantBrandingStr = "Tenant Branding"
+
+	// TenantLocaleStr - common name for the Tenant Locale for use in logs.
+	TenantLocaleStr = "Tenant Locale"
 )
 
 // User - defines a Tenant user.
@@ -972,4 +984,58 @@ type DataCleaningRuleCondition struct {
 	Value          string `json:"value"`
 	ValueAggregate string `json:"valueAggregate"`
 	Duration       string `json:"duration"`
+}
+
+type Branding struct {
+	ID                    string        `json:"_id"`
+	REV                   string        `json:"_rev"`
+	Datatype              string        `json:"datatype"`
+	TenantID              string        `json:"tenantId"`
+	Color                 string        `json:"color"`
+	Logo                  *BrandingLogo `json:"logo"`
+	CreatedTimestamp      int64         `json:"createdTimestamp"`
+	LastModifiedTimestamp int64         `json:"lastModifiedTimestamp"`
+}
+
+type BrandingLogo struct {
+	File *BrandingLogoFile `json:"file"`
+}
+
+type BrandingLogoFile struct {
+	ContentType string `json:"content_type"`
+	Data        string `json:"data"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (b *Branding) GetID() string {
+	return b.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (b *Branding) SetID(s string) error {
+	b.ID = s
+	return nil
+}
+
+type Locale struct {
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Intl                  string `json:"intl"`
+	Moment                string `json:"moment"`
+	Timezone              string `json:"timezone"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (l *Locale) GetID() string {
+	return l.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (l *Locale) SetID(s string) error {
+	l.ID = s
+	return nil
 }

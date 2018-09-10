@@ -1,8 +1,10 @@
-* Fix - removing requirement for the 'thresholds' property on Threshold Profile update
 ## Current Release 
+### 0.213.0 
+**Release Date:** Mon Sep 10 13:39:24 UTC 2018     
+## Previous Releases 
+* Fix - removing requirement for the 'thresholds' property on Threshold Profile update
 ### 0.212.0 
 **Release Date:** Fri Sep  7 19:19:45 UTC 2018     
-## Previous Releases 
 * Fix - sort monitored object ids before issuing a query when using metadata
 * Feature - APIs for branding and locale
 ### 0.211.0 

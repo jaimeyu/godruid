@@ -107,7 +107,7 @@ const (
 		"views": {
 		  "allValuesByKeyWithCounts": {
 			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n      \n        emit(key, doc.data.meta[key].toLowerCase());\n        \n      }\n    }\n}",
-			"reduce": "function (keys, values, rereduce) {\n  if (rereduce) {\n    var valuesByKeySubtrees = values\n    return valuesByKeySubtrees.reduce(function(mergedValuesByKey, valuesByKeySubtree) {\n      if (!valuesByKeySubtree) {\n        return mergedValuesByKey\n      }\n      \n      Object.keys(valuesByKeySubtree).forEach(function (key) {\n        if (mergedValuesByKey[key]) {\n          if (mergedValuesByKey[key] === 'extended' || valuesByKeySubtree[key] === 'extended') {\n            mergedValuesByKey[key] = 'extended'\n            return\n          }\n\n          Object.keys(valuesByKeySubtree[key]).forEach(function (valueKey) {\n            var count = mergedValuesByKey[key][valueKey]\n            if (count) {\n              mergedValuesByKey[key][valueKey] = count + valuesByKeySubtree[key][valueKey]\n            } else {\n              mergedValuesByKey[key][valueKey] = valuesByKeySubtree[key][valueKey]\n            }\n          })\n          \n          \n          if (Object.keys(mergedValuesByKey[key]).length > 7) {\n            mergedValuesByKey[key] = 'extended'\n          }\n        } else {\n          mergedValuesByKey[key] = valuesByKeySubtree[key]\n        }\n      })\n      \n      return mergedValuesByKey\n    }, {})\n  }\n  \n  return keys.reduce(function (valuesByKey, key, index) {\n    var keyName = key[0]\n    \n    if (!valuesByKey[keyName]) {\n      valuesByKey[keyName] = {}\n    }\n      \n    var count = valuesByKey[keyName][values[index]]\n    if (count) {\n      valuesByKey[keyName][values[index]] = count + 1\n    } else {\n      valuesByKey[keyName][values[index]] = 1\n    }\n    return valuesByKey\n  }, {})\n}"
+			"reduce": "function (keys, values, rereduce) {\n  if (rereduce) {\n    var valuesByKeySubtrees = values\n    return valuesByKeySubtrees.reduce(function(mergedValuesByKey, valuesByKeySubtree) {\n      if (!valuesByKeySubtree) {\n        return mergedValuesByKey\n      }\n      \n      Object.keys(valuesByKeySubtree).forEach(function (key) {\n        if (mergedValuesByKey[key]) {\n          if (mergedValuesByKey[key] === 'extended' || valuesByKeySubtree[key] === 'extended') {\n            mergedValuesByKey[key] = 'extended'\n            return\n          }\n\n          Object.keys(valuesByKeySubtree[key]).forEach(function (valueKey) {\n            var count = mergedValuesByKey[key][valueKey]\n            if (count) {\n              mergedValuesByKey[key][valueKey] = count + valuesByKeySubtree[key][valueKey]\n            } else {\n              mergedValuesByKey[key][valueKey] = valuesByKeySubtree[key][valueKey]\n            }\n          })\n          \n          \n          if (Object.keys(mergedValuesByKey[key]).length > 30) {\n            mergedValuesByKey[key] = 'extended'\n          }\n        } else {\n          mergedValuesByKey[key] = valuesByKeySubtree[key]\n        }\n      })\n      \n      return mergedValuesByKey\n    }, {})\n  }\n  \n  return keys.reduce(function (valuesByKey, key, index) {\n    var keyName = key[0]\n    \n    if (!valuesByKey[keyName]) {\n      valuesByKey[keyName] = {}\n    }\n      \n    var count = valuesByKey[keyName][values[index]]\n    if (count) {\n      valuesByKey[keyName][values[index]] = count + 1\n    } else {\n      valuesByKey[keyName][values[index]] = 1\n    }\n    return valuesByKey\n  }, {})\n}"
 		  },
 		  "allValuesPerKey": {
 			"map": "function(doc) {\n    if(doc.data.meta) {\n      for (var key in doc.data.meta) {\n      \n        emit(key, doc.data.meta[key]);\n        \n      }\n    }\n}",
@@ -133,8 +133,7 @@ const (
 		"language": "javascript",
 		"views": {
 			"by{{KeyName}}": {
-				"reduce": "function(keys, values) {\n    return sum(values);\n}",
-				"map": "function(doc) {\n    if (doc.data.meta) {\n        if (doc.data.{{KeyField}}) {\n            emit(doc.data.{{KeyField}}, 1);\n        }\n    }\n}"
+				"map": "function(doc) {\n    if (doc.data.meta) {\n        if (doc.data.meta[\"{{KeyField}}\"]) {\n            emit(doc.data.meta[\"{{KeyField}}\"].toLowerCase(), doc.data.objectId);\n        }\n    }\n}"
 			}
 		}
 	}`
@@ -353,15 +352,8 @@ func TriggerBuildCouchIndex(dbName string, ddoc string, key string, legacyName b
 
 // createNewTenantMetadataViews - Create an index based on metadata keys
 func createNewTenantMetadataViews(dbName string, key string) error {
-	err := createCouchDBViewIndex(dbName, metaIndexTemplate, key, []string{key}, metaFieldPrefix)
-	if err != nil {
-		if !strings.Contains(err.Error(), "status 409 - conflict") {
-			msg := fmt.Sprintf("Index failed db:%s key:%s Error: %s", dbName, key, err.Error())
-			return errors.New(msg)
-		}
-	}
 	// Create a view based on unique values per new value
-	err = createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, metaFieldPrefix)
+	err := createCouchDBViewIndex(dbName, metaUniqueValuesViewsDdocTemplate, key, []string{key}, "")
 	if err != nil {
 		if !strings.Contains(err.Error(), "status 409 - conflict") {
 			msg := fmt.Sprintf("View failed db:%s key:%s Error: %s", dbName, key, err.Error())

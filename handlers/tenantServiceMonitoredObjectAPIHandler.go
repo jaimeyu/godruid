@@ -536,7 +536,7 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 
 			err = existingMonitoredObject.Validate(true)
 			if err != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate%s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
 				continue
 			}
 			// Issue request to DAO Layer

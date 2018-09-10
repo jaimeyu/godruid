@@ -1,3 +1,4 @@
+* Fix - Metadata value filtering with case insensitivity
 ## Current Release 
 ### 0.213.0 
 **Release Date:** Mon Sep 10 13:39:24 UTC 2018     

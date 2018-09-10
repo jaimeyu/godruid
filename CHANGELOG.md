@@ -1,8 +1,10 @@
-* Fix - Metadata value filtering with case insensitivity
 ## Current Release 
+### 0.214.0 
+**Release Date:** Mon Sep 10 18:37:59 UTC 2018     
+## Previous Releases 
+* Fix - Metadata value filtering with case insensitivity
 ### 0.213.0 
 **Release Date:** Mon Sep 10 13:39:24 UTC 2018     
-## Previous Releases 
 * Fix - removing requirement for the 'thresholds' property on Threshold Profile update
 ### 0.212.0 
 **Release Date:** Fri Sep  7 19:19:45 UTC 2018     

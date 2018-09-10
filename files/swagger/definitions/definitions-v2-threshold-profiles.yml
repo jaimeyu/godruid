@@ -14,7 +14,7 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["name", "thresholds"]
+            required: ["name"]
             properties:
               name:
                 type: "string"

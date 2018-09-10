@@ -1,3 +1,4 @@
+* Fix - always setting the TenantId in a 'patch' scenario to ensure legacy models will work with V2 APIs
 ## Current Release 
 ### 0.213.0 
 **Release Date:** Mon Sep 10 13:39:24 UTC 2018     

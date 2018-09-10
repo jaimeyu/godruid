@@ -300,6 +300,7 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	}
 
 	existing.Rules = data.Rules
+	existing.TenantID = tenantID
 
 	// Issue request to DAO Layer
 	result, err := tenantDB.UpdateTenantDataCleaningProfile(existing)

@@ -255,6 +255,7 @@ func doUpdateBrandingV2(allowedRoles []string, tenantDB datastore.TenantServiceD
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantBrandingStr, params.BrandingID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateTenantBranding(patched)
@@ -308,7 +309,7 @@ func doDeleteBrandingV2(allowedRoles []string, tenantDB datastore.TenantServiceD
 
 func doGetAllBrandingsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllBrandingsV2Params) (time.Time, int, *swagmodels.BrandingListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantBrandingStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantBrandingStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantBrandingStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

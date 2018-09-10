@@ -255,6 +255,7 @@ func doUpdateIngestionProfileV2(allowedRoles []string, tenantDB datastore.Tenant
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantIngestionProfileStr, params.IngestionProfileID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateTenantIngestionProfile(patched)

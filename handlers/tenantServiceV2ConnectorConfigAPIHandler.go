@@ -255,6 +255,7 @@ func doUpdateConnectorConfigV2(allowedRoles []string, tenantDB datastore.TenantS
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantConnectorConfigStr, params.ConnectorID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateTenantConnectorConfig(patched)
@@ -308,7 +309,7 @@ func doDeleteConnectorConfigV2(allowedRoles []string, tenantDB datastore.TenantS
 
 func doGetAllConnectorConfigsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllConnectorConfigsV2Params) (time.Time, int, *swagmodels.ConnectorConfigListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantConnectorConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantConnectorConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantConnectorConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

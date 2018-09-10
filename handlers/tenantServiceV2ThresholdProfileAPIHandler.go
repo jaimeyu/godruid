@@ -255,6 +255,7 @@ func doUpdateThresholdProfileV2(allowedRoles []string, tenantDB datastore.Tenant
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantThresholdProfileStr, params.ThrPrfID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateTenantThresholdProfile(patched)
@@ -308,7 +309,7 @@ func doDeleteThresholdProfileV2(allowedRoles []string, tenantDB datastore.Tenant
 
 func doGetAllThresholdProfilesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params) (time.Time, int, *swagmodels.ThresholdProfileListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantThresholdProfileStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantThresholdProfileStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

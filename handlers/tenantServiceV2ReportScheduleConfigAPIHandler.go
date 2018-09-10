@@ -265,6 +265,7 @@ func doUpdateReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantReportScheduleConfigStr, params.ConfigID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Ensure that the passed in data adheres to the model requirements
 	err = patched.Validate(true)
@@ -334,7 +335,7 @@ func doDeleteReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 
 func doGetAllReportScheduleConfigsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Params) (time.Time, int, *swagmodels.ReportScheduleConfigListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantReportScheduleConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantReportScheduleConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

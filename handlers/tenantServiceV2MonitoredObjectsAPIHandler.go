@@ -344,6 +344,7 @@ func doUpdateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantMonitoredObjectStr, params.MonObjID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	err = patched.Validate(true)
 	if err != nil {

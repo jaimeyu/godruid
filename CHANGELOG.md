@@ -1,3 +1,4 @@
+* Fix - removing requirement for the 'thresholds' property on Threshold Profile update
 ## Current Release 
 ### 0.212.0 
 **Release Date:** Fri Sep  7 19:19:45 UTC 2018     

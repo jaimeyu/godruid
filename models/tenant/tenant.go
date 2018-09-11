@@ -622,9 +622,6 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	if !isUpdate && len(mo.REV) != 0 {
 		return errors.New("Invalid Tenant Monitored Object request: must not provide a revision value in a creation request")
 	}
-	if len(mo.MonitoredObjectID) == 0 {
-		return errors.New("Invalid Tenant Monitored Object request: must provide a Monitored Object ID")
-	}
 
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)

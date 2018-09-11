@@ -700,15 +700,6 @@ func TestTenantMonitoredObjectValidation(t *testing.T) {
 	err = original.Validate(false)
 	assert.Nil(t, err)
 
-	// Must have MonitoredObjectID
-	original.MonitoredObjectID = ""
-	err = original.Validate(false)
-	assert.NotNil(t, err)
-
-	original.MonitoredObjectID = "newone"
-	err = original.Validate(false)
-	assert.Nil(t, err)
-
 	// Must not provide REV if it is not an Update
 	original.REV = "oops"
 	err = original.Validate(false)

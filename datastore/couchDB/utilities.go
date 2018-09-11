@@ -583,14 +583,18 @@ func createDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 }
 
 // Retrieve IDs from a particular view based on a key criteria
-func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
+func getColumnByDesignDocument(dbName string, designDocName string, viewName string, key string, column string, txformfunc func(string) string, isIndex bool) ([]string, error) {
 	db, err := getDatabase(dbName)
 	viewName = strings.ToLower(viewName)
 	key = strings.ToLower(key)
 	view := createDBPathStr("_design", designDocName, "_view", viewName)
 
 	qp := url.Values{}
-	qp.Set("key", fmt.Sprintf("[\"%s\"]", key))
+	if isIndex {
+		qp.Set("key", fmt.Sprintf("[\"%s\"]", key))
+	} else {
+		qp.Set("keys", fmt.Sprintf("[\"%s\"]", key))
+	}
 
 	vr, err := db.Get(view, qp)
 
@@ -607,10 +611,22 @@ func getIDsByView(dbName string, designDocName string, viewName string, key stri
 
 	for _, r := range rows.([]interface{}) {
 		rMap := r.(map[string]interface{})
-		moList = append(moList, ds.GetDataIDFromFullID(rMap["id"].(string)))
+		moList = append(moList, txformfunc(rMap[column].(string)))
 	}
 
 	return moList, nil
+}
+
+func getIDsByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
+	return getColumnByDesignDocument(dbName, designDocName, viewName, key, "id", ds.GetDataIDFromFullID, true)
+}
+
+func identity(val string) string {
+	return val
+}
+
+func getValuesByView(dbName string, designDocName string, viewName string, key string) ([]string, error) {
+	return getColumnByDesignDocument(dbName, designDocName, viewName, key, "value", identity, false)
 }
 
 func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {

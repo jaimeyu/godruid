@@ -6315,7 +6315,7 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
+            required: ["url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
             properties:
               name:
                 type: "string"
@@ -6336,6 +6336,8 @@ definitions:
               datahubConnectionRetryFrequency:
                 type: "integer"
               type:
+                type: "string"
+              zone:
                 type: "string"
               
   ConnectorConfigUpdateRequest:
@@ -6378,6 +6380,8 @@ definitions:
                 type: "integer"
               type:
                 type: "string"
+              zone:
+                type: "string"
   
   ConnectorConfigResponse:
     type: "object"
@@ -6405,7 +6409,7 @@ definitions:
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "name", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -6433,6 +6437,8 @@ definitions:
           datahubConnectionRetryFrequency:
             type: "integer"
           type:
+            type: "string"
+          zone:
             type: "string"
           createdTimestamp:
             type: "integer"

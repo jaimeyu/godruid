@@ -236,6 +236,9 @@ type ConnectorConfigUpdateRequestDataAttributes struct {
 
 	// username
 	Username string `json:"username,omitempty"`
+
+	// zone
+	Zone string `json:"zone,omitempty"`
 }
 
 // Validate validates this connector config update request data attributes

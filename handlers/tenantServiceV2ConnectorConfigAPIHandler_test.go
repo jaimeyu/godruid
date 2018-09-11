@@ -75,7 +75,7 @@ func TestConnectorConfigCRUDV2(t *testing.T) {
 	assert.NotNil(t, castedUpdate)
 	assert.NotEqual(t, castedCreate.Payload.Data, castedUpdate.Payload.Data)
 	assert.NotEqual(t, castedCreate.Payload.Data.Attributes.Rev, castedUpdate.Payload.Data.Attributes.Rev)
-	assert.Equal(t, newName, *castedUpdate.Payload.Data.Attributes.Name)
+	assert.Equal(t, newName, castedUpdate.Payload.Data.Attributes.Name)
 	assert.Equal(t, castedCreate.Payload.Data.Attributes.URL, castedUpdate.Payload.Data.Attributes.URL)
 	assert.Equal(t, castedCreate.Payload.Data.Attributes.Port, castedUpdate.Payload.Data.Attributes.Port)
 
@@ -236,7 +236,7 @@ func generateRandomTenantConnectorConfigCreationRequest() *swagmodels.ConnectorC
 		Data: &swagmodels.ConnectorConfigCreateRequestData{
 			Type: &connectorConfigTypeString,
 			Attributes: &swagmodels.ConnectorConfigCreateRequestDataAttributes{
-				Name:                            &name,
+				Name:                            name,
 				URL:                             &url,
 				Username:                        &username,
 				Password:                        &password,

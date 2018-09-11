@@ -202,8 +202,7 @@ type ConnectorConfigCreateRequestDataAttributes struct {
 	ExportGroup *string `json:"exportGroup"`
 
 	// name
-	// Required: true
-	Name *string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// password
 	// Required: true
@@ -228,6 +227,9 @@ type ConnectorConfigCreateRequestDataAttributes struct {
 	// username
 	// Required: true
 	Username *string `json:"username"`
+
+	// zone
+	Zone string `json:"zone,omitempty"`
 }
 
 // Validate validates this connector config create request data attributes
@@ -243,10 +245,6 @@ func (m *ConnectorConfigCreateRequestDataAttributes) Validate(formats strfmt.Reg
 	}
 
 	if err := m.validateExportGroup(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -301,15 +299,6 @@ func (m *ConnectorConfigCreateRequestDataAttributes) validateDatahubHeartbeatFre
 func (m *ConnectorConfigCreateRequestDataAttributes) validateExportGroup(formats strfmt.Registry) error {
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"exportGroup", "body", m.ExportGroup); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"name", "body", m.Name); err != nil {
 		return err
 	}
 

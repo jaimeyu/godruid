@@ -255,6 +255,7 @@ func doUpdateDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantDashboardStr, params.DashboardID, err.Error())
 	}
 	patched = fetched
+	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateDashboard(patched)
@@ -308,7 +309,7 @@ func doDeleteDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 
 func doGetAllDashboardsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllDashboardsV2Params) (time.Time, int, *swagmodels.DashboardListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantDashboardStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantDashboardStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantDashboardStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

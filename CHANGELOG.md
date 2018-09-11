@@ -1,3 +1,5 @@
+* Feature - adding allowed origin support based on suffix matching
+* Fix - always setting the TenantId in a 'patch' scenario to ensure legacy models will work with V2 APIs
 ## Current Release 
 ### 0.214.0 
 **Release Date:** Mon Sep 10 18:37:59 UTC 2018     

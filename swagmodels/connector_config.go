@@ -172,8 +172,7 @@ type ConnectorConfigAttributes struct {
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
 	// name
-	// Required: true
-	Name *string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// password
 	// Required: true
@@ -201,6 +200,9 @@ type ConnectorConfigAttributes struct {
 	// username
 	// Required: true
 	Username *string `json:"username"`
+
+	// zone
+	Zone string `json:"zone,omitempty"`
 }
 
 // Validate validates this connector config attributes
@@ -228,10 +230,6 @@ func (m *ConnectorConfigAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -313,15 +311,6 @@ func (m *ConnectorConfigAttributes) validateExportGroup(formats strfmt.Registry)
 func (m *ConnectorConfigAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigAttributes) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"name", "body", m.Name); err != nil {
 		return err
 	}
 

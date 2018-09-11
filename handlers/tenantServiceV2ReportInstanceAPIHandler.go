@@ -106,7 +106,7 @@ func doGetSLAReportV2(allowedRoles []string, tenantDB datastore.TenantServiceDat
 
 func doGetAllSLAReportsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllSLAReportsV2Params) (time.Time, int, *swagmodels.GathergrpcJSONAPIObjectList, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantSLAReportStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantSLAReportStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

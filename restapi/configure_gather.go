@@ -39,6 +39,9 @@ var (
 		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
 		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/raw-metrics", "/api/v2/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
 	}
+
+	supportedOrigins = []string{}
+	supportedMethods = "GET, HEAD, POST, PUT, PATCH, OPTIONS"
 )
 
 func configureFlags(api *operations.GatherAPI) {
@@ -124,6 +127,8 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	testSH.RegisterAPIHandlers(nonSwaggerMUX)
 	metricSH.RegisterAPIHandlers(nonSwaggerMUX)
 
+	supportedOrigins = cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
+
 	// Register the metrics to be tracked in Gather
 	go startMonitoring(cfg)
 
@@ -149,6 +154,20 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger.Log.Debugf("Received request: %s%s", r.Method, r.URL)
 
+		// Handle CORS headers:
+		reqHeader := r.Header.Get("Origin")
+		logger.Log.Debugf("Recieved origin is: %s", reqHeader)
+		if isOriginInSupportedList(reqHeader) {
+
+			w.Header().Set("Access-Control-Allow-Origin", reqHeader)
+			w.Header().Set("Access-Control-Allow-Methods", supportedMethods)
+		}
+
+		if r.Method == http.MethodOptions {
+			optionsHandler(w, r)
+			return
+		}
+
 		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
 			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
@@ -160,4 +179,18 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 		}
 
 	})
+}
+
+func isOriginInSupportedList(requestOrigin string) bool {
+	for _, originRegex := range supportedOrigins {
+		if strings.HasSuffix(requestOrigin, originRegex) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func optionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
 }

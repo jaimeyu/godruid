@@ -1,8 +1,10 @@
-* Feature - adding regulator metric type to the ingestion dictionary
 ## Current Release 
+### 0.216.0 
+**Release Date:** Wed Sep 12 15:51:47 UTC 2018     
+## Previous Releases 
+* Feature - adding regulator metric type to the ingestion dictionary
 ### 0.215.0 
 **Release Date:** Tue Sep 11 16:41:39 UTC 2018     
-## Previous Releases 
 * Feature - adding allowed origin support based on suffix matching
 * Fix - always setting the TenantId in a 'patch' scenario to ensure legacy models will work with V2 APIs
 ### 0.214.0 

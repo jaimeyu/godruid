@@ -1,3 +1,4 @@
+* Feature - adding regulator metric type to the ingestion dictionary
 ## Current Release 
 ### 0.215.0 
 **Release Date:** Tue Sep 11 16:41:39 UTC 2018     

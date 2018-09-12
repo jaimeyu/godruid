@@ -2174,6 +2174,159 @@
           "unknown"
         ]
       }
+    },
+    "accedian-regulator": {
+      "metricMap": {
+        "acceptRateAvg": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Accept Avg Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "acceptRateMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Accept Min Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "acceptRateMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "3"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Accept Max Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "dropRateAvg": {
+          "ui": {
+            "group": "unknown",
+            "position": "4"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Drop Avg Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "dropRateMin": {
+          "ui": {
+            "group": "unknown",
+            "position": "5"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Drop Min Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "dropRateMax": {
+          "ui": {
+            "group": "unknown",
+            "position": "6"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "Drop Max Rate",
+              "units": [
+                "Mpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "cir": {
+          "ui": {
+            "group": "unknown",
+            "position": "7"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "cir",
+              "units": [
+                "kpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        },
+        "eir": {
+          "ui": {
+            "group": "unknown",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "regulator",
+              "rawMetricId": "eir",
+              "units": [
+                "kpbs"
+              ],
+              "directions": [
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+          "unknown"
+        ]
+      }
     }
   }
 }

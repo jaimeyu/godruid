@@ -123,7 +123,7 @@
     description: "A single object Report Schedule Configuration response from Datahub"
     properties:
       data:
-        $ref: '#/definitions/TenantReportScheduleConfig'
+        $ref: '#/definitions/ReportScheduleConfig'
 
   ReportScheduleConfigListResponse:
     type: "object"
@@ -132,7 +132,7 @@
       data:
         type: "array"
         items:
-           $ref: '#/definitions/TenantReportScheduleConfig'
+           $ref: '#/definitions/ReportScheduleConfig'
 
   ReportScheduleConfig:
     type: "object"
@@ -143,6 +143,8 @@
         enum: [reportScheduleConfigs]
       id:
         type: "string"
+      relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
       attributes:
         type: "object"
         required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]

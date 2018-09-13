@@ -257,6 +257,19 @@ func doUpdateDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 	patched = fetched
 	patched.TenantID = tenantID
 
+	// Before updating, make sure to handle any relationship data:
+	if params.Body.Data.Relationships != nil {
+		cards := params.Body.Data.Relationships.Cards
+		if cards != nil {
+			patched.Cards = getIdsFromRelationshipData(params.Body.Data.Relationships.Cards)
+		}
+
+		tp := params.Body.Data.Relationships.ThresholdProfile
+		if tp != nil {
+			patched.ThresholdProfile = params.Body.Data.Relationships.ThresholdProfile.Data.ID
+		}
+	}
+
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateDashboard(patched)
 	if err != nil {

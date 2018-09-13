@@ -750,6 +750,7 @@ func (d *Dashboard) SetID(s string) error {
 var (
 	dashboardCardRelationshipName = "cards"
 	dashboardTPRelationshipName   = "thresholdProfile"
+	dashboardTPRelationshipType   = "thresholdProfiles"
 )
 
 // GetReferences to satisfy the jsonapi.MarshalReferences interface
@@ -760,7 +761,7 @@ func (d *Dashboard) GetReferences() []jsonapi.Reference {
 			Name: dashboardCardRelationshipName,
 		},
 		{
-			Type: dashboardTPRelationshipName,
+			Type: dashboardTPRelationshipType,
 			Name: dashboardTPRelationshipName,
 		},
 	}
@@ -779,7 +780,7 @@ func (d *Dashboard) GetReferencedIDs() []jsonapi.ReferenceID {
 
 	result = append(result, jsonapi.ReferenceID{
 		ID:   d.ThresholdProfile,
-		Type: dashboardTPRelationshipName,
+		Type: dashboardTPRelationshipType,
 		Name: dashboardTPRelationshipName,
 	})
 

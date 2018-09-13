@@ -16,6 +16,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
+	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -711,4 +712,14 @@ func generateLinks(urlBase string, paginationOffsets *common.PaginationOffsets, 
 	}
 
 	return links
+}
+
+func getIdsFromRelationshipData(relationships *swagmodels.JSONAPIRelationship) []string {
+	result := []string{}
+
+	for _, val := range relationships.Data {
+		result = append(result, val.ID)
+	}
+
+	return result
 }

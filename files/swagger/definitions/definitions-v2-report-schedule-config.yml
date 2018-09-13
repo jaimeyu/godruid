@@ -12,9 +12,11 @@
             enum: [reportScheduleConfigs]
           id:
             type: "string"
+          relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
           attributes:
             type: "object"
-            required: ["thresholdProfile", "name"]
+            required: ["relationships", "name"]
             properties:
               timeRangeDuration: 
                 type: "string"
@@ -70,6 +72,8 @@
             enum: [reportScheduleConfigs]
           id:
             type: "string"
+          relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
           attributes:
             type: "object"
             required: ["_rev"]
@@ -80,9 +84,6 @@
               timeRangeDuration: 
                 type: "string"
                 description: "Period of time for which the report will be generated"
-              thresholdProfile: 
-                type: "string"
-                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
                 description: "Time period for which individual results should be aggregated"
@@ -144,7 +145,7 @@
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "thresholdProfile", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -158,9 +159,6 @@
           timeRangeDuration: 
             type: "string"
             description: "Period of time for which the report will be generated"
-          thresholdProfile: 
-            type: "string"
-            description: "The unique identifier of the Threshold Profile used to generate the report"
           granularity: 
             type: "string"
             description: "Time period for which individual results should be aggregated"
@@ -200,3 +198,12 @@
           lastModifiedTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was last altered."
+
+  ReportScheduleConfigRelationships:
+    type: "object"
+    required: ["thresholdProfile"]
+    properties:
+      thresholdProfile:
+        description: "References the unique identifier of the Threshold Profile used to generate Threshold Crossing Events for this report"
+        $ref: '#/definitions/JsonApiSingleRelationship'
+

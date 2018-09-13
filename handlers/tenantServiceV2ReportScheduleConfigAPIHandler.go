@@ -267,6 +267,14 @@ func doUpdateReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 	patched = fetched
 	patched.TenantID = tenantID
 
+	// Before updating, make sure to handle any relationship data:
+	if params.Body.Data.Relationships != nil {
+		tp := params.Body.Data.Relationships.ThresholdProfile
+		if tp != nil {
+			patched.ThresholdProfile = params.Body.Data.Relationships.ThresholdProfile.Data.ID
+		}
+	}
+
 	// Ensure that the passed in data adheres to the model requirements
 	err = patched.Validate(true)
 	if err != nil {

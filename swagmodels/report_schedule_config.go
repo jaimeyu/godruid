@@ -200,10 +200,6 @@ type ReportScheduleConfigAttributes struct {
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// The unique identifier of the Threshold Profile used to generate the report
-	// Required: true
-	ThresholdProfile *string `json:"thresholdProfile"`
-
 	// Period of time for which the report will be generated
 	// Required: true
 	TimeRangeDuration *string `json:"timeRangeDuration"`
@@ -274,10 +270,6 @@ func (m *ReportScheduleConfigAttributes) Validate(formats strfmt.Registry) error
 	}
 
 	if err := m.validateTenantID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateThresholdProfile(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -419,15 +411,6 @@ func (m *ReportScheduleConfigAttributes) validateReportType(formats strfmt.Regis
 func (m *ReportScheduleConfigAttributes) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"tenantId", "body", m.TenantID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ReportScheduleConfigAttributes) validateThresholdProfile(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"thresholdProfile", "body", m.ThresholdProfile); err != nil {
 		return err
 	}
 

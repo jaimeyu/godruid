@@ -1,3 +1,4 @@
+* Fix - handling relationships for the report schedule config APIs
 ## Current Release 
 ### 0.217.0 
 **Release Date:** Thu Sep 13 00:21:23 UTC 2018     

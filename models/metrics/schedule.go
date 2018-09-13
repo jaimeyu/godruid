@@ -1,9 +1,13 @@
 package metrics
 
-import "errors"
-import admmod "github.com/accedian/adh-gather/models/admin"
-import cron "github.com/robfig/cron"
-import "fmt"
+import (
+	"errors"
+	"fmt"
+
+	admmod "github.com/accedian/adh-gather/models/admin"
+	"github.com/manyminds/api2go/jsonapi"
+	cron "github.com/robfig/cron"
+)
 
 const (
 	ReportScheduleConfigType = "reportScheduleConfig"
@@ -53,6 +57,43 @@ func (ssc *ReportScheduleConfig) GetID() string {
 func (ssc *ReportScheduleConfig) SetID(s string) error {
 	ssc.ID = s
 	return nil
+}
+
+var (
+	reportScheduleConfigTPRelationshipType = "thresholdProfiles"
+	reportScheduleConfigTPRelationshipName = "thresholdProfile"
+)
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (ssc *ReportScheduleConfig) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: reportScheduleConfigTPRelationshipType,
+			Name: reportScheduleConfigTPRelationshipName,
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (ssc *ReportScheduleConfig) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	result = append(result, jsonapi.ReferenceID{
+		ID:   ssc.ThresholdProfile,
+		Type: reportScheduleConfigTPRelationshipType,
+		Name: reportScheduleConfigTPRelationshipName,
+	})
+
+	return result
+}
+
+// SetToOneReferenceID - satisfy the unmarshalling of relationships that point to only one reference ID
+func (ssc *ReportScheduleConfig) SetToOneReferenceID(name, ID string) error {
+	if name == reportScheduleConfigTPRelationshipName {
+		ssc.ThresholdProfile = ID
+		return nil
+	}
+
+	return errors.New("There is no to-one relationship with the name " + name)
 }
 
 func (ssc *ReportScheduleConfig) Validate(isUpdate bool) error {

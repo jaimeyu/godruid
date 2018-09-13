@@ -86,6 +86,9 @@ type ReportScheduleConfigUpdateRequestData struct {
 	// Required: true
 	ID *string `json:"id"`
 
+	// relationships
+	Relationships *ReportScheduleConfigRelationships `json:"relationships,omitempty"`
+
 	// type
 	// Required: true
 	// Enum: [reportScheduleConfigs]
@@ -101,6 +104,10 @@ func (m *ReportScheduleConfigUpdateRequestData) Validate(formats strfmt.Registry
 	}
 
 	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRelationships(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -136,6 +143,24 @@ func (m *ReportScheduleConfigUpdateRequestData) validateID(formats strfmt.Regist
 
 	if err := validate.Required("data"+"."+"id", "body", m.ID); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ReportScheduleConfigUpdateRequestData) validateRelationships(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Relationships) { // not required
+		return nil
+	}
+
+	if m.Relationships != nil {
+		if err := m.Relationships.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "relationships")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -233,9 +258,6 @@ type ReportScheduleConfigUpdateRequestDataAttributes struct {
 
 	// The type of report this config will generate
 	ReportType string `json:"reportType,omitempty"`
-
-	// The unique identifier of the Threshold Profile used to generate the report
-	ThresholdProfile string `json:"thresholdProfile,omitempty"`
 
 	// Period of time for which the report will be generated
 	TimeRangeDuration string `json:"timeRangeDuration,omitempty"`

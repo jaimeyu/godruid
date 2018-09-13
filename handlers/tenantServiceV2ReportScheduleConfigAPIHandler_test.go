@@ -226,13 +226,20 @@ func generateRandomTenantReportScheduleConfigCreationRequest() *swagmodels.Repor
 		Data: &swagmodels.ReportScheduleConfigCreateRequestData{
 			Type: &reportScehduleConfigTypeString,
 			Attributes: &swagmodels.ReportScheduleConfigCreateRequestDataAttributes{
-				Name:             &name,
-				ThresholdProfile: &thresh,
-				DayMonth:         dayMonth,
-				DayWeek:          dayWeek,
-				Hour:             hour,
-				Minute:           minute,
-				Month:            month,
+				Name:     &name,
+				DayMonth: dayMonth,
+				DayWeek:  dayWeek,
+				Hour:     hour,
+				Minute:   minute,
+				Month:    month,
+			},
+			Relationships: &swagmodels.ReportScheduleConfigRelationships{
+				ThresholdProfile: &swagmodels.JSONAPISingleRelationship{
+					Data: &swagmodels.JSONAPIRelationshipData{
+						ID:   thresh,
+						Type: "thresholdProfiles",
+					},
+				},
 			},
 		},
 	}
@@ -250,8 +257,9 @@ func generateReportScheduleConfigUpdateRequest(id string, rev string, name *stri
 	if name != nil {
 		result.Data.Attributes.Name = *name
 	}
+
 	if thresh != nil {
-		result.Data.Attributes.ThresholdProfile = *thresh
+		result.Data.Relationships.ThresholdProfile.Data.ID = *thresh
 	}
 
 	return result

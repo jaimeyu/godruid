@@ -1,8 +1,10 @@
-* Fix - handling relationships for the report schedule config APIs
 ## Current Release 
+### 0.218.0 
+**Release Date:** Thu Sep 13 01:42:47 UTC 2018     
+## Previous Releases 
+* Fix - handling relationships for the report schedule config APIs
 ### 0.217.0 
 **Release Date:** Thu Sep 13 00:21:23 UTC 2018     
-## Previous Releases 
 * Fix - handling relationship data on patch for Dashboards
 ### 0.216.0 
 **Release Date:** Wed Sep 12 15:51:47 UTC 2018     

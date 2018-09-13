@@ -41,17 +41,17 @@ func TestReportScheduleConfigCRUDV2(t *testing.T) {
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Name)
-	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.ThresholdProfile)
+	assert.NotEmpty(t, castedCreate.Payload.Data.Relationships)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Hour)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Minute)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.DayMonth)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.DayWeek)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Datatype)
-	assert.True(t, castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
-	assert.True(t, castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
 
 	// Make sure we can retrieve this record:
-	fetched := handlers.HandleGetReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetReportScheduleConfigV2Params{ConfigID: castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "GET")})
+	fetched := handlers.HandleGetReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "GET")})
 	castedFetch := fetched.(*tenant_provisioning_service_v2.GetReportScheduleConfigV2OK)
 	assert.NotNil(t, castedFetch)
 	assert.Equal(t, castedCreate.Payload.Data, castedFetch.Payload.Data)
@@ -65,18 +65,18 @@ func TestReportScheduleConfigCRUDV2(t *testing.T) {
 
 	// Make an update to the Record
 	newName := fake.CharactersN(16)
-	updateRequestBody := generateReportScheduleConfigUpdateRequest(castedCreate.Payload.Data.ID, castedCreate.Payload.Data.Attributes.Rev, &newName, nil)
-	updated := handlers.HandleUpdateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params{ConfigID: castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "PATCH")})
+	updateRequestBody := generateReportScheduleConfigUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev, &newName, nil)
+	updated := handlers.HandleUpdateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateReportScheduleConfigV2OK)
 	assert.NotNil(t, castedUpdate)
 	assert.NotEqual(t, castedCreate.Payload.Data, castedUpdate.Payload.Data)
 	assert.NotEqual(t, castedCreate.Payload.Data.Attributes.Rev, castedUpdate.Payload.Data.Attributes.Rev)
-	assert.Equal(t, newName, castedUpdate.Payload.Data.Attributes.Name)
+	assert.Equal(t, newName, *castedUpdate.Payload.Data.Attributes.Name)
 	assert.Equal(t, castedCreate.Payload.Data.Attributes.Hour, castedUpdate.Payload.Data.Attributes.Hour)
-	assert.Equal(t, castedCreate.Payload.Data.Attributes.ThresholdProfile, castedUpdate.Payload.Data.Attributes.ThresholdProfile)
+	assert.Equal(t, castedCreate.Payload.Data.Relationships.ThresholdProfile, castedUpdate.Payload.Data.Relationships.ThresholdProfile)
 
 	// Delete the record
-	deleted := handlers.HandleDeleteReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params{ConfigID: castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "DELETE")})
+	deleted := handlers.HandleDeleteReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteReportScheduleConfigV2OK)
 	assert.NotNil(t, castedDelete)
 	assert.Equal(t, castedUpdate.Payload.Data, castedDelete.Payload.Data)
@@ -143,14 +143,14 @@ func TestReportScheduleConfigConflictV2(t *testing.T) {
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Name)
-	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.ThresholdProfile)
+	assert.NotEmpty(t, castedCreate.Payload.Data.Relationships.ThresholdProfile)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Hour)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Minute)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.DayMonth)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.DayWeek)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Datatype)
-	assert.True(t, castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
-	assert.True(t, castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
 
 	// Try to create the record again - should succeed as we are not guarding against name collisiones
 	createdConflict := handlers.HandleCreateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "POST")})
@@ -159,13 +159,13 @@ func TestReportScheduleConfigConflictV2(t *testing.T) {
 
 	// Try the update with a bad revision
 	newName := fake.CharactersN(16)
-	updateRequestBody := generateReportScheduleConfigUpdateRequest(castedCreate.Payload.Data.ID, castedCreate.Payload.Data.Attributes.Rev+"pork", &newName, nil)
-	updated := handlers.HandleUpdateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params{ConfigID: castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "PATCH")})
+	updateRequestBody := generateReportScheduleConfigUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev+"pork", &newName, nil)
+	updated := handlers.HandleUpdateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Conflict)
 	assert.NotNil(t, castedUpdate)
 
 	// Delete the tenant
-	deleted := handlers.HandleDeleteReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params{ConfigID: castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "DELETE")})
+	deleted := handlers.HandleDeleteReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteReportScheduleConfigV2OK)
 	assert.NotNil(t, castedDelete)
 	assert.NotNil(t, castedDelete.Payload.Data)

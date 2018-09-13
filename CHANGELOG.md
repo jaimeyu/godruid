@@ -1,3 +1,4 @@
+* Fix - handling relationship data on patch for Dashboards
 ## Current Release 
 ### 0.216.0 
 **Release Date:** Wed Sep 12 15:51:47 UTC 2018     

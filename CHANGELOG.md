@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.220.0 
+**Release Date:** Wed Sep 19 18:47:44 UTC 2018     
+## Previous Releases 
 ### 0.219.0 
 **Release Date:** Thu Sep 13 02:28:03 UTC 2018     
-## Previous Releases 
 ### 0.218.0 
 **Release Date:** Thu Sep 13 01:42:47 UTC 2018     
 * Fix - handling relationships for the report schedule config APIs

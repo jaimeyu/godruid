@@ -7091,6 +7091,10 @@ definitions:
             type: "array"
             items:
               type: "number"
+          series:
+            type: "array"
+            items:
+              type: "string"
   DataCleaningProfileCreateRequest:
     type: "object"
     description: "Object used to create a Data Cleaning Profile in Datahub"

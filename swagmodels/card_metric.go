@@ -101,6 +101,9 @@ type CardMetricOptions struct {
 	// format unit
 	FormatUnit string `json:"formatUnit,omitempty"`
 
+	// series
+	Series []string `json:"series"`
+
 	// use bins
 	UseBins bool `json:"useBins,omitempty"`
 }

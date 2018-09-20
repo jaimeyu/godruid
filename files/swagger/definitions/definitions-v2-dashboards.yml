@@ -366,3 +366,7 @@
             type: "array"
             items:
               type: "number"
+          series:
+            type: "array"
+            items:
+              type: "string"

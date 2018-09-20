@@ -205,6 +205,10 @@ type ReportScheduleConfigAttributes struct {
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
+	// meta
+	// Required: true
+	Meta map[string][]string `json:"meta"`
+
 	// Recurring minute when this report should be generated
 	// Required: true
 	Minute *string `json:"minute"`
@@ -275,6 +279,10 @@ func (m *ReportScheduleConfigAttributes) Validate(formats strfmt.Registry) error
 	}
 
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMeta(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -393,6 +401,11 @@ func (m *ReportScheduleConfigAttributes) validateLastModifiedTimestamp(formats s
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (m *ReportScheduleConfigAttributes) validateMeta(formats strfmt.Registry) error {
 
 	return nil
 }

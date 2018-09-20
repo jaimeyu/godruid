@@ -57,6 +57,12 @@
               active:
                 type: "boolean"
                 description: "When true, the report will be generated. When false, the report will not be generated"
+              meta:
+                type: "object"
+                additionalProperties:
+                  type: "array"
+                  items:
+                    type: "string"
                     
   ReportScheduleConfigUpdateRequest:
     type: "object"
@@ -117,6 +123,13 @@
               active:
                 type: "boolean"
                 description: "When true, the report will be generated. When false, the report will not be generated"
+              meta:
+                type: "object"
+                additionalProperties:
+                  type: "array"
+                  items:
+                    type: "string"
+              
 
   ReportScheduleConfigResponse:
     type: "object"
@@ -147,7 +160,7 @@
             $ref: '#/definitions/ReportScheduleConfigRelationships'
       attributes:
         type: "object"
-        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "meta", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -194,6 +207,12 @@
           active:
             type: "boolean"
             description: "When true, the report will be generated. When false, the report will not be generated"
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"
           createdTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was instantiated."

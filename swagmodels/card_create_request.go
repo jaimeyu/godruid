@@ -193,6 +193,9 @@ type CardCreateRequestDataAttributes struct {
 	// description
 	Description string `json:"description,omitempty"`
 
+	// metadata filters
+	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
+
 	// metrics
 	Metrics []*CardMetric `json:"metrics"`
 
@@ -213,6 +216,10 @@ type CardCreateRequestDataAttributes struct {
 func (m *CardCreateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateMetadataFilters(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMetrics(formats); err != nil {
 		res = append(res, err)
 	}
@@ -232,6 +239,31 @@ func (m *CardCreateRequestDataAttributes) Validate(formats strfmt.Registry) erro
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CardCreateRequestDataAttributes) validateMetadataFilters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetadataFilters) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MetadataFilters); i++ {
+		if swag.IsZero(m.MetadataFilters[i]) { // not required
+			continue
+		}
+
+		if m.MetadataFilters[i] != nil {
+			if err := m.MetadataFilters[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + "attributes" + "." + "metadataFilters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

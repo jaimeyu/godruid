@@ -833,11 +833,6 @@ func (d *Dashboard) DeleteToManyIDs(name string, IDs []string) error {
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
-type MetadataFilter struct {
-	Key    string   `json:"key"`
-	Values []string `json:"values"`
-}
-
 type CardPosition struct {
 	Position   int        `json:"position"`
 	Dimensions *Dimension `json:"dimensions"`
@@ -858,6 +853,7 @@ type Card struct {
 	State                 string             `json:"state"`
 	Visualization         *CardVisualization `json:"visualization"`
 	Metrics               []*CardMetric      `json:"metrics"`
+	MetadataFilters       []*MetadataFilter  `json:"metadataFilters"`
 	CreatedTimestamp      int64              `json:"createdTimestamp"`
 	LastModifiedTimestamp int64              `json:"lastModifiedTimestamp"`
 }
@@ -887,15 +883,26 @@ type CardVisualizationAvailability struct {
 	Type []string `json:"type"`
 }
 
+type MetadataFilter struct {
+	Key    string   `json:"key"`
+	Values []string `json:"values"`
+}
+
 type CardMetric struct {
-	Key         string             `json:"key"`
-	Label       string             `json:"label"`
-	VendorLabel string             `json:"vendorLabel"`
-	VendorKey   string             `json:"vendorKey"`
-	ObjectType  string             `json:"objectType"`
-	Type        string             `json:"type"`
-	Options     *CardMetricOptions `json:"options"`
-	Units       []string           `json:"units"`
+	Enabled              bool               `json:"enabled"`
+	Key                  string             `json:"key"`
+	Label                string             `json:"label"`
+	Metric               string             `json:"metric"`
+	MetricKey            string             `json:"metricKey"`
+	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
+	RawMetricID          string             `json:"rawMetricId"`
+	VendorLabel          string             `json:"vendorLabel"`
+	VendorKey            string             `json:"vendorKey"`
+	ObjectType           string             `json:"objectType"`
+	Type                 string             `json:"type"`
+	Options              *CardMetricOptions `json:"options"`
+	Unit                 string             `json:"unit"`
+	Units                []string           `json:"units"`
 }
 
 type CardMetricOptions struct {

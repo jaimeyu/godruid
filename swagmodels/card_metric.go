@@ -16,11 +16,23 @@ import (
 // swagger:model CardMetric
 type CardMetric struct {
 
+	// enabled
+	Enabled bool `json:"enabled,omitempty"`
+
 	// key
 	Key string `json:"key,omitempty"`
 
 	// label
 	Label string `json:"label,omitempty"`
+
+	// metric
+	Metric string `json:"metric,omitempty"`
+
+	// metric key
+	MetricKey string `json:"metricKey,omitempty"`
+
+	// monitored object types
+	MonitoredObjectTypes []string `json:"monitoredObjectTypes"`
 
 	// object type
 	ObjectType string `json:"objectType,omitempty"`
@@ -28,8 +40,14 @@ type CardMetric struct {
 	// options
 	Options *CardMetricOptions `json:"options,omitempty"`
 
+	// raw metric Id
+	RawMetricID string `json:"rawMetricId,omitempty"`
+
 	// type
 	Type string `json:"type,omitempty"`
+
+	// unit
+	Unit string `json:"unit,omitempty"`
 
 	// units
 	Units []string `json:"units"`
@@ -106,6 +124,9 @@ type CardMetricOptions struct {
 
 	// use bins
 	UseBins bool `json:"useBins,omitempty"`
+
+	// use explicit series
+	UseExplicitSeries bool `json:"useExplicitSeries,omitempty"`
 }
 
 // Validate validates this card metric options

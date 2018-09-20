@@ -229,6 +229,9 @@ type ReportScheduleConfigCreateRequestDataAttributes struct {
 	// Recurring hour when this report should be generated
 	Hour string `json:"hour,omitempty"`
 
+	// meta
+	Meta map[string][]string `json:"meta,omitempty"`
+
 	// Recurring minute when this report should be generated
 	Minute string `json:"minute,omitempty"`
 

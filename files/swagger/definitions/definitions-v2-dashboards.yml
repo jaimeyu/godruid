@@ -200,6 +200,10 @@
                 enum: [active, pending]
               visualization:
                 $ref: '#/definitions/CardVisualization'
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
               metrics:
                 type: "array"
                 items:
@@ -235,6 +239,10 @@
                 enum: [active, pending]
               visualization:
                 $ref: '#/definitions/CardVisualization'
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
               metrics:
                 type: "array"
                 items:
@@ -269,7 +277,7 @@
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metadataFilters", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -292,6 +300,10 @@
           visualization:
             $ref: '#/definitions/CardVisualization'
             description: "Object which contains the components to display on this Card"
+          metadataFilters:
+              type: "array"
+              items:
+                $ref: '#/definitions/MetadataFilter'
           metrics:
             type: "array"
             description: "A list of the data which will be displayed in the Card visualization"
@@ -349,8 +361,22 @@
         type: "string"
       objectType:
         type: "string"
+      unit:
+        type: "string"
       type:
         type: "string"
+      rawMetricId:
+        type: "string"
+      metric:
+        type: "string"
+      metricKey:
+        type: "string"
+      enabled:
+        type: "boolean"
+      monitoredObjectTypes:
+        type: "array"
+        items:
+          type: "string"
       units:
         type: "array"
         items:
@@ -358,6 +384,8 @@
       options:
         type: "object"
         properties:
+          useExplicitSeries:
+            type: "boolean"
           useBins:
             type: "boolean"
           formatUnit:
@@ -366,6 +394,7 @@
             type: "array"
             items:
               type: "number"
+              format: "double"
           series:
             type: "array"
             items:

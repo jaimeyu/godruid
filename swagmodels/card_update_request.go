@@ -211,6 +211,9 @@ type CardUpdateRequestDataAttributes struct {
 	// description
 	Description string `json:"description,omitempty"`
 
+	// metadata filters
+	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
+
 	// metrics
 	Metrics []*CardMetric `json:"metrics"`
 
@@ -230,6 +233,10 @@ func (m *CardUpdateRequestDataAttributes) Validate(formats strfmt.Registry) erro
 	var res []error
 
 	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetadataFilters(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -255,6 +262,31 @@ func (m *CardUpdateRequestDataAttributes) validateRev(formats strfmt.Registry) e
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"_rev", "body", m.Rev); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *CardUpdateRequestDataAttributes) validateMetadataFilters(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetadataFilters) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MetadataFilters); i++ {
+		if swag.IsZero(m.MetadataFilters[i]) { // not required
+			continue
+		}
+
+		if m.MetadataFilters[i] != nil {
+			if err := m.MetadataFilters[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + "attributes" + "." + "metadataFilters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

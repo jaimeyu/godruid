@@ -165,6 +165,10 @@ type CardAttributes struct {
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
+	// metadata filters
+	// Required: true
+	MetadataFilters []*MetadataFilter `json:"metadataFilters"`
+
 	// A list of the data which will be displayed in the Card visualization
 	// Required: true
 	Metrics []*CardMetric `json:"metrics"`
@@ -208,6 +212,10 @@ func (m *CardAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetadataFilters(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -277,6 +285,31 @@ func (m *CardAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) 
 
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *CardAttributes) validateMetadataFilters(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"metadataFilters", "body", m.MetadataFilters); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.MetadataFilters); i++ {
+		if swag.IsZero(m.MetadataFilters[i]) { // not required
+			continue
+		}
+
+		if m.MetadataFilters[i] != nil {
+			if err := m.MetadataFilters[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("attributes" + "." + "metadataFilters" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

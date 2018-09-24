@@ -127,6 +127,12 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	testSH.RegisterAPIHandlers(nonSwaggerMUX)
 	metricSH.RegisterAPIHandlers(nonSwaggerMUX)
 
+	// Setup Colt MEF DEMO stuff if applicaple
+	if cfg.GetBool(gather.CK_args_coltmef_enabled.String()) {
+		coltMEFHandler := handlers.CreateColtMEFHandler()
+		coltMEFHandler.RegisterAPIHandlers(nonSwaggerMUX)
+	}
+
 	supportedOrigins = cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())
 
 	// Register the metrics to be tracked in Gather
@@ -173,6 +179,9 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {
 			// Metric Service V1 call
+			nonSwaggerMUX.ServeHTTP(w, r)
+		} else if strings.Index(r.URL.Path, "/colt-mef/recommendation") == 0 {
+			// Colt MEF calls
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else {
 			next.ServeHTTP(w, r)

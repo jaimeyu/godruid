@@ -41,6 +41,10 @@ const (
 	CK_druid_timeoutsms_filteredrawmetrics   ConfigKey = "druid.timeoutsms.filteredrawmetrics"
 	CK_kafka_broker                          ConfigKey = "kafka.broker"
 	CK_args_authorizationAAA                 ConfigKey = "args.AuthorizationAAA"
+	CK_args_coltmef_enabled                  ConfigKey = "args.coltmef.enabled"
+	CK_args_coltmef_server                   ConfigKey = "args.coltmef.server"
+	CK_args_coltmef_appid                    ConfigKey = "args.coltmef.appid"
+	CK_args_coltmef_secret                   ConfigKey = "args.coltmef.secret"
 )
 
 func (key ConfigKey) String() string {

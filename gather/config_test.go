@@ -26,6 +26,7 @@ func TestLoadingConfig(t *testing.T) {
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "adh-admin")
 	assert.Equal(t, cfg.GetInt(gather.CK_server_monitoring_port.String()), 9191)
+	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), false)
 }
 
 func TestLoadingDefaults(t *testing.T) {
@@ -45,6 +46,7 @@ func TestLoadingDefaults(t *testing.T) {
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentPouchAPICalls.String()), 1000)
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentProvAPICalls.String()), 1000)
 	assert.Equal(t, cfg.GetInt(gather.CK_server_datastore_batchsize.String()), 1000)
+	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), false)
 }
 
 func TestWithEnvironmentVariables(t *testing.T) {
@@ -60,6 +62,9 @@ func TestWithEnvironmentVariables(t *testing.T) {
 
 	os.Setenv("ARGS_DEBUG", "true")
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)
+
+	os.Setenv("ARGS_COLTMEF_ENABLED", "true")
+	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), true)
 
 	os.Setenv("ARGS_ADMINDB_NAME", "testname")
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "testname")

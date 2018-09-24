@@ -35,6 +35,11 @@ args:
   maxConcurrentPouchAPICalls:  1000
   maxConcurrentProvAPICalls:   1000
   maxConcurrentMetricAPICalls: 500
+  coltmef:
+    enabled: false
+    server: "https://demo.ondemand.colt.net/api/performance/recommendation"
+    appID: "datahubtest"
+    secret: "test123"
 
 connector:
   maxSecondsWithoutHeartbeat: 120

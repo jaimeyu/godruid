@@ -21,8 +21,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var (
-	makeRecommendationAPIStr = "colt_make_rcm"
+const (
+	recommendationRequestPath = "/recommendation"
+	makeRecommendationAPIStr  = "colt_make_rcm"
 )
 
 type ColtMEFHandler struct {
@@ -176,8 +177,6 @@ type ColtRecommendationResponse struct {
 }
 
 func getAuthHeader(recommendation []byte, key string) string {
-	requestPath := "/recommendation"
-
 	hashedPayload := base64HMACSHA256(recommendation, key)
 
 	timeNow := time.Now().UTC()
@@ -185,7 +184,7 @@ func getAuthHeader(recommendation []byte, key string) string {
 	hour := timeNow.Hour()
 
 	timestamp := fmt.Sprintf("%04d%02d%02d%02d", dateY, dateM, DateD, hour)
-	requestData := strings.Join([]string{timestamp, requestPath, hashedPayload}, "")
+	requestData := strings.Join([]string{timestamp, recommendationRequestPath, hashedPayload}, "")
 
 	return base64HMACSHA256([]byte(requestData), key)
 }

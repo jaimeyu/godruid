@@ -1,3 +1,4 @@
+* Fix - handling multiple MOs with the same objectname for bulk meta update
 ## Current Release 
 ### 0.222.0 
 **Release Date:** Thu Sep 20 17:09:17 UTC 2018     

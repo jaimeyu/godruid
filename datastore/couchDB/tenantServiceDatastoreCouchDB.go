@@ -1004,13 +1004,12 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, do
 	return nil
 }
 
-// GetMonitoredObjectByObjectName - Returns an Monitored based on its Object Name
+// GetMonitoredObjectsByObjectName - Returns an Monitored based on its Object Name
 // This is useful because the tool used to ingest data from the NID creates unique IDs but
 // the clients may use a different mapping based on monitored object name.
 // Assumption right now is that most clients monitored object objectName will be unique.
-func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectsByObjectName(name string, tenantID string) ([]*tenmod.MonitoredObject, error) {
 
-	mo := &tenmod.MonitoredObject{}
 	dbName := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	db, err := getDatabase(dbName)
 	if err != nil {
@@ -1019,13 +1018,13 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 
 	index := monitoredObjectIndex
 	selector := fmt.Sprintf(`data.objectName == "%s"`, name)
-	// Expect only 1 return
-	const expectOnly1Result = 1
+
+	const limit = 1000 // default value for query operation is only 25 so we'll use a much larger value
 
 	logger.Log.Debugf("Fetching monitored object for tenant %s by object name %s in index %s using selector %s", tenantID, name, index, selector)
 
 	// This returns a LIST of objects but we're only going to check for 1 object
-	fetchedData, err := db.Query(nil, selector, nil, expectOnly1Result, nil, index)
+	fetchedData, err := db.Query(nil, selector, nil, limit, nil, index)
 	if err != nil {
 		return nil, err
 	}
@@ -1038,16 +1037,25 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectByObjectName(name st
 		return nil, fmt.Errorf("Could not find mapping of monitored object with name %s to id", name)
 	}
 
-	err = convertGenericCouchDataToObject(fetchedData[0], mo, "Index Search by Name")
-	if err != nil {
-		return nil, err
+	mos := make([]*tenmod.MonitoredObject, 0)
+
+	for _, fetchedMO := range fetchedData {
+
+		populatedMO := &tenmod.MonitoredObject{}
+
+		err = convertGenericCouchDataToObject(fetchedMO, populatedMO, "Index Search by Name")
+		if err != nil {
+			return nil, err
+		}
+
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("Found mapping of monitored object with name %s to mo %s", name, models.AsJSONString(populatedMO))
+		}
+
+		mos = append(mos, populatedMO)
 	}
 
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Found mapping of monitored object with name %s to mo %s", name, models.AsJSONString(mo))
-	}
-
-	return mo, nil
+	return mos, nil
 }
 
 // CreateTenantMeta - CouchDB implementation of CreateTenantMeta

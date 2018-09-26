@@ -97,62 +97,9 @@ func (cmh *ColtMEFHandler) MakeRecommendation(w http.ResponseWriter, r *http.Req
 
 	logger.Log.Infof("Issuing Service Change request for: %s", models.AsJSONString(requestObj))
 
-	requestObjBytes, err := json.Marshal(requestObj)
+	responseObj, code, err := cmh.doMakeRecommendation(requestObj)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to prepare service change data: %s", err.Error())
-		reportError(w, startTime, "400", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Setup the request to Colt
-	req, err := http.NewRequest("POST", cmh.server, bytes.NewBuffer(requestObjBytes))
-	if err != nil {
-		msg := fmt.Sprintf("Unable to prepare service change request: %s", err.Error())
-		reportError(w, startTime, "400", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	req.Header.Set("x-colt-app-id", cmh.appID)
-	req.Header.Set("x-colt-app-sig", getAuthHeader(requestObjBytes, cmh.sharedSecret))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := cmh.httpClient.Do(req)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to issue service change: %s", err.Error())
-		reportError(w, startTime, "500", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	defer resp.Body.Close()
-
-	respBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to read service change response: %s", err.Error())
-		reportError(w, startTime, "500", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-
-		responseObj := &ColtError{}
-		err = json.Unmarshal(respBytes, responseObj)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to unmarshal service change response: %s", err.Error())
-			reportError(w, startTime, "500", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-			return
-		}
-
-		msg := fmt.Sprintf("Service change failed: %d - %s", responseObj.Code, responseObj.Message)
-		reportError(w, startTime, "500", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	responseObj := &ColtRecommendationResponse{}
-	err = json.Unmarshal(respBytes, responseObj)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to unmarshal service change response: %s", err.Error())
-		reportError(w, startTime, "500", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
+		reportError(w, startTime, string(code), makeRecommendationAPIStr, err.Error(), code)
 		return
 	}
 
@@ -176,7 +123,11 @@ type ColtRecommendationResponse struct {
 	RecommendationID string `json:"recommendation_id"`
 }
 
-func getAuthHeader(recommendation []byte, key string) string {
+type ColtRecommendationState struct {
+	State string `json:"state"`
+}
+
+func getAuthHeader(recommendation []byte, key string, path string) string {
 	hashedPayload := base64HMACSHA256(recommendation, key)
 
 	timeNow := time.Now().UTC()
@@ -184,7 +135,7 @@ func getAuthHeader(recommendation []byte, key string) string {
 	hour := timeNow.Hour()
 
 	timestamp := fmt.Sprintf("%04d%02d%02d%02d", dateY, dateM, DateD, hour)
-	requestData := strings.Join([]string{timestamp, recommendationRequestPath, hashedPayload}, "")
+	requestData := strings.Join([]string{timestamp, path, hashedPayload}, "")
 
 	return base64HMACSHA256([]byte(requestData), key)
 }
@@ -193,4 +144,97 @@ func base64HMACSHA256(payload []byte, key string) string {
 	hashObj := hmac.New(sha256.New, []byte(key))
 	hashObj.Write(payload)
 	return base64.StdEncoding.EncodeToString(hashObj.Sum(nil))
+}
+
+func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) (*ColtRecommendationResponse, int, error) {
+	requestObjBytes, err := json.Marshal(requestObj)
+	if err != nil {
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change data: %s", err.Error())
+	}
+
+	// Setup the request to Colt
+	req, err := http.NewRequest("POST", cmh.server, bytes.NewBuffer(requestObjBytes))
+	if err != nil {
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change request: %s", err.Error())
+	}
+
+	req.Header.Set("x-colt-app-id", cmh.appID)
+	req.Header.Set("x-colt-app-sig", getAuthHeader(requestObjBytes, cmh.sharedSecret, recommendationRequestPath))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := cmh.httpClient.Do(req)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change: %s", err.Error())
+	}
+
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response: %s", err.Error())
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+
+		responseObj := &ColtError{}
+		err = json.Unmarshal(respBytes, responseObj)
+		if err != nil {
+			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change response: %s", err.Error())
+		}
+
+		return nil, http.StatusInternalServerError, fmt.Errorf("Service change failed: %d - %s", responseObj.Code, responseObj.Message)
+	}
+
+	responseObj := &ColtRecommendationResponse{}
+	err = json.Unmarshal(respBytes, responseObj)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change response: %s", err.Error())
+	}
+
+	return responseObj, http.StatusOK, nil
+}
+
+func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) (*ColtRecommendationState, int, error) {
+	// Setup the request to Colt
+	req, err := http.NewRequest("GET", cmh.server, nil)
+	if err != nil {
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change status request: %s", err.Error())
+	}
+
+	req.Header.Set("x-colt-app-id", cmh.appID)
+	req.Header.Set("x-colt-app-sig", getAuthHeader([]byte{}, cmh.sharedSecret, recommendationRequestPath+"/"+recommendationID))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := cmh.httpClient.Do(req)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change status request: %s", err.Error())
+	}
+
+	defer resp.Body.Close()
+
+	respBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change status response: %s", err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+
+		responseObj := &ColtError{}
+		err = json.Unmarshal(respBytes, responseObj)
+		if err != nil {
+			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response: %s", err.Error())
+		}
+
+		return nil, http.StatusInternalServerError, fmt.Errorf("Service change status check failed: %d - %s", responseObj.Code, responseObj.Message)
+	}
+
+	responseObj := &ColtRecommendationState{}
+	err = json.Unmarshal(respBytes, responseObj)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response: %s", err.Error())
+	}
+
+	return responseObj, http.StatusOK, nil
 }

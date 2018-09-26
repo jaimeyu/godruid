@@ -1,49 +1,38 @@
 package messaging_test
 
 import (
-	"context"
-	"fmt"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/messaging"
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/spf13/viper"
 )
 
 func TestReader(t *testing.T) {
+	gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
+
 	kafkaConsumer := messaging.CreateKafkaReader("colt-mef")
+	kafkaProducer := messaging.CreateKafkaWriter("colt-mef")
 
 	go func() {
 		for {
 			kafkaConsumer.ReadMessage(func(stuff []byte) bool {
 				logger.Log.Debugf("JUST HERE IN THE ACTION: %s", string(stuff))
-				return true
+				return false
 			})
 		}
 	}()
 
-	// make a writer that produces to topic-A, using the least-bytes distribution
-	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  []string{"localhost:9092"},
-		Topic:    "colt-mef",
-		Balancer: &kafka.LeastBytes{},
-	})
-
 	for i := 0; i < 5; i++ {
 		index := strconv.FormatInt(int64(i), 10)
-		w.WriteMessages(context.Background(),
-			kafka.Message{
-				Key:   []byte("Key-A" + index),
-				Value: []byte(fmt.Sprintf("Hello World!: %s%s%s%s", index, index, index, index)),
-			},
-		)
+		kafkaProducer.WriteMessage("Key-A"+index, []byte(`{"service_id": "80033646","action": "INCREASE_BANDWIDTH","bandwidth_change": 200}`))
 	}
-
-	w.Close()
 
 	time.Sleep(time.Second * 5)
 
+	kafkaProducer.Destroy()
 	kafkaConsumer.Destroy()
 }

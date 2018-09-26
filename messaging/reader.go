@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/accedian/adh-gather/gather"
+
 	"github.com/accedian/adh-gather/logger"
 	kafka "github.com/segmentio/kafka-go"
 )
@@ -15,12 +17,13 @@ type KafkaConsumer struct {
 }
 
 func CreateKafkaReader(topicName string) *KafkaConsumer {
+	cfg := gather.GetConfig()
 	result := &KafkaConsumer{}
 
 	result.topicName = topicName
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
+		Brokers: []string{cfg.GetString(gather.CK_kafka_broker.String())},
 		Topic:   result.topicName,
 
 		Partition: 0,

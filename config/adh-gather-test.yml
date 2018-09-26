@@ -35,7 +35,7 @@ args:
     secret: "test123"
 
 kafka:
-  broker: kafka:9092
+  broker: "localhost:9092"
 
 druid:
   broker:

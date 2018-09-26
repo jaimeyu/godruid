@@ -36,7 +36,7 @@ args:
     secret: "test123"
 
 kafka:
-  broker: kafka:9092
+  broker: "localhost:9092"
 
 druid:
   auth: "https://accedian-dh2.npav.accedian.net/api/v1/auth/login/"

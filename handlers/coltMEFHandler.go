@@ -16,7 +16,6 @@ import (
 
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
-	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
 )
@@ -86,24 +85,13 @@ func (cmh *ColtMEFHandler) MakeRecommendation(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Turn the query Params into the request object:
-	requestObj := &ColtRecommendation{}
-	err = json.Unmarshal(requestBytes, requestObj)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to read service change data: %s", err.Error())
-		reportError(w, startTime, "400", makeRecommendationAPIStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	logger.Log.Infof("Issuing Service Change request for: %s", models.AsJSONString(requestObj))
-
-	responseObj, code, err := cmh.doMakeRecommendation(requestObj)
+	responseObj, code, err := cmh.doMakeRecommendation(requestBytes)
 	if err != nil {
 		reportError(w, startTime, string(code), makeRecommendationAPIStr, err.Error(), code)
 		return
 	}
 
-	logger.Log.Infof("Completed service change: %s", db.HistogramStr, models.AsJSONString(requestObj))
+	logger.Log.Infof("Completed service change: %s", db.HistogramStr, string(requestBytes))
 	trackAPIMetrics(startTime, "200", makeRecommendationAPIStr)
 	fmt.Fprintf(w, responseObj.RecommendationID)
 }
@@ -146,7 +134,16 @@ func base64HMACSHA256(payload []byte, key string) string {
 	return base64.StdEncoding.EncodeToString(hashObj.Sum(nil))
 }
 
-func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) (*ColtRecommendationResponse, int, error) {
+func (cmh *ColtMEFHandler) doMakeRecommendation(requestBytes []byte) (*ColtRecommendationResponse, int, error) {
+
+	// Deserialize the request
+	requestObj := &ColtRecommendation{}
+	err := json.Unmarshal(requestBytes, requestObj)
+	if err != nil {
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to read service change data: %s", err.Error())
+	}
+
+	// Re-serialize the bytes to ensure we do not have any "extra stuff" in the request
 	requestObjBytes, err := json.Marshal(requestObj)
 	if err != nil {
 		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change data: %s", err.Error())
@@ -158,11 +155,13 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change request: %s", err.Error())
 	}
 
+	// Fill in necessary request headers
 	req.Header.Set("x-colt-app-id", cmh.appID)
 	req.Header.Set("x-colt-app-sig", getAuthHeader(requestObjBytes, cmh.sharedSecret, recommendationRequestPath))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
+	// Issue request to COlt
 	resp, err := cmh.httpClient.Do(req)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change: %s", err.Error())
@@ -170,13 +169,14 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 
 	defer resp.Body.Close()
 
+	// Read the request
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response: %s", err.Error())
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-
+		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
 		if err != nil {
@@ -186,6 +186,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 		return nil, http.StatusInternalServerError, fmt.Errorf("Service change failed: %d - %s", responseObj.Code, responseObj.Message)
 	}
 
+	// Request was successful, format the response object
 	responseObj := &ColtRecommendationResponse{}
 	err = json.Unmarshal(respBytes, responseObj)
 	if err != nil {
@@ -237,4 +238,9 @@ func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) 
 	}
 
 	return responseObj, http.StatusOK, nil
+}
+
+func handleRecommendationRequest(recommendationRequest []byte) bool {
+	// Deserialize the object
+	return true
 }

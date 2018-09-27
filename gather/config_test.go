@@ -26,7 +26,8 @@ func TestLoadingConfig(t *testing.T) {
 	assert.Equal(t, cfg.GetBool(gather.CK_args_debug.String()), true)
 	assert.Equal(t, cfg.GetString(gather.CK_args_admindb_name.String()), "adh-admin")
 	assert.Equal(t, cfg.GetInt(gather.CK_server_monitoring_port.String()), 9191)
-	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), false)
+	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), true)
+	assert.Equal(t, cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String()), 10)
 }
 
 func TestLoadingDefaults(t *testing.T) {
@@ -47,6 +48,7 @@ func TestLoadingDefaults(t *testing.T) {
 	assert.Equal(t, cfg.GetInt(gather.CK_args_maxConcurrentProvAPICalls.String()), 1000)
 	assert.Equal(t, cfg.GetInt(gather.CK_server_datastore_batchsize.String()), 1000)
 	assert.Equal(t, cfg.GetBool(gather.CK_args_coltmef_enabled.String()), false)
+	assert.Equal(t, cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String()), 10)
 }
 
 func TestWithEnvironmentVariables(t *testing.T) {
@@ -71,4 +73,7 @@ func TestWithEnvironmentVariables(t *testing.T) {
 
 	os.Setenv("SERVER_CORS_ALLOWEDORIGINS", "http://stuff.com http://other.com")
 	assert.Equal(t, cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String()), []string{"http://stuff.com", "http://other.com"})
+
+	os.Setenv("ARGS_COLTMEF_STATUSRETRYCOUNT", "2000")
+	assert.Equal(t, cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String()), 2000)
 }

@@ -16,19 +16,14 @@ import (
 
 	"github.com/accedian/adh-gather/gather"
 
-	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
-	"github.com/accedian/adh-gather/server"
-	"github.com/gorilla/mux"
 )
 
 const (
 	recommendationRequestPath = "/recommendation"
-	makeRecommendationAPIStr  = "colt_make_rcm"
 )
 
 type ColtMEFHandler struct {
-	routes     []server.Route
 	httpClient *http.Client
 
 	requestReader *messaging.KafkaConsumer
@@ -37,9 +32,10 @@ type ColtMEFHandler struct {
 	pendingWriter *messaging.KafkaProducer
 	resultWriter  *messaging.KafkaProducer
 
-	server       string
-	appID        string
-	sharedSecret string
+	server           string
+	appID            string
+	sharedSecret     string
+	statusRetryCount int
 }
 
 func CreateColtMEFHandler() *ColtMEFHandler {
@@ -58,6 +54,7 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.server = cfg.GetString(gather.CK_args_coltmef_server.String())
 	result.appID = cfg.GetString(gather.CK_args_coltmef_appid.String())
 	result.sharedSecret = cfg.GetString(gather.CK_args_coltmef_secret.String())
+	result.statusRetryCount = cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String())
 
 	result.requestReader = messaging.CreateKafkaReader(requestTopic, "0")
 	result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
@@ -77,62 +74,7 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.pendingWriter = messaging.CreateKafkaWriter(pendingTopic)
 	result.resultWriter = messaging.CreateKafkaWriter(resultTopic)
 
-	result.routes = []server.Route{
-
-		server.Route{
-			Name:        "MakeRecommendation",
-			Method:      "POST",
-			Pattern:     "/colt-mef/recommendation",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.MakeRecommendation),
-		},
-	}
-
 	return result
-}
-
-// RegisterAPIHandlers - will bind any REST API routes defined in this service
-// to the passed in request multiplexor.
-func (cmh *ColtMEFHandler) RegisterAPIHandlers(router *mux.Router) {
-	for _, route := range cmh.routes {
-		logger.Log.Debugf("Registering endpoint: %v", route)
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(route.HandlerFunc)
-	}
-}
-
-// TODO: remove this handler when we officially move to just KAFKA
-// MakeRecommendation - REST Handler for Recommend a service change API.
-func (cmh *ColtMEFHandler) MakeRecommendation(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", makeRecommendationAPIStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	// Deserialize the request
-	requestObj := &ColtRecommendation{}
-	err = json.Unmarshal(requestBytes, requestObj)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to read service change data: %s", err.Error())
-		reportError(w, startTime, "400", makeRecommendationAPIStr, msg, http.StatusBadRequest)
-		return
-	}
-
-	responseObj, code, err := cmh.doMakeRecommendation(requestObj)
-	if err != nil {
-		reportError(w, startTime, string(code), makeRecommendationAPIStr, err.Error(), code)
-		return
-	}
-
-	logger.Log.Infof("Completed service change: %s", db.HistogramStr, string(requestBytes))
-	trackAPIMetrics(startTime, "200", makeRecommendationAPIStr)
-	fmt.Fprintf(w, responseObj.RecommendationID)
 }
 
 // doMakeRecommendation - Handles the logic to make a call to the Colt POST /api/performance/recommendation API for making a service change recommendation
@@ -172,7 +114,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 
 	logger.Log.Debugf("MAKE RECOMMENDATION RESPONSE: %s", string(respBytes))
 
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusOK {
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
@@ -197,7 +139,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 // status of a service change recommendation
 func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) (*ColtRecommendationState, int, error) {
 	// Setup the request to Colt
-	req, err := http.NewRequest("GET", cmh.server, nil)
+	req, err := http.NewRequest("GET", cmh.server+"/"+recommendationID, nil)
 	if err != nil {
 		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change status request: %s", err.Error())
 	}
@@ -218,6 +160,8 @@ func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) 
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change status response: %s", err.Error())
 	}
+
+	logger.Log.Debugf("CHECK RECOMMENDATION STATE RESPONSE: %s", string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 
@@ -285,7 +229,6 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 	}
 
 	// Poll the status API until we get a successful response
-	maxPollCount := 5
 	pollCount := 0
 	var pollResp *ColtRecommendationState
 	for {
@@ -301,11 +244,11 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 			return true
 		}
 
-		if pollResp.State == "PENDING" {
+		if pollResp.State == "PENDING" || pollResp.State == "INPROGRESS" {
 			continue
 		}
 
-		if pollCount >= maxPollCount {
+		if pollCount >= cmh.statusRetryCount {
 			// Too many attempts, just fail this request
 			msg := fmt.Sprintf("Unable to check status of Recommendation %s: Request timed out waiting for Recommendation completion", requestObj.RecommendationID)
 			logger.Log.Errorf(msg)
@@ -335,6 +278,8 @@ func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string,
 		return fmt.Errorf("Error marshalling result for recommendation %s: %s", reqID, msgErr.Error())
 	}
 
+	logger.Log.Debugf("Completed Change Service Request %s: Recommendation %s Status %s Message %s", result.RequestID, result.RecommendationID, result.Status, result.ErrorMessage)
+
 	return cmh.resultWriter.WriteMessage("Result:"+reqID, msgBytes)
 }
 
@@ -349,6 +294,8 @@ func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
 	if msgErr != nil {
 		return fmt.Errorf("Error marshalling pending object for recommendation %s: %s", reqID, msgErr.Error())
 	}
+
+	logger.Log.Debugf("Change Service Request %s moving to Pending state for Recommendation %s", result.RequestID, result.RecommendationID)
 
 	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
 }

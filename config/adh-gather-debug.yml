@@ -34,6 +34,7 @@ args:
     server: "https://demo.ondemand.colt.net/api/performance/recommendation"
     appID: "datahubtest"
     secret: "test123"
+    statusRetryCount: 10
 
 kafka:
   broker: "localhost:9092"

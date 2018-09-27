@@ -59,10 +59,11 @@ type Config struct {
 		maxConcurrentMetricAPICalls uint64
 		debug                       bool
 		coltmef                     struct {
-			enabled bool
-			server  string
-			appID   string
-			secret  string
+			enabled          bool
+			server           string
+			appID            string
+			secret           string
+			statusRetryCount int
 		}
 	}
 }
@@ -133,4 +134,5 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_coltmef_server.String(), "https://demo.ondemand.colt.net/api/performance/recommendation")
 	v.SetDefault(CK_args_coltmef_appid.String(), "datahubtest")
 	v.SetDefault(CK_args_coltmef_secret.String(), "test123")
+	v.SetDefault(CK_args_coltmef_statusretrycount.String(), 10)
 }

@@ -40,6 +40,7 @@ args:
     server: "https://demo.ondemand.colt.net/api/performance/recommendation"
     appID: "datahubtest"
     secret: "test123"
+    statusRetryCount: 10
 
 connector:
   maxSecondsWithoutHeartbeat: 120

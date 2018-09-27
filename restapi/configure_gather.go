@@ -129,8 +129,7 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 
 	// Setup Colt MEF DEMO stuff if applicaple
 	if cfg.GetBool(gather.CK_args_coltmef_enabled.String()) {
-		coltMEFHandler := handlers.CreateColtMEFHandler()
-		coltMEFHandler.RegisterAPIHandlers(nonSwaggerMUX)
+		handlers.CreateColtMEFHandler()
 	}
 
 	supportedOrigins = cfg.GetStringSlice(gather.CK_server_cors_allowedorigins.String())

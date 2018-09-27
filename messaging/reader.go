@@ -3,6 +3,7 @@ package messaging
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/accedian/adh-gather/gather"
 
@@ -16,17 +17,18 @@ type KafkaConsumer struct {
 	topicName string
 }
 
-func CreateKafkaReader(topicName string) *KafkaConsumer {
+func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
 	cfg := gather.GetConfig()
 	result := &KafkaConsumer{}
 
 	result.topicName = topicName
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{cfg.GetString(gather.CK_kafka_broker.String())},
-		Topic:   result.topicName,
-
-		Partition: 0,
+		Brokers:        []string{cfg.GetString(gather.CK_kafka_broker.String())},
+		Topic:          result.topicName,
+		GroupID:        result.topicName + "-" + groupTag,
+		Partition:      0,
+		CommitInterval: time.Second,
 	})
 
 	result.reader = r

@@ -59,8 +59,8 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.appID = cfg.GetString(gather.CK_args_coltmef_appid.String())
 	result.sharedSecret = cfg.GetString(gather.CK_args_coltmef_secret.String())
 
-	result.requestReader = messaging.CreateKafkaReader(requestTopic)
-	result.pendingReader = messaging.CreateKafkaReader(pendingTopic)
+	result.requestReader = messaging.CreateKafkaReader(requestTopic, "0")
+	result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
 
 	// Start the message readers
 	go func() {

@@ -14,24 +14,24 @@ import (
 func TestReader(t *testing.T) {
 	gather.LoadConfig("../config/adh-gather-test.yml", viper.New())
 
-	kafkaConsumer := messaging.CreateKafkaReader("colt-mef")
+	kafkaConsumer := messaging.CreateKafkaReader("colt-mef", "0")
 	kafkaProducer := messaging.CreateKafkaWriter("colt-mef")
 
 	go func() {
 		for {
 			kafkaConsumer.ReadMessage(func(stuff []byte) bool {
 				logger.Log.Debugf("JUST HERE IN THE ACTION: %s", string(stuff))
-				return false
+				return true
 			})
 		}
 	}()
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 2; i++ {
 		index := strconv.FormatInt(int64(i), 10)
 		kafkaProducer.WriteMessage("Key-A"+index, []byte(`{"service_id": "80033646","action": "INCREASE_BANDWIDTH","bandwidth_change": 200}`))
 	}
 
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 20)
 
 	kafkaProducer.Destroy()
 	kafkaConsumer.Destroy()

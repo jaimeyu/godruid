@@ -259,7 +259,7 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		break
 	}
 
-	logger.Log.Infof("Service Change Recommendation %s completed with result %s", requestObj.RecommendationID, pollResp.State)
+	logger.Log.Infof("Service Change Status Check completed for Recommendation %s with result %s", requestObj.RecommendationID, pollResp.State)
 	cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, pollResp.State, "")
 	return true
 }

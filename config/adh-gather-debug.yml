@@ -29,9 +29,15 @@ args:
   maxConcurrentPouchAPICalls:  1000
   maxConcurrentProvAPICalls:   1000
   maxConcurrentMetricAPICalls: 500
+  coltmef:
+    enabled: true
+    server: "https://demo.ondemand.colt.net/api/performance/recommendation"
+    appID: "datahubtest"
+    secret: "test123"
+    statusRetryCount: 10
 
 kafka:
-  broker: kafka:9092
+  broker: "localhost:9092"
 
 druid:
   auth: "https://accedian-dh2.npav.accedian.net/api/v1/auth/login/"

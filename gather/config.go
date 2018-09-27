@@ -58,6 +58,13 @@ type Config struct {
 		maxConcurrentProvAPICalls   uint64
 		maxConcurrentMetricAPICalls uint64
 		debug                       bool
+		coltmef                     struct {
+			enabled          bool
+			server           string
+			appID            string
+			secret           string
+			statusRetryCount int
+		}
 	}
 }
 
@@ -123,5 +130,9 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_druid_timeoutsms_aggregatedmetrics.String(), 45000)
 	v.SetDefault(CK_druid_timeoutsms_rawmetrics.String(), 45000)
 	v.SetDefault(CK_druid_timeoutsms_filteredrawmetrics.String(), 45000)
-
+	v.SetDefault(CK_args_coltmef_enabled.String(), false)
+	v.SetDefault(CK_args_coltmef_server.String(), "https://demo.ondemand.colt.net/api/performance/recommendation")
+	v.SetDefault(CK_args_coltmef_appid.String(), "datahubtest")
+	v.SetDefault(CK_args_coltmef_secret.String(), "test123")
+	v.SetDefault(CK_args_coltmef_statusretrycount.String(), 10)
 }

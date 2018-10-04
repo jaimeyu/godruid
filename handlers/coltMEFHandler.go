@@ -56,6 +56,8 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.sharedSecret = cfg.GetString(gather.CK_args_coltmef_secret.String())
 	result.statusRetryCount = cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String())
 
+	logger.Log.Infof("Starting event handler at %s with app ID %s", result.server, result.appID)
+
 	result.requestReader = messaging.CreateKafkaReader(requestTopic, "0")
 	result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
 

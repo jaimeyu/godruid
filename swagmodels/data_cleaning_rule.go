@@ -6,8 +6,6 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -29,7 +27,6 @@ type DataCleaningRule struct {
 
 	// The name of the vendor which provides the metric used in the rule.
 	// Required: true
-	// Enum: [accedian-twamp accedian-flowmeter]
 	MetricVendor *string `json:"metricVendor"`
 
 	// Object which determines when a rule will be triggered/applied
@@ -90,43 +87,9 @@ func (m *DataCleaningRule) validateMetricLabel(formats strfmt.Registry) error {
 	return nil
 }
 
-var dataCleaningRuleTypeMetricVendorPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["accedian-twamp","accedian-flowmeter"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		dataCleaningRuleTypeMetricVendorPropEnum = append(dataCleaningRuleTypeMetricVendorPropEnum, v)
-	}
-}
-
-const (
-
-	// DataCleaningRuleMetricVendorAccedianTwamp captures enum value "accedian-twamp"
-	DataCleaningRuleMetricVendorAccedianTwamp string = "accedian-twamp"
-
-	// DataCleaningRuleMetricVendorAccedianFlowmeter captures enum value "accedian-flowmeter"
-	DataCleaningRuleMetricVendorAccedianFlowmeter string = "accedian-flowmeter"
-)
-
-// prop value enum
-func (m *DataCleaningRule) validateMetricVendorEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, dataCleaningRuleTypeMetricVendorPropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (m *DataCleaningRule) validateMetricVendor(formats strfmt.Registry) error {
 
 	if err := validate.Required("metricVendor", "body", m.MetricVendor); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := m.validateMetricVendorEnum("metricVendor", "body", *m.MetricVendor); err != nil {
 		return err
 	}
 

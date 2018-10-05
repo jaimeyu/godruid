@@ -58,7 +58,6 @@
     properties:
       metricVendor:
         type: "string"
-        enum: [accedian-twamp,accedian-flowmeter]
         description: "The name of the vendor which provides the metric used in the rule."
       metricLabel:
         type: "string"

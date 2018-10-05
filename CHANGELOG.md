@@ -1,3 +1,5 @@
+* Fix - Removing restriction on data cleaning profile vendor
+* Feature - Adding logging to event handler startup
 ## Current Release 
 ### 0.224.0 
 **Release Date:** Thu Sep 27 17:41:43 UTC 2018     

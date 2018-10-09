@@ -38,7 +38,7 @@ func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
 
 func (c *KafkaConsumer) Destroy() {
 	if err := c.reader.Close(); err != nil {
-		logger.Log.Errorf("Unable to close Kafka Consumer: %s", err.Error())
+		logger.Log.Errorf("Unable to close Kafka Consumer for topic: %s", c.topicName, err.Error())
 	}
 }
 
@@ -48,23 +48,27 @@ func (c *KafkaConsumer) ReadMessage(action func([]byte) bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
+	logger.Log.Debugf("message for topic %s at offset %d: %s = %s\n", c.topicName, m.Offset, string(m.Key), string(m.Value))
 
 	if action != nil {
 		if action(m.Value) {
 
 			c.reader.CommitMessages(ctx, m)
 
-			logger.Log.Debugf("Successfully read message and completed action for: %s", string(m.Value))
+			if err != nil {
+				logger.Log.Errorf("Error occured while committing on topic %s message %s: %s", c.topicName, string(m.Value), err)
+			}
+
+			logger.Log.Debugf("Successfully read message and completed action on topic %s for: %s", c.topicName, string(m.Value))
 			return m.Value, nil
 		}
 
-		logger.Log.Debugf("Successfully read message but could not complete action for: %s", string(m.Value))
-		return nil, fmt.Errorf("Unable to complete action required by: %s", string(m.Value))
+		logger.Log.Debugf("Successfully read message on topic %s but could not complete action for: %s", c.topicName, string(m.Value))
+		return nil, fmt.Errorf("Unable to complete action on topic %s required by: %s", c.topicName, string(m.Value))
 	}
 
 	c.reader.CommitMessages(ctx, m)
 
-	logger.Log.Debugf("Successfully read message: %s", string(m.Value))
+	logger.Log.Debugf("Successfully read message on topic %s: %s", c.topicName, string(m.Value))
 	return m.Value, nil
 }

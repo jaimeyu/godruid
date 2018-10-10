@@ -212,9 +212,12 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	}
 
 	// Write a record to the Pending Topic to continue the process
-	logger.Log.Infof("Service Change Recommendation %s added to pending queue", responseObj.RecommendationID)
-	cmh.writePending(requestObj.RequestID, responseObj.RecommendationID)
-
+	err = cmh.writePending(requestObj.RequestID, responseObj.RecommendationID)
+	if err != nil {
+		logger.Log.Errorf("Unable to add service change recommendation %s to pending queue", responseObj.RecommendationID)
+	} else {
+		logger.Log.Infof("Service Change Recommendation %s added to pending queue", responseObj.RecommendationID)
+	}
 	// Recommendation was completed successfully
 	return true
 }

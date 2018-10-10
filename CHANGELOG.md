@@ -1,3 +1,4 @@
+* Feature - Adding additional logging to event handler 
 ## Current Release 
 ### 0.225.0 
 **Release Date:** Fri Oct  5 15:53:46 UTC 2018     

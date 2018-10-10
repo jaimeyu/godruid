@@ -1,9 +1,13 @@
 * Fix - Removing restriction on data cleaning profile vendor
 * Feature - Adding logging to event handler startup
 ## Current Release 
+### 0.225.0 
+**Release Date:** Fri Oct  5 15:53:46 UTC 2018     
+## Previous Releases 
+* Fix - Removing restriction on data cleaning profile vendor
+* Feature - Adding logging to event handler startup
 ### 0.224.0 
 **Release Date:** Thu Sep 27 17:41:43 UTC 2018     
-## Previous Releases 
 ### 0.223.0 
 **Release Date:** Wed Sep 26 15:30:57 UTC 2018     
 * Fix - handling multiple MOs with the same objectname for bulk meta update

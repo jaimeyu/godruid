@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.227.0 
+**Release Date:** Thu Oct 11 15:25:30 UTC 2018     
+## Previous Releases 
 ### 0.226.0 
 **Release Date:** Wed Oct 10 15:52:44 UTC 2018     
-## Previous Releases 
 * Feature - Adding additional logging to event handler 
 ### 0.225.0 
 **Release Date:** Fri Oct  5 15:53:46 UTC 2018     

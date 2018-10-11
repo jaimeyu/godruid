@@ -1901,6 +1901,70 @@
               ]
             }
           ]
+        },
+        "syncQuality": {
+          "ui": {
+            "group": "unknown",
+            "position": "13"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "syncState": {
+          "ui": {
+            "group": "unknown",
+            "position": "13"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
         }
       },
       "ui": {
@@ -3241,7 +3305,47 @@
                   ]
                 }
               ]
-            }    
+            },
+        "syncQuality": {
+          "ui": {
+            "group": "unknown",
+            "position": "12"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "eth-dm",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "syncState": {
+          "ui": {
+            "group": "unknown",
+            "position": "13"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "eth-dm",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        }    
     },
       "ui": {
         "metricGroups": [

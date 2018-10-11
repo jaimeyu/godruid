@@ -889,28 +889,24 @@ type MetadataFilter struct {
 }
 
 type CardMetric struct {
-	Enabled              bool               `json:"enabled"`
-	Key                  string             `json:"key"`
-	Label                string             `json:"label"`
-	Metric               string             `json:"metric"`
-	MetricKey            string             `json:"metricKey"`
+	Vendor               string             `json:"vendor"`
 	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
-	RawMetricID          string             `json:"rawMetricId"`
-	VendorLabel          string             `json:"vendorLabel"`
-	VendorKey            string             `json:"vendorKey"`
-	ObjectType           string             `json:"objectType"`
-	Type                 string             `json:"type"`
-	Options              *CardMetricOptions `json:"options"`
+	Metric               string             `json:"metric"`
+	Directions           []string           `json:"directions"`
 	Unit                 string             `json:"unit"`
-	Units                []string           `json:"units"`
+	Options              *CardMetricOptions `json:"options"`
 }
 
 type CardMetricOptions struct {
-	UseBins           bool      `json:"useBins"`
-	FormatUnit        string    `json:"formatUnit"`
-	UseExplicitSeries bool      `json:"useExplicitSeries"`
-	Series            []string  `json:"series"`
-	Bins              []float64 `json:"bins"`
+	CardType          string                   `json:"type"`
+	Directions        []string                 `json:"directions"`
+	Buckets           []map[string]interface{} `json:"buckets"`
+	Aggregation       string                   `json:"aggregration"`
+	UseBins           bool                     `json:"useBins"`
+	FormatUnit        string                   `json:"formatUnit"`
+	UseExplicitSeries bool                     `json:"useExplicitSeries"`
+	Series            []string                 `json:"series"`
+	Bins              []float64                `json:"bins"`
 }
 
 type MonitoredObjectBulkMetadataItem struct {

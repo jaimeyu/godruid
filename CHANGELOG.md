@@ -1,4 +1,4 @@
-* Feature - Adding additional logging to event handler 
+* Feature - Restructuring V2 card API
 ## Current Release 
 ### 0.226.0 
 **Release Date:** Wed Oct 10 15:52:44 UTC 2018     

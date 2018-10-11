@@ -35,11 +35,13 @@ func CreateKafkaWriter(topicName string) *KafkaProducer {
 
 func (p *KafkaProducer) Destroy() {
 	if err := p.writer.Close(); err != nil {
-		logger.Log.Errorf("Unable to close Kafka Producer: %s", err.Error())
+		logger.Log.Errorf("Unable to close Kafka Producer on topic %s: %s", p.topicName, err.Error())
 	}
 }
 
 func (p *KafkaProducer) WriteMessage(messageKey string, messageBytes []byte) error {
+
+	logger.Log.Debugf("Writing message to topic %s with key %s", p.topicName, messageKey)
 
 	if err := p.writer.WriteMessages(context.Background(),
 		kafka.Message{
@@ -47,8 +49,11 @@ func (p *KafkaProducer) WriteMessage(messageKey string, messageBytes []byte) err
 			Value: messageBytes,
 		},
 	); err != nil {
+		logger.Log.Errorf("Message could not be written to topic %s with key %s due to: %s", p.topicName, messageKey, err)
 		return err
 	}
+
+	logger.Log.Debugf("Message successfully written to topic %s with key %s", p.topicName, messageKey)
 
 	return nil
 }

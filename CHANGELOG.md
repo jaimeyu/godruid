@@ -1,8 +1,10 @@
-* Feature - Restructuring V2 card API
 ## Current Release 
+### 0.228.0 
+**Release Date:** Fri Oct 12 18:04:48 UTC 2018     
+## Previous Releases 
+* Feature - Restructuring V2 card API
 ### 0.227.0 
 **Release Date:** Thu Oct 11 15:25:30 UTC 2018     
-## Previous Releases 
 ### 0.226.0 
 **Release Date:** Wed Oct 10 15:52:44 UTC 2018     
 * Feature - Adding additional logging to event handler 

@@ -890,15 +890,18 @@ type MetadataFilter struct {
 
 type CardMetric struct {
 	Vendor               string             `json:"vendor"`
+	VendorKey            string             `json:"vendorKey"`
 	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
 	Metric               string             `json:"metric"`
 	Directions           []string           `json:"directions"`
 	Unit                 string             `json:"unit"`
+	Key                  string             `json:"key"`
+	Type                 string             `json:"type"`
 	Options              *CardMetricOptions `json:"options"`
 }
 
 type CardMetricOptions struct {
-	CardType          string                   `json:"type"`
+	Type              string                   `json:"type"`
 	Directions        []string                 `json:"directions"`
 	Buckets           []map[string]interface{} `json:"buckets"`
 	Aggregation       string                   `json:"aggregration"`

@@ -22,6 +22,9 @@ type CardMetric struct {
 	// directions
 	Directions []string `json:"directions,omitempty"`
 
+	// key
+	Key string `json:"key,omitempty"`
+
 	// metric
 	Metric string `json:"metric,omitempty"`
 
@@ -31,11 +34,17 @@ type CardMetric struct {
 	// options
 	Options *CardMetricOptions `json:"options,omitempty"`
 
+	// type
+	Type string `json:"type,omitempty"`
+
 	// unit
 	Unit string `json:"unit,omitempty"`
 
 	// vendor
 	Vendor string `json:"vendor,omitempty"`
+
+	// vendor key
+	VendorKey string `json:"vendorKey,omitempty"`
 }
 
 // Validate validates this card metric

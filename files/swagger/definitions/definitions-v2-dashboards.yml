@@ -353,6 +353,10 @@
     properties:
       vendor:
         type: "string"
+      vendorKey:
+        type: "string"
+      key:
+        type: "string"
       monitoredObjectTypes:
         type: "array"
         items:
@@ -365,6 +369,8 @@
         items:
           type: "string"
       unit:
+        type: "string"
+      type:
         type: "string"
       options:
         type: "object"

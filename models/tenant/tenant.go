@@ -889,28 +889,27 @@ type MetadataFilter struct {
 }
 
 type CardMetric struct {
-	Enabled              bool               `json:"enabled"`
-	Key                  string             `json:"key"`
-	Label                string             `json:"label"`
-	Metric               string             `json:"metric"`
-	MetricKey            string             `json:"metricKey"`
-	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
-	RawMetricID          string             `json:"rawMetricId"`
-	VendorLabel          string             `json:"vendorLabel"`
 	VendorKey            string             `json:"vendorKey"`
 	ObjectType           string             `json:"objectType"`
+	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
+	Metric               string             `json:"metric"`
+	Directions           []string           `json:"directions"`
+	Unit                 string             `json:"unit"`
+	Key                  string             `json:"key"`
 	Type                 string             `json:"type"`
 	Options              *CardMetricOptions `json:"options"`
-	Unit                 string             `json:"unit"`
-	Units                []string           `json:"units"`
 }
 
 type CardMetricOptions struct {
-	UseBins           bool      `json:"useBins"`
-	FormatUnit        string    `json:"formatUnit"`
-	UseExplicitSeries bool      `json:"useExplicitSeries"`
-	Series            []string  `json:"series"`
-	Bins              []float64 `json:"bins"`
+	Type              string                   `json:"type"`
+	Directions        []string                 `json:"directions"`
+	Buckets           []map[string]interface{} `json:"buckets"`
+	Aggregation       string                   `json:"aggregration"`
+	UseBins           bool                     `json:"useBins"`
+	FormatUnit        string                   `json:"formatUnit"`
+	UseExplicitSeries bool                     `json:"useExplicitSeries"`
+	Series            []string                 `json:"series"`
+	Bins              []float64                `json:"bins"`
 }
 
 type MonitoredObjectBulkMetadataItem struct {

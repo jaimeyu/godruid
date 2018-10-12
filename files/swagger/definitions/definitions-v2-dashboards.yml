@@ -351,9 +351,9 @@
   CardMetric:
     type: "object"
     properties:
-      vendor:
-        type: "string"
       vendorKey:
+        type: "string"
+      objectType:
         type: "string"
       key:
         type: "string"

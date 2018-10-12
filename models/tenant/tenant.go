@@ -889,8 +889,8 @@ type MetadataFilter struct {
 }
 
 type CardMetric struct {
-	Vendor               string             `json:"vendor"`
 	VendorKey            string             `json:"vendorKey"`
+	ObjectType           string             `json:"objectType"`
 	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
 	Metric               string             `json:"metric"`
 	Directions           []string           `json:"directions"`

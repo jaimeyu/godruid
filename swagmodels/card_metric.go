@@ -31,6 +31,9 @@ type CardMetric struct {
 	// monitored object types
 	MonitoredObjectTypes []string `json:"monitoredObjectTypes"`
 
+	// object type
+	ObjectType string `json:"objectType,omitempty"`
+
 	// options
 	Options *CardMetricOptions `json:"options,omitempty"`
 
@@ -39,9 +42,6 @@ type CardMetric struct {
 
 	// unit
 	Unit string `json:"unit,omitempty"`
-
-	// vendor
-	Vendor string `json:"vendor,omitempty"`
 
 	// vendor key
 	VendorKey string `json:"vendorKey,omitempty"`

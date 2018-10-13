@@ -1,8 +1,10 @@
-* Fix - Restructuring V2 card API
 ## Current Release 
+### 0.229.0 
+**Release Date:** Sat Oct 13 11:49:31 UTC 2018     
+## Previous Releases 
+* Fix - Restructuring V2 card API
 ### 0.228.0 
 **Release Date:** Fri Oct 12 18:04:48 UTC 2018     
-## Previous Releases 
 * Feature - Restructuring V2 card API
 ### 0.227.0 
 **Release Date:** Thu Oct 11 15:25:30 UTC 2018     

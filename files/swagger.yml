@@ -6899,17 +6899,37 @@ definitions:
   CardMetric:
     type: "object"
     properties:
-      vendorKey:
+      key: # DEPRECATE for V3
         type: "string"
-      objectType:
+      label: # DEPRECATE for V3
         type: "string"
-      key:
+      vendorLabel: # DEPRECATE for V3
         type: "string"
+      vendorKey: # DEPRECATE for V3
+        type: "string"
+      objectType: # DEPRECATE for V3
+        type: "string"
+      type: # DEPRECATE for V3
+        type: "string"
+      rawMetricId: # DEPRECATE for V3
+        type: "string"
+      metricKey: # DEPRECATE for V3
+        type: "string"
+      enabled: # DEPRECATE for V3
+        type: "boolean"
+      units: # DEPRECATE for V3
+        type: "array"
+        items:
+          type: "string"
       monitoredObjectTypes:
         type: "array"
         items:
           type: "string"
       metric:
+        type: "string"
+      vendor:
+        type: "string"
+      unit:
         type: "string"
       directions:
         type: "array"
@@ -6940,18 +6960,18 @@ definitions:
           aggregation:
             type: "string"
             enum: ["none","sum"]
-          useExplicitSeries:
+          useExplicitSeries: # DEPRECATE for V3
             type: "boolean"
-          useBins:
+          useBins: # DEPRECATE for V3
             type: "boolean"
-          formatUnit:
+          formatUnit: # DEPRECATE for V3
             type: "string"
-          bins: 
+          bins:  # DEPRECATE for V3
             type: "array"
             items:
               type: "number"
               format: "double"
-          series:
+          series: # DEPRECATE for V3
             type: "array"
             items:
               type: "string"

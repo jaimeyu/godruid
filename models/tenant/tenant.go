@@ -889,13 +889,16 @@ type MetadataFilter struct {
 }
 
 type CardMetric struct {
-	VendorKey            string             `json:"vendorKey"`
-	ObjectType           string             `json:"objectType"`
-	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
-	Metric               string             `json:"metric"`
-	Directions           []string           `json:"directions"`
-	Unit                 string             `json:"unit"`
 	Key                  string             `json:"key"`
+	Directions           []string           `json:"directions"`
+	Label                string             `json:"label"`
+	Metric               string             `json:"metric"`
+	MetricKey            string             `json:"metricKey"`
+	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
+	RawMetricID          string             `json:"rawMetricId"`
+	VendorLabel          string             `json:"vendorLabel"`
+	VendorKey            string             `json:"vendorKey"`
+	Unit                 string             `json:"unit"`
 	Type                 string             `json:"type"`
 	Options              *CardMetricOptions `json:"options"`
 }

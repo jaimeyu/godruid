@@ -22,11 +22,20 @@ type CardMetric struct {
 	// directions
 	Directions []string `json:"directions,omitempty"`
 
+	// enabled
+	Enabled bool `json:"enabled,omitempty"`
+
 	// key
 	Key string `json:"key,omitempty"`
 
+	// label
+	Label string `json:"label,omitempty"`
+
 	// metric
 	Metric string `json:"metric,omitempty"`
+
+	// metric key
+	MetricKey string `json:"metricKey,omitempty"`
 
 	// monitored object types
 	MonitoredObjectTypes []string `json:"monitoredObjectTypes"`
@@ -37,14 +46,26 @@ type CardMetric struct {
 	// options
 	Options *CardMetricOptions `json:"options,omitempty"`
 
+	// raw metric Id
+	RawMetricID string `json:"rawMetricId,omitempty"`
+
 	// type
 	Type string `json:"type,omitempty"`
 
 	// unit
 	Unit string `json:"unit,omitempty"`
 
+	// units
+	Units []string `json:"units"`
+
+	// vendor
+	Vendor string `json:"vendor,omitempty"`
+
 	// vendor key
 	VendorKey string `json:"vendorKey,omitempty"`
+
+	// vendor label
+	VendorLabel string `json:"vendorLabel,omitempty"`
 }
 
 // Validate validates this card metric

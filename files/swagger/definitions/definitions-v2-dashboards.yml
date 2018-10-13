@@ -388,6 +388,10 @@
         x-omitempty: true
         items:
           type: "string"
+      unit:
+        type: "string"
+      type:
+        type: "string"
       options:
         type: "object"
         properties:

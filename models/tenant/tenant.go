@@ -889,7 +889,6 @@ type MetadataFilter struct {
 }
 
 type CardMetric struct {
-	Enabled              bool               `json:"enabled"`
 	Key                  string             `json:"key"`
 	Directions           []string           `json:"directions"`
 	Label                string             `json:"label"`
@@ -899,12 +898,9 @@ type CardMetric struct {
 	RawMetricID          string             `json:"rawMetricId"`
 	VendorLabel          string             `json:"vendorLabel"`
 	VendorKey            string             `json:"vendorKey"`
-	Vendor               string             `json:"vendor"`
-	ObjectType           string             `json:"objectType"`
+	Unit                 string             `json:"unit"`
 	Type                 string             `json:"type"`
 	Options              *CardMetricOptions `json:"options"`
-	Unit                 string             `json:"unit"`
-	Units                []string           `json:"units"`
 }
 
 type CardMetricOptions struct {

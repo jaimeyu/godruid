@@ -30,6 +30,10 @@ func CreateKafkaWriter(topicName string) *KafkaProducer {
 
 	result.writer = w
 
+	w.Stats()
+
+	logger.Log.Debugf("Created kafka writer for topic %s", topicName)
+
 	return result
 }
 
@@ -40,6 +44,8 @@ func (p *KafkaProducer) Destroy() {
 }
 
 func (p *KafkaProducer) WriteMessage(messageKey string, messageBytes []byte) error {
+
+	defer logger.Log.Debugf("Dumping write stats for topic %s: %+v", p.topicName, p.writer.Stats())
 
 	logger.Log.Debugf("Writing message to topic %s with key %s", p.topicName, messageKey)
 
@@ -53,7 +59,7 @@ func (p *KafkaProducer) WriteMessage(messageKey string, messageBytes []byte) err
 		return err
 	}
 
-	logger.Log.Debugf("Message successfully written to topic %s with key %s", p.topicName, messageKey)
+	logger.Log.Debugf("Message successfully written message %s to topic %s with key %s", string(messageBytes), p.topicName, messageKey)
 
 	return nil
 }

@@ -1,0 +1,60 @@
+  # MetricBaseline:
+  #   type: "object"
+  #   required: ["type", "id", "attributes"]
+  #   properties:
+  #     type: 
+  #       type: "string"
+  #       enum: [metricBaselines]
+  #     id:
+  #       type: "string"
+  #     attributes:
+  #       type: "object"
+  #       required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp"]
+  #       properties:
+  #         tenantId:
+  #           type: "string"
+  #           description: "Unique identifier of the Tenant in Datahub"
+  #         _id:
+  #           type: "string"
+  #         _rev:
+  #           type: "string"
+  #           description: "Value used to ensure updates to this object are handled in order."
+  #         datatype:
+  #           type: "string"
+  #           description: "Name used to identify this type of record in Datahub"
+  #         monitoredObjectId:
+  #           type: "string"
+  #           description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+  #         baselines:
+  #           description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+  #           type: "array"
+  #           items:
+  #             $ref: '#/definitions/MetricBaselineData'
+  #         createdTimestamp:
+  #           type: "integer"
+  #           description: "Time since epoch at which this object was instantiated."
+  #         lastModifiedTimestamp:
+  #           type: "integer"
+  #           description: "Time since epoch at which this object was last altered."
+      
+  # MetricBaselineResponse:
+  #   type: "object"
+  #   description: "A Metric Baseline response from Datahub"
+  #   required: ["data"]
+  #   properties:
+  #     data:
+  #       $ref: '#/definitions/MetricBaseline'
+
+  # MetricBaselineListResponse:
+  #   type: "object"
+  #   description: "Metric Baseline response including one or more values"
+  #   required: ["data"]
+  #   properties:
+  #     links:
+  #       type: "object"
+  #       additionalProperties:
+  #         type: "string"
+  #     data:
+  #       type: "array"
+  #       items:
+  #         $ref: '#/definitions/MetricBaseline'

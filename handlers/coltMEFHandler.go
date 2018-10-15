@@ -80,18 +80,18 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 }
 
 // doMakeRecommendation - Handles the logic to make a call to the Colt POST /api/performance/recommendation API for making a service change recommendation
-func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) (*ColtRecommendationResponse, int, error) {
+func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *ColtRecommendation) (*ColtRecommendationResponse, int, error) {
 
 	// Re-serialize the bytes to ensure we do not have any "extra stuff" in the request
 	requestObjBytes, err := json.Marshal(requestObj)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change data: %s", err.Error())
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change data for service change request %s: %s", requestID, err.Error())
 	}
 
 	// Setup the request to Colt
 	req, err := http.NewRequest("POST", cmh.server, bytes.NewBuffer(requestObjBytes))
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change request: %s", err.Error())
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to build outgoing service change request for service change request %s: %s", requestID, err.Error())
 	}
 
 	// Fill in necessary request headers
@@ -103,7 +103,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 	// Issue request to COlt
 	resp, err := cmh.httpClient.Do(req)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change for service change request %s: %s", requestID, err.Error())
 	}
 
 	defer resp.Body.Close()
@@ -111,27 +111,27 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 	// Read the request
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response for service change request %s: %s", requestID, err.Error())
 	}
 
-	logger.Log.Debugf("MAKE RECOMMENDATION RESPONSE: %s", string(respBytes))
+	logger.Log.Debugf("MAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", requestID, string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
 		if err != nil {
-			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change response: %s", err.Error())
+			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal recommendation response for service change request %s: %s", requestID, err.Error())
 		}
 
-		return nil, http.StatusInternalServerError, fmt.Errorf("Service change failed: %d - %s", responseObj.Code, responseObj.Message)
+		return nil, http.StatusInternalServerError, fmt.Errorf("Service change failed for service change request %s: %d - %s", requestID, responseObj.Code, responseObj.Message)
 	}
 
 	// Request was successful, format the response object
 	responseObj := &ColtRecommendationResponse{}
 	err = json.Unmarshal(respBytes, responseObj)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change response: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal recommendation response for service change request %s: %s", requestID, err.Error())
 	}
 
 	return responseObj, http.StatusOK, nil
@@ -139,11 +139,11 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestObj *ColtRecommendation) 
 
 // doCheckRecommendationStatus - Handles the logic to make a call to the Colt GET /api/performance/recommendation/{recommendationID} API for checking the
 // status of a service change recommendation
-func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) (*ColtRecommendationState, int, error) {
+func (cmh *ColtMEFHandler) doCheckRecommendationStatus(requestID string, recommendationID string) (*ColtRecommendationState, int, error) {
 	// Setup the request to Colt
 	req, err := http.NewRequest("GET", cmh.server+"/"+recommendationID, nil)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change status request: %s", err.Error())
+		return nil, http.StatusBadRequest, fmt.Errorf("Unable to prepare service change status request for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 	}
 
 	req.Header.Set("x-colt-app-id", cmh.appID)
@@ -153,33 +153,33 @@ func (cmh *ColtMEFHandler) doCheckRecommendationStatus(recommendationID string) 
 
 	resp, err := cmh.httpClient.Do(req)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change status request: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change status request for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change status response: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change status response for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 	}
 
-	logger.Log.Debugf("CHECK RECOMMENDATION STATE RESPONSE: %s", string(respBytes))
+	logger.Log.Debugf("CHECK RECOMMENDATION STATE RESPONSE [SERVICE CHANGE REQ: %s, RECOMMENDATION REQ: %s]: %s", requestID, recommendationID, string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
 		if err != nil {
-			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response: %s", err.Error())
+			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 		}
 
-		return nil, http.StatusInternalServerError, fmt.Errorf("Service change status check failed: %d - %s", responseObj.Code, responseObj.Message)
+		return nil, http.StatusInternalServerError, fmt.Errorf("Service change status check failed for service change request %s and recommendation %s: %d - %s", requestID, recommendationID, responseObj.Code, responseObj.Message)
 	}
 
 	responseObj := &ColtRecommendationState{}
 	err = json.Unmarshal(respBytes, responseObj)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response: %s", err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal service change status response for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 	}
 
 	return responseObj, http.StatusOK, nil
@@ -195,8 +195,10 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 		return true
 	}
 
+	logger.Log.Infof("Received service change request %s: %+v", requestObj.RequestID, *requestObj)
+
 	// Issue the Recommendation API to Colt
-	responseObj, code, err := cmh.doMakeRecommendation(requestObj.ServiceChange)
+	responseObj, code, err := cmh.doMakeRecommendation(requestObj.RequestID, requestObj.ServiceChange)
 	if err != nil {
 		msg := err.Error()
 		logger.Log.Error(msg)
@@ -205,7 +207,7 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	}
 
 	if code != http.StatusOK {
-		msg := fmt.Sprintf("Unable to complete Service Change Request. Response code was %d", code)
+		msg := fmt.Sprintf("Unable to complete service change request %s. Response code was %d", requestObj.RequestID, code)
 		logger.Log.Error(msg)
 		cmh.writeResult(requestObj.RequestID, responseObj.RecommendationID, "FAILED", msg)
 		return true
@@ -214,9 +216,9 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	// Write a record to the Pending Topic to continue the process
 	err = cmh.writePending(requestObj.RequestID, responseObj.RecommendationID)
 	if err != nil {
-		logger.Log.Errorf("Unable to add service change recommendation %s to pending queue", responseObj.RecommendationID)
+		logger.Log.Errorf("Unable to add service change recommendation %s for service change request %s to pending queue", responseObj.RecommendationID, requestObj.RequestID)
 	} else {
-		logger.Log.Infof("Service Change Recommendation %s added to pending queue", responseObj.RecommendationID)
+		logger.Log.Infof("Service change recommendation %s for service change request %s added to pending queue", responseObj.RecommendationID, requestObj.RequestID)
 	}
 	// Recommendation was completed successfully
 	return true
@@ -233,6 +235,8 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		return true
 	}
 
+	logger.Log.Debugf("Pulled status request for recommendation %s for service change request %s", requestObj.RecommendationID, requestObj.RequestID)
+
 	// Poll the status API until we get a successful response
 	pollCount := 0
 	var pollResp *ColtRecommendationState
@@ -241,9 +245,9 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 
 		var code int
 		var err error
-		pollResp, code, err = cmh.doCheckRecommendationStatus(requestObj.RecommendationID)
+		pollResp, code, err = cmh.doCheckRecommendationStatus(requestObj.RequestID, requestObj.RecommendationID)
 		if err != nil || code != http.StatusOK {
-			msg := fmt.Sprintf("Unable to check status of Recommendation %s: %d - %s", requestObj.RecommendationID, code, err.Error())
+			msg := fmt.Sprintf("Unable to check status of recommendation %s for service change request %s: %d - %s", requestObj.RecommendationID, requestObj.RequestID, code, err.Error())
 			logger.Log.Errorf(msg)
 			cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, "FAILED", msg)
 			return true
@@ -255,7 +259,7 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 
 		if pollCount >= cmh.statusRetryCount {
 			// Too many attempts, just fail this request
-			msg := fmt.Sprintf("Unable to check status of Recommendation %s: Request timed out waiting for Recommendation completion", requestObj.RecommendationID)
+			msg := fmt.Sprintf("Unable to check status of recommendation %s for service change request %s: Request timed out waiting for Recommendation completion", requestObj.RecommendationID, requestObj.RequestID)
 			logger.Log.Errorf(msg)
 			cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, "FAILED", msg)
 			return true
@@ -264,13 +268,14 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		break
 	}
 
-	logger.Log.Infof("Service Change Status Check completed for Recommendation %s with result %s", requestObj.RecommendationID, pollResp.State)
+	logger.Log.Infof("Service change status check completed for recommendation %s for service change request %s with result %s", requestObj.RecommendationID, requestObj.RequestID, pollResp.State)
 	cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, pollResp.State, "")
 	return true
 }
 
 // writeResult - helper to write a result to the service change result topic
 func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string, err string) error {
+
 	result := ServiceChangeResult{
 		RequestID:        reqID,
 		RecommendationID: recID,
@@ -280,7 +285,7 @@ func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string,
 
 	msgBytes, msgErr := json.Marshal(result)
 	if msgErr != nil {
-		return fmt.Errorf("Error marshalling result for recommendation %s: %s", reqID, msgErr.Error())
+		return fmt.Errorf("Error marshalling result for service change request %s and recommendation %s: %s", reqID, recID, msgErr.Error())
 	}
 
 	logger.Log.Debugf("Completed Change Service Request %s: Recommendation %s Status %s Message %s", result.RequestID, result.RecommendationID, result.Status, result.ErrorMessage)
@@ -297,10 +302,10 @@ func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
 
 	msgBytes, msgErr := json.Marshal(result)
 	if msgErr != nil {
-		return fmt.Errorf("Error marshalling pending object for recommendation %s: %s", reqID, msgErr.Error())
+		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
 	}
 
-	logger.Log.Debugf("Change Service Request %s moving to Pending state for Recommendation %s", result.RequestID, result.RecommendationID)
+	logger.Log.Debugf("Service change request %s moving to Pending state for recommendation ID %s", result.RequestID, result.RecommendationID)
 
 	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
 }

@@ -31,6 +31,8 @@ func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
 		CommitInterval: time.Second,
 	})
 
+	logger.Log.Debugf("Created kafka reader for topic %s", topicName)
+
 	result.reader = r
 
 	return result
@@ -53,7 +55,7 @@ func (c *KafkaConsumer) ReadMessage(action func([]byte) bool) ([]byte, error) {
 	if action != nil {
 		if action(m.Value) {
 
-			c.reader.CommitMessages(ctx, m)
+			err = c.reader.CommitMessages(ctx, m)
 
 			if err != nil {
 				logger.Log.Errorf("Error occured while committing on topic %s message %s: %s", c.topicName, string(m.Value), err)
@@ -67,7 +69,11 @@ func (c *KafkaConsumer) ReadMessage(action func([]byte) bool) ([]byte, error) {
 		return nil, fmt.Errorf("Unable to complete action on topic %s required by: %s", c.topicName, string(m.Value))
 	}
 
-	c.reader.CommitMessages(ctx, m)
+	err = c.reader.CommitMessages(ctx, m)
+
+	if err != nil {
+		logger.Log.Errorf("Error occured while committing on topic %s message %s: %s", c.topicName, string(m.Value), err)
+	}
 
 	logger.Log.Debugf("Successfully read message on topic %s: %s", c.topicName, string(m.Value))
 	return m.Value, nil

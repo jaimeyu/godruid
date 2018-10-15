@@ -1,8 +1,10 @@
-* Fix - Adding even more debug logs to event handling
 ## Current Release 
+### 0.231.0 
+**Release Date:** Mon Oct 15 14:16:58 UTC 2018     
+## Previous Releases 
+* Fix - Adding even more debug logs to event handling
 ### 0.230.0 
 **Release Date:** Sat Oct 13 15:42:24 UTC 2018     
-## Previous Releases 
 * Fix - Restructuring V2 card API
 ### 0.229.0 
 **Release Date:** Sat Oct 13 11:49:31 UTC 2018     

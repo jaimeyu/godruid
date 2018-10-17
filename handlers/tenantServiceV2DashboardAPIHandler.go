@@ -250,11 +250,10 @@ func doUpdateDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *tenmod.Dashboard
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &tenmod.Dashboard{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantDashboardStr, params.DashboardID, err.Error())
 	}
-	patched = fetched
 	patched.TenantID = tenantID
 
 	// Before updating, make sure to handle any relationship data:

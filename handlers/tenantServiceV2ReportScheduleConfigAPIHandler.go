@@ -260,11 +260,10 @@ func doUpdateReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *metmod.ReportScheduleConfig
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &metmod.ReportScheduleConfig{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantReportScheduleConfigStr, params.ConfigID, err.Error())
 	}
-	patched = fetched
 	patched.TenantID = tenantID
 
 	// Before updating, make sure to handle any relationship data:

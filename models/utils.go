@@ -105,7 +105,7 @@ func MergeMaps(dst map[string]interface{}, src map[string]interface{}) {
  * If we only deal with maps, we may not know about how to transform the maps
  * back into the struct.
  */
-func MergeObjWithMap(orig interface{}, reqJson []byte) error {
+func MergeObjWithMap(container interface{}, orig interface{}, reqJson []byte) error {
 	const KEY_DATA = "data"
 	const KEY_ATTR = "attributes"
 	requestMap := make(map[string]interface{})
@@ -145,7 +145,7 @@ func MergeObjWithMap(orig interface{}, reqJson []byte) error {
 
 	// Unmarshal the data into an known struct.
 	//fmt.Println("unshalling json to obj ", string(jstr), orig, reflect.TypeOf(orig))
-	errUnMarsh := json.Unmarshal(jstr, orig)
+	errUnMarsh := json.Unmarshal(jstr, container)
 	if errUnMarsh != nil {
 		return errUnMarsh
 	}

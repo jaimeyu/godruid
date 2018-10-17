@@ -6,9 +6,10 @@ import (
 
 	"encoding/json"
 	"fmt"
+	"reflect"
+
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/stretchr/testify/assert"
-	"reflect"
 )
 
 func TestPrettyPrint(t *testing.T) {
@@ -133,14 +134,15 @@ func TestMergeMapIntoObject(t *testing.T) {
 	}
 
 	// Test empty values
+	merged := &testStruct{}
 	var errEmpty error
-	errEmpty = MergeObjWithMap(&newSt, []byte("hello"))
+	errEmpty = MergeObjWithMap(merged, &newSt, []byte("hello"))
 	if errEmpty == nil {
 		t.Fail()
 	}
 
 	//	fmt.Printf("Doing merge on struct\n\n")
-	err := MergeObjWithMap(&newSt, js)
+	err := MergeObjWithMap(merged, &newSt, js)
 	if err != nil {
 		fmt.Println("Failed merging with error: ", err)
 		t.Fail()
@@ -148,7 +150,7 @@ func TestMergeMapIntoObject(t *testing.T) {
 
 	//	fmt.Printf("Expectedst:%+v\n", expectedSt)
 	//	fmt.Printf("newSt     :%+v\n", newSt)
-	if !reflect.DeepEqual(newSt, expectedSt) {
+	if !reflect.DeepEqual(*merged, expectedSt) {
 		t.Fail()
 	}
 }
@@ -156,8 +158,10 @@ func TestMergeMapIntoObject(t *testing.T) {
 //TestMergeMapBadJSON -- Tests MergeObjWithMap with bad json data
 func TestMergeMapBadJSON(t *testing.T) {
 	newSt := &testStruct{}
+	merged := &testStruct{}
+
 	var errEmpty error
-	errEmpty = MergeObjWithMap(&newSt, []byte("hello"))
+	errEmpty = MergeObjWithMap(merged, &newSt, []byte("hello"))
 	if errEmpty == nil {
 		t.Fail()
 	}
@@ -165,8 +169,10 @@ func TestMergeMapBadJSON(t *testing.T) {
 
 //TestMergeMapBadObj -- Tests MergeObjWithMap with bad object data
 func TestMergeMapBadObj(t *testing.T) {
+	merged := &testStruct{}
+
 	var errEmpty error
-	errEmpty = MergeObjWithMap(nil, []byte("hello"))
+	errEmpty = MergeObjWithMap(merged, nil, []byte("hello"))
 	if errEmpty == nil {
 		t.Fail()
 	}

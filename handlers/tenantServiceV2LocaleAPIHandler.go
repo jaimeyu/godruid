@@ -250,11 +250,10 @@ func doUpdateLocaleV2(allowedRoles []string, tenantDB datastore.TenantServiceDat
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *tenmod.Locale
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &tenmod.Locale{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantLocaleStr, params.LocaleID, err.Error())
 	}
-	patched = fetched
 	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant

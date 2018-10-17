@@ -171,7 +171,8 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 			meta = make(map[string]string)
 		}
 
-		errMerge := models.MergeObjWithMap(oldMonitoredObject, requestBytes)
+		patched := &tenmod.MonitoredObject{}
+		errMerge := models.MergeObjWithMap(patched, oldMonitoredObject, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
@@ -179,26 +180,26 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		oldMonitoredObject.Meta = meta
 
 		// This only checks if the ID&REV is set.
-		err = oldMonitoredObject.Validate(true)
+		err = patched.Validate(true)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateMonitoredObject(oldMonitoredObject)
+		result, err := tenantDB.UpdateMonitoredObject(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Done, now generate the couchdb views
-		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject.Meta)
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, patched.Meta)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(meta))
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, msg), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
-			NotifyMonitoredObjectUpdated(oldMonitoredObject.TenantID, oldMonitoredObject)
+			NotifyMonitoredObjectUpdated(oldMonitoredObject.TenantID, patched)
 		}
 
 		converted := swagmodels.JSONAPITenantMonitoredObject{}

@@ -153,25 +153,26 @@ func HandlePatchTenantDomain(allowedRoles []string, tenantDB datastore.TenantSer
 			return tenant_provisioning_service.NewPatchTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to retrieve %s: %s", tenmod.TenantDomainStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		errMerge := models.MergeObjWithMap(oldDomain, requestBytes)
+		patched := &tenmod.Domain{}
+		errMerge := models.MergeObjWithMap(patched, oldDomain, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantDomainBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// This only checks if the ID&REV is set.
-		err = oldDomain.Validate(true)
+		err = patched.Validate(true)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantDomainBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateTenantDomain(oldDomain)
+		result, err := tenantDB.UpdateTenantDomain(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantDomainInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchTenantDomainStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
-			NotifyDomainUpdated(oldDomain.TenantID, oldDomain)
+			NotifyDomainUpdated(oldDomain.TenantID, patched)
 		}
 
 		converted := swagmodels.JSONAPITenantDomain{}

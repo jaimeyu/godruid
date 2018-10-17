@@ -156,11 +156,10 @@ func HandlePatchTenant(allowedRoles []string, adminDB datastore.AdminServiceData
 		}
 
 		// Merge the attributes passed in with the patch request to the tenant fetched from the datastore
-		var patchedTenant *admmod.Tenant
-		if err := models.MergeObjWithMap(fetchedTenant, patchRequestBytes); err != nil {
+		patchedTenant := &admmod.Tenant{}
+		if err := models.MergeObjWithMap(patchedTenant, fetchedTenant, patchRequestBytes); err != nil {
 			return admin_provisioning_service.NewPatchTenantInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to patch tenant with id %s: %s", params.TenantID, err.Error()), startTime, http.StatusInternalServerError, mon.PatchTenantStr, mon.APICompleted, mon.AdminAPICompleted))
 		}
-		patchedTenant = fetchedTenant
 
 		// Ensure that the tenant is properly constructed following the merge prior to updating the record in the datastore
 		err = patchedTenant.Validate(true)

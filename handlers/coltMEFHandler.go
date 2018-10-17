@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/accedian/adh-gather/messaging"
+	"github.com/accedian/adh-gather/models"
 
 	"github.com/accedian/adh-gather/gather"
 
@@ -20,7 +21,8 @@ import (
 )
 
 const (
-	recommendationRequestPath = "/recommendation"
+	recommendationRequestPath = "/api/performance/recommendation"
+	errorPrefix               = "Some error start here"
 )
 
 type ColtMEFHandler struct {
@@ -195,7 +197,7 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 		return true
 	}
 
-	logger.Log.Infof("Received service change request %s: %+v", requestObj.RequestID, *requestObj)
+	logger.Log.Infof("Received service change request %s: %s", requestObj.RequestID, models.AsJSONString(requestObj))
 
 	// Issue the Recommendation API to Colt
 	responseObj, code, err := cmh.doMakeRecommendation(requestObj.RequestID, requestObj.ServiceChange)
@@ -207,21 +209,46 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	}
 
 	if code != http.StatusOK {
+
+		// Handle a duplicate service change request for the same service:
+		if code == http.StatusConflict {
+			recommendationID := getRecommendationIDFromConflictMessage(err.Error())
+
+			// Existing request for the serice, poll for the result
+			logger.Log.Warningf("Service Change recommendation %s is already in progress for service %s. Initiating status check", recommendationID, requestObj.ServiceChange.ServiceID)
+			return cmh.pollRecommendationStatus(requestObj.RequestID, recommendationID)
+		}
+
+		// Handle any other error a permaent failure
 		msg := fmt.Sprintf("Unable to complete service change request %s. Response code was %d", requestObj.RequestID, code)
 		logger.Log.Error(msg)
 		cmh.writeResult(requestObj.RequestID, responseObj.RecommendationID, "FAILED", msg)
 		return true
 	}
 
-	// Write a record to the Pending Topic to continue the process
-	err = cmh.writePending(requestObj.RequestID, responseObj.RecommendationID)
+	// The result will depend on the status of the polling result for the service change request
+	return cmh.pollRecommendationStatus(requestObj.RequestID, responseObj.RecommendationID)
+}
+
+func getRecommendationIDFromConflictMessage(errorMessage string) string {
+
+	errorSubstring := errorMessage[:len(errorPrefix)-1]
+	errorSubstringParts := strings.Split(errorSubstring, " ")
+
+	return errorSubstringParts[0]
+}
+
+func (cmh *ColtMEFHandler) pollRecommendationStatus(requestID string, recommendationID string) bool {
+	pendingBytes, err := createPendingPayload(requestID, recommendationID)
 	if err != nil {
-		logger.Log.Errorf("Unable to add service change recommendation %s for service change request %s to pending queue", responseObj.RecommendationID, requestObj.RequestID)
-	} else {
-		logger.Log.Infof("Service change recommendation %s for service change request %s added to pending queue", responseObj.RecommendationID, requestObj.RequestID)
+		msg := fmt.Sprintf("Unable to add service change recommendation %s for service change request %s to pending queue: %s", recommendationID, requestID, err.Error())
+		logger.Log.Error(msg)
+		cmh.writeResult(requestID, recommendationID, "FAILED", msg)
+		return true
 	}
-	// Recommendation was completed successfully
-	return true
+
+	// Poll status of update until complete:
+	return cmh.handleRecommendationStatusCheck(pendingBytes)
 }
 
 // handleRecommendationStatusCheck - method to be used to handle messages pulled off of the service change pending topic
@@ -295,19 +322,23 @@ func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string,
 
 // writePending - helper to write a result to the service change pending topic
 func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
+	msgBytes, msgErr := createPendingPayload(reqID, recID)
+	if msgErr != nil {
+		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
+	}
+
+	logger.Log.Debugf("Service change request %s moving to Pending state for recommendation ID %s", reqID, recID)
+
+	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
+}
+
+func createPendingPayload(reqID string, recID string) ([]byte, error) {
 	result := ServiceChangeCheckStatusRequest{
 		RequestID:        reqID,
 		RecommendationID: recID,
 	}
 
-	msgBytes, msgErr := json.Marshal(result)
-	if msgErr != nil {
-		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
-	}
-
-	logger.Log.Debugf("Service change request %s moving to Pending state for recommendation ID %s", result.RequestID, result.RecommendationID)
-
-	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
+	return json.Marshal(result)
 }
 
 // getAuthHeader - helper to build the necessary auth token for REST calls to Colt APIs

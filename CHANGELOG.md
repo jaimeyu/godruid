@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.232.0 
+**Release Date:** Wed Oct 17 16:08:00 UTC 2018     
+## Previous Releases 
 ### 0.231.0 
 **Release Date:** Mon Oct 15 14:16:58 UTC 2018     
-## Previous Releases 
 * Fix - Adding even more debug logs to event handling
 ### 0.230.0 
 **Release Date:** Sat Oct 13 15:42:24 UTC 2018     

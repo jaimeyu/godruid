@@ -25,6 +25,7 @@ import (
 
 const (
 	testDataAPIPrefix = "/test-data"
+	certsAPIPrefix    = "/certs"
 )
 
 var (
@@ -173,7 +174,8 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
+		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 ||
+			strings.Index(r.URL.Path, certsAPIPrefix) == 0 {
 			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {

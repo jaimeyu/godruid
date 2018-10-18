@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	logPrefix                 = "COLT-MEF: "
 	recommendationRequestPath = "/recommendation"
 	errorPrefix               = "Some error start here"
 )
@@ -38,6 +39,8 @@ type ColtMEFHandler struct {
 	appID            string
 	sharedSecret     string
 	statusRetryCount int
+
+	lastServiceChangeMap map[string]*ServiceChangeIdentifier
 }
 
 func CreateColtMEFHandler() *ColtMEFHandler {
@@ -58,7 +61,7 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.sharedSecret = cfg.GetString(gather.CK_args_coltmef_secret.String())
 	result.statusRetryCount = cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String())
 
-	logger.Log.Infof("Starting event handler at %s with app ID %s", result.server, result.appID)
+	logger.Log.Infof("%sStarting event handler at %s with app ID %s", logPrefix, result.server, result.appID)
 
 	result.requestReader = messaging.CreateKafkaReader(requestTopic, "0")
 	result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
@@ -116,7 +119,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response for service change request %s: %s", requestID, err.Error())
 	}
 
-	logger.Log.Debugf("MAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", requestID, string(respBytes))
+	logger.Log.Debugf("%sMAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", logPrefix, requestID, string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 		// Request was not successful, format the error response
@@ -165,7 +168,7 @@ func (cmh *ColtMEFHandler) doCheckRecommendationStatus(requestID string, recomme
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change status response for service change request %s and recommendation %s: %s", requestID, recommendationID, err.Error())
 	}
 
-	logger.Log.Debugf("CHECK RECOMMENDATION STATE RESPONSE [SERVICE CHANGE REQ: %s, RECOMMENDATION REQ: %s]: %s", requestID, recommendationID, string(respBytes))
+	logger.Log.Debugf("%sCHECK RECOMMENDATION STATE RESPONSE [SERVICE CHANGE REQ: %s, RECOMMENDATION REQ: %s]: %s", logPrefix, requestID, recommendationID, string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
 
@@ -193,17 +196,17 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	requestObj := &ServiceChangeRequest{}
 	err := json.Unmarshal(requestBytes, requestObj)
 	if err != nil {
-		logger.Log.Errorf("Unable to read service change data: %s", err.Error())
+		logger.Log.Errorf("%sUnable to read service change data: %s", logPrefix, err.Error())
 		return true
 	}
 
-	logger.Log.Infof("Received service change request %s: %s", requestObj.RequestID, models.AsJSONString(requestObj))
+	logger.Log.Infof("%sReceived service change request %s: %s", logPrefix, requestObj.RequestID, models.AsJSONString(requestObj))
 
 	// Issue the Recommendation API to Colt
 	responseObj, code, err := cmh.doMakeRecommendation(requestObj.RequestID, requestObj.ServiceChange)
 	if err != nil {
 		msg := err.Error()
-		logger.Log.Error(msg)
+		logger.Log.Errorf("%s%s", logPrefix, msg)
 		cmh.writeResult(requestObj.RequestID, "", "FAILED", msg)
 		return true
 	}
@@ -211,20 +214,22 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	if code != http.StatusOK {
 
 		// Handle a duplicate service change request for the same service:
-		if code == http.StatusConflict {
-			recommendationID := getRecommendationIDFromConflictMessage(err.Error())
+		// if code == http.StatusConflict {
+		// 	recommendationID := getRecommendationIDFromConflictMessage(err.Error())
 
-			// Existing request for the serice, poll for the result
-			logger.Log.Warningf("Service Change recommendation %s is already in progress for service %s. Initiating status check", recommendationID, requestObj.ServiceChange.ServiceID)
-			return cmh.pollRecommendationStatus(requestObj.RequestID, recommendationID)
-		}
+		// 	// Existing request for the serice, poll for the result
+		// 	logger.Log.Warningf("%sService Change recommendation %s is already in progress for service %s. Initiating status check", logPrefix, recommendationID, requestObj.ServiceChange.ServiceID)
+		// 	return cmh.pollRecommendationStatus(requestObj.RequestID, recommendationID)
+		// }
 
 		// Handle any other error a permaent failure
 		msg := fmt.Sprintf("Unable to complete service change request %s. Response code was %d", requestObj.RequestID, code)
-		logger.Log.Error(msg)
+		logger.Log.Errorf("%s%s", logPrefix, msg)
 		cmh.writeResult(requestObj.RequestID, responseObj.RecommendationID, "FAILED", msg)
 		return true
 	}
+
+	logger.Log.Infof("%sRecommendation %s: successfully submitted", logPrefix, responseObj.RecommendationID)
 
 	// The result will depend on the status of the polling result for the service change request
 	return cmh.pollRecommendationStatus(requestObj.RequestID, responseObj.RecommendationID)
@@ -242,7 +247,7 @@ func (cmh *ColtMEFHandler) pollRecommendationStatus(requestID string, recommenda
 	pendingBytes, err := createPendingPayload(requestID, recommendationID)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to add service change recommendation %s for service change request %s to pending queue: %s", recommendationID, requestID, err.Error())
-		logger.Log.Error(msg)
+		logger.Log.Errorf("%s%s", logPrefix, msg)
 		cmh.writeResult(requestID, recommendationID, "FAILED", msg)
 		return true
 	}
@@ -258,11 +263,11 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 	requestObj := &ServiceChangeCheckStatusRequest{}
 	err := json.Unmarshal(recommendationStatusRequest, requestObj)
 	if err != nil {
-		logger.Log.Errorf("Unable to read service change status data: %s", err.Error())
+		logger.Log.Errorf("%sUnable to read service change status data: %s", logPrefix, err.Error())
 		return true
 	}
 
-	logger.Log.Debugf("Pulled status request for recommendation %s for service change request %s", requestObj.RecommendationID, requestObj.RequestID)
+	logger.Log.Debugf("%sPulled status request for recommendation %s for service change request %s", logPrefix, requestObj.RecommendationID, requestObj.RequestID)
 
 	// Poll the status API until we get a successful response
 	pollCount := 0
@@ -275,7 +280,7 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		pollResp, code, err = cmh.doCheckRecommendationStatus(requestObj.RequestID, requestObj.RecommendationID)
 		if err != nil || code != http.StatusOK {
 			msg := fmt.Sprintf("Unable to check status of recommendation %s for service change request %s: %d - %s", requestObj.RecommendationID, requestObj.RequestID, code, err.Error())
-			logger.Log.Errorf(msg)
+			logger.Log.Errorf("%s%s", logPrefix, msg)
 			cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, "FAILED", msg)
 			return true
 		}
@@ -287,7 +292,7 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		if pollCount >= cmh.statusRetryCount {
 			// Too many attempts, just fail this request
 			msg := fmt.Sprintf("Unable to check status of recommendation %s for service change request %s: Request timed out waiting for Recommendation completion", requestObj.RecommendationID, requestObj.RequestID)
-			logger.Log.Errorf(msg)
+			logger.Log.Errorf("%s%s", logPrefix, msg)
 			cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, "FAILED", msg)
 			return true
 		}
@@ -295,7 +300,7 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 		break
 	}
 
-	logger.Log.Infof("Service change status check completed for recommendation %s for service change request %s with result %s", requestObj.RecommendationID, requestObj.RequestID, pollResp.State)
+	logger.Log.Infof("%sService change status check completed for recommendation %s for service change request %s with result %s", logPrefix, requestObj.RecommendationID, requestObj.RequestID, pollResp.State)
 	cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, pollResp.State, "")
 	return true
 }
@@ -315,7 +320,7 @@ func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string,
 		return fmt.Errorf("Error marshalling result for service change request %s and recommendation %s: %s", reqID, recID, msgErr.Error())
 	}
 
-	logger.Log.Debugf("Completed Change Service Request %s: Recommendation %s Status %s Message %s", result.RequestID, result.RecommendationID, result.Status, result.ErrorMessage)
+	logger.Log.Debugf("%sCompleted Change Service Request %s: Recommendation %s Status %s Message %s", logPrefix, result.RequestID, result.RecommendationID, result.Status, result.ErrorMessage)
 
 	return cmh.resultWriter.WriteMessage("Result:"+reqID, msgBytes)
 }
@@ -327,7 +332,7 @@ func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
 		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
 	}
 
-	logger.Log.Debugf("Service change request %s moving to Pending state for recommendation ID %s", reqID, recID)
+	logger.Log.Debugf("%sService change request %s moving to Pending state for recommendation ID %s", logPrefix, reqID, recID)
 
 	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
 }

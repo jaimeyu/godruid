@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	recommendationRequestPath = "/api/performance/recommendation"
+	recommendationRequestPath = "/recommendation"
 	errorPrefix               = "Some error start here"
 )
 

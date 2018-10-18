@@ -250,11 +250,10 @@ func doUpdateConnectorInstanceV2(allowedRoles []string, tenantDB datastore.Tenan
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *tenmod.ConnectorInstance
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &tenmod.ConnectorInstance{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantConnectorInstanceStr, params.ConnectorInstanceID, err.Error())
 	}
-	patched = fetched
 	patched.TenantID = tenantID
 
 	// Finally update the record in the datastore with the merged map and fetched tenant

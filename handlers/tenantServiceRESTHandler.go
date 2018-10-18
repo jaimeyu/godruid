@@ -463,7 +463,8 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	patched := &tenmod.User{}
+	errMerge := models.MergeObjWithMap(patched, oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
@@ -471,17 +472,17 @@ func (tsh *TenantServiceRESTHandler) PatchTenantUser(w http.ResponseWriter, r *h
 
 	}
 	// This only checks if the ID&REV is set.
-	err = oldData.Validate(true)
+	err = patched.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Patching %s: %s", tenmod.TenantUserStr, oldData)
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantUserStr, patched)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateTenantUser(oldData)
+	result, err := tsh.TenantDB.UpdateTenantUser(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantUserStr, err.Error())
 		reportError(w, startTime, "500", mon.UpdateTenantUserStr, msg, http.StatusInternalServerError)
@@ -1019,7 +1020,8 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(oldDomain, requestBytes)
+	patched := &tenmod.Domain{}
+	errMerge := models.MergeObjWithMap(patched, oldDomain, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
@@ -1027,24 +1029,24 @@ func (tsh *TenantServiceRESTHandler) PatchTenantDomain(w http.ResponseWriter, r 
 
 	}
 	// This only checks if the ID&REV is set.
-	err = oldDomain.Validate(true)
+	err = patched.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 	// Done checking for differences
-	logger.Log.Infof("Patching %s: %s", opStr, oldDomain)
+	logger.Log.Infof("Patching %s: %s", opStr, patched)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateTenantDomain(oldDomain)
+	result, err := tsh.TenantDB.UpdateTenantDomain(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantDomainStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	NotifyDomainUpdated(oldDomain.TenantID, oldDomain)
+	NotifyDomainUpdated(oldDomain.TenantID, patched)
 	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantDomainStr, "Patched")
 }
 
@@ -1207,17 +1209,18 @@ func (tsh *TenantServiceRESTHandler) PatchTenantIngestionProfile(w http.Response
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(origData, requestBytes)
+	patched := &tenmod.IngestionProfile{}
+	errMerge := models.MergeObjWithMap(patched, origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Patching%s: %s", tenmod.TenantIngestionProfileStr, origData)
+	logger.Log.Infof("Patching%s: %s", tenmod.TenantIngestionProfileStr, patched)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateTenantIngestionProfile(origData)
+	result, err := tsh.TenantDB.UpdateTenantIngestionProfile(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1404,17 +1407,18 @@ func (tsh *TenantServiceRESTHandler) PatchTenantThresholdProfile(w http.Response
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(origData, requestBytes)
+	patched := &tenmod.ThresholdProfile{}
+	errMerge := models.MergeObjWithMap(patched, origData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, origData)
+	logger.Log.Infof("Updating %s: %s", tenmod.TenantThresholdProfileStr, patched)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateTenantThresholdProfile(origData)
+	result, err := tsh.TenantDB.UpdateTenantThresholdProfile(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
@@ -1628,7 +1632,8 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	patched := &tenmod.MonitoredObject{}
+	errMerge := models.MergeObjWithMap(patched, oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
@@ -1638,37 +1643,37 @@ func (tsh *TenantServiceRESTHandler) PatchMonitoredObject(w http.ResponseWriter,
 	// The merge operation doesn't do deletions so it the request has a non empty collection for meta,
 	// then we overwrite the meta data completely with the new one.
 	if len(data.Meta) != 0 {
-		oldData.Meta = data.Meta
+		patched.Meta = data.Meta
 	}
 
 	// This only checks if the ID&REV is set.
-	err = oldData.Validate(true)
+	err = patched.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, oldData)
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMonitoredObjectStr, patched)
 
 	// Issue request to DAO Layer
 
-	result, err := tsh.TenantDB.UpdateMonitoredObject(oldData)
+	result, err := tsh.TenantDB.UpdateMonitoredObject(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
-	err = tsh.TenantDB.UpdateMonitoredObjectMetadataViews(tenantID, oldData.Meta)
+	err = tsh.TenantDB.UpdateMonitoredObjectMetadataViews(tenantID, patched.Meta)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(oldData))
+		msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(patched))
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)
 		return
 	}
 
 	logger.Log.Debugf("DEBUG PATCHED GOING TO NOTIFY")
-	NotifyMonitoredObjectUpdated(data.TenantID, oldData)
+	NotifyMonitoredObjectUpdated(data.TenantID, patched)
 	sendSuccessResponse(result, w, startTime, opStr, tenmod.TenantMonitoredObjectStr, "Patched")
 }
 
@@ -1921,24 +1926,25 @@ func (tsh *TenantServiceRESTHandler) PatchTenantMeta(w http.ResponseWriter, r *h
 		return
 	}
 
-	errMerge := models.MergeObjWithMap(oldData, requestBytes)
+	patched := &tenmod.Metadata{}
+	errMerge := models.MergeObjWithMap(patched, oldData, requestBytes)
 	if errMerge != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	err = data.Validate(true)
+	err = patched.Validate(true)
 	if err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", opStr, msg, http.StatusBadRequest)
 		return
 	}
 
-	logger.Log.Infof("Patching %s: %s", tenmod.TenantMetaStr, oldData)
+	logger.Log.Infof("Patching %s: %s", tenmod.TenantMetaStr, patched)
 
 	// Issue request to DAO Layer
-	result, err := tsh.TenantDB.UpdateTenantMeta(oldData)
+	result, err := tsh.TenantDB.UpdateTenantMeta(patched)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error())
 		reportError(w, startTime, "500", opStr, msg, http.StatusInternalServerError)

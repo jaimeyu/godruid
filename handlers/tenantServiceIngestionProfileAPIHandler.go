@@ -229,13 +229,14 @@ func HandlePatchTenantIngestionProfile(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service.NewPatchTenantIngestionProfileBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchIngPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		errMerge := models.MergeObjWithMap(origData, requestBytes)
+		patched := &tenmod.IngestionProfile{}
+		errMerge := models.MergeObjWithMap(patched, origData, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantIngestionProfileBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchIngPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateTenantIngestionProfile(origData)
+		result, err := tenantDB.UpdateTenantIngestionProfile(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantIngestionProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantIngestionProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchIngPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}

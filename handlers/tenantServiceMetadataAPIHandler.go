@@ -200,13 +200,14 @@ func HandlePatchTenantMetadata(allowedRoles []string, tenantDB datastore.TenantS
 			return tenant_provisioning_service.NewPatchTenantMetadataBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchTenantMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		errMerge := models.MergeObjWithMap(origData, requestBytes)
+		patched := &tenmod.Metadata{}
+		errMerge := models.MergeObjWithMap(patched, origData, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantMetadataBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchTenantMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateTenantMeta(origData)
+		result, err := tenantDB.UpdateTenantMeta(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMetadataInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMetaStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchTenantMetaStr, mon.APICompleted, mon.TenantAPICompleted))
 		}

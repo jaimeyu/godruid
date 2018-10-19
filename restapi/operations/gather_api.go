@@ -83,6 +83,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2CreateLocaleV2Handler: tenant_provisioning_service_v2.CreateLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateLocaleV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateLocaleV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2CreateMetadataConfigV2Handler: tenant_provisioning_service_v2.CreateMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMetadataConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMetadataConfigV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateMonitoredObjectV2Handler: tenant_provisioning_service_v2.CreateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMonitoredObjectV2 has not yet been implemented")
 		}),
@@ -145,6 +148,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2DeleteLocaleV2Handler: tenant_provisioning_service_v2.DeleteLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteLocaleV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteLocaleV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteMetadataConfigV2Handler: tenant_provisioning_service_v2.DeleteMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetadataConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetadataConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler: tenant_provisioning_service_v2.DeleteMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMonitoredObjectV2 has not yet been implemented")
@@ -211,6 +217,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetAllLocalesV2Handler: tenant_provisioning_service_v2.GetAllLocalesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllLocalesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllLocalesV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler: tenant_provisioning_service_v2.GetAllMetadataConfigsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMetadataConfigsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMetadataConfigsV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler: tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMonitoredObjectsV2 has not yet been implemented")
@@ -298,6 +307,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetLocaleV2Handler: tenant_provisioning_service_v2.GetLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.GetLocaleV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetLocaleV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetMetadataConfigV2Handler: tenant_provisioning_service_v2.GetMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMetadataConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMetadataConfigV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetMonitoredObjectV2Handler: tenant_provisioning_service_v2.GetMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMonitoredObjectV2 has not yet been implemented")
@@ -422,6 +434,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2UpdateLocaleV2Handler: tenant_provisioning_service_v2.UpdateLocaleV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateLocaleV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateLocaleV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateMetadataConfigV2Handler: tenant_provisioning_service_v2.UpdateMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMetadataConfigV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMetadataConfigV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler: tenant_provisioning_service_v2.UpdateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMonitoredObjectV2 has not yet been implemented")
 		}),
@@ -486,7 +501,7 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
 	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
@@ -517,6 +532,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2CreateIngestionProfileV2Handler tenant_provisioning_service_v2.CreateIngestionProfileV2Handler
 	// TenantProvisioningServiceV2CreateLocaleV2Handler sets the operation handler for the create locale v2 operation
 	TenantProvisioningServiceV2CreateLocaleV2Handler tenant_provisioning_service_v2.CreateLocaleV2Handler
+	// TenantProvisioningServiceV2CreateMetadataConfigV2Handler sets the operation handler for the create metadata config v2 operation
+	TenantProvisioningServiceV2CreateMetadataConfigV2Handler tenant_provisioning_service_v2.CreateMetadataConfigV2Handler
 	// TenantProvisioningServiceV2CreateMonitoredObjectV2Handler sets the operation handler for the create monitored object v2 operation
 	TenantProvisioningServiceV2CreateMonitoredObjectV2Handler tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
@@ -559,6 +576,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2DeleteIngestionProfileV2Handler tenant_provisioning_service_v2.DeleteIngestionProfileV2Handler
 	// TenantProvisioningServiceV2DeleteLocaleV2Handler sets the operation handler for the delete locale v2 operation
 	TenantProvisioningServiceV2DeleteLocaleV2Handler tenant_provisioning_service_v2.DeleteLocaleV2Handler
+	// TenantProvisioningServiceV2DeleteMetadataConfigV2Handler sets the operation handler for the delete metadata config v2 operation
+	TenantProvisioningServiceV2DeleteMetadataConfigV2Handler tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler
 	// TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler sets the operation handler for the delete monitored object v2 operation
 	TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler tenant_provisioning_service_v2.DeleteMonitoredObjectV2Handler
 	// TenantProvisioningServiceDeleteReportScheduleConfigHandler sets the operation handler for the delete report schedule config operation
@@ -603,6 +622,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllIngestionProfilesV2Handler tenant_provisioning_service_v2.GetAllIngestionProfilesV2Handler
 	// TenantProvisioningServiceV2GetAllLocalesV2Handler sets the operation handler for the get all locales v2 operation
 	TenantProvisioningServiceV2GetAllLocalesV2Handler tenant_provisioning_service_v2.GetAllLocalesV2Handler
+	// TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler sets the operation handler for the get all metadata configs v2 operation
+	TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler tenant_provisioning_service_v2.GetAllMetadataConfigsV2Handler
 	// TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler sets the operation handler for the get all monitored objects v2 operation
 	TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler
 	// TenantProvisioningServiceGetAllReportScheduleConfigHandler sets the operation handler for the get all report schedule config operation
@@ -661,6 +682,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetIngestionProfileV2Handler tenant_provisioning_service_v2.GetIngestionProfileV2Handler
 	// TenantProvisioningServiceV2GetLocaleV2Handler sets the operation handler for the get locale v2 operation
 	TenantProvisioningServiceV2GetLocaleV2Handler tenant_provisioning_service_v2.GetLocaleV2Handler
+	// TenantProvisioningServiceV2GetMetadataConfigV2Handler sets the operation handler for the get metadata config v2 operation
+	TenantProvisioningServiceV2GetMetadataConfigV2Handler tenant_provisioning_service_v2.GetMetadataConfigV2Handler
 	// TenantProvisioningServiceV2GetMonitoredObjectV2Handler sets the operation handler for the get monitored object v2 operation
 	TenantProvisioningServiceV2GetMonitoredObjectV2Handler tenant_provisioning_service_v2.GetMonitoredObjectV2Handler
 	// MetricsServiceGetRawMetricsHandler sets the operation handler for the get raw metrics operation
@@ -743,6 +766,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2UpdateIngestionProfileV2Handler tenant_provisioning_service_v2.UpdateIngestionProfileV2Handler
 	// TenantProvisioningServiceV2UpdateLocaleV2Handler sets the operation handler for the update locale v2 operation
 	TenantProvisioningServiceV2UpdateLocaleV2Handler tenant_provisioning_service_v2.UpdateLocaleV2Handler
+	// TenantProvisioningServiceV2UpdateMetadataConfigV2Handler sets the operation handler for the update metadata config v2 operation
+	TenantProvisioningServiceV2UpdateMetadataConfigV2Handler tenant_provisioning_service_v2.UpdateMetadataConfigV2Handler
 	// TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler sets the operation handler for the update monitored object v2 operation
 	TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler tenant_provisioning_service_v2.UpdateMonitoredObjectV2Handler
 	// TenantProvisioningServiceUpdateReportScheduleConfigHandler sets the operation handler for the update report schedule config operation
@@ -886,6 +911,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateLocaleV2Handler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateMetadataConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateMetadataConfigV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2CreateMonitoredObjectV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler")
 	}
@@ -968,6 +997,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2DeleteLocaleV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteLocaleV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler == nil {
@@ -1056,6 +1089,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetAllLocalesV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllLocalesV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllMetadataConfigsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler == nil {
@@ -1172,6 +1209,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetLocaleV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetLocaleV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetMetadataConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetMetadataConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetMonitoredObjectV2Handler == nil {
@@ -1336,6 +1377,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2UpdateLocaleV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateLocaleV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateMetadataConfigV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateMetadataConfigV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler == nil {
@@ -1561,6 +1606,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/metadata-configs"] = tenant_provisioning_service_v2.NewCreateMetadataConfigV2(o.context, o.TenantProvisioningServiceV2CreateMetadataConfigV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/monitored-objects"] = tenant_provisioning_service_v2.NewCreateMonitoredObjectV2(o.context, o.TenantProvisioningServiceV2CreateMonitoredObjectV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1662,6 +1712,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewDeleteLocaleV2(o.context, o.TenantProvisioningServiceV2DeleteLocaleV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewDeleteMetadataConfigV2(o.context, o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1772,6 +1827,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/locales"] = tenant_provisioning_service_v2.NewGetAllLocalesV2(o.context, o.TenantProvisioningServiceV2GetAllLocalesV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metadata-configs"] = tenant_provisioning_service_v2.NewGetAllMetadataConfigsV2(o.context, o.TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -1917,6 +1977,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewGetLocaleV2(o.context, o.TenantProvisioningServiceV2GetLocaleV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewGetMetadataConfigV2(o.context, o.TenantProvisioningServiceV2GetMetadataConfigV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -2122,6 +2187,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/v2/locales/{localeId}"] = tenant_provisioning_service_v2.NewUpdateLocaleV2(o.context, o.TenantProvisioningServiceV2UpdateLocaleV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewUpdateMetadataConfigV2(o.context, o.TenantProvisioningServiceV2UpdateMetadataConfigV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

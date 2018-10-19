@@ -41,6 +41,7 @@ const (
 	DataCleaningHistoryStr     = "data_cln_hist"
 	BrandingStr                = "branding"
 	LocaleStr                  = "locale"
+	MetadataConfigStr          = "meta_cfg"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -224,6 +225,14 @@ const (
 	GetTenantBrandingStr    = BrandingStr + metricNameDelimiter + OPGetStr
 	GetAllTenantBrandingStr = BrandingStr + metricNameDelimiter + OPGetAllStr
 	DeleteTenantBrandingStr = BrandingStr + metricNameDelimiter + OPDeleteStr
+
+	CreateMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPCreateStr
+	UpdateMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPUpdateStr
+	GetMetadataConfigStr       = MetadataConfigStr + metricNameDelimiter + OPGetStr
+	PatchMetadataConfigStr     = MetadataConfigStr + metricNameDelimiter + OPPatchStr
+	GetActiveMetadataConfigStr = MetadataConfigStr + metricNameDelimiter + OPGetActiveStr
+	DeleteMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPDeleteStr
+	GetAllMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPGetAllStr
 )
 
 type MetricCounterType string

@@ -37,6 +37,7 @@ type TenantServiceDatastoreInMemory struct {
 	tenantIDtoMetaSlice                map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice              map[string][]*tenmod.IngestionProfile
 	tenantIDtoDataCleaningProfileSlice map[string][]*tenmod.DataCleaningProfile
+	tenantIDtoMetadataConfigSlice      map[string][]*tenmod.MetadataConfig
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -58,6 +59,7 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
 	res.tenantIDtoDataCleaningProfileSlice = map[string][]*tenmod.DataCleaningProfile{}
+	res.tenantIDtoMetadataConfigSlice = map[string][]*tenmod.MetadataConfig{}
 
 	return res, nil
 }
@@ -96,6 +98,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantIngestionProfileType:
 		if tsd.tenantIDtoIngPrfSlice[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantMetadataConfigType:
+		if tsd.tenantIDtoMetadataConfigSlice[tenantID] == nil {
 			return tenantDNE
 		}
 	case tenmod.TenantThresholdProfileType:
@@ -1958,4 +1964,112 @@ func (tsd *TenantServiceDatastoreInMemory) GetAllTenantLocales(tenantID string) 
 	}
 
 	return recList, nil
+}
+
+// CreateTenantMetadataConfig - InMemory implementation of CreateTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantMetadataConfig(metaCfgReq *tenmod.MetadataConfig) (*tenmod.MetadataConfig, error) {
+	if err := tsd.DoesTenantExist(metaCfgReq.TenantID, tenmod.TenantMetadataConfigType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID] = make([]*tenmod.MetadataConfig, 1)
+	}
+
+	existing, _ := tsd.GetActiveTenantMetadataConfig(metaCfgReq.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantMetadataConfigStr)
+	}
+
+	recCopy := tenmod.MetadataConfig{}
+	deepcopy.Copy(&recCopy, metaCfgReq)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetadataConfigType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// UpdateTenantMetadataConfig - InMemory implementation of UpdateTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMetadataConfig(metaCfgReq *tenmod.MetadataConfig) (*tenmod.MetadataConfig, error) {
+	if len(metaCfgReq.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(metaCfgReq.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(metaCfgReq.TenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	recCopy := tenmod.MetadataConfig{}
+	deepcopy.Copy(&recCopy, metaCfgReq)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetadataConfigType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetTenantMetadataConfig - InMemory implementation of GetTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Metadata Config ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+	existing := tsd.tenantIDtoMetadataConfigSlice[tenantID][0]
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	return existing, nil
+}
+
+// DeleteTenantMetadataConfig - InMemory implementation of DeleteTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Metadata Config ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+	existing, err := tsd.GetActiveTenantMetadataConfig(tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	tsd.tenantIDtoMetadataConfigSlice[tenantID][0] = nil
+
+	return existing, nil
+}
+
+// GetActiveTenantMetadataConfig - InMemory implementation of GetActiveTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	existing := tsd.tenantIDtoMetadataConfigSlice[tenantID][0]
+	if existing == nil {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantMetadataConfigStr)
+	}
+
+	return existing, nil
 }

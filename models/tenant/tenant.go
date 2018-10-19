@@ -64,6 +64,9 @@ const (
 
 	// TenantLocaleType - datatype string used to identify a Locale in the datastore record
 	TenantLocaleType TenantDataType = "locale"
+
+	// TenantMdetadataConfigType - datatype string used to identify a Metadata Configuration in the datastore record
+	TenantMetadataConfigType TenantDataType = "metadataConfig"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -166,6 +169,9 @@ const (
 
 	// TenantLocaleStr - common name for the Tenant Locale for use in logs.
 	TenantLocaleStr = "Tenant Locale"
+
+	// TenantMetadataConfigStr - common name for the Tenant Metadata Config for use in logs.
+	TenantMetadataConfigStr = "Tenant Metadata Configuration"
 )
 
 // User - defines a Tenant user.
@@ -1048,5 +1054,29 @@ func (l *Locale) GetID() string {
 // SetID - required implementation for jsonapi unmarshalling
 func (l *Locale) SetID(s string) error {
 	l.ID = s
+	return nil
+}
+
+// MetadataConfig - defines a Tenant MetadataConfig.
+type MetadataConfig struct {
+	ID                    string   `json:"_id"`
+	REV                   string   `json:"_rev"`
+	Datatype              string   `json:"datatype"`
+	TenantID              string   `json:"tenantId"`
+	EndPoint              string   `json:"endPoint"`
+	MidPoints             []string `json:"midPoints"`
+	StartPoint            string   `json:"startPoint"`
+	CreatedTimestamp      int64    `json:"createdTimestamp"`
+	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (cfg *MetadataConfig) GetID() string {
+	return cfg.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (cfg *MetadataConfig) SetID(s string) error {
+	cfg.ID = s
 	return nil
 }

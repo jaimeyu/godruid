@@ -1,3 +1,4 @@
+* Feature - adding tenant meatadata configuration APIs
 ## Current Release 
 ### 0.232.0 
 **Release Date:** Wed Oct 17 16:08:00 UTC 2018     

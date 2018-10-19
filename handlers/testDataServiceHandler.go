@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	cr "crypto/rand"
 	"crypto/x509"
@@ -1098,6 +1097,8 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
+	logger.Log.Debugf("Received CSR request")
+
 	caPublicKeyFile, err := ioutil.ReadFile("/Users/ptzolov/.secret/colt/ca.crt")
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find local ca.crt content: %s ", err.Error())
@@ -1181,6 +1182,8 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 		msg := fmt.Sprintf("Could not create x509 client certificate content: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
+
+	logger.Log.Debugf("Successfully generate client cert, sending to client.")
 
 	w.Write(clientCRTRaw)
 }

@@ -39,8 +39,6 @@ type ColtMEFHandler struct {
 	appID            string
 	sharedSecret     string
 	statusRetryCount int
-
-	lastServiceChangeMap map[string]*ServiceChangeIdentifier
 }
 
 func CreateColtMEFHandler() *ColtMEFHandler {
@@ -121,7 +119,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 
 	logger.Log.Debugf("%sMAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", logPrefix, requestID, string(respBytes))
 
-	if resp.StatusCode != http.StatusOK {
+T	if resp.StatusCode != http.StatusOK {
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)

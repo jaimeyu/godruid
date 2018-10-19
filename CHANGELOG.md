@@ -1,8 +1,10 @@
-* Feature - adding tenant meatadata configuration APIs
 ## Current Release 
+### 0.233.0 
+**Release Date:** Fri Oct 19 15:23:19 UTC 2018     
+## Previous Releases 
+* Feature - adding tenant meatadata configuration APIs
 ### 0.232.0 
 **Release Date:** Wed Oct 17 16:08:00 UTC 2018     
-## Previous Releases 
 ### 0.231.0 
 **Release Date:** Mon Oct 15 14:16:58 UTC 2018     
 * Fix - Adding even more debug logs to event handling

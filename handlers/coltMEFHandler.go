@@ -23,17 +23,17 @@ import (
 const (
 	logPrefix                 = "COLT-MEF: "
 	recommendationRequestPath = "/recommendation"
-	errorPrefix               = "Some error start here"
+	errorPrefix               = "Recommendation"
 )
 
 type ColtMEFHandler struct {
 	httpClient *http.Client
 
 	requestReader *messaging.KafkaConsumer
-	pendingReader *messaging.KafkaConsumer
+	// pendingReader *messaging.KafkaConsumer
 
-	pendingWriter *messaging.KafkaProducer
-	resultWriter  *messaging.KafkaProducer
+	// pendingWriter *messaging.KafkaProducer
+	resultWriter *messaging.KafkaProducer
 
 	server           string
 	appID            string
@@ -43,7 +43,7 @@ type ColtMEFHandler struct {
 
 func CreateColtMEFHandler() *ColtMEFHandler {
 	requestTopic := "colt-mef-requests"
-	pendingTopic := "colt-mef-pending"
+	// pendingTopic := "colt-mef-pending"
 	resultTopic := "colt-mef-results"
 	result := new(ColtMEFHandler)
 
@@ -62,7 +62,7 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	logger.Log.Infof("%sStarting event handler at %s with app ID %s", logPrefix, result.server, result.appID)
 
 	result.requestReader = messaging.CreateKafkaReader(requestTopic, "0")
-	result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
+	// result.pendingReader = messaging.CreateKafkaReader(pendingTopic, "0")
 
 	// Start the message readers
 	go func() {
@@ -70,13 +70,13 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 			result.requestReader.ReadMessage(result.handleRecommendationRequest)
 		}
 	}()
-	go func() {
-		for {
-			result.pendingReader.ReadMessage(result.handleRecommendationStatusCheck)
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		result.pendingReader.ReadMessage(result.handleRecommendationStatusCheck)
+	// 	}
+	// }()
 
-	result.pendingWriter = messaging.CreateKafkaWriter(pendingTopic)
+	// result.pendingWriter = messaging.CreateKafkaWriter(pendingTopic)
 	result.resultWriter = messaging.CreateKafkaWriter(resultTopic)
 
 	return result
@@ -119,7 +119,7 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 
 	logger.Log.Debugf("%sMAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", logPrefix, requestID, string(respBytes))
 
-T	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK {
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
@@ -127,7 +127,7 @@ T	if resp.StatusCode != http.StatusOK {
 			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal recommendation response for service change request %s: %s", requestID, err.Error())
 		}
 
-		return nil, http.StatusInternalServerError, fmt.Errorf("Service change failed for service change request %s: %d - %s", requestID, responseObj.Code, responseObj.Message)
+		return nil, resp.StatusCode, fmt.Errorf("Service change failed for service change request %s: %d - %s", requestID, responseObj.Code, responseObj.Message)
 	}
 
 	// Request was successful, format the response object
@@ -203,6 +203,15 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	// Issue the Recommendation API to Colt
 	responseObj, code, err := cmh.doMakeRecommendation(requestObj.RequestID, requestObj.ServiceChange)
 	if err != nil {
+		// Handle a duplicate service change request for the same service:
+		if code == http.StatusConflict {
+			recommendationID := getRecommendationIDFromConflictMessage(err.Error())
+
+			// Existing request for the serice, poll for the result
+			logger.Log.Warningf("%sService Change recommendation %s is already in progress for service %s. Initiating status check", logPrefix, recommendationID, requestObj.ServiceChange.ServiceID)
+			return cmh.pollRecommendationStatus(requestObj.RequestID, recommendationID)
+		}
+
 		msg := err.Error()
 		logger.Log.Errorf("%s%s", logPrefix, msg)
 		cmh.writeResult(requestObj.RequestID, "", "FAILED", msg)
@@ -210,16 +219,6 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 	}
 
 	if code != http.StatusOK {
-
-		// Handle a duplicate service change request for the same service:
-		// if code == http.StatusConflict {
-		// 	recommendationID := getRecommendationIDFromConflictMessage(err.Error())
-
-		// 	// Existing request for the serice, poll for the result
-		// 	logger.Log.Warningf("%sService Change recommendation %s is already in progress for service %s. Initiating status check", logPrefix, recommendationID, requestObj.ServiceChange.ServiceID)
-		// 	return cmh.pollRecommendationStatus(requestObj.RequestID, recommendationID)
-		// }
-
 		// Handle any other error a permaent failure
 		msg := fmt.Sprintf("Unable to complete service change request %s. Response code was %d", requestObj.RequestID, code)
 		logger.Log.Errorf("%s%s", logPrefix, msg)
@@ -235,10 +234,14 @@ func (cmh *ColtMEFHandler) handleRecommendationRequest(requestBytes []byte) bool
 
 func getRecommendationIDFromConflictMessage(errorMessage string) string {
 
-	errorSubstring := errorMessage[:len(errorPrefix)-1]
-	errorSubstringParts := strings.Split(errorSubstring, " ")
+	errorParts := strings.Split(errorMessage, " ")
+	for i, val := range errorParts {
+		if val == errorPrefix {
+			return errorParts[i+1]
+		}
+	}
 
-	return errorSubstringParts[0]
+	return ""
 }
 
 func (cmh *ColtMEFHandler) pollRecommendationStatus(requestID string, recommendationID string) bool {
@@ -324,16 +327,16 @@ func (cmh *ColtMEFHandler) writeResult(reqID string, recID string, state string,
 }
 
 // writePending - helper to write a result to the service change pending topic
-func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
-	msgBytes, msgErr := createPendingPayload(reqID, recID)
-	if msgErr != nil {
-		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
-	}
+// func (cmh *ColtMEFHandler) writePending(reqID string, recID string) error {
+// 	msgBytes, msgErr := createPendingPayload(reqID, recID)
+// 	if msgErr != nil {
+// 		return fmt.Errorf("Error marshalling pending object for service change request %s and recommendation ID %s: %s", reqID, recID, msgErr.Error())
+// 	}
 
-	logger.Log.Debugf("%sService change request %s moving to Pending state for recommendation ID %s", logPrefix, reqID, recID)
+// 	logger.Log.Debugf("%sService change request %s moving to Pending state for recommendation ID %s", logPrefix, reqID, recID)
 
-	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
-}
+// 	return cmh.pendingWriter.WriteMessage("Pending:"+reqID, msgBytes)
+// }
 
 func createPendingPayload(reqID string, recID string) ([]byte, error) {
 	result := ServiceChangeCheckStatusRequest{

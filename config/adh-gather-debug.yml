@@ -31,7 +31,7 @@ args:
   maxConcurrentMetricAPICalls: 500
   coltmef:
     enabled: true
-    server: "https://ondemand.colt.net/api/performance/recommendation"
+    server: "https://demo.ondemand.colt.net/api/performance/recommendation"
     appID: "datahubprod"
     secret: "test123"
     statusRetryCount: 10

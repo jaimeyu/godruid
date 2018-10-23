@@ -46,6 +46,9 @@ const (
 	CK_args_coltmef_appid                    ConfigKey = "args.coltmef.appid"
 	CK_args_coltmef_secret                   ConfigKey = "args.coltmef.secret"
 	CK_args_coltmef_statusretrycount         ConfigKey = "args.coltmef.statusretrycount"
+	CK_args_coltmef_checkpoint1              ConfigKey = "args.coltmef.checkpoint1"
+	CK_args_coltmef_checkpoint2              ConfigKey = "args.coltmef.checkpoint2"
+	CK_args_coltmef_checkpoint3              ConfigKey = "args.coltmef.checkpoint3"
 )
 
 func (key ConfigKey) String() string {

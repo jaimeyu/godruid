@@ -24,6 +24,8 @@ const (
 	logPrefix                 = "COLT-MEF: "
 	recommendationRequestPath = "/recommendation"
 	errorPrefix               = "Recommendation"
+
+	slackURL = "https://hooks.slack.com/services/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"
 )
 
 type ColtMEFHandler struct {
@@ -39,6 +41,10 @@ type ColtMEFHandler struct {
 	appID            string
 	sharedSecret     string
 	statusRetryCount int
+
+	pollCheckpoint1 float64
+	pollCheckpoint2 float64
+	pollCheckpoint3 float64
 }
 
 func CreateColtMEFHandler() *ColtMEFHandler {
@@ -58,6 +64,10 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.appID = cfg.GetString(gather.CK_args_coltmef_appid.String())
 	result.sharedSecret = cfg.GetString(gather.CK_args_coltmef_secret.String())
 	result.statusRetryCount = cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String())
+
+	result.pollCheckpoint1 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint1.String())
+	result.pollCheckpoint2 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint2.String())
+	result.pollCheckpoint3 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint3.String())
 
 	logger.Log.Infof("%sStarting event handler at %s with app ID %s", logPrefix, result.server, result.appID)
 
@@ -98,10 +108,15 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 	}
 
 	// Fill in necessary request headers
+	authHeader := getAuthHeader(requestObjBytes, cmh.sharedSecret, recommendationRequestPath)
 	req.Header.Set("x-colt-app-id", cmh.appID)
-	req.Header.Set("x-colt-app-sig", getAuthHeader(requestObjBytes, cmh.sharedSecret, recommendationRequestPath))
+	req.Header.Set("x-colt-app-sig", authHeader)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("%s Submitting recommendation %s to server %s for app-id %s using auth token %s", logPrefix, string(requestObjBytes), cmh.server, cmh.appID, authHeader)
+	}
 
 	// Issue request to COlt
 	resp, err := cmh.httpClient.Do(req)
@@ -271,10 +286,15 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 	logger.Log.Debugf("%sPulled status request for recommendation %s for service change request %s", logPrefix, requestObj.RecommendationID, requestObj.RequestID)
 
 	// Poll the status API until we get a successful response
+	pollStart := time.Now()
+	messageCount := 0
 	pollCount := 0
 	var pollResp *ColtRecommendationState
 	for {
 		time.Sleep(10 * time.Second)
+
+		duration := time.Since(pollStart).Seconds()
+		cmh.postUpdateState(duration, &messageCount, requestObj.RequestID, requestObj.RecommendationID)
 
 		var code int
 		var err error
@@ -304,6 +324,22 @@ func (cmh *ColtMEFHandler) handleRecommendationStatusCheck(recommendationStatusR
 	logger.Log.Infof("%sService change status check completed for recommendation %s for service change request %s with result %s", logPrefix, requestObj.RecommendationID, requestObj.RequestID, pollResp.State)
 	cmh.writeResult(requestObj.RequestID, requestObj.RecommendationID, pollResp.State, "")
 	return true
+}
+
+func (cmh *ColtMEFHandler) postUpdateState(duration float64, messageCount *int, requestID string, recommendationID string) {
+	if duration > cmh.pollCheckpoint1 && *messageCount == 0 {
+		msg := fmt.Sprintf("Service Change %s for recommendation %s has been in progress for over %.1f seconds", requestID, recommendationID, cmh.pollCheckpoint1)
+		postSlackUpdate(cmh.httpClient, requestID, msg)
+		*messageCount = *messageCount + 1
+	} else if duration > cmh.pollCheckpoint2 && *messageCount == 1 {
+		msg := fmt.Sprintf("Service Change %s for recommendation %s has been in progress for over %.1f seconds and may be stuck", requestID, recommendationID, cmh.pollCheckpoint2)
+		postSlackUpdate(cmh.httpClient, requestID, msg)
+		*messageCount = *messageCount + 1
+	} else if duration > cmh.pollCheckpoint3 && *messageCount == 2 {
+		msg := fmt.Sprintf("Service Change %s for recommendation %s has been in progress for over %.1f seconds and is certainly stuck, contact novitasdevops@colt.net", requestID, recommendationID, cmh.pollCheckpoint3)
+		postSlackUpdate(cmh.httpClient, requestID, msg)
+		*messageCount = *messageCount + 1
+	}
 }
 
 // writeResult - helper to write a result to the service change result topic
@@ -366,4 +402,37 @@ func base64HMACSHA256(payload []byte, key string) string {
 	hashObj := hmac.New(sha256.New, []byte(key))
 	hashObj.Write(payload)
 	return base64.StdEncoding.EncodeToString(hashObj.Sum(nil))
+}
+
+func postSlackUpdate(client *http.Client, serviceChangeID string, payload string) {
+
+	reqPaylod := map[string]interface{}{}
+	reqPaylod["text"] = payload
+
+	payloadBytes, err := json.Marshal(reqPaylod)
+	if err != nil {
+		logger.Log.Errorf("%sUnable to unmarshal payload for slack message for service change request %s: %s", logPrefix, serviceChangeID, err.Error())
+	}
+
+	req, err := http.NewRequest("POST", slackURL, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		logger.Log.Errorf("%sUnable to build slack message for service change request %s: %s", logPrefix, serviceChangeID, err.Error())
+	}
+
+	// Fill in necessary request headers
+	req.Header.Set("Content-Type", "application/json")
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("%s Submitting slack message of status for service change request %s: %s", logPrefix, serviceChangeID, payload)
+	}
+
+	// Issue request to COlt
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Log.Errorf("%sUnable to issue slack update post for service change request %s: %s", logPrefix, serviceChangeID, err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		logger.Log.Errorf("%sError completing slack update post for service change request %s: Response Code %d", logPrefix, serviceChangeID, resp.StatusCode)
+	}
 }

@@ -41,6 +41,9 @@ args:
     appID: "datahubtest"
     secret: "test123"
     statusRetryCount: 10
+    checkpoint1: 300
+    checkpoint2: 600
+    checkpoint3: 900
 
 connector:
   maxSecondsWithoutHeartbeat: 120

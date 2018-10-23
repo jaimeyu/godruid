@@ -1095,11 +1095,12 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 
 // SignCSR - Sign CSR and return client cert
 func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
+
 	startTime := time.Now()
 
 	logger.Log.Debugf("Received CSR request")
 
-	caPublicKeyFile, err := ioutil.ReadFile("/Users/ptzolov/.secret/colt/ca.crt")
+	caPublicKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_crt")
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find local ca.crt content: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
@@ -1116,7 +1117,8 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	}
 
 	//      private key
-	caPrivateKeyFile, err := ioutil.ReadFile("/Users/ptzolov/.secret/colt/ca.key")
+	caPrivateKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_key")
+
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find ca.key private key content: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
@@ -1126,12 +1128,8 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 		msg := fmt.Sprintf("Could not decode ca.key private key content: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
-	der, err := x509.DecryptPEMBlock(pemBlock, []byte("aaaa"))
-	if err != nil {
-		msg := fmt.Sprintf("Could not decode ca.key pemblock content: %s ", err.Error())
-		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
-	}
-	caPrivateKey, err := x509.ParsePKCS1PrivateKey(der)
+
+	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
 	if err != nil {
 		msg := fmt.Sprintf("Could not parse ca.key content: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)

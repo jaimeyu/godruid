@@ -3837,6 +3837,177 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/metadata-configs:
+    post:
+      summary: Create a Metadata Configuration for a Tenant.
+      operationId: CreateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Metadata Configuration already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Metadata Configurations
+      operationId: GetAllMetadataConfigsV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Metadata Configuration is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/metadata-configs/{MetadataConfigId}:
+    get:
+      summary: Retrieve a Tenant Metadata Configuration by id.
+      operationId: GetMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metadata Configuration
+      operationId: UpdateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Metadata Configuration specified by the provided Metadata Configuration Id.
+      operationId: DeleteMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/monitored-objects:
     get:
       summary: Retrieve all Monitored Objects for a Tenant.
@@ -7329,6 +7500,129 @@ definitions:
           type: "object"
           description: "Provides data properties by which the Metric may be filtered and/or aggregated"
 
+  MetadataConfigCreateRequest:
+    type: "object"
+    description: "Object used to create a Metadata Configuration in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metadataConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["startPoint", "endPoint", "midPoints"]
+            properties:
+              startPoint:
+                description: "The first point of a Logical Map"
+                type: "string"
+              endPoint:
+                description: "The last point of a Logical Map"
+                type: "string"
+              midPoints: 
+                description: "The points between the startPoint and endPoint of a logical map"
+                type: "array"
+                items:
+                  type: "string"
+                    
+  MetadataConfigUpdateRequest:
+    type: "object"
+    description: "Object used to update a Metadata Configuration in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metadataConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              startPoint:
+                description: "The first point of a Logical Map"
+                type: "string"
+              endPoint:
+                description: "The last point of a Logical Map"
+                type: "string"
+              midPoints: 
+                description: "The points between the startPoint and endPoint of a logical map"
+                type: "array"
+                items:
+                  type: "string"
+            
+             
+  MetadataConfigListResponse:
+    type: "object"
+    description: "Metadata Configuration response including one or more values"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MetadataConfig'
+
+  MetadataConfigResponse:
+    type: "object"
+    description: "A single object Metadata Configuration response from Datahub"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/MetadataConfig'
+
+  MetadataConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [metadataConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_id", "_rev", "tenantId", "dataType", "startPoint", "endPoint", "midPoints", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            description: "Name used to identify this type of record in Datahub"
+            type: "string"
+          startPoint:
+            description: "The first point of a Logical Map"
+            type: "string"
+          endPoint:
+            description: "The last point of a Logical Map"
+            type: "string"
+          midPoints: 
+            description: "The points between the startPoint and endPoint of a logical map"
+            type: "array"
+            items:
+              type: "string"
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."
   MonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]

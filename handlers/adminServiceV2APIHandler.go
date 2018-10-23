@@ -286,6 +286,12 @@ func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to create default Ingestion Profile %s", err.Error())
 	}
 
+	// Create a default Metadata Config for the Tenant.
+	_, err = tenantDB.CreateTenantMetadataConfig(&tenmod.MetadataConfig{TenantID: idForTenant})
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to create default Metadata Config %s", err.Error())
+	}
+
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
 	threshProfileResponse, err := tenantDB.CreateTenantThresholdProfile(threshPrfData)

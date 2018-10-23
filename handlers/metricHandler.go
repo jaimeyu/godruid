@@ -19,6 +19,7 @@ import (
 	"github.com/accedian/adh-gather/server"
 	"github.com/gorilla/mux"
 	"github.com/manyminds/api2go/jsonapi"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -27,16 +28,16 @@ const (
 )
 
 type MetricServiceHandler struct {
-	druidDB  db.DruidDatastore
-	tenantDB db.TenantServiceDatastore
-	routes   []server.Route
+	metricsDB db.MetricsDatastore
+	tenantDB  db.TenantServiceDatastore
+	routes    []server.Route
 }
 
 func CreateMetricServiceHandler() *MetricServiceHandler {
 	result := new(MetricServiceHandler)
 
 	ddb := druid.NewDruidDatasctoreClient()
-	result.druidDB = ddb
+	result.metricsDB = ddb
 
 	tdb, err := GetTenantServiceDatastore()
 	if err != nil {
@@ -79,13 +80,6 @@ func CreateMetricServiceHandler() *MetricServiceHandler {
 			Method:      "GET",
 			Pattern:     "/api/v1/raw-metrics",
 			HandlerFunc: result.GetRawMetrics,
-		},
-
-		server.Route{
-			Name:        "GetRawMetrics",
-			Method:      "POST",
-			Pattern:     "/api/v2/raw-metrics",
-			HandlerFunc: result.GetRawMetricsV2,
 		},
 
 		server.Route{
@@ -149,7 +143,7 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 		reportError(w, startTime, "400", mon.QueryThresholdCrossingStr, msg, http.StatusBadRequest)
 		return
 	}
-	request := metrics.ThresholdCrossingRequest{}
+	request := metrics.ThresholdCrossingV1{}
 	if err := json.Unmarshal(requestBytes, &request); err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.QueryThresholdCrossingStr, msg, http.StatusBadRequest)
@@ -165,12 +159,12 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 	// Convert to PB type...will remove this when we remove the PB handling
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.QueryThresholdCrossingStr, err.Error())
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossStr, msg, http.StatusNotFound)
 		return
 	}
 
-	logger.Log.Infof("Retrieving %s for: %v", db.QueryThresholdCrossingStr, request)
+	logger.Log.Infof("Retrieving %s for: %v", db.ThresholdCrossingStr, request)
 
 	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
 	if err != nil {
@@ -179,7 +173,7 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 		return
 	}
 
-	result, err := msh.druidDB.QueryThresholdCrossing(&request, &pbTP, metaMOs)
+	result, err := msh.metricsDB.QueryThresholdCrossingV1(&request, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve  Threshold Crossing Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryThresholdCrossingStr, msg, http.StatusInternalServerError)
@@ -195,12 +189,12 @@ func (msh *MetricServiceHandler) QueryThresholdCrossing(w http.ResponseWriter, r
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.QueryThresholdCrossingStr, request)
+	logger.Log.Infof("Completed %s fetch for: %v", db.ThresholdCrossingStr, request)
 	trackAPIMetrics(startTime, "200", mon.QueryThresholdCrossingStr)
 	fmt.Fprintf(w, string(res))
 }
 
-func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
+func (msh *MetricServiceHandler) GetInternalSLAReportV1(slaReportRequest *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
 	startTime := time.Now()
 
 	// Turn the query Params into the request object:
@@ -230,7 +224,7 @@ func (msh *MetricServiceHandler) GetInternalSLAReport(slaReportRequest *metrics.
 		return nil, err
 	}
 
-	report, err := msh.druidDB.GetSLAReport(slaReportRequest, &pbTP, metaMOs)
+	report, err := msh.metricsDB.GetSLAReportV1(slaReportRequest, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
@@ -286,7 +280,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetSLAReport(&slaReportRequest, &pbTP, metaMOs)
+	result, err := msh.metricsDB.GetSLAReportV1(&slaReportRequest, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)
@@ -318,7 +312,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
 		return
 	}
-	thresholdCrossingReq := metrics.ThresholdCrossingTopNRequest{}
+	thresholdCrossingReq := metrics.ThresholdCrossingTopNV1{}
 	if err := json.Unmarshal(requestBytes, &thresholdCrossingReq); err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusBadRequest)
@@ -367,7 +361,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 	// Convert to PB type...will remove this when we remove the PB handling
 	pbTP := pb.TenantThresholdProfile{}
 	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.ThresholdCrossingStr, err.Error())
+		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.TopNThresholdCrossingByMonitoredObjectStr, err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusNotFound)
 		return
 	}
@@ -384,7 +378,7 @@ func (msh *MetricServiceHandler) GetThresholdCrossingByMonitoredObjectTopN(w htt
 		return
 	}
 
-	result, err := msh.druidDB.GetThresholdCrossingByMonitoredObjectTopN(&thresholdCrossingReq, &pbTP, metaMOs)
+	result, err := msh.metricsDB.GetThresholdCrossingByMonitoredObjectTopNV1(&thresholdCrossingReq, &pbTP, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Threshold Crossing By Monitored Object. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetThrCrossByMonObjTopNStr, msg, http.StatusInternalServerError)
@@ -417,7 +411,7 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 	}
 
 	// Turn the query Params into the request object:
-	hcRequest := &metrics.HistogramRequest{}
+	hcRequest := &metrics.HistogramV1{}
 	err = json.Unmarshal(requestBytes, hcRequest)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
@@ -434,15 +428,17 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.druidDB.GetHistogram(hcRequest, metaMOs)
+	report, err := msh.metricsDB.GetHistogramV1(hcRequest, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Histogram. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
 		return
 	}
 
+	rendered := renderHistogramV1(report)
+
 	// Convert the res to byte[]
-	res, err := json.Marshal(result)
+	res, err := json.Marshal(rendered)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal Histogram response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetHistogramObjStr, msg, http.StatusInternalServerError)
@@ -455,6 +451,11 @@ func (msh *MetricServiceHandler) GetHistogram(w http.ResponseWriter, r *http.Req
 	fmt.Fprintf(w, string(res))
 }
 
+func renderHistogramV1(report map[string]interface{}) map[string]interface{} {
+
+	return wrapJsonAPIObject(report, uuid.NewV4().String(), "histogramReports")
+}
+
 // GetRawMetrics - Retrieve raw metric data from druid
 func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
@@ -464,15 +465,22 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	rawMetricReq := populateRawMetricsRequest(queryParams)
 	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, rawMetricReq)
 
-	result, err := msh.druidDB.GetRawMetrics(rawMetricReq)
+	report, err := msh.metricsDB.GetRawMetricsV1(rawMetricReq)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
 		return
 	}
 
+	rendered, err := renderRawMetricsV1(report)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
+		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
+		return
+	}
+
 	// Convert the res to byte[]
-	res, err := json.Marshal(result)
+	res, err := json.Marshal(rendered)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
@@ -485,63 +493,91 @@ func (msh *MetricServiceHandler) GetRawMetrics(w http.ResponseWriter, r *http.Re
 	fmt.Fprintf(w, string(res))
 }
 
-// GetRawMetrics - Retrieve raw metric data from druid
-func (msh *MetricServiceHandler) GetRawMetricsV2(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
+type RawMetricsResponse struct {
+	Timestamp string                 `json:"timestamp"`
+	Result    map[string]interface{} `json:"result"`
+}
 
-	requestBytes, err := getRequestBytes(r)
-	if err != nil {
-		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
-		reportError(w, startTime, "400", mon.GetRawMetricStr, msg, http.StatusBadRequest)
-		return
+func renderRawMetricsV1(report map[string]interface{}) (map[string]interface{}, error) {
+
+	if len(report) != 0 {
+		rawReport := report["results"]
+		bReport, err := json.Marshal(rawReport)
+		if err != nil {
+			return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
+		}
+
+		rawMetrics := make([]RawMetricsResponse, 0)
+		err = json.Unmarshal(bReport, &rawMetrics)
+		if err != nil {
+			return nil, fmt.Errorf("Error formatting RawMetric JSON. Err: %s", err)
+		}
+
+		// v1 response structure of monId->timeseriesArray->direction->metricset
+		responseMap := make(map[string][]map[string]interface{})
+
+		for _, timeseriesEntry := range rawMetrics {
+			seriesTimestamp := timeseriesEntry.Timestamp
+
+			for k, v := range timeseriesEntry.Result {
+
+				hasData := false
+				parts := strings.Split(k, ".")
+				monObj := parts[0]
+				direction := parts[1]
+				metric := parts[len(parts)-1]
+
+				// Initialize an empty map if one does not exist for the current monitored object
+				// We do this at this point since we still want an empty array for the monitored object
+				// even if there are no non-infinity metrics
+				if _, ok := responseMap[monObj]; !ok {
+					responseMap[monObj] = make([]map[string]interface{}, 0)
+				}
+
+				switch v.(type) {
+				case float32:
+					hasData = true
+				case string:
+					hasData = !strings.Contains(v.(string), "Infinity")
+				default:
+					hasData = true
+				}
+				if !strings.Contains(metric, "temporary") && hasData {
+					timeseries := responseMap[monObj]
+
+					var moTimeMap map[string]interface{}
+					// Retrieve the latest entry in the timeseries array to see if we are now processing a
+					// new timeblock or adding to an existing one
+					if len(timeseries) != 0 && timeseries[len(timeseries)-1]["timestamp"] == seriesTimestamp {
+						// We know we are working with the latest entry in the timeseries array
+						moTimeMap = timeseries[len(timeseries)-1]
+					} else {
+						// We know we are working now with a new time block so create a new entry with the associated timestamp
+						moTimeMap = make(map[string]interface{})
+						moTimeMap["timestamp"] = seriesTimestamp
+						timeseries = append(timeseries, moTimeMap)
+					}
+
+					// If the map for the specified direction did not exist before then add it in
+					if _, ok := moTimeMap[direction]; !ok {
+						moTimeMap[direction] = make(map[string]interface{})
+					}
+
+					// Retrieve the map for the specified direction and set the appropriate metric value
+					moDirMap := moTimeMap[direction].(map[string]interface{})
+					moDirMap[metric] = v
+
+					// Finally set the whole timeseries for the monitored object
+					responseMap[monObj] = timeseries
+				}
+			}
+		}
+
+		dataContainer := map[string]interface{}{"result": responseMap}
+		logger.Log.Debugf("Reformatted raw metrics data: %v", responseMap)
+		return wrapJsonAPIObjectAsArray(dataContainer, uuid.NewV4().String(), "raw-metrics"), nil
 	}
-
-	// Turn the query Params into the request object:
-	request := &metrics.RawMetricsRequest{}
-	err = json.Unmarshal(requestBytes, request)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve raw metrics. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	logger.Log.Infof("Retrieving %s for: %v", db.RawMetricStr, request)
-
-	var metaMOs []string
-
-	if len(request.Meta) != 0 {
-		logger.Log.Debugf("Retrieving monitored objects by meta data for request: %v", request)
-		metaMOs, err = msh.MetaToMonitoredObjects(request.Tenant, request.Meta)
-	} else {
-		logger.Log.Debugf("Retrieving all monitored objects for request: %v", request)
-		metaMOs, err = msh.tenantDB.GetAllMonitoredObjectsIDs(request.Tenant)
-	}
-
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	result, err := msh.druidDB.GetFilteredRawMetrics(request, metaMOs)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Raw Metrics. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	// Convert the res to byte[]
-	res, err := json.Marshal(result)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to marshal Raw Metrics response. %s:", err.Error())
-		reportError(w, startTime, "500", mon.GetRawMetricStr, msg, http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.RawMetricStr, request)
-	trackAPIMetrics(startTime, "200", mon.GetRawMetricStr)
-	fmt.Fprintf(w, string(res))
+	return wrapJsonAPIObjectAsArray(map[string]interface{}{}, uuid.NewV4().String(), "raw-metrics"), nil
 }
 
 func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r *http.Request) {
@@ -553,19 +589,27 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
 		return
 	}
-	request := metrics.AggregateMetricsAPIRequest{}
-	if err := json.Unmarshal(requestBytes, &request); err != nil {
+	requestV1 := metrics.AggregateMetricsV1{}
+	if err := json.Unmarshal(requestBytes, &requestV1); err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
 		return
 	}
-	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, request)
+	logger.Log.Infof("Retrieving %s for: %v", db.AggMetricsStr, requestV1)
 
-	if request.TenantID == "" {
+	if requestV1.TenantID == "" {
 		msg := fmt.Sprintf("Tenant ID is required to retrieved aggregate metrics")
 		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
 		return
 	}
+
+	request := metrics.AggregateMetricsV1{TenantID: requestV1.TenantID,
+		Meta:        requestV1.Meta,
+		Interval:    requestV1.Interval,
+		Granularity: requestV1.Granularity,
+		Timeout:     requestV1.Timeout,
+		Aggregation: requestV1.Aggregation,
+		Metrics:     requestV1.Metrics}
 
 	metaMOs, err := msh.MetaToMonitoredObjects(request.TenantID, request.Meta)
 	if err != nil {
@@ -574,7 +618,7 @@ func (msh *MetricServiceHandler) QueryAggregatedMetrics(w http.ResponseWriter, r
 		return
 	}
 
-	result, err := msh.druidDB.GetAggregatedMetrics(&request, metaMOs)
+	result, err := msh.metricsDB.GetAggregatedMetricsV1(&request, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Aggregated Metrics. %s:", err.Error())
 		reportError(w, startTime, "500", mon.QueryAggregatedMetricsStr, msg, http.StatusInternalServerError)
@@ -633,7 +677,7 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
 		return
 	}
-	request := metrics.TopNForMetric{}
+	request := metrics.TopNForMetricV1{}
 	if err := json.Unmarshal(requestBytes, &request); err != nil {
 		msg := generateErrorMessage(http.StatusBadRequest, err.Error())
 		reportError(w, startTime, "400", mon.QueryAggregatedMetricsStr, msg, http.StatusBadRequest)
@@ -657,15 +701,17 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	result, err := msh.druidDB.GetTopNForMetric(&topNreq, metaMOs)
+	result, err := msh.metricsDB.GetTopNForMetricV1(&topNreq, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve Top N response. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
 		return
 	}
 
+	rendered := renderTopNForMetricsV1(result)
+
 	// Convert the res to byte[]
-	res, err := json.Marshal(result)
+	res, err := json.Marshal(rendered)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to marshal TOP N. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GetTopNReqStr, msg, http.StatusInternalServerError)
@@ -673,10 +719,14 @@ func (msh *MetricServiceHandler) GetTopNFor(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.Header().Set(contentType, jsonAPIContentType)
-	logger.Log.Infof("Completed %s fetch for: %v", db.TopNForMetricString, topNreq)
+	logger.Log.Infof("Completed %s fetch for: %v", db.TopNForMetricStr, topNreq)
 	trackAPIMetrics(startTime, "200", mon.GetTopNReqStr)
 	fmt.Fprintf(w, string(res))
 
+}
+
+func renderTopNForMetricsV1(report map[string]interface{}) map[string]interface{} {
+	return wrapJsonAPIObjectAsArray(report, uuid.NewV4().String(), "top-n")
 }
 
 //MetaToMonitoredObjects - Retrieve a set of monitored object IDs based on the passed in metadata criteria

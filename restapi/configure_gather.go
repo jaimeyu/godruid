@@ -33,11 +33,12 @@ var (
 	nonSwaggerMUX *mux.Router
 	adminDB       datastore.AdminServiceDatastore
 	tenantDB      datastore.TenantServiceDatastore
-	druidDB       datastore.DruidDatastore
+	metricsDB     datastore.MetricsDatastore
 
+	// DEPRECATED - REMOVE ONCE V1 IS REMOVED
 	metricServiceV1APIRouteRoots = []string{
 		"/api/v1/threshold-crossing", "/api/v1/threshold-crossing-by-monitored-object", "/api/v1/threshold-crossing-by-monitored-object-top-n",
-		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/raw-metrics", "/api/v2/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
+		"/api/v1/generate-sla-report", "/api/v1/histogram", "/api/v1/raw-metrics", "/api/v1/aggregated-metrics", "/api/v1/topn-metrics",
 	}
 
 	supportedOrigins = []string{}
@@ -78,18 +79,18 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 		logger.Log.Fatalf("Unable to instantiate Tenant Service DAO: %s", err.Error())
 	}
 
-	druidDB := druid.NewDruidDatasctoreClient()
+	metricsDB := druid.NewDruidDatasctoreClient()
 
 	// Register the V1 APIs
 	configureAdminServiceV1API(api, adminDB, tenantDB)
 	configureTenantServiceV1API(api, tenantDB)
-	// configureMetricServiceV1API(api, druidDB)  - Not using this implementation but leaving it in in case we change our minds
+	// configureMetricServiceV1API(api, metricsDB)  - Not using this implementation but leaving it in in case we change our minds
 	configurev1APIThatWeMayRemove(api, tenantDB)
 
 	// Register the V2 APIs
 	configureAdminServiceV2API(api, adminDB, tenantDB)
-	configureTenantServiceV2API(api, tenantDB, druidDB)
-	// configureMetricServiceV2API(api, druidDB)
+	configureMetricServiceV2API(api, tenantDB, metricsDB)
+	configureTenantServiceV2API(api, tenantDB, metricsDB)
 
 	api.ServerShutdown = func() {}
 
@@ -176,7 +177,7 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
 			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
-		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {
+		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) { // DEPRECATED - Remove once V1 is removed
 			// Metric Service V1 call
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if strings.Index(r.URL.Path, "/colt-mef/recommendation") == 0 {

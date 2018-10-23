@@ -31,12 +31,19 @@ func TestReportScheduleConfigCRUDV2(t *testing.T) {
 	assert.True(t, *castedCreateTeant.Payload.Data.Attributes.CreatedTimestamp > 0)
 	assert.True(t, *castedCreateTeant.Payload.Data.Attributes.LastModifiedTimestamp > 0)
 
+	// Make sure a record is created when the tenant is created
+	existingTp := handlers.HandleGetAllThresholdProfilesV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params{HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "GET")})
+	castedExistingTp := existingTp.(*tenant_provisioning_service_v2.GetAllThresholdProfilesV2OK)
+	assert.NotNil(t, castedExistingTp)
+	assert.Equal(t, 1, len(castedExistingTp.Payload.Data))
+	assert.Equal(t, "Default", *castedExistingTp.Payload.Data[0].Attributes.Name)
+
 	// Make sure there are no existing ReportScheduleConfigs
 	existing := handlers.HandleGetAllReportScheduleConfigsV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Params{HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "GET")})
 	castedResponse := existing.(*tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2NotFound)
 	assert.NotNil(t, castedResponse)
 
-	created := handlers.HandleCreateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest(), HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "POST")})
+	created := handlers.HandleCreateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest(*castedExistingTp.Payload.Data[0].Attributes.ID), HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "POST")})
 	castedCreate := created.(*tenant_provisioning_service_v2.CreateReportScheduleConfigV2Created)
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
@@ -65,8 +72,12 @@ func TestReportScheduleConfigCRUDV2(t *testing.T) {
 
 	// Make an update to the Record
 	newName := fake.CharactersN(16)
-	updateRequestBody := generateReportScheduleConfigUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev, &newName, nil)
+	tp := *castedExistingTp.Payload.Data[0].Attributes.ID
+
+	updateRequestBody := generateReportScheduleConfigUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev, &newName, &tp)
+
 	updated := handlers.HandleUpdateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateReportScheduleConfigV2Params{ConfigID: *castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "PATCH")})
+
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateReportScheduleConfigV2OK)
 	assert.NotNil(t, castedUpdate)
 	assert.NotEqual(t, castedCreate.Payload.Data, castedUpdate.Payload.Data)
@@ -137,12 +148,13 @@ func TestReportScheduleConfigConflictV2(t *testing.T) {
 	castedResponse := existing.(*tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2NotFound)
 	assert.NotNil(t, castedResponse)
 
-	createReqBody := generateRandomTenantReportScheduleConfigCreationRequest()
+	createReqBody := generateRandomTenantReportScheduleConfigCreationRequest("xxxx")
 	created := handlers.HandleCreateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "POST")})
 	castedCreate := created.(*tenant_provisioning_service_v2.CreateReportScheduleConfigV2Created)
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Name)
+
 	assert.NotEmpty(t, castedCreate.Payload.Data.Relationships.ThresholdProfile)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Hour)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Minute)
@@ -186,11 +198,11 @@ func TestReportScheduleConfigAPIsProtectedByAuthV2(t *testing.T) {
 	assert.NotNil(t, castedFetch)
 
 	// Create - SkylightAdmin and TenantAdmin Only
-	created := handlers.HandleCreateReportScheduleConfigV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, ReportScheduleConfigUrl, "POST")})
+	created := handlers.HandleCreateReportScheduleConfigV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest("XXX"), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, ReportScheduleConfigUrl, "POST")})
 	castedCreate := created.(*tenant_provisioning_service_v2.CreateReportScheduleConfigV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
-	created = handlers.HandleCreateReportScheduleConfigV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, ReportScheduleConfigUrl, "POST")})
+	created = handlers.HandleCreateReportScheduleConfigV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest("xxx"), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, ReportScheduleConfigUrl, "POST")})
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateReportScheduleConfigV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
@@ -213,9 +225,9 @@ func TestReportScheduleConfigAPIsProtectedByAuthV2(t *testing.T) {
 	assert.NotNil(t, castedDelete)
 }
 
-func generateRandomTenantReportScheduleConfigCreationRequest() *swagmodels.ReportScheduleConfigCreateRequest {
+func generateRandomTenantReportScheduleConfigCreationRequest(thresholdProfile string) *swagmodels.ReportScheduleConfigCreateRequest {
 	name := fake.CharactersN(12)
-	thresh := fake.CharactersN(12)
+	thresh := thresholdProfile
 	dayMonth := "1"
 	hour := "12"
 	minute := "14"
@@ -226,12 +238,13 @@ func generateRandomTenantReportScheduleConfigCreationRequest() *swagmodels.Repor
 		Data: &swagmodels.ReportScheduleConfigCreateRequestData{
 			Type: &reportScehduleConfigTypeString,
 			Attributes: &swagmodels.ReportScheduleConfigCreateRequestDataAttributes{
-				Name:     &name,
-				DayMonth: dayMonth,
-				DayWeek:  dayWeek,
-				Hour:     hour,
-				Minute:   minute,
-				Month:    month,
+				Name:             &name,
+				DayMonth:         dayMonth,
+				DayWeek:          dayWeek,
+				Hour:             hour,
+				Minute:           minute,
+				Month:            month,
+				ThresholdProfile: thresholdProfile,
 			},
 			Relationships: &swagmodels.ReportScheduleConfigRelationships{
 				ThresholdProfile: &swagmodels.JSONAPISingleRelationship{
@@ -259,6 +272,12 @@ func generateReportScheduleConfigUpdateRequest(id string, rev string, name *stri
 	}
 
 	if thresh != nil {
+		if result.Data.Relationships == nil {
+			result.Data.Relationships = &swagmodels.ReportScheduleConfigRelationships{}
+			result.Data.Relationships.ThresholdProfile = &swagmodels.JSONAPISingleRelationship{
+				Data: &swagmodels.JSONAPIRelationshipData{},
+			}
+		}
 		result.Data.Relationships.ThresholdProfile.Data.ID = *thresh
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	defaultMetricsRequestBytes = []byte(`{
+	defaultMetricsRequestBytes = []byte(`{ 
 		 "tenantId": "8501f157-b7f5-41c3-aaba-c75e0566c54c",
 		 "domainIds": [
 		   "7c3d3280-628c-c778-92ec-4e9b83fcbb4d",
@@ -34,12 +34,12 @@ var (
 
 func TestAggregateMetricsRequestSerialization(t *testing.T) {
 
-	actual := AggregateMetricsAPIRequest{}
+	actual := AggregateMetricsV1{}
 
-	expected := &AggregateMetricsAPIRequest{
+	expected := &AggregateMetricsV1{
 		TenantID: "8501f157-b7f5-41c3-aaba-c75e0566c54c",
 		Interval: "2018-04-08T14:00:00/2018-04-09T15:00:00",
-		Aggregation: AggregationSpec{
+		Aggregation: AggregationSpecV1{
 			Name: "avg",
 		},
 	}

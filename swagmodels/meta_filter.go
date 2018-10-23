@@ -9,7 +9,8 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 )
 
-// MetaFilter meta filter
+// MetaFilter An object that allows filtering on arbitrary metadata criteria and their values.  The keys in the map are associated with metadata categories and the value array  corresponds to a set of whitelist filter-in values for that category. The logical  semantics associated with this structure are conditional-AND across metadata criteria (keys) and conditional-OR across the values contained within the value array. For example, {"region":["montreal","ottawa"], "group":["radio"]} will match all records that are of group "radio" AND from the region "montreal" OR "ottawa"
+//
 // swagger:model MetaFilter
 type MetaFilter map[string][]string
 

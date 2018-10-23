@@ -5,6 +5,7 @@ import (
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service_v2"
+	"github.com/accedian/adh-gather/restapi/operations/metrics_service_v2"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service"
 	"github.com/accedian/adh-gather/restapi/operations/tenant_provisioning_service_v2"
 )
@@ -23,14 +24,14 @@ func configureAdminServiceV2API(api *operations.GatherAPI, adminDB datastore.Adm
 	api.AdminProvisioningServiceV2GetValidTypesV2Handler = admin_provisioning_service_v2.GetValidTypesV2HandlerFunc(handlers.HandleGetValidTypesV2(handlers.AllRoles, adminDB))
 }
 
-func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore, druidDB datastore.DruidDatastore) {
+func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore, metricsDB datastore.MetricsDatastore) {
 	api.TenantProvisioningServiceV2GetDataCleaningProfileHandler = tenant_provisioning_service_v2.GetDataCleaningProfileHandlerFunc(handlers.HandleGetDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceV2GetDataCleaningProfilesHandler = tenant_provisioning_service_v2.GetDataCleaningProfilesHandlerFunc(handlers.HandleGetDataCleaningProfilesV2(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceV2DeleteDataCleaningProfileHandler = tenant_provisioning_service_v2.DeleteDataCleaningProfileHandlerFunc(handlers.HandleDeleteDataCleaningProfileV2(handlers.SkylightAdminRoleOnly, tenantDB))
 	api.TenantProvisioningServiceV2CreateDataCleaningProfileHandler = tenant_provisioning_service_v2.CreateDataCleaningProfileHandlerFunc(handlers.HandleCreateDataCleaningProfileV2(handlers.SkylightAdminRoleOnly, tenantDB))
 	api.TenantProvisioningServiceV2UpdateDataCleaningProfileHandler = tenant_provisioning_service_v2.UpdateDataCleaningProfileHandlerFunc(handlers.HandleUpdateDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceBulkUpsertMonitoredObjectMetaHandler = tenant_provisioning_service.BulkUpsertMonitoredObjectMetaHandlerFunc(handlers.HandleBulkUpsertMonitoredObjectsMeta(handlers.SkylightAndTenantAdminRoles, tenantDB))
-	api.TenantProvisioningServiceV2GetDataCleaningHistoryHandler = tenant_provisioning_service_v2.GetDataCleaningHistoryHandlerFunc(handlers.HandleGetDataCleaningHistoryV2(handlers.SkylightAndTenantAdminRoles, druidDB))
+	api.TenantProvisioningServiceV2GetDataCleaningHistoryHandler = tenant_provisioning_service_v2.GetDataCleaningHistoryHandlerFunc(handlers.HandleGetDataCleaningHistoryV2(handlers.SkylightAndTenantAdminRoles, metricsDB))
 
 	api.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler = tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(handlers.HandleGetAllMonitoredObjectsV2(handlers.AllRoles, tenantDB))
 	api.TenantProvisioningServiceV2GetFilteredMonitoredObjectListV2Handler = tenant_provisioning_service_v2.GetFilteredMonitoredObjectListV2HandlerFunc(handlers.HandleGetFilteredMonitoredObjectListV2(handlers.AllRoles, tenantDB))
@@ -105,5 +106,12 @@ func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.T
 	api.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler = tenant_provisioning_service_v2.DeleteMetadataConfigV2HandlerFunc(handlers.HandleDeleteMetadataConfigV2(handlers.SkylightAdminRoleOnly, tenantDB))
 }
 
-func configureMetricServiceV2API(api *operations.GatherAPI, druidDB datastore.DruidDatastore) {
+func configureMetricServiceV2API(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore, metricsDB datastore.MetricsDatastore) {
+	api.MetricsServiceV2GetHistogramV2Handler = metrics_service_v2.GetHistogramV2HandlerFunc(handlers.HandleGetHistogramV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2GetTopNForMetricV2Handler = metrics_service_v2.GetTopNForMetricV2HandlerFunc(handlers.HandleGetTopNForMetricV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2QueryThresholdCrossingV2Handler = metrics_service_v2.QueryThresholdCrossingV2HandlerFunc(handlers.HandleGetThresholdCrossingV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2QueryAggregateMetricsV2Handler = metrics_service_v2.QueryAggregateMetricsV2HandlerFunc(handlers.HandleGetAggregateMetricsV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2GetFilteredRawMetricsV2Handler = metrics_service_v2.GetFilteredRawMetricsV2HandlerFunc(handlers.HandleGetRawMetricsV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2GenerateSLAReportV2Handler = metrics_service_v2.GenerateSLAReportV2HandlerFunc(handlers.HandleGenerateSLAReportV2(handlers.AllRoles, metricsDB, tenantDB))
+	api.MetricsServiceV2GetThresholdCrossingByMonitoredObjectTopNV2Handler = metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2HandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopNV2(handlers.AllRoles, metricsDB, tenantDB))
 }

@@ -28,7 +28,7 @@ type ThresholdCrossingByMOTopNAPIRequestObject struct {
 	Meta map[string][]string `json:"meta,omitempty"`
 
 	// the metric to be used for the top N query
-	Metric *MetricIdentifierObject `json:"metric,omitempty"`
+	Metric *MetricIdentifier `json:"metric,omitempty"`
 
 	// query timeout in milliseconds
 	NumResults int32 `json:"numResults,omitempty"`

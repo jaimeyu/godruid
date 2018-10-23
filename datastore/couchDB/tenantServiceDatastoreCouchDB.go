@@ -35,7 +35,7 @@ type TenantServiceDatastoreCouchDB struct {
 	server              string
 	cfg                 config.Provider
 	connectorUpdateChan chan *tenmod.ConnectorConfig
-	metricsDB           ds.DruidDatastore
+	metricsDB           ds.MetricsDatastore
 	batchSize           int64
 }
 

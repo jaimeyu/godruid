@@ -1,3 +1,4 @@
+* Feature - V2 Metric APIs
 ## Current Release 
 ### 0.233.0 
 **Release Date:** Fri Oct 19 15:23:19 UTC 2018     

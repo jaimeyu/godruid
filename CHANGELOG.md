@@ -1,3 +1,4 @@
+* Fix - Adding metric API guards
 ## Current Release 
 ### 0.237.0 
 **Release Date:** Wed Oct 24 18:14:13 UTC 2018     

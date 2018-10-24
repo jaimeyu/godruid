@@ -426,14 +426,16 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
 			return nil, err
 		}
-		topNResults = make([]metrics.TopNEntryResponse, len(topNResponse))
+		topNResults = make([]metrics.TopNEntryResponse, 0)
 
-		for i, r := range topNResponse {
+		for _, r := range topNResponse {
 			rawMap := r.(map[string]interface{})
-			toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
-			delete(rawMap, "monitoredObjectId")
-			toAdd.Result = rawMap
-			topNResults[i] = toAdd
+			if rawMap["monitoredObjectId"] != nil {
+				toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
+				delete(rawMap, "monitoredObjectId")
+				toAdd.Result = rawMap
+				topNResults = append(topNResults, toAdd)
+			}
 		}
 
 	}
@@ -543,15 +545,15 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
 			return nil, err
 		}
-		topNResults = make([]metrics.TopNEntryResponse, len(topNResponse))
+		topNResults = make([]metrics.TopNEntryResponse, 0)
 
-		for i, r := range topNResponse {
+		for _, r := range topNResponse {
 			rawMap := r.(map[string]interface{})
 			if rawMap["monitoredObjectId"] != nil {
 				toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
 				delete(rawMap, "monitoredObjectId")
 				toAdd.Result = rawMap
-				topNResults[i] = toAdd
+				topNResults = append(topNResults, toAdd)
 			}
 		}
 

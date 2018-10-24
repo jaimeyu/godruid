@@ -37,10 +37,11 @@ type ColtMEFHandler struct {
 	// pendingWriter *messaging.KafkaProducer
 	resultWriter *messaging.KafkaProducer
 
-	server           string
-	appID            string
-	sharedSecret     string
-	statusRetryCount int
+	server                       string
+	appID                        string
+	sharedSecret                 string
+	statusRetryCount             int
+	consecutiveRequestErrorCount int
 
 	pollCheckpoint1 float64
 	pollCheckpoint2 float64
@@ -68,6 +69,8 @@ func CreateColtMEFHandler() *ColtMEFHandler {
 	result.pollCheckpoint1 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint1.String())
 	result.pollCheckpoint2 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint2.String())
 	result.pollCheckpoint3 = cfg.GetFloat64(gather.CK_args_coltmef_checkpoint3.String())
+
+	result.consecutiveRequestErrorCount = 0
 
 	logger.Log.Infof("%sStarting event handler at %s with app ID %s", logPrefix, result.server, result.appID)
 
@@ -135,15 +138,24 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 	logger.Log.Debugf("%sMAKE RECOMMENDATION RESPONSE [SERVICE CHANGE REQ: %s]: %s", logPrefix, requestID, string(respBytes))
 
 	if resp.StatusCode != http.StatusOK {
+		cmh.consecutiveRequestErrorCount++
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
 		if err != nil {
+			if cmh.consecutiveRequestErrorCount > 0 && cmh.consecutiveRequestErrorCount%5 == 0 {
+				postSlackUpdate(cmh.httpClient, requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error response had an invalid format.", cmh.consecutiveRequestErrorCount))
+			}
 			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal recommendation response for service change request %s: %s", requestID, err.Error())
 		}
 
+		if cmh.consecutiveRequestErrorCount > 0 && cmh.consecutiveRequestErrorCount%5 == 0 {
+			postSlackUpdate(cmh.httpClient, requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error was: %d - %s", cmh.consecutiveRequestErrorCount, responseObj.Code, responseObj.Message))
+		}
 		return nil, resp.StatusCode, fmt.Errorf("Service change failed for service change request %s: %d - %s", requestID, responseObj.Code, responseObj.Message)
 	}
+
+	cmh.consecutiveRequestErrorCount = 0
 
 	// Request was successful, format the response object
 	responseObj := &ColtRecommendationResponse{}
@@ -435,4 +447,6 @@ func postSlackUpdate(client *http.Client, serviceChangeID string, payload string
 	if resp.StatusCode != http.StatusOK {
 		logger.Log.Errorf("%sError completing slack update post for service change request %s: Response Code %d", logPrefix, serviceChangeID, resp.StatusCode)
 	}
+
+	resp.Body.Close()
 }

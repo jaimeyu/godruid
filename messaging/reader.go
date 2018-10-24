@@ -27,7 +27,6 @@ func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
 		Brokers:        []string{cfg.GetString(gather.CK_kafka_broker.String())},
 		Topic:          result.topicName,
 		GroupID:        result.topicName + "-" + groupTag,
-		Partition:      0,
 		CommitInterval: time.Second,
 	})
 

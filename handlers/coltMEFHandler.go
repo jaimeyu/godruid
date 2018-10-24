@@ -124,6 +124,8 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 	// Issue request to COlt
 	resp, err := cmh.httpClient.Do(req)
 	if err != nil {
+		cmh.consecutiveRequestErrorCount++
+		cmh.postConsecutiveRequestError(requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error was at the http layer: %s", cmh.consecutiveRequestErrorCount, err.Error()))
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to issue service change for service change request %s: %s", requestID, err.Error())
 	}
 
@@ -132,6 +134,8 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 	// Read the request
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		cmh.consecutiveRequestErrorCount++
+		cmh.postConsecutiveRequestError(requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error was parsing the response body: %s", cmh.consecutiveRequestErrorCount, err.Error()))
 		return nil, http.StatusInternalServerError, fmt.Errorf("Unable to read service change response for service change request %s: %s", requestID, err.Error())
 	}
 
@@ -139,19 +143,16 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 
 	if resp.StatusCode != http.StatusOK {
 		cmh.consecutiveRequestErrorCount++
+
 		// Request was not successful, format the error response
 		responseObj := &ColtError{}
 		err = json.Unmarshal(respBytes, responseObj)
 		if err != nil {
-			if cmh.consecutiveRequestErrorCount > 0 && cmh.consecutiveRequestErrorCount%5 == 0 {
-				postSlackUpdate(cmh.httpClient, requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error response had an invalid format.", cmh.consecutiveRequestErrorCount))
-			}
+			cmh.postConsecutiveRequestError(requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error response had an invalid format.", cmh.consecutiveRequestErrorCount))
 			return nil, http.StatusInternalServerError, fmt.Errorf("Unable to unmarshal recommendation response for service change request %s: %s", requestID, err.Error())
 		}
 
-		if cmh.consecutiveRequestErrorCount > 0 && cmh.consecutiveRequestErrorCount%5 == 0 {
-			postSlackUpdate(cmh.httpClient, requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error was: %d - %s", cmh.consecutiveRequestErrorCount, responseObj.Code, responseObj.Message))
-		}
+		cmh.postConsecutiveRequestError(requestID, fmt.Sprintf("There have been %d consecutive failed requests. The last error was: %d - %s", cmh.consecutiveRequestErrorCount, responseObj.Code, responseObj.Message))
 		return nil, resp.StatusCode, fmt.Errorf("Service change failed for service change request %s: %d - %s", requestID, responseObj.Code, responseObj.Message)
 	}
 
@@ -165,6 +166,13 @@ func (cmh *ColtMEFHandler) doMakeRecommendation(requestID string, requestObj *Co
 	}
 
 	return responseObj, http.StatusOK, nil
+}
+
+func (cmh *ColtMEFHandler) postConsecutiveRequestError(requestID string, msg string) {
+	logger.Log.Debug(logPrefix + msg)
+	if cmh.consecutiveRequestErrorCount > 0 && cmh.consecutiveRequestErrorCount%5 == 0 {
+		postSlackUpdate(cmh.httpClient, requestID, msg)
+	}
 }
 
 // doCheckRecommendationStatus - Handles the logic to make a call to the Colt GET /api/performance/recommendation/{recommendationID} API for checking the

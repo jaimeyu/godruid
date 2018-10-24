@@ -1,8 +1,10 @@
 * Fix - Adding metric API guards
 ## Current Release 
+### 0.237.0 
+**Release Date:** Wed Oct 24 18:14:13 UTC 2018     
+## Previous Releases 
 ### 0.236.0 
 **Release Date:** Wed Oct 24 17:27:41 UTC 2018     
-## Previous Releases 
 * Fix - Adding metric API guards
 ### 0.235.0 
 **Release Date:** Wed Oct 24 16:35:29 UTC 2018     

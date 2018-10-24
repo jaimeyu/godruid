@@ -32,9 +32,12 @@ args:
   coltmef:
     enabled: true
     server: "https://demo.ondemand.colt.net/api/performance/recommendation"
-    appID: "datahubtest"
+    appID: "datahubprod"
     secret: "test123"
     statusRetryCount: 10
+    checkpoint1: 300
+    checkpoint2: 600
+    checkpoint3: 900
 
 kafka:
   broker: "localhost:9092"

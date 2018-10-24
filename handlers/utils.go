@@ -234,6 +234,206 @@ var (
 									}
 								}
 							}
+						},
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"twamp-sl": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}

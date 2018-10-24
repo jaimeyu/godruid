@@ -1258,7 +1258,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 
 	switch len(postAggregations) {
 	case 0:
-		return nil, fmt.Errorf("No threshold crossing events configured for threshold profile %s", thresholdProfile.Name)
+		return nil, fmt.Errorf("No threshold crossing events configured with threshold profile %s for the requested metrics", thresholdProfile.Name)
 	case 1: // There should not be any post aggregation if we have less than 2 events that we care about since we need 2 entries for the aggregation operator so we deal with this by adding 0
 		postAggregations = append(postAggregations, godruid.PostAggConstant("", 0))
 		scoredPostAggregation = []godruid.PostAggregation{

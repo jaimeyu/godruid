@@ -32,7 +32,7 @@ type TopNMetricsAPIRequestObject struct {
 
 	// metric
 	// Required: true
-	Metric *MetricIdentifierObject `json:"metric"`
+	Metric *MetricIdentifier `json:"metric"`
 
 	// metrics view
 	MetricsView []*MetricViewObject `json:"metricsView"`

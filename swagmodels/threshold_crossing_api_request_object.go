@@ -30,7 +30,7 @@ type ThresholdCrossingAPIRequestObject struct {
 	Meta map[string][]string `json:"meta,omitempty"`
 
 	// limits the results to include only metrics in the whitelist
-	Metrics []*MetricIdentifierObject `json:"metrics"`
+	Metrics []*MetricIdentifier `json:"metrics"`
 
 	// the tenant identifier
 	// Required: true

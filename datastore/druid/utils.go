@@ -18,7 +18,6 @@ import (
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/accedian/godruid"
-	uuid "github.com/satori/go.uuid"
 )
 
 // Format a ThresholdCrossing object into something the UI can consume
@@ -47,14 +46,13 @@ func reformatThresholdCrossingResponse(thresholdCrossing []*pb.ThresholdCrossing
 	return dataContainer, nil
 }
 
-func convertHistogramResponse(tenantId string, meta map[string][]string, interval string, rawResponse string) (map[string]interface{}, error) {
+func reformatHistogramResponse(tenantId string, meta map[string][]string, interval string, rawResponse string) (map[string]interface{}, error) {
 
 	const (
-		HistogramReport = "histogramReports"
-		AttrData        = "data"
-		AttrTimestamp   = "timestamp"
-		AttrResult      = "result"
-		KeyDelim        = "."
+		AttrData      = "data"
+		AttrTimestamp = "timestamp"
+		AttrResult    = "result"
+		KeyDelim      = "."
 
 		IndexVendor      = 1
 		IndexObjectType  = 2
@@ -105,11 +103,14 @@ func convertHistogramResponse(tenantId string, meta map[string][]string, interva
 		metricResults := make([]metrics.MetricResult, 0)
 		for k, m := range resultMap {
 			keyfields := metrickeyRegex.FindStringSubmatch(k)
-			metricResults = append(metricResults, metrics.MetricResult{Vendor: keyfields[IndexVendor],
-				ObjectType: keyfields[IndexObjectType],
-				Name:       keyfields[IndexMetricName],
-				Direction:  keyfields[IndexDirection],
-				Results:    m})
+			metricAdd := metrics.MetricResult{}
+			metricAdd.Vendor = keyfields[IndexVendor]
+			metricAdd.ObjectType = keyfields[IndexObjectType]
+			metricAdd.Metric = keyfields[IndexMetricName]
+			metricAdd.Direction = keyfields[IndexDirection]
+			metricAdd.Results = m
+
+			metricResults = append(metricResults, metricAdd)
 		}
 		timeslice.Result = metricResults
 		timeSlices = append(timeSlices, timeslice)
@@ -121,51 +122,22 @@ func convertHistogramResponse(tenantId string, meta map[string][]string, interva
 	hcReport.ReportTimeRange = interval
 	hcReport.ReportCompletionTime = time.Now().UTC().String()
 
-	uuid := uuid.NewV4()
-	rr := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id":         uuid.String(),
-			"type":       HistogramReport,
-			"attributes": hcReport,
-		},
-	}
-
-	return rr, nil
-}
-
-func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) (map[string]interface{}, error) {
-	res := gabs.New()
-	for _, tc := range thresholdCrossing {
-		monObjId := tc.Event["monitoredObjectId"]
-		monObj := ""
-		if monObjId != nil {
-			monObj = monObjId.(string)
-		}
-		if !res.ExistsP("result." + monObj) {
-			_, err := res.ArrayP("result." + monObj)
-			if err != nil {
-				return nil, fmt.Errorf("Error formatting Threshold Crossing By Monitored Object JSON. Err: %s", err)
-			}
-		}
-
-		obj := gabs.New()
-		obj.SetP(tc.Timestamp, "timestamp")
-		for k, v := range tc.Event {
-			obj.SetP(v, k)
-		}
-		res.ArrayAppendP(obj.Data(), "result."+monObj)
-
-	}
-
-	dataContainer := map[string]interface{}{}
-	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
+	objMapBytes, err := json.Marshal(hcReport)
+	if err != nil {
 		return nil, err
 	}
-	logger.Log.Debugf("Reformatted threshold crossing by mon obj data: %v", dataContainer)
-	return dataContainer, nil
+
+	objMap := make(map[string]interface{})
+	err = json.Unmarshal(objMapBytes, &objMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return objMap, nil
 }
 
-func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]interface{}, error) {
+// DEPRECATED - Remove after Filtered raw metrics V2 query removed
+func reformatRawMetricsResponse(rawMetrics []metrics.TimeseriesEntryResponse) (map[string]interface{}, error) {
 
 	// v1 response structure of monId->timeseriesArray->direction->metricset
 	responseMap := make(map[string][]map[string]interface{})
@@ -229,6 +201,126 @@ func reformatRawMetricsResponse(rawMetrics []RawMetricsResponse) (map[string]int
 
 	dataContainer := map[string]interface{}{"result": responseMap}
 	logger.Log.Debugf("Reformatted raw metrics data: %v", responseMap)
+	return dataContainer, nil
+}
+
+// DEPRECATED - Remove after V1 is removed
+func reformatHistogramResponseV1(tenantId string, meta map[string][]string, interval string, rawResponse string) (map[string]interface{}, error) {
+
+	const (
+		AttrData      = "data"
+		AttrTimestamp = "timestamp"
+		AttrResult    = "result"
+		KeyDelim      = "."
+
+		IndexVendor      = 1
+		IndexObjectType  = 2
+		IndexMetricName  = 3
+		IndexDirection   = 4
+		IndexBucketIndex = 5
+	)
+
+	fieldsRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+?).(?P<Index>.+)`)
+	metrickeyRegex := regexp.MustCompile(`(?P<Vendor>.+?)\.(?P<ObjectType>.+?)\.(?P<MetricName>.+?)\.(?P<Direction>.+)`)
+
+	// Temporary hack to put the payload in a format understandable by the json library
+	jsonResponse, err := gabs.ParseJSON([]byte(fmt.Sprintf(`{"data":%s}`, rawResponse)))
+	if err != nil {
+		return nil, err
+	}
+
+	hcReport := metrics.HistogramReportV1{}
+	timeSlices := make([]metrics.HistogramTimeSeriesEntryV1, 0)
+
+	// Process each time slice in the raw druid response
+	rawTimeslices, _ := jsonResponse.S(AttrData).Children()
+	for _, rawTimeslice := range rawTimeslices {
+		// Create a new timeslice for the current set of time that we are processing from the druid response
+		timeslice := metrics.HistogramTimeSeriesEntryV1{Timestamp: rawTimeslice.S(AttrTimestamp).Data().(string)}
+
+		// Process each bucket response for each metric in the time slice
+		rawResultMap, _ := rawTimeslice.S(AttrResult).ChildrenMap()
+		resultMap := make(map[string][]metrics.BucketResult)
+		for rawkey, value := range rawResultMap {
+
+			// Build up the key as vendor.objecttype.metricname.direction. This allows us to figure out which buckets belong to which metric since
+			// there can be multiple in the original request
+			fields := fieldsRegex.FindStringSubmatch(rawkey)
+			mapkey := fields[IndexVendor] + KeyDelim + fields[IndexObjectType] + KeyDelim + fields[IndexMetricName] + KeyDelim + fields[IndexDirection]
+
+			bucketResult := metrics.BucketResult{Index: fields[IndexBucketIndex], Count: int(value.Data().(float64))}
+
+			// If a set of result buckets does not already exist for the metric we need to create one and add it to our current time slice
+			metricBucket, found := resultMap[mapkey]
+			if !found {
+				metricBucket = make([]metrics.BucketResult, 0)
+			}
+			metricBucket = append(metricBucket, bucketResult)
+			resultMap[mapkey] = metricBucket
+		}
+
+		metricResults := make([]metrics.MetricResultV1, 0)
+		for k, m := range resultMap {
+			keyfields := metrickeyRegex.FindStringSubmatch(k)
+			metricResults = append(metricResults, metrics.MetricResultV1{Vendor: keyfields[IndexVendor],
+				ObjectType: keyfields[IndexObjectType],
+				Name:       keyfields[IndexMetricName],
+				Direction:  keyfields[IndexDirection],
+				Results:    m})
+		}
+		timeslice.Result = metricResults
+		timeSlices = append(timeSlices, timeslice)
+	}
+
+	hcReport.TimeSeriesResult = timeSlices
+	hcReport.TenantID = tenantId
+	hcReport.Meta = meta
+	hcReport.ReportTimeRange = interval
+	hcReport.ReportCompletionTime = time.Now().UTC().String()
+
+	objMapBytes, err := json.Marshal(hcReport)
+	if err != nil {
+		return nil, err
+	}
+
+	objMap := make(map[string]interface{})
+	err = json.Unmarshal(objMapBytes, &objMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return objMap, nil
+}
+
+func reformatThresholdCrossingByMonitoredObjectResponse(thresholdCrossing []ThresholdCrossingByMonitoredObjectResponse) (map[string]interface{}, error) {
+	res := gabs.New()
+	for _, tc := range thresholdCrossing {
+		monObjId := tc.Event["monitoredObjectId"]
+		monObj := ""
+		if monObjId != nil {
+			monObj = monObjId.(string)
+		}
+		if !res.ExistsP("result." + monObj) {
+			_, err := res.ArrayP("result." + monObj)
+			if err != nil {
+				return nil, fmt.Errorf("Error formatting Threshold Crossing By Monitored Object JSON. Err: %s", err)
+			}
+		}
+
+		obj := gabs.New()
+		obj.SetP(tc.Timestamp, "timestamp")
+		for k, v := range tc.Event {
+			obj.SetP(v, k)
+		}
+		res.ArrayAppendP(obj.Data(), "result."+monObj)
+
+	}
+
+	dataContainer := map[string]interface{}{}
+	if err := json.Unmarshal(res.Bytes(), &dataContainer); err != nil {
+		return nil, err
+	}
+	logger.Log.Debugf("Reformatted threshold crossing by mon obj data: %v", dataContainer)
 	return dataContainer, nil
 }
 
@@ -500,7 +592,7 @@ func sendRequest(method string, httpClient *http.Client, endpoint, authToken str
 
 // For postprocessing metrics
 type PostProcessor interface {
-	Apply(input []AggMetricsResponse) []AggMetricsResponse
+	Apply(input []metrics.TimeseriesEntryResponse) []metrics.TimeseriesEntryResponse
 }
 
 var (
@@ -509,7 +601,7 @@ var (
 
 type NoopPostProcessor struct{}
 
-func (pp NoopPostProcessor) Apply(input []AggMetricsResponse) []AggMetricsResponse {
+func (pp NoopPostProcessor) Apply(input []metrics.TimeseriesEntryResponse) []metrics.TimeseriesEntryResponse {
 	logger.Log.Debugf("NoopPostProcessor.apply called")
 	return input
 }
@@ -519,7 +611,7 @@ type DropKeysPostprocessor struct {
 	countKeys  map[string][]string
 }
 
-func (pp DropKeysPostprocessor) Apply(input []AggMetricsResponse) []AggMetricsResponse {
+func (pp DropKeysPostprocessor) Apply(input []metrics.TimeseriesEntryResponse) []metrics.TimeseriesEntryResponse {
 	logger.Log.Debugf("DropKeysPostprocessor.apply called with %v, %v, %v", pp.keysToDrop, pp.countKeys, input)
 	if len(pp.keysToDrop) > 0 {
 		for _, v := range input {

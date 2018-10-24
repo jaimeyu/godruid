@@ -14,6 +14,7 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/swagmodels"
@@ -659,6 +660,16 @@ func wrapJsonAPIObject(obj interface{}, id string, otype string) map[string]inte
 			"attributes": obj}}
 }
 
+func wrapJsonAPIObjectAsArray(obj interface{}, id string, otype string) map[string]interface{} {
+
+	return map[string]interface{}{
+		"data": []map[string]interface{}{
+			map[string]interface{}{
+				"id":         id,
+				"type":       otype,
+				"attributes": obj}}}
+}
+
 // authorizeRequest - Does the initial setup of a REST handler function, including logging, incrementing API counters for monitoring and tracking the
 // initialization time of the call.
 // Returns:
@@ -722,4 +733,59 @@ func getIdsFromRelationshipData(relationships *swagmodels.JSONAPIRelationship) [
 	}
 
 	return result
+}
+
+func addValToList(list []*metmod.MetricViolationSummaryType, entry map[string]interface{}, ts string) []*metmod.MetricViolationSummaryType {
+
+	if entry == nil {
+		entry = make(map[string]interface{})
+	}
+
+	if entry["violationDuration"] != nil || entry["violationCount"] != nil {
+
+		// var check float64
+		_, ok := entry["violationDuration"].(float64)
+		if !ok {
+			return list
+		}
+
+		_, ok = entry["violationDuration"].(float64)
+		if !ok {
+			return list
+		}
+
+		tmp := metmod.MetricViolationSummaryType{
+			"violationCount":    entry["violationCount"],
+			"violationDuration": entry["violationDuration"],
+			"timestamp":         ts,
+		}
+
+		list = append(list, &tmp)
+	}
+
+	return list
+}
+
+func buildHash(args ...string) string {
+	str := ""
+	for _, w := range args {
+		str = str + "." + w
+	}
+	return str
+}
+
+func utilMetricViolationSummaryTypeMap2Array(src map[string]*metmod.MetricViolationSummaryType) []*metmod.MetricViolationSummaryType {
+	var res []*metmod.MetricViolationSummaryType
+	for _, v := range src {
+		res = append(res, v)
+	}
+	return res
+}
+
+func utilMetricViolationsSummaryAsTimeSeriesEntryMap2Array(src map[string]*metmod.MetricViolationsSummaryAsTimeSeriesEntry) []*metmod.MetricViolationsSummaryAsTimeSeriesEntry {
+	var res []*metmod.MetricViolationsSummaryAsTimeSeriesEntry
+	for _, v := range src {
+		res = append(res, v)
+	}
+	return res
 }

@@ -1951,7 +1951,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 
 	request := metmod.SLAReportRequest{
 		TenantID:          TENANT,
-		SlaScheduleConfig: "1000",
+		SLAScheduleConfig: "1000",
 	}
 
 	report := metmod.SLAReport{
@@ -1967,7 +1967,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 				},
 			},
 		},
-		ReportScheduleConfig: request.SlaScheduleConfig,
+		ReportScheduleConfig: request.SLAScheduleConfig,
 	}
 	tdb := runner.tenantDB
 

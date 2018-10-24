@@ -1,4 +1,4 @@
-* Fix - Adding even more debug logs to event handling
+* Fix - Adding metric API guards
 ## Current Release 
 ### 0.234.0 
 **Release Date:** Tue Oct 23 18:08:51 UTC 2018     

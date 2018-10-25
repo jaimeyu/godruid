@@ -24,8 +24,8 @@ import (
 //go:generate swagger generate server --target .. --name gather --spec ../files/swagger.yml --model-package swagmodels --exclude-main --exclude-spec
 
 const (
-	testDataAPIPrefix = "/test-data"
-	certsAPIPrefix    = "/certs"
+	testDataAPIPrefix     = "/test-data"
+	distributionAPIPrefix = "/distribution"
 )
 
 var (
@@ -175,7 +175,7 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 		}
 
 		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 ||
-			strings.Index(r.URL.Path, certsAPIPrefix) == 0 {
+			strings.Index(r.URL.Path, distributionAPIPrefix) == 0 {
 			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) {

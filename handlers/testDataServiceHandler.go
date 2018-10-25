@@ -62,6 +62,7 @@ const (
 	getDocsByTypeStr                    = "get_docs_by_type"
 	insertTenViewsStr                   = "insert_tenant_views"
 	signCSRStr                          = "sign_csr"
+	downloadRRStr                       = "download_roadrunner"
 
 	stringGeneratorCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
@@ -147,8 +148,14 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 		server.Route{
 			Name:        "SignCSR",
 			Method:      "POST",
-			Pattern:     "/certs/sign-csr",
+			Pattern:     "/distribution/sign-csr",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.SignCSR),
+		},
+		server.Route{
+			Name:        "DownloadRoadrunner",
+			Method:      "GET",
+			Pattern:     "/distribution/download-roadrunner",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.DownloadRoadrunner),
 		},
 	}
 
@@ -1184,6 +1191,19 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	logger.Log.Debugf("Successfully generate client cert, sending to client.")
 
 	w.Write(clientCRTRaw)
+}
+
+// DownloadRoadrunner - Download Roadrunner package for isntallation
+func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *http.Request) {
+
+	startTime := time.Now()
+
+	logger.Log.Debugf("Received DownloadRoadrunner request")
+
+	logger.Log.Debugf("Successfully generate Roadrunner package for downloading, sending to client.")
+
+	fmt.Println("START TIME--->", startTime)
+	w.Write([]byte("HELO"))
 }
 
 // generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.

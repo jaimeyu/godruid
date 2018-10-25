@@ -753,56 +753,11 @@
         type: integer
         description: Number of results to return
       metric:
-        $ref: '#/definitions/MetricIdentifierObject'
+        $ref: '#/definitions/MetricIdentifier'
       metricsView:
         type: array
         items:
           $ref: '#/definitions/MetricViewObject'
-  FilteredRawMetricsRequestObject:
-    type: object
-    required:
-      - tenantId
-      - interval
-      - objectType
-      - metrics
-      - directions
-      - meta
-    properties:
-      tenantId:
-        type: string
-        description: the tenant identifier
-        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
-      meta:
-        type: object
-        description: set of meta keys and list of values for the purposes of filtering
-        additionalProperties:
-          type: array
-          items:
-            type: string
-      interval:
-        type: string
-        description: ISO-8601 interval
-        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
-      timeout:
-        type: integer
-        description: query timeout in milliseconds
-        example: 30000
-      metrics:
-        type: array
-        items:
-          type: string
-      directions:
-        type: array
-        items:
-          type: string
-      objectType:
-        type: string
-        description: the type of monitored object
-        example: twamp-sf
-      granularity:
-        type: string
-        description: the granularity for timeseries in ISO-8601 duration format, or ALL
-        example: PT1H
   MetricBucketObject:
     type: object
     properties:
@@ -921,7 +876,7 @@
       metrics:
         type: array
         items:
-          $ref: '#/definitions/MetricIdentifierObject'
+          $ref: '#/definitions/MetricIdentifier'
 
   ThresholdCrossingAPIRequestObject:
     type: object
@@ -960,7 +915,7 @@
         type: array
         description: limits the results to include only metrics in the whitelist
         items:
-          $ref: '#/definitions/MetricIdentifierObject'
+          $ref: '#/definitions/MetricIdentifier'
   ThresholdCrossingByMOTopNAPIRequestObject:
     type: object
     required:
@@ -1000,7 +955,7 @@
         description: query timeout in milliseconds
         example: 30000
       metric:
-        $ref: '#/definitions/MetricIdentifierObject'
+        $ref: '#/definitions/MetricIdentifier'
         description: the metric to be used for the top N query
   SLAReportRequestObject:
     type: object
@@ -1038,26 +993,6 @@
       timezone: 
         type: "string"
         description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
-  MetricIdentifierObject:
-    type: object
-    required:
-      - vendor
-      - objectType
-      - name
-    properties:
-      vendor:
-        type: string
-        example: accedian-twamp
-      objectType:
-        type: string
-        example: twamp-pe
-      name:
-        type: string
-        example: delayP95
-      direction:
-        type: integer
-        example: 0
-        default: 0
 
   MetricResultsResponseObject:
     type: object

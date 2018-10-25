@@ -1,7 +1,7 @@
   ReportScheduleConfigCreateRequest:
     type: "object"
     required: ["data"]
-    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    description: "Object used to create a new Report Generation Schedule in Datahub"
     properties:
       data:
         type: "object"

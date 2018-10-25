@@ -70,21 +70,6 @@ func configureTenantServiceV1API(api *operations.GatherAPI, tenantDB datastore.T
 
 }
 
-func configureMetricServiceV1API(api *operations.GatherAPI, druidDB datastore.DruidDatastore) {
-	// TODO calls from V1 Metrics service that were hooked up with generated code, but are having issues with unmarshalling the pb.Any object
-	// ======================= START OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
-	// api.MetricsServiceQueryAggregatedMetricsHandler = metrics_service.QueryAggregatedMetricsHandlerFunc(handlers.HandleQueryAggregatedMetrics(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceQueryThresholdCrossingHandler = metrics_service.QueryThresholdCrossingHandlerFunc(handlers.HandleQueryThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingHandler = metrics_service.GetThresholdCrossingHandlerFunc(handlers.HandleGetThresholdCrossing(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectHandler = metrics_service.GetThresholdCrossingByMonitoredObjectHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObject(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetThresholdCrossingByMonitoredObjectTopNHandler = metrics_service.GetThresholdCrossingByMonitoredObjectTopNHandlerFunc(handlers.HandleGetThresholdCrossingByMonitoredObjectTopN(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetTopNForMetricHandler = metrics_service.GetTopNForMetricHandlerFunc(handlers.HandleGetTopNFor(handlers.AllRoles, tenantDB, druidDB))
-	// api.MetricsServiceGetRawMetricsHandler = metrics_service.GetRawMetricsHandlerFunc(handlers.HandleGetRawMetrics(handlers.AllRoles, druidDB))
-	// api.MetricsServiceGetHistogramHandler = metrics_service.GetHistogramHandlerFunc(handlers.HandleGetHistogram(handlers.AllRoles, druidDB))
-	// api.MetricsServiceGenSLAReportHandler = metrics_service.GenSLAReportHandlerFunc(handlers.HandleGenSLAReport(handlers.AllRoles, tenantDB, druidDB))
-	// ======================= END OF METRICS SERVICE V1 CALLS TO REMOVE ===========================================================
-}
-
 func configurev1APIThatWeMayRemove(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore) {
 	api.AdminProvisioningServiceUpdateTenantHandler = admin_provisioning_service.UpdateTenantHandlerFunc(func(params admin_provisioning_service.UpdateTenantParams) middleware.Responder {
 		return middleware.NotImplemented("operation admin_provisioning_service.UpdateTenant has not yet been implemented")

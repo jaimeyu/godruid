@@ -113,4 +113,10 @@ type TenantServiceDatastore interface {
 	GetTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
 	GetAllTenantLocales(tenantID string) ([]*tenmod.Locale, error)
 	DeleteTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
+
+	CreateTenantMetadataConfig(*tenmod.MetadataConfig) (*tenmod.MetadataConfig, error)
+	UpdateTenantMetadataConfig(*tenmod.MetadataConfig) (*tenmod.MetadataConfig, error)
+	GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
+	DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
+	GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error)
 }

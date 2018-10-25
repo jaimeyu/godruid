@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ReportScheduleConfigCreateRequest Object used to create a new Report Genaration Schedule in Datahub
+// ReportScheduleConfigCreateRequest Object used to create a new Report Generation Schedule in Datahub
 // swagger:model ReportScheduleConfigCreateRequest
 type ReportScheduleConfigCreateRequest struct {
 

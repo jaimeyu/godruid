@@ -3837,6 +3837,435 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/metadata-configs:
+    post:
+      summary: Create a Metadata Configuration for a Tenant.
+      operationId: CreateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Metadata Configuration already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Metadata Configurations
+      operationId: GetAllMetadataConfigsV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Metadata Configuration is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/metadata-configs/{MetadataConfigId}:
+    get:
+      summary: Retrieve a Tenant Metadata Configuration by id.
+      operationId: GetMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metadata Configuration
+      operationId: UpdateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Metadata Configuration specified by the provided Metadata Configuration Id.
+      operationId: DeleteMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  
+  /v2/metrics/threshold-crossing-by-monitored-object-top-n:
+    post:
+      summary: Retrieve the Top N threshold crossing events using the given threshold profile and the specified metric filters
+      operationId: GetThresholdCrossingByMonitoredObjectTopNV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Top N threshold crossing by monitored object successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingByMOTopNResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingByMOTopNRequest'
+      tags:
+        - MetricsServiceV2
+  
+  /v2/metrics/generate-sla-report:
+    post:
+      summary: Retrieve an SLA report for given time range and parameters
+      operationId: GenerateSLAReportV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "SLA report successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiSLAReportResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiSLAReportRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/histogram:
+    post:
+      summary: Retrieve a histogram of measurements using custom buckets specified in the request
+      operationId: GetHistogramV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Histogram request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiHistogramResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiHistogramRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/topn-metrics:
+    post:
+      summary: Retrieve the Top-N for the specified set of metrics
+      operationId: GetTopNForMetricV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Top N request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiTopNForMetricResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTopNForMetricRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/threshold-crossing:
+    post:
+      summary: Retrieve threshold crossing events for the given threshold profile
+      operationId: QueryThresholdCrossingV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Threshold crossings successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/aggregated-metrics:
+    post:
+      summary: Retrieve a variety of aggregation types against the specified metric filters
+      operationId: QueryAggregateMetricsV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Aggregation request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiAggregationResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiAggregationRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/raw-metrics:
+    post:
+      summary: Returns raw metric entries from the metrics datastore based on the provided metric filters
+      operationId: GetFilteredRawMetricsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Raw metric request successfully processed"
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilteredRawMetricsRequestObject'
+      tags:
+        - MetricsServiceV2
   /v2/monitored-objects:
     get:
       summary: Retrieve all Monitored Objects for a Tenant.
@@ -5242,56 +5671,11 @@ definitions:
         type: integer
         description: Number of results to return
       metric:
-        $ref: '#/definitions/MetricIdentifierObject'
+        $ref: '#/definitions/MetricIdentifier'
       metricsView:
         type: array
         items:
           $ref: '#/definitions/MetricViewObject'
-  FilteredRawMetricsRequestObject:
-    type: object
-    required:
-      - tenantId
-      - interval
-      - objectType
-      - metrics
-      - directions
-      - meta
-    properties:
-      tenantId:
-        type: string
-        description: the tenant identifier
-        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
-      meta:
-        type: object
-        description: set of meta keys and list of values for the purposes of filtering
-        additionalProperties:
-          type: array
-          items:
-            type: string
-      interval:
-        type: string
-        description: ISO-8601 interval
-        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
-      timeout:
-        type: integer
-        description: query timeout in milliseconds
-        example: 30000
-      metrics:
-        type: array
-        items:
-          type: string
-      directions:
-        type: array
-        items:
-          type: string
-      objectType:
-        type: string
-        description: the type of monitored object
-        example: twamp-sf
-      granularity:
-        type: string
-        description: the granularity for timeseries in ISO-8601 duration format, or ALL
-        example: PT1H
   MetricBucketObject:
     type: object
     properties:
@@ -5410,7 +5794,7 @@ definitions:
       metrics:
         type: array
         items:
-          $ref: '#/definitions/MetricIdentifierObject'
+          $ref: '#/definitions/MetricIdentifier'
 
   ThresholdCrossingAPIRequestObject:
     type: object
@@ -5449,7 +5833,7 @@ definitions:
         type: array
         description: limits the results to include only metrics in the whitelist
         items:
-          $ref: '#/definitions/MetricIdentifierObject'
+          $ref: '#/definitions/MetricIdentifier'
   ThresholdCrossingByMOTopNAPIRequestObject:
     type: object
     required:
@@ -5489,7 +5873,7 @@ definitions:
         description: query timeout in milliseconds
         example: 30000
       metric:
-        $ref: '#/definitions/MetricIdentifierObject'
+        $ref: '#/definitions/MetricIdentifier'
         description: the metric to be used for the top N query
   SLAReportRequestObject:
     type: object
@@ -5527,26 +5911,6 @@ definitions:
       timezone: 
         type: "string"
         description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
-  MetricIdentifierObject:
-    type: object
-    required:
-      - vendor
-      - objectType
-      - name
-    properties:
-      vendor:
-        type: string
-        example: accedian-twamp
-      objectType:
-        type: string
-        example: twamp-pe
-      name:
-        type: string
-        example: delayP95
-      direction:
-        type: integer
-        example: 0
-        default: 0
 
   MetricResultsResponseObject:
     type: object
@@ -6294,8 +6658,89 @@ definitions:
           lastModifiedTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was last altered."
-  MetaFilter:
+
+  MetricIdentifierFilter:
+    description: Filter object that identifies a specific metric within a monitored object by its key attributes
     type: object
+    required: [vendor, objectType, metric]
+    properties:
+      vendor:
+        description: Vendor name associated with the monitored object 
+        type: string
+        example: accedian-twamp
+      objectType:
+        description: Object types to be considered as part of the filter
+        type: array
+        example: 
+          - ["twamp-pe"]
+          - ["twamp-sl","twamp-sf"]
+        items:
+          type: string
+      metric:
+        description: Name that identifies the specific metric within a monitored object
+        type: string
+        example: delayP95
+      direction:
+        description: Set of one or more directions to be used by the filter to identify required metric records
+        type: array
+        example: 
+          - ["0"]
+          - ["0","1"]
+        items:
+          type: string
+          
+  MetricIdentifier:
+    description: Identifies a specific metric within a monitored object based on key attributes
+    type: object
+    required: [vendor, objectType, metric]
+    properties:
+      vendor:
+        description: Vendor name associated with the monitored object 
+        type: string
+        example: accedian-twamp
+      objectType:
+        description: Object type associated with the monitored object
+        type: string
+        example: twamp-pe
+      metric:
+        description: Name that identifies the specific metric within a monitored object
+        type: string
+        example: delayP95
+      direction:
+        description: Attributes that identifies the direction of a test associated with a particular metric
+        type: string
+        example: 
+          - "0"
+          - "1"
+          - "2"
+
+  MetaFilter:
+    description: >
+      An object that allows filtering on arbitrary metadata criteria and their values. 
+      The keys in the map are associated with metadata categories and the value array 
+      corresponds to a set of whitelist filter-in values for that category. The logical 
+      semantics associated with this structure are conditional-AND across metadata
+      criteria (keys) and conditional-OR across the values contained within the value
+      array. For example, {"region":["montreal","ottawa"], "group":["radio"]} will match
+      all records that are of group "radio" AND from the region "montreal" OR "ottawa"
+    type: object
+    example: {"region":["montreal","ottawa"], "group":["radio"]}
+    additionalProperties:
+      type: array
+      items:
+        type: string
+  
+  DimensionFilter:
+    description: >
+      An object that allows filtering on dimensions tracked against metric records during ingestion.
+      The keys in the map are associated with the dimension name and the value array corresponds
+      to a set of whitelist filter-in values for that dimension. The logical 
+      semantics associated with this structure are conditional-AND across dimensions
+      (keys) and conditional-OR across the values contained within the value
+      array. For example, {"firmware":["v1.0.0","v1.0.1"], "state":["active"]} will match
+      all records that have a state of "active" AND with firmware versions "v1.0.0" OR "v1.0.1"
+    type: object
+    example: {"firmware":["v1.0.0","v1.0.1"], "state":["active"]}
     additionalProperties:
       type: array
       items:
@@ -7329,6 +7774,1005 @@ definitions:
           type: "object"
           description: "Provides data properties by which the Metric may be filtered and/or aggregated"
 
+  MetadataConfigCreateRequest:
+    type: "object"
+    description: "Object used to create a Metadata Configuration in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metadataConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["startPoint", "endPoint", "midPoints"]
+            properties:
+              startPoint:
+                description: "The first point of a Logical Map"
+                type: "string"
+              endPoint:
+                description: "The last point of a Logical Map"
+                type: "string"
+              midPoints: 
+                description: "The points between the startPoint and endPoint of a logical map"
+                type: "array"
+                items:
+                  type: "string"
+                    
+  MetadataConfigUpdateRequest:
+    type: "object"
+    description: "Object used to update a Metadata Configuration in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metadataConfigs]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              startPoint:
+                description: "The first point of a Logical Map"
+                type: "string"
+              endPoint:
+                description: "The last point of a Logical Map"
+                type: "string"
+              midPoints: 
+                description: "The points between the startPoint and endPoint of a logical map"
+                type: "array"
+                items:
+                  type: "string"
+            
+             
+  MetadataConfigListResponse:
+    type: "object"
+    description: "Metadata Configuration response including one or more values"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MetadataConfig'
+
+  MetadataConfigResponse:
+    type: "object"
+    description: "A single object Metadata Configuration response from Datahub"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/MetadataConfig'
+
+  MetadataConfig:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [metadataConfigs]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["_id", "_rev", "tenantId", "dataType", "startPoint", "endPoint", "midPoints", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            description: "Name used to identify this type of record in Datahub"
+            type: "string"
+          startPoint:
+            description: "The first point of a Logical Map"
+            type: "string"
+          endPoint:
+            description: "The last point of a Logical Map"
+            type: "string"
+          midPoints: 
+            description: "The points between the startPoint and endPoint of a logical map"
+            type: "array"
+            items:
+              type: "string"
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."
+   
+  # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
+  ## REQUEST DEFINITION 
+  JsonApiThresholdCrossingByMOTopNRequest:
+    description: JSON API compliant wrapper for the threshold crossing by monitored object topn query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id: 
+            type: string
+          type: 
+            type: string
+            enum: [thresholdCrossingByMOTopNs]
+          attributes:
+            $ref: '#/definitions/ThresholdCrossingByMOTopNConfig'
+
+  ## RESPONSE DEFINITION
+  JsonApiThresholdCrossingByMOTopNResponse:
+    description: JSON API compliant wrapper for the threshold crossing by monitored object topn response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [thresholdCrossingByMOTopNs]
+          attributes:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ThresholdCrossingByMOTopNConfig'
+              - properties:
+                  result:
+                    $ref: '#/definitions/ThresholdCrossingByMOTopNReport'
+
+  ## ENTITY DEFINITIONS
+  ThresholdCrossingByMOTopNConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, thresholdProfileId, numResults, metric]
+    properties:
+      aggregator:
+        description: the type of aggregation to determine the top N result set
+        type: string
+        enum: [min, max, avg]
+        example:
+          - max
+          - min
+          - avg
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      thresholdProfileId:
+        description: ID of the threshold profile that is used to select metrics and events
+        type: string
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      numResults:
+        description: Query timeout in milliseconds
+        type: integer
+        format: int32
+        example: 30000
+      metric:
+        description: The metric to be used for the top N query
+        $ref: '#/definitions/MetricIdentifierFilter'
+        
+  
+  ThresholdCrossingByMOTopNReport:
+    description: The rendered response structure from the metric query
+    type: array
+    items:
+      description: A set of entries detailing the number of event crossings per type ordered from most to least. Ranking is based on weighted criticality of each event type.
+      type: object
+      allOf:
+        - $ref: '#/definitions/ResultEntryParameters'
+        - properties:
+            result:
+              type: object
+              properties:
+                critical:
+                  description: Number of critical event crossings for this metric
+                  type: integer
+                major:
+                  description: Number of major event crossings for this metric
+                  type: integer
+                minor:
+                  description: Number of minor event crossings for this metric
+                  type: integer
+                info:
+                  description: Number of info event crossings for this metric
+                  type: integer
+                warn:
+                  description: Number of warning event crossings for this metric
+                  type: integer
+                scored:
+                  description: The score that determined the ranking of this specific entry within the topn
+                  type: number
+                  format: float
+                total:
+                  description: Total number of event crossings
+                  type: integer
+
+  # SLA REPORT DEFINITIONS
+  ## REQUEST DEFINITION 
+  JsonApiSLAReportRequest:
+    description: JSON API compliant wrapper for the SLA report query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id: 
+            type: string
+          type: 
+            type: string
+            enum: [slaReports]
+          attributes:
+            $ref: '#/definitions/SLAReportConfig'
+
+  ## RESPONSE DEFINITION
+  JsonApiSLAReportResponse:
+    description: JSON API compliant wrapper for the SLA report response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [slaReports]
+          attributes:
+            type: object
+            properties:
+              config:   
+                $ref: '#/definitions/SLAReportConfig'
+              result:
+                $ref: '#/definitions/SLAReport'
+
+  ## ENTITY DEFINITIONS
+  SLAReportConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, thresholdProfileId]
+    properties:
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      thresholdProfileId:
+        description: ID of the threshold profile that is used to select metrics and events
+        type: string
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      granularity:
+        description: The granularity for timeseries in ISO-8601 duration format, or ALL
+        type: string
+        example: PT1H
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      timezone: 
+        description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
+        type: string
+
+  SLAReportSummary:
+    description: The rendered response structure from the metric query
+    type: object
+    properties:
+      objectCount:
+        type: integer
+      totalDuration:
+        type: integer
+      totalViolationCount:
+        type: integer
+      totalViolationDuration:
+        type: integer
+      slaCompliancePercent:
+        type: number
+        format: float
+      byGranularity:
+        type: array
+        x-omitempty: true
+        items:
+            $ref: '#/definitions/SLATotalsTimestamp'
+    required: 
+      - objectCount
+      - totalDuration
+      - totalViolationCount
+      - totalViolationDuration
+      - slaCompliancePercent
+  SLATotalsTimestamp:
+    type: object
+    required:
+      - timestamp
+      - totalDuration
+      - totalViolationCount
+      - totalViolationDuration
+    properties:
+      timestamp:
+        type: string
+      totalDuration:
+        type: integer
+      totalViolationCount:
+        type: integer
+      totalViolationDuration:
+        type: integer
+  SLAReport:
+    type: object
+    properties:
+      summary:
+        $ref: '#/definitions/SLAReportSummary'
+      metric:
+        type: array
+        items:
+          $ref: '#/definitions/SLAReportMetric'
+  SLAReportMetric:
+    
+    allOf:
+    - $ref: '#/definitions/MetricIdentifier'
+    - properties:
+        byGranularity:
+            type: array
+            x-omitempty: true
+            items:
+                $ref: '#/definitions/SLAMetricEntryTimeStamp'
+        byHourOfDay:
+            type: array
+            x-omitempty: true
+            items:
+                $ref: '#/definitions/SLAMetricByHourOfDay'
+        byDayOfWeek:
+            type: array
+            x-omitempty: true
+            items:
+                $ref: '#/definitions/SLAMetricByDayOfWeek'
+  SLAMetricByHourOfDay:
+    type: object
+    required: 
+      - hourOfDay
+      - violationCount
+    properties:
+      hourOfDay:
+        type: string
+      violationCount:
+        type: integer
+  SLAMetricByDayOfWeek:
+    type: object
+    required:
+      - violationCount
+      - dayOfWeek
+    properties:
+      dayOfWeek:
+        type: string
+      violationCount:
+        type: integer
+
+  SLAMetricEntryTimeStamp:
+    type: object
+    required:
+      - timestamp
+      - totalDuration
+      - violationCount
+      - violationDuration
+    properties:
+      timestamp:
+        type: string
+      totalDuration:
+        type: integer
+      violationCount:
+        type: integer
+      violationDuration:
+        type: integer
+  SLAMetricEntry:
+    type: object
+    required:
+            - totalDuration
+            - violationCount
+            - violationDuration
+    properties:
+      totalDuration:
+        type: integer
+      violationCount:
+        type: integer
+      violationDuration:
+        type: integer
+  # RAW METRICS DEFINITIONS
+  ## ENTITY DEFINITIONS
+  FilteredRawMetricsRequestObject:
+    type: object
+    required: [tenantId, interval, objectType, metrics, directions]
+    properties:
+      tenantId:
+        type: string
+        description: The tenant identifier
+        example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      metrics:
+        description: Array of metric names to be used as a whitelist to be considered for the raw metrics request
+        type: array
+        items:
+          type: string
+      directions:
+        description: Array of directions to be used as a whitelist to be considered for the raw metrics request
+        type: array
+        items:
+          type: string
+      objectType:
+        description: The type of monitored object that we want to consider for the request
+        type: string
+        example: twamp-sf
+      granularity:
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        type: string
+        example: PT1H, all
+          
+  # AGGREGATION DEFINITIONS
+  ## REQUEST DEFINITION
+  JsonApiAggregationRequest:
+    description: JSON API compliant wrapper for the aggregation query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id: 
+            type: string
+          type: 
+            type: string
+            enum: [aggregateMetrics]
+          attributes:
+            $ref: '#/definitions/AggregationConfig'
+
+  ## RESPONSE DEFINITION
+  JsonApiAggregationResponse:
+    description: JSON API compliant wrapper for the aggregation response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [aggregateMetrics]
+          attributes:
+            type: object
+            allOf:
+              - $ref: '#/definitions/AggregationConfig'
+              - properties:
+                  result:
+                    $ref: '#/definitions/AggregationReport'
+
+  ## ENTITY DEFINITIONS
+  AggregationConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, aggregation, metrics]
+    properties:
+      monitoredObjects:
+        description: An optional array of monitored objects that we want to retrieve specific aggregations against. This attribute cannot be used if the meta attribute is also present in the request.
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. This attribute cannot be used if the monitoredObjects attribute is also present in the request. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        description: The granularity for timeseries in ISO-8601 duration format, or ALL
+        type: string
+        example: PT1H
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      aggregation:
+        description: The aggregation function to be used against the metrics filtered-in for the query
+        type: string
+        enum: [min, max, avg]
+        example:
+          - min
+          - max
+          - avg
+      metrics:
+        description: An array of identifiers that filter-in specifically identified metrics.
+        type: array
+        items:
+          $ref: '#/definitions/MetricIdentifierFilter'
+      dimensions:
+        description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
+        $ref: '#/definitions/DimensionFilter'
+
+  AggregationReport:
+    description: The rendered response structure from the metric query
+    type: array
+    items:
+      $ref: '#/definitions/MetricResultSeries'
+
+  # HISTOGRAM DEFINITIONS
+  ## REQUEST DEFINITION
+  JsonApiHistogramRequest:
+    description: JSON API compliant wrapper for the histogram query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id: 
+            type: string
+          type: 
+            type: string
+            enum: [histograms]
+          attributes:
+            $ref: '#/definitions/HistogramConfig'
+
+  ## RESPONSE DEFINITION
+  JsonApiHistogramResponse:
+    description: JSON API compliant wrapper for the histogram response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [histograms]
+          attributes:
+            type: object
+            allOf:
+              - $ref: '#/definitions/HistogramConfig'
+              - properties:
+                  result:
+                    $ref: '#/definitions/HistogramReport'
+
+  ## ENTITY DEFINITIONS
+  HistogramConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, metrics]
+    properties:
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      granularity:
+        description: The granularity for timeseries in ISO-8601 duration format, or ALL
+        type: string
+        example: PT1H
+      metrics:
+        description: A list of the requested metric identifiers and the histogram buckets associated with those identifiers
+        type: array
+        items:
+          allOf:
+            - $ref: '#/definitions/MetricIdentifierFilter'
+            - properties:
+                buckets:
+                  description: An ordered set of histogram buckets that should be filled with the appropriate metric data
+                  example: > 
+                    "buckets":[{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      lower:
+                        description: The specification for the lower boundary of the bucket
+                        type: object
+                        required: [value]
+                        properties:
+                          value:
+                            description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
+                            type: number
+                            format: float
+                          strict:
+                            description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
+                            type: boolean
+                      upper:
+                        description: The specification for the upper boundary of the bucket
+                        type: object
+                        required: [value]
+                        properties:
+                          value:
+                            description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
+                            type: number
+                            format: float
+                          strict:
+                            description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
+                            type: boolean
+      dimensions:
+        description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
+        $ref: '#/definitions/DimensionFilter'
+
+  HistogramReport:
+    description: The rendered response structure from the metric query
+    type: array
+    items:
+      allOf:
+        - $ref: '#/definitions/ResultEntryParameters'
+        - properties:
+            series:
+              description: An ordered list of metric values corresponding to the buckets provided in the histogram request
+              type: array
+              items:
+                type: object
+                required: [values]
+                properties:
+                  timestamp:
+                    type: string
+                  values:
+                    type: array
+                    items:
+                      type: integer
+
+  # TOPNFORMETRIC DEFINITIONS
+  ## REQUEST DEFINITIONS
+  JsonApiTopNForMetricRequest:
+    description: JSON API compliant wrapper for the topn query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [topNForMetrics]
+          attributes:
+            $ref: '#/definitions/TopNForMetricConfig'
+
+  ## RESPONSE DEFINITIONS
+  JsonApiTopNForMetricResponse:
+    description: JSON API compliant wrapper for the topn response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [topNForMetrics]
+          attributes:
+            type: object
+            allOf:
+              - $ref: '#/definitions/TopNForMetricConfig'
+              - properties:
+                  result:
+                    $ref: '#/definitions/TopNForMetricReport'
+
+  ## ENTITY DEFINITIONS
+  TopNForMetricConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, aggregator, metric]
+    properties:
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      monitoredObjects:
+        description: An optional array of monitored objects that we want to retrieve specific topn against. This attribute cannot be used if the meta attribute is also present in the request.
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      aggregator:
+        type: string
+        description: The type of aggregation (avg/min/max)
+        enum: [min, max, avg]
+        example:
+          - min
+          - max
+          - avg
+      numResults:
+        description: Number of results to return
+        type: integer
+      metric:
+        description: An identifier that considers one specific metric based on the provided information
+        $ref: '#/definitions/MetricIdentifierFilter'
+      dimensions:
+        description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
+        $ref: '#/definitions/DimensionFilter'
+      metricsView:
+        x-omitempty: true
+        type: array
+        items:
+          $ref: '#/definitions/MetricView'
+
+  MetricView:
+    type: object
+    required: [metric, aggregator, name]
+    properties:
+      metric:
+        type: string
+        example: delayP95_max
+      aggregator:
+        type: string
+        example: min/max/sum/
+      name:
+        type: string
+        example: delayP95
+
+  TopNForMetricReport:
+    description: The rendered response structure from the metric query
+    type: array
+    items:
+      type: object
+      allOf:
+        - $ref: '#/definitions/ResultEntryParameters'
+        - properties:
+            result:
+              description: Ranked list of top metric values for the specified criteria
+              type: object
+              required: [value]
+              properties:
+                count:
+                  type: integer
+                value:
+                  type: number
+                  format: float
+
+  # THRESHOLD CROSSING DEFINITIONS
+  ## REQUEST DEFINITION
+  JsonApiThresholdCrossingRequest:
+    description: JSON API compliant wrapper for the threshold crossing query
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type, attributes]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [thresholdCrossings]
+          attributes:
+            $ref: '#/definitions/ThresholdCrossingConfig'
+
+  ## RESPONSE DEFINITION
+  JsonApiThresholdCrossingResponse:
+    description: JSON API compliant wrapper for the threshold crossing response
+    type: object
+    properties:
+      data:
+        type: object
+        required: [type]
+        properties:
+          id:
+            type: string
+          type: 
+            type: string
+            enum: [thresholdCrossings]
+          attributes:
+            type: object
+            properties:
+              config:
+                $ref: '#/definitions/ThresholdCrossingConfig'
+              result:
+                $ref: '#/definitions/ThresholdCrossingReport'
+        
+  ## ENTITY DEFINITIONS
+  ThresholdCrossingConfig:
+    description: The necessary request parameters for the metric api call
+    type: object
+    required: [interval, metrics]
+    properties:
+      meta:
+        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+        $ref: '#/definitions/MetaFilter'
+        example: {"region":["montreal","ottawa"], "group":["radio"]}
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      granularity:
+        description: the granularity for timeseries in ISO-8601 duration format, or ALL
+        type: string
+        example: PT1H
+      thresholdProfileId:
+        type: string
+        description: ID of the threshold profile that is used to select metrics and events
+        example: d1988d68-7444-4098-91eb-bd5a987397cb
+      timeout:
+        type: integer
+        description: query timeout in milliseconds
+        example: 30000
+      metrics:
+        type: array
+        description: limits the results to include only metrics in the whitelist
+        items:
+          $ref: '#/definitions/MetricIdentifierFilter'
+
+  ThresholdCrossingReport:
+    type: object
+    properties:
+      metric:
+        type: array
+        items:
+          $ref: '#/definitions/ThresholdCrossingReportMetric'
+      summary:
+        type: array
+        items:
+          $ref: '#/definitions/ThresholdCrossingTotals'
+
+  ThresholdCrossingReportMetric:
+    allOf: 
+    - $ref: '#/definitions/MetricIdentifierFilter'
+    - properties:
+        critical:
+            type: array
+            items:
+                $ref: '#/definitions/ThresholdCrossingViolations'
+        major:
+            type: array
+            items:
+                $ref: '#/definitions/ThresholdCrossingViolations'
+        minor:
+            type: array
+            items:
+                $ref: '#/definitions/ThresholdCrossingViolations'
+        warning:
+            type: array
+            items:
+                $ref: '#/definitions/ThresholdCrossingViolations'
+        sla:
+            type: array
+            items:
+                $ref: '#/definitions/ThresholdCrossingViolations'
+
+  ThresholdCrossingViolations:
+    type: object
+    required:
+      - violationCount
+      - violationDuration
+      - timestamp
+    properties:
+      timestamp:
+        type: string
+      violationCount:
+        type: integer
+      violationDuration:
+        type: integer
+
+  ThresholdCrossingTotals:
+    type: object
+    required:
+      - timestamp
+    properties:
+      timestamp:
+        type: string
+      totalDuration:
+        type: integer
+      totalViolationCount:
+        type: integer
+      totalViolationDuration:
+        type: integer
+
+  # COMMON METRIC ENTITIES
+  ResultEntryParameters:
+    description: Describes filtering criteria used for a particular query
+    type: object
+    required: [metric]
+    properties:
+      monitoredObjectIds:
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+      vendor:
+        type: string
+      objectType:
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+      metric:
+        type: string
+      direction:
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+
+  MetricResultSeries:
+    description: Describes series data prefixed with the filter criteria that were used to generate the output
+    type: object
+    allOf:
+      - $ref: '#/definitions/ResultEntryParameters'
+      - properties:
+          series:
+            type: array
+            items:
+              $ref: '#/definitions/MetricResultEntry'
+        required: [series]
+
+  MetricResultEntry:
+    description: A singular time series entry that contains the timestamp and value
+    type: object
+    required: [timestamp, value]
+    properties:
+      timestamp:
+        type: string
+      value:
+        type: number
+        format: double
   MonitoredObjectCreateRequest:
     type: "object"
     required: ["data"]
@@ -7616,7 +9060,7 @@ definitions:
   ReportScheduleConfigCreateRequest:
     type: "object"
     required: ["data"]
-    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    description: "Object used to create a new Report Generation Schedule in Datahub"
     properties:
       data:
         type: "object"

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/accedian/adh-gather/models"
+	"github.com/accedian/adh-gather/models/metrics"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -163,7 +164,7 @@ func TestPostprocessResults(t *testing.T) {
 			      }
 		}]`)
 
-	response := make([]AggMetricsResponse, 0)
+	response := make([]metrics.TimeseriesEntryResponse, 0)
 	err := json.Unmarshal(resultStr, &response)
 	assert.Nil(t, err)
 

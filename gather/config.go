@@ -2,6 +2,7 @@ package gather
 
 import (
 	"strings"
+	"time"
 
 	"github.com/accedian/adh-gather/config"
 	"github.com/accedian/adh-gather/logger"
@@ -64,6 +65,9 @@ type Config struct {
 			appID            string
 			secret           string
 			statusRetryCount int
+			checkpoint1      float64
+			checkpoint2      float64
+			checkpoint3      float64
 		}
 	}
 }
@@ -129,10 +133,14 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_druid_timeoutsms_thresholdcrossing.String(), 45000)
 	v.SetDefault(CK_druid_timeoutsms_aggregatedmetrics.String(), 45000)
 	v.SetDefault(CK_druid_timeoutsms_rawmetrics.String(), 45000)
-	v.SetDefault(CK_druid_timeoutsms_filteredrawmetrics.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_topn.String(), 45000)
+	v.SetDefault(CK_druid_timeoutsms_thresholdcrossingtopn.String(), 45000)
 	v.SetDefault(CK_args_coltmef_enabled.String(), false)
 	v.SetDefault(CK_args_coltmef_server.String(), "https://demo.ondemand.colt.net/api/performance/recommendation")
 	v.SetDefault(CK_args_coltmef_appid.String(), "datahubtest")
 	v.SetDefault(CK_args_coltmef_secret.String(), "test123")
 	v.SetDefault(CK_args_coltmef_statusretrycount.String(), 10)
+	v.SetDefault(CK_args_coltmef_checkpoint1.String(), (5 * time.Minute).Seconds())
+	v.SetDefault(CK_args_coltmef_checkpoint2.String(), (10 * time.Minute).Seconds())
+	v.SetDefault(CK_args_coltmef_checkpoint3.String(), (15 * time.Minute).Seconds())
 }

@@ -17,34 +17,33 @@ import (
 // swagger:model FilteredRawMetricsRequestObject
 type FilteredRawMetricsRequestObject struct {
 
-	// directions
+	// Array of directions to be used as a whitelist to be considered for the raw metrics request
 	// Required: true
 	Directions []string `json:"directions"`
 
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
 
-	// ISO-8601 interval
+	// Time boundary for the metrics under consideration using the ISO-8601 standard
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// set of meta keys and list of values for the purposes of filtering
-	// Required: true
-	Meta map[string][]string `json:"meta"`
+	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	Meta MetaFilter `json:"meta,omitempty"`
 
-	// metrics
+	// Array of metric names to be used as a whitelist to be considered for the raw metrics request
 	// Required: true
 	Metrics []string `json:"metrics"`
 
-	// the type of monitored object
+	// The type of monitored object that we want to consider for the request
 	// Required: true
 	ObjectType *string `json:"objectType"`
 
-	// the tenant identifier
+	// The tenant identifier
 	// Required: true
 	TenantID *string `json:"tenantId"`
 
-	// query timeout in milliseconds
+	// Query timeout in milliseconds
 	Timeout int64 `json:"timeout,omitempty"`
 }
 
@@ -101,6 +100,17 @@ func (m *FilteredRawMetricsRequestObject) validateInterval(formats strfmt.Regist
 }
 
 func (m *FilteredRawMetricsRequestObject) validateMeta(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Meta) { // not required
+		return nil
+	}
+
+	if err := m.Meta.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("meta")
+		}
+		return err
+	}
 
 	return nil
 }

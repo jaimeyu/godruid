@@ -5,6 +5,7 @@ type Provider interface {
 	GetString(key string) string
 	GetStringSlice(key string) []string
 	GetInt(key string) int
+	GetFloat64(key string) float64
 	GetBool(key string) bool
 	GetStringMap(key string) map[string]interface{}
 	GetStringMapString(key string) map[string]string

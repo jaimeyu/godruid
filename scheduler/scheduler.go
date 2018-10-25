@@ -95,7 +95,7 @@ func convertScheduleConfigToRequest(s metrics.ReportScheduleConfig) (*metrics.SL
 	request.Granularity = s.Granularity
 	request.Timeout = s.Timeout
 	request.Timezone = "UTC"
-	request.SlaScheduleConfig = s.ID
+	request.SLAScheduleConfig = s.ID
 
 	// iso interval yyyymmddThhmmssfff/yyyymmddThhmmssfff
 	// see http://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/viewer.htm#a003169814.htm
@@ -148,7 +148,7 @@ func pendWork(request metrics.SLAReportRequest) error {
 		}
 
 		// Now get the Report
-		report, err := schedulecfg.msh.GetInternalSLAReport(&request)
+		report, err := schedulecfg.msh.GetInternalSLAReportV1(&request)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to get Scheduled SLA Report Configuration: %s. Error: %s", models.AsJSONString(request), err.Error())
 			logger.Log.Errorf(msg)

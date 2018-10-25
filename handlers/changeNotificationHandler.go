@@ -51,7 +51,7 @@ type ChangeNotificationHandler struct {
 	topic              string
 	adminDB            *datastore.AdminServiceDatastore
 	tenantDB           *datastore.TenantServiceDatastore
-	metricsDB          datastore.DruidDatastore
+	metricsDB          datastore.MetricsDatastore
 	batchSize          int64
 	// To block pollChanges from overlapping
 	locker uint32

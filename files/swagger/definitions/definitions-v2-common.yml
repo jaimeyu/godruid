@@ -1,5 +1,86 @@
-  MetaFilter:
+
+  MetricIdentifierFilter:
+    description: Filter object that identifies a specific metric within a monitored object by its key attributes
     type: object
+    required: [vendor, objectType, metric]
+    properties:
+      vendor:
+        description: Vendor name associated with the monitored object 
+        type: string
+        example: accedian-twamp
+      objectType:
+        description: Object types to be considered as part of the filter
+        type: array
+        example: 
+          - ["twamp-pe"]
+          - ["twamp-sl","twamp-sf"]
+        items:
+          type: string
+      metric:
+        description: Name that identifies the specific metric within a monitored object
+        type: string
+        example: delayP95
+      direction:
+        description: Set of one or more directions to be used by the filter to identify required metric records
+        type: array
+        example: 
+          - ["0"]
+          - ["0","1"]
+        items:
+          type: string
+          
+  MetricIdentifier:
+    description: Identifies a specific metric within a monitored object based on key attributes
+    type: object
+    required: [vendor, objectType, metric]
+    properties:
+      vendor:
+        description: Vendor name associated with the monitored object 
+        type: string
+        example: accedian-twamp
+      objectType:
+        description: Object type associated with the monitored object
+        type: string
+        example: twamp-pe
+      metric:
+        description: Name that identifies the specific metric within a monitored object
+        type: string
+        example: delayP95
+      direction:
+        description: Attributes that identifies the direction of a test associated with a particular metric
+        type: string
+        example: 
+          - "0"
+          - "1"
+          - "2"
+
+  MetaFilter:
+    description: >
+      An object that allows filtering on arbitrary metadata criteria and their values. 
+      The keys in the map are associated with metadata categories and the value array 
+      corresponds to a set of whitelist filter-in values for that category. The logical 
+      semantics associated with this structure are conditional-AND across metadata
+      criteria (keys) and conditional-OR across the values contained within the value
+      array. For example, {"region":["montreal","ottawa"], "group":["radio"]} will match
+      all records that are of group "radio" AND from the region "montreal" OR "ottawa"
+    type: object
+    example: {"region":["montreal","ottawa"], "group":["radio"]}
+    additionalProperties:
+      type: array
+      items:
+        type: string
+  
+  DimensionFilter:
+    description: >
+      An object that allows filtering on dimensions tracked against metric records during ingestion.
+      The keys in the map are associated with the dimension name and the value array corresponds
+      to a set of whitelist filter-in values for that dimension. The logical 
+      semantics associated with this structure are conditional-AND across dimensions
+      (keys) and conditional-OR across the values contained within the value
+      array. For example, {"firmware":["v1.0.0","v1.0.1"], "state":["active"]} will match
+      all records that have a state of "active" AND with firmware versions "v1.0.0" OR "v1.0.1"
+    type: object
+    example: {"firmware":["v1.0.0","v1.0.1"], "state":["active"]}
     additionalProperties:
       type: array
       items:

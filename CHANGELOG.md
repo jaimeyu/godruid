@@ -1,7 +1,23 @@
 ## Current Release 
+### 0.238.0 
+**Release Date:** Wed Oct 24 18:30:39 UTC 2018     
+## Previous Releases 
+* Fix - Adding metric API guards
+### 0.237.0 
+**Release Date:** Wed Oct 24 18:14:13 UTC 2018     
+### 0.236.0 
+**Release Date:** Wed Oct 24 17:27:41 UTC 2018     
+* Fix - Adding metric API guards
+### 0.235.0 
+**Release Date:** Wed Oct 24 16:35:29 UTC 2018     
+### 0.234.0 
+**Release Date:** Tue Oct 23 18:08:51 UTC 2018     
+* Feature - V2 Metric APIs
+### 0.233.0 
+**Release Date:** Fri Oct 19 15:23:19 UTC 2018     
+* Feature - adding tenant meatadata configuration APIs
 ### 0.232.0 
 **Release Date:** Wed Oct 17 16:08:00 UTC 2018     
-## Previous Releases 
 ### 0.231.0 
 **Release Date:** Mon Oct 15 14:16:58 UTC 2018     
 * Fix - Adding even more debug logs to event handling

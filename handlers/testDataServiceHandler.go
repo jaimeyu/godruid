@@ -1175,7 +1175,7 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 		Issuer:       caCRT.Subject,
 		Subject:      clientCSR.Subject,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(24 * time.Hour),
+		NotAfter:     time.Now().Add(720 * time.Hour),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 	}

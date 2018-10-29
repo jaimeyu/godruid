@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mholt/archiver"
 	"github.com/satori/go.uuid"
+	"io"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -1109,17 +1112,17 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 
 	caPublicKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_crt")
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find local ca.crt content: %s ", err.Error())
+		msg := fmt.Sprintf("Unable to find local ca.crt: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 	pemBlock, _ := pem.Decode(caPublicKeyFile)
 	if pemBlock == nil {
-		msg := fmt.Sprintf("Could not decode ca.crt public key content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not decode ca.crt public key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 	caCRT, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
-		msg := fmt.Sprintf("Could not parse ca.crt pemblock content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not parse ca.crt pemblock: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 
@@ -1127,39 +1130,39 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	caPrivateKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_key")
 
 	if err != nil {
-		msg := fmt.Sprintf("Unable to find ca.key private key content: %s ", err.Error())
+		msg := fmt.Sprintf("Unable to find ca.key private key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 	pemBlock, _ = pem.Decode(caPrivateKeyFile)
 	if pemBlock == nil {
-		msg := fmt.Sprintf("Could not decode ca.key private key content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not decode ca.key private key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 
 	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
 	if err != nil {
-		msg := fmt.Sprintf("Could not parse ca.key content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not parse ca.key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 
 	csrBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		msg := fmt.Sprintf("Could not read CSR POST body content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not read CSR POST body: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
 	}
 
 	pemBlock, _ = pem.Decode(csrBytes)
 	if pemBlock == nil {
-		msg := fmt.Sprintf("Could not decode CSR content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not decode CSR: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
 	}
 	clientCSR, err := x509.ParseCertificateRequest(pemBlock.Bytes)
 	if err != nil {
-		msg := fmt.Sprintf("Could not parse CSR content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not parse CSR: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
 	}
 	if err = clientCSR.CheckSignature(); err != nil {
-		msg := fmt.Sprintf("Invalid CSR signature content: %s ", err.Error())
+		msg := fmt.Sprintf("Invalid CSR signature: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
 	}
 
@@ -1184,7 +1187,7 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	clientCRTRaw, err := x509.CreateCertificate(cr.Reader, &clientCRTTemplate, caCRT, clientCSR.PublicKey, caPrivateKey)
 
 	if err != nil {
-		msg := fmt.Sprintf("Could not create x509 client certificate content: %s ", err.Error())
+		msg := fmt.Sprintf("Could not create x509 client certificate: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
 	}
 
@@ -1193,17 +1196,246 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	w.Write(clientCRTRaw)
 }
 
+func dockerLogin() string {
+	type GoogleToken struct {
+		AccessToken string `json:"access_token"`
+		ExpiresIn   string `json:"expires_in"`
+		TokenType   string `json:"token_type"`
+	}
+
+	meta := "http://metadata.google.internal/computeMetadata/v1"
+	svcAcc := meta + "/instance/service-accounts/default/token"
+
+	req, _ := http.NewRequest("GET", svcAcc, nil)
+	req.Header.Set("Metadata-Flavor", "Google")
+
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		fmt.Println("ERR--->", err)
+	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	var token GoogleToken
+	json.Unmarshal(body, &token)
+
+	return token.AccessToken
+}
+
+type ManifestObject struct {
+	Mediatype string
+	Size      int
+	Digest    string
+}
+
+type ManifestV2 struct {
+	SchemaVersion int
+	MediaType     string
+	Config        ManifestObject
+	Layers        []ManifestObject
+}
+
+type ManifestV1 struct {
+	RepoTags []string
+	Config   string
+	Layers   []string
+}
+
+func convertManifest(manifest *ManifestV2, repo string) ([]ManifestV1, error) {
+	var layers []string
+
+	for _, l := range manifest.Layers {
+		name := strings.Split(l.Digest, ":")[1] + ".tar.gz"
+		layers = append(layers, name)
+	}
+
+	return []ManifestV1{
+		ManifestV1{
+			Config:   manifest.Config.Digest,
+			Layers:   layers,
+			RepoTags: []string{repo},
+		},
+	}, nil
+}
+
+func (tsh *TestDataServiceHandler) writeConnectorENV(archiveDir string, tenantID string, zone string) error {
+	configs, err := tsh.tenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
+	if err != nil {
+		return err
+	}
+
+	config := configs[0]
+	envTemplate := `export FILE_DIR=%s
+                        export VERSION=%s`
+	env := fmt.Sprintf(envTemplate, config.URL, gather.CK_connector_dockerVersion.String())
+	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // DownloadRoadrunner - Download Roadrunner package for isntallation
 func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *http.Request) {
 
-	startTime := time.Now()
+	queryParams := r.URL.Query()
 
+	cfg := gather.GetConfig()
+	startTime := time.Now()
 	logger.Log.Debugf("Received DownloadRoadrunner request")
+
+	archiveDir := "/tmp/roadrunnerArchive"
+	os.MkdirAll(archiveDir, os.ModePerm)
+
+	httpC := http.DefaultClient
+	tr := &http.Transport{}
+	httpC.Transport = tr
+
+	accessToken := dockerLogin()
+
+	imageName := cfg.GetString(gather.CK_connector_dockerImageName.String())
+	baseURL := cfg.GetString(gather.CK_connector_dockerRegistry.String()) + imageName + "/"
+	manifestURL := baseURL + "manifests/" + cfg.GetString(gather.CK_connector_dockerVersion.String())
+	layerURL := baseURL + "blobs/"
+
+	req, err := http.NewRequest("GET", manifestURL, nil)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to create docker image manifest request: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json")
+
+	// fetch manifest from docker registry
+	manifestResp, err := httpC.Do(req)
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to fetch docker image manifest: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	manifest, err := ioutil.ReadAll(manifestResp.Body)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to read docker image manifest: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+	manifestObj := &ManifestV2{}
+
+	err = json.Unmarshal(manifest, manifestObj)
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to unmarshall docker image manifest: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	// convert from manivestV2 to manifest V1
+	manifestV1, _ := convertManifest(manifestObj, cfg.GetString(gather.CK_connector_dockerRegistryPrefix.String())+
+		imageName+":"+cfg.GetString(gather.CK_connector_dockerVersion.String()))
+
+	manifestBytes, _ := json.Marshal(manifestV1)
+
+	ioutil.WriteFile(archiveDir+"/manifest.json", manifestBytes, os.ModePerm)
+
+	// Get the config object
+
+	config := manifestObj.Config
+	req, err = http.NewRequest("GET", layerURL+config.Digest, nil)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to create docker image config request: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", config.Mediatype)
+
+	configResp, err := httpC.Do(req)
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to fetch docker image config: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	configBytes, _ := ioutil.ReadAll(configResp.Body)
+	ioutil.WriteFile(archiveDir+"/"+config.Digest, configBytes, os.ModePerm)
+
+	// fetch the blobs that make up the docker image
+	for _, l := range manifestObj.Layers {
+		req, err := http.NewRequest("GET", layerURL+l.Digest, nil)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to create docker layer request for url %s: %s ", layerURL+l.Digest, err.Error())
+			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+		req.Header.Set("Accept", l.Mediatype)
+
+		layerResp, err := httpC.Do(req)
+
+		if err != nil {
+			msg := fmt.Sprintf("Unable to fetch docker layer request for url %s: %s ", layerURL+l.Digest, err.Error())
+			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		}
+
+		name := strings.Split(l.Digest, ":")[1]
+		ext := ".tar.gz"
+		fullPath := archiveDir + "/" + name + ext
+
+		f, err := os.Create(fullPath)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to create file %s: %s ", fullPath, err.Error())
+			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		}
+
+		fileBytes, _ := ioutil.ReadAll(layerResp.Body)
+		f.Write(fileBytes)
+
+		f.Close()
+	}
+
+	files, err := ioutil.ReadDir(archiveDir)
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to read directory %s: %s ", archiveDir, err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	var filenames []string
+	for _, f := range files {
+		filenames = append(filenames, archiveDir+"/"+f.Name())
+	}
+
+	// create docker image
+	err = archiver.Tar.Make(archiveDir+"/roadrunner.docker", filenames)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to save docker image %s: %s ", archiveDir+"/roadrunner.docker", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
 
 	logger.Log.Debugf("Successfully generate Roadrunner package for downloading, sending to client.")
 
-	fmt.Println("START TIME--->", startTime)
-	w.Write([]byte("HELO"))
+	archivePath := archiveDir + "/roadrunner.tar.gz"
+
+	// write env.sh file
+	err = tsh.writeConnectorENV(archiveDir, queryParams["tenant"][0], queryParams["zone"][0])
+	if err != nil {
+		msg := fmt.Sprintf("Unable to write env file: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+	// Make arhive for downloading
+	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "connector/run.sh", "connector/.env"})
+	if err != nil {
+		msg := fmt.Sprintf("Unable to save roadrunner archive  %s: %s ", archivePath, err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+
+	f, err := os.Open(archivePath)
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to open archive for downloading %s: %s ", archivePath, err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+	}
+	io.Copy(w, f)
 }
 
 // generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.

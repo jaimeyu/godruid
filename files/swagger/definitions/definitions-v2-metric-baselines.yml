@@ -15,6 +15,9 @@
           attributes:
             type: "object"
             properties:
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -39,6 +42,9 @@
             type: "object"
             required: ["_rev", "baselines"]
             properties:
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -132,7 +138,7 @@
 
   MetricBaselineDataWrapper:
     type: "object"
-    required: ["type", "id", "attributes"]
+    required: ["type", "attributes"]
     properties:
       type: 
         type: "string"
@@ -148,14 +154,44 @@
     required: ["data"]
     properties:
       data:
-        type: "array"
-        items:
-          $ref: '#/definitions/MetricBaselineDataWrapper'
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineHourResponse]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              baselines: 
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
 
-  MetricBaselineHourOfWeekBody:
+  MetricBaselineUpdateHourRequest:
     type: "object"
-    description: "Metric Baseline data request body for a baseline tracked by a specific hour of the week"
     required: ["data"]
+    description: "Object used to update a single Metric Baseline for a Monitored Object in Datahub"
     properties:
       data:
-        $ref: '#/definitions/MetricBaselineDataWrapper'
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineHourUpdate]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["baseline"]
+            properties:
+              baseline:
+                description: "A single datapoint for a one hour baseline for a metric"
+                $ref: '#/definitions/MetricBaselineData'

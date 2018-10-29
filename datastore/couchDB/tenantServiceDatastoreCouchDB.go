@@ -696,6 +696,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(tenantID string, da
 // DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantMonitoredObjectStr, dataID)
+	originalTenantID := tenantID
+	originalDataID := dataID
 	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantMonitoredObjectType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -704,6 +706,20 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string,
 	if err := deleteDataFromCouch(dbName, dataID, &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
 	}
+
+	// Try and remove any metric baselines for this monitored object:
+	associatedMetricBaseline, err := tsd.GetMetricBaselineForMonitoredObject(originalDataID, originalDataID)
+	if err != nil {
+		logger.Log.Warningf("Successful deletion of %s %s and there is no associated %s  for %s %s: %s", tenmod.TenantMonitoredObjectStr, originalDataID, tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, originalDataID)
+	}
+	if associatedMetricBaseline != nil {
+		metricBaslineID := ds.GetDataIDFromFullID(associatedMetricBaseline.ID)
+		_, err = tsd.DeleteMetricBaseline(originalTenantID, metricBaslineID)
+		if err != nil {
+			logger.Log.Warningf("Successful deletion of %s %s but unable to delete associated %s %s: %s", tenmod.TenantMonitoredObjectStr, originalDataID, tenmod.TenantMetricBaselineStr, metricBaslineID)
+		}
+	}
+
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
 	return &dataContainer, nil
 }

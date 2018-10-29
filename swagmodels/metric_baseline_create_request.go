@@ -192,6 +192,9 @@ type MetricBaselineCreateRequestDataAttributes struct {
 
 	// Contains the dynamically calculated baseline values for the metrics collected by Datahub
 	Baselines []*MetricBaselineData `json:"baselines"`
+
+	// Unique identifier of the Monitored Object for which these baselines are applicable
+	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
 }
 
 // Validate validates this metric baseline create request data attributes

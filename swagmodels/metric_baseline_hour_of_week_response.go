@@ -6,6 +6,7 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -21,7 +22,7 @@ type MetricBaselineHourOfWeekResponse struct {
 
 	// data
 	// Required: true
-	Data []*MetricBaselineDataWrapper `json:"data"`
+	Data *MetricBaselineHourOfWeekResponseData `json:"data"`
 }
 
 // Validate validates this metric baseline hour of week response
@@ -44,20 +45,13 @@ func (m *MetricBaselineHourOfWeekResponse) validateData(formats strfmt.Registry)
 		return err
 	}
 
-	for i := 0; i < len(m.Data); i++ {
-		if swag.IsZero(m.Data[i]) { // not required
-			continue
-		}
-
-		if m.Data[i] != nil {
-			if err := m.Data[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("data" + "." + strconv.Itoa(i))
-				}
-				return err
+	if m.Data != nil {
+		if err := m.Data.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data")
 			}
+			return err
 		}
-
 	}
 
 	return nil
@@ -74,6 +68,199 @@ func (m *MetricBaselineHourOfWeekResponse) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *MetricBaselineHourOfWeekResponse) UnmarshalBinary(b []byte) error {
 	var res MetricBaselineHourOfWeekResponse
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// MetricBaselineHourOfWeekResponseData metric baseline hour of week response data
+// swagger:model MetricBaselineHourOfWeekResponseData
+type MetricBaselineHourOfWeekResponseData struct {
+
+	// attributes
+	// Required: true
+	Attributes *MetricBaselineHourOfWeekResponseDataAttributes `json:"attributes"`
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// type
+	// Required: true
+	// Enum: [metricBaselineHourResponse]
+	Type *string `json:"type"`
+}
+
+// Validate validates this metric baseline hour of week response data
+func (m *MetricBaselineHourOfWeekResponseData) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MetricBaselineHourOfWeekResponseData) validateAttributes(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes", "body", m.Attributes); err != nil {
+		return err
+	}
+
+	if m.Attributes != nil {
+		if err := m.Attributes.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "attributes")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineHourOfWeekResponseData) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"id", "body", m.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var metricBaselineHourOfWeekResponseDataTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["metricBaselineHourResponse"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		metricBaselineHourOfWeekResponseDataTypeTypePropEnum = append(metricBaselineHourOfWeekResponseDataTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// MetricBaselineHourOfWeekResponseDataTypeMetricBaselineHourResponse captures enum value "metricBaselineHourResponse"
+	MetricBaselineHourOfWeekResponseDataTypeMetricBaselineHourResponse string = "metricBaselineHourResponse"
+)
+
+// prop value enum
+func (m *MetricBaselineHourOfWeekResponseData) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, metricBaselineHourOfWeekResponseDataTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MetricBaselineHourOfWeekResponseData) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"type", "body", m.Type); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("data"+"."+"type", "body", *m.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *MetricBaselineHourOfWeekResponseData) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *MetricBaselineHourOfWeekResponseData) UnmarshalBinary(b []byte) error {
+	var res MetricBaselineHourOfWeekResponseData
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// MetricBaselineHourOfWeekResponseDataAttributes metric baseline hour of week response data attributes
+// swagger:model MetricBaselineHourOfWeekResponseDataAttributes
+type MetricBaselineHourOfWeekResponseDataAttributes struct {
+
+	// Contains the dynamically calculated baseline values for the metrics collected by Datahub
+	Baselines []*MetricBaselineData `json:"baselines"`
+
+	// Unique identifier of the Monitored Object for which these baselines are applicable
+	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
+}
+
+// Validate validates this metric baseline hour of week response data attributes
+func (m *MetricBaselineHourOfWeekResponseDataAttributes) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateBaselines(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MetricBaselineHourOfWeekResponseDataAttributes) validateBaselines(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Baselines) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Baselines); i++ {
+		if swag.IsZero(m.Baselines[i]) { // not required
+			continue
+		}
+
+		if m.Baselines[i] != nil {
+			if err := m.Baselines[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + "attributes" + "." + "baselines" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *MetricBaselineHourOfWeekResponseDataAttributes) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *MetricBaselineHourOfWeekResponseDataAttributes) UnmarshalBinary(b []byte) error {
+	var res MetricBaselineHourOfWeekResponseDataAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

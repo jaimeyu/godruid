@@ -38,7 +38,7 @@ type UpdateMetricBaselineForHourOfWeekV2Params struct {
 	  Required: true
 	  In: body
 	*/
-	Body *swagmodels.MetricBaselineHourOfWeekBody
+	Body *swagmodels.MetricBaselineUpdateHourRequest
 	/*
 	  Required: true
 	  In: path
@@ -57,7 +57,7 @@ func (o *UpdateMetricBaselineForHourOfWeekV2Params) BindRequest(r *http.Request,
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body swagmodels.MetricBaselineHourOfWeekBody
+		var body swagmodels.MetricBaselineUpdateHourRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

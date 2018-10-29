@@ -246,7 +246,7 @@
           in: body
           required: true
           schema:
-            $ref: '#/definitions/MetricBaselineHourOfWeekBody'
+            $ref: '#/definitions/MetricBaselineUpdateHourRequest'
       tags:
         - TenantProvisioningServiceV2
   /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:

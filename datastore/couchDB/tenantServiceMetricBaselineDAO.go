@@ -22,6 +22,17 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMetricBaseline(metricBaselineReq
 	metricBaselineReq.ID = ds.GenerateID(metricBaselineReq, string(tenmod.TenantMetricBaselineType))
 	tenantID := ds.PrependToDataID(metricBaselineReq.TenantID, string(admmod.TenantType))
 
+	// Make sure there is no existing record for this id:
+	existing, err := tsd.GetMetricBaselineForMonitoredObject(metricBaselineReq.TenantID, metricBaselineReq.MonitoredObjectID)
+	if err != nil {
+		if !strings.Contains(err.Error(), ds.NotFoundStr) {
+			return nil, fmt.Errorf("Unable to create %s. Receieved this error when checking for existing %s record: %s", tenmod.TenantMetricBaselineStr, tenmod.TenantMetricBaselineStr, err.Error())
+		}
+	}
+	if existing != nil {
+		return nil, fmt.Errorf(ds.ConflictStr)
+	}
+
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
 	dataContainer := &tenmod.MetricBaseline{}
 	if err := createDataInCouch(dbName, metricBaselineReq, dataContainer, string(tenmod.TenantMetricBaselineType), tenmod.TenantMetricBaselineStr); err != nil {

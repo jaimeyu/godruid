@@ -1207,7 +1207,7 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	w.Write(clientCRTRaw)
 }
 
-func dockerLogin() string {
+func dockerLogin() (string, error) {
 	type GoogleToken struct {
 		AccessToken string `json:"access_token"`
 		ExpiresIn   string `json:"expires_in"`
@@ -1223,14 +1223,14 @@ func dockerLogin() string {
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		fmt.Println("ERR--->", err)
+		return "", err
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	var token GoogleToken
 	json.Unmarshal(body, &token)
 
-	return token.AccessToken
+	return token.AccessToken, nil
 }
 
 type ManifestObject struct {
@@ -1285,7 +1285,7 @@ func (tsh *TestDataServiceHandler) writeConnectorConfigs(archiveDir string, tena
 		return err
 	}
 
-	configTemplate, err := ioutil.ReadFile("connector/adh-roadrunner.yml")
+	configTemplate, err := ioutil.ReadFile("/files/connector/adh-roadrunner.yml")
 	if err != nil {
 		return err
 	}
@@ -1315,7 +1315,13 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	tr := &http.Transport{}
 	httpC.Transport = tr
 
-	accessToken := dockerLogin()
+	accessToken, err := dockerLogin()
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to login to docker: %s ", err.Error())
+		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
+	}
 
 	imageName := cfg.GetString(gather.CK_connector_dockerImageName.String())
 	baseURL := cfg.GetString(gather.CK_connector_dockerRegistry.String()) + imageName + "/"
@@ -1458,7 +1464,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		return
 	}
 	// Make arhive for downloading
-	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "connector/run.sh", archiveDir + "/.env"})
+	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "/files/connector/run.sh", archiveDir + "/.env"})
 	if err != nil {
 		msg := fmt.Sprintf("Unable to save roadrunner archive  %s: %s ", archivePath, err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)

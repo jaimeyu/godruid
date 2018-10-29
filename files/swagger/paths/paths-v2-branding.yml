@@ -1,0 +1,332 @@
+  /v2/brandings:
+    post:
+      summary: Create a Branding for a Tenant.
+      operationId: CreateBrandingV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/BrandingResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Branding being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/BrandingCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Brandings for the specified Tenant.
+      operationId: GetAllBrandingsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BrandingListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No branding records are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/brandings/{brandingId}:
+    get:
+      summary: Retrieve a Tenant Branding by Id.
+      operationId: GetBrandingV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BrandingResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified branding is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: brandingId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Branding specified by the provided Branding Id.
+      operationId: UpdateBrandingV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BrandingResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified branding is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the branding being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/BrandingUpdateRequest'
+        - name: brandingId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Branding specified by the provided Branding Id.
+      operationId: DeleteBrandingV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BrandingResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified branding is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: brandingId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/locales:
+    post:
+      summary: Create a Locale for a Tenant.
+      operationId: CreateLocaleV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/LocaleResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Locale being provisioned already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LocaleCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Retrieve all Locales for the specified Tenant.
+      operationId: GetAllLocalesV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LocaleListResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Locales are provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/locales/{localeId}:
+    get:
+      summary: Retrieve a Tenant Locale by Id.
+      operationId: GetLocaleV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LocaleResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Locale is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: localeId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Locale for a Tenant.
+      operationId: UpdateLocaleV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LocaleResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Locale is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision number passed in to the Locale being updated"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LocaleUpdateRequest'
+        - name: localeId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Locale specified by the provided Locale Id.
+      operationId: DeleteLocaleV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LocaleResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The requested Locale is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: localeId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2

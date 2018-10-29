@@ -148,10 +148,10 @@ func HandleCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore
 	}
 }
 
-func HandleGetDataCleaningHistoryV2(allowedRoles []string, druidDB datastore.DruidDatastore) func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
+func HandleGetDataCleaningHistoryV2(allowedRoles []string, metricsDB datastore.MetricsDatastore) func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) middleware.Responder {
 		// Do the work
-		startTime, responseCode, response, err := doGetDataCleaningHistoryV2(allowedRoles, druidDB, params)
+		startTime, responseCode, response, err := doGetDataCleaningHistoryV2(allowedRoles, metricsDB, params)
 
 		// Success Response
 		if responseCode == http.StatusOK {
@@ -300,6 +300,7 @@ func doUpdateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	}
 
 	existing.Rules = data.Rules
+	existing.TenantID = tenantID
 
 	// Issue request to DAO Layer
 	result, err := tenantDB.UpdateTenantDataCleaningProfile(existing)
@@ -362,7 +363,7 @@ func doCreateDataCleaningProfileV2(allowedRoles []string, tenantDB datastore.Ten
 	return startTime, http.StatusCreated, &converted, nil
 }
 
-func doGetDataCleaningHistoryV2(allowedRoles []string, druidDB datastore.DruidDatastore, params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) (time.Time, int, *swagmodels.DataCleaningHistoryResponse, error) {
+func doGetDataCleaningHistoryV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, params tenant_provisioning_service_v2.GetDataCleaningHistoryParams) (time.Time, int, *swagmodels.DataCleaningHistoryResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching all %s: %s", tenmod.TenantDataCleaningHistoryStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
@@ -372,7 +373,7 @@ func doGetDataCleaningHistoryV2(allowedRoles []string, druidDB datastore.DruidDa
 	}
 
 	// Issue request to DAO Layer
-	result, err := druidDB.GetDataCleaningHistory(tenantID, params.MonitoredObjectID, params.Interval)
+	result, err := metricsDB.GetDataCleaningHistory(tenantID, params.MonitoredObjectID, params.Interval)
 	if err != nil {
 		if checkForNotFound(err.Error()) {
 			return startTime, http.StatusNotFound, nil, err

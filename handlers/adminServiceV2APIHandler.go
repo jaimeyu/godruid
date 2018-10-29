@@ -286,6 +286,12 @@ func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to create default Ingestion Profile %s", err.Error())
 	}
 
+	// Create a default Metadata Config for the Tenant.
+	_, err = tenantDB.CreateTenantMetadataConfig(&tenmod.MetadataConfig{TenantID: idForTenant})
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to create default Metadata Config %s", err.Error())
+	}
+
 	// Create a default Threshold Profile for the Tenant
 	threshPrfData := createDefaultTenantThresholdPrf(idForTenant)
 	threshProfileResponse, err := tenantDB.CreateTenantThresholdProfile(threshPrfData)
@@ -375,11 +381,10 @@ func doUpdateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 	}
 
 	// Merge the attributes passed in with the patch request to the tenant fetched from the datastore
-	var patchedTenant *admmod.Tenant
-	if err := models.MergeObjWithMap(fetchedTenant, patchRequestBytes); err != nil {
+	patchedTenant := &admmod.Tenant{}
+	if err := models.MergeObjWithMap(patchedTenant, fetchedTenant, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch tenant with id %s: %s", params.TenantID, err.Error())
 	}
-	patchedTenant = fetchedTenant
 
 	// Finally update the tenant in the datastore with the merged map and fetched tenant
 	result, err := adminDB.UpdateTenantDescriptor(patchedTenant)

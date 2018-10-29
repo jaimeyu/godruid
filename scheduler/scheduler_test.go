@@ -39,7 +39,7 @@ type metricServiceHandler struct {
 	result chan int
 }
 
-func (m *metricServiceHandler) GetInternalSLAReport(request *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
+func (m *metricServiceHandler) GetInternalSLAReportV1(request *metrics.SLAReportRequest) (*metrics.SLAReport, error) {
 
 	logger.Log.Debugf("Execute mock get a SLA Report from druid")
 	// Send a 1 to signfy we actually executed the cron job
@@ -96,6 +96,7 @@ func TestSchedulerBasics(t *testing.T) {
 	}
 
 	mockadmindb := mockAdminDB{}
+	// func Initialize(m metrics.MetricServiceHandler, scheduleDB metrics.ScheduleDB, adminDB metrics.AdminInterface, workers uint) {
 
 	scheduler.Initialize(&mockmsh, &mockdb, &mockadmindb, 1)
 

@@ -171,7 +171,8 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 			meta = make(map[string]string)
 		}
 
-		errMerge := models.MergeObjWithMap(oldMonitoredObject, requestBytes)
+		patched := &tenmod.MonitoredObject{}
+		errMerge := models.MergeObjWithMap(patched, oldMonitoredObject, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
@@ -179,26 +180,26 @@ func HandlePatchTenantMonitoredObject(allowedRoles []string, tenantDB datastore.
 		oldMonitoredObject.Meta = meta
 
 		// This only checks if the ID&REV is set.
-		err = oldMonitoredObject.Validate(true)
+		err = patched.Validate(true)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateMonitoredObject(oldMonitoredObject)
+		result, err := tenantDB.UpdateMonitoredObject(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Done, now generate the couchdb views
-		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, oldMonitoredObject.Meta)
+		err = tenantDB.UpdateMonitoredObjectMetadataViews(data.TenantID, patched.Meta)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to update monitored object keys %s: %s -> %s", tenmod.TenantMonitoredObjectStr, err.Error(), models.AsJSONString(meta))
 			return tenant_provisioning_service.NewPatchTenantMonitoredObjectInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, msg), startTime, http.StatusInternalServerError, mon.PatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		if changeNotificationEnabled {
-			NotifyMonitoredObjectUpdated(oldMonitoredObject.TenantID, oldMonitoredObject)
+			NotifyMonitoredObjectUpdated(oldMonitoredObject.TenantID, patched)
 		}
 
 		converted := swagmodels.JSONAPITenantMonitoredObject{}
@@ -520,42 +521,58 @@ func HandleBulkUpsertMonitoredObjectsMeta(allowedRoles []string, tenantDB datast
 				ID: item.MetadataKey,
 			}
 			// Issue request to DAO Layer
-			existingMonitoredObject, err := tenantDB.GetMonitoredObjectByObjectName(item.MetadataKey, tenantID)
+			existingMonitoredObjects, err := tenantDB.GetMonitoredObjectsByObjectName(item.MetadataKey, tenantID)
 			if err != nil {
 				itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s %s", tenmod.TenantMonitoredObjectStr, err.Error()))
 				continue
 			}
 
-			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMonitoredObject.ObjectName, existingMonitoredObject.ID)
+			revlist := "" // Create a comma separated list of revisions since multiple monitored objects could be associated with this key
+			var moErr error
 
-			existingMonitoredObject.Meta = item.Metadata
+			for i, existingMO := range existingMonitoredObjects {
+				logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMO.ObjectName, existingMO.ID)
 
-			splitID := datastore.GetDataIDFromFullID(existingMonitoredObject.ID)
+				existingMO.Meta = item.Metadata
 
-			existingMonitoredObject.ID = splitID
+				splitID := datastore.GetDataIDFromFullID(existingMO.ID)
 
-			err = existingMonitoredObject.Validate(true)
-			if err != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate%s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				existingMO.ID = splitID
+
+				moErr = existingMO.Validate(true)
+				if moErr != nil {
+					itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+					break
+				}
+				// Issue request to DAO Layer
+				updatedMonitoredObject, moErr := tenantDB.UpdateMonitoredObject(existingMO)
+				if moErr != nil {
+					itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+					break
+				}
+
+				if i > 0 {
+					revlist += ","
+				}
+				revlist += updatedMonitoredObject.REV
+
+				// Track all distinct metadata items to be index processed after all are items are worked through
+				for k := range item.Metadata {
+					metaKeys[k] = ""
+				}
+
+				logger.Log.Debugf("Sending notification of update to monitored object %s", existingMO.ObjectName)
+				NotifyMonitoredObjectUpdated(existingMO.TenantID, existingMO)
+			}
+
+			// If there was an error against a monitored object for a set of monitored objects that share the same object ID then continue through the loop.
+			// The inner loop will have already reported the proble
+			if moErr != nil {
 				continue
 			}
-			// Issue request to DAO Layer
-			updatedMonitoredObject, err := tenantDB.UpdateMonitoredObject(existingMonitoredObject)
-			if err != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
-				continue
-			}
-
-			// Track all distinct metadata items to be index processed after all are items are worked through
-			for k := range item.Metadata {
-				metaKeys[k] = ""
-			}
-
-			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMonitoredObject.ObjectName)
-			NotifyMonitoredObjectUpdated(existingMonitoredObject.TenantID, existingMonitoredObject)
 
 			itemResponse.OK = true
-			itemResponse.REV = updatedMonitoredObject.REV
+			itemResponse.REV = revlist
 			response[i] = &itemResponse
 		}
 

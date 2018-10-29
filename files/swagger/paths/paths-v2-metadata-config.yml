@@ -1,0 +1,171 @@
+  /v2/metadata-configs:
+    post:
+      summary: Create a Metadata Configuration for a Tenant.
+      operationId: CreateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Metadata Configuration already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Metadata Configurations
+      operationId: GetAllMetadataConfigsV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Metadata Configuration is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/metadata-configs/{MetadataConfigId}:
+    get:
+      summary: Retrieve a Tenant Metadata Configuration by id.
+      operationId: GetMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metadata Configuration
+      operationId: UpdateMetadataConfigV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetadataConfigUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Metadata Configuration specified by the provided Metadata Configuration Id.
+      operationId: DeleteMetadataConfigV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetadataConfigResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metadata Configuration is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: MetadataConfigId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2

@@ -35,7 +35,7 @@ type AggregateMetricsAPIRequestObject struct {
 
 	// metrics
 	// Required: true
-	Metrics []*MetricIdentifierObject `json:"metrics"`
+	Metrics []*MetricIdentifier `json:"metrics"`
 
 	// the tenant identifier
 	// Required: true

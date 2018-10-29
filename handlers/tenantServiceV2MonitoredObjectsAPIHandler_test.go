@@ -83,8 +83,8 @@ func TestMonitoredObjectCRUDV2(t *testing.T) {
 	assert.Equal(t, newAName, castedUpdate.Payload.Data.Attributes.ActuatorName)
 	assert.Equal(t, newOName, castedUpdate.Payload.Data.Attributes.ObjectName)
 	assert.Equal(t, newRName, castedUpdate.Payload.Data.Attributes.ReflectorName)
-	assert.Equal(t, castedCreate.Payload.Data.Attributes.ReflectorType, castedUpdate.Payload.Data.Attributes.ReflectorType)
-	assert.Equal(t, castedCreate.Payload.Data.Attributes.ObjectType, castedUpdate.Payload.Data.Attributes.ObjectType)
+	assert.NotEqual(t, castedCreate.Payload.Data.Attributes.ReflectorType, castedUpdate.Payload.Data.Attributes.ReflectorType)
+	assert.NotEqual(t, castedCreate.Payload.Data.Attributes.ObjectType, castedUpdate.Payload.Data.Attributes.ObjectType)
 
 	// Delete the record
 	deleted := handlers.HandleDeleteMonitoredObjectV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteMonitoredObjectV2Params{MonObjID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, monitoredObjectUrl, "DELETE")})

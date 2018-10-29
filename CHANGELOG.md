@@ -1,7 +1,74 @@
 ## Current Release 
+### 0.234.0 
+**Release Date:** Tue Oct 23 18:08:51 UTC 2018     
+## Previous Releases 
+* Feature - V2 Metric APIs
+### 0.233.0 
+**Release Date:** Fri Oct 19 15:23:19 UTC 2018     
+* Feature - adding tenant meatadata configuration APIs
+### 0.232.0 
+**Release Date:** Wed Oct 17 16:08:00 UTC 2018     
+### 0.231.0 
+**Release Date:** Mon Oct 15 14:16:58 UTC 2018     
+* Fix - Adding even more debug logs to event handling
+### 0.230.0 
+**Release Date:** Sat Oct 13 15:42:24 UTC 2018     
+* Fix - Restructuring V2 card API
+### 0.229.0 
+**Release Date:** Sat Oct 13 11:49:31 UTC 2018     
+* Fix - Restructuring V2 card API
+### 0.228.0 
+**Release Date:** Fri Oct 12 18:04:48 UTC 2018     
+* Feature - Restructuring V2 card API
+### 0.227.0 
+**Release Date:** Thu Oct 11 15:25:30 UTC 2018     
+### 0.226.0 
+**Release Date:** Wed Oct 10 15:52:44 UTC 2018     
+* Feature - Adding additional logging to event handler 
+### 0.225.0 
+**Release Date:** Fri Oct  5 15:53:46 UTC 2018     
+* Fix - Removing restriction on data cleaning profile vendor
+* Feature - Adding logging to event handler startup
+### 0.224.0 
+**Release Date:** Thu Sep 27 17:41:43 UTC 2018     
+### 0.223.0 
+**Release Date:** Wed Sep 26 15:30:57 UTC 2018     
+* Fix - handling multiple MOs with the same objectname for bulk meta update
+### 0.222.0 
+**Release Date:** Thu Sep 20 17:09:17 UTC 2018     
+### 0.221.0 
+**Release Date:** Thu Sep 20 15:57:58 UTC 2018     
+### 0.220.0 
+**Release Date:** Wed Sep 19 18:47:44 UTC 2018     
+### 0.219.0 
+**Release Date:** Thu Sep 13 02:28:03 UTC 2018     
+### 0.218.0 
+**Release Date:** Thu Sep 13 01:42:47 UTC 2018     
+* Fix - handling relationships for the report schedule config APIs
+### 0.217.0 
+**Release Date:** Thu Sep 13 00:21:23 UTC 2018     
+* Fix - handling relationship data on patch for Dashboards
+### 0.216.0 
+**Release Date:** Wed Sep 12 15:51:47 UTC 2018     
+* Feature - adding regulator metric type to the ingestion dictionary
+### 0.215.0 
+**Release Date:** Tue Sep 11 16:41:39 UTC 2018     
+* Feature - adding allowed origin support based on suffix matching
+* Fix - always setting the TenantId in a 'patch' scenario to ensure legacy models will work with V2 APIs
+### 0.214.0 
+**Release Date:** Mon Sep 10 18:37:59 UTC 2018     
+* Fix - Metadata value filtering with case insensitivity
+### 0.213.0 
+**Release Date:** Mon Sep 10 13:39:24 UTC 2018     
+* Fix - removing requirement for the 'thresholds' property on Threshold Profile update
+### 0.212.0 
+**Release Date:** Fri Sep  7 19:19:45 UTC 2018     
+* Fix - sort monitored object ids before issuing a query when using metadata
+* Feature - APIs for branding and locale
+### 0.211.0 
+**Release Date:** Wed Sep  5 15:19:28 UTC 2018     
 ### 0.210.0 
 **Release Date:** Tue Sep  4 14:28:35 UTC 2018     
-## Previous Releases 
 * Feature - data cleaning history api
 ### 0.209.0 
 **Release Date:** Fri Aug 31 02:33:32 UTC 2018     

@@ -31,10 +31,13 @@ type TenantServiceDatastoreInMemory struct {
 	tenantToIDtoTenantSLAReportMap            map[string]map[string]*metmod.SLAReport
 	tenantToIDtoDashboardMap                  map[string]map[string]*tenmod.Dashboard
 	tenantToIDtoCardMap                       map[string]map[string]*tenmod.Card
+	tenantToIDtoBrandingMap                   map[string]map[string]*tenmod.Branding
+	tenantToIDtoLocaleMap                     map[string]map[string]*tenmod.Locale
 
 	tenantIDtoMetaSlice                map[string][]*tenmod.Metadata
 	tenantIDtoIngPrfSlice              map[string][]*tenmod.IngestionProfile
 	tenantIDtoDataCleaningProfileSlice map[string][]*tenmod.DataCleaningProfile
+	tenantIDtoMetadataConfigSlice      map[string][]*tenmod.MetadataConfig
 }
 
 // CreateTenantServiceDAO - returns an in-memory implementation of the Tenant Service
@@ -50,10 +53,13 @@ func CreateTenantServiceDAO() (*TenantServiceDatastoreInMemory, error) {
 	res.tenantToIDtoTenantSLAReportMap = map[string]map[string]*metmod.SLAReport{}
 	res.tenantToIDtoDashboardMap = map[string]map[string]*tenmod.Dashboard{}
 	res.tenantToIDtoCardMap = map[string]map[string]*tenmod.Card{}
+	res.tenantToIDtoBrandingMap = map[string]map[string]*tenmod.Branding{}
+	res.tenantToIDtoLocaleMap = map[string]map[string]*tenmod.Locale{}
 
 	res.tenantIDtoMetaSlice = map[string][]*tenmod.Metadata{}
 	res.tenantIDtoIngPrfSlice = map[string][]*tenmod.IngestionProfile{}
 	res.tenantIDtoDataCleaningProfileSlice = map[string][]*tenmod.DataCleaningProfile{}
+	res.tenantIDtoMetadataConfigSlice = map[string][]*tenmod.MetadataConfig{}
 
 	return res, nil
 }
@@ -94,6 +100,10 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		if tsd.tenantIDtoIngPrfSlice[tenantID] == nil {
 			return tenantDNE
 		}
+	case tenmod.TenantMetadataConfigType:
+		if tsd.tenantIDtoMetadataConfigSlice[tenantID] == nil {
+			return tenantDNE
+		}
 	case tenmod.TenantThresholdProfileType:
 		if tsd.tenantToIDtoTenantThrPrfMap[tenantID] == nil {
 			return tenantDNE
@@ -116,6 +126,14 @@ func (tsd *TenantServiceDatastoreInMemory) DoesTenantExist(tenantID string, ctx 
 		}
 	case tenmod.TenantDataCleaningProfileType:
 		if tsd.tenantIDtoDataCleaningProfileSlice[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantBrandingType:
+		if tsd.tenantToIDtoBrandingMap[tenantID] == nil {
+			return tenantDNE
+		}
+	case tenmod.TenantLocaleType:
+		if tsd.tenantToIDtoLocaleMap[tenantID] == nil {
 			return tenantDNE
 		}
 	default:
@@ -1713,7 +1731,7 @@ func (tsd *TenantServiceDatastoreInMemory) UpdateMonitoredObjectMetadataViews(te
 func (tsd *TenantServiceDatastoreInMemory) CheckAndAddMetadataView(tenantID string, metas map[string]string) error {
 	return nil
 }
-func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error) {
+func (tsd *TenantServiceDatastoreInMemory) GetMonitoredObjectsByObjectName(name string, tenantID string) ([]*tenmod.MonitoredObject, error) {
 	return nil, nil
 }
 func (tsd *TenantServiceDatastoreInMemory) GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error) {
@@ -1724,4 +1742,356 @@ func (tsd *TenantServiceDatastoreInMemory) GetMetadataKeys(tenantId string) (map
 }
 func (tsd *TenantServiceDatastoreInMemory) GetAllMonitoredObjectsIDs(tenantID string) ([]string, error) {
 	return nil, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantBranding(branding *tenmod.Branding) (*tenmod.Branding, error) {
+	if err := tsd.DoesTenantExist(branding.TenantID, tenmod.TenantBrandingType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoBrandingMap[branding.TenantID] = map[string]*tenmod.Branding{}
+	}
+
+	recCopy := tenmod.Branding{}
+	deepcopy.Copy(&recCopy, branding)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantBrandingType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoBrandingMap[branding.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Branding ID", tenmod.TenantBrandingStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantBrandingStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantBrandingType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantBrandingStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoBrandingMap[tenantID][dataID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoBrandingMap))
+	if ok {
+		delete(tsd.tenantToIDtoBrandingMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoBrandingMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoBrandingMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// UpdateTenantBranding - InMemory implementation of UpdateTenantBranding
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantBranding(branding *tenmod.Branding) (*tenmod.Branding, error) {
+	if len(branding.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantBrandingStr)
+	}
+	if len(branding.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantBrandingStr)
+	}
+	if err := tsd.DoesTenantExist(branding.TenantID, tenmod.TenantBrandingType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantBrandingStr)
+	}
+	if tsd.tenantToIDtoBrandingMap[branding.TenantID][branding.ID] == nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recCopy := tenmod.Branding{}
+	deepcopy.Copy(&recCopy, branding)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantBrandingType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoBrandingMap[branding.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetTenantBranding - InMemory implementation of GetTenantBranding
+func (tsd *TenantServiceDatastoreInMemory) GetTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Branding ID", tenmod.TenantBrandingStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantBrandingStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantBrandingType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantBrandingStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoBrandingMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// GetAllTenantBrandings - InMemory implementation of GetAllTenantBrandings
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantBrandings(tenantID string) ([]*tenmod.Branding, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantBrandingType)
+	if err != nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recList := make([]*tenmod.Branding, 0)
+
+	for _, rec := range tsd.tenantToIDtoBrandingMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	if len(recList) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	return recList, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantLocale(locale *tenmod.Locale) (*tenmod.Locale, error) {
+	if err := tsd.DoesTenantExist(locale.TenantID, tenmod.TenantLocaleType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantToIDtoLocaleMap[locale.TenantID] = map[string]*tenmod.Locale{}
+	}
+
+	recCopy := tenmod.Locale{}
+	deepcopy.Copy(&recCopy, locale)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantLocaleType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantToIDtoLocaleMap[locale.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Locale ID", tenmod.TenantLocaleStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantLocaleStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantLocaleType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantLocaleStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoLocaleMap[tenantID][dataID]
+	logger.Log.Debugf(models.AsJSONString(tsd.tenantToIDtoLocaleMap))
+	if ok {
+		delete(tsd.tenantToIDtoLocaleMap[tenantID], dataID)
+
+		// Delete the tenant user map if there are no more users.
+		if len(tsd.tenantToIDtoLocaleMap[tenantID]) == 0 {
+			delete(tsd.tenantToIDtoLocaleMap, tenantID)
+		}
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// UpdateTenantLocale- InMemory implementation of UpdateTenantLocale
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantLocale(locale *tenmod.Locale) (*tenmod.Locale, error) {
+	if len(locale.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantLocaleStr)
+	}
+	if len(locale.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantLocaleStr)
+	}
+	if err := tsd.DoesTenantExist(locale.TenantID, tenmod.TenantLocaleType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantLocaleStr)
+	}
+	if tsd.tenantToIDtoLocaleMap[locale.TenantID][locale.ID] == nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recCopy := tenmod.Locale{}
+	deepcopy.Copy(&recCopy, locale)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantLocaleType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantToIDtoLocaleMap[locale.TenantID][recCopy.ID] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetTenantLocale - InMemory implementation of GetTenantLocale
+func (tsd *TenantServiceDatastoreInMemory) GetTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error) {
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Locale ID", tenmod.TenantLocaleStr)
+	}
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantLocaleStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantLocaleType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantLocaleStr)
+	}
+
+	rec, ok := tsd.tenantToIDtoLocaleMap[tenantID][dataID]
+	if ok {
+		return rec, nil
+	}
+
+	return nil, fmt.Errorf(ds.NotFoundStr)
+}
+
+// GetAllTenantLocales - InMemory implementation of GetAllTenantLocales
+func (tsd *TenantServiceDatastoreInMemory) GetAllTenantLocales(tenantID string) ([]*tenmod.Locale, error) {
+	err := tsd.DoesTenantExist(tenantID, tenmod.TenantLocaleType)
+	if err != nil {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	recList := make([]*tenmod.Locale, 0)
+
+	for _, rec := range tsd.tenantToIDtoLocaleMap[tenantID] {
+		recList = append(recList, rec)
+	}
+
+	if len(recList) == 0 {
+		return nil, fmt.Errorf(ds.NotFoundStr)
+	}
+
+	return recList, nil
+}
+
+// CreateTenantMetadataConfig - InMemory implementation of CreateTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) CreateTenantMetadataConfig(metaCfgReq *tenmod.MetadataConfig) (*tenmod.MetadataConfig, error) {
+	if err := tsd.DoesTenantExist(metaCfgReq.TenantID, tenmod.TenantMetadataConfigType); err != nil {
+		// Make a place for the tenant
+		tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID] = make([]*tenmod.MetadataConfig, 1)
+	}
+
+	existing, _ := tsd.GetActiveTenantMetadataConfig(metaCfgReq.TenantID)
+	if existing != nil {
+		return nil, fmt.Errorf("Unable to create %s, it already exists", tenmod.TenantMetadataConfigStr)
+	}
+
+	recCopy := tenmod.MetadataConfig{}
+	deepcopy.Copy(&recCopy, metaCfgReq)
+	recCopy.ID = uuid.NewV4().String()
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetadataConfigType)
+	recCopy.CreatedTimestamp = ds.MakeTimestamp()
+	recCopy.LastModifiedTimestamp = recCopy.CreatedTimestamp
+
+	tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// UpdateTenantMetadataConfig - InMemory implementation of UpdateTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) UpdateTenantMetadataConfig(metaCfgReq *tenmod.MetadataConfig) (*tenmod.MetadataConfig, error) {
+	if len(metaCfgReq.ID) == 0 {
+		return nil, fmt.Errorf("%s must have an ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(metaCfgReq.REV) == 0 {
+		return nil, fmt.Errorf("%s must have a revision", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(metaCfgReq.TenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	recCopy := tenmod.MetadataConfig{}
+	deepcopy.Copy(&recCopy, metaCfgReq)
+	recCopy.REV = uuid.NewV4().String()
+	recCopy.Datatype = string(tenmod.TenantMetadataConfigType)
+	recCopy.LastModifiedTimestamp = ds.MakeTimestamp()
+
+	tsd.tenantIDtoMetadataConfigSlice[metaCfgReq.TenantID][0] = &recCopy
+
+	return &recCopy, nil
+}
+
+// GetTenantMetadataConfig - InMemory implementation of GetTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Metadata Config ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+	existing := tsd.tenantIDtoMetadataConfigSlice[tenantID][0]
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	return existing, nil
+}
+
+// DeleteTenantMetadataConfig - InMemory implementation of DeleteTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if len(dataID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Metadata Config ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+	existing, err := tsd.GetActiveTenantMetadataConfig(tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if dataID != existing.ID {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	tsd.tenantIDtoMetadataConfigSlice[tenantID][0] = nil
+
+	return existing, nil
+}
+
+// GetActiveTenantMetadataConfig - InMemory implementation of GetActiveTenantMetadataConfig
+func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("%s must provide a Tenant ID", tenmod.TenantMetadataConfigStr)
+	}
+	if err := tsd.DoesTenantExist(tenantID, tenmod.TenantMetadataConfigType); err != nil {
+		return nil, fmt.Errorf("%s does not exist", tenmod.TenantMetadataConfigStr)
+	}
+
+	existing := tsd.tenantIDtoMetadataConfigSlice[tenantID][0]
+	if existing == nil {
+		return nil, fmt.Errorf("%s not found", tenmod.TenantMetadataConfigStr)
+	}
+
+	return existing, nil
+}
+
+func (tsd *TenantServiceDatastoreInMemory) CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("CreateMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("UpdateMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("UpdateBaselineForHourOfWeek is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("GetMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("GetMetricBaselineForMonitoredObject is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {
+	return nil, fmt.Errorf("GetMetricBaselineForMonitoredObjectForHourOfWeek is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("DeleteMetricBaseline is not implemented for In-Memory Datastore")
 }

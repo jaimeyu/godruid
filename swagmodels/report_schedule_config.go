@@ -27,6 +27,9 @@ type ReportScheduleConfig struct {
 	// Required: true
 	ID *string `json:"id"`
 
+	// relationships
+	Relationships *ReportScheduleConfigRelationships `json:"relationships,omitempty"`
+
 	// type
 	// Required: true
 	// Enum: [reportScheduleConfigs]
@@ -42,6 +45,10 @@ func (m *ReportScheduleConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRelationships(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,6 +84,24 @@ func (m *ReportScheduleConfig) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ReportScheduleConfig) validateRelationships(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Relationships) { // not required
+		return nil
+	}
+
+	if m.Relationships != nil {
+		if err := m.Relationships.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("relationships")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -180,6 +205,10 @@ type ReportScheduleConfigAttributes struct {
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
+	// meta
+	// Required: true
+	Meta map[string][]string `json:"meta"`
+
 	// Recurring minute when this report should be generated
 	// Required: true
 	Minute *string `json:"minute"`
@@ -199,10 +228,6 @@ type ReportScheduleConfigAttributes struct {
 	// Unique identifier of the Tenant in Datahub
 	// Required: true
 	TenantID *string `json:"tenantId"`
-
-	// The unique identifier of the Threshold Profile used to generate the report
-	// Required: true
-	ThresholdProfile *string `json:"thresholdProfile"`
 
 	// Period of time for which the report will be generated
 	// Required: true
@@ -257,6 +282,10 @@ func (m *ReportScheduleConfigAttributes) Validate(formats strfmt.Registry) error
 		res = append(res, err)
 	}
 
+	if err := m.validateMeta(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMinute(formats); err != nil {
 		res = append(res, err)
 	}
@@ -274,10 +303,6 @@ func (m *ReportScheduleConfigAttributes) Validate(formats strfmt.Registry) error
 	}
 
 	if err := m.validateTenantID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateThresholdProfile(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -380,6 +405,11 @@ func (m *ReportScheduleConfigAttributes) validateLastModifiedTimestamp(formats s
 	return nil
 }
 
+func (m *ReportScheduleConfigAttributes) validateMeta(formats strfmt.Registry) error {
+
+	return nil
+}
+
 func (m *ReportScheduleConfigAttributes) validateMinute(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"minute", "body", m.Minute); err != nil {
@@ -419,15 +449,6 @@ func (m *ReportScheduleConfigAttributes) validateReportType(formats strfmt.Regis
 func (m *ReportScheduleConfigAttributes) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"tenantId", "body", m.TenantID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ReportScheduleConfigAttributes) validateThresholdProfile(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"thresholdProfile", "body", m.ThresholdProfile); err != nil {
 		return err
 	}
 

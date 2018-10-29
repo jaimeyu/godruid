@@ -1,7 +1,7 @@
   ReportScheduleConfigCreateRequest:
     type: "object"
     required: ["data"]
-    description: "Object used to create a new Report Genaration Schedule in Datahub"
+    description: "Object used to create a new Report Generation Schedule in Datahub"
     properties:
       data:
         type: "object"
@@ -12,9 +12,11 @@
             enum: [reportScheduleConfigs]
           id:
             type: "string"
+          relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
           attributes:
             type: "object"
-            required: ["thresholdProfile", "name"]
+            required: ["relationships", "name"]
             properties:
               timeRangeDuration: 
                 type: "string"
@@ -55,6 +57,12 @@
               active:
                 type: "boolean"
                 description: "When true, the report will be generated. When false, the report will not be generated"
+              meta:
+                type: "object"
+                additionalProperties:
+                  type: "array"
+                  items:
+                    type: "string"
                     
   ReportScheduleConfigUpdateRequest:
     type: "object"
@@ -70,6 +78,8 @@
             enum: [reportScheduleConfigs]
           id:
             type: "string"
+          relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
           attributes:
             type: "object"
             required: ["_rev"]
@@ -80,9 +90,6 @@
               timeRangeDuration: 
                 type: "string"
                 description: "Period of time for which the report will be generated"
-              thresholdProfile: 
-                type: "string"
-                description: "The unique identifier of the Threshold Profile used to generate the report"
               granularity: 
                 type: "string"
                 description: "Time period for which individual results should be aggregated"
@@ -116,13 +123,20 @@
               active:
                 type: "boolean"
                 description: "When true, the report will be generated. When false, the report will not be generated"
+              meta:
+                type: "object"
+                additionalProperties:
+                  type: "array"
+                  items:
+                    type: "string"
+              
 
   ReportScheduleConfigResponse:
     type: "object"
     description: "A single object Report Schedule Configuration response from Datahub"
     properties:
       data:
-        $ref: '#/definitions/TenantReportScheduleConfig'
+        $ref: '#/definitions/ReportScheduleConfig'
 
   ReportScheduleConfigListResponse:
     type: "object"
@@ -131,7 +145,7 @@
       data:
         type: "array"
         items:
-           $ref: '#/definitions/TenantReportScheduleConfig'
+           $ref: '#/definitions/ReportScheduleConfig'
 
   ReportScheduleConfig:
     type: "object"
@@ -142,9 +156,11 @@
         enum: [reportScheduleConfigs]
       id:
         type: "string"
+      relationships:
+            $ref: '#/definitions/ReportScheduleConfigRelationships'
       attributes:
         type: "object"
-        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "thresholdProfile", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "datatype", "tenantId", "timeRangeDuration", "granularity", "timeout", "timezone", "name", "reportType", "minute", "hour", "dayMonth", "month", "dayWeek", "active", "meta", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -158,9 +174,6 @@
           timeRangeDuration: 
             type: "string"
             description: "Period of time for which the report will be generated"
-          thresholdProfile: 
-            type: "string"
-            description: "The unique identifier of the Threshold Profile used to generate the report"
           granularity: 
             type: "string"
             description: "Time period for which individual results should be aggregated"
@@ -194,9 +207,24 @@
           active:
             type: "boolean"
             description: "When true, the report will be generated. When false, the report will not be generated"
+          meta:
+            type: "object"
+            additionalProperties:
+              type: "array"
+              items:
+                type: "string"
           createdTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was last altered."
+
+  ReportScheduleConfigRelationships:
+    type: "object"
+    required: ["thresholdProfile"]
+    properties:
+      thresholdProfile:
+        description: "References the unique identifier of the Threshold Profile used to generate Threshold Crossing Events for this report"
+        $ref: '#/definitions/JsonApiSingleRelationship'
+

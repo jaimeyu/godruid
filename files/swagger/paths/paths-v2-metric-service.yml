@@ -1,0 +1,258 @@
+  
+  /v2/metrics/threshold-crossing-by-monitored-object-top-n:
+    post:
+      summary: Retrieve the Top N threshold crossing events using the given threshold profile and the specified metric filters
+      operationId: GetThresholdCrossingByMonitoredObjectTopNV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Top N threshold crossing by monitored object successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingByMOTopNResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingByMOTopNRequest'
+      tags:
+        - MetricsServiceV2
+  
+  /v2/metrics/generate-sla-report:
+    post:
+      summary: Retrieve an SLA report for given time range and parameters
+      operationId: GenerateSLAReportV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "SLA report successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiSLAReportResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiSLAReportRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/histogram:
+    post:
+      summary: Retrieve a histogram of measurements using custom buckets specified in the request
+      operationId: GetHistogramV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Histogram request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiHistogramResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiHistogramRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/topn-metrics:
+    post:
+      summary: Retrieve the Top-N for the specified set of metrics
+      operationId: GetTopNForMetricV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Top N request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiTopNForMetricResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiTopNForMetricRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/threshold-crossing:
+    post:
+      summary: Retrieve threshold crossing events for the given threshold profile
+      operationId: QueryThresholdCrossingV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Threshold crossings successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Threshold profile not found"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiThresholdCrossingRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/metrics/aggregated-metrics:
+    post:
+      summary: Retrieve a variety of aggregation types against the specified metric filters
+      operationId: QueryAggregateMetricsV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Aggregation request successfully processed"
+          schema:
+            $ref: '#/definitions/JsonApiAggregationResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "Missing provisioned data from request parameters"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/JsonApiAggregationRequest'
+      tags:
+        - MetricsServiceV2
+
+  /v2/raw-metrics:
+    post:
+      summary: Returns raw metric entries from the metrics datastore based on the provided metric filters
+      operationId: GetFilteredRawMetricsV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: "Raw metric request successfully processed"
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilteredRawMetricsRequestObject'
+      tags:
+        - MetricsServiceV2

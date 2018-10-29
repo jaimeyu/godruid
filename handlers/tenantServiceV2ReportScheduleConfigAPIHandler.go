@@ -260,11 +260,19 @@ func doUpdateReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *metmod.ReportScheduleConfig
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &metmod.ReportScheduleConfig{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantReportScheduleConfigStr, params.ConfigID, err.Error())
 	}
-	patched = fetched
+	patched.TenantID = tenantID
+
+	// Before updating, make sure to handle any relationship data:
+	if params.Body.Data.Relationships != nil {
+		tp := params.Body.Data.Relationships.ThresholdProfile
+		if tp != nil {
+			patched.ThresholdProfile = params.Body.Data.Relationships.ThresholdProfile.Data.ID
+		}
+	}
 
 	// Ensure that the passed in data adheres to the model requirements
 	err = patched.Validate(true)
@@ -334,7 +342,7 @@ func doDeleteReportScheduleConfigV2(allowedRoles []string, tenantDB datastore.Te
 
 func doGetAllReportScheduleConfigsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllReportScheduleConfigsV2Params) (time.Time, int, *swagmodels.ReportScheduleConfigListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantReportScheduleConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantReportScheduleConfigStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantReportScheduleConfigStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

@@ -38,7 +38,7 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["_rev", "metrics"]
+            required: ["_rev"]
             properties:
               _rev:
                 type: "string"
@@ -143,12 +143,10 @@
         enabled:
           description: "When true, this metric will be recorded by Datahub. When false, this metric is ommitted."
           type: "boolean"
+        direction:
+          type: "string"
+          description: "Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)"
         dimensions:
-          type: "array"
+          type: "object"
           description: "Provides data properties by which the Metric may be filtered and/or aggregated"
-          items:
-            type: "object"
-            additionalProperties:
-              type: "array"
-              items:
-                type: "string"
+

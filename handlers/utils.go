@@ -14,8 +14,10 @@ import (
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/models/common"
+	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
+	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/manyminds/api2go/jsonapi"
 )
 
@@ -134,6 +136,206 @@ var (
 					},
 					"monitoredObjectTypeMap": {
 						"twamp-sf": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"twamp-pe": {
+							"metricMap": {
+								"delayP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "100000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "95000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "100000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "92500",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "95000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"jitterP95": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "30000",
+														"lowerStrict": "true",
+														"unit": "ms"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "20000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "30000",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "15000",
+														"lowerStrict": "true",
+														"unit": "ms",
+														"upperLimit": "20000"
+													}
+												}
+											}
+										}
+									}
+								},
+								"packetsLostPct": {
+									"directionMap": {
+										"0": {
+											"eventMap": {
+												"critical": {
+													"eventAttrMap": {
+														"lowerLimit": "0.8",
+														"lowerStrict": "true",
+														"unit": "pct"
+													}
+												},
+												"major": {
+													"eventAttrMap": {
+														"lowerLimit": "0.3",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.8",
+														"upperStrict": "false"
+													}
+												},
+												"minor": {
+													"eventAttrMap": {
+														"lowerLimit": "0.1",
+														"lowerStrict": "true",
+														"unit": "pct",
+														"upperLimit": "0.3"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"twamp-sl": {
 							"metricMap": {
 								"delayP95": {
 									"directionMap": {
@@ -658,6 +860,16 @@ func wrapJsonAPIObject(obj interface{}, id string, otype string) map[string]inte
 			"attributes": obj}}
 }
 
+func wrapJsonAPIObjectAsArray(obj interface{}, id string, otype string) map[string]interface{} {
+
+	return map[string]interface{}{
+		"data": []map[string]interface{}{
+			map[string]interface{}{
+				"id":         id,
+				"type":       otype,
+				"attributes": obj}}}
+}
+
 // authorizeRequest - Does the initial setup of a REST handler function, including logging, incrementing API counters for monitoring and tracking the
 // initialization time of the call.
 // Returns:
@@ -711,4 +923,69 @@ func generateLinks(urlBase string, paginationOffsets *common.PaginationOffsets, 
 	}
 
 	return links
+}
+
+func getIdsFromRelationshipData(relationships *swagmodels.JSONAPIRelationship) []string {
+	result := []string{}
+
+	for _, val := range relationships.Data {
+		result = append(result, val.ID)
+	}
+
+	return result
+}
+
+func addValToList(list []*metmod.MetricViolationSummaryType, entry map[string]interface{}, ts string) []*metmod.MetricViolationSummaryType {
+
+	if entry == nil {
+		entry = make(map[string]interface{})
+	}
+
+	if entry["violationDuration"] != nil || entry["violationCount"] != nil {
+
+		// var check float64
+		_, ok := entry["violationDuration"].(float64)
+		if !ok {
+			return list
+		}
+
+		_, ok = entry["violationDuration"].(float64)
+		if !ok {
+			return list
+		}
+
+		tmp := metmod.MetricViolationSummaryType{
+			"violationCount":    entry["violationCount"],
+			"violationDuration": entry["violationDuration"],
+			"timestamp":         ts,
+		}
+
+		list = append(list, &tmp)
+	}
+
+	return list
+}
+
+func buildHash(args ...string) string {
+	str := ""
+	for _, w := range args {
+		str = str + "." + w
+	}
+	return str
+}
+
+func utilMetricViolationSummaryTypeMap2Array(src map[string]*metmod.MetricViolationSummaryType) []*metmod.MetricViolationSummaryType {
+	var res []*metmod.MetricViolationSummaryType
+	for _, v := range src {
+		res = append(res, v)
+	}
+	return res
+}
+
+func utilMetricViolationsSummaryAsTimeSeriesEntryMap2Array(src map[string]*metmod.MetricViolationsSummaryAsTimeSeriesEntry) []*metmod.MetricViolationsSummaryAsTimeSeriesEntry {
+	var res []*metmod.MetricViolationsSummaryAsTimeSeriesEntry
+	for _, v := range src {
+		res = append(res, v)
+	}
+	return res
 }

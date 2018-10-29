@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ReportScheduleConfigCreateRequest Object used to create a new Report Genaration Schedule in Datahub
+// ReportScheduleConfigCreateRequest Object used to create a new Report Generation Schedule in Datahub
 // swagger:model ReportScheduleConfigCreateRequest
 type ReportScheduleConfigCreateRequest struct {
 
@@ -85,6 +85,9 @@ type ReportScheduleConfigCreateRequestData struct {
 	// id
 	ID string `json:"id,omitempty"`
 
+	// relationships
+	Relationships *ReportScheduleConfigRelationships `json:"relationships,omitempty"`
+
 	// type
 	// Required: true
 	// Enum: [reportScheduleConfigs]
@@ -96,6 +99,10 @@ func (m *ReportScheduleConfigCreateRequestData) Validate(formats strfmt.Registry
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRelationships(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -119,6 +126,24 @@ func (m *ReportScheduleConfigCreateRequestData) validateAttributes(formats strfm
 		if err := m.Attributes.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("data" + "." + "attributes")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ReportScheduleConfigCreateRequestData) validateRelationships(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Relationships) { // not required
+		return nil
+	}
+
+	if m.Relationships != nil {
+		if err := m.Relationships.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "relationships")
 			}
 			return err
 		}
@@ -204,6 +229,9 @@ type ReportScheduleConfigCreateRequestDataAttributes struct {
 	// Recurring hour when this report should be generated
 	Hour string `json:"hour,omitempty"`
 
+	// meta
+	Meta map[string][]string `json:"meta,omitempty"`
+
 	// Recurring minute when this report should be generated
 	Minute string `json:"minute,omitempty"`
 
@@ -218,8 +246,7 @@ type ReportScheduleConfigCreateRequestDataAttributes struct {
 	ReportType string `json:"reportType,omitempty"`
 
 	// The unique identifier of the Threshold Profile used to generate the report
-	// Required: true
-	ThresholdProfile *string `json:"thresholdProfile"`
+	ThresholdProfile string `json:"thresholdProfile,omitempty"`
 
 	// Period of time for which the report will be generated
 	TimeRangeDuration string `json:"timeRangeDuration,omitempty"`
@@ -239,10 +266,6 @@ func (m *ReportScheduleConfigCreateRequestDataAttributes) Validate(formats strfm
 		res = append(res, err)
 	}
 
-	if err := m.validateThresholdProfile(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -252,15 +275,6 @@ func (m *ReportScheduleConfigCreateRequestDataAttributes) Validate(formats strfm
 func (m *ReportScheduleConfigCreateRequestDataAttributes) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"name", "body", m.Name); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ReportScheduleConfigCreateRequestDataAttributes) validateThresholdProfile(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"thresholdProfile", "body", m.ThresholdProfile); err != nil {
 		return err
 	}
 

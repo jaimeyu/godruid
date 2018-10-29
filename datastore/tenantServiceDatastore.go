@@ -58,7 +58,7 @@ type TenantServiceDatastore interface {
 	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
-	GetMonitoredObjectByObjectName(name string, tenantID string) (*tenmod.MonitoredObject, error)
+	GetMonitoredObjectsByObjectName(name string, tenantID string) ([]*tenmod.MonitoredObject, error)
 	GetAllMonitoredObjectsByPage(tenantID string, startKey string, limit int64) ([]*tenmod.MonitoredObject, *common.PaginationOffsets, error)
 
 	CreateTenantMeta(meta *tenmod.Metadata) (*tenmod.Metadata, error)
@@ -101,4 +101,30 @@ type TenantServiceDatastore interface {
 	DeleteTenantDataCleaningProfile(tenantID string, dataID string) (*tenmod.DataCleaningProfile, error)
 	GetAllTenantDataCleaningProfiles(tenantID string) ([]*tenmod.DataCleaningProfile, error)
 	GetAllMonitoredObjectsIDs(tenantID string) ([]string, error)
+
+	CreateTenantBranding(card *tenmod.Branding) (*tenmod.Branding, error)
+	UpdateTenantBranding(card *tenmod.Branding) (*tenmod.Branding, error)
+	GetTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error)
+	GetAllTenantBrandings(tenantID string) ([]*tenmod.Branding, error)
+	DeleteTenantBranding(tenantID string, dataID string) (*tenmod.Branding, error)
+
+	CreateTenantLocale(card *tenmod.Locale) (*tenmod.Locale, error)
+	UpdateTenantLocale(card *tenmod.Locale) (*tenmod.Locale, error)
+	GetTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
+	GetAllTenantLocales(tenantID string) ([]*tenmod.Locale, error)
+	DeleteTenantLocale(tenantID string, dataID string) (*tenmod.Locale, error)
+
+	CreateTenantMetadataConfig(*tenmod.MetadataConfig) (*tenmod.MetadataConfig, error)
+	UpdateTenantMetadataConfig(*tenmod.MetadataConfig) (*tenmod.MetadataConfig, error)
+	GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
+	DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
+	GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error)
+
+	CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
+	UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
+	UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
+	GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
+	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
+	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)
+	DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
 }

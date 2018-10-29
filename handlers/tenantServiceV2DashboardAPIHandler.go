@@ -250,11 +250,24 @@ func doUpdateDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *tenmod.Dashboard
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &tenmod.Dashboard{}
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantDashboardStr, params.DashboardID, err.Error())
 	}
-	patched = fetched
+	patched.TenantID = tenantID
+
+	// Before updating, make sure to handle any relationship data:
+	if params.Body.Data.Relationships != nil {
+		cards := params.Body.Data.Relationships.Cards
+		if cards != nil {
+			patched.Cards = getIdsFromRelationshipData(params.Body.Data.Relationships.Cards)
+		}
+
+		tp := params.Body.Data.Relationships.ThresholdProfile
+		if tp != nil {
+			patched.ThresholdProfile = params.Body.Data.Relationships.ThresholdProfile.Data.ID
+		}
+	}
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateDashboard(patched)
@@ -308,7 +321,7 @@ func doDeleteDashboardV2(allowedRoles []string, tenantDB datastore.TenantService
 
 func doGetAllDashboardsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetAllDashboardsV2Params) (time.Time, int, *swagmodels.DashboardListResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list fot %s %s", tenmod.TenantDashboardStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s list for %s %s", tenmod.TenantDashboardStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantDashboardStr, params.HTTPRequest.Header.Get(XFwdUserRoles))

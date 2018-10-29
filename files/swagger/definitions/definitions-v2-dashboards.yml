@@ -200,6 +200,10 @@
                 enum: [active, pending]
               visualization:
                 $ref: '#/definitions/CardVisualization'
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
               metrics:
                 type: "array"
                 items:
@@ -235,6 +239,10 @@
                 enum: [active, pending]
               visualization:
                 $ref: '#/definitions/CardVisualization'
+              metadataFilters:
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetadataFilter'
               metrics:
                 type: "array"
                 items:
@@ -269,7 +277,7 @@
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "name", "datatype", "tenantId", "description", "state", "visualization", "metadataFilters", "metrics", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -292,6 +300,10 @@
           visualization:
             $ref: '#/definitions/CardVisualization'
             description: "Object which contains the components to display on this Card"
+          metadataFilters:
+              type: "array"
+              items:
+                $ref: '#/definitions/MetadataFilter'
           metrics:
             type: "array"
             description: "A list of the data which will be displayed in the Card visualization"
@@ -339,30 +351,75 @@
   CardMetric:
     type: "object"
     properties:
-      key:
+      key: # DEPRECATE FOR V3
         type: "string"
-      label:
+      label: # DEPRECATE FOR V3
         type: "string"
-      vendorLabel:
+      vendorLabel: # DEPRECATE FOR V3
         type: "string"
-      vendorKey:
+      vendorKey: # DEPRECATE FOR V3
         type: "string"
-      objectType:
+      vendor:
         type: "string"
-      type:
+      objectType: # DEPRECATE FOR V3
         type: "string"
-      units:
+      unit:
+        type: "string"
+      type: # DEPRECATE FOR V3
+        type: "string"
+      rawMetricId: # DEPRECATE FOR V3
+        type: "string"
+      metric:
+        type: "string"
+      metricKey: # DEPRECATE FOR V3
+        type: "string"
+      enabled: # DEPRECATE FOR V3
+        type: "boolean"
+      monitoredObjectTypes:
+        type: "array"
+        items:
+          type: "string"
+      directions:
+        type: "array"
+        x-omitempty: true
+        items:
+          type: "string"
+      units: # DEPRECATE FOR V3
         type: "array"
         items:
           type: "string"
       options:
         type: "object"
         properties:
-          useBins:
+          useExplicitSeries: # DEPRECATE FOR V3
             type: "boolean"
-          formatUnit:
+          useBins: # DEPRECATE FOR V3
+            type: "boolean"
+          formatUnit: # DEPRECATE FOR V3
             type: "string"
-          bins: 
+          bins: # DEPRECATE FOR V3
             type: "array"
             items:
               type: "number"
+              format: "double"
+          series: # DEPRECATE FOR V3
+            type: "array"
+            items:
+              type: "string"
+          type:
+            type: "string"
+            enum: ["measure","events","bins"]
+          directions:
+            type: "array"
+            x-omitempty: true
+            items:
+              type: "string"
+          buckets:
+            type: "array"
+            x-omitempty: true
+            items:
+              type: "object"
+              additionalProperties: true
+          aggregation:
+            type: "string"
+            enum: ["none","sum"]

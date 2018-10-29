@@ -23,38 +23,26 @@ type MetricBaselineData struct {
 	// The total number of values recorded for this metric in datahub
 	Count int64 `json:"count,omitempty"`
 
-	// Integer value of the day of the week for which this baseline is calculated. Values are 0-6 which corresponds to Sunday-Saturday
-	// Maximum: 6
-	// Minimum: 0
-	DayOfWeek *int32 `json:"dayOfWeek,omitempty"`
-
 	// The direction of the metric baseline
 	Direction string `json:"direction,omitempty"`
 
-	// Integer value of the hour of the day for which this baseline is calculated. Values are 0-23 which corresponds to 00:00-23:00
-	// Maximum: 23
+	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
+	// Maximum: 167
 	// Minimum: 0
-	HourOfDay *int32 `json:"hourOfDay,omitempty"`
+	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
 
 	// The name of the metric represented by this baseline
 	Metric string `json:"metric,omitempty"`
 
 	// The total sumation of all values recorded for this metric in datahub
 	Sum float64 `json:"sum,omitempty"`
-
-	// The unit of measurement for this metric
-	Unit string `json:"unit,omitempty"`
 }
 
 // Validate validates this metric baseline data
 func (m *MetricBaselineData) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDayOfWeek(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateHourOfDay(formats); err != nil {
+	if err := m.validateHourOfWeek(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -64,34 +52,17 @@ func (m *MetricBaselineData) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *MetricBaselineData) validateDayOfWeek(formats strfmt.Registry) error {
+func (m *MetricBaselineData) validateHourOfWeek(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.DayOfWeek) { // not required
+	if swag.IsZero(m.HourOfWeek) { // not required
 		return nil
 	}
 
-	if err := validate.MinimumInt("dayOfWeek", "body", int64(*m.DayOfWeek), 0, false); err != nil {
+	if err := validate.MinimumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("dayOfWeek", "body", int64(*m.DayOfWeek), 6, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *MetricBaselineData) validateHourOfDay(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.HourOfDay) { // not required
-		return nil
-	}
-
-	if err := validate.MinimumInt("hourOfDay", "body", int64(*m.HourOfDay), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MaximumInt("hourOfDay", "body", int64(*m.HourOfDay), 23, false); err != nil {
+	if err := validate.MaximumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
 		return err
 	}
 

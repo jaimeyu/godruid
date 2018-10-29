@@ -49,7 +49,10 @@ func (m IngestionProfileMetricList) Validate(formats strfmt.Registry) error {
 type IngestionProfileMetricListItems0 struct {
 
 	// Provides data properties by which the Metric may be filtered and/or aggregated
-	Dimensions []map[string][]string `json:"dimensions"`
+	Dimensions interface{} `json:"dimensions,omitempty"`
+
+	// Describes the direction of the test in case a Threshold needs to be different for one direction (i.e. actuator to reflector) versus another (i.e. round trip)
+	Direction string `json:"direction,omitempty"`
 
 	// When true, this metric will be recorded by Datahub. When false, this metric is ommitted.
 	Enabled bool `json:"enabled,omitempty"`

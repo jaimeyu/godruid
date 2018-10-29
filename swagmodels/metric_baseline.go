@@ -170,7 +170,7 @@ type MetricBaselineAttributes struct {
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
 	// Unique identifier of the Monitored Object for which these baselines are applicable
-	ObjectID string `json:"objectId,omitempty"`
+	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
 
 	// Unique identifier of the Tenant in Datahub
 	// Required: true

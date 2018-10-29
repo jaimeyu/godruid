@@ -58,6 +58,17 @@ const (
 
 	// TenantDataCleaningProfileType - datatype string used to identify a Tenant Data Cleaning Profile in the datastore record
 	TenantDataCleaningProfileType TenantDataType = "dataCleaningProfile"
+
+	// TenantBrandingType - datatype string used to identify a Tenant Branding in the datastore record
+	TenantBrandingType TenantDataType = "branding"
+
+	// TenantLocaleType - datatype string used to identify a Locale in the datastore record
+	TenantLocaleType TenantDataType = "locale"
+
+	// TenantMdetadataConfigType - datatype string used to identify a Metadata Configuration in the datastore record
+	TenantMetadataConfigType TenantDataType = "metadataConfig"
+
+	TenantMetricBaselineType TenantDataType = "metricBaseline"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -154,6 +165,17 @@ const (
 
 	// TenantDataCleaningHistoryStr - common name for the Tenant Cleaning History for use in logs.
 	TenantDataCleaningHistoryStr = "Tenant Data Cleaning History"
+
+	// TenantBrandingStr - common name for the Tenant Branding for use in logs.
+	TenantBrandingStr = "Tenant Branding"
+
+	// TenantLocaleStr - common name for the Tenant Locale for use in logs.
+	TenantLocaleStr = "Tenant Locale"
+
+	// TenantMetadataConfigStr - common name for the Tenant Metadata Config for use in logs.
+	TenantMetadataConfigStr = "Tenant Metadata Configuration"
+
+	TenantMetricBaselineStr = "Tenant Metric Baseline"
 )
 
 // User - defines a Tenant user.
@@ -384,11 +406,12 @@ type IngPrfMetricMap struct {
 }
 
 type IngestionProfileMetric struct {
-	Enabled             bool                  `json:"enabled"`
-	Metric              string                `json:"metric"`
-	MonitoredObjectType string                `json:"monitoredObjectType"`
-	Vendor              string                `json:"vendor"`
-	Dimensions          []map[string][]string `json:"dimensions"`
+	Enabled             bool                `json:"enabled"`
+	Metric              string              `json:"metric"`
+	MonitoredObjectType string              `json:"monitoredObjectType"`
+	Vendor              string              `json:"vendor"`
+	Direction           string              `json:"direction"`
+	Dimensions          map[string][]string `json:"dimensions"`
 }
 
 // ThresholdProfile - defines a Tenant Threshold Profile.
@@ -461,6 +484,7 @@ func (prf *ThresholdProfile) Validate(isUpdate bool) error {
 
 type ThresholdProfileThreshold struct {
 	Direction           string              `json:"direction"`
+	Dimensions          map[string][]string `json:"dimensions"`
 	Enabled             string              `json:"enabled"`
 	Events              []map[string]string `json:"events"`
 	Metric              string              `json:"metric"`
@@ -608,9 +632,6 @@ func (mo *MonitoredObject) Validate(isUpdate bool) error {
 	if !isUpdate && len(mo.REV) != 0 {
 		return errors.New("Invalid Tenant Monitored Object request: must not provide a revision value in a creation request")
 	}
-	if len(mo.MonitoredObjectID) == 0 {
-		return errors.New("Invalid Tenant Monitored Object request: must provide a Monitored Object ID")
-	}
 
 	// Enforce lower case to Meta
 	newMeta := make(map[string]string)
@@ -739,6 +760,7 @@ func (d *Dashboard) SetID(s string) error {
 var (
 	dashboardCardRelationshipName = "cards"
 	dashboardTPRelationshipName   = "thresholdProfile"
+	dashboardTPRelationshipType   = "thresholdProfiles"
 )
 
 // GetReferences to satisfy the jsonapi.MarshalReferences interface
@@ -749,7 +771,7 @@ func (d *Dashboard) GetReferences() []jsonapi.Reference {
 			Name: dashboardCardRelationshipName,
 		},
 		{
-			Type: dashboardTPRelationshipName,
+			Type: dashboardTPRelationshipType,
 			Name: dashboardTPRelationshipName,
 		},
 	}
@@ -768,7 +790,7 @@ func (d *Dashboard) GetReferencedIDs() []jsonapi.ReferenceID {
 
 	result = append(result, jsonapi.ReferenceID{
 		ID:   d.ThresholdProfile,
-		Type: dashboardTPRelationshipName,
+		Type: dashboardTPRelationshipType,
 		Name: dashboardTPRelationshipName,
 	})
 
@@ -821,11 +843,6 @@ func (d *Dashboard) DeleteToManyIDs(name string, IDs []string) error {
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
-type MetadataFilter struct {
-	Key    string   `json:"key"`
-	Values []string `json:"values"`
-}
-
 type CardPosition struct {
 	Position   int        `json:"position"`
 	Dimensions *Dimension `json:"dimensions"`
@@ -846,6 +863,7 @@ type Card struct {
 	State                 string             `json:"state"`
 	Visualization         *CardVisualization `json:"visualization"`
 	Metrics               []*CardMetric      `json:"metrics"`
+	MetadataFilters       []*MetadataFilter  `json:"metadataFilters"`
 	CreatedTimestamp      int64              `json:"createdTimestamp"`
 	LastModifiedTimestamp int64              `json:"lastModifiedTimestamp"`
 }
@@ -875,23 +893,40 @@ type CardVisualizationAvailability struct {
 	Type []string `json:"type"`
 }
 
+type MetadataFilter struct {
+	Key    string   `json:"key"`
+	Values []string `json:"values"`
+}
+
 type CardMetric struct {
-	Key         string             `json:"key"`
-	Label       string             `json:"label"`
-	VendorLabel string             `json:"vendorLabel"`
-	VendorKey   string             `json:"vendorKey"`
-	ObjectType  string             `json:"objectType"`
-	Type        string             `json:"type"`
-	Options     *CardMetricOptions `json:"options"`
-	Units       []string           `json:"units"`
+	Enabled              bool               `json:"enabled"`
+	Key                  string             `json:"key"`
+	Label                string             `json:"label"`
+	Metric               string             `json:"metric"`
+	MetricKey            string             `json:"metricKey"`
+	MonitoredObjectTypes []string           `json:"monitoredObjectTypes"`
+	RawMetricID          string             `json:"rawMetricId"`
+	VendorLabel          string             `json:"vendorLabel"`
+	VendorKey            string             `json:"vendorKey"`
+	ObjectType           string             `json:"objectType"`
+	Type                 string             `json:"type"`
+	Options              *CardMetricOptions `json:"options"`
+	Unit                 string             `json:"unit"`
+	Units                []string           `json:"units"`
+	Vendor               string             `json:"vendor"`
+	Directions           []string           `json:"directions"`
 }
 
 type CardMetricOptions struct {
-	UseBins           bool      `json:"useBins"`
-	FormatUnit        string    `json:"formatUnit"`
-	UseExplicitSeries bool      `json:"useExplicitSeries"`
-	Series            []string  `json:"series"`
-	Bins              []float64 `json:"bins"`
+	Type              string                   `json:"type"`
+	Directions        []string                 `json:"directions"`
+	Buckets           []map[string]interface{} `json:"buckets"`
+	Aggregation       string                   `json:"aggregration"`
+	UseBins           bool                     `json:"useBins"`
+	FormatUnit        string                   `json:"formatUnit"`
+	UseExplicitSeries bool                     `json:"useExplicitSeries"`
+	Series            []string                 `json:"series"`
+	Bins              []float64                `json:"bins"`
 }
 
 type MonitoredObjectBulkMetadataItem struct {
@@ -970,4 +1005,113 @@ type DataCleaningRuleCondition struct {
 	Value          string `json:"value"`
 	ValueAggregate string `json:"valueAggregate"`
 	Duration       string `json:"duration"`
+}
+
+type Branding struct {
+	ID                    string        `json:"_id"`
+	REV                   string        `json:"_rev"`
+	Datatype              string        `json:"datatype"`
+	TenantID              string        `json:"tenantId"`
+	Color                 string        `json:"color"`
+	Logo                  *BrandingLogo `json:"logo"`
+	CreatedTimestamp      int64         `json:"createdTimestamp"`
+	LastModifiedTimestamp int64         `json:"lastModifiedTimestamp"`
+}
+
+type BrandingLogo struct {
+	File *BrandingLogoFile `json:"file"`
+}
+
+type BrandingLogoFile struct {
+	ContentType string `json:"content_type"`
+	Data        string `json:"data"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (b *Branding) GetID() string {
+	return b.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (b *Branding) SetID(s string) error {
+	b.ID = s
+	return nil
+}
+
+type Locale struct {
+	ID                    string `json:"_id"`
+	REV                   string `json:"_rev"`
+	Datatype              string `json:"datatype"`
+	TenantID              string `json:"tenantId"`
+	Intl                  string `json:"intl"`
+	Moment                string `json:"moment"`
+	Timezone              string `json:"timezone"`
+	CreatedTimestamp      int64  `json:"createdTimestamp"`
+	LastModifiedTimestamp int64  `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (l *Locale) GetID() string {
+	return l.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (l *Locale) SetID(s string) error {
+	l.ID = s
+	return nil
+}
+
+// MetadataConfig - defines a Tenant MetadataConfig.
+type MetadataConfig struct {
+	ID                    string   `json:"_id"`
+	REV                   string   `json:"_rev"`
+	Datatype              string   `json:"datatype"`
+	TenantID              string   `json:"tenantId"`
+	EndPoint              string   `json:"endPoint"`
+	MidPoints             []string `json:"midPoints"`
+	StartPoint            string   `json:"startPoint"`
+	CreatedTimestamp      int64    `json:"createdTimestamp"`
+	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (cfg *MetadataConfig) GetID() string {
+	return cfg.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (cfg *MetadataConfig) SetID(s string) error {
+	cfg.ID = s
+	return nil
+}
+
+type MetricBaseline struct {
+	ID                    string                `json:"_id"`
+	REV                   string                `json:"_rev"`
+	Datatype              string                `json:"datatype"`
+	TenantID              string                `json:"tenantId"`
+	Baselines             []*MetricBaselineData `json:"baselines"`
+	MonitoredObjectID     string                `json:"monitoredObjectId"`
+	CreatedTimestamp      int64                 `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (mb *MetricBaseline) GetID() string {
+	return mb.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (mb *MetricBaseline) SetID(s string) error {
+	mb.ID = s
+	return nil
+}
+
+type MetricBaselineData struct {
+	Average    float64 `json:"average"`
+	Count      int64   `json:"count"`
+	Direction  string  `json:"direction"`
+	HourOfWeek int32   `json:"hourOfWeek"`
+	Metric     string  `json:"metric"`
+	Sum        float64 `json:"sum"`
 }

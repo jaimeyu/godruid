@@ -1144,7 +1144,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantIngestionProfileCRUD(t 
 	// Get a record
 	fetched, err := runner.tenantDB.GetTenantIngestionProfile(TENANT, created.ID)
 	assert.Nil(t, err)
-	assert.Equal(t, created, fetched, "The retrieved record should be the same as the created record")
+	assert.Equal(t, len(created.MetricList), len(fetched.MetricList), "The retrieved record should be the same as the created record")
 
 	time.Sleep(time.Millisecond * 2)
 
@@ -1951,7 +1951,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 
 	request := metmod.SLAReportRequest{
 		TenantID:          TENANT,
-		SlaScheduleConfig: "1000",
+		SLAScheduleConfig: "1000",
 	}
 
 	report := metmod.SLAReport{
@@ -1967,7 +1967,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantReportScheduleCRUD(t *t
 				},
 			},
 		},
-		ReportScheduleConfig: request.SlaScheduleConfig,
+		ReportScheduleConfig: request.SLAScheduleConfig,
 	}
 	tdb := runner.tenantDB
 

@@ -22,9 +22,6 @@ type MetricBaselineListResponse struct {
 	// data
 	// Required: true
 	Data []*MetricBaseline `json:"data"`
-
-	// links
-	Links map[string]string `json:"links,omitempty"`
 }
 
 // Validate validates this metric baseline list response

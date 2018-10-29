@@ -229,13 +229,14 @@ func HandlePatchTenantThresholdProfile(allowedRoles []string, tenantDB datastore
 			return tenant_provisioning_service.NewPatchTenantThresholdProfileBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
-		errMerge := models.MergeObjWithMap(origData, requestBytes)
+		patched := &tenmod.ThresholdProfile{}
+		errMerge := models.MergeObjWithMap(patched, origData, requestBytes)
 		if errMerge != nil {
 			return tenant_provisioning_service.NewPatchTenantThresholdProfileBadRequest().WithPayload(reportAPIError(generateErrorMessage(http.StatusBadRequest, err.Error()), startTime, http.StatusBadRequest, mon.PatchThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}
 
 		// Issue request to DAO Layer
-		result, err := tenantDB.UpdateTenantThresholdProfile(origData)
+		result, err := tenantDB.UpdateTenantThresholdProfile(patched)
 		if err != nil {
 			return tenant_provisioning_service.NewPatchTenantThresholdProfileInternalServerError().WithPayload(reportAPIError(fmt.Sprintf("Unable to store %s: %s", tenmod.TenantThresholdProfileStr, err.Error()), startTime, http.StatusInternalServerError, mon.PatchThrPrfStr, mon.APICompleted, mon.TenantAPICompleted))
 		}

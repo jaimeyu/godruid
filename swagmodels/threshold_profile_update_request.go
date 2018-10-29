@@ -214,8 +214,7 @@ type ThresholdProfileUpdateRequestDataAttributes struct {
 	ThresholdList ThresholdList `json:"thresholdList"`
 
 	// Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead
-	// Required: true
-	Thresholds *ThresholdsObject `json:"thresholds"`
+	Thresholds *ThresholdsObject `json:"thresholds,omitempty"`
 }
 
 // Validate validates this threshold profile update request data attributes
@@ -267,8 +266,8 @@ func (m *ThresholdProfileUpdateRequestDataAttributes) validateThresholdList(form
 
 func (m *ThresholdProfileUpdateRequestDataAttributes) validateThresholds(formats strfmt.Registry) error {
 
-	if err := validate.Required("data"+"."+"attributes"+"."+"thresholds", "body", m.Thresholds); err != nil {
-		return err
+	if swag.IsZero(m.Thresholds) { // not required
+		return nil
 	}
 
 	if m.Thresholds != nil {

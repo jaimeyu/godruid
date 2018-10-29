@@ -19,7 +19,7 @@ import (
 type ReportScheduleConfigListResponse struct {
 
 	// data
-	Data []*TenantReportScheduleConfig `json:"data"`
+	Data []*ReportScheduleConfig `json:"data"`
 }
 
 // Validate validates this report schedule config list response

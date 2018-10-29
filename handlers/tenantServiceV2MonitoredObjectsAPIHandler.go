@@ -339,11 +339,12 @@ func doUpdateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 	}
 
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
-	var patched *tenmod.MonitoredObject
-	if err := models.MergeObjWithMap(fetched, patchRequestBytes); err != nil {
+	patched := &tenmod.MonitoredObject{}
+	logger.Log.Debugf("THE PATCH REQ is: %s", string(patchRequestBytes))
+	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantMonitoredObjectStr, params.MonObjID, err.Error())
 	}
-	patched = fetched
+	patched.TenantID = tenantID
 
 	err = patched.Validate(true)
 	if err != nil {

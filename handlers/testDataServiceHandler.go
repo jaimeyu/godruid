@@ -1114,16 +1114,19 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find local ca.crt: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	pemBlock, _ := pem.Decode(caPublicKeyFile)
 	if pemBlock == nil {
 		msg := fmt.Sprintf("Could not decode ca.crt public key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	caCRT, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
 		msg := fmt.Sprintf("Could not parse ca.crt pemblock: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	//      private key
@@ -1132,38 +1135,45 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find ca.key private key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	pemBlock, _ = pem.Decode(caPrivateKeyFile)
 	if pemBlock == nil {
 		msg := fmt.Sprintf("Could not decode ca.key private key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
 	if err != nil {
 		msg := fmt.Sprintf("Could not parse ca.key: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	csrBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		msg := fmt.Sprintf("Could not read CSR POST body: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
 	}
 
 	pemBlock, _ = pem.Decode(csrBytes)
 	if pemBlock == nil {
 		msg := fmt.Sprintf("Could not decode CSR: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
 	}
 	clientCSR, err := x509.ParseCertificateRequest(pemBlock.Bytes)
 	if err != nil {
 		msg := fmt.Sprintf("Could not parse CSR: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
 	}
 	if err = clientCSR.CheckSignature(); err != nil {
 		msg := fmt.Sprintf("Invalid CSR signature: %s ", err.Error())
 		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
 	}
 
 	// create client certificate template
@@ -1189,6 +1199,7 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		msg := fmt.Sprintf("Could not create x509 client certificate: %s ", err.Error())
 		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	logger.Log.Debugf("Successfully generate client cert, sending to client.")
@@ -1258,7 +1269,8 @@ func convertManifest(manifest *ManifestV2, repo string) ([]ManifestV1, error) {
 	}, nil
 }
 
-func (tsh *TestDataServiceHandler) writeConnectorENV(archiveDir string, tenantID string, zone string) error {
+func (tsh *TestDataServiceHandler) writeConnectorConfigs(archiveDir string, tenantID string, zone string) error {
+	cfg := gather.GetConfig()
 	configs, err := tsh.tenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
 	if err != nil {
 		return err
@@ -1269,6 +1281,17 @@ func (tsh *TestDataServiceHandler) writeConnectorENV(archiveDir string, tenantID
                         export VERSION=%s`
 	env := fmt.Sprintf(envTemplate, config.URL, gather.CK_connector_dockerVersion.String())
 	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	configTemplate, err := ioutil.ReadFile("connector/adh-roadrunner.yml")
+	if err != nil {
+		return err
+	}
+
+	rrConfig := fmt.Sprintf(string(configTemplate), cfg.GetString("deploy.domain"), tenantID, zone)
+	err = ioutil.WriteFile(archiveDir+"/adh-roadrunner.yml", []byte(rrConfig), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -1303,6 +1326,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create docker image manifest request: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
@@ -1314,12 +1338,14 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to fetch docker image manifest: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	manifest, err := ioutil.ReadAll(manifestResp.Body)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to read docker image manifest: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	manifestObj := &ManifestV2{}
 
@@ -1328,6 +1354,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to unmarshall docker image manifest: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	// convert from manivestV2 to manifest V1
@@ -1345,6 +1372,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to create docker image config request: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
@@ -1355,6 +1383,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to fetch docker image config: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	configBytes, _ := ioutil.ReadAll(configResp.Body)
@@ -1366,6 +1395,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		if err != nil {
 			msg := fmt.Sprintf("Unable to create docker layer request for url %s: %s ", layerURL+l.Digest, err.Error())
 			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+			return
 		}
 		req.Header.Set("Authorization", "Bearer "+accessToken)
 		req.Header.Set("Accept", l.Mediatype)
@@ -1375,6 +1405,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		if err != nil {
 			msg := fmt.Sprintf("Unable to fetch docker layer request for url %s: %s ", layerURL+l.Digest, err.Error())
 			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+			return
 		}
 
 		name := strings.Split(l.Digest, ":")[1]
@@ -1385,6 +1416,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		if err != nil {
 			msg := fmt.Sprintf("Unable to create file %s: %s ", fullPath, err.Error())
 			reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+			return
 		}
 
 		fileBytes, _ := ioutil.ReadAll(layerResp.Body)
@@ -1398,6 +1430,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to read directory %s: %s ", archiveDir, err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	var filenames []string
@@ -1410,6 +1443,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to save docker image %s: %s ", archiveDir+"/roadrunner.docker", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	logger.Log.Debugf("Successfully generate Roadrunner package for downloading, sending to client.")
@@ -1417,16 +1451,18 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	archivePath := archiveDir + "/roadrunner.tar.gz"
 
 	// write env.sh file
-	err = tsh.writeConnectorENV(archiveDir, queryParams["tenant"][0], queryParams["zone"][0])
+	err = tsh.writeConnectorConfigs(archiveDir, queryParams["tenant"][0], queryParams["zone"][0])
 	if err != nil {
 		msg := fmt.Sprintf("Unable to write env file: %s ", err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	// Make arhive for downloading
-	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "connector/run.sh", "connector/.env"})
+	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "connector/run.sh", archiveDir + "/.env"})
 	if err != nil {
 		msg := fmt.Sprintf("Unable to save roadrunner archive  %s: %s ", archivePath, err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 
 	f, err := os.Open(archivePath)
@@ -1434,6 +1470,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	if err != nil {
 		msg := fmt.Sprintf("Unable to open archive for downloading %s: %s ", archivePath, err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
+		return
 	}
 	io.Copy(w, f)
 }

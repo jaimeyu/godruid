@@ -1,0 +1,22 @@
+bufferSize: 1000000
+removeFile: true
+fileWatcherTicker: 100
+hosts:
+-
+  dhHost: "%s"
+  tenantId: "%s"
+  wsDataPort: 443
+  wsStatusPort: 443
+  tls: true
+  zone: "%s"
+pprof:
+  host: 0.0.0.0
+  port: 7070
+  enabled: false
+user:
+  email: "admin@datahub.com"
+  commonName: "accedian.com"
+  company: ["Accedian, Inc"]
+  country: ["Canada"]
+  province: ["ON"]
+  locality: ["Ottawa"]

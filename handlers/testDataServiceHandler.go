@@ -1306,7 +1306,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 
 	cfg := gather.GetConfig()
 	startTime := time.Now()
-	logger.Log.Debugf("Received DownloadRoadrunner request")
+	logger.Log.Infof("Received DownloadRoadrunner request")
 
 	archiveDir := "/tmp/roadrunnerArchive"
 	os.MkdirAll(archiveDir, os.ModePerm)
@@ -1452,8 +1452,6 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		return
 	}
 
-	logger.Log.Debugf("Successfully generate Roadrunner package for downloading, sending to client.")
-
 	archivePath := archiveDir + "/roadrunner.tar.gz"
 
 	// write env.sh file
@@ -1464,7 +1462,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		return
 	}
 	// Make arhive for downloading
-	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "/files/connector/run.sh", archiveDir + "/.env"})
+	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", "/files/connector/run.sh", archiveDir + "/.env", archiveDir + "/adh-roadrunner.yml"})
 	if err != nil {
 		msg := fmt.Sprintf("Unable to save roadrunner archive  %s: %s ", archivePath, err.Error())
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
@@ -1478,6 +1476,8 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 		reportError(w, startTime, "500", downloadRRStr, msg, http.StatusInternalServerError)
 		return
 	}
+
+	logger.Log.Infof("Successfully generate Roadrunner package for downloading, sending to client.")
 	io.Copy(w, f)
 }
 

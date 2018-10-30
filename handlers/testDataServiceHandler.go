@@ -1279,7 +1279,7 @@ func (tsh *TestDataServiceHandler) writeConnectorConfigs(archiveDir string, tena
 	config := configs[0]
 	envTemplate := `export FILE_DIR=%s
                         export VERSION=%s`
-	env := fmt.Sprintf(envTemplate, config.URL, gather.CK_connector_dockerVersion.String())
+	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()))
 	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
 	if err != nil {
 		return err

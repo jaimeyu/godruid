@@ -80,7 +80,7 @@ type MetricBaselineUpdateHourRequestData struct {
 
 	// attributes
 	// Required: true
-	Attributes *MetricBaselineUpdateHourRequestDataAttributes `json:"attributes"`
+	Attributes *MetricBaselineData `json:"attributes"`
 
 	// id
 	// Required: true
@@ -192,65 +192,6 @@ func (m *MetricBaselineUpdateHourRequestData) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *MetricBaselineUpdateHourRequestData) UnmarshalBinary(b []byte) error {
 	var res MetricBaselineUpdateHourRequestData
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// MetricBaselineUpdateHourRequestDataAttributes metric baseline update hour request data attributes
-// swagger:model MetricBaselineUpdateHourRequestDataAttributes
-type MetricBaselineUpdateHourRequestDataAttributes struct {
-
-	// A single datapoint for a one hour baseline for a metric
-	// Required: true
-	Baseline *MetricBaselineData `json:"baseline"`
-}
-
-// Validate validates this metric baseline update hour request data attributes
-func (m *MetricBaselineUpdateHourRequestDataAttributes) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateBaseline(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *MetricBaselineUpdateHourRequestDataAttributes) validateBaseline(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"baseline", "body", m.Baseline); err != nil {
-		return err
-	}
-
-	if m.Baseline != nil {
-		if err := m.Baseline.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("data" + "." + "attributes" + "." + "baseline")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *MetricBaselineUpdateHourRequestDataAttributes) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *MetricBaselineUpdateHourRequestDataAttributes) UnmarshalBinary(b []byte) error {
-	var res MetricBaselineUpdateHourRequestDataAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

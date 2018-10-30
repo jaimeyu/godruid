@@ -8552,12 +8552,7 @@ definitions:
           id:
             type: "string"
           attributes:
-            type: "object"
-            required: ["baseline"]
-            properties:
-              baseline:
-                description: "A single datapoint for a one hour baseline for a metric"
-                $ref: '#/definitions/MetricBaselineData'
+              $ref: '#/definitions/MetricBaselineData'
    
   # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
   ## REQUEST DEFINITION 

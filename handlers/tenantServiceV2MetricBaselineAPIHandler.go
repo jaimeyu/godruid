@@ -407,7 +407,7 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to marshal response %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
 
-	err = json.Unmarshal(baselineBytes, baselineContainer)
+	err = json.Unmarshal(baselineBytes, &baselineContainer)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to marshal response %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
@@ -424,10 +424,6 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 			},
 		},
 	}
-	err = convertToJsonapiObject(result, &converted)
-	if err != nil {
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMetricBaselineStr, err.Error())
-	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdForHourOfWeekStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
@@ -443,7 +439,7 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 	}
 
 	// Retrieve tne request bytes from the payload in order to convert it to a map
-	patchRequestBytes, err := json.Marshal(params.Body.Data.Attributes.Baseline)
+	patchRequestBytes, err := json.Marshal(params.Body.Data.Attributes)
 	if err != nil || params.Body == nil {
 		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Invalid request body: %s", models.AsJSONString(params.Body))
 	}

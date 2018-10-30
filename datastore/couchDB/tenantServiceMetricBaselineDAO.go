@@ -228,6 +228,8 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeek(tena
 		existing.Baselines = append(existing.Baselines, baselineData)
 	}
 
+	existing.ID = ds.GetDataIDFromFullID(existing.ID)
+
 	updated, err := tsd.UpdateMetricBaseline(existing)
 	if err != nil {
 		return nil, err
@@ -275,6 +277,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectFor
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Log.Debugf("ABOUT TO Retrieve BASELINE DATA FROM: %s", models.AsJSONString(existing))
 
 	res := []*tenmod.MetricBaselineData{}
 	for _, baseline := range existing.Baselines {

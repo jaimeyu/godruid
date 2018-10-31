@@ -17,6 +17,7 @@ const (
 
 	monitoredObjectDBSuffix = "_monitored-objects"
 	reportObjectDBSuffix    = "_reports"
+	metricBaselineDBSuffix  = "_metric-baselines"
 
 	// Indexer for monitored objects by name
 	monitoredObjectIndex   = "indexOfObjectName"

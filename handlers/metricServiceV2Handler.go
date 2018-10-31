@@ -381,7 +381,7 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	daoRequest.TenantID = tenantID
 
 	logger.Log.Debugf("Retrieving threshold profile for %s with id %s and tenant %s", datastore.ThresholdCrossingStr, daoRequest.ThresholdProfileID, tenantID)
-	// Retrieve threshold profile associated with the tenant
+	// Retrieve threshold profile associated with the tenants
 	thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, daoRequest.ThresholdProfileID)
 	if err != nil {
 		return startTime, http.StatusNotFound, nil, err

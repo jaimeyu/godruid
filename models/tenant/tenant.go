@@ -67,6 +67,8 @@ const (
 
 	// TenantMdetadataConfigType - datatype string used to identify a Metadata Configuration in the datastore record
 	TenantMetadataConfigType TenantDataType = "metadataConfig"
+
+	TenantMetricBaselineType TenantDataType = "metricBaseline"
 )
 
 // MonitoredObjectType - defines the known types of Monitored Objects for Skylight Datahub
@@ -172,6 +174,8 @@ const (
 
 	// TenantMetadataConfigStr - common name for the Tenant Metadata Config for use in logs.
 	TenantMetadataConfigStr = "Tenant Metadata Configuration"
+
+	TenantMetricBaselineStr = "Tenant Metric Baseline"
 )
 
 // User - defines a Tenant user.
@@ -1079,4 +1083,35 @@ func (cfg *MetadataConfig) GetID() string {
 func (cfg *MetadataConfig) SetID(s string) error {
 	cfg.ID = s
 	return nil
+}
+
+type MetricBaseline struct {
+	ID                    string                `json:"_id"`
+	REV                   string                `json:"_rev"`
+	Datatype              string                `json:"datatype"`
+	TenantID              string                `json:"tenantId"`
+	Baselines             []*MetricBaselineData `json:"baselines"`
+	MonitoredObjectID     string                `json:"monitoredObjectId"`
+	CreatedTimestamp      int64                 `json:"createdTimestamp"`
+	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (mb *MetricBaseline) GetID() string {
+	return mb.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (mb *MetricBaseline) SetID(s string) error {
+	mb.ID = s
+	return nil
+}
+
+type MetricBaselineData struct {
+	Average    float64 `json:"average"`
+	Count      int64   `json:"count"`
+	Direction  string  `json:"direction"`
+	HourOfWeek int32   `json:"hourOfWeek"`
+	Metric     string  `json:"metric"`
+	Sum        float64 `json:"sum"`
 }

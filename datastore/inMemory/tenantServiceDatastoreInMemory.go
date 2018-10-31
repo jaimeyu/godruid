@@ -2073,3 +2073,25 @@ func (tsd *TenantServiceDatastoreInMemory) GetActiveTenantMetadataConfig(tenantI
 
 	return existing, nil
 }
+
+func (tsd *TenantServiceDatastoreInMemory) CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("CreateMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("UpdateMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("UpdateBaselineForHourOfWeek is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("GetMetricBaseline is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("GetMetricBaselineForMonitoredObject is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {
+	return nil, fmt.Errorf("GetMetricBaselineForMonitoredObjectForHourOfWeek is not implemented for In-Memory Datastore")
+}
+func (tsd *TenantServiceDatastoreInMemory) DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("DeleteMetricBaseline is not implemented for In-Memory Datastore")
+}

@@ -1,168 +1,3 @@
-  /v2/threshold-profiles:
-    post:
-      summary: Create a Threshold Profile for a Tenant.
-      operationId: CreateThresholdProfileV2
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '201':
-          description: ''
-          schema:
-            $ref: '#/definitions/ThresholdProfileResponse'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '409':
-          description: "The record is already provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ThresholdProfileCreateRequest'
-      tags:
-        - TenantProvisioningServiceV2
-    get:
-      summary: Retrieve all Threshold Profiles for the specified Tenant.
-      operationId: GetAllThresholdProfilesV2
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/ThresholdProfileListResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "There are no Threshold Profiles provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      tags:
-        - TenantProvisioningServiceV2
-  /v2/threshold-profiles/{thrPrfId}:
-    get:
-      summary: Retrieve a Tenant Threshold Profile by id.
-      operationId: GetThresholdProfileV2
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/ThresholdProfileResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The requested Threshold Profile is not provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: thrPrfId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningServiceV2
-    patch:
-      summary: Update a Tenant Threshold Profile
-      operationId: UpdateThresholdProfileV2
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/ThresholdProfileResponse'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The requested Threshold Profile is not provisioned"
-          schema:
-            type: string
-        '409':
-          description: "Incorrect revision provided in Threshold Profile update request"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: thrPrfId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ThresholdProfileUpdateRequest'
-      tags:
-        - TenantProvisioningServiceV2
-    delete:
-      summary: Delete a Tenant Threshold Profile specified by the provided id.
-      operationId: DeleteThresholdProfileV2
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/ThresholdProfileResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The requested Threshold Profile is not provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: thrPrfId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningServiceV2
-
   /v2/metric-baselines:
     post:
       summary: Create an Metric Baseline for a Tenant.
@@ -340,4 +175,112 @@
           type: string
       tags:
         - TenantProvisioningServiceV2
-
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}:
+    get:
+      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId.
+      operationId: GetMetricBaselineByMonitoredObjectIdV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
+      operationId: UpdateMetricBaselineForHourOfWeekV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineUpdateHourRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
+    get:
+      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
+      operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineHourOfWeekResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
+      tags:
+        - TenantProvisioningServiceV2

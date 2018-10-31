@@ -119,4 +119,12 @@ type TenantServiceDatastore interface {
 	GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
 	DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
 	GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error)
+
+	CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
+	UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
+	UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
+	GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
+	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
+	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)
+	DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
 }

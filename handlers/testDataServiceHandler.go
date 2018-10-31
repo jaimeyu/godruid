@@ -1478,6 +1478,10 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 	}
 
 	logger.Log.Infof("Successfully generate Roadrunner package for downloading, sending to client.")
+
+	w.Header().Add("Content-Disposition", "attachment; filename=DataHubConnector.tar.gz;")
+	w.Header().Add("Content-Type", "multipart/form-data")
+
 	io.Copy(w, f)
 }
 

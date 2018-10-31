@@ -267,6 +267,8 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObject(te
 		logger.Log.Debugf("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(res))
 	}
 
+	res.ID = ds.GetDataIDFromFullID(res.ID)
+
 	return &res, nil
 }
 
@@ -277,8 +279,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectFor
 	if err != nil {
 		return nil, err
 	}
-
-	logger.Log.Debugf("ABOUT TO Retrieve BASELINE DATA FROM: %s", models.AsJSONString(existing))
 
 	res := []*tenmod.MetricBaselineData{}
 	for _, baseline := range existing.Baselines {

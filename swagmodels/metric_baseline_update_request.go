@@ -204,6 +204,10 @@ func (m *MetricBaselineUpdateRequestData) UnmarshalBinary(b []byte) error {
 // swagger:model MetricBaselineUpdateRequestDataAttributes
 type MetricBaselineUpdateRequestDataAttributes struct {
 
+	// Value used to ensure updates to this object are handled in order.
+	// Required: true
+	Rev *string `json:"_rev"`
+
 	// Contains the dynamically calculated baseline values for the metrics collected by Datahub
 	// Required: true
 	Baselines []*MetricBaselineData `json:"baselines"`
@@ -216,6 +220,10 @@ type MetricBaselineUpdateRequestDataAttributes struct {
 func (m *MetricBaselineUpdateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateRev(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateBaselines(formats); err != nil {
 		res = append(res, err)
 	}
@@ -223,6 +231,15 @@ func (m *MetricBaselineUpdateRequestDataAttributes) Validate(formats strfmt.Regi
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *MetricBaselineUpdateRequestDataAttributes) validateRev(formats strfmt.Registry) error {
+
+	if err := validate.Required("data"+"."+"attributes"+"."+"_rev", "body", m.Rev); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -42,6 +42,9 @@
             type: "object"
             required: ["_rev", "baselines"]
             properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"

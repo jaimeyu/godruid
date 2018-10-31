@@ -227,7 +227,7 @@ func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	// Issue request to DAO Layer to Create Record
 	result, err := tenantDB.CreateMetricBaseline(&data)
 	if err != nil {
-		if strings.Contains(err.Error(), datastore.ConflictErrorStr) {
+		if strings.Contains(err.Error(), datastore.ConflictStr) {
 			return startTime, http.StatusConflict, nil, err
 		}
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMetricBaselineStr, err.Error())

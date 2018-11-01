@@ -7,7 +7,6 @@ import (
 
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
-	"github.com/accedian/adh-gather/datastore/inMemory"
 	"github.com/accedian/adh-gather/gather"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -44,9 +43,6 @@ func GetTenantServiceDatastore() (db.TenantServiceDatastore, error) {
 	case gather.COUCH:
 		logger.Log.Debug("TenantService DB is using CouchDB Implementation")
 		return couchDB.CreateTenantServiceDAO()
-	case gather.MEM:
-		logger.Log.Debug("TenantService DB is using InMemory Implementation")
-		return inMemory.CreateTenantServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")

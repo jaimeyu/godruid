@@ -10,7 +10,6 @@ import (
 	admmod "github.com/accedian/adh-gather/models/admin"
 
 	"github.com/accedian/adh-gather/datastore/couchDB"
-	"github.com/accedian/adh-gather/datastore/inMemory"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -188,9 +187,6 @@ func GetAdminServiceDatastore() (datastore.AdminServiceDatastore, error) {
 	case gather.COUCH:
 		logger.Log.Debug("AdminService DB is using CouchDB Implementation")
 		return couchDB.CreateAdminServiceDAO()
-	case gather.MEM:
-		logger.Log.Debug("AdminService DB is using InMemory Implementation")
-		return inMemory.CreateAdminServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")

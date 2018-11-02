@@ -87,6 +87,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2CreateMetadataConfigV2Handler: tenant_provisioning_service_v2.CreateMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMetadataConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMetadataConfigV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2CreateMetricBaselineV2Handler: tenant_provisioning_service_v2.CreateMetricBaselineV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMetricBaselineV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2CreateMonitoredObjectV2Handler: tenant_provisioning_service_v2.CreateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.CreateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2CreateMonitoredObjectV2 has not yet been implemented")
 		}),
@@ -152,6 +155,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2DeleteMetadataConfigV2Handler: tenant_provisioning_service_v2.DeleteMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetadataConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetadataConfigV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DeleteMetricBaselineV2Handler: tenant_provisioning_service_v2.DeleteMetricBaselineV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetricBaselineV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler: tenant_provisioning_service_v2.DeleteMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMonitoredObjectV2 has not yet been implemented")
@@ -224,6 +230,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler: tenant_provisioning_service_v2.GetAllMetadataConfigsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMetadataConfigsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMetadataConfigsV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetAllMetricBaselinesV2Handler: tenant_provisioning_service_v2.GetAllMetricBaselinesV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMetricBaselinesV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMetricBaselinesV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler: tenant_provisioning_service_v2.GetAllMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetAllMonitoredObjectsV2 has not yet been implemented")
@@ -317,6 +326,15 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2GetMetadataConfigV2Handler: tenant_provisioning_service_v2.GetMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMetadataConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMetadataConfigV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler: tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2Handler: tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2GetMetricBaselineV2Handler: tenant_provisioning_service_v2.GetMetricBaselineV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMetricBaselineV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMetricBaselineV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2GetMonitoredObjectV2Handler: tenant_provisioning_service_v2.GetMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.GetMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2GetMonitoredObjectV2 has not yet been implemented")
@@ -456,6 +474,12 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2UpdateMetadataConfigV2Handler: tenant_provisioning_service_v2.UpdateMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMetadataConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMetadataConfigV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler: tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2UpdateMetricBaselineV2Handler: tenant_provisioning_service_v2.UpdateMetricBaselineV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMetricBaselineV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler: tenant_provisioning_service_v2.UpdateMonitoredObjectV2HandlerFunc(func(params tenant_provisioning_service_v2.UpdateMonitoredObjectV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2UpdateMonitoredObjectV2 has not yet been implemented")
 		}),
@@ -553,6 +577,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2CreateLocaleV2Handler tenant_provisioning_service_v2.CreateLocaleV2Handler
 	// TenantProvisioningServiceV2CreateMetadataConfigV2Handler sets the operation handler for the create metadata config v2 operation
 	TenantProvisioningServiceV2CreateMetadataConfigV2Handler tenant_provisioning_service_v2.CreateMetadataConfigV2Handler
+	// TenantProvisioningServiceV2CreateMetricBaselineV2Handler sets the operation handler for the create metric baseline v2 operation
+	TenantProvisioningServiceV2CreateMetricBaselineV2Handler tenant_provisioning_service_v2.CreateMetricBaselineV2Handler
 	// TenantProvisioningServiceV2CreateMonitoredObjectV2Handler sets the operation handler for the create monitored object v2 operation
 	TenantProvisioningServiceV2CreateMonitoredObjectV2Handler tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler
 	// TenantProvisioningServiceCreateReportScheduleConfigHandler sets the operation handler for the create report schedule config operation
@@ -597,6 +623,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2DeleteLocaleV2Handler tenant_provisioning_service_v2.DeleteLocaleV2Handler
 	// TenantProvisioningServiceV2DeleteMetadataConfigV2Handler sets the operation handler for the delete metadata config v2 operation
 	TenantProvisioningServiceV2DeleteMetadataConfigV2Handler tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler
+	// TenantProvisioningServiceV2DeleteMetricBaselineV2Handler sets the operation handler for the delete metric baseline v2 operation
+	TenantProvisioningServiceV2DeleteMetricBaselineV2Handler tenant_provisioning_service_v2.DeleteMetricBaselineV2Handler
 	// TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler sets the operation handler for the delete monitored object v2 operation
 	TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler tenant_provisioning_service_v2.DeleteMonitoredObjectV2Handler
 	// TenantProvisioningServiceDeleteReportScheduleConfigHandler sets the operation handler for the delete report schedule config operation
@@ -645,6 +673,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetAllLocalesV2Handler tenant_provisioning_service_v2.GetAllLocalesV2Handler
 	// TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler sets the operation handler for the get all metadata configs v2 operation
 	TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler tenant_provisioning_service_v2.GetAllMetadataConfigsV2Handler
+	// TenantProvisioningServiceV2GetAllMetricBaselinesV2Handler sets the operation handler for the get all metric baselines v2 operation
+	TenantProvisioningServiceV2GetAllMetricBaselinesV2Handler tenant_provisioning_service_v2.GetAllMetricBaselinesV2Handler
 	// TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler sets the operation handler for the get all monitored objects v2 operation
 	TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Handler
 	// TenantProvisioningServiceGetAllReportScheduleConfigHandler sets the operation handler for the get all report schedule config operation
@@ -707,6 +737,12 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2GetLocaleV2Handler tenant_provisioning_service_v2.GetLocaleV2Handler
 	// TenantProvisioningServiceV2GetMetadataConfigV2Handler sets the operation handler for the get metadata config v2 operation
 	TenantProvisioningServiceV2GetMetadataConfigV2Handler tenant_provisioning_service_v2.GetMetadataConfigV2Handler
+	// TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler sets the operation handler for the get metric baseline by monitored object Id for hour of week v2 operation
+	TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler
+	// TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2Handler sets the operation handler for the get metric baseline by monitored object Id v2 operation
+	TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2Handler tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Handler
+	// TenantProvisioningServiceV2GetMetricBaselineV2Handler sets the operation handler for the get metric baseline v2 operation
+	TenantProvisioningServiceV2GetMetricBaselineV2Handler tenant_provisioning_service_v2.GetMetricBaselineV2Handler
 	// TenantProvisioningServiceV2GetMonitoredObjectV2Handler sets the operation handler for the get monitored object v2 operation
 	TenantProvisioningServiceV2GetMonitoredObjectV2Handler tenant_provisioning_service_v2.GetMonitoredObjectV2Handler
 	// MetricsServiceGetRawMetricsHandler sets the operation handler for the get raw metrics operation
@@ -799,6 +835,10 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2UpdateLocaleV2Handler tenant_provisioning_service_v2.UpdateLocaleV2Handler
 	// TenantProvisioningServiceV2UpdateMetadataConfigV2Handler sets the operation handler for the update metadata config v2 operation
 	TenantProvisioningServiceV2UpdateMetadataConfigV2Handler tenant_provisioning_service_v2.UpdateMetadataConfigV2Handler
+	// TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler sets the operation handler for the update metric baseline for hour of week v2 operation
+	TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Handler
+	// TenantProvisioningServiceV2UpdateMetricBaselineV2Handler sets the operation handler for the update metric baseline v2 operation
+	TenantProvisioningServiceV2UpdateMetricBaselineV2Handler tenant_provisioning_service_v2.UpdateMetricBaselineV2Handler
 	// TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler sets the operation handler for the update monitored object v2 operation
 	TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler tenant_provisioning_service_v2.UpdateMonitoredObjectV2Handler
 	// TenantProvisioningServiceUpdateReportScheduleConfigHandler sets the operation handler for the update report schedule config operation
@@ -946,6 +986,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateMetadataConfigV2Handler")
 	}
 
+	if o.TenantProvisioningServiceV2CreateMetricBaselineV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateMetricBaselineV2Handler")
+	}
+
 	if o.TenantProvisioningServiceV2CreateMonitoredObjectV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.CreateMonitoredObjectV2Handler")
 	}
@@ -1032,6 +1076,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteMetricBaselineV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteMetricBaselineV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler == nil {
@@ -1128,6 +1176,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllMetadataConfigsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetAllMetricBaselinesV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetAllMetricBaselinesV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetAllMonitoredObjectsV2Handler == nil {
@@ -1252,6 +1304,18 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2GetMetadataConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetMetadataConfigV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2GetMetricBaselineV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.GetMetricBaselineV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2GetMonitoredObjectV2Handler == nil {
@@ -1436,6 +1500,14 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2UpdateMetadataConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateMetadataConfigV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2UpdateMetricBaselineV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.UpdateMetricBaselineV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2UpdateMonitoredObjectV2Handler == nil {
@@ -1666,6 +1738,11 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v2/metric-baselines"] = tenant_provisioning_service_v2.NewCreateMetricBaselineV2(o.context, o.TenantProvisioningServiceV2CreateMetricBaselineV2Handler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v2/monitored-objects"] = tenant_provisioning_service_v2.NewCreateMonitoredObjectV2(o.context, o.TenantProvisioningServiceV2CreateMonitoredObjectV2Handler)
 
 	if o.handlers["POST"] == nil {
@@ -1772,6 +1849,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewDeleteMetadataConfigV2(o.context, o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/metric-baselines/{metricBaselineId}"] = tenant_provisioning_service_v2.NewDeleteMetricBaselineV2(o.context, o.TenantProvisioningServiceV2DeleteMetricBaselineV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -1892,6 +1974,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/metadata-configs"] = tenant_provisioning_service_v2.NewGetAllMetadataConfigsV2(o.context, o.TenantProvisioningServiceV2GetAllMetadataConfigsV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metric-baselines"] = tenant_provisioning_service_v2.NewGetAllMetricBaselinesV2(o.context, o.TenantProvisioningServiceV2GetAllMetricBaselinesV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -2047,6 +2134,21 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewGetMetadataConfigV2(o.context, o.TenantProvisioningServiceV2GetMetadataConfigV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}"] = tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(o.context, o.TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}"] = tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2(o.context, o.TenantProvisioningServiceV2GetMetricBaselineByMonitoredObjectIDV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/metric-baselines/{metricBaselineId}"] = tenant_provisioning_service_v2.NewGetMetricBaselineV2(o.context, o.TenantProvisioningServiceV2GetMetricBaselineV2Handler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -2277,6 +2379,16 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewUpdateMetadataConfigV2(o.context, o.TenantProvisioningServiceV2UpdateMetadataConfigV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}"] = tenant_provisioning_service_v2.NewUpdateMetricBaselineForHourOfWeekV2(o.context, o.TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/metric-baselines/{metricBaselineId}"] = tenant_provisioning_service_v2.NewUpdateMetricBaselineV2(o.context, o.TenantProvisioningServiceV2UpdateMetricBaselineV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

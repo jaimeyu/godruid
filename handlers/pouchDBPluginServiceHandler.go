@@ -10,7 +10,6 @@ import (
 
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
-	"github.com/accedian/adh-gather/datastore/inMemory"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/server"
@@ -157,9 +156,6 @@ func getPouchDBPluginServiceDatastore() (db.PouchDBPluginServiceDatastore, error
 	case gather.COUCH:
 		logger.Log.Debug("PouchDBPluginService DB is using CouchDB Implementation")
 		return couchDB.CreatePouchDBServiceDAO()
-	case gather.MEM:
-		logger.Log.Debug("PouchDBPluginService DB is using InMemory Implementation")
-		return inMemory.CreatePouchDBPluginServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")

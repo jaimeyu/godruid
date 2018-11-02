@@ -67,7 +67,7 @@
 
   ThresholdProfileResponse:
     type: "object"
-    description: "A single object Threshold Profileresponse from Datahub"
+    description: "A single object Threshold Profile response from Datahub"
     required: ["data"]
     properties:
       data:

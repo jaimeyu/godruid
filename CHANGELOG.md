@@ -1,3 +1,5 @@
+Feature - Upgrading docker-go-sdk reference to 0.11.0 which includes Go v1.11.1.
+Feature - Ran dep ensure to pull in missing dependencies
 ## Current Release 
 ### 0.241.0 
 **Release Date:** Fri Nov  2 16:51:51 UTC 2018     

@@ -1188,7 +1188,7 @@ func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Reques
 		Issuer:       caCRT.Subject,
 		Subject:      clientCSR.Subject,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(720 * time.Hour),
+		NotAfter:     time.Now().Add(1440 * time.Hour),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 	}
@@ -1310,6 +1310,7 @@ func (tsh *TestDataServiceHandler) DownloadRoadrunner(w http.ResponseWriter, r *
 
 	archiveDir := "/tmp/roadrunnerArchive"
 	os.MkdirAll(archiveDir, os.ModePerm)
+	defer os.RemoveAll(archiveDir)
 
 	httpC := http.DefaultClient
 	tr := &http.Transport{}

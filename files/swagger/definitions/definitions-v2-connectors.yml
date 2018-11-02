@@ -13,7 +13,7 @@
             type: "string"
           attributes:
             type: "object"
-            required: ["url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
+            required: ["url", "pollingFrequency", "type"]
             properties:
               name:
                 type: "string"
@@ -107,7 +107,7 @@
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "url", "pollingFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"

@@ -176,6 +176,8 @@ const (
 	TenantMetadataConfigStr = "Tenant Metadata Configuration"
 
 	TenantMetricBaselineStr = "Tenant Metric Baseline"
+
+	TenantDownloadRoadrunnerStr = "Tenant Download Roadrunner"
 )
 
 // User - defines a Tenant user.

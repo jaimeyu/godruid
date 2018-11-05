@@ -49,11 +49,9 @@ func (mbp *MetricBaselineProvisioner) handleMetricBaselineProvisioningRequest(re
 	requestObjStr := models.AsJSONString(requestObj)
 	logger.Log.Infof("Received %s: %s", metricBaselineRequestLogStr, requestObjStr)
 
-	for _, baseline := range requestObj.Baselines {
-		_, err := mbp.tenantDB.UpdateMetricBaselineForHourOfWeek(requestObj.TenantID, requestObj.MonitoredObjectID, baseline)
-		if err != nil {
-			logger.Log.Errorf("Error updating %s for %s %s for %s %s for baseline %s: %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, requestObj.TenantID, tenmod.TenantMonitoredObjectStr, requestObj.MonitoredObjectID, models.AsJSONString(baseline), err.Error())
-		}
+	_, err = mbp.tenantDB.UpdateMetricBaselineForHourOfWeekWithCollection(requestObj.TenantID, requestObj.MonitoredObjectID, requestObj.Baselines)
+	if err != nil {
+		logger.Log.Errorf("Error updating %s for %s %s for %s %s for baseline data %s: %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, requestObj.TenantID, tenmod.TenantMonitoredObjectStr, requestObj.MonitoredObjectID, models.AsJSONString(requestObj.Baselines), err.Error())
 	}
 
 	logger.Log.Infof("Completed %s: %s", metricBaselineRequestLogStr, requestObjStr)

@@ -123,6 +123,7 @@ type TenantServiceDatastore interface {
 	CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
 	UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
 	UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
+	UpdateMetricBaselineForHourOfWeekWithCollection(tenantID string, monObjID string, baselineDataCollection []*tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
 	GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
 	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
 	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)

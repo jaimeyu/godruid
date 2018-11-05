@@ -239,6 +239,62 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeek(tena
 	return updated, nil
 }
 
+// UpdateMetricBaselineForHourOfWeekWithCollection - couchDB implementation of UpdateMetricBaselineForHourOfWeekWithCollection
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithCollection(tenantID string, monObjID string, baselineDataCollection []*tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error) {
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Updating %s for %s %s for %s %s for %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, models.AsJSONString(baselineDataCollection))
+	}
+
+	existing, err := tsd.GetMetricBaselineForMonitoredObject(tenantID, monObjID)
+	if err != nil {
+		if !strings.Contains(err.Error(), ds.NotFoundStr) {
+			// Error was something permanent, return it
+			return nil, err
+		}
+
+		// Error was that the Baseline does not exist for this Monitored Object, let's create it
+		createObj := tenmod.MetricBaseline{
+			MonitoredObjectID: monObjID,
+			TenantID:          tenantID,
+			Baselines:         []*tenmod.MetricBaselineData{},
+		}
+
+		created, err := tsd.CreateMetricBaseline(&createObj)
+		if err != nil {
+			return nil, fmt.Errorf("Error trying to create %s as one did not exist to update: %s", tenmod.TenantMetricBaselineStr, err.Error())
+		}
+
+		// Set existing to be the returned value from the creation call
+		existing = created
+	}
+
+	for _, baselineFromCollection := range baselineDataCollection {
+		didUpdateBaseline := false
+		for index, baseline := range existing.Baselines {
+			if baseline.HourOfWeek == baselineFromCollection.HourOfWeek && baseline.Metric == baselineFromCollection.Metric && baseline.Direction == baselineFromCollection.Direction {
+				// The baseline is already being tracked, update it
+				existing.Baselines[index] = baselineFromCollection
+				didUpdateBaseline = true
+				break
+			}
+		}
+
+		// If the baseline was not already being tracked, add it
+		if !didUpdateBaseline {
+			existing.Baselines = append(existing.Baselines, baselineFromCollection)
+		}
+	}
+	existing.ID = ds.GetDataIDFromFullID(existing.ID)
+
+	updated, err := tsd.UpdateMetricBaseline(existing)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Updated %s for %s %s %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
+	return updated, nil
+}
+
 func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error) {
 	logger.Log.Debugf("Retrieving %s for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))

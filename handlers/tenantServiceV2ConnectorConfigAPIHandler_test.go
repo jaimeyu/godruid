@@ -46,10 +46,10 @@ func TestConnectorConfigCRUDV2(t *testing.T) {
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Username)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Password)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.ExportGroup)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.Port > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.Port > 0)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.PollingFrequency > 0)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.DatahubConnectionRetryFrequency > 0)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.DatahubHeartbeatFrequency > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.DatahubConnectionRetryFrequency > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.DatahubHeartbeatFrequency > 0)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Datatype)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
@@ -151,10 +151,10 @@ func TestConnectorConfigConflictV2(t *testing.T) {
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Username)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Password)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.ExportGroup)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.Port > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.Port > 0)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.PollingFrequency > 0)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.DatahubConnectionRetryFrequency > 0)
-	assert.True(t, *castedCreate.Payload.Data.Attributes.DatahubHeartbeatFrequency > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.DatahubConnectionRetryFrequency > 0)
+	assert.True(t, castedCreate.Payload.Data.Attributes.DatahubHeartbeatFrequency > 0)
 	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Datatype)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
 	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
@@ -238,14 +238,14 @@ func generateRandomTenantConnectorConfigCreationRequest() *swagmodels.ConnectorC
 			Attributes: &swagmodels.ConnectorConfigCreateRequestDataAttributes{
 				Name:                            name,
 				URL:                             &url,
-				Username:                        &username,
-				Password:                        &password,
-				ExportGroup:                     &exportGroup,
+				Username:                        username,
+				Password:                        password,
+				ExportGroup:                     exportGroup,
 				Type:                            &someType,
-				Port:                            &port,
+				Port:                            port,
 				PollingFrequency:                &pollingFrequency,
-				DatahubHeartbeatFrequency:       &datahubHeartbeatFrequency,
-				DatahubConnectionRetryFrequency: &datahubConnectionRetryFrequency,
+				DatahubHeartbeatFrequency:       datahubHeartbeatFrequency,
+				DatahubConnectionRetryFrequency: datahubConnectionRetryFrequency,
 			},
 		},
 	}

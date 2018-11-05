@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"io"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
@@ -14,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mholt/archiver"
 	"github.com/satori/go.uuid"
 
 	cr "crypto/rand"

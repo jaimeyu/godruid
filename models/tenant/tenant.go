@@ -1108,7 +1108,7 @@ func (mb *MetricBaseline) SetID(s string) error {
 }
 
 type MetricBaselineData struct {
-	Average    float64 `json:"average"`
+	Average    float64 `json:"avg"`
 	Count      int64   `json:"count"`
 	Direction  string  `json:"direction"`
 	HourOfWeek int32   `json:"hourOfWeek"`

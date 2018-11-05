@@ -84,31 +84,29 @@ func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tena
 }
 
 func dockerLogin() (string, error) {
-	// type GoogleToken struct {
-	//	AccessToken string `json:"access_token"`
-	//	ExpiresIn   string `json:"expires_in"`
-	//	TokenType   string `json:"token_type"`
-	// }
+	type GoogleToken struct {
+		AccessToken string `json:"access_token"`
+		ExpiresIn   string `json:"expires_in"`
+		TokenType   string `json:"token_type"`
+	}
 
-	// meta := "http://metadata.google.internal/computeMetadata/v1"
-	// svcAcc := meta + "/instance/service-accounts/default/token"
+	meta := "http://metadata.google.internal/computeMetadata/v1"
+	svcAcc := meta + "/instance/service-accounts/default/token"
 
-	// req, _ := http.NewRequest("GET", svcAcc, nil)
-	// req.Header.Set("Metadata-Flavor", "Google")
+	req, _ := http.NewRequest("GET", svcAcc, nil)
+	req.Header.Set("Metadata-Flavor", "Google")
 
-	// resp, err := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 
-	// if err != nil {
-	//	return "", err
-	// }
+	if err != nil {
+		return "", err
+	}
 
-	// body, _ := ioutil.ReadAll(resp.Body)
-	// var token GoogleToken
-	// json.Unmarshal(body, &token)
+	body, _ := ioutil.ReadAll(resp.Body)
+	var token GoogleToken
+	json.Unmarshal(body, &token)
 
-	// return token.AccessToken, nil
-
-	return "ya29.c.ElpLBqbCf8o8Hia-g_nQDPpvCWluRxrkoLO9uEGMDP1gtfBBW2rfEUfLOTztT_T2xwQeUCM3lbM31d_a7E2buTZZtN295m16Y4g4ff-ez9IkYKptCWLktuT1hJQ", nil
+	return token.AccessToken, nil
 }
 
 type ManifestObject struct {

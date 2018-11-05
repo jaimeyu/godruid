@@ -24,7 +24,8 @@ import (
 //go:generate swagger generate server --target .. --name gather --spec ../files/swagger.yml --model-package swagmodels --exclude-main --exclude-spec
 
 const (
-	testDataAPIPrefix = "/test-data"
+	testDataAPIPrefix     = "/test-data"
+	distributionAPIPrefix = "/distribution"
 )
 
 var (
@@ -141,6 +142,9 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	// Start pprof profiler
 	go startProfile(cfg)
 
+	// Start the handler for updating metric baseline data
+	go startMetricBaselineProvisioner(tenantDB)
+
 	// Start websocket server
 	websocket.Server(tenantDB)
 
@@ -174,7 +178,8 @@ func addNonSwaggerHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 {
+		if strings.Index(r.URL.Path, testDataAPIPrefix) == 0 ||
+			strings.Index(r.URL.Path, distributionAPIPrefix) == 0 {
 			// Test Data Call
 			nonSwaggerMUX.ServeHTTP(w, r)
 		} else if gather.DoesSliceContainString(metricServiceV1APIRouteRoots, r.URL.Path) { // DEPRECATED - Remove once V1 is removed
@@ -202,4 +207,8 @@ func isOriginInSupportedList(requestOrigin string) bool {
 
 func optionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func startMetricBaselineProvisioner(db datastore.TenantServiceDatastore) {
+	handlers.CreateMetricBaselineProvisioner(db)
 }

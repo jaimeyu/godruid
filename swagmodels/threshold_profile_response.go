@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ThresholdProfileResponse A single object Threshold Profileresponse from Datahub
+// ThresholdProfileResponse A single object Threshold Profile response from Datahub
 // swagger:model ThresholdProfileResponse
 type ThresholdProfileResponse struct {
 

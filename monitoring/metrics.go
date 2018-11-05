@@ -42,6 +42,8 @@ const (
 	BrandingStr                = "branding"
 	LocaleStr                  = "locale"
 	MetadataConfigStr          = "meta_cfg"
+	MetricBaselineStr          = "metric_bsln"
+	DownloadRoadrunnerStr      = "download_roadrunner"
 
 	// OPCreateStr - metric constant for a create operation
 	OPCreateStr = "create"
@@ -233,6 +235,16 @@ const (
 	GetActiveMetadataConfigStr = MetadataConfigStr + metricNameDelimiter + OPGetActiveStr
 	DeleteMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPDeleteStr
 	GetAllMetadataConfigStr    = MetadataConfigStr + metricNameDelimiter + OPGetAllStr
+
+	CreateTenantMetricBaselineStr                        = MetricBaselineStr + metricNameDelimiter + OPCreateStr
+	UpdateTenantMetricBaselineStr                        = MetricBaselineStr + metricNameDelimiter + OPUpdateStr
+	GetTenantMetricBaselineStr                           = MetricBaselineStr + metricNameDelimiter + OPGetStr
+	GetMetricBaselineByMonitoredObjectIdForHourOfWeekStr = MetricBaselineStr + metricNameDelimiter + "monobj_hourwk" + metricNameDelimiter + OPGetAllStr
+	DeleteTenantMetricBaselineStr                        = MetricBaselineStr + metricNameDelimiter + OPDeleteStr
+	GetMetricBaselineByMonitoredObjectIdStr              = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
+	UpdateMetricBaselineForHourOfWeekV2Str               = MetricBaselineStr + metricNameDelimiter + "hourwk" + metricNameDelimiter + OPUpdateStr
+
+	GetDownloadRoadrunnerStr = DownloadRoadrunnerStr + metricNameDelimiter + OPGetStr
 )
 
 type MetricCounterType string

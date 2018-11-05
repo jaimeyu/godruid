@@ -1,8 +1,16 @@
-* Fix - Adding metric API guards
+Feature - Upgrading docker-go-sdk reference to 0.11.0 which includes Go v1.11.1.
+Feature - Ran dep ensure to pull in missing dependencies
+Fix     - Build issue
 ## Current Release 
+### 0.241.0 
+**Release Date:** Fri Nov  2 16:51:51 UTC 2018     
+## Previous Releases 
+### 0.240.0 
+**Release Date:** Thu Nov  1 18:40:27 UTC 2018     
+### 0.239.0 
+**Release Date:** Wed Oct 31 19:06:11 UTC 2018     
 ### 0.238.0 
 **Release Date:** Wed Oct 24 18:30:39 UTC 2018     
-## Previous Releases 
 * Fix - Adding metric API guards
 ### 0.237.0 
 **Release Date:** Wed Oct 24 18:14:13 UTC 2018     

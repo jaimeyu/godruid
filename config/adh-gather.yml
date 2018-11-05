@@ -47,6 +47,11 @@ args:
 
 connector:
   maxSecondsWithoutHeartbeat: 120
+  dockerImageName: "npav-172917/adh-roadrunner"
+  dockerRegistry: "https://gcr.io/v2/"
+  dockerVersion: "latest"
+  dockerRegistryPrefix: "gcr.io/"
+  configDir: "/files/connector/"
 
 druid:
   broker:

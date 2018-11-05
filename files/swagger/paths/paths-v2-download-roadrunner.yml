@@ -1,0 +1,38 @@
+  /v2/distribution/download-roadrunner:
+    get:
+      summary: Download a roadrunner tarball ready for installing
+      operationId: DownloadRoadrunner
+      produces:
+        - application/octet-stream
+      responses:
+        '200':
+          description: 'download roadrunner archive'
+          schema:
+            type: string
+            format: binary
+          headers:
+            Content-Disposition:
+              type: string
+              default: "attachment; filename=DataHubConnector.tar.gz;"
+            Content-Type:
+              type: string
+              default: "application/octet-stream"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2

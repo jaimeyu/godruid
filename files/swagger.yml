@@ -3666,6 +3666,44 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/distribution/download-roadrunner:
+    get:
+      summary: Download a roadrunner tarball ready for installing
+      operationId: DownloadRoadrunner
+      produces:
+        - application/octet-stream
+      responses:
+        '200':
+          description: 'download roadrunner archive'
+          schema:
+            type: string
+            format: binary
+          headers:
+            Content-Disposition:
+              type: string
+              default: "attachment; filename=DataHubConnector.tar.gz;"
+            Content-Type:
+              type: string
+              default: "application/octet-stream"
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: zone
+          in: query
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
   /v2/ingestion-profiles:
     post:
       summary: Create an Ingestion Profile for a Tenant.
@@ -4008,7 +4046,292 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
-  
+  /v2/metric-baselines:
+    post:
+      summary: Create an Metric Baseline for a Tenant.
+      operationId: CreateMetricBaselineV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Metric Baseline already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Metric Baselines
+      operationId: GetAllMetricBaselinesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Metric Baseline is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: objectId
+          description: "Provides ability to retrieve a Metric Baseline object for the provided objectId"
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/metric-baselines/{metricBaselineId}:
+    get:
+      summary: Retrieve a Tenant Metric Baseline by id.
+      operationId: GetMetricBaselineV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metric Baseline
+      operationId: UpdateMetricBaselineV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Metric Baseline specified by the provided Metric Baseline Id.
+      operationId: DeleteMetricBaselineV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}:
+    get:
+      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId.
+      operationId: GetMetricBaselineByMonitoredObjectIdV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
+      operationId: UpdateMetricBaselineForHourOfWeekV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineUpdateHourRequest'
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
+    get:
+      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
+      operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineHourOfWeekResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
+      tags:
+        - TenantProvisioningServiceV2  
   /v2/metrics/threshold-crossing-by-monitored-object-top-n:
     post:
       summary: Retrieve the Top N threshold crossing events using the given threshold profile and the specified metric filters
@@ -4915,6 +5238,185 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+
+  /v2/metric-baselines:
+    post:
+      summary: Create an Metric Baseline for a Tenant.
+      operationId: CreateMetricBaselineV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '409':
+          description: "The Metric Baseline already exists"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineCreateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    get:
+      summary: Get all Tenant Metric Baselines
+      operationId: GetAllMetricBaselinesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineListResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "No Metric Baseline is provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: objectId
+          description: "Provides ability to retrieve a Metric Baseline object for the provided objectId"
+          in: query
+          required: false
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    
+  /v2/metric-baselines/{metricBaselineId}:
+    get:
+      summary: Retrieve a Tenant Metric Baseline by id.
+      operationId: GetMetricBaselineV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+    patch:
+      summary: Update a Tenant Metric Baseline
+      operationId: UpdateMetricBaselineV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '409':
+          description: "Incorrect revision provided for th update request"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Delete a Tenant Metric Baseline specified by the provided Metric Baseline Id.
+      operationId: DeleteMetricBaselineV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineResponse'
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: metricBaselineId
+          in: path
+          required: true
+          type: string
+      tags:
+        - TenantProvisioningServiceV2
+
 definitions:
   JsonApiTenant:
     type: "object"
@@ -6760,7 +7262,7 @@ definitions:
             type: "string"
           attributes:
             type: "object"
-            required: ["url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type"]
+            required: ["url", "pollingFrequency", "type"]
             properties:
               name:
                 type: "string"
@@ -6854,7 +7356,7 @@ definitions:
         type: "string"
       attributes:
         type: "object"
-        required: ["_rev", "url", "port", "pollingFrequency", "username", "password", "exportGroup", "datahubHeartbeatFrequency", "datahubConnectionRetryFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["_rev", "url", "pollingFrequency", "type", "createdTimestamp", "lastModifiedTimestamp"]
         properties:
           _rev:
             type: "string"
@@ -7897,6 +8399,201 @@ definitions:
           lastModifiedTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was last altered."
+  MetricBaselineCreateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to create a new Metric Baseline object in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselines]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
+                    
+  MetricBaselineUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update an existing Metric Baseline object in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselines]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            required: ["_rev", "baselines"]
+            properties:
+              _rev:
+                type: "string"
+                description: "Value used to ensure updates to this object are handled in order."
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineData:
+    type: "object"
+    properties:
+      metric:
+        description: "The name of the metric represented by this baseline"
+        type: "string"
+      hourOfWeek:
+        description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+        type: "integer"
+        format: "int32"
+        minimum: 0
+        maximum: 167
+      direction:
+        description: "The direction of the metric baseline"
+        type: "string"
+      sum:
+        description: "The total sumation of all values recorded for this metric in datahub"
+        type: "number"
+        format: "double"
+      count:
+        description: "The total number of values recorded for this metric in datahub"
+        type: "integer"
+        format: "int64"
+      average:
+        description: "The calculated average of the Metric obtained via (sum/count)"
+        type: "number"
+        format: "double"
+  
+  MetricBaseline:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [metricBaselines]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp"]
+        properties:
+          tenantId:
+            type: "string"
+            description: "Unique identifier of the Tenant in Datahub"
+          _id:
+            type: "string"
+          _rev:
+            type: "string"
+            description: "Value used to ensure updates to this object are handled in order."
+          datatype:
+            type: "string"
+            description: "Name used to identify this type of record in Datahub"
+          monitoredObjectId:
+            type: "string"
+            description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+          baselines:
+            description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+            type: "array"
+            items:
+              $ref: '#/definitions/MetricBaselineData'
+          createdTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was instantiated."
+          lastModifiedTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last altered."
+      
+  MetricBaselineResponse:
+    type: "object"
+    description: "A Metric Baseline response from Datahub"
+    required: ["data"]
+    properties:
+      data:
+        $ref: '#/definitions/MetricBaseline'
+
+  MetricBaselineListResponse:
+    type: "object"
+    description: "Metric Baseline response including one or more values"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MetricBaseline'
+
+  MetricBaselineDataWrapper:
+    type: "object"
+    required: ["type", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [metricBaselineData]
+      id:
+        type: "string"
+      attributes:
+        $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineHourOfWeekResponse:
+    type: "object"
+    description: "Metric Baseline data response including one or more baselines tracked by a specific hour of the week"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineHourResponse]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            properties:
+              monitoredObjectId:
+                type: "string"
+                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              baselines: 
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineUpdateHourRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update a single Metric Baseline for a Monitored Object in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineHourUpdate]
+          id:
+            type: "string"
+          attributes:
+              $ref: '#/definitions/MetricBaselineData'
    
   # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
   ## REQUEST DEFINITION 
@@ -9356,7 +10053,7 @@ definitions:
 
   ThresholdProfileResponse:
     type: "object"
-    description: "A single object Threshold Profileresponse from Datahub"
+    description: "A single object Threshold Profile response from Datahub"
     required: ["data"]
     properties:
       data:

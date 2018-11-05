@@ -5,17 +5,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"io/ioutil"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/satori/go.uuid"
 
+	cr "crypto/rand"
+	"crypto/x509"
+	"encoding/pem"
+	"time"
+
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
-	"github.com/accedian/adh-gather/datastore/inMemory"
 	"github.com/accedian/adh-gather/gather"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
@@ -57,6 +63,7 @@ const (
 	generateSLAReportStr                = "gen_sla_report"
 	getDocsByTypeStr                    = "get_docs_by_type"
 	insertTenViewsStr                   = "insert_tenant_views"
+	signCSRStr                          = "sign_csr"
 
 	stringGeneratorCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
@@ -139,6 +146,12 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.
 				MigrateMetadata),
 		},
+		server.Route{
+			Name:        "SignCSR",
+			Method:      "POST",
+			Pattern:     "/distribution/sign-csr",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.SignCSR),
+		},
 	}
 
 	// Wire up the datastore impls
@@ -178,9 +191,6 @@ func getTestDataServiceDatastore() (db.TestDataServiceDatastore, error) {
 	case gather.COUCH:
 		logger.Log.Debug("TestDataService DB is using CouchDB Implementation")
 		return couchDB.CreateTestDataServiceDAO()
-	case gather.MEM:
-		logger.Log.Debug("TestDataService DB is using InMemory Implementation")
-		return inMemory.CreateTestDataServiceDAO()
 	}
 
 	return nil, errors.New("No DB implementation provided for Admin Service. Check configuration")
@@ -1080,6 +1090,110 @@ func (tsh *TestDataServiceHandler) PopulateDruidWithFauxData(tenantID string, mi
 	}
 
 	return nil
+}
+
+// SignCSR - Sign CSR and return client cert
+func (tsh *TestDataServiceHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
+
+	startTime := time.Now()
+
+	logger.Log.Debugf("Received CSR request")
+
+	caPublicKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_crt")
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find local ca.crt: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+	pemBlock, _ := pem.Decode(caPublicKeyFile)
+	if pemBlock == nil {
+		msg := fmt.Sprintf("Could not decode ca.crt public key: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+	caCRT, err := x509.ParseCertificate(pemBlock.Bytes)
+	if err != nil {
+		msg := fmt.Sprintf("Could not parse ca.crt pemblock: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	//      private key
+	caPrivateKeyFile, err := ioutil.ReadFile("/run/secrets/tls_ca_key")
+
+	if err != nil {
+		msg := fmt.Sprintf("Unable to find ca.key private key: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+	pemBlock, _ = pem.Decode(caPrivateKeyFile)
+	if pemBlock == nil {
+		msg := fmt.Sprintf("Could not decode ca.key private key: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+	if err != nil {
+		msg := fmt.Sprintf("Could not parse ca.key: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	csrBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		msg := fmt.Sprintf("Could not read CSR POST body: %s ", err.Error())
+		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	pemBlock, _ = pem.Decode(csrBytes)
+	if pemBlock == nil {
+		msg := fmt.Sprintf("Could not decode CSR: %s ", err.Error())
+		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
+	}
+	clientCSR, err := x509.ParseCertificateRequest(pemBlock.Bytes)
+	if err != nil {
+		msg := fmt.Sprintf("Could not parse CSR: %s ", err.Error())
+		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
+	}
+	if err = clientCSR.CheckSignature(); err != nil {
+		msg := fmt.Sprintf("Invalid CSR signature: %s ", err.Error())
+		reportError(w, startTime, "400", signCSRStr, msg, http.StatusBadRequest)
+		return
+	}
+
+	// create client certificate template
+	clientCRTTemplate := x509.Certificate{
+		Signature:          clientCSR.Signature,
+		SignatureAlgorithm: clientCSR.SignatureAlgorithm,
+
+		PublicKeyAlgorithm: clientCSR.PublicKeyAlgorithm,
+		PublicKey:          clientCSR.PublicKey,
+
+		SerialNumber: big.NewInt(2),
+		Issuer:       caCRT.Subject,
+		Subject:      clientCSR.Subject,
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(1440 * time.Hour),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+	}
+
+	// create client certificate from template and CA public key
+	clientCRTRaw, err := x509.CreateCertificate(cr.Reader, &clientCRTTemplate, caCRT, clientCSR.PublicKey, caPrivateKey)
+
+	if err != nil {
+		msg := fmt.Sprintf("Could not create x509 client certificate: %s ", err.Error())
+		reportError(w, startTime, "500", signCSRStr, msg, http.StatusInternalServerError)
+		return
+	}
+
+	logger.Log.Debugf("Successfully generate client cert, sending to client.")
+
+	w.Write(clientCRTRaw)
 }
 
 // generateAndSendKafkaMsg - Generates a Kafka message to send metric data to druid.

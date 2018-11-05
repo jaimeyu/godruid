@@ -153,19 +153,16 @@ type ConnectorConfigAttributes struct {
 	CreatedTimestamp *int64 `json:"createdTimestamp"`
 
 	// datahub connection retry frequency
-	// Required: true
-	DatahubConnectionRetryFrequency *int64 `json:"datahubConnectionRetryFrequency"`
+	DatahubConnectionRetryFrequency int64 `json:"datahubConnectionRetryFrequency,omitempty"`
 
 	// datahub heartbeat frequency
-	// Required: true
-	DatahubHeartbeatFrequency *int64 `json:"datahubHeartbeatFrequency"`
+	DatahubHeartbeatFrequency int64 `json:"datahubHeartbeatFrequency,omitempty"`
 
 	// datatype
 	Datatype string `json:"datatype,omitempty"`
 
 	// export group
-	// Required: true
-	ExportGroup *string `json:"exportGroup"`
+	ExportGroup string `json:"exportGroup,omitempty"`
 
 	// Time since epoch at which this object was last altered.
 	// Required: true
@@ -175,16 +172,14 @@ type ConnectorConfigAttributes struct {
 	Name string `json:"name,omitempty"`
 
 	// password
-	// Required: true
-	Password *string `json:"password"`
+	Password string `json:"password,omitempty"`
 
 	// polling frequency
 	// Required: true
 	PollingFrequency *int64 `json:"pollingFrequency"`
 
 	// port
-	// Required: true
-	Port *int64 `json:"port"`
+	Port int64 `json:"port,omitempty"`
 
 	// tenant Id
 	TenantID string `json:"tenantId,omitempty"`
@@ -198,8 +193,7 @@ type ConnectorConfigAttributes struct {
 	URL *string `json:"url"`
 
 	// username
-	// Required: true
-	Username *string `json:"username"`
+	Username string `json:"username,omitempty"`
 
 	// zone
 	Zone string `json:"zone,omitempty"`
@@ -217,31 +211,11 @@ func (m *ConnectorConfigAttributes) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDatahubConnectionRetryFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDatahubHeartbeatFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateExportGroup(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validatePassword(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validatePollingFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -250,10 +224,6 @@ func (m *ConnectorConfigAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateURL(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateUsername(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -281,33 +251,6 @@ func (m *ConnectorConfigAttributes) validateCreatedTimestamp(formats strfmt.Regi
 	return nil
 }
 
-func (m *ConnectorConfigAttributes) validateDatahubConnectionRetryFrequency(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"datahubConnectionRetryFrequency", "body", m.DatahubConnectionRetryFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigAttributes) validateDatahubHeartbeatFrequency(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"datahubHeartbeatFrequency", "body", m.DatahubHeartbeatFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigAttributes) validateExportGroup(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"exportGroup", "body", m.ExportGroup); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *ConnectorConfigAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
@@ -317,27 +260,9 @@ func (m *ConnectorConfigAttributes) validateLastModifiedTimestamp(formats strfmt
 	return nil
 }
 
-func (m *ConnectorConfigAttributes) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"password", "body", m.Password); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *ConnectorConfigAttributes) validatePollingFrequency(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"pollingFrequency", "body", m.PollingFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigAttributes) validatePort(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"port", "body", m.Port); err != nil {
 		return err
 	}
 
@@ -356,15 +281,6 @@ func (m *ConnectorConfigAttributes) validateType(formats strfmt.Registry) error 
 func (m *ConnectorConfigAttributes) validateURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"url", "body", m.URL); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigAttributes) validateUsername(formats strfmt.Registry) error {
-
-	if err := validate.Required("attributes"+"."+"username", "body", m.Username); err != nil {
 		return err
 	}
 

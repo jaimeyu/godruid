@@ -1,6 +1,6 @@
 # adh-gather
 
-The magic circle component, responsible for gathering data from various datasource and presenting it to UI and other 3rdParties
+The magic circle component, responsible for gathering data from various datasource and presenting it to UI and other 3rdParties.
 
 ## Get IT
 
@@ -46,10 +46,10 @@ You can modify the following values in  the `config/adh-gath.yml` file:
   	4. args
     	1. admindb: 
 			- name: the name of the admin database used for adh-gather
-			- impl: type of datastore to use for Admin Service. (0=InMemory, 1=CouchDB)
-		2. tenantdb: type of datastore to use for Tenant Service. (0=InMemory, 1=CouchDB)
-		3. pouchplugindb: type of datastore to use for PouchDB Plugin Service. (0=InMemory, 1=CouchDB)
-		4. testdatadb: type of datastore to use for TestData Service. (0=InMemory, 1=CouchDB)
+			- impl: type of datastore to use for Admin Service. (1=CouchDB)
+		2. tenantdb: type of datastore to use for Tenant Service. (1=CouchDB)
+		3. pouchplugindb: type of datastore to use for PouchDB Plugin Service. (1=CouchDB)
+		4. testdatadb: type of datastore to use for TestData Service. (1=CouchDB)
 	5. kafka
 		1. broker: the hostname and port of the kafka broker to listen to for change notifications
 

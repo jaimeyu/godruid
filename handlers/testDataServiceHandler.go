@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/satori/go.uuid"
+
+	"io"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
@@ -13,9 +14,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mholt/archiver"
+	"github.com/satori/go.uuid"
+
 	cr "crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
+	"time"
+
 	db "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/couchDB"
 	"github.com/accedian/adh-gather/gather"
@@ -28,7 +34,6 @@ import (
 	wr "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/gorilla/mux"
 	"github.com/segmentio/kafka-go"
-	"time"
 )
 
 const (

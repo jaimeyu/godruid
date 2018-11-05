@@ -176,6 +176,12 @@ func doCreateConnectorConfigV2(allowedRoles []string, tenantDB datastore.TenantS
 
 	data.TenantID = tenantID
 
+	// if config with zone already exists for this tenant, return error
+	configs, _ := tenantDB.GetAllTenantConnectorConfigs(tenantID, data.Zone)
+	if len(configs) != 0 {
+		return startTime, http.StatusConflict, nil, fmt.Errorf("connector Config with zone: %s already exists, please use a different zone", data.Zone)
+	}
+
 	// Issue request to DAO Layer to Create Record
 	result, err := tenantDB.CreateTenantConnectorConfig(&data)
 	if err != nil {
@@ -255,6 +261,12 @@ func doUpdateConnectorConfigV2(allowedRoles []string, tenantDB datastore.TenantS
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to patch %s with id %s: %s", tenmod.TenantConnectorConfigStr, params.ConnectorID, err.Error())
 	}
 	patched.TenantID = tenantID
+
+	// if config with zone already exists for this tenant, return error
+	configs, _ := tenantDB.GetAllTenantConnectorConfigs(tenantID, patched.Zone)
+	if len(configs) != 0 {
+		return startTime, http.StatusConflict, nil, fmt.Errorf("connector Config with zone: %s already exists, please use a different zone", patched.Zone)
+	}
 
 	// Finally update the record in the datastore with the merged map and fetched tenant
 	result, err := tenantDB.UpdateTenantConnectorConfig(patched)

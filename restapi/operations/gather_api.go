@@ -44,6 +44,7 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		BinProducer:         runtime.ByteStreamProducer(),
 		TxtProducer:         runtime.TextProducer(),
 		TenantProvisioningServiceBulkInsertMonitoredObjectHandler: tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkInsertMonitoredObject has not yet been implemented")
@@ -197,6 +198,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		}),
 		TenantProvisioningServiceV2DeleteThresholdProfileV2Handler: tenant_provisioning_service_v2.DeleteThresholdProfileV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteThresholdProfileV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteThresholdProfileV2 has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2DownloadRoadrunnerHandler: tenant_provisioning_service_v2.DownloadRoadrunnerHandlerFunc(func(params tenant_provisioning_service_v2.DownloadRoadrunnerParams) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DownloadRoadrunner has not yet been implemented")
 		}),
 		MetricsServiceGenSLAReportHandler: metrics_service.GenSLAReportHandlerFunc(func(params metrics_service.GenSLAReportParams) middleware.Responder {
 			return middleware.NotImplemented("operation MetricsServiceGenSLAReport has not yet been implemented")
@@ -541,11 +545,13 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
+	// BinProducer registers a producer for a "application/octet-stream" mime type
+	BinProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
@@ -651,6 +657,8 @@ type GatherAPI struct {
 	AdminProvisioningServiceV2DeleteTenantV2Handler admin_provisioning_service_v2.DeleteTenantV2Handler
 	// TenantProvisioningServiceV2DeleteThresholdProfileV2Handler sets the operation handler for the delete threshold profile v2 operation
 	TenantProvisioningServiceV2DeleteThresholdProfileV2Handler tenant_provisioning_service_v2.DeleteThresholdProfileV2Handler
+	// TenantProvisioningServiceV2DownloadRoadrunnerHandler sets the operation handler for the download roadrunner operation
+	TenantProvisioningServiceV2DownloadRoadrunnerHandler tenant_provisioning_service_v2.DownloadRoadrunnerHandler
 	// MetricsServiceGenSLAReportHandler sets the operation handler for the gen SLA report operation
 	MetricsServiceGenSLAReportHandler metrics_service.GenSLAReportHandler
 	// MetricsServiceV2GenerateSLAReportV2Handler sets the operation handler for the generate SLA report v2 operation
@@ -926,6 +934,10 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.BinProducer == nil {
+		unregistered = append(unregistered, "BinProducer")
+	}
+
 	if o.TxtProducer == nil {
 		unregistered = append(unregistered, "TxtProducer")
 	}
@@ -1132,6 +1144,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2DeleteThresholdProfileV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteThresholdProfileV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DownloadRoadrunnerHandler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DownloadRoadrunnerHandler")
 	}
 
 	if o.MetricsServiceGenSLAReportHandler == nil {
@@ -1620,6 +1636,9 @@ func (o *GatherAPI) ProducersFor(mediaTypes []string) map[string]runtime.Produce
 		case "application/vnd.api+json":
 			result["application/vnd.api+json"] = o.JSONProducer
 
+		case "application/octet-stream":
+			result["application/octet-stream"] = o.BinProducer
+
 		case "text/plain":
 			result["text/plain"] = o.TxtProducer
 
@@ -1919,6 +1938,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/threshold-profiles/{thrPrfId}"] = tenant_provisioning_service_v2.NewDeleteThresholdProfileV2(o.context, o.TenantProvisioningServiceV2DeleteThresholdProfileV2Handler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v2/distribution/download-roadrunner"] = tenant_provisioning_service_v2.NewDownloadRoadrunner(o.context, o.TenantProvisioningServiceV2DownloadRoadrunnerHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

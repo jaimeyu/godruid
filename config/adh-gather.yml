@@ -51,6 +51,7 @@ connector:
   dockerRegistry: "https://gcr.io/v2/"
   dockerVersion: "latest"
   dockerRegistryPrefix: "gcr.io/"
+  configDir: "/files/connector/"
 
 druid:
   broker:

@@ -32,6 +32,7 @@ const (
 	CK_connector_dockerRegistry               ConfigKey = "connector.dockerRegistry"
 	CK_connector_dockerVersion                ConfigKey = "connector.dockerVersion"
 	CK_connector_dockerRegistryPrefix         ConfigKey = "connector.dockerRegistryPrefix"
+	CK_connector_config_dir                   ConfigKey = "connector.configDir"
 	CK_druid_broker_server                    ConfigKey = "druid.broker.server"
 	CK_druid_broker_port                      ConfigKey = "druid.broker.port"
 	CK_druid_broker_table                     ConfigKey = "druid.broker.table"

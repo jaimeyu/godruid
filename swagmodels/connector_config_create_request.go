@@ -190,31 +190,26 @@ func (m *ConnectorConfigCreateRequestData) UnmarshalBinary(b []byte) error {
 type ConnectorConfigCreateRequestDataAttributes struct {
 
 	// datahub connection retry frequency
-	// Required: true
-	DatahubConnectionRetryFrequency *int64 `json:"datahubConnectionRetryFrequency"`
+	DatahubConnectionRetryFrequency int64 `json:"datahubConnectionRetryFrequency,omitempty"`
 
 	// datahub heartbeat frequency
-	// Required: true
-	DatahubHeartbeatFrequency *int64 `json:"datahubHeartbeatFrequency"`
+	DatahubHeartbeatFrequency int64 `json:"datahubHeartbeatFrequency,omitempty"`
 
 	// export group
-	// Required: true
-	ExportGroup *string `json:"exportGroup"`
+	ExportGroup string `json:"exportGroup,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
 
 	// password
-	// Required: true
-	Password *string `json:"password"`
+	Password string `json:"password,omitempty"`
 
 	// polling frequency
 	// Required: true
 	PollingFrequency *int64 `json:"pollingFrequency"`
 
 	// port
-	// Required: true
-	Port *int64 `json:"port"`
+	Port int64 `json:"port,omitempty"`
 
 	// type
 	// Required: true
@@ -225,8 +220,7 @@ type ConnectorConfigCreateRequestDataAttributes struct {
 	URL *string `json:"url"`
 
 	// username
-	// Required: true
-	Username *string `json:"username"`
+	Username string `json:"username,omitempty"`
 
 	// zone
 	Zone string `json:"zone,omitempty"`
@@ -236,27 +230,7 @@ type ConnectorConfigCreateRequestDataAttributes struct {
 func (m *ConnectorConfigCreateRequestDataAttributes) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDatahubConnectionRetryFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDatahubHeartbeatFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateExportGroup(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePassword(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validatePollingFrequency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -268,64 +242,15 @@ func (m *ConnectorConfigCreateRequestDataAttributes) Validate(formats strfmt.Reg
 		res = append(res, err)
 	}
 
-	if err := m.validateUsername(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
 }
 
-func (m *ConnectorConfigCreateRequestDataAttributes) validateDatahubConnectionRetryFrequency(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"datahubConnectionRetryFrequency", "body", m.DatahubConnectionRetryFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validateDatahubHeartbeatFrequency(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"datahubHeartbeatFrequency", "body", m.DatahubHeartbeatFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validateExportGroup(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"exportGroup", "body", m.ExportGroup); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"password", "body", m.Password); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *ConnectorConfigCreateRequestDataAttributes) validatePollingFrequency(formats strfmt.Registry) error {
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"pollingFrequency", "body", m.PollingFrequency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validatePort(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"port", "body", m.Port); err != nil {
 		return err
 	}
 
@@ -344,15 +269,6 @@ func (m *ConnectorConfigCreateRequestDataAttributes) validateType(formats strfmt
 func (m *ConnectorConfigCreateRequestDataAttributes) validateURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"url", "body", m.URL); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ConnectorConfigCreateRequestDataAttributes) validateUsername(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"attributes"+"."+"username", "body", m.Username); err != nil {
 		return err
 	}
 

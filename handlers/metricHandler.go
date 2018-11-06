@@ -209,14 +209,6 @@ func (msh *MetricServiceHandler) GetInternalSLAReportV1(slaReportRequest *metric
 		return nil, err
 	}
 
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.SLAReportStr, err.Error())
-		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
-		return nil, err
-	}
-
 	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
@@ -224,7 +216,7 @@ func (msh *MetricServiceHandler) GetInternalSLAReportV1(slaReportRequest *metric
 		return nil, err
 	}
 
-	report, err := msh.metricsDB.GetSLAReportV1(slaReportRequest, &pbTP, metaMOs)
+	report, err := msh.metricsDB.GetSLAReportV1(slaReportRequest, thresholdProfile, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportInternalError(startTime, "500", mon.GetSLAReportStr, msg)
@@ -265,14 +257,6 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Convert to PB type...will remove this when we remove the PB handling
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		msg := fmt.Sprintf("Unable to convert request to fetch %s: %s", db.SLAReportStr, err.Error())
-		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusNotFound)
-		return
-	}
-
 	metaMOs, err := msh.MetaToMonitoredObjects(tenantID, slaReportRequest.Meta)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve monitored object list for meta data. %s:", err.Error())
@@ -280,7 +264,7 @@ func (msh *MetricServiceHandler) GetSLAReport(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	result, err := msh.metricsDB.GetSLAReportV1(&slaReportRequest, &pbTP, metaMOs)
+	result, err := msh.metricsDB.GetSLAReportV1(&slaReportRequest, thresholdProfile, metaMOs)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to retrieve SLA Report. %s:", err.Error())
 		reportError(w, startTime, "500", mon.GenerateSLAReportStr, msg, http.StatusInternalServerError)

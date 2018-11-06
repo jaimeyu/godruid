@@ -11,11 +11,11 @@ import (
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/models"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	metmod "github.com/accedian/adh-gather/models/metrics"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service_v2"
 	"github.com/accedian/adh-gather/swagmodels"
@@ -381,14 +381,10 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	daoRequest.TenantID = tenantID
 
 	logger.Log.Debugf("Retrieving threshold profile for %s with id %s and tenant %s", datastore.ThresholdCrossingStr, daoRequest.ThresholdProfileID, tenantID)
-	// Retrieve threshold profile associated with the tenants
+	// Retrieve threshold profile associated with the tenant
 	thresholdProfile, err := tenantDB.GetTenantThresholdProfile(tenantID, daoRequest.ThresholdProfileID)
 	if err != nil {
 		return startTime, http.StatusNotFound, nil, err
-	}
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		return startTime, http.StatusInternalServerError, nil, err
 	}
 
 	logger.Log.Debugf("Retrieving monitored objects for %s associated with meta criteria: %v", datastore.ThresholdCrossingStr, daoRequest.Meta)
@@ -403,7 +399,7 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	}
 
 	// Issue request to DAO Layer
-	queryReport, err := metricsDB.QueryThresholdCrossing(&daoRequest, &pbTP, metaMOs)
+	queryReport, err := metricsDB.QueryThresholdCrossing(&daoRequest, thresholdProfile, metaMOs)
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -594,37 +590,9 @@ func renderThresholdCrossingV2(config interface{}, report map[string]interface{}
 
 	listThresholdCrossings := make(map[string]*metmod.MetricViolationsTimeSeries)
 
-	// var totals []map[string]interface{}
-	totals := make(map[string][]*metmod.MetricViolationSummaryType)
-	totals["summary"] = make([]*metmod.MetricViolationSummaryType, 0)
-
 	for _, tsEntry := range metrics {
 		ts := tsEntry.Timestamp
 		results := tsEntry.Result
-
-		if (float64(results.TotalDuration) == 0) &&
-			(float64(results.TotalViolationCount) == 0) &&
-			(float64(results.TotalViolationDuration) == 0) {
-
-		} else {
-
-			totals["summary"] = append(totals["summary"], &metmod.MetricViolationSummaryType{
-				"timestamp":              ts,
-				"totalDuration":          float64(results.TotalDuration),
-				"totalViolationCount":    float64(results.TotalViolationCount),
-				"totalViolationDuration": float64(results.TotalViolationDuration),
-			})
-		}
-
-		totals["critical"] = addValToList(totals["critical"], results.BySeverity["critical"], ts)
-
-		totals["major"] = addValToList(totals["major"], results.BySeverity["major"], ts)
-
-		totals["minor"] = addValToList(totals["minor"], results.BySeverity["minor"], ts)
-
-		totals["warning"] = addValToList(totals["warning"], results.BySeverity["warning"], ts)
-
-		totals["sla"] = addValToList(totals["sla"], results.BySeverity["sla"], ts)
 
 		for _, metric := range results.ByMetric {
 
@@ -660,23 +628,20 @@ func renderThresholdCrossingV2(config interface{}, report map[string]interface{}
 			}
 
 			listThresholdCrossings[hash] = c
-
 		}
-
 	}
 
-	swaggerResponse := make(map[string]interface{})
-	swaggerResponse["summary"] = totals["summary"]
+	reportResponse := make(map[string]interface{})
 
-	swaggerMetrics := make([]*metmod.MetricViolationsTimeSeries, 0)
+	reportMetrics := make([]*metmod.MetricViolationsTimeSeries, 0)
 	for _, metric := range listThresholdCrossings {
-		swaggerMetrics = append(swaggerMetrics, metric)
+		reportMetrics = append(reportMetrics, metric)
 	}
-	swaggerResponse["metric"] = swaggerMetrics
+	reportResponse["metric"] = reportMetrics
 
 	rawResponse := make(map[string]interface{})
 	rawResponse["config"] = config
-	rawResponse["result"] = swaggerResponse
+	rawResponse["result"] = reportResponse
 
 	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "thresholdCrossings")
 }
@@ -861,7 +826,7 @@ func renderTopNByBuckets(raw [][]byte, schema metmod.DruidViolationsMap) (*metmo
 	return &response, nil
 
 }
-func getSLATopNByBuckets(druidDB datastore.MetricsDatastore, request *metmod.SLAReportRequest, granularity int, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string, sla bool) ([][]byte, metmod.DruidViolationsMap, error) {
+func getSLATopNByBuckets(druidDB datastore.MetricsDatastore, request *metmod.SLAReportRequest, granularity int, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string, sla bool) ([][]byte, metmod.DruidViolationsMap, error) {
 
 	timeout := request.Timeout
 	if timeout == 0 {
@@ -871,12 +836,12 @@ func getSLATopNByBuckets(druidDB datastore.MetricsDatastore, request *metmod.SLA
 	var responses [][]byte
 	responsSchemas := make(metmod.DruidViolationsMap)
 
-	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	for vk, v := range thresholdProfile.Thresholds.VendorMap {
+		for tk, t := range v.MonitoredObjectTypeMap {
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			for mk, m := range t.MetricMap {
+				for dk, d := range m.DirectionMap {
+					for ek, e := range d.EventMap {
 						if ek != "sla" {
 							continue
 						}
@@ -921,10 +886,6 @@ func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastor
 	if err != nil {
 		return startTime, http.StatusNotFound, nil, fmt.Errorf("Could not get ThresholdProfile (%s) for tenant ID %s", daoRequest.ThresholdProfileID, tenantID)
 	}
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		return startTime, http.StatusInternalServerError, nil, err
-	}
 
 	/**********************/
 
@@ -935,20 +896,20 @@ func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastor
 
 	/*** SLA violations per hour & day of week buckets ***/
 
-	dayOfWeekBucket, dayOfWeekSchema, err := getSLATopNByBuckets(druidDB, &slaReportRequest, datastore.DayOfWeek, &pbTP, metaMOs, true)
+	dayOfWeekBucket, dayOfWeekSchema, err := getSLATopNByBuckets(druidDB, &slaReportRequest, datastore.DayOfWeek, thresholdProfile, metaMOs, true)
 	dayOfWeekRendered, err := renderTopNByBuckets(dayOfWeekBucket, dayOfWeekSchema)
 	if err != nil {
 		logger.Log.Errorf("Could not render day of week:%s", err.Error())
 	}
 
-	hourOfDayBucket, hourOfDaySchema, err := getSLATopNByBuckets(druidDB, &slaReportRequest, datastore.HourOfDay, &pbTP, metaMOs, true)
+	hourOfDayBucket, hourOfDaySchema, err := getSLATopNByBuckets(druidDB, &slaReportRequest, datastore.HourOfDay, thresholdProfile, metaMOs, true)
 	hourOfDayRendered, err := renderTopNByBuckets(hourOfDayBucket, hourOfDaySchema)
 	if err != nil {
 		logger.Log.Errorf("Could not render day of week:%s", err.Error())
 	}
 
 	/*** SLA Violations per time bucket ***/
-	slaViolationsGranular, schemaGranular, err := druidDB.GetSLAViolationsQueryWithGranularity(&slaReportRequest, &pbTP, metaMOs)
+	slaViolationsGranular, schemaGranular, err := druidDB.GetSLAViolationsQueryWithGranularity(&slaReportRequest, thresholdProfile, metaMOs)
 
 	slaViolationsGranularSummary, err := ReformatGetSLAViolationsQueryWithGranularityV2(slaViolationsGranular, schemaGranular, false)
 
@@ -959,7 +920,7 @@ func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastor
 		logger.Log.Errorf("Could not copy request: %s", err.Error())
 	}
 	slaReportRequestWithGranularityAll.Granularity = "all"
-	slaViolationsAll, slaViolationsAllSchema, err := druidDB.GetSLAViolationsQueryWithGranularity(&slaReportRequestWithGranularityAll, &pbTP, metaMOs)
+	slaViolationsAll, slaViolationsAllSchema, err := druidDB.GetSLAViolationsQueryWithGranularity(&slaReportRequestWithGranularityAll, thresholdProfile, metaMOs)
 
 	slaViolationsAllSummary, err := ReformatGetSLAViolationsQueryAllGranularityV2(slaViolationsAll, slaViolationsAllSchema, true)
 	if err != nil {
@@ -1145,13 +1106,9 @@ func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metric
 	if err != nil {
 		return startTime, http.StatusNotFound, nil, err
 	}
-	pbTP := pb.TenantThresholdProfile{}
-	if err := pb.ConvertToPBObject(thresholdProfile, &pbTP); err != nil {
-		return startTime, http.StatusInternalServerError, nil, err
-	}
 
 	// Issue request to DAO Layer
-	queryReport, err := metricsDB.GetThresholdCrossingByMonitoredObjectTopN(&daoRequest, &pbTP, metaMOs)
+	queryReport, err := metricsDB.GetThresholdCrossingByMonitoredObjectTopN(&daoRequest, thresholdProfile, metaMOs)
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err

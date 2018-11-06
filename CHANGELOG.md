@@ -1,3 +1,4 @@
+Feature - Adding code to process baseline threshold profile queries
 Feature - Upgrading docker-go-sdk reference to 0.11.0 which includes Go v1.11.1.
 Feature - Ran dep ensure to pull in missing dependencies
 Fix     - Build issue

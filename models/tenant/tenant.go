@@ -494,6 +494,14 @@ type ThresholdProfileThreshold struct {
 	Vendor              string              `json:"vendor"`
 }
 
+type ThresholdType string
+
+const (
+	ThresholdStandard           ThresholdType = "standard"
+	ThresholdPercentageBaseline ThresholdType = "baseline_percentage"
+	ThresholdStaticBaseline     ThresholdType = "baseline_static"
+)
+
 type MonitoredObjectGroup struct {
 	MonitoredObjectTypeMap map[string]map[string]map[string]map[string]map[string]map[string]map[string]map[string]map[string]string `json:"monitoredObjectTypeMap"`
 	MetricMap              map[string]map[string]map[string]string                                                                   `json:"metricMap"`

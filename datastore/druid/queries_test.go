@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"github.com/accedian/adh-gather/datastore/druid"
-	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/logger"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/godruid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFilterHelper(t *testing.T) {
-	filter, err := druid.FilterHelper("foo", lowerEvent)
+	filter, err := druid.FilterHelper("foo", lowerEvent.EventAttrMap)
 	if err != nil {
 		logger.Log.Error("Filter helper error: ", err)
 	}
@@ -24,7 +24,7 @@ func TestFilterHelper(t *testing.T) {
 		LowerStrict: true,
 	}, filter)
 
-	filter, err = druid.FilterHelper("foo", upperEvent)
+	filter, err = druid.FilterHelper("foo", upperEvent.EventAttrMap)
 	if err != nil {
 		logger.Log.Error("Filter helper error: ", err)
 	}
@@ -37,7 +37,7 @@ func TestFilterHelper(t *testing.T) {
 		UpperStrict: true,
 	}, filter)
 
-	filter, err = druid.FilterHelper("foo", bothEvent)
+	filter, err = druid.FilterHelper("foo", bothEvent.EventAttrMap)
 	if err != nil {
 		logger.Log.Error("Filter helper error: ", err)
 	}
@@ -51,21 +51,6 @@ func TestFilterHelper(t *testing.T) {
 		Upper:       10000,
 		UpperStrict: true,
 	}, filter)
-}
-
-func TestThresholdCrossingQuery(t *testing.T) {
-	// PEYO TODO FIX THIS TEST
-	// q, err := druid.ThresholdCrossingQuery("master", "druidTableName", "delayP95", "PT1H", "1900-11-02/2100-01-01", "TWAMP", "0", tp)
-
-	// if err != nil {
-	// 	logger.Log.Error("ThresholdCrossing query error: ", err)
-	// }
-
-	// qJson, _ := json.Marshal(q)
-	// expectedJson, _ := json.Marshal(testThresholdCrossing1)
-
-	// check to see if the number of bytes is equal since filters can be out of order
-	// assert.Equal(t, len(expectedJson), len(qJson))
 }
 
 func TestBuildMonitoredObjectFilterNoEntries(t *testing.T) {
@@ -85,68 +70,43 @@ func TestBuildMonitoredObjectFilterOk(t *testing.T) {
 	}
 }
 
-var metric1 = "delayP95"
-
-var tp = &pb.TenantThresholdProfileData{
-	Thresholds: &pb.TenantThresholdProfileData_VendorMap{
-		VendorMap: map[string]*pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-			"accedian": &pb.TenantThresholdProfileData_MonitoredObjectTypeMap{
-				MonitoredObjectTypeMap: map[string]*pb.TenantThresholdProfileData_MetricMap{
-					"TWAMP": &pb.TenantThresholdProfileData_MetricMap{
-						MetricMap: map[string]*pb.TenantThresholdProfileData_DirectionMap{
-							"delayP95": &pb.TenantThresholdProfileData_DirectionMap{
-								DirectionMap: map[string]*pb.TenantThresholdProfileData_EventMap{
-									"0": &pb.TenantThresholdProfileData_EventMap{
-										EventMap: map[string]*pb.TenantThresholdProfileData_EventAttrMap{
-											"minor": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"upperLimit": "30000",
-													"unit":       "ms",
-												},
-											},
-											"major": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "30000",
-													"lowerStrict": "true",
-													"upperLimit":  "50000",
-													"upperStrict": "false",
-													"unit":        "ms",
-												},
-											},
-											"critical": &pb.TenantThresholdProfileData_EventAttrMap{
-												map[string]string{
-													"lowerLimit":  "50000",
-													"lowerStrict": "true",
-													"unit":        "ms",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	},
+func TestBaselineColumn(t *testing.T) {
+	assert.Equal(t, "bl_delayAvg", druid.BaselineColumn("delayAvg"))
 }
 
-var lowerEvent = &pb.TenantThresholdProfileData_EventAttrMap{
+func TestThresholdCrossingTypeDefault(t *testing.T) {
+	assert.Equal(t, tenmod.ThresholdStandard, druid.ThresholdCrossingType(map[string]string{}))
+}
+
+func TestThresholdCrossingTypeExplicitTypes(t *testing.T) {
+	assert.Equal(t, tenmod.ThresholdStandard, druid.ThresholdCrossingType(map[string]string{"eventType": "standard"}))
+	assert.Equal(t, tenmod.ThresholdPercentageBaseline, druid.ThresholdCrossingType(map[string]string{"eventType": "baseline_percentage"}))
+	assert.Equal(t, tenmod.ThresholdStaticBaseline, druid.ThresholdCrossingType(map[string]string{"eventType": "baseline_static"}))
+}
+
+func TestIsBaselineTypes(t *testing.T) {
+	assert.True(t, druid.IsBaselineType(tenmod.ThresholdStaticBaseline))
+	assert.True(t, druid.IsBaselineType(tenmod.ThresholdPercentageBaseline))
+	assert.False(t, druid.IsBaselineType(tenmod.ThresholdStandard))
+}
+
+var metric1 = "delayP95"
+
+var lowerEvent = &tenmod.ThrPrfEventAttrMap{
 	EventAttrMap: map[string]string{
 		"lowerLimit":  "10000",
 		"lowerStrict": "true",
 	},
 }
 
-var upperEvent = &pb.TenantThresholdProfileData_EventAttrMap{
+var upperEvent = &tenmod.ThrPrfEventAttrMap{
 	EventAttrMap: map[string]string{
 		"upperLimit":  "10000",
 		"upperStrict": "true",
 	},
 }
 
-var bothEvent = &pb.TenantThresholdProfileData_EventAttrMap{
+var bothEvent = &tenmod.ThrPrfEventAttrMap{
 	EventAttrMap: map[string]string{
 		"upperLimit":  "10000",
 		"upperStrict": "true",

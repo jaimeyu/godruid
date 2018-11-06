@@ -167,11 +167,8 @@ type ThresholdCrossingTimeSeriesEntry struct {
 }
 
 type ThresholdCrossingTimeSeriesResult struct {
-	TotalDuration          int64                             `json:"totalDuration"`
-	TotalViolationCount    int32                             `json:"totalViolationCount"`
-	TotalViolationDuration int64                             `json:"totalViolationDuration"`
-	ByMetric               []*ThresholdCrossingMetricResult  `json:"byMetric"`
-	BySeverity             map[string]map[string]interface{} `json:"bySeverity"`
+	ByMetric   []*ThresholdCrossingMetricResult  `json:"byMetric"`
+	BySeverity map[string]map[string]interface{} `json:"bySeverity"`
 }
 
 type ThresholdCrossingMetricResult struct {

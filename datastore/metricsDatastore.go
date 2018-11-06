@@ -88,24 +88,24 @@ type MetricsDatastore interface {
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error)
+	QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) (map[string]interface{}, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	// DEPRECATED: DELETE WHEN V1 IS TERMINATED
 	QueryThresholdCrossingV1(request *metrics.ThresholdCrossingV1, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error)
 
-	GetSLAReportV1(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (*metrics.SLAReport, error)
-	GetSLAViolationsQueryAllGranularity(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error)
-	GetSLAViolationsQueryWithGranularity(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error)
-	GetSLATimeSeries(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error)
-	GetTopNTimeByBuckets(request *metrics.SLAReportRequest, extractFn int, vendor, objType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap,
+	GetSLAReportV1(request *metrics.SLAReportRequest, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) (*metrics.SLAReport, error)
+	GetSLAViolationsQueryAllGranularity(request *metrics.SLAReportRequest, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error)
+	GetSLAViolationsQueryWithGranularity(request *metrics.SLAReportRequest, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error)
+	GetSLATimeSeries(request *metrics.SLAReportRequest, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error)
+	GetTopNTimeByBuckets(request *metrics.SLAReportRequest, extractFn int, vendor, objType, metric, direction, event string, eventAttr *tenmod.ThrPrfEventAttrMap,
 		metaMOs []string) ([]byte, metrics.DruidViolationsMap, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
 	// Uses TopN query.
-	GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopN, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]metrics.TopNEntryResponse, error)
+	GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopN, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) ([]metrics.TopNEntryResponse, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object

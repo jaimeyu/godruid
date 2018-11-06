@@ -11,6 +11,7 @@ import (
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/models/metrics"
+	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/godruid"
 	"github.com/satori/go.uuid"
 )
@@ -25,13 +26,23 @@ const (
 	DayOfWeek       = 1
 )
 
+// Constants for Threshold Crossing Baseline functionality
+const (
+	DruidBaselineIdPrefix = "bl_"
+	DruidFilterIdSuffix   = "_baseline"
+)
+
+// Map used to reference the mathematical functions to calculate baselines for the different types of provisioned thresholds
+var baselineFunctions = map[tenmod.ThresholdType]string{
+	tenmod.ThresholdPercentageBaseline: "(%s/%s)-1",
+	tenmod.ThresholdStaticBaseline:     "%s-%s",
+}
+
 var knownEventNames = []string{"critical", "major", "minor", "warn", "info"}
 
 // FilterHelper - helper function to select correct druid filter based on
 // a given event and metric
-func FilterHelper(metric string, e *pb.TenantThresholdProfileData_EventAttrMap) (*godruid.Filter, error) {
-
-	event := e.GetEventAttrMap()
+func FilterHelper(metric string, event map[string]string) (*godruid.Filter, error) {
 
 	upperStrict, err := strconv.ParseBool(event["upperStrict"])
 	if err != nil && event["upperStrict"] != "" {
@@ -244,106 +255,100 @@ func HistogramQueryV1(tenant string, metaMOs []string, dataSource string, interv
 		Intervals:    []string{interval}}, nil
 }
 
-// ThresholdCrossingQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
-// defined by the supplied threshold profile..
-func ThresholdCrossingQuery(tenant string, dataSource string, metaMOs []string, metrics []string, granularity string, interval string, objectTypes []string, directions []string, thresholdProfile *pb.TenantThresholdProfileData, vendors []string, timeout int32) (*godruid.QueryTimeseries, error) {
-
-	var aggregations []godruid.Aggregation
-
-	aggregations = append(aggregations, godruid.AggCount("total"))
-
-	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
-	for _, vendorKey := range sortedVendorMapKeys {
-		vk := vendorKey
-		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
-		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
-		// if no vendors have been provided, use all of them, otherwise
-		// only include the provided ones
-
-		if vendors == nil || contains(vendors, vk) {
-			sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
-			for _, typeKey := range sortedMOTypeMapKeys {
-				tk := typeKey
-				t := v.GetMonitoredObjectTypeMap()[tk]
-				// for tk, t := range v.GetMonitoredObjectTypeMap() {
-				// if no objectTypes have been provided, use all of them, otherwise
-				// only include the provided ones
-				if objectTypes == nil || contains(objectTypes, tk) {
-					sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
-					for _, metricTypeKey := range sortedMetricTypeMapKeys {
-						mk := metricTypeKey
-						m := t.GetMetricMap()[mk]
-						// for mk, m := range t.GetMetricMap() {
-						// if no metrics have been provided, use all of them, otherwise
-						// only include the provided ones
-						if metrics == nil || contains(metrics, mk) {
-							sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
-							for _, directionTypeKey := range sortedDirectionTypeMapKeys {
-								dk := directionTypeKey
-								d := m.GetDirectionMap()[dk]
-								// for dk, d := range m.GetDirectionMap() {
-								if directions == nil || contains(directions, dk) {
-									sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
-									for _, eventTypeKey := range sortedEventTypeMapKeys {
-										ek := eventTypeKey
-										e := d.GetEventMap()[ek]
-										// for ek, e := range d.GetEventMap() {
-										name := vk + "." + tk + "." + mk + "." + ek + "." + dk
-										filter, err := FilterHelper(mk, e)
-										if err != nil {
-											return nil, err
-										}
-										aggregation := godruid.AggFiltered(
-											godruid.FilterAnd(
-												filter,
-												godruid.FilterSelector("objectType", tk),
-												godruid.FilterSelector("direction", dk),
-											),
-											&godruid.Aggregation{
-												Type: "count",
-												Name: name,
-											},
-										)
-										aggregations = append(aggregations, aggregation)
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-	}
-
-	return &godruid.QueryTimeseries{
-		DataSource:  dataSource,
-		Granularity: toGranularity(granularity),
-		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
-		Filter: godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			cleanFilter(),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
-		),
-		Aggregations: aggregations,
-		Intervals:    []string{interval}}, nil
+// Returns the associated baseline column based on the provided metric name
+func BaselineColumn(metric string) string {
+	// May need to put a check here to see if it is actually a metric that even has a baseline
+	return DruidBaselineIdPrefix + metric
 }
 
-func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifierFilter, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
+// Maps the type of threshold configured for a specific event severity in the event attributes map. Defaults to the standard type
+func ThresholdCrossingType(eventAttrs map[string]string) tenmod.ThresholdType {
+	if tType, ok := eventAttrs["eventType"]; ok {
+		switch tType {
+		case string(tenmod.ThresholdPercentageBaseline):
+			return tenmod.ThresholdPercentageBaseline
+		case string(tenmod.ThresholdStaticBaseline):
+			return tenmod.ThresholdStaticBaseline
+		case string(tenmod.ThresholdStandard):
+			return tenmod.ThresholdStandard
+		}
+	}
+
+	return tenmod.ThresholdStandard
+}
+
+// Determines whether the provided threshold type is baseline-based or a standard threshold profile
+func IsBaselineType(thresholdType tenmod.ThresholdType) bool {
+	for ttype, _ := range baselineFunctions {
+		if ttype == thresholdType {
+			return true
+		}
+	}
+	return false
+}
+
+// Creates a threshold crossing filter based on the type of threshold passed in (baseline-based or standard)
+// Arguments:
+//   fieldNamePrefix - the identifying prefix needed for baseline-based thresholds to uniquely name the virtual column
+//   metric - the name of the metric that we are building the filter for
+//   eventMap - the provisioned attribute value pairs for the threshold we are processing
+//	 baselineColumns - the set of virtual columns that have been built up to ensure that there are no duplicate columns
+// Returns:
+//	 *godruid.Filter - a filter that represents the provisioned threshold
+//	 *godruid.VirtualColumn - a virtual column that represents the baseline calculation for the metric. This is only applicable if the threshold is baseline-based
+//	 error - if any issue is encountered during processing
+func BuildThresholdCrossingFilter(fieldNamePrefix string, metric string, eventMap *tenmod.ThrPrfEventAttrMap, baselineColumns *[]godruid.VirtualColumn) (*godruid.Filter, error) {
+	thresholdCrossingType := ThresholdCrossingType(eventMap.EventAttrMap)
+	filterDim := metric
+
+	var divByZeroFilter *godruid.Filter
+
+	// Add a baseline function in a virtual column for threshold crossings that are baseline based
+	if IsBaselineType(thresholdCrossingType) {
+		bcol := BaselineColumn(metric)
+		filterDim = fieldNamePrefix + DruidFilterIdSuffix
+
+		// Ensure that this virtual column has not already been built up from the provided set since we cannot have dups
+		found := false
+		for _, bc := range *baselineColumns {
+			if bc.Name == filterDim {
+				found = true
+				break
+			}
+		}
+		if !found {
+			*baselineColumns = append(*baselineColumns, godruid.NewVirtualColumn(filterDim, fmt.Sprintf(baselineFunctions[thresholdCrossingType], metric, bcol), godruid.VirtualColumnDouble))
+		}
+
+		if thresholdCrossingType == tenmod.ThresholdPercentageBaseline {
+			divByZeroFilter = godruid.FilterNot(godruid.FilterSelector(bcol, "0"))
+		}
+	}
+
+	boundedFilter, err := FilterHelper(filterDim, eventMap.EventAttrMap)
+	if err != nil {
+		return nil, err
+	}
+	thresholdFilter := boundedFilter
+
+	if divByZeroFilter != nil {
+		// To guard against division by zero.
+		// The division by zero filter MUST BE FIRST
+		thresholdFilter = godruid.FilterAnd(
+			divByZeroFilter,
+			boundedFilter,
+		)
+	}
+
+	return thresholdFilter, nil
+}
+
+func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifierFilter, thresholdProfile *tenmod.ThresholdProfile, timeout int32) (*godruid.QueryTimeseries, error) {
+
+	// columns used for baseline calculations
+	var baselineCalculationCols []godruid.VirtualColumn
 	// all of the aggregations
 	var aggregations []godruid.Aggregation
-	// all of the post aggregations
-	var postAggregations []godruid.PostAggregation
-	// the names of the aggregations that are computing violation counts
-	var violationCountAggs []string
-	// the names of the aggregations that are computing violation counts, grouped by eventName
-	violationCountAggsByEvent := map[string][]string{}
-	// the names of the aggregations that are computing de-duped duration sum
-	var durationAggs []string
-	// the names of the aggregations that are computing de-duped violation duration sum
-	var violationDurationAggs []string
-	// the names of the aggregations that are computing de-duped violation duration sum, grouped by eventName
-	violationDurationAggsByEvent := map[string][]string{}
 
 	type objectTypeDirectionFilters struct {
 		BaseFilter              *godruid.Filter
@@ -351,34 +356,29 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 		ThresholdFilterList     []*godruid.Filter
 	}
 
-	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
-	for _, vendorKey := range sortedVendorMapKeys {
-		vk := vendorKey
-		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
-		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
-		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
-		for _, typeKey := range sortedMOTypeMapKeys {
-			tk := typeKey
-			t := v.GetMonitoredObjectTypeMap()[tk]
-			// for tk, t := range v.GetMonitoredObjectTypeMap() {
+	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.Thresholds.VendorMap).MapKeys())
+	for _, vk := range sortedVendorMapKeys {
+		v := thresholdProfile.Thresholds.VendorMap[vk]
+
+		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.MonitoredObjectTypeMap).MapKeys())
+		for _, tk := range sortedMOTypeMapKeys {
+			t := v.MonitoredObjectTypeMap[tk]
 			// This is for de-duping violation duration for metrics that are violated at the same time for the same object.
 			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
 
-			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
-			for _, metricTypeKey := range sortedMetricTypeMapKeys {
-				mk := metricTypeKey
-				m := t.GetMetricMap()[mk]
-				// for mk, m := range t.GetMetricMap() {
-				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
-				for _, directionTypeKey := range sortedDirectionTypeMapKeys {
-					dk := directionTypeKey
-					d := m.GetDirectionMap()[dk]
-					// for dk, d := range m.GetDirectionMap() {
+			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.MetricMap).MapKeys())
+			for _, mk := range sortedMetricTypeMapKeys {
+				m := t.MetricMap[mk]
+				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.DirectionMap).MapKeys())
+				for _, dk := range sortedDirectionTypeMapKeys {
+					d := m.DirectionMap[dk]
 
 					// skip metrics that are not on the whitelist (if one was provided)
 					if !inWhitelist(metricWhitelist, vk, tk, mk, dk) {
 						continue
 					}
+
+					aggNamePrefix := buildMetricAggPrefix(vk, tk, mk, dk)
 
 					// create a base filter for this objectType and direction (druid doesn't store vendor)
 					objectTypeAndDirectionFilter := godruid.FilterAnd(
@@ -386,25 +386,12 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 						godruid.FilterSelector("direction", dk),
 					)
 
-					aggNamePrefix := buildMetricAggPrefix(vk, tk, mk, dk)
-					// create an aggregation to sum the total duration this metric was measured.
-					aggregations = append(aggregations, godruid.AggFiltered(
-						objectTypeAndDirectionFilter,
-						&godruid.Aggregation{
-							Type:      "longSum",
-							FieldName: "duration",
-							Name:      aggNamePrefix + ".totalDuration",
-						},
-					))
-
 					// process the provisioned events (severities) and create aggregations
-					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
-					for _, eventTypeKey := range sortedEventTypeMapKeys {
-						ek := eventTypeKey
-						e := d.GetEventMap()[ek]
-						// for ek, e := range d.GetEventMap() {
+					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.EventMap).MapKeys())
+					for _, ek := range sortedEventTypeMapKeys {
+						e := d.EventMap[ek]
 
-						thresholdFilter, err := FilterHelper(mk, e)
+						thresholdFilter, err := BuildThresholdCrossingFilter(aggNamePrefix, mk, e, &baselineCalculationCols)
 						if err != nil {
 							return nil, err
 						}
@@ -441,14 +428,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 								Name: violationCountAggName,
 							},
 						))
-						violationCountAggs = append(violationCountAggs, violationCountAggName)
-
-						aggs, ok := violationCountAggsByEvent[ek]
-						if !ok {
-							violationCountAggsByEvent[ek] = []string{violationCountAggName}
-						} else {
-							violationCountAggsByEvent[ek] = append(aggs, violationCountAggName)
-						}
 
 						// Sum the duration while this metric was in violation.
 						aggregations = append(aggregations, godruid.AggFiltered(
@@ -472,17 +451,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 
 				for k, v := range perDirectionFilters {
 
-					// An aggregation to sum the duration for a vendor/objectType/direction
-					aggregations = append(aggregations, godruid.AggFiltered(
-						v.BaseFilter,
-						&godruid.Aggregation{
-							Type:      "longSum",
-							FieldName: "duration",
-							Name:      k + ".totalDuration",
-						},
-					))
-					durationAggs = append(durationAggs, k+".totalDuration")
-
 					if len(v.ThresholdFilterList) > 0 {
 						// Sum the violation duration per vendor/objecttype/direction
 						aggregations = append(aggregations, godruid.AggFiltered(
@@ -496,7 +464,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 								Name:      k + ".violationDuration",
 							},
 						))
-						violationDurationAggs = append(violationDurationAggs, k+".violationDuration")
 					}
 
 					if len(v.ThresholdFiltersByEvent) > 0 {
@@ -540,12 +507,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 								},
 							))
 
-							aggs, ok := violationDurationAggsByEvent[eventName]
-							if !ok {
-								violationDurationAggsByEvent[eventName] = []string{"__event." + eventName + "." + k + ".violationDuration"}
-							} else {
-								violationDurationAggsByEvent[eventName] = append(aggs, "__event."+eventName+"."+k+".violationDuration")
-							}
 							// add the threshold filters to the processed list so we can exclude them for the next event
 							processed = append(processed, tf...)
 
@@ -559,45 +520,6 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 		}
 	}
 
-	if len(violationCountAggs) > 0 {
-		// Sum the violation count per metric to get an overall total.
-		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
-			"totalViolationCount",
-			"+",
-			buildPostAggregationFields(violationCountAggs)))
-	}
-	if len(violationCountAggsByEvent) > 0 {
-		for ek, v := range violationCountAggsByEvent {
-			postAggregations = append(postAggregations, godruid.PostAggArithmetic(
-				buildTopLevelEventAgg(ek, "totalViolationCount"),
-				"+",
-				buildPostAggregationFields(v)))
-		}
-	}
-	if len(violationDurationAggs) > 0 {
-		// Sum the violation duration per metric to get an overall violation duration.
-		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
-			"totalViolationDuration",
-			"+",
-			buildPostAggregationFields(violationDurationAggs)))
-	}
-	if len(violationDurationAggsByEvent) > 0 {
-		for ek, v := range violationDurationAggsByEvent {
-			postAggregations = append(postAggregations, godruid.PostAggArithmetic(
-				buildTopLevelEventAgg(ek, "totalViolationDuration"),
-				"+",
-				buildPostAggregationFields(v)))
-		}
-
-	}
-	if len(durationAggs) > 0 {
-		// Sum the total duration per metric to get an overall total duration.
-		postAggregations = append(postAggregations, godruid.PostAggArithmetic(
-			"totalDuration",
-			"+",
-			buildPostAggregationFields(durationAggs)))
-	}
-
 	return &godruid.QueryTimeseries{
 		QueryType:   godruid.TIMESERIES,
 		DataSource:  dataSource,
@@ -608,9 +530,9 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 			cleanFilter(),
 			BuildMonitoredObjectFilter(tenant, metaMOs),
 		),
-		Aggregations:     aggregations,
-		PostAggregations: postAggregations,
-		Intervals:        []string{interval}}, nil
+		Aggregations:   aggregations,
+		VirtualColumns: baselineCalculationCols,
+		Intervals:      []string{interval}}, nil
 }
 
 func ThresholdViolationsQueryV1(tenant string, dataSource string, metaMOs []string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifierV1, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
@@ -688,7 +610,7 @@ func ThresholdViolationsQueryV1(tenant string, dataSource string, metaMOs []stri
 						e := d.GetEventMap()[ek]
 						// for ek, e := range d.GetEventMap() {
 
-						thresholdFilter, err := FilterHelper(mk, e)
+						thresholdFilter, err := FilterHelper(mk, e.EventAttrMap)
 						if err != nil {
 							return nil, err
 						}
@@ -897,13 +819,14 @@ func ThresholdViolationsQueryV1(tenant string, dataSource string, metaMOs []stri
 		Intervals:        []string{interval}}, nil
 }
 
-func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, metrics.DruidViolationsMap, error) {
+func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, thresholdProfile *tenmod.ThresholdProfile, timeout int32) (*godruid.QueryTimeseries, metrics.DruidViolationsMap, error) {
 	var aggregations []godruid.Aggregation
 	var postAggregations []godruid.PostAggregation
 	var violationCountAggs []string
 	var totalDurationAggs []string
 	var violationDurationAggs []string
 	var objectDirectionFilters []*godruid.Filter
+	var baselineCalculationCols []godruid.VirtualColumn
 
 	type objectTypeDirectionFilters struct {
 		BaseFilter       *godruid.Filter
@@ -911,18 +834,15 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 	}
 
 	responseSchemaMap := make(metrics.DruidViolationsMap)
-	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.GetThresholds().GetVendorMap()).MapKeys())
+	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.Thresholds.VendorMap).MapKeys())
 	for _, vendorKey := range sortedVendorMapKeys {
 		vk := vendorKey
-		v := thresholdProfile.GetThresholds().GetVendorMap()[vk]
-		// }
-		// for vk, v := range thresholdProfile.GetThresholds().GetVendorMap() {
+		v := thresholdProfile.Thresholds.VendorMap[vk]
 
-		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.GetMonitoredObjectTypeMap()).MapKeys())
+		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.MonitoredObjectTypeMap).MapKeys())
 		for _, typeKey := range sortedMOTypeMapKeys {
 			tk := typeKey
-			t := v.GetMonitoredObjectTypeMap()[tk]
-			// for tk, t := range v.GetMonitoredObjectTypeMap() {
+			t := v.MonitoredObjectTypeMap[tk]
 			// @TODO: HEY! We need to remove this!
 			if tk != "twamp-sf" {
 				continue
@@ -930,21 +850,18 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 
 			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
 
-			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.GetMetricMap()).MapKeys())
+			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.MetricMap).MapKeys())
 			for _, metricTypeKey := range sortedMetricTypeMapKeys {
 				mk := metricTypeKey
-				m := t.GetMetricMap()[mk]
-				// for mk, m := range t.GetMetricMap() {
-				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.GetDirectionMap()).MapKeys())
+				m := t.MetricMap[mk]
+				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.DirectionMap).MapKeys())
 				for _, directionTypeKey := range sortedDirectionTypeMapKeys {
 					dk := directionTypeKey
-					d := m.GetDirectionMap()[dk]
-					// for dk, d := range m.GetDirectionMap() {
-					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.GetEventMap()).MapKeys())
+					d := m.DirectionMap[dk]
+					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.EventMap).MapKeys())
 					for _, eventTypeKey := range sortedEventTypeMapKeys {
 						ek := eventTypeKey
-						e := d.GetEventMap()[ek]
-						// for ek, e := range d.GetEventMap() {
+						e := d.EventMap[ek]
 						if ek != "sla" {
 							continue
 						}
@@ -954,7 +871,9 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 							godruid.FilterSelector("direction", dk),
 						)
 
-						thresholdFilter, err := FilterHelper(mk, e)
+						aggNamePrefix := vk + "." + tk + "." + mk + "." + ek + "." + dk
+
+						thresholdFilter, err := BuildThresholdCrossingFilter(aggNamePrefix, mk, e, &baselineCalculationCols)
 						if err != nil {
 							return nil, nil, err
 						}
@@ -966,7 +885,6 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 							dirFilters.ThresholdFilters = append(dirFilters.ThresholdFilters, thresholdFilter)
 						}
 
-						aggNamePrefix := vk + "." + tk + "." + mk + "." + ek + "." + dk
 						// Count violations for this metric
 						aggregations = append(aggregations, godruid.AggFiltered(
 							godruid.FilterAnd(
@@ -1119,6 +1037,7 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 				cleanFilter(),
 				BuildMonitoredObjectFilter(tenant, metaMOs),
 			),
+			VirtualColumns:   baselineCalculationCols,
 			Aggregations:     aggregations,
 			PostAggregations: postAggregations,
 			Intervals:        []string{interval}},
@@ -1126,9 +1045,10 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 		nil
 }
 
-func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, timeBucket int, timeZone string, vendor, objectType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, metrics.DruidViolationsMap, error) {
+func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, timeBucket int, timeZone string, vendor, objectType, metric, direction, event string, eventAttr *tenmod.ThrPrfEventAttrMap, granularity string, interval string, timeout int32) (*godruid.QueryTopN, metrics.DruidViolationsMap, error) {
 	var aggregations []godruid.Aggregation
 	var dimension godruid.DimSpec
+	var baselineCalculationCols []godruid.VirtualColumn
 	schema := make(metrics.DruidViolationsMap)
 	prefix := vendor + "." + objectType + "." + metric + "." + event + "." + direction
 
@@ -1166,7 +1086,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 		return nil, nil, fmt.Errorf("Invalid value for 'timeBucket' : %v", timeBucket)
 	}
 
-	thresholdFilter, err := FilterHelper(metric, eventAttr)
+	thresholdFilter, err := BuildThresholdCrossingFilter(prefix, metric, eventAttr, &baselineCalculationCols)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1197,21 +1117,24 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
-		Metric:       countName,
-		Dimension:    dimension,
-		Threshold:    threshold,
-		Aggregations: aggregations,
-		Intervals:    []string{interval},
+		Metric:         countName,
+		Dimension:      dimension,
+		Threshold:      threshold,
+		Aggregations:   aggregations,
+		VirtualColumns: baselineCalculationCols,
+		Intervals:      []string{interval},
 	}, schema, nil
 
 }
 
 // ThresholdCrossingByMonitoredObjectQuery - Query that returns a count of events that crossed a thresholds for metric/thresholds
 // defined by the supplied threshold profile. Groups results my monitored object ID.
-func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, metaMOs []string, metric metrics.MetricIdentifierFilter, granularity string, interval string, thresholdProfile *pb.TenantThresholdProfileData, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
+func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource string, metaMOs []string, metric metrics.MetricIdentifierFilter, granularity string, interval string, thresholdProfile *tenmod.ThresholdProfile, timeout int32, numResults int32) (*godruid.QueryTopN, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations []godruid.PostAggregation
+	// columns used for baseline calculations
+	var baselineCalculationCols []godruid.VirtualColumn
 
 	var eventWeights = make(map[string]float32)
 	eventWeights["minor"] = 0.0001
@@ -1220,25 +1143,24 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 
 	aggregations = append(aggregations, godruid.AggCount("total"))
 
-	vendorMap := thresholdProfile.GetThresholds().GetVendorMap()
+	vendorMap := thresholdProfile.Thresholds.VendorMap
 	// NOTE: We make the assumption here, for now, that all of the object types that are passed in will be grouped in some way in the threshold profile and therefore will
 	// have the same event thresholds for each object type. This may not be the case in the future but for now it is.
-	events := vendorMap[metric.Vendor].GetMonitoredObjectTypeMap()[metric.ObjectType[0]].GetMetricMap()[metric.Metric].GetDirectionMap()[metric.Direction[0]].GetEventMap()
+	events := vendorMap[metric.Vendor].MonitoredObjectTypeMap[metric.ObjectType[0]].MetricMap[metric.Metric].DirectionMap[metric.Direction[0]].EventMap
 
 	sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(events).MapKeys())
 	for _, eventTypeKey := range sortedEventTypeMapKeys {
 		ek := eventTypeKey
 		e := events[ek]
-		// for ek, e := range events {
+
 		name := ek
-		filter, err := FilterHelper(metric.Metric, e)
+		filter, err := BuildThresholdCrossingFilter(name, metric.Metric, e, &baselineCalculationCols)
 		if err != nil {
 			return nil, err
 		}
+
 		aggregation := godruid.AggFiltered(
-			godruid.FilterAnd(
-				filter,
-			),
+			filter,
 			&godruid.Aggregation{
 				Type: "count",
 				Name: name,
@@ -1283,6 +1205,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 			buildInFilter("direction", metric.Direction),
 		),
 		PostAggregations: scoredPostAggregation,
+		VirtualColumns:   baselineCalculationCols,
 		Intervals:        []string{interval},
 		Metric:           "scored",
 		Threshold:        int(numResults),
@@ -1313,7 +1236,7 @@ func ThresholdCrossingByMonitoredObjectTopNQueryV1(tenant string, dataSource str
 		e := events[ek]
 		// for ek, e := range events {
 		name := ek
-		filter, err := FilterHelper(metric, e)
+		filter, err := FilterHelper(metric, e.EventAttrMap)
 		if err != nil {
 			return nil, err
 		}

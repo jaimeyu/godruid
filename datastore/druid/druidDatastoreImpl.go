@@ -257,7 +257,7 @@ func (dc *DruidDatastoreClient) GetHistogramV1(request *metrics.HistogramV1, met
 }
 
 // New version of threshold-crossing
-func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (map[string]interface{}, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
@@ -269,7 +269,7 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossing.String()))
 	}
 
-	query, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.Metrics, thresholdProfile.Data, timeout)
+	query, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.Metrics, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
@@ -489,7 +489,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetricV1(request *metrics.TopNForMetri
 	return responseMap, nil
 }
 
-func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopN, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]metrics.TopNEntryResponse, error) {
+func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(request *metrics.ThresholdCrossingTopN, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) ([]metrics.TopNEntryResponse, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetThresholdCrossingByMonitoredObject for request: %v", models.AsJSONString(request))
@@ -501,7 +501,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossingtopn.String()))
 	}
 
-	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, metaMOs, request.Metric, request.Granularity, request.Interval, thresholdProfile.Data, timeout, request.NumResults)
+	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, metaMOs, request.Metric, request.Granularity, request.Interval, thresholdProfile, timeout, request.NumResults)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossByMonObjTopNStr)
@@ -745,7 +745,7 @@ type Debug struct {
 	Data map[string]interface{} `json:"data"`
 }
 
-func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (*metrics.SLAReport, error) {
+func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (*metrics.SLAReport, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
@@ -758,7 +758,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
+	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -786,7 +786,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 	}
 
-	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
+	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetSLAReportStr)
 		return nil, err
@@ -813,15 +813,15 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 	var hourOfDayBucketMap map[string]interface{}
 	var dayOfWeekBucketMap map[string]interface{}
 
-	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	for vk, v := range thresholdProfile.Thresholds.VendorMap {
+		for tk, t := range v.MonitoredObjectTypeMap {
 			if tk != "twamp-sf" {
 				continue
 			}
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			for mk, m := range t.MetricMap {
+				for dk, d := range m.DirectionMap {
+					for ek, e := range d.EventMap {
 						if ek != "sla" {
 							continue
 						}
@@ -908,7 +908,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 	return &slaReport, nil
 }
 
-func (dc *DruidDatastoreClient) GetSLAViolationsQueryAllGranularity(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
+func (dc *DruidDatastoreClient) GetSLAViolationsQueryAllGranularity(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
@@ -921,7 +921,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryAllGranularity(request *met
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, respSchema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
+	query, respSchema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -947,7 +947,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryAllGranularity(request *met
 	return response, respSchema, nil
 }
 
-func (dc *DruidDatastoreClient) GetSLAViolationsQueryWithGranularity(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
+func (dc *DruidDatastoreClient) GetSLAViolationsQueryWithGranularity(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
 	methodStartTime := time.Now()
 
 	if logger.IsDebugEnabled() {
@@ -960,7 +960,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryWithGranularity(request *me
 	if timeout == 0 {
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
-	query, schema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
+	query, schema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, methodStartTime, successCode, mon.GetSLAReportStr)
 		return nil, nil, err
@@ -981,7 +981,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryWithGranularity(request *me
 	return response, schema, nil
 }
 
-func (dc *DruidDatastoreClient) GetTopNTimeByBuckets(request *metrics.SLAReportRequest, extractFn int, vendor, objType, metric, direction, event string, eventAttr *pb.TenantThresholdProfileData_EventAttrMap, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
+func (dc *DruidDatastoreClient) GetTopNTimeByBuckets(request *metrics.SLAReportRequest, extractFn int, vendor, objType, metric, direction, event string, eventAttr *tenant.ThrPrfEventAttrMap, metaMOs []string) ([]byte, metrics.DruidViolationsMap, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
@@ -1016,7 +1016,7 @@ func (dc *DruidDatastoreClient) GetTopNTimeByBuckets(request *metrics.SLAReportR
 	return response, schema, nil
 }
 
-func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
@@ -1031,12 +1031,12 @@ func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportReque
 	var hourOfDayBucketMap map[string]interface{}
 	var dayOfWeekBucketMap map[string]interface{}
 
-	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	for vk, v := range thresholdProfile.Thresholds.VendorMap {
+		for tk, t := range v.MonitoredObjectTypeMap {
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			for mk, m := range t.MetricMap {
+				for dk, d := range m.DirectionMap {
+					for ek, e := range d.EventMap {
 						if ek != "sla" {
 							continue
 						}
@@ -1098,7 +1098,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportReque
 	return hourOfDayBucketMap, dayOfWeekBucketMap, nil
 }
 
-func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (map[string]interface{}, map[string]interface{}, error) {
 	methodStartTime := time.Now()
 	var err error
 	if logger.IsDebugEnabled() {
@@ -1115,12 +1115,12 @@ func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportReq
 	var hourOfDayBucketMap map[string]interface{}
 	var dayOfWeekBucketMap map[string]interface{}
 
-	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	for vk, v := range thresholdProfile.Thresholds.VendorMap {
+		for tk, t := range v.MonitoredObjectTypeMap {
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			for mk, m := range t.MetricMap {
+				for dk, d := range m.DirectionMap {
+					for ek, e := range d.EventMap {
 						if ek != "sla" {
 							continue
 						}
@@ -1186,7 +1186,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportReq
 }
 
 // GetSLAReportV2 - Get SLA report but returns in a v2 compatible format
-func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest, thresholdProfile *pb.TenantThresholdProfile, metaMOs []string) (*metrics.SLAReport, error) {
+func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (*metrics.SLAReport, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling GetSLAReport for request: %v", models.AsJSONString(request))
@@ -1199,7 +1199,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile.Data, timeout)
+	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -1227,7 +1227,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 	}
 
-	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile.Data, timeout)
+	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetSLAReportStr)
 		return nil, err
@@ -1254,15 +1254,15 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 	var hourOfDayBucketMap map[string]interface{}
 	var dayOfWeekBucketMap map[string]interface{}
 
-	for vk, v := range thresholdProfile.Data.GetThresholds().GetVendorMap() {
-		for tk, t := range v.GetMonitoredObjectTypeMap() {
+	for vk, v := range thresholdProfile.Thresholds.VendorMap {
+		for tk, t := range v.MonitoredObjectTypeMap {
 			if tk != "twamp-sf" {
 				continue
 			}
 
-			for mk, m := range t.GetMetricMap() {
-				for dk, d := range m.GetDirectionMap() {
-					for ek, e := range d.GetEventMap() {
+			for mk, m := range t.MetricMap {
+				for dk, d := range m.DirectionMap {
+					for ek, e := range d.EventMap {
 						if ek != "sla" {
 							continue
 						}

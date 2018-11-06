@@ -20,9 +20,6 @@ type ThresholdCrossingReport struct {
 
 	// metric
 	Metric []*ThresholdCrossingReportMetric `json:"metric"`
-
-	// summary
-	Summary []*ThresholdCrossingTotals `json:"summary"`
 }
 
 // Validate validates this threshold crossing report
@@ -30,10 +27,6 @@ func (m *ThresholdCrossingReport) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMetric(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateSummary(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,31 +51,6 @@ func (m *ThresholdCrossingReport) validateMetric(formats strfmt.Registry) error 
 			if err := m.Metric[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("metric" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *ThresholdCrossingReport) validateSummary(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Summary) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.Summary); i++ {
-		if swag.IsZero(m.Summary[i]) { // not required
-			continue
-		}
-
-		if m.Summary[i] != nil {
-			if err := m.Summary[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("summary" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

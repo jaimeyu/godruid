@@ -424,7 +424,7 @@ func reformatSLATimeSeries(druidResponse []byte) ([]metrics.TimeSeriesEntry, err
 }
 
 func reformatThresholdCrossingTimeSeries(druidResponse []byte) ([]metrics.ThresholdCrossingTimeSeriesEntry, error) {
-	logger.Log.Debugf("Response from druid for %s: %s", db.SLAReportStr, string(druidResponse))
+	logger.Log.Debugf("Response from druid for %s: %s", db.ThresholdCrossingStr, string(druidResponse))
 	entries := []*druidTimeSeriesEntry{}
 	if err := json.Unmarshal(druidResponse, &entries); err != nil {
 		return nil, err
@@ -461,18 +461,8 @@ func reformatThresholdCrossingTimeSeries(druidResponse []byte) ([]metrics.Thresh
 						metricResult.BySeverity[aggrName.severity] = sevEntry
 					}
 					sevEntry[aggrName.agg] = v
-				} else if aggrName.agg == "totalDuration" {
-					metricResult.TotalDuration = v.(float64)
 				}
 
-			} else if isTopLevelEventAgg(k) {
-				aggrName := parseTopLevelEventAgg(k)
-				sevEntry, ok := byEventMap[aggrName.severity]
-				if !ok {
-					sevEntry = make(map[string]interface{})
-					byEventMap[aggrName.severity] = sevEntry
-				}
-				sevEntry[aggrName.agg] = v
 			} else {
 				obj.SetP(v, k)
 			}
@@ -490,7 +480,7 @@ func reformatThresholdCrossingTimeSeries(druidResponse []byte) ([]metrics.Thresh
 		}
 	}
 
-	logger.Log.Debugf("Formatted result for %s: %v", db.SLAReportStr, models.AsJSONString(res))
+	logger.Log.Debugf("Formatted result for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(res))
 	return res, nil
 }
 

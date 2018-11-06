@@ -768,10 +768,6 @@
         type: array
         items:
           $ref: '#/definitions/ThresholdCrossingReportMetric'
-      summary:
-        type: array
-        items:
-          $ref: '#/definitions/ThresholdCrossingTotals'
 
   ThresholdCrossingReportMetric:
     allOf: 
@@ -810,20 +806,6 @@
       violationCount:
         type: integer
       violationDuration:
-        type: integer
-
-  ThresholdCrossingTotals:
-    type: object
-    required:
-      - timestamp
-    properties:
-      timestamp:
-        type: string
-      totalDuration:
-        type: integer
-      totalViolationCount:
-        type: integer
-      totalViolationDuration:
         type: integer
 
   # COMMON METRIC ENTITIES

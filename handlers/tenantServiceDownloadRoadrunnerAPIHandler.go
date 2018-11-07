@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mholt/archiver"
-	// "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -61,9 +62,16 @@ func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tena
 	}
 
 	config := configs[0]
-	envTemplate := `export FILE_DIR=%s
-			export VERSION=%s`
-	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()))
+
+	host := cfg.GetString("deploy.domain")
+	addrs, err := net.LookupHost(host)
+
+	if err != nil {
+		return fmt.Errorf("Unable to resolve host: %s : %v", host, err)
+	}
+
+	envTemplate := "export FILE_DIR=%s\nexport VERSION=%s\nexport HOST=%s\nexport IP=%s"
+	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()), host, addrs[0])
 	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
 	if err != nil {
 		return err
@@ -74,7 +82,7 @@ func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tena
 		return err
 	}
 
-	rrConfig := fmt.Sprintf(string(configTemplate), cfg.GetString("deploy.domain"), tenantID, zone)
+	rrConfig := fmt.Sprintf(string(configTemplate), host, tenantID, zone)
 	err = ioutil.WriteFile(archiveDir+"/adh-roadrunner.yml", []byte(rrConfig), os.ModePerm)
 	if err != nil {
 		return err
@@ -156,7 +164,9 @@ func doGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.TenantSer
 	cfg := gather.GetConfig()
 	logger.Log.Infof("Received DownloadRoadrunner request")
 
-	archiveDir := "/tmp/roadrunnerArchive"
+	// create tmp dir for roadrunner archive
+	uuid := uuid.NewV4()
+	archiveDir := "/tmp/roadrunnerArchive/" + uuid.String()
 	os.MkdirAll(archiveDir, os.ModePerm)
 	defer os.RemoveAll(archiveDir)
 

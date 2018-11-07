@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.243.0 
+**Release Date:** Wed Nov  7 18:57:27 UTC 2018     
+## Previous Releases 
 ### 0.242.0 
 **Release Date:** Tue Nov  6 20:08:54 UTC 2018     
-## Previous Releases 
 Feature - Adding code to process baseline threshold profile queries
 Feature - Upgrading docker-go-sdk reference to 0.11.0 which includes Go v1.11.1.
 Feature - Ran dep ensure to pull in missing dependencies

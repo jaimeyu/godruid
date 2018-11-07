@@ -201,16 +201,10 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeek(tena
 		createObj := tenmod.MetricBaseline{
 			MonitoredObjectID: monObjID,
 			TenantID:          tenantID,
-			Baselines:         []*tenmod.MetricBaselineData{},
+			Baselines:         []*tenmod.MetricBaselineData{baselineData},
 		}
 
-		created, err := tsd.CreateMetricBaseline(&createObj)
-		if err != nil {
-			return nil, fmt.Errorf("Error trying to create %s as one did not exist to update: %s", tenmod.TenantMetricBaselineStr, err.Error())
-		}
-
-		// Set existing to be the returned value from the creation call
-		existing = created
+		return tsd.CreateMetricBaseline(&createObj)
 	}
 
 	didUpdateBaseline := false
@@ -256,16 +250,10 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 		createObj := tenmod.MetricBaseline{
 			MonitoredObjectID: monObjID,
 			TenantID:          tenantID,
-			Baselines:         []*tenmod.MetricBaselineData{},
+			Baselines:         baselineDataCollection,
 		}
 
-		created, err := tsd.CreateMetricBaseline(&createObj)
-		if err != nil {
-			return nil, fmt.Errorf("Error trying to create %s as one did not exist to update: %s", tenmod.TenantMetricBaselineStr, err.Error())
-		}
-
-		// Set existing to be the returned value from the creation call
-		existing = created
+		return tsd.CreateMetricBaseline(&createObj)
 	}
 
 	for _, baselineFromCollection := range baselineDataCollection {
@@ -284,6 +272,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 			existing.Baselines = append(existing.Baselines, baselineFromCollection)
 		}
 	}
+
 	existing.ID = ds.GetDataIDFromFullID(existing.ID)
 
 	updated, err := tsd.UpdateMetricBaseline(existing)
@@ -299,33 +288,39 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObject(te
 	logger.Log.Debugf("Retrieving %s for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
+	// Retrieve just the subset of values.
+	requestBody := map[string]interface{}{}
+	requestBody["keys"] = []string{strings.ToLower(monObjID)}
+
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
-	db, err := getDatabase(dbName)
+
+	fetchResponse, err := fetchDesignDocumentResults(requestBody, dbName, metricBaselineByMOIDIndex)
 	if err != nil {
 		return nil, err
 	}
 
-	resultList, err := getAllOfAny(string(tenmod.TenantMetricBaselineType), "monitoredObjectId", monObjID, tenmod.TenantMetricBaselineStr, db)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(resultList) == 0 {
+	rows := fetchResponse["rows"].([]interface{})
+	if rows == nil || len(rows) == 0 {
 		return nil, fmt.Errorf(ds.NotFoundStr)
 	}
+	obj := rows[0].(map[string]interface{})
+	value := obj["value"].(map[string]interface{})
+	logger.Log.Debugf("Retrieved %s", models.AsJSONString(value))
 
-	res := tenmod.MetricBaseline{}
-	if err = convertGenericCouchDataToObject(resultList[0], &res, string(tenmod.TenantMetricBaselineType)); err != nil {
+	response := tenmod.MetricBaseline{}
+	stripPrefixFromID(value)
+
+	// Marshal the response from the datastore to bytes so that it
+	// can be Marshalled back to the proper type.
+	if err = convertGenericCouchDataToObject(value, &response, string(tenmod.TenantMetricBaselineType)); err != nil {
 		return nil, err
 	}
 
 	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(res))
+		logger.Log.Debugf("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(response))
 	}
 
-	res.ID = ds.GetDataIDFromFullID(res.ID)
-
-	return &res, nil
+	return &response, nil
 }
 
 func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {

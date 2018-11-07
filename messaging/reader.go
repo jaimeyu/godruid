@@ -18,6 +18,10 @@ type KafkaConsumer struct {
 }
 
 func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
+	return CreateKafkaReaderWithSyncTime(topicName, groupTag, time.Second)
+}
+
+func CreateKafkaReaderWithSyncTime(topicName string, groupTag string, syncTimeInterval time.Duration) *KafkaConsumer {
 	cfg := gather.GetConfig()
 	result := &KafkaConsumer{}
 
@@ -27,7 +31,9 @@ func CreateKafkaReader(topicName string, groupTag string) *KafkaConsumer {
 		Brokers:        []string{cfg.GetString(gather.CK_kafka_broker.String())},
 		Topic:          result.topicName,
 		GroupID:        result.topicName + "-" + groupTag,
-		CommitInterval: time.Second,
+		CommitInterval: syncTimeInterval,
+		MinBytes:       10e3, // 10KB
+		MaxBytes:       10e6, // 10MB
 	})
 
 	logger.Log.Debugf("Created kafka reader for topic %s", topicName)
@@ -43,6 +49,7 @@ func (c *KafkaConsumer) Destroy() {
 	}
 }
 
+// ReadMessage - used to read a message when an explicit action must be completed successfully before committing the offset for the message read.
 func (c *KafkaConsumer) ReadMessage(action func([]byte) bool) ([]byte, error) {
 	ctx := context.Background()
 	m, err := c.reader.FetchMessage(ctx)
@@ -74,6 +81,17 @@ func (c *KafkaConsumer) ReadMessage(action func([]byte) bool) ([]byte, error) {
 		logger.Log.Errorf("Error occured while committing on topic %s message %s: %s", c.topicName, string(m.Value), err)
 	}
 
+	logger.Log.Debugf("Successfully read message on topic %s: %s", c.topicName, string(m.Value))
+	return m.Value, nil
+}
+
+// ReadMessageWithoutExplicitOffsetManagement - used when you just want to read a message from a kafka topic without concern for managing the offset
+func (c *KafkaConsumer) ReadMessageWithoutExplicitOffsetManagement() ([]byte, error) {
+	ctx := context.Background()
+	m, err := c.reader.ReadMessage(ctx)
+	if err != nil {
+		return nil, err
+	}
 	logger.Log.Debugf("Successfully read message on topic %s: %s", c.topicName, string(m.Value))
 	return m.Value, nil
 }

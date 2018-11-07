@@ -38,6 +38,9 @@ args:
     checkpoint1: 300
     checkpoint2: 600
     checkpoint3: 900
+  metricbaselines:
+    numworkers: 10
+    maxnumjobs: 100
 
 kafka:
   broker: "localhost:9092"

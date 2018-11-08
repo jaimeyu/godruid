@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.245.0 
+**Release Date:** Thu Nov  8 16:48:17 UTC 2018     
+## Previous Releases 
 ### 0.244.0 
 **Release Date:** Thu Nov  8 04:33:34 UTC 2018     
-## Previous Releases 
 * Fix - Roadrunner package updated so it can be started multiple times on a guest for multitenancy deployments. 
 ### 0.243.0 
 **Release Date:** Wed Nov  7 18:57:27 UTC 2018     

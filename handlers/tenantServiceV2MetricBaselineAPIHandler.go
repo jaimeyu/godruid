@@ -240,7 +240,7 @@ func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.CreateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Created %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Created %s %s", tenmod.TenantMetricBaselineStr, *converted.Data.ID)
 	return startTime, http.StatusCreated, &converted, nil
 }
 
@@ -269,7 +269,7 @@ func doGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServi
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID)
 	return startTime, http.StatusOK, &converted, nil
 }
 
@@ -321,7 +321,7 @@ func doUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.UpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Updated %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Updated %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID)
 	return startTime, http.StatusOK, &converted, nil
 }
 
@@ -350,7 +350,7 @@ func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.DeleteTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Deleted %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Deleted %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID)
 	return startTime, http.StatusOK, &converted, nil
 }
 
@@ -379,7 +379,7 @@ func doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB da
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Retrieved %s for Monitored Object %s", tenmod.TenantMetricBaselineStr, params.MonitoredObjectID)
 	return startTime, http.StatusOK, &converted, nil
 }
 
@@ -426,7 +426,7 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdForHourOfWeekStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Retrieved %s for Monitored Object %s", tenmod.TenantMetricBaselineStr, params.MonitoredObjectID)
 	return startTime, http.StatusOK, &converted, nil
 }
 
@@ -467,6 +467,6 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.UpdateMetricBaselineForHourOfWeekV2Str, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(converted))
+	logger.Log.Infof("Updated %s for Monitored Object %s", tenmod.TenantMetricBaselineStr, params.MonitoredObjectID)
 	return startTime, http.StatusOK, &converted, nil
 }

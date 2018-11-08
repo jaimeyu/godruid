@@ -1500,7 +1500,7 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 		ResultFormat: "list",
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
-			godruid.FilterSelector("monitoredObjectId", strings.ToLower(monitoredObjectID)),
+			godruid.FilterSelector("monitoredObjectId", monitoredObjectID),
 			godruid.FilterSelector("cleanStatus", "-1"),
 		),
 		Columns: []string{"__time", "direction", "errorCode", "failedRules", "duration"},

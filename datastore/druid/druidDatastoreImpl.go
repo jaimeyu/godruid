@@ -1654,10 +1654,14 @@ func parseFailedRules(input interface{}) []string {
 		if singleRule, ok := input.(string); ok {
 			return []string{singleRule}
 		}
-		if multipleRules, ok := input.([]string); ok {
-			return multipleRules
+
+		result := []string{}
+		for _, val := range input.([]interface{}) {
+			result = append(result, val.(string))
 		}
+		return result
 	}
+
 	return []string{}
 }
 

@@ -1485,6 +1485,7 @@ type ActiveRuleDetails struct {
 	startTime int64
 	endTime   int64
 	isError   bool
+	testFreq  int64
 }
 
 func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitoredObjectID string, interval string) ([]*swagmodels.DataCleaningTransition, error) {
@@ -1500,7 +1501,7 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 		ResultFormat: "list",
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
-			godruid.FilterSelector("monitoredObjectId", strings.ToLower(monitoredObjectID)),
+			godruid.FilterSelector("monitoredObjectId", monitoredObjectID),
 			godruid.FilterSelector("cleanStatus", "-1"),
 		),
 		Columns: []string{"__time", "direction", "errorCode", "failedRules", "duration"},
@@ -1552,14 +1553,7 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 			errCode := int32(e["errorCode"].(float64))
 
 			// Extract the failed rule(s) string. This will be the key for tracking active rules.
-			var failedRules []string
-			if errCode != 0 {
-				failedRules = []string{fmt.Sprintf("%d", errCode)}
-			} else {
-				// This is a multi-value dimension and Druid nicely sends us a string if there
-				// is only 1 value and an array when there is more than one.
-				failedRules = parseFailedRules(e["failedRules"])
-			}
+			failedRules := parseFailedRules(e["failedRules"])
 
 			if len(failedRules) == 0 && errCode == 0 {
 				// Really shouldn't happen.
@@ -1573,6 +1567,16 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 					activeRules[direction] = map[string]*ActiveRuleDetails{}
 				}
 
+				// Check if the failed rule is actually an indication of an invalid test (errorCode != 0)
+				isErrCodeFailure := false
+				if failedRule == "msg:errorCode!=0" {
+					if errCode == 0 {
+						continue
+					}
+					isErrCodeFailure = true
+					failedRule = fmt.Sprintf("%d", errCode)
+				}
+
 				if activeRule, ok := activeRules[direction][failedRule]; ok {
 					// We've seen this rule before. It's either a continuation or a new occurance
 					logger.Log.Debugf("entry found for for direction %v, ruleKey %v, value %v", direction, failedRule, *activeRule)
@@ -1584,14 +1588,14 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 					} else {
 						// It's a whole new trigger period for this rule.
 						// Add the clear event to history.
-						updateHistory(history, activeRule.endTime, direction, false, failedRule, errCode != 0)
+						updateHistory(history, activeRule.endTime, direction, false, failedRule, isErrCodeFailure)
 
 						// Reset the active rule for the new raise
 						activeRule.startTime = timestamp
 						activeRule.endTime = timestamp + duration
 
 						// Add the raise event to history
-						updateHistory(history, activeRule.startTime, direction, true, failedRule, errCode != 0)
+						updateHistory(history, activeRule.startTime, direction, true, failedRule, isErrCodeFailure)
 					}
 
 				} else {
@@ -1599,11 +1603,19 @@ func (dc *DruidDatastoreClient) GetDataCleaningHistory(tenantID string, monitore
 					activeRules[direction][failedRule] = &ActiveRuleDetails{
 						startTime: timestamp,
 						endTime:   timestamp + duration,
-						isError:   errCode != 0,
+						isError:   isErrCodeFailure,
+						testFreq:  duration,
 					}
-					updateHistory(history, timestamp, direction, true, failedRule, errCode != 0)
+					updateHistory(history, timestamp, direction, true, failedRule, isErrCodeFailure)
 				}
 			}
+		}
+	}
+
+	// All the active rules now need a clear event for closure.
+	for direction, ruleSet := range activeRules {
+		for rule, event := range ruleSet {
+			updateHistory(history, event.endTime, direction, false, rule, event.isError)
 		}
 	}
 
@@ -1654,10 +1666,14 @@ func parseFailedRules(input interface{}) []string {
 		if singleRule, ok := input.(string); ok {
 			return []string{singleRule}
 		}
-		if multipleRules, ok := input.([]string); ok {
-			return multipleRules
+
+		result := []string{}
+		for _, val := range input.([]interface{}) {
+			result = append(result, val.(string))
 		}
+		return result
 	}
+
 	return []string{}
 }
 

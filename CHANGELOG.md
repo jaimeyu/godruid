@@ -1,7 +1,18 @@
 ## Current Release 
+### 0.247.0 
+**Release Date:** Fri Nov  9 01:16:41 UTC 2018     
+## Previous Releases 
+### 0.246.0 
+**Release Date:** Thu Nov  8 20:33:30 UTC 2018     
+### 0.245.0 
+**Release Date:** Thu Nov  8 16:48:17 UTC 2018     
+### 0.244.0 
+**Release Date:** Thu Nov  8 04:33:34 UTC 2018     
+* Fix - Roadrunner package updated so it can be started multiple times on a guest for multitenancy deployments. 
+### 0.243.0 
+**Release Date:** Wed Nov  7 18:57:27 UTC 2018     
 ### 0.242.0 
 **Release Date:** Tue Nov  6 20:08:54 UTC 2018     
-## Previous Releases 
 Feature - Adding code to process baseline threshold profile queries
 Feature - Upgrading docker-go-sdk reference to 0.11.0 which includes Go v1.11.1.
 Feature - Ran dep ensure to pull in missing dependencies

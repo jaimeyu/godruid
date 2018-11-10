@@ -332,7 +332,12 @@ func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsData
 		Metric:     *swagMid.Metric,
 		Direction:  swagMid.Direction}
 
-	rendered, err := renderTopNMetrics(params.Body.Data.Attributes, mID, queryReport, uuid.NewV4().String(), "topNForMetrics")
+	descending := true
+	if daoRequest.Sorted == "asc" {
+		descending = false
+	}
+
+	rendered, err := renderTopNMetrics(params.Body.Data.Attributes, mID, queryReport, uuid.NewV4().String(), "topNForMetrics", descending)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to render %s report: %s", datastore.TopNForMetricStr, err.Error())
 	}
@@ -1117,7 +1122,12 @@ func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metric
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, err.Error())
 	}
 
-	rendered, err := renderTopNMetrics(params.Body.Data.Attributes, daoRequest.Metric, queryReport, uuid.NewV4().String(), "thresholdCrossingByMOTopNs")
+	descending := true
+	if daoRequest.Sorted == "asc" {
+		descending = false
+	}
+
+	rendered, err := renderTopNMetrics(params.Body.Data.Attributes, daoRequest.Metric, queryReport, uuid.NewV4().String(), "thresholdCrossingByMOTopNs", descending)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to render %s report: %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, err.Error())
 	}
@@ -1295,12 +1305,16 @@ func renderHistogramTimeseriesMetrics(reportType string, reportID string, config
 	return renderV2Report(config, reportResponse, reportID, reportType)
 }
 
-func renderTopNMetrics(config interface{}, metricIdentifier metmod.MetricIdentifierFilter, report []metmod.TopNEntryResponse, ID string, reportType string) (map[string]interface{}, error) {
+func renderTopNMetrics(config interface{}, metricIdentifier metmod.MetricIdentifierFilter, report []metmod.TopNEntryResponse, ID string, reportType string, descendingOrder bool) (map[string]interface{}, error) {
 
 	renderedReport := make([]map[string]interface{}, len(report))
 
 	for i, r := range report {
-		renderedReport[i] = map[string]interface{}{"monitoredObjectIds": []string{r.MonitoredObjectId},
+		reportEntryIndex := i
+		if !descendingOrder {
+			reportEntryIndex = (len(report) - 1) - i
+		}
+		renderedReport[reportEntryIndex] = map[string]interface{}{"monitoredObjectIds": []string{r.MonitoredObjectId},
 			"vendor":     metricIdentifier.Vendor,
 			"objectType": metricIdentifier.ObjectType,
 			"metric":     metricIdentifier.Metric,

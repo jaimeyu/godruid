@@ -8665,6 +8665,13 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      sorted:
+        type: string
+        description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
+        enum: [asc, desc]
+        example:
+          - asc
+          - desc
       numResults:
         description: Query timeout in milliseconds
         type: integer
@@ -9229,6 +9236,13 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      sorted:
+        type: string
+        description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
+        enum: [asc, desc]
+        example:
+          - asc
+          - desc
       aggregator:
         type: string
         description: The type of aggregation (avg/min/max)

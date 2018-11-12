@@ -1,4 +1,36 @@
   /v2/metric-baselines:
+    patch:
+      summary: Update multiple Tenant Metric Baselines for multiple Monitored Objects
+      operationId: BulkUpdateMetricBaselinesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineBulkUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
     post:
       summary: Create an Metric Baseline for a Tenant.
       operationId: CreateMetricBaselineV2
@@ -71,7 +103,6 @@
           type: string
       tags:
         - TenantProvisioningServiceV2
-    
   /v2/metric-baselines/{metricBaselineId}:
     get:
       summary: Retrieve a Tenant Metric Baseline by id.

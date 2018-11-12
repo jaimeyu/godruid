@@ -184,7 +184,7 @@
     properties:
       data:
         type: "object"
-        required: ["type", "id", "attributes"]
+        required: ["type", "attributes"]
         properties:
           type: 
             type: "string"
@@ -193,3 +193,55 @@
             type: "string"
           attributes:
               $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineBulkUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update Metric Baselines for multiple Monitored Objects in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineBulkUpdate]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            description: "A map of Monitored Object ID to an array of Metric Baseline values to be updated for the Monitored Object"
+            additionalProperties:
+              type: "array"
+              items:
+                $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineBulkUpdateResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineBulkUpdateResponse]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            description: "A map of monitored object ID to the response data for each Monitored Object's update request"
+            additionalProperties:
+              type: "object"
+              properties:
+                ok:
+                  type: "boolean"
+                id:
+                  type: "string"
+                rev:
+                  type: "string"
+                error:
+                  type: "string"
+                reason:
+                  type: "string"

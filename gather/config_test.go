@@ -30,6 +30,7 @@ func TestLoadingConfig(t *testing.T) {
 	assert.Equal(t, cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String()), 10)
 	assert.Equal(t, cfg.GetFloat64(gather.CK_args_coltmef_checkpoint1.String()), float64(300))
 	assert.Equal(t, cfg.GetFloat64(gather.CK_args_coltmef_checkpoint3.String()), float64(900))
+	assert.Equal(t, cfg.GetInt(gather.CK_args_metricbaselines_numworkers.String()), 10)
 }
 
 func TestLoadingDefaults(t *testing.T) {
@@ -53,6 +54,7 @@ func TestLoadingDefaults(t *testing.T) {
 	assert.Equal(t, cfg.GetInt(gather.CK_args_coltmef_statusretrycount.String()), 10)
 	assert.Equal(t, cfg.GetFloat64(gather.CK_args_coltmef_checkpoint1.String()), float64(300))
 	assert.Equal(t, cfg.GetFloat64(gather.CK_args_coltmef_checkpoint3.String()), float64(900))
+	assert.Equal(t, cfg.GetInt(gather.CK_args_metricbaselines_numworkers.String()), 10)
 }
 
 func TestWithEnvironmentVariables(t *testing.T) {
@@ -83,4 +85,7 @@ func TestWithEnvironmentVariables(t *testing.T) {
 
 	os.Setenv("ARGS_COLTMEF_CHECKPOINT1", "1000")
 	assert.Equal(t, cfg.GetFloat64(gather.CK_args_coltmef_checkpoint1.String()), float64(1000))
+
+	os.Setenv("ARGS_METRICBASELINES_NUMWORKERS", "2000")
+	assert.Equal(t, cfg.GetInt(gather.CK_args_metricbaselines_numworkers.String()), 2000)
 }

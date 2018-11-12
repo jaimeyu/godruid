@@ -128,4 +128,8 @@ type TenantServiceDatastore interface {
 	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
 	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)
 	DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
+	// GetMetricBaselinesForMOsIn - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated
+	// in a subsequent bulk PUT call.
+	GetMetricBaselinesForMOsIn(tenantID string, moIDList []string, addNotFoundValuesInResponse bool) ([]*tenmod.MetricBaseline, error)
+	BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error)
 }

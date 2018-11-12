@@ -357,6 +357,15 @@ func fetchAllDocs(body map[string]interface{}, resource *couchdb.Resource) (map[
 	return parseData(data)
 }
 
+func fetchAllDocsWithQP(queryParams *url.Values, body map[string]interface{}, resource *couchdb.Resource) (map[string]interface{}, error) {
+	_, data, err := resource.PostJSON("_all_docs", nil, body, *queryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseData(data)
+}
+
 func parseData(data []byte) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
 	err := json.Unmarshal(data, &result)

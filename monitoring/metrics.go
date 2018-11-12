@@ -244,7 +244,8 @@ const (
 	GetMetricBaselineByMonitoredObjectIdStr              = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
 	UpdateMetricBaselineForHourOfWeekV2Str               = MetricBaselineStr + metricNameDelimiter + "hourwk" + metricNameDelimiter + OPUpdateStr
 
-	GetDownloadRoadrunnerStr = DownloadRoadrunnerStr + metricNameDelimiter + OPGetStr
+	GetDownloadRoadrunnerStr          = DownloadRoadrunnerStr + metricNameDelimiter + OPGetStr
+	BulkUpdateTenantMetricBaselineStr = MetricBaselineStr + metricNameDelimiter + OPBulkUpdate
 )
 
 type MetricCounterType string

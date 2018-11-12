@@ -55,6 +55,10 @@ type Config struct {
 		testdatadb struct {
 			impl DBImpl
 		}
+		metricbaselines struct {
+			numWorkers int
+			maxNumJobs int
+		}
 		maxConcurrentPouchAPICalls  uint64
 		maxConcurrentProvAPICalls   uint64
 		maxConcurrentMetricAPICalls uint64
@@ -143,4 +147,6 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_coltmef_checkpoint1.String(), (5 * time.Minute).Seconds())
 	v.SetDefault(CK_args_coltmef_checkpoint2.String(), (10 * time.Minute).Seconds())
 	v.SetDefault(CK_args_coltmef_checkpoint3.String(), (15 * time.Minute).Seconds())
+	v.SetDefault(CK_args_metricbaselines_maxnumjobs.String(), 100)
+	v.SetDefault(CK_args_metricbaselines_numworkers.String(), 10)
 }

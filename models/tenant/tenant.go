@@ -1125,3 +1125,28 @@ type MetricBaselineData struct {
 	Metric     string  `json:"metric"`
 	Sum        float64 `json:"sum"`
 }
+
+// MergeBaseline - will add the baseline data provided to this Metric Baseline object
+func (mb *MetricBaseline) MergeBaseline(baselineData *MetricBaselineData) {
+	didUpdateBaseline := false
+	for index, baseline := range mb.Baselines {
+		if baseline.HourOfWeek == baselineData.HourOfWeek && baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
+			// The baseline is already being tracked, update it
+			mb.Baselines[index] = baselineData
+			didUpdateBaseline = true
+			break
+		}
+	}
+
+	// If the baseline was not already being tracked, add it
+	if !didUpdateBaseline {
+		mb.Baselines = append(mb.Baselines, baselineData)
+	}
+}
+
+// MergeBaselines - will add the baseline data collection provided to this Metric Baseline object
+func (mb *MetricBaseline) MergeBaselines(baselineDataCollection []*MetricBaselineData) {
+	for _, baselineFromCollection := range baselineDataCollection {
+		mb.MergeBaseline(baselineFromCollection)
+	}
+}

@@ -2,7 +2,7 @@ server:
   datastore:
     ip: http://localhost
     port: 5984
-    batchsize: 1000
+    batchsize: 5000
   rest:
     ip: 0.0.0.0
     port: 10001
@@ -44,6 +44,9 @@ args:
     checkpoint1: 300
     checkpoint2: 600
     checkpoint3: 900
+  metricbaselines:
+    numworkers: 10
+    maxnumjobs: 100
 
 connector:
   maxSecondsWithoutHeartbeat: 120

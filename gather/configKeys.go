@@ -55,6 +55,8 @@ const (
 	CK_args_coltmef_checkpoint1               ConfigKey = "args.coltmef.checkpoint1"
 	CK_args_coltmef_checkpoint2               ConfigKey = "args.coltmef.checkpoint2"
 	CK_args_coltmef_checkpoint3               ConfigKey = "args.coltmef.checkpoint3"
+	CK_args_metricbaselines_numworkers        ConfigKey = "args.metricbaselines.numworkers"
+	CK_args_metricbaselines_maxnumjobs        ConfigKey = "args.metricbaselines.maxnumjobs"
 )
 
 func (key ConfigKey) String() string {

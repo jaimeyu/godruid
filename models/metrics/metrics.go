@@ -205,6 +205,8 @@ type ThresholdCrossingTopN struct {
 	Granularity        string `json:"granularity,omitempty"`
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
+	// Indicates whether the results should be in ascending or descending order
+	Sorted string `json:"sorted,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -268,6 +270,9 @@ type TopNForMetric struct {
 
 	// Metrics that are related and interesting BUT are NOT part of the post aggregation
 	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
+
+	// Indicates whether the results should be in ascending or descending order
+	Sorted string `json:"sorted,omitempty"`
 }
 
 // DEPRECATED - Remove once V1 is removed

@@ -48,6 +48,10 @@ type TopNForMetricConfig struct {
 	// Number of results to return
 	NumResults int64 `json:"numResults,omitempty"`
 
+	// Indicates whether the response should return the topn in ascending or descending order. The default value is descending
+	// Enum: [asc desc]
+	Sorted string `json:"sorted,omitempty"`
+
 	// Query timeout in milliseconds
 	Timeout int64 `json:"timeout,omitempty"`
 }
@@ -77,6 +81,10 @@ func (m *TopNForMetricConfig) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMetricsView(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSorted(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -211,6 +219,49 @@ func (m *TopNForMetricConfig) validateMetricsView(formats strfmt.Registry) error
 			}
 		}
 
+	}
+
+	return nil
+}
+
+var topNForMetricConfigTypeSortedPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["asc","desc"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		topNForMetricConfigTypeSortedPropEnum = append(topNForMetricConfigTypeSortedPropEnum, v)
+	}
+}
+
+const (
+
+	// TopNForMetricConfigSortedAsc captures enum value "asc"
+	TopNForMetricConfigSortedAsc string = "asc"
+
+	// TopNForMetricConfigSortedDesc captures enum value "desc"
+	TopNForMetricConfigSortedDesc string = "desc"
+)
+
+// prop value enum
+func (m *TopNForMetricConfig) validateSortedEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, topNForMetricConfigTypeSortedPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TopNForMetricConfig) validateSorted(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sorted) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateSortedEnum("sorted", "body", m.Sorted); err != nil {
+		return err
 	}
 
 	return nil

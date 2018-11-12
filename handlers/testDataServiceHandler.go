@@ -150,7 +150,7 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Name:        "SignCSR",
 			Method:      "POST",
 			Pattern:     "/distribution/sign-csr",
-			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.SignCSR),
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight, UserRoleTenantAdmin}, result.SignCSR),
 		},
 	}
 

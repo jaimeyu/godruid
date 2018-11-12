@@ -38,6 +38,10 @@ type ThresholdCrossingByMOTopNConfig struct {
 	// Required: true
 	NumResults *int32 `json:"numResults"`
 
+	// Indicates whether the response should return the topn in ascending or descending order. The default value is descending
+	// Enum: [asc desc]
+	Sorted string `json:"sorted,omitempty"`
+
 	// ID of the threshold profile that is used to select metrics and events
 	// Required: true
 	ThresholdProfileID *string `json:"thresholdProfileId"`
@@ -67,6 +71,10 @@ func (m *ThresholdCrossingByMOTopNConfig) Validate(formats strfmt.Registry) erro
 	}
 
 	if err := m.validateNumResults(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSorted(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -172,6 +180,49 @@ func (m *ThresholdCrossingByMOTopNConfig) validateMetric(formats strfmt.Registry
 func (m *ThresholdCrossingByMOTopNConfig) validateNumResults(formats strfmt.Registry) error {
 
 	if err := validate.Required("numResults", "body", m.NumResults); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var thresholdCrossingByMOTopNConfigTypeSortedPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["asc","desc"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		thresholdCrossingByMOTopNConfigTypeSortedPropEnum = append(thresholdCrossingByMOTopNConfigTypeSortedPropEnum, v)
+	}
+}
+
+const (
+
+	// ThresholdCrossingByMOTopNConfigSortedAsc captures enum value "asc"
+	ThresholdCrossingByMOTopNConfigSortedAsc string = "asc"
+
+	// ThresholdCrossingByMOTopNConfigSortedDesc captures enum value "desc"
+	ThresholdCrossingByMOTopNConfigSortedDesc string = "desc"
+)
+
+// prop value enum
+func (m *ThresholdCrossingByMOTopNConfig) validateSortedEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, thresholdCrossingByMOTopNConfigTypeSortedPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ThresholdCrossingByMOTopNConfig) validateSorted(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Sorted) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateSortedEnum("sorted", "body", m.Sorted); err != nil {
 		return err
 	}
 

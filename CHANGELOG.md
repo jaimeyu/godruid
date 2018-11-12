@@ -1,3 +1,4 @@
+Feature - Adding ability to sort topn responses
 ## Current Release 
 ### 0.249.0 
 **Release Date:** Mon Nov 12 18:25:42 UTC 2018     

@@ -4047,6 +4047,38 @@ paths:
       tags:
         - TenantProvisioningServiceV2
   /v2/metric-baselines:
+    patch:
+      summary: Update multiple Tenant Metric Baselines for multiple Monitored Objects
+      operationId: BulkUpdateMetricBaselinesV2
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MetricBaselineBulkUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
     post:
       summary: Create an Metric Baseline for a Tenant.
       operationId: CreateMetricBaselineV2
@@ -4119,7 +4151,6 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
-    
   /v2/metric-baselines/{metricBaselineId}:
     get:
       summary: Retrieve a Tenant Metric Baseline by id.
@@ -4331,7 +4362,8 @@ paths:
           type: integer
           format: int32
       tags:
-        - TenantProvisioningServiceV2  
+        - TenantProvisioningServiceV2
+  
   /v2/metrics/threshold-crossing-by-monitored-object-top-n:
     post:
       summary: Retrieve the Top N threshold crossing events using the given threshold profile and the specified metric filters
@@ -5238,185 +5270,6 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
-
-  /v2/metric-baselines:
-    post:
-      summary: Create an Metric Baseline for a Tenant.
-      operationId: CreateMetricBaselineV2
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '201':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricBaselineResponse'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '409':
-          description: "The Metric Baseline already exists"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/MetricBaselineCreateRequest'
-      tags:
-        - TenantProvisioningServiceV2
-    get:
-      summary: Get all Tenant Metric Baselines
-      operationId: GetAllMetricBaselinesV2
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricBaselineListResponse'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "No Metric Baseline is provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: objectId
-          description: "Provides ability to retrieve a Metric Baseline object for the provided objectId"
-          in: query
-          required: false
-          type: string
-      tags:
-        - TenantProvisioningServiceV2
-    
-  /v2/metric-baselines/{metricBaselineId}:
-    get:
-      summary: Retrieve a Tenant Metric Baseline by id.
-      operationId: GetMetricBaselineV2
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricBaselineResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The specified Metric Baseline is not provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: metricBaselineId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningServiceV2
-    patch:
-      summary: Update a Tenant Metric Baseline
-      operationId: UpdateMetricBaselineV2
-      consumes:
-        - application/vnd.api+json
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricBaselineResponse'
-        '400':
-          description: "Request data does not pass validation"
-          schema:
-            type: string
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The specified Metric Baseline is not provisioned"
-          schema:
-            type: string
-        '409':
-          description: "Incorrect revision provided for th update request"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: metricBaselineId
-          in: path
-          required: true
-          type: string
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/MetricBaselineUpdateRequest'
-      tags:
-        - TenantProvisioningServiceV2
-    delete:
-      summary: Delete a Tenant Metric Baseline specified by the provided Metric Baseline Id.
-      operationId: DeleteMetricBaselineV2
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/MetricBaselineResponse'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '404':
-          description: "The specified Metric Baseline is not provisioned"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: metricBaselineId
-          in: path
-          required: true
-          type: string
-      tags:
-        - TenantProvisioningServiceV2
-
 definitions:
   JsonApiTenant:
     type: "object"
@@ -8585,7 +8438,7 @@ definitions:
     properties:
       data:
         type: "object"
-        required: ["type", "id", "attributes"]
+        required: ["type", "attributes"]
         properties:
           type: 
             type: "string"
@@ -8594,6 +8447,58 @@ definitions:
             type: "string"
           attributes:
               $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineBulkUpdateRequest:
+    type: "object"
+    required: ["data"]
+    description: "Object used to update Metric Baselines for multiple Monitored Objects in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineBulkUpdate]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            description: "A map of Monitored Object ID to an array of Metric Baseline values to be updated for the Monitored Object"
+            additionalProperties:
+              type: "array"
+              items:
+                $ref: '#/definitions/MetricBaselineData'
+
+  MetricBaselineBulkUpdateResponse:
+    type: "object"
+    required: ["data"]
+    properties:
+      data:
+        type: "object"
+        required: ["type", "id", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [metricBaselineBulkUpdateResponse]
+          id:
+            type: "string"
+          attributes:
+            type: "object"
+            description: "A map of monitored object ID to the response data for each Monitored Object's update request"
+            additionalProperties:
+              type: "object"
+              properties:
+                ok:
+                  type: "boolean"
+                id:
+                  type: "string"
+                rev:
+                  type: "string"
+                error:
+                  type: "string"
+                reason:
+                  type: "string"
    
   # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
   ## REQUEST DEFINITION 

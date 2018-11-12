@@ -52,6 +52,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler: tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceBulkUpdateMonitoredObjectHandler: tenant_provisioning_service.BulkUpdateMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkUpdateMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkUpdateMonitoredObject has not yet been implemented")
 		}),
@@ -545,7 +548,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
 	// BinProducer registers a producer for a "application/octet-stream" mime type
@@ -559,6 +562,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceBulkInsertMonitoredObjectHandler tenant_provisioning_service.BulkInsertMonitoredObjectHandler
 	// TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler sets the operation handler for the bulk insert monitored objects v2 operation
 	TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Handler
+	// TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler sets the operation handler for the bulk update metric baselines v2 operation
+	TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Handler
 	// TenantProvisioningServiceBulkUpdateMonitoredObjectHandler sets the operation handler for the bulk update monitored object operation
 	TenantProvisioningServiceBulkUpdateMonitoredObjectHandler tenant_provisioning_service.BulkUpdateMonitoredObjectHandler
 	// TenantProvisioningServiceV2BulkUpdateMonitoredObjectsV2Handler sets the operation handler for the bulk update monitored objects v2 operation
@@ -948,6 +953,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Handler")
 	}
 
 	if o.TenantProvisioningServiceBulkUpdateMonitoredObjectHandler == nil {
@@ -1693,6 +1702,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v2/bulk/insert/monitored-objects"] = tenant_provisioning_service_v2.NewBulkInsertMonitoredObjectsV2(o.context, o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/metric-baselines"] = tenant_provisioning_service_v2.NewBulkUpdateMetricBaselinesV2(o.context, o.TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

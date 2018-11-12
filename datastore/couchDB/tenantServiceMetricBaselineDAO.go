@@ -2,6 +2,7 @@ package couchDB
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	ds "github.com/accedian/adh-gather/datastore"
@@ -10,10 +11,12 @@ import (
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	couchdb "github.com/leesper/couchdb-golang"
 )
 
 const (
-	metricBaselinesByNameIndex = "_design/baselineIndex/_view/byName"
+	metricBaselinesByNameIndex         = "_design/baselineIndex/_view/byName"
+	metricBaselineBulkFetchNotFoundStr = "not_found"
 )
 
 // CreateMetricBaseline - CouchDB implementation of CreateMetricBaseline
@@ -207,21 +210,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeek(tena
 		return tsd.CreateMetricBaseline(&createObj)
 	}
 
-	didUpdateBaseline := false
-	for index, baseline := range existing.Baselines {
-		if baseline.HourOfWeek == baselineData.HourOfWeek && baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
-			// The baseline is already being tracked, update it
-			existing.Baselines[index] = baselineData
-			didUpdateBaseline = true
-			break
-		}
-	}
-
-	// If the baseline was not already being tracked, add it
-	if !didUpdateBaseline {
-		existing.Baselines = append(existing.Baselines, baselineData)
-	}
-
+	existing.MergeBaseline(baselineData)
 	existing.ID = ds.GetDataIDFromFullID(existing.ID)
 
 	updated, err := tsd.UpdateMetricBaseline(existing)
@@ -256,23 +245,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 		return tsd.CreateMetricBaseline(&createObj)
 	}
 
-	for _, baselineFromCollection := range baselineDataCollection {
-		didUpdateBaseline := false
-		for index, baseline := range existing.Baselines {
-			if baseline.HourOfWeek == baselineFromCollection.HourOfWeek && baseline.Metric == baselineFromCollection.Metric && baseline.Direction == baselineFromCollection.Direction {
-				// The baseline is already being tracked, update it
-				existing.Baselines[index] = baselineFromCollection
-				didUpdateBaseline = true
-				break
-			}
-		}
-
-		// If the baseline was not already being tracked, add it
-		if !didUpdateBaseline {
-			existing.Baselines = append(existing.Baselines, baselineFromCollection)
-		}
-	}
-
+	existing.MergeBaselines(baselineDataCollection)
 	existing.ID = ds.GetDataIDFromFullID(existing.ID)
 
 	updated, err := tsd.UpdateMetricBaseline(existing)
@@ -342,5 +315,165 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectFor
 		logger.Log.Debugf("Retrieved %d %ss for %s %s for %s %s for hour of week %s", len(res), tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 	}
 
+	return res, nil
+}
+
+// GetMetricBaselinesForMOsIn - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated
+// in a subsequent bulk PUT call.
+func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselinesForMOsIn(tenantID string, moIDList []string, addNotFoundValuesInResponse bool) ([]*tenmod.MetricBaseline, error) {
+	logger.Log.Debugf("Bulk retrieving %ss for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID)
+
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	numMos := len(moIDList)
+	if int64(numMos) > tsd.batchSize {
+		return nil, fmt.Errorf("Too many Monitored Objects in bulk request. Limit is %d but request contains %d", tsd.batchSize, numMos)
+	}
+
+	mbTypeString := string(tenmod.TenantMetricBaselineType)
+
+	// Build request to fetch existing records
+	qp := &url.Values{}
+	qp.Add("include_docs", "true")
+	requestBody := map[string]interface{}{}
+	updatedKeys := []string{}
+	for _, moID := range moIDList {
+		updatedKeys = append(updatedKeys, ds.PrependToDataID(moID, mbTypeString))
+	}
+	requestBody["keys"] = updatedKeys
+	fetchedGetData, err := fetchAllDocsWithQP(qp, requestBody, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Log.Debugf("Fetch All response: %s", models.AsJSONString(fetchedGetData))
+
+	// Need to convert retrieved records:
+	rows, ok := fetchedGetData["rows"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("Unable to convert bulk fetch response: response from fetch has invalid format %s", models.AsJSONString(rows))
+	}
+	convertedRetrievedBaselines := []*tenmod.MetricBaseline{}
+	for _, row := range rows {
+		value, ok := row.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Unable to convert single row to generic object %s", models.AsJSONString(value))
+		}
+		// Make sure that any records that are not found are added to the response as new empty records
+		errorStr, okError := value["error"].(string)
+		fetchedBaseline, okBaseline := value["doc"].(map[string]interface{})
+		if okError && addNotFoundValuesInResponse {
+			if errorStr == metricBaselineBulkFetchNotFoundStr {
+				// This was an error but it was just that the record was not found, create a new value to be added to the result
+				moID, ok := value["key"].(string)
+				if !ok {
+					return nil, fmt.Errorf("Can't create record for: %s", models.AsJSONString(row))
+				}
+				ts := ds.MakeTimestamp()
+				strippedMOID := ds.GetDataIDFromFullID(moID)
+				addObject := tenmod.MetricBaseline{
+					ID:                    strippedMOID,
+					Datatype:              mbTypeString,
+					TenantID:              tenantID,
+					MonitoredObjectID:     strippedMOID,
+					Baselines:             []*tenmod.MetricBaselineData{},
+					CreatedTimestamp:      ts,
+					LastModifiedTimestamp: ts,
+				}
+				convertedRetrievedBaselines = append(convertedRetrievedBaselines, &addObject)
+				continue
+			}
+
+			return nil, fmt.Errorf("Can't find record for: %s", models.AsJSONString(row))
+		}
+
+		// Handle the retrieved record
+		if !okBaseline {
+			return nil, fmt.Errorf("Unable to convert bulk fetch single value response to baseline: %s", err.Error())
+		}
+		stripPrefixFromID(fetchedBaseline)
+
+		// Conver a fetched doc to the proper type for merging
+		dataContainer := tenmod.MetricBaseline{}
+		if err = convertGenericCouchDataToObject(fetchedBaseline, &dataContainer, tenmod.TenantMetricBaselineStr); err != nil {
+			return nil, err
+		}
+
+		convertedRetrievedBaselines = append(convertedRetrievedBaselines, &dataContainer)
+	}
+
+	// Return the converted baseline data
+	logger.Log.Debugf("Completed bulk retrieval of %ss for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID)
+	return convertedRetrievedBaselines, nil
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error) {
+	logger.Log.Debugf("Bulk updating %s", tenmod.TenantMetricBaselineStr)
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	numMbs := len(baselineUpdateList)
+	if int64(numMbs) > tsd.batchSize {
+		return nil, fmt.Errorf("Too many Monitored Objects in bulk request. Limit is %d but request contains %d", tsd.batchSize, numMbs)
+	}
+
+	// Iterate over the collection and populate necessary fields
+	data := make([]map[string]interface{}, 0)
+	for _, mb := range baselineUpdateList {
+		mb.ID = ds.PrependToDataID(mb.ID, string(tenmod.TenantMetricBaselineType))
+		genericMB, err := convertDataToCouchDbSupportedModel(mb)
+		if err != nil {
+			return nil, err
+		}
+
+		dataType := string(tenmod.TenantMetricBaselineType)
+		dataProp := genericMB["data"].(map[string]interface{})
+		dataProp["datatype"] = dataType
+		dataProp["lastModifiedTimestamp"] = ds.MakeTimestamp()
+
+		data = append(data, genericMB)
+	}
+	body := map[string]interface{}{
+		"docs": data}
+
+	fetchedData, err := performBulkUpdate(body, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate the response
+	res := make([]*common.BulkOperationResult, 0)
+	for _, fetched := range fetchedData {
+		newObj := common.BulkOperationResult{}
+		if fetched["id"] != nil {
+			newObj.ID = fetched["id"].(string)
+		}
+		if fetched["rev"] != nil {
+			newObj.REV = fetched["rev"].(string)
+		}
+		if fetched["reason"] != nil {
+			newObj.REASON = fetched["reason"].(string)
+		}
+		if fetched["error"] != nil {
+			newObj.ERROR = fetched["error"].(string)
+		}
+		if fetched["ok"] != nil {
+			newObj.OK = fetched["ok"].(bool)
+		}
+
+		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
+		res = append(res, &newObj)
+	}
+
+	logger.Log.Debugf("Bulk update of %s complete\n", tenmod.TenantMetricBaselineStr)
 	return res, nil
 }

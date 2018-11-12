@@ -83,8 +83,7 @@ type MetricBaselineUpdateHourRequestData struct {
 	Attributes *MetricBaselineData `json:"attributes"`
 
 	// id
-	// Required: true
-	ID *string `json:"id"`
+	ID string `json:"id,omitempty"`
 
 	// type
 	// Required: true
@@ -97,10 +96,6 @@ func (m *MetricBaselineUpdateHourRequestData) Validate(formats strfmt.Registry) 
 	var res []error
 
 	if err := m.validateAttributes(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -127,15 +122,6 @@ func (m *MetricBaselineUpdateHourRequestData) validateAttributes(formats strfmt.
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *MetricBaselineUpdateHourRequestData) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("data"+"."+"id", "body", m.ID); err != nil {
-		return err
 	}
 
 	return nil

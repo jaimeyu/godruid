@@ -143,7 +143,7 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	go startProfile(cfg)
 
 	// Start the handler for updating metric baseline data
-	go startMetricBaselineProvisioner(tenantDB)
+	// go startMetricBaselineProvisioner(tenantDB)
 
 	// Start websocket server
 	websocket.Server(tenantDB)
@@ -209,6 +209,6 @@ func optionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func startMetricBaselineProvisioner(db datastore.TenantServiceDatastore) {
-	handlers.CreateMetricBaselineProvisioner(db)
-}
+// func startMetricBaselineProvisioner(db datastore.TenantServiceDatastore) {
+// 	handlers.CreateMetricBaselineProvisioner(db)
+// }

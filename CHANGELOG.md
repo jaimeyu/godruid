@@ -1,8 +1,10 @@
-* Fix - /distribution/sign-csr was whitelisting only Skylight Admin access and was blocking tenant admins. This caused issues with Road Runner trying to connect and setup its certificates because road runner was not using skylight admin credentials anymore. 
 ## Current Release 
+### 0.248.0 
+**Release Date:** Mon Nov 12 15:15:32 UTC 2018     
+## Previous Releases 
+* Fix - /distribution/sign-csr was whitelisting only Skylight Admin access and was blocking tenant admins. This caused issues with Road Runner trying to connect and setup its certificates because road runner was not using skylight admin credentials anymore. 
 ### 0.247.0 
 **Release Date:** Fri Nov  9 01:16:41 UTC 2018     
-## Previous Releases 
 ### 0.246.0 
 **Release Date:** Thu Nov  8 20:33:30 UTC 2018     
 ### 0.245.0 

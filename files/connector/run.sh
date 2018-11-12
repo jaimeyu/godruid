@@ -9,7 +9,7 @@ main() {
     echo "Loading connector docker image"
     docker load < $CURRENT_DIR/roadrunner.docker
 
-    mkdir "${CURRENT_DIR}/.rr_ssh"
+    mkdir -p "${CURRENT_DIR}/.rr_ssh"
 
     echo "Getting client certs from datahub"
     docker run -it -v "${CURRENT_DIR}/":"/tmp/config" \
@@ -17,7 +17,8 @@ main() {
 
     echo "Starting connector"
     docker run -d -v "${CURRENT_DIR}/":"/tmp/config" -v "${FILE_DIR}":"/tmp/files" -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner" \
-           --restart always --name aod-connector \
+           --restart always \
+           --add-host "${HOST}:${IP}" \
            gcr.io/npav-172917/adh-roadrunner:"${VERSION}" data --config=/tmp/config/adh-roadrunner.yml
 
 }

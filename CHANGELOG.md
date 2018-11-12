@@ -1,8 +1,10 @@
-* Fix - Workaround for Alpine OS broken dependencies. We're getting conflicting SSL library errors so I retargetted the images to use our last good builds until either we fix the images or maintainer fixes the dependency problem.
 ## Current Release 
+### 0.249.0 
+**Release Date:** Mon Nov 12 18:25:42 UTC 2018     
+## Previous Releases 
+* Fix - Workaround for Alpine OS broken dependencies. We're getting conflicting SSL library errors so I retargetted the images to use our last good builds until either we fix the images or maintainer fixes the dependency problem.
 ### 0.248.0 
 **Release Date:** Mon Nov 12 15:15:32 UTC 2018     
-## Previous Releases 
 * Fix - /distribution/sign-csr was whitelisting only Skylight Admin access and was blocking tenant admins. This caused issues with Road Runner trying to connect and setup its certificates because road runner was not using skylight admin credentials anymore. 
 ### 0.247.0 
 **Release Date:** Fri Nov  9 01:16:41 UTC 2018     

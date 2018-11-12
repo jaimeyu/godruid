@@ -1,4 +1,5 @@
-FROM iron/go
+#FROM iron/go
+FROM gcr.io/npav-172917/adh-gather:0.247.0
 
 
 ENV GOPATH /go

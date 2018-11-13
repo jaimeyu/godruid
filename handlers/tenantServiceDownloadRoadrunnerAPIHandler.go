@@ -321,7 +321,7 @@ func doGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.TenantSer
 		return startTime, http.StatusInternalServerError, nil, msg
 	}
 	// Make arhive for downloading
-	err = archiver.Tar.Make(archivePath, []string{archiveDir + "/roadrunner.docker", cfg.GetString(gather.CK_connector_config_dir.String()) + connectorRunScriptStr, archiveDir + "/.env", archiveDir + "/adh-roadrunner.yml"})
+	err = archiver.TarGz.Make(archivePath, []string{archiveDir + "/roadrunner.docker", cfg.GetString(gather.CK_connector_config_dir.String()) + connectorRunScriptStr, archiveDir + "/.env", archiveDir + "/adh-roadrunner.yml"})
 	if err != nil {
 		msg := fmt.Errorf("Unable to save roadrunner archive  %s: %s ", archivePath, err.Error())
 		return startTime, http.StatusInternalServerError, nil, msg

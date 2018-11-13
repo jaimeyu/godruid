@@ -1,8 +1,10 @@
-* Feature - Multitenancy support for RoadRunner configuration. 
 ## Current Release 
+### 0.253.0 
+**Release Date:** Tue Nov 13 19:35:01 UTC 2018     
+## Previous Releases 
+* Feature - Multitenancy support for RoadRunner configuration. 
 ### 0.252.0 
 **Release Date:** Tue Nov 13 16:04:51 UTC 2018     
-## Previous Releases 
 * Fix - Only return threshold topn entries that have a non-zero score against them
 ### 0.251.0 
 **Release Date:** Mon Nov 12 21:35:24 UTC 2018     

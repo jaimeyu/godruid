@@ -1,8 +1,10 @@
-* Fix - Making the dowloaded Roadrunner tar.gz archive and actual gz archive
 ## Current Release 
+### 0.254.0 
+**Release Date:** Tue Nov 13 22:44:24 UTC 2018     
+## Previous Releases 
+* Fix - Making the dowloaded Roadrunner tar.gz archive and actual gz archive
 ### 0.253.0 
 **Release Date:** Tue Nov 13 19:35:01 UTC 2018     
-## Previous Releases 
 * Feature - Multitenancy support for RoadRunner configuration. 
 ### 0.252.0 
 **Release Date:** Tue Nov 13 16:04:51 UTC 2018     

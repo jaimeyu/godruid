@@ -204,15 +204,15 @@ const (
 		"language": "javascript"
 	}`
 
-	metricBaselineByMO = `{
-		"_id": "_design/metricBaseline",
-		"views": {
-			"byMOID": {
-				"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'metricBaseline' && doc.data.baselines) {  \n    emit(doc.data.monitoredObjectId.toLowerCase(), doc) \n  }\n}"
-			}
-		},
-		"language": "javascript"
-	}`
+	// metricBaselineByMO = `{
+	// 	"_id": "_design/metricBaseline",
+	// 	"views": {
+	// 		"byMOID": {
+	// 			"map": "function (doc) {\n  if (doc.data && doc.data.datatype && doc.data.datatype === 'metricBaseline' && doc.data.baselines) {  \n    emit(doc.data.monitoredObjectId.toLowerCase(), doc) \n  }\n}"
+	// 		}
+	// 	},
+	// 	"language": "javascript"
+	// }`
 )
 
 func getTenantViews() []map[string]interface{} {
@@ -245,15 +245,15 @@ func getTenantViews() []map[string]interface{} {
 	return []map[string]interface{}{monObjNameSplitter, metaViewObject, monitoredObjectMetaIndexObject, monitoredObjectCountIndexObject, moIndexObject, indexMonObjectNamesObject}
 }
 
-func getMetricBaselineViews() []map[string]interface{} {
-	baselineByMOID := map[string]interface{}{}
+// func getMetricBaselineViews() []map[string]interface{} {
+// 	baselineByMOID := map[string]interface{}{}
 
-	if err := json.Unmarshal([]byte(metricBaselineByMO), &baselineByMOID); err != nil {
-		logger.Log.Errorf("Unable to generate Metric Baseline by Monitored Object ID view: %s", err.Error())
-	}
+// 	if err := json.Unmarshal([]byte(metricBaselineByMO), &baselineByMOID); err != nil {
+// 		logger.Log.Errorf("Unable to generate Metric Baseline by Monitored Object ID view: %s", err.Error())
+// 	}
 
-	return []map[string]interface{}{baselineByMOID}
-}
+// 	return []map[string]interface{}{baselineByMOID}
+// }
 
 /*
  This function takes a key and then creates an index for it and then start the indexer.

@@ -34,7 +34,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
-	fail, err = runner.tenantDB.GetMetricBaselineForMonitoredObject(TENANT, "someID")
+	fail, err = runner.tenantDB.GetMetricBaseline(TENANT, "someID")
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
@@ -96,7 +96,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Equal(t, created.MonitoredObjectID, fetched.MonitoredObjectID, "Monitored object not the same")
 
 	// Get a record by monitored object ID
-	fetched, err = runner.tenantDB.GetMetricBaselineForMonitoredObject(TENANT, created.MonitoredObjectID)
+	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
 	assert.Nil(t, err)
 	assert.ElementsMatch(t, created.Baselines, fetched.Baselines, "The retrieved record should have the same baselines as the created record")
 	assert.Equal(t, created.MonitoredObjectID, fetched.MonitoredObjectID, "Monitored object not the same")
@@ -125,7 +125,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Equal(t, 1, len(baselineArray))
 
 	// Update an entire record
-	fetched, err = runner.tenantDB.GetMetricBaselineForMonitoredObject(TENANT, upsert.MonitoredObjectID)
+	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, upsert.MonitoredObjectID)
 	assert.Nil(t, err)
 	assert.NotNil(t, fetched)
 	assert.Equal(t, 3, len(fetched.Baselines))
@@ -151,7 +151,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Nil(t, err)
 	assert.NotNil(t, deletedMO)
 
-	fetched, err = runner.tenantDB.GetMetricBaselineForMonitoredObject(TENANT, MONOBJ1)
+	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, MONOBJ1)
 	assert.NotNil(t, err)
 	assert.Nil(t, fetched)
 
@@ -160,7 +160,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Nil(t, err)
 	assert.NotNil(t, deleted)
 
-	fetched, err = runner.tenantDB.GetMetricBaselineForMonitoredObject(TENANT, created.MonitoredObjectID)
+	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
 	assert.NotNil(t, err)
 	assert.Nil(t, fetched)
 }

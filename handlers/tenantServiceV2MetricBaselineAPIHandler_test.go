@@ -64,28 +64,28 @@ func TestMetricBaselineCRUDV2(t *testing.T) {
 	assert.Equal(t, castedCreate.Payload.Data.Attributes.MonitoredObjectID, castedFetchByMOForHour.Payload.Data.Attributes.MonitoredObjectID)
 
 	// Make an update to the Record
-	newName := fake.CharactersN(16)
-	updateRequestBody := generateMetricBaselineUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev, &newName, castedCreate.Payload.Data.Attributes.Baselines)
+	newBaseline := generateRandomMetricBaselineData()
+	castedCreate.Payload.Data.Attributes.Baselines = append(castedCreate.Payload.Data.Attributes.Baselines, newBaseline)
+	updateRequestBody := generateMetricBaselineUpdateRequest(*castedCreate.Payload.Data.ID, *castedCreate.Payload.Data.Attributes.Rev, &castedCreate.Payload.Data.Attributes.MonitoredObjectID, castedCreate.Payload.Data.Attributes.Baselines)
 	updated := handlers.HandleUpdateMetricBaselineV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateMetricBaselineV2Params{MetricBaselineID: *castedCreate.Payload.Data.ID, Body: updateRequestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, MetricBaselineUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateMetricBaselineV2OK)
 	assert.NotNil(t, castedUpdate)
 	assert.NotEqual(t, castedCreate.Payload.Data, castedUpdate.Payload.Data)
 	assert.NotEqual(t, castedCreate.Payload.Data.Attributes.Rev, castedUpdate.Payload.Data.Attributes.Rev)
-	assert.Equal(t, newName, castedUpdate.Payload.Data.Attributes.MonitoredObjectID)
 	assert.ElementsMatch(t, castedCreate.Payload.Data.Attributes.Baselines, castedUpdate.Payload.Data.Attributes.Baselines)
 
 	// Update baseline for hour of week
-	newBaseline := generateRandomMetricBaselineData()
+	newBaseline2 := generateRandomMetricBaselineData()
 	requestBody := swagmodels.MetricBaselineUpdateHourRequest{
 		Data: &swagmodels.MetricBaselineUpdateHourRequestData{
-			Attributes: newBaseline,
+			Attributes: newBaseline2,
 			Type:       &MetricBaselineTypeString,
 		},
 	}
 	updatedBaseline := handlers.HandleUpdateMetricBaselineForHourOfWeekV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params{MonitoredObjectID: castedUpdate.Payload.Data.Attributes.MonitoredObjectID, Body: &requestBody, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, MetricBaselineUrl, "PATCH")})
 	castedUpdateBaseline := updatedBaseline.(*tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2OK)
 	assert.NotNil(t, castedUpdateBaseline)
-	assert.Equal(t, 3, len(castedUpdateBaseline.Payload.Data.Attributes.Baselines))
+	assert.Equal(t, 4, len(castedUpdateBaseline.Payload.Data.Attributes.Baselines))
 	assert.Equal(t, castedUpdate.Payload.Data.Attributes.MonitoredObjectID, castedUpdateBaseline.Payload.Data.Attributes.MonitoredObjectID)
 
 	// Delete the record

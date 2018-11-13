@@ -388,7 +388,7 @@ func doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB da
 	}
 
 	// Issue request to DAO Layer
-	result, err := tenantDB.GetMetricBaselineForMonitoredObject(tenantID, params.MonitoredObjectID)
+	result, err := tenantDB.GetMetricBaseline(tenantID, params.MonitoredObjectID)
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -497,6 +497,8 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 }
 
 func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) (time.Time, int, *swagmodels.MetricBaselineBulkUpdateResponse, error) {
+	startTime := time.Now()
+
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Bulk Updating %ss for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -515,6 +517,9 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to complete bulk update of %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
 
+	durationTillBulkGet := time.Since(startTime).Seconds()
+	logger.Log.Warningf("TIME UNTIL BULK FETCH COMPLETE: %f", durationTillBulkGet)
+
 	// Have the existing MOs, need to update each one
 	for _, existingBaseline := range existingMetricBaselineList {
 		baselineUpdates, err := convertMetricBaselineDataCollectionFromSwagToDBModel(params.Body.Data.Attributes[existingBaseline.MonitoredObjectID])
@@ -525,11 +530,17 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 		existingBaseline.MergeBaselines(baselineUpdates)
 	}
 
+	durationTillMergeComplete := time.Since(startTime).Seconds()
+	logger.Log.Warningf("TIME UNTIL MERGE COMPLETE: %f", durationTillMergeComplete)
+
 	// Attempt the Bulk update request on the DB
 	metricBaselineUpdateResponse, err := tenantDB.BulkUpdateMetricBaselines(tenantID, existingMetricBaselineList)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to bulk update %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
+
+	durationTilBulkUpdateComplete := time.Since(startTime).Seconds()
+	logger.Log.Warningf("TIME UNTIL BULK UPDATE COMPLETE: %f", durationTilBulkUpdateComplete)
 
 	id := "-1"
 	resType := "metricBaselineBulkUpdateResponse"
@@ -551,6 +562,9 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 			Attributes: convertedResults,
 		},
 	}
+
+	durationTilMethodComplete := time.Since(startTime).Seconds()
+	logger.Log.Warningf("TIME UNTIL METHOD COMPLETE: %f", durationTilMethodComplete)
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Bulk Updated of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)

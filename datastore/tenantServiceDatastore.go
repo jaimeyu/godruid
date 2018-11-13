@@ -125,7 +125,7 @@ type TenantServiceDatastore interface {
 	UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
 	UpdateMetricBaselineForHourOfWeekWithCollection(tenantID string, monObjID string, baselineDataCollection []*tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
 	GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
-	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
+	// GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
 	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)
 	DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
 	// GetMetricBaselinesForMOsIn - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated

@@ -1,3 +1,4 @@
+* Feature - Multitenancy support for RoadRunner configuration. 
 ## Current Release 
 ### 0.251.0 
 **Release Date:** Mon Nov 12 21:35:24 UTC 2018     

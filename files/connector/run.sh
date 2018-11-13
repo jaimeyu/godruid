@@ -18,7 +18,9 @@ main() {
     echo "Starting connector"
     docker run -d -v "${CURRENT_DIR}/":"/tmp/config" -v "${FILE_DIR}":"/tmp/files" -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner" \
            --restart always \
-           --add-host "${HOST}:${IP}" \
+		   --name aod-connector-for-${TENANT_HOSTNAME} \
+           --add-host "${DEPLOYMENT_HOSTNAME}:${DEPLOYMENT_IP}" \
+           --add-host "${TENANT_HOSTNAME}:${TENANT_IP}" \
            gcr.io/npav-172917/adh-roadrunner:"${VERSION}" data --config=/tmp/config/adh-roadrunner.yml
 
 }

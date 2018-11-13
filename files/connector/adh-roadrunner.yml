@@ -4,6 +4,7 @@ fileWatcherTicker: 100
 hosts:
 -
   dhHost: "%s"
+  tenantHost: "%s"
   tenantId: "%s"
   wsDataPort: 443
   wsStatusPort: 443

@@ -1,3 +1,4 @@
+* Fix - Only return threshold topn entries that have a non-zero score against them
 ## Current Release 
 ### 0.251.0 
 **Release Date:** Mon Nov 12 21:35:24 UTC 2018     

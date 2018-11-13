@@ -549,7 +549,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 
 		for _, r := range topNResponse {
 			rawMap := r.(map[string]interface{})
-			if rawMap["monitoredObjectId"] != nil {
+			if score := rawMap["scored"]; rawMap["monitoredObjectId"] != nil && score != nil && score.(float64) != 0 {
 				toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
 				delete(rawMap, "monitoredObjectId")
 				toAdd.Result = rawMap

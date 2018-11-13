@@ -3,14 +3,15 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mholt/archiver"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mholt/archiver"
+	"github.com/satori/go.uuid"
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/gather"
@@ -53,7 +54,7 @@ func HandleGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.Tenan
 	}
 }
 
-func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tenantDB datastore.TenantServiceDatastore) error {
+func writeConnectorConfigs(archiveDir string, tenantID string, tenantHost string, zone string, tenantDB datastore.TenantServiceDatastore) error {
 	cfg := gather.GetConfig()
 	configs, err := tenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
 
@@ -70,8 +71,14 @@ func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tena
 		return fmt.Errorf("Unable to resolve host: %s : %v", host, err)
 	}
 
-	envTemplate := "export FILE_DIR=%s\nexport VERSION=%s\nexport HOST=%s\nexport IP=%s"
-	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()), host, addrs[0])
+	tenantHostaddrs, err := net.LookupHost(tenantHost)
+
+	if err != nil {
+		return fmt.Errorf("Unable to resolve host: %s : %v", tenantHost, err)
+	}
+
+	envTemplate := "export FILE_DIR=%s\nexport VERSION=%s\nexport DEPLOYMENT_HOSTNAME=%s\nexport DEPLOYMENT_IP=%s\nexport TENANT_HOSTNAME=%s\nexport TENANT_IP=%s\n  \n"
+	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()), host, addrs[0], tenantHost, tenantHostaddrs[0])
 	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
 	if err != nil {
 		return err
@@ -82,7 +89,7 @@ func writeConnectorConfigs(archiveDir string, tenantID string, zone string, tena
 		return err
 	}
 
-	rrConfig := fmt.Sprintf(string(configTemplate), host, tenantID, zone)
+	rrConfig := fmt.Sprintf(string(configTemplate), host, tenantHost, tenantID, zone)
 	err = ioutil.WriteFile(archiveDir+"/adh-roadrunner.yml", []byte(rrConfig), os.ModePerm)
 	if err != nil {
 		return err
@@ -155,6 +162,12 @@ func convertManifest(manifest *ManifestV2, repo string) ([]ManifestV1, error) {
 
 func doGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.DownloadRoadrunnerParams) (time.Time, int, *tenant_provisioning_service_v2.DownloadRoadrunnerOK, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	// We need to know the tenant's hostname in order to point to the correct login portal for road runner
+	tenantHost := params.HTTPRequest.Header.Get("X-Forwarded-Server")
+	logger.Log.Errorf("header: tenantHost:%s", tenantHost)
+
+	logger.Log.Errorf("header: %+v", params.HTTPRequest.Header)
+
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s %s for %s %s", tenmod.TenantDownloadRoadrunnerStr, params.Zone, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
@@ -302,7 +315,7 @@ func doGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.TenantSer
 	archivePath := archiveDir + "/roadrunner.tar.gz"
 
 	// write env.sh file
-	err = writeConnectorConfigs(archiveDir, tenantID, params.Zone, tenantDB)
+	err = writeConnectorConfigs(archiveDir, tenantID, tenantHost, params.Zone, tenantDB)
 	if err != nil {
 		msg := fmt.Errorf("Unable to write env file: %s ", err.Error())
 		return startTime, http.StatusInternalServerError, nil, msg

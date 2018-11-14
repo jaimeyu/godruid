@@ -1,3 +1,4 @@
+* Fix - Alpine image is now pointing to alpine latest instead of edge
 ## Current Release 
 ### 0.254.0 
 **Release Date:** Tue Nov 13 22:44:24 UTC 2018     

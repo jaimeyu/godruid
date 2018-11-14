@@ -1,8 +1,10 @@
-* Fix - Updated run.sh to remove the old running aod_connector container before starting a new one.
 ## Current Release 
+### 0.255.0 
+**Release Date:** Wed Nov 14 15:14:03 UTC 2018     
+## Previous Releases 
+* Fix - Updated run.sh to remove the old running aod_connector container before starting a new one.
 ### 0.254.0 
 **Release Date:** Tue Nov 13 22:44:24 UTC 2018     
-## Previous Releases 
 * Fix - Making the dowloaded Roadrunner tar.gz archive and actual gz archive
 ### 0.253.0 
 **Release Date:** Tue Nov 13 19:35:01 UTC 2018     

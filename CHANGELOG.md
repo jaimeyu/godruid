@@ -1,3 +1,4 @@
+* Fix - Updated run.sh to remove the old running aod_connector container before starting a new one.
 ## Current Release 
 ### 0.254.0 
 **Release Date:** Tue Nov 13 22:44:24 UTC 2018     

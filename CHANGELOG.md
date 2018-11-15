@@ -1,8 +1,10 @@
-* Fix - Removed excessive logging from doGetDownloadRoadrunner and doGetIngestionDictionaryV2
 ## Current Release 
+### 0.257.0 
+**Release Date:** Thu Nov 15 19:50:03 UTC 2018     
+## Previous Releases 
+* Fix - Removed excessive logging from doGetDownloadRoadrunner and doGetIngestionDictionaryV2
 ### 0.256.0 
 **Release Date:** Thu Nov 15 17:56:17 UTC 2018     
-## Previous Releases 
 * Fix - Remove unnecessary debug log
 ### 0.255.0 
 **Release Date:** Wed Nov 14 15:14:03 UTC 2018     

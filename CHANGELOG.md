@@ -1,3 +1,4 @@
+* Fix - Remove unnecessary debug log
 ## Current Release 
 ### 0.255.0 
 **Release Date:** Wed Nov 14 15:14:03 UTC 2018     

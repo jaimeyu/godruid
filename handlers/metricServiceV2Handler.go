@@ -526,7 +526,6 @@ func rerenderThresholdCrossingV2(metricFilters []metmod.MetricIdentifierFilter, 
 
 	delete(results, "metric")
 	results["metric"] = txfEntries
-	fmt.Printf("%v", report)
 
 	return report
 }

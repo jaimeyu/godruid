@@ -1,8 +1,11 @@
 * Fix - Removed excessive logging from doGetDownloadRoadrunner and doGetIngestionDictionaryV2
 ## Current Release 
+### 0.256.0 
+**Release Date:** Thu Nov 15 17:56:17 UTC 2018     
+## Previous Releases 
+* Fix - Remove unnecessary debug log
 ### 0.255.0 
 **Release Date:** Wed Nov 14 15:14:03 UTC 2018     
-## Previous Releases 
 * Fix - Updated run.sh to remove the old running aod_connector container before starting a new one.
 ### 0.254.0 
 **Release Date:** Tue Nov 13 22:44:24 UTC 2018     

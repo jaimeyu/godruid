@@ -1,8 +1,10 @@
-* Fix - Alpine image is now pointing to alpine latest instead of edge
 ## Current Release 
+### 0.258.0 
+**Release Date:** Fri Nov 16 16:08:32 UTC 2018     
+## Previous Releases 
+* Fix - Alpine image is now pointing to alpine latest instead of edge
 ### 0.257.0 
 **Release Date:** Thu Nov 15 19:50:03 UTC 2018     
-## Previous Releases 
 * Fix - Removed excessive logging from doGetDownloadRoadrunner and doGetIngestionDictionaryV2
 ### 0.256.0 
 **Release Date:** Thu Nov 15 17:56:17 UTC 2018     

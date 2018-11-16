@@ -544,7 +544,9 @@ func doGetIngestionDictionaryV2(allowedRoles []string, adminDB datastore.AdminSe
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetIngDictStr, mon.APICompleted, mon.AdminAPICompleted)
-	logger.Log.Infof("Retrieved %s %s", admmod.IngestionDictionaryStr, models.AsJSONString(converted))
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Retrieved %s %s", admmod.IngestionDictionaryStr, models.AsJSONString(converted))
+	}
 	return startTime, http.StatusOK, &converted, nil
 
 }

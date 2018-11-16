@@ -165,6 +165,11 @@ type MetricBaselineAttributes struct {
 	// Required: true
 	Datatype *string `json:"datatype"`
 
+	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
+	// Maximum: 167
+	// Minimum: 0
+	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
+
 	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
@@ -198,6 +203,10 @@ func (m *MetricBaselineAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatatype(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateHourOfWeek(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -270,6 +279,23 @@ func (m *MetricBaselineAttributes) validateCreatedTimestamp(formats strfmt.Regis
 func (m *MetricBaselineAttributes) validateDatatype(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"datatype", "body", m.Datatype); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineAttributes) validateHourOfWeek(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.HourOfWeek) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
 		return err
 	}
 

@@ -2421,7 +2421,7 @@ func (o *GatherAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}"] = tenant_provisioning_service_v2.NewUpdateMetricBaselineForHourOfWeekV2(o.context, o.TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler)
+	o.handlers["PATCH"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}"] = tenant_provisioning_service_v2.NewUpdateMetricBaselineForHourOfWeekV2(o.context, o.TenantProvisioningServiceV2UpdateMetricBaselineForHourOfWeekV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

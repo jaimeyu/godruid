@@ -4264,7 +4264,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineResponse'
+            $ref: '#/definitions/MetricBaselineListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -4284,6 +4284,7 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     patch:
       summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
       operationId: UpdateMetricBaselineForHourOfWeekV2
@@ -4317,6 +4318,11 @@ paths:
           schema:
             type: string
       parameters:
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
         - name: monitoredObjectId
           in: path
           required: true
@@ -4328,7 +4334,6 @@ paths:
             $ref: '#/definitions/MetricBaselineUpdateHourRequest'
       tags:
         - TenantProvisioningServiceV2
-  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     get:
       summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
       operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2
@@ -8272,6 +8277,12 @@ definitions:
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              hourOfWeek:
+                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                type: "integer"
+                format: "int32"
+                minimum: 0
+                maximum: 167
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -8302,6 +8313,12 @@ definitions:
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              hourOfWeek:
+                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                type: "integer"
+                format: "int32"
+                minimum: 0
+                maximum: 167
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -8314,12 +8331,6 @@ definitions:
       metric:
         description: "The name of the metric represented by this baseline"
         type: "string"
-      hourOfWeek:
-        description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
-        type: "integer"
-        format: "int32"
-        minimum: 0
-        maximum: 167
       direction:
         description: "The direction of the metric baseline"
         type: "string"
@@ -8363,6 +8374,12 @@ definitions:
           monitoredObjectId:
             type: "string"
             description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+          hourOfWeek:
+            description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+            type: "integer"
+            format: "int32"
+            minimum: 0
+            maximum: 167
           baselines:
             description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
             type: "array"
@@ -8425,6 +8442,12 @@ definitions:
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              hourOfWeek:
+                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                type: "integer"
+                format: "int32"
+                minimum: 0
+                maximum: 167
               baselines: 
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -8446,7 +8469,13 @@ definitions:
           id:
             type: "string"
           attributes:
-              $ref: '#/definitions/MetricBaselineData'
+            type: "object"
+            properties:
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
 
   MetricBaselineBulkUpdateRequest:
     type: "object"
@@ -8463,12 +8492,24 @@ definitions:
           id:
             type: "string"
           attributes:
-            type: "object"
-            description: "A map of Monitored Object ID to an array of Metric Baseline values to be updated for the Monitored Object"
-            additionalProperties:
-              type: "array"
-              items:
-                $ref: '#/definitions/MetricBaselineData'
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                monitoredObjectId:
+                  type: "string"
+                  description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+                hourOfWeek:
+                  description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                  type: "integer"
+                  format: "int32"
+                  minimum: 0
+                  maximum: 167
+                baselines: 
+                  description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                  type: "array"
+                  items:
+                    $ref: '#/definitions/MetricBaselineData'
 
   MetricBaselineBulkUpdateResponse:
     type: "object"

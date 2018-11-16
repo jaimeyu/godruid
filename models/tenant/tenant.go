@@ -1100,6 +1100,7 @@ type MetricBaseline struct {
 	REV                   string                `json:"_rev"`
 	Datatype              string                `json:"datatype"`
 	TenantID              string                `json:"tenantId"`
+	HourOfWeek            int32                 `json:"hourOfWeek"`
 	Baselines             []*MetricBaselineData `json:"baselines"`
 	MonitoredObjectID     string                `json:"monitoredObjectId"`
 	CreatedTimestamp      int64                 `json:"createdTimestamp"`
@@ -1118,19 +1119,18 @@ func (mb *MetricBaseline) SetID(s string) error {
 }
 
 type MetricBaselineData struct {
-	Average    float64 `json:"avg"`
-	Count      int64   `json:"count"`
-	Direction  string  `json:"direction"`
-	HourOfWeek int32   `json:"hourOfWeek"`
-	Metric     string  `json:"metric"`
-	Sum        float64 `json:"sum"`
+	Average   float64 `json:"avg"`
+	Count     int64   `json:"count"`
+	Direction string  `json:"direction"`
+	Metric    string  `json:"metric"`
+	Sum       float64 `json:"sum"`
 }
 
 // MergeBaseline - will add the baseline data provided to this Metric Baseline object
 func (mb *MetricBaseline) MergeBaseline(baselineData *MetricBaselineData) {
 	didUpdateBaseline := false
 	for index, baseline := range mb.Baselines {
-		if baseline.HourOfWeek == baselineData.HourOfWeek && baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
+		if baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
 			// The baseline is already being tracked, update it
 			mb.Baselines[index] = baselineData
 			didUpdateBaseline = true

@@ -16,6 +16,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	const MONOBJ1 = "MONOBJ1"
 	const MONOBJ2 = "MONOBJ2"
 	const DELAYP95 = "delayP95"
+	const JITTER95 = "jitterP(%"
 
 	// Create a tenant
 	data := admmod.Tenant{
@@ -48,7 +49,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Nil(t, fail)
 
 	// Try to update an hour in a record that does not exist, should creatre the record
-	upsert, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, MONOBJ1, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "0", HourOfWeek: 150})
+	upsert, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, MONOBJ1, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "0"})
 	assert.Nil(t, err)
 	assert.NotNil(t, upsert)
 	assert.NotEmpty(t, upsert.ID)
@@ -56,7 +57,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Equal(t, string(tenmod.TenantMetricBaselineType), upsert.Datatype)
 	assert.Equal(t, DELAYP95, upsert.Baselines[0].Metric, "Metric not the same")
 	assert.Equal(t, "0", upsert.Baselines[0].Direction, "Direction not the same")
-	assert.Equal(t, int32(150), upsert.Baselines[0].HourOfWeek, "HourofWeek not the same")
+	assert.Equal(t, int32(150), upsert.HourOfWeek, "HourofWeek not the same")
 	assert.Equal(t, TENANT, upsert.TenantID, "Tenant ID not the same")
 	assert.True(t, upsert.CreatedTimestamp > 0, "CreatedTimestamp was not set")
 	assert.True(t, upsert.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
@@ -66,6 +67,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 		Datatype:          string(tenmod.TenantMetricBaselineType),
 		TenantID:          TENANT,
 		MonitoredObjectID: MONOBJ1,
+		HourOfWeek:        150,
 	}
 	failedCreate, err := runner.tenantDB.CreateMetricBaseline(&createObj)
 	assert.NotNil(t, err)
@@ -95,14 +97,8 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.ElementsMatch(t, created.Baselines, fetched.Baselines, "The retrieved record should have the same baselines as the created record")
 	assert.Equal(t, created.MonitoredObjectID, fetched.MonitoredObjectID, "Monitored object not the same")
 
-	// Get a record by monitored object ID
-	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
-	assert.Nil(t, err)
-	assert.ElementsMatch(t, created.Baselines, fetched.Baselines, "The retrieved record should have the same baselines as the created record")
-	assert.Equal(t, created.MonitoredObjectID, fetched.MonitoredObjectID, "Monitored object not the same")
-
 	// Add new baseline data to existing record
-	updated, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "1", HourOfWeek: 250})
+	updated, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)
 	assert.Equal(t, upsert.ID, updated.ID, "ID not the same")
@@ -110,7 +106,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Equal(t, 2, len(updated.Baselines), "Baseline array should have 2 elements")
 
 	// add another bit of data for hour 150
-	_, err = runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "1", HourOfWeek: 150})
+	_, err = runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "1"})
 	assert.Nil(t, err)
 
 	// Get baselines for an hour of the week - success
@@ -120,15 +116,14 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Equal(t, 2, len(baselineArray))
 
 	baselineArray, err = runner.tenantDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, upsert.MonitoredObjectID, 250)
-	assert.Nil(t, err)
-	assert.NotNil(t, baselineArray)
-	assert.Equal(t, 1, len(baselineArray))
+	assert.NotNil(t, err)
+	assert.Nil(t, baselineArray)
 
 	// Update an entire record
-	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, upsert.MonitoredObjectID)
+	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, upsert.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, fetched)
-	assert.Equal(t, 3, len(fetched.Baselines))
+	assert.Equal(t, 2, len(fetched.Baselines))
 
 	fetched.Baselines = []*tenmod.MetricBaselineData{}
 	fetched.ID = ds.GetDataIDFromFullID(fetched.ID)

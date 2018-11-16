@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/models"
 	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/manyminds/api2go/jsonapi"
@@ -128,32 +129,6 @@ func HandleDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 	}
 }
 
-// HandleGetMetricBaselineByMonitoredObjectIDV2 - retrieve all MetricBaseline records
-func HandleGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
-	return func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
-
-		// Do the work
-		startTime, responseCode, response, err := doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles, tenantDB, params)
-
-		// Success Response
-		if responseCode == http.StatusOK {
-			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2OK().WithPayload(response)
-		}
-
-		// Error Responses
-		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
-		switch responseCode {
-		case http.StatusForbidden:
-			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2Forbidden().WithPayload(errorMessage)
-		case http.StatusNotFound:
-			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2NotFound().WithPayload(errorMessage)
-		default:
-			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2InternalServerError().WithPayload(errorMessage)
-		}
-
-	}
-}
-
 func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 
@@ -203,11 +178,11 @@ func HandleUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB d
 }
 
 // HandleBulkUpdateMetricBaselinesV2 - update multiple MetricBaseline records for Multiple Monitored Objects
-func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
+func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, bulkUpdateManager *MetricBaselineBulkUpdateManager) func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
 
 		// Do the work
-		startTime, responseCode, response, err := doBulkUpdateMetricBaselineV2(allowedRoles, tenantDB, params)
+		startTime, responseCode, response, err := doBulkUpdateMetricBaselineV2(allowedRoles, tenantDB, params, bulkUpdateManager)
 
 		// Success Response
 		if responseCode == http.StatusOK {
@@ -252,7 +227,7 @@ func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	// Issue request to DAO Layer to Create Record
 	result, err := tenantDB.CreateMetricBaseline(&data)
 	if err != nil {
-		if strings.Contains(err.Error(), datastore.ConflictStr) {
+		if strings.Contains(err.Error(), datastore.ConflictErrorStr) {
 			return startTime, http.StatusConflict, nil, err
 		}
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
@@ -379,35 +354,6 @@ func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
-	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
-	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
-
-	if !isAuthorized {
-		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch %s operation not authorized for role: %s", tenmod.TenantMetricBaselineStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
-	}
-
-	// Issue request to DAO Layer
-	result, err := tenantDB.GetMetricBaseline(tenantID, params.MonitoredObjectID)
-	if err != nil {
-		if strings.Contains(err.Error(), datastore.NotFoundStr) {
-			return startTime, http.StatusNotFound, nil, err
-		}
-
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
-	}
-
-	converted := swagmodels.MetricBaselineResponse{}
-	err = convertToJsonapiObject(result, &converted)
-	if err != nil {
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMetricBaselineStr, err.Error())
-	}
-
-	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Retrieved %s for Monitored Object %s", tenmod.TenantMetricBaselineStr, params.MonitoredObjectID)
-	return startTime, http.StatusOK, &converted, nil
-}
-
 func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineHourOfWeekResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s for %s %s for %s %s and hourOfWeek %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, params.HourOfWeek), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
@@ -464,19 +410,19 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 	}
 
 	// Retrieve tne request bytes from the payload in order to convert it to a map
-	patchRequestBytes, err := json.Marshal(params.Body.Data.Attributes)
+	patchRequestBytes, err := json.Marshal(params.Body.Data.Attributes.Baselines)
 	if err != nil || params.Body == nil {
 		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Invalid request body: %s", models.AsJSONString(params.Body))
 	}
 
-	patchObject := tenmod.MetricBaselineData{}
+	patchObject := []*tenmod.MetricBaselineData{}
 	err = json.Unmarshal(patchRequestBytes, &patchObject)
 	if err != nil {
 		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Invalid request body: %s", models.AsJSONString(params.Body))
 	}
 
 	// Issue request to DAO Layer
-	result, err := tenantDB.UpdateMetricBaselineForHourOfWeek(tenantID, params.MonitoredObjectID, &patchObject)
+	result, err := tenantDB.UpdateMetricBaselineForHourOfWeekWithCollection(tenantID, params.MonitoredObjectID, params.HourOfWeek, patchObject)
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -496,7 +442,7 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) (time.Time, int, *swagmodels.MetricBaselineBulkUpdateResponse, error) {
+func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params, bulkUpdateManager *MetricBaselineBulkUpdateManager) (time.Time, int, *swagmodels.MetricBaselineBulkUpdateResponse, error) {
 	startTime := time.Now()
 
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
@@ -506,13 +452,198 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Bulk Update %s operation not authorized for role: %s", tenmod.TenantMetricBaselineStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 	}
 
-	// Build up the request body to fetch existing records for all of the passed in MOs
-	moIDList := []string{}
-	for moID := range params.Body.Data.Attributes {
-		moIDList = append(moIDList, moID)
+	// // Build up the request body to fetch existing records for all of the passed in MOs
+	// moIDToHourOfWeekMap := map[string][]int32{}
+	// for _, entry := range params.Body.Data.Attributes {
+	// 	_, ok := moIDToHourOfWeekMap[entry.MonitoredObjectID]
+	// 	if !ok {
+	// 		moIDToHourOfWeekMap[entry.MonitoredObjectID] = []int32{*entry.HourOfWeek}
+	// 		continue
+	// 	}
+
+	// 	moIDToHourOfWeekMap[entry.MonitoredObjectID] = append(moIDToHourOfWeekMap[entry.MonitoredObjectID], *entry.HourOfWeek)
+	// }
+
+	// existingMetricBaselineList, err := tenantDB.GetMetricBaselinesFor(tenantID, moIDToHourOfWeekMap, true)
+	// if err != nil {
+	// 	return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to complete bulk update of %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	// }
+
+	// durationTillBulkGet := time.Since(startTime).Seconds()
+	// logger.Log.Warningf("TIME UNTIL BULK FETCH COMPLETE: %f", durationTillBulkGet)
+
+	// // Make a map for easy retrieval of baseline changes
+	// mappedChanges := map[string][]*swagmodels.MetricBaselineData{}
+	// for _, entry := range params.Body.Data.Attributes {
+	// 	mapping := fmt.Sprintf("%s_%d", entry.MonitoredObjectID, *entry.HourOfWeek)
+	// 	mappedChanges[mapping] = entry.Baselines
+	// }
+
+	// // Have the existing MOs, need to update each one
+	// for _, existingBaseline := range existingMetricBaselineList {
+	// 	key := fmt.Sprintf("%s_%d", existingBaseline.MonitoredObjectID, existingBaseline.HourOfWeek)
+	// 	baselineUpdates, err := convertMetricBaselineDataCollectionFromSwagToDBModel(mappedChanges[key])
+	// 	if err != nil {
+	// 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf(err.Error())
+	// 	}
+
+	// 	existingBaseline.MergeBaselines(baselineUpdates)
+	// }
+
+	// durationTillMergeComplete := time.Since(startTime).Seconds()
+	// logger.Log.Warningf("TIME UNTIL MERGE COMPLETE: %f", durationTillMergeComplete)
+
+	// // Attempt the Bulk update request on the DB
+	// metricBaselineUpdateResponse, err := tenantDB.BulkUpdateMetricBaselines(tenantID, existingMetricBaselineList)
+	// if err != nil {
+	// 	return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to bulk update %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	// }
+
+	// durationTilBulkUpdateComplete := time.Since(startTime).Seconds()
+	// logger.Log.Warningf("TIME UNTIL BULK UPDATE COMPLETE: %f", durationTilBulkUpdateComplete)
+
+	// convertStartTime := time.Now()
+
+	// id := "-1"
+	// resType := "metricBaselineBulkUpdateResponse"
+	// convertedResults := map[string]swagmodels.MetricBaselineBulkUpdateResponseDataAttributesAnon{}
+	// for _, res := range metricBaselineUpdateResponse {
+	// 	addItem := swagmodels.MetricBaselineBulkUpdateResponseDataAttributesAnon{
+	// 		Error:  res.ERROR,
+	// 		ID:     res.ID,
+	// 		Ok:     res.OK,
+	// 		Reason: res.REASON,
+	// 		Rev:    res.REV,
+	// 	}
+	// 	convertedResults[res.ID] = addItem
+	// }
+	// converted := swagmodels.MetricBaselineBulkUpdateResponse{
+	// 	Data: &swagmodels.MetricBaselineBulkUpdateResponseData{
+	// 		ID:         &id,
+	// 		Type:       &resType,
+	// 		Attributes: convertedResults,
+	// 	},
+	// }
+
+	// durationTilConvertComplete := time.Since(convertStartTime).Seconds()
+	// logger.Log.Warningf("TIME UNTIL RESPONSE CONVERSION COMPLETE: %f", durationTilConvertComplete)
+
+	// durationTilMethodComplete := time.Since(startTime).Seconds()
+	// logger.Log.Warningf("TIME UNTIL METHOD COMPLETE: %f", durationTilMethodComplete)
+
+	// reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
+	// logger.Log.Infof("Bulk Updated of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)
+	// return startTime, http.StatusOK, &converted, nil
+	go func() {
+		job := bulkUpdateJob{
+			params:    params,
+			startTime: startTime,
+			tenantID:  tenantID,
+		}
+		bulkUpdateManager.jobs <- job
+	}()
+	idVal := "-1"
+	typeResp := "metricBaselineBulkUpdateResponse"
+	value := map[string]swagmodels.MetricBaselineBulkUpdateResponseDataAttributesAnon{}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
+	return startTime, http.StatusOK, &swagmodels.MetricBaselineBulkUpdateResponse{
+		Data: &swagmodels.MetricBaselineBulkUpdateResponseData{
+			ID:         &idVal,
+			Type:       &typeResp,
+			Attributes: value,
+		},
+	}, nil
+}
+
+func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []*swagmodels.MetricBaselineData) ([]*tenmod.MetricBaselineData, error) {
+	result := []*tenmod.MetricBaselineData{}
+	for _, val := range swagCollection {
+		swagBytes, err := json.Marshal(val)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to marshal request baseline changes to bytes: %s", err.Error())
+		}
+
+		addItem := tenmod.MetricBaselineData{}
+		err = json.Unmarshal(swagBytes, &addItem)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to unmarshal request baseline change bytes to DB model: %s", err.Error())
+		}
+
+		result = append(result, &addItem)
 	}
 
-	existingMetricBaselineList, err := tenantDB.GetMetricBaselinesForMOsIn(tenantID, moIDList, true)
+	return result, nil
+}
+
+type MetricBaselineBulkUpdateManager struct {
+	jobs     chan bulkUpdateJob
+	results  chan bulkUpdateResult
+	tenantDB datastore.TenantServiceDatastore
+}
+
+type bulkUpdateJob struct {
+	startTime time.Time
+	tenantID  string
+	params    tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params
+}
+
+type bulkUpdateResult struct {
+	startTime  time.Time
+	resultCode int
+	result     *swagmodels.MetricBaselineBulkUpdateResponse
+	err        error
+}
+
+func CreateMetricBaselineBulkUpdateManager(db datastore.TenantServiceDatastore) *MetricBaselineBulkUpdateManager {
+	cfg := gather.GetConfig()
+
+	numJobs := cfg.GetInt(gather.CK_args_metricbaselines_maxnumjobs.String())
+	numWorkers := cfg.GetInt(gather.CK_args_metricbaselines_numworkers.String())
+
+	result := MetricBaselineBulkUpdateManager{
+		jobs:     make(chan bulkUpdateJob, numJobs),
+		results:  make(chan bulkUpdateResult, numJobs),
+		tenantDB: db,
+	}
+
+	for w := 1; w <= numWorkers; w++ {
+		go result.bulkMetricBaselineUpdateWorker(w, result.jobs, result.results)
+	}
+
+	return &result
+}
+
+func (manager *MetricBaselineBulkUpdateManager) bulkMetricBaselineUpdateWorker(id int, jobs <-chan bulkUpdateJob, results chan<- bulkUpdateResult) {
+	for j := range jobs {
+		jobStartTime := time.Now()
+		logger.Log.Warningf("worker %d started job", id)
+		// startTime, resultCode, result, err := manager.performBulkUpdate(j.startTime, j.tenantID, j.params)
+		manager.performBulkUpdate(j.startTime, j.tenantID, j.params)
+		logger.Log.Warningf("worker %d finished job with duration %f", id, time.Since(jobStartTime).Seconds())
+		// results <- bulkUpdateResult{
+		// 	result:     result,
+		// 	err:        err,
+		// 	resultCode: resultCode,
+		// 	startTime:  startTime,
+		// }
+	}
+}
+
+func (manager *MetricBaselineBulkUpdateManager) performBulkUpdate(startTime time.Time, tenantID string, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) (time.Time, int, *swagmodels.MetricBaselineBulkUpdateResponse, error) {
+	// Build up the request body to fetch existing records for all of the passed in MOs
+	moIDToHourOfWeekMap := map[string][]int32{}
+	for _, entry := range params.Body.Data.Attributes {
+		_, ok := moIDToHourOfWeekMap[entry.MonitoredObjectID]
+		if !ok {
+			moIDToHourOfWeekMap[entry.MonitoredObjectID] = []int32{*entry.HourOfWeek}
+			continue
+		}
+
+		moIDToHourOfWeekMap[entry.MonitoredObjectID] = append(moIDToHourOfWeekMap[entry.MonitoredObjectID], *entry.HourOfWeek)
+	}
+
+	existingMetricBaselineList, err := manager.tenantDB.GetMetricBaselinesFor(tenantID, moIDToHourOfWeekMap, true)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to complete bulk update of %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
@@ -520,9 +651,17 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 	durationTillBulkGet := time.Since(startTime).Seconds()
 	logger.Log.Warningf("TIME UNTIL BULK FETCH COMPLETE: %f", durationTillBulkGet)
 
+	// Make a map for easy retrieval of baseline changes
+	mappedChanges := map[string][]*swagmodels.MetricBaselineData{}
+	for _, entry := range params.Body.Data.Attributes {
+		mapping := fmt.Sprintf("%s_%d", entry.MonitoredObjectID, *entry.HourOfWeek)
+		mappedChanges[mapping] = entry.Baselines
+	}
+
 	// Have the existing MOs, need to update each one
 	for _, existingBaseline := range existingMetricBaselineList {
-		baselineUpdates, err := convertMetricBaselineDataCollectionFromSwagToDBModel(params.Body.Data.Attributes[existingBaseline.MonitoredObjectID])
+		key := fmt.Sprintf("%s_%d", existingBaseline.MonitoredObjectID, existingBaseline.HourOfWeek)
+		baselineUpdates, err := convertMetricBaselineDataCollectionFromSwagToDBModel(mappedChanges[key])
 		if err != nil {
 			return startTime, http.StatusInternalServerError, nil, fmt.Errorf(err.Error())
 		}
@@ -534,13 +673,15 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 	logger.Log.Warningf("TIME UNTIL MERGE COMPLETE: %f", durationTillMergeComplete)
 
 	// Attempt the Bulk update request on the DB
-	metricBaselineUpdateResponse, err := tenantDB.BulkUpdateMetricBaselines(tenantID, existingMetricBaselineList)
+	metricBaselineUpdateResponse, err := manager.tenantDB.BulkUpdateMetricBaselines(tenantID, existingMetricBaselineList)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to bulk update %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
 
 	durationTilBulkUpdateComplete := time.Since(startTime).Seconds()
 	logger.Log.Warningf("TIME UNTIL BULK UPDATE COMPLETE: %f", durationTilBulkUpdateComplete)
+
+	convertStartTime := time.Now()
 
 	id := "-1"
 	resType := "metricBaselineBulkUpdateResponse"
@@ -563,30 +704,13 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 		},
 	}
 
+	durationTilConvertComplete := time.Since(convertStartTime).Seconds()
+	logger.Log.Warningf("TIME UNTIL RESPONSE CONVERSION COMPLETE: %f", durationTilConvertComplete)
+
 	durationTilMethodComplete := time.Since(startTime).Seconds()
 	logger.Log.Warningf("TIME UNTIL METHOD COMPLETE: %f", durationTilMethodComplete)
 
-	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
+	// reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Bulk Updated of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)
 	return startTime, http.StatusOK, &converted, nil
-}
-
-func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []swagmodels.MetricBaselineData) ([]*tenmod.MetricBaselineData, error) {
-	result := []*tenmod.MetricBaselineData{}
-	for _, val := range swagCollection {
-		swagBytes, err := json.Marshal(val)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to marshal request baseline changes to bytes: %s", err.Error())
-		}
-
-		addItem := tenmod.MetricBaselineData{}
-		err = json.Unmarshal(swagBytes, &addItem)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to unmarshal request baseline change bytes to DB model: %s", err.Error())
-		}
-
-		result = append(result, &addItem)
-	}
-
-	return result, nil
 }

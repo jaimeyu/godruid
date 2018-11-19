@@ -1105,6 +1105,7 @@ type MetricBaseline struct {
 	MonitoredObjectID     string                `json:"monitoredObjectId"`
 	CreatedTimestamp      int64                 `json:"createdTimestamp"`
 	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
+	LastResetTimestamp    int64                 `json:"lastResetTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling

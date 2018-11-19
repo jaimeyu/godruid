@@ -8,9 +8,9 @@
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Response body indicating the bulk update request has been received successfully and will be completed'
           schema:
-            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+            type: string
         '400':
           description: "Request data does not pass validation"
           schema:

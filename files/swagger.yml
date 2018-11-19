@@ -4056,9 +4056,9 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Response body indicating the bulk update request has been received successfully and will be completed'
           schema:
-            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+            type: string
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -8358,7 +8358,7 @@ definitions:
         type: "string"
       attributes:
         type: "object"
-        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp", "lastResetTimestamp"]
         properties:
           tenantId:
             type: "string"
@@ -8391,6 +8391,9 @@ definitions:
           lastModifiedTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was last altered."
+          lastResetTimestamp:
+            type: "integer"
+            description: "Time since epoch at which this object was last reset to 0"
       
   MetricBaselineResponse:
     type: "object"
@@ -8510,36 +8513,6 @@ definitions:
                   type: "array"
                   items:
                     $ref: '#/definitions/MetricBaselineData'
-
-  MetricBaselineBulkUpdateResponse:
-    type: "object"
-    required: ["data"]
-    properties:
-      data:
-        type: "object"
-        required: ["type", "id", "attributes"]
-        properties:
-          type: 
-            type: "string"
-            enum: [metricBaselineBulkUpdateResponse]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            description: "A map of monitored object ID to the response data for each Monitored Object's update request"
-            additionalProperties:
-              type: "object"
-              properties:
-                ok:
-                  type: "boolean"
-                id:
-                  type: "string"
-                rev:
-                  type: "string"
-                error:
-                  type: "string"
-                reason:
-                  type: "string"
    
   # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
   ## REQUEST DEFINITION 

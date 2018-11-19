@@ -277,6 +277,11 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 		return nil, err
 	}
 
+	err = db.SetRevsLimit(1)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Log.Debugf("Created DB %s\n", dbName)
 
 	return db, nil

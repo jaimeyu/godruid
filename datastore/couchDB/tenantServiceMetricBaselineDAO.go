@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	ds "github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
@@ -167,45 +166,6 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 	return updated, nil
 }
 
-// func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error) {
-// 	logger.Log.Debugf("Retrieving %s for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
-// 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
-
-// 	// Retrieve just the subset of values.
-// 	requestBody := map[string]interface{}{}
-// 	requestBody["keys"] = []string{strings.ToLower(monObjID)}
-
-// 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
-
-// 	fetchResponse, err := fetchDesignDocumentResults(requestBody, dbName, metricBaselineByMOIDIndex)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	rows := fetchResponse["rows"].([]interface{})
-// 	if rows == nil || len(rows) == 0 {
-// 		return nil, fmt.Errorf(ds.NotFoundStr)
-// 	}
-// 	obj := rows[0].(map[string]interface{})
-// 	value := obj["value"].(map[string]interface{})
-// 	logger.Log.Debugf("Retrieved %s", models.AsJSONString(value))
-
-// 	response := tenmod.MetricBaseline{}
-// 	stripPrefixFromID(value)
-
-// 	// Marshal the response from the datastore to bytes so that it
-// 	// can be Marshalled back to the proper type.
-// 	if err = convertGenericCouchDataToObject(value, &response, string(tenmod.TenantMetricBaselineType)); err != nil {
-// 		return nil, err
-// 	}
-
-// 	if logger.IsDebugEnabled() {
-// 		logger.Log.Debugf("Retrieved %s %s", tenmod.TenantMetricBaselineStr, models.AsJSONString(response))
-// 	}
-
-// 	return &response, nil
-// }
-
 func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {
 	logger.Log.Debugf("Retrieving %ss for %s %s for %s %s for hour of week %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 
@@ -227,8 +187,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectFor
 // GetMetricBaselinesFor - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated
 // in a subsequent bulk PUT call.
 func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselinesFor(tenantID string, moIDToHourOfWeekMap map[string][]int32, addNotFoundValuesInResponse bool) ([]*tenmod.MetricBaseline, error) {
-	startTime := time.Now()
-
 	logger.Log.Debugf("Bulk retrieving %ss for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID)
 
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
@@ -258,22 +216,10 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselinesFor(tenantID string,
 	requestBody := map[string]interface{}{}
 	requestBody["keys"] = keyMap
 
-	durationTillFetchBodyComplete := time.Since(startTime).Seconds()
-	logger.Log.Warningf("DAO TIME UNTIL FETCH BODY READY: %f", durationTillFetchBodyComplete)
-
-	daoCallStartTime := time.Now()
-
 	fetchedGetData, err := fetchAllDocsWithQP(qp, requestBody, resource)
 	if err != nil {
 		return nil, err
 	}
-
-	durationTillFetchComplete := time.Since(daoCallStartTime).Seconds()
-	logger.Log.Warningf("DAO TIME FOR BULK FETCH FROM COUCH: %f", durationTillFetchComplete)
-
-	logger.Log.Debugf("Fetch All response: %s", models.AsJSONString(fetchedGetData))
-
-	buildResponseStartTime := time.Now()
 
 	// Need to convert retrieved records:
 	rows, ok := fetchedGetData["rows"].([]interface{})
@@ -332,20 +278,12 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselinesFor(tenantID string,
 		convertedRetrievedBaselines = append(convertedRetrievedBaselines, &dataContainer)
 	}
 
-	durationTillResponseComplete := time.Since(buildResponseStartTime).Seconds()
-	logger.Log.Warningf("DAO TIME TO CONVERT FETCH RESPONSE: %f", durationTillResponseComplete)
-
-	durationTillFetchMethodComplete := time.Since(startTime).Seconds()
-	logger.Log.Warningf("DAO TIME UNTIL FETCH METHOD COMPLETE: %f", durationTillFetchMethodComplete)
-
 	// Return the converted baseline data
 	logger.Log.Debugf("Completed bulk retrieval of %ss for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID)
 	return convertedRetrievedBaselines, nil
 }
 
 func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error) {
-	startTime := time.Now()
-
 	logger.Log.Debugf("Bulk updating %s", tenmod.TenantMetricBaselineStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
@@ -378,20 +316,10 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID str
 	body := map[string]interface{}{
 		"docs": data}
 
-	durationTillUpdateBodyComplete := time.Since(startTime).Seconds()
-	logger.Log.Warningf("DAO TIME UNTIL UPDATE BODY COMPLETE: %f", durationTillUpdateBodyComplete)
-
-	daoCallStartTime := time.Now()
-
 	fetchedData, err := performBulkUpdateInBatchMode(body, resource)
 	if err != nil {
 		return nil, err
 	}
-
-	durationTillUpdateCallComplete := time.Since(daoCallStartTime).Seconds()
-	logger.Log.Warningf("DAO TIME TO COMPLETE BULK UPDATE ON COUCH: %f", durationTillUpdateCallComplete)
-
-	buildResponseStartTime := time.Now()
 
 	// Populate the response
 	res := make([]*common.BulkOperationResult, 0)
@@ -416,12 +344,6 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID str
 		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
 		res = append(res, &newObj)
 	}
-
-	durationTillResponseComplete := time.Since(buildResponseStartTime).Seconds()
-	logger.Log.Warningf("DAO TIME TO CONVERT UPDATE RESPONSE: %f", durationTillResponseComplete)
-
-	durationTillUpdateMethodComplete := time.Since(startTime).Seconds()
-	logger.Log.Warningf("DAO TIME UNTIL UPDATE METHOD COMPLETE: %f", durationTillUpdateMethodComplete)
 
 	logger.Log.Debugf("Bulk update of %s complete\n", tenmod.TenantMetricBaselineStr)
 	return res, nil

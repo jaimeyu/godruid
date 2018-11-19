@@ -174,6 +174,10 @@ type MetricBaselineAttributes struct {
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
 
+	// Time since epoch at which this object was last reset to 0
+	// Required: true
+	LastResetTimestamp *int64 `json:"lastResetTimestamp"`
+
 	// Unique identifier of the Monitored Object for which these baselines are applicable
 	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
 
@@ -211,6 +215,10 @@ func (m *MetricBaselineAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLastResetTimestamp(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -305,6 +313,15 @@ func (m *MetricBaselineAttributes) validateHourOfWeek(formats strfmt.Registry) e
 func (m *MetricBaselineAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineAttributes) validateLastResetTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"lastResetTimestamp", "body", m.LastResetTimestamp); err != nil {
 		return err
 	}
 

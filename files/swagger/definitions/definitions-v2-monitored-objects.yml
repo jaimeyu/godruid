@@ -191,6 +191,41 @@
               "wgs87_x": "-45.7123912"
               "wgs87_y": "-74.2130912"
 
+  BulkMonitoredObjectMetaCreateRequest: 
+    type: "object"
+    required: ["data"]
+    description: "Object used to update the meta information for one or more Monitored Objects in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [monitoredObjectsMeta]
+          attributes:
+            type: "object"
+            properties:
+              metadata-entries:
+                type: "array"
+                items:
+                  type: "object"
+                  required: ["objectName", "metadata"]
+                  properties:
+                    objectName:
+                      type: "string"
+                      description: "Name of the monitored object in the datastore"
+                    metadata:
+                      type: "object"
+                      description: "Attributes added to a Monitored Object that help identify the Monitored Object as well as provide filtering/grouping properties"
+                      additionalProperties:
+                        type: "string"
+                      example:
+                        "region": "paris"
+                        "wgs87_x": "-45.7123912"
+                        "wgs87_y": "-74.2130912"
+  
+
   BulkMonitoredObjectUpdateRequest:
     type: "object"
     description: "Object used to update one or more Monitored Objects in Datahub"

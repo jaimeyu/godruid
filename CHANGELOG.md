@@ -1,3 +1,4 @@
+* Feature - Adding V2 API for  bulk meta
 ## Current Release 
 ### 0.258.0 
 **Release Date:** Fri Nov 16 16:08:32 UTC 2018     

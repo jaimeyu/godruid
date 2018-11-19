@@ -43,11 +43,14 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
-		JSONProducer:        runtime.JSONProducer(),
 		BinProducer:         runtime.ByteStreamProducer(),
+		JSONProducer:        runtime.JSONProducer(),
 		TxtProducer:         runtime.TextProducer(),
 		TenantProvisioningServiceBulkInsertMonitoredObjectHandler: tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkInsertMonitoredObject has not yet been implemented")
+		}),
+		TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler: tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2 has not yet been implemented")
 		}),
 		TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2 has not yet been implemented")
@@ -548,18 +551,20 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/json" mime type
+	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/json" mime type
-	JSONProducer runtime.Producer
 	// BinProducer registers a producer for a "application/octet-stream" mime type
 	BinProducer runtime.Producer
+	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
+	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
 	// TenantProvisioningServiceBulkInsertMonitoredObjectHandler sets the operation handler for the bulk insert monitored object operation
 	TenantProvisioningServiceBulkInsertMonitoredObjectHandler tenant_provisioning_service.BulkInsertMonitoredObjectHandler
+	// TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler sets the operation handler for the bulk insert monitored objects meta v2 operation
+	TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Handler
 	// TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler sets the operation handler for the bulk insert monitored objects v2 operation
 	TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Handler
 	// TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler sets the operation handler for the bulk update metric baselines v2 operation
@@ -935,12 +940,12 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "JSONConsumer")
 	}
 
-	if o.JSONProducer == nil {
-		unregistered = append(unregistered, "JSONProducer")
-	}
-
 	if o.BinProducer == nil {
 		unregistered = append(unregistered, "BinProducer")
+	}
+
+	if o.JSONProducer == nil {
+		unregistered = append(unregistered, "JSONProducer")
 	}
 
 	if o.TxtProducer == nil {
@@ -949,6 +954,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceBulkInsertMonitoredObjectHandler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service.BulkInsertMonitoredObjectHandler")
+	}
+
+	if o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler == nil {
@@ -1639,14 +1648,14 @@ func (o *GatherAPI) ProducersFor(mediaTypes []string) map[string]runtime.Produce
 	for _, mt := range mediaTypes {
 		switch mt {
 
+		case "application/octet-stream":
+			result["application/octet-stream"] = o.BinProducer
+
 		case "application/json":
 			result["application/json"] = o.JSONProducer
 
 		case "application/vnd.api+json":
 			result["application/vnd.api+json"] = o.JSONProducer
-
-		case "application/octet-stream":
-			result["application/octet-stream"] = o.BinProducer
 
 		case "text/plain":
 			result["text/plain"] = o.TxtProducer
@@ -1697,6 +1706,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v1/tenants/{tenantId}/bulk/insert/monitored-objects"] = tenant_provisioning_service.NewBulkInsertMonitoredObject(o.context, o.TenantProvisioningServiceBulkInsertMonitoredObjectHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v2/bulk/insert/monitored-objects/meta"] = tenant_provisioning_service_v2.NewBulkInsertMonitoredObjectsMetaV2(o.context, o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

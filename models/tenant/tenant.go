@@ -968,6 +968,31 @@ func (meta *MonitoredObjectBulkMetadata) Validate(isUpdate bool) error {
 	return nil
 }
 
+type BulkMetadataEntries struct {
+	ID              string              `json:"_id"`
+	MetadataEntries []BulkMetadataEntry `json:"metadata-entries"`
+}
+
+type BulkMetadataEntry struct {
+	Metadata   map[string]string `json:"metadata"`
+	ObjectName string            `json:"objectName"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (bme *BulkMetadataEntries) GetID() string {
+	return bme.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (bme *BulkMetadataEntries) SetID(s string) error {
+	bme.ID = s
+	return nil
+}
+
+func (bme *BulkMetadataEntries) GetName() string {
+	return "monitoredObjectsMeta"
+}
+
 // Error models
 type RequestErrorItem struct {
 	Reason string                          `json:"reason"`

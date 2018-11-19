@@ -1,8 +1,10 @@
-* Feature - Adding V2 API for  bulk meta
 ## Current Release 
+### 0.259.0 
+**Release Date:** Mon Nov 19 14:28:33 UTC 2018     
+## Previous Releases 
+* Feature - Adding V2 API for  bulk meta
 ### 0.258.0 
 **Release Date:** Fri Nov 16 16:08:32 UTC 2018     
-## Previous Releases 
 * Fix - Alpine image is now pointing to alpine latest instead of edge
 ### 0.257.0 
 **Release Date:** Thu Nov 15 19:50:03 UTC 2018     

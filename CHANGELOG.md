@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.260.0 
+**Release Date:** Tue Nov 20 02:58:26 UTC 2018     
+## Previous Releases 
 ### 0.259.0 
 **Release Date:** Mon Nov 19 14:28:33 UTC 2018     
-## Previous Releases 
 * Feature - Adding V2 API for  bulk meta
 ### 0.258.0 
 **Release Date:** Fri Nov 16 16:08:32 UTC 2018     

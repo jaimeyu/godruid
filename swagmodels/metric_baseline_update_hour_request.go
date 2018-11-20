@@ -7,6 +7,7 @@ package swagmodels
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -80,7 +81,7 @@ type MetricBaselineUpdateHourRequestData struct {
 
 	// attributes
 	// Required: true
-	Attributes *MetricBaselineData `json:"attributes"`
+	Attributes *MetricBaselineUpdateHourRequestDataAttributes `json:"attributes"`
 
 	// id
 	ID string `json:"id,omitempty"`
@@ -178,6 +179,71 @@ func (m *MetricBaselineUpdateHourRequestData) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *MetricBaselineUpdateHourRequestData) UnmarshalBinary(b []byte) error {
 	var res MetricBaselineUpdateHourRequestData
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// MetricBaselineUpdateHourRequestDataAttributes metric baseline update hour request data attributes
+// swagger:model MetricBaselineUpdateHourRequestDataAttributes
+type MetricBaselineUpdateHourRequestDataAttributes struct {
+
+	// Contains the dynamically calculated baseline values for the metrics collected by Datahub
+	Baselines []*MetricBaselineData `json:"baselines"`
+}
+
+// Validate validates this metric baseline update hour request data attributes
+func (m *MetricBaselineUpdateHourRequestDataAttributes) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateBaselines(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MetricBaselineUpdateHourRequestDataAttributes) validateBaselines(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Baselines) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Baselines); i++ {
+		if swag.IsZero(m.Baselines[i]) { // not required
+			continue
+		}
+
+		if m.Baselines[i] != nil {
+			if err := m.Baselines[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("data" + "." + "attributes" + "." + "baselines" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *MetricBaselineUpdateHourRequestDataAttributes) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *MetricBaselineUpdateHourRequestDataAttributes) UnmarshalBinary(b []byte) error {
+	var res MetricBaselineUpdateHourRequestDataAttributes
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

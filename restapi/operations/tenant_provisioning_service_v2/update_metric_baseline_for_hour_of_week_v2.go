@@ -29,7 +29,7 @@ func NewUpdateMetricBaselineForHourOfWeekV2(ctx *middleware.Context, handler Upd
 	return &UpdateMetricBaselineForHourOfWeekV2{Context: ctx, Handler: handler}
 }
 
-/*UpdateMetricBaselineForHourOfWeekV2 swagger:route PATCH /v2/metric-baselines/by-monitored-object/{monitoredObjectId} TenantProvisioningServiceV2 updateMetricBaselineForHourOfWeekV2
+/*UpdateMetricBaselineForHourOfWeekV2 swagger:route PATCH /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek} TenantProvisioningServiceV2 updateMetricBaselineForHourOfWeekV2
 
 Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
 

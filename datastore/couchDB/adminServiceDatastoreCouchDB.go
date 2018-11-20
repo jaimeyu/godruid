@@ -277,6 +277,11 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 		return nil, err
 	}
 
+	err = db.SetRevsLimit(1)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Log.Debugf("Created DB %s\n", dbName)
 
 	return db, nil
@@ -305,18 +310,18 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 		}
 	}
 
-	mbDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, metricBaselineDBSuffix)))
-	if err != nil {
-		return err
-	}
+	// mbDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, metricBaselineDBSuffix)))
+	// if err != nil {
+	// 	return err
+	// }
 
-	// Store the views related to Monitored Objects
-	for _, viewPayload := range getMetricBaselineViews() {
-		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", mbDB, nil)
-		if err != nil {
-			return err
-		}
-	}
+	// // Store the views related to Monitored Objects
+	// for _, viewPayload := range getMetricBaselineViews() {
+	// 	_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", mbDB, nil)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	logger.Log.Debugf("Added views to DB %s\n", dbName)
 	return nil

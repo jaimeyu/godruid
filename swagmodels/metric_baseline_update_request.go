@@ -212,6 +212,11 @@ type MetricBaselineUpdateRequestDataAttributes struct {
 	// Required: true
 	Baselines []*MetricBaselineData `json:"baselines"`
 
+	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
+	// Maximum: 167
+	// Minimum: 0
+	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
+
 	// Unique identifier of the Monitored Object for which these baselines are applicable
 	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
 }
@@ -225,6 +230,10 @@ func (m *MetricBaselineUpdateRequestDataAttributes) Validate(formats strfmt.Regi
 	}
 
 	if err := m.validateBaselines(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateHourOfWeek(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -263,6 +272,23 @@ func (m *MetricBaselineUpdateRequestDataAttributes) validateBaselines(formats st
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineUpdateRequestDataAttributes) validateHourOfWeek(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.HourOfWeek) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("data"+"."+"attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("data"+"."+"attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
+		return err
 	}
 
 	return nil

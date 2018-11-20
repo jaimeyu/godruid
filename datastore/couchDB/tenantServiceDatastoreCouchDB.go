@@ -708,7 +708,7 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string,
 	}
 
 	// Try and remove any metric baselines for this monitored object:
-	associatedMetricBaseline, err := tsd.GetMetricBaselineForMonitoredObject(originalTenantID, originalDataID)
+	associatedMetricBaseline, err := tsd.GetMetricBaseline(originalTenantID, originalDataID)
 	if err != nil {
 		logger.Log.Warningf("Successful deletion of %s %s and there is no associated %s  for %s %s: %s", tenmod.TenantMonitoredObjectStr, originalDataID, tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, originalDataID)
 	}

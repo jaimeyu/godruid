@@ -12,6 +12,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -39,6 +40,11 @@ type UpdateMetricBaselineForHourOfWeekV2Params struct {
 	  In: body
 	*/
 	Body *swagmodels.MetricBaselineUpdateHourRequest
+	/*
+	  Required: true
+	  In: path
+	*/
+	HourOfWeek int32
 	/*
 	  Required: true
 	  In: path
@@ -77,6 +83,11 @@ func (o *UpdateMetricBaselineForHourOfWeekV2Params) BindRequest(r *http.Request,
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
+	rHourOfWeek, rhkHourOfWeek, _ := route.Params.GetOK("hourOfWeek")
+	if err := o.bindHourOfWeek(rHourOfWeek, rhkHourOfWeek, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	rMonitoredObjectID, rhkMonitoredObjectID, _ := route.Params.GetOK("monitoredObjectId")
 	if err := o.bindMonitoredObjectID(rMonitoredObjectID, rhkMonitoredObjectID, route.Formats); err != nil {
 		res = append(res, err)
@@ -85,6 +96,25 @@ func (o *UpdateMetricBaselineForHourOfWeekV2Params) BindRequest(r *http.Request,
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindHourOfWeek binds and validates parameter HourOfWeek from path.
+func (o *UpdateMetricBaselineForHourOfWeekV2Params) bindHourOfWeek(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
+
+	value, err := swag.ConvertInt32(raw)
+	if err != nil {
+		return errors.InvalidType("hourOfWeek", "path", "int32", raw)
+	}
+	o.HourOfWeek = value
+
 	return nil
 }
 

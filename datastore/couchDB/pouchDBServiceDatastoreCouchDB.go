@@ -339,6 +339,17 @@ func performBulkUpdate(body map[string]interface{}, resource *couchdb.Resource) 
 	return parseDataArray(data)
 }
 
+func performBulkUpdateInBatchMode(body map[string]interface{}, resource *couchdb.Resource) ([]map[string]interface{}, error) {
+	params := url.Values{}
+	params.Add("batch", "ok")
+	_, data, err := resource.PostJSON("_bulk_docs", nil, body, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseDataArray(data)
+}
+
 func performBulkGet(queryParams *url.Values, body map[string]interface{}, resource *couchdb.Resource) (map[string]interface{}, error) {
 	_, data, err := resource.PostJSON("_bulk_get", nil, body, *queryParams)
 	if err != nil {

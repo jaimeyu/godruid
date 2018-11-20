@@ -1,8 +1,10 @@
-* Feature - Initial checkin of metric query integration tests
 ## Current Release 
+### 0.261.0 
+**Release Date:** Tue Nov 20 14:47:32 UTC 2018     
+## Previous Releases 
+* Feature - Initial checkin of metric query integration tests
 ### 0.260.0 
 **Release Date:** Tue Nov 20 02:58:26 UTC 2018     
-## Previous Releases 
 ### 0.259.0 
 **Release Date:** Mon Nov 19 14:28:33 UTC 2018     
 * Feature - Adding V2 API for  bulk meta

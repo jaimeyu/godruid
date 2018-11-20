@@ -1,8 +1,10 @@
-* Fix - Add a toggle to add/remove data cleaning to aggregate request 
 ## Current Release 
+### 0.262.0 
+**Release Date:** Tue Nov 20 16:41:27 UTC 2018     
+## Previous Releases 
+* Fix - Add a toggle to add/remove data cleaning to aggregate request 
 ### 0.261.0 
 **Release Date:** Tue Nov 20 14:47:32 UTC 2018     
-## Previous Releases 
 * Feature - Initial checkin of metric query integration tests
 ### 0.260.0 
 **Release Date:** Tue Nov 20 02:58:26 UTC 2018     

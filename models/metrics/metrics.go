@@ -385,6 +385,7 @@ type AggregateMetrics struct {
 	Interval         string                   `json:"interval,omitempty"`
 	Granularity      string                   `json:"granularity,omitempty"`
 	Timeout          int32                    `json:"timeout,omitempty"`
+	IgnoreCleaning   bool                     `json:"ignoreCleaning,omitempty"`
 	Aggregation      string                   `json:"aggregation"`
 	Metrics          []MetricIdentifierFilter `json:"metrics,omitempty"`
 	MonitoredObjects []string                 `json:"monitoredObjects,omitempty"`

@@ -1381,7 +1381,7 @@ func RawMetricsQueryV1(tenant string, dataSource string, metrics []string, inter
 }
 
 //AggMetricsQuery  - Query that returns a aggregated metric values
-func AggMetricsQuery(tenant string, dataSource string, interval string, monitoredObjectIds []string, aggregateOnMeta bool, aggregationFunc string, metrics []metrics.MetricIdentifierFilter, timeout int32, granularity string) (godruid.Query, *PostProcessor, *db.QueryKeySpec, error) {
+func AggMetricsQuery(tenant string, dataSource string, interval string, monitoredObjectIds []string, aggregateOnMeta bool, aggregationFunc string, metrics []metrics.MetricIdentifierFilter, ignoreCleaning bool, timeout int32, granularity string) (godruid.Query, *PostProcessor, *db.QueryKeySpec, error) {
 
 	var aggregations []godruid.Aggregation
 	var pp PostProcessor
@@ -1446,6 +1446,11 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 		countKeys:  countKeys,
 	}
 
+	var cleanFilterRef *godruid.Filter
+	if !ignoreCleaning {
+		cleanFilterRef = cleanFilter()
+	}
+
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
@@ -1453,7 +1458,7 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			cleanFilter(),
+			cleanFilterRef,
 			BuildMonitoredObjectFilter(tenant, monitoredObjectIds),
 		),
 		Intervals:        []string{interval},

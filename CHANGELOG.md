@@ -1,3 +1,4 @@
+* Fix - Add a toggle to add/remove data cleaning to aggregate request 
 ## Current Release 
 ### 0.261.0 
 **Release Date:** Tue Nov 20 14:47:32 UTC 2018     

@@ -1,3 +1,4 @@
+* Feature - Initial checkin of metric query integration tests
 ## Current Release 
 ### 0.260.0 
 **Release Date:** Tue Nov 20 02:58:26 UTC 2018     

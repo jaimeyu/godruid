@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	ds "github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/logger"
+	"github.com/accedian/adh-gather/models"
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
@@ -11,12 +13,13 @@ import (
 )
 
 func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *testing.T) {
+	mbDB := runner.tenantDB.(ds.TenantMetricBaselineDatastore)
 	const COMPANY1 = "MetricBaselineCompany"
 	const SUBDOMAIN1 = "subdom1"
 	const MONOBJ1 = "MONOBJ1"
 	const MONOBJ2 = "MONOBJ2"
 	const DELAYP95 = "delayP95"
-	const JITTER95 = "jitterP(%"
+	const JITTER95 = "jitterP95"
 
 	// Create a tenant
 	data := admmod.Tenant{
@@ -31,25 +34,25 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	TENANT := ds.GetDataIDFromFullID(tenantDescriptor.ID)
 
 	// Try to fetch a record even though none exist:
-	fail, err := runner.tenantDB.GetMetricBaseline(TENANT, "someID")
+	fail, err := mbDB.GetMetricBaseline(TENANT, "someID")
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
-	fail, err = runner.tenantDB.GetMetricBaseline(TENANT, "someID")
+	fail, err = mbDB.GetMetricBaseline(TENANT, "someID")
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
-	failArray, err := runner.tenantDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, "someID", int32(1))
+	failArray, err := mbDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, "someID", int32(1))
 	assert.NotNil(t, err)
 	assert.Nil(t, failArray)
 
 	// Try to Update a record that does not exist:
-	fail, err = runner.tenantDB.UpdateMetricBaseline(&tenmod.MetricBaseline{})
+	fail, err = mbDB.UpdateMetricBaseline(&tenmod.MetricBaseline{})
 	assert.NotNil(t, err)
 	assert.Nil(t, fail)
 
 	// Try to update an hour in a record that does not exist, should creatre the record
-	upsert, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, MONOBJ1, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "0"})
+	upsert, err := mbDB.UpdateMetricBaselineForHourOfWeek(TENANT, MONOBJ1, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "0"})
 	assert.Nil(t, err)
 	assert.NotNil(t, upsert)
 	assert.NotEmpty(t, upsert.ID)
@@ -69,7 +72,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 		MonitoredObjectID: MONOBJ1,
 		HourOfWeek:        150,
 	}
-	failedCreate, err := runner.tenantDB.CreateMetricBaseline(&createObj)
+	failedCreate, err := mbDB.CreateMetricBaseline(&createObj)
 	assert.NotNil(t, err)
 	assert.Nil(t, failedCreate)
 
@@ -80,7 +83,7 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 		MonitoredObjectID: MONOBJ2,
 		Baselines:         []*tenmod.MetricBaselineData{},
 	}
-	created, err := runner.tenantDB.CreateMetricBaseline(&metricBaseline1)
+	created, err := mbDB.CreateMetricBaseline(&metricBaseline1)
 	assert.Nil(t, err)
 	assert.NotNil(t, created)
 	assert.NotEmpty(t, created.ID)
@@ -92,42 +95,47 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.True(t, created.LastModifiedTimestamp > 0, "LastmodifiedTimestamp was not set")
 
 	// Get a record
-	fetched, err := runner.tenantDB.GetMetricBaseline(TENANT, created.ID)
+	fetched, err := mbDB.GetMetricBaseline(TENANT, created.ID)
 	assert.Nil(t, err)
 	assert.ElementsMatch(t, created.Baselines, fetched.Baselines, "The retrieved record should have the same baselines as the created record")
 	assert.Equal(t, created.MonitoredObjectID, fetched.MonitoredObjectID, "Monitored object not the same")
 
+	logger.Log.Warningf("BEFORE UPDATE: %s", models.AsJSONString(upsert))
+
 	// Add new baseline data to existing record
-	updated, err := runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
+	updated, err := mbDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
 	assert.Nil(t, err)
 	assert.NotNil(t, updated)
 	assert.Equal(t, upsert.ID, updated.ID, "ID not the same")
 	assert.Equal(t, TENANT, updated.TenantID, "Tenant ID not the same")
 	assert.Equal(t, 2, len(updated.Baselines), "Baseline array should have 2 elements")
 
+	logger.Log.Warningf("AFTER UPDATE ONE: %s", models.AsJSONString(updated))
+
 	// add another bit of data for hour 150
-	_, err = runner.tenantDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "1"})
+	anotherUpdate, err := mbDB.UpdateMetricBaselineForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150, &tenmod.MetricBaselineData{Metric: DELAYP95, Direction: "1"})
 	assert.Nil(t, err)
+	logger.Log.Warningf("AFTER UPDATE TWO: %s", models.AsJSONString(anotherUpdate))
 
 	// Get baselines for an hour of the week - success
-	baselineArray, err := runner.tenantDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150)
+	baselineArray, err := mbDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, upsert.MonitoredObjectID, 150)
 	assert.Nil(t, err)
 	assert.NotNil(t, baselineArray)
-	assert.Equal(t, 2, len(baselineArray))
+	assert.Equal(t, 3, len(baselineArray))
 
-	baselineArray, err = runner.tenantDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, upsert.MonitoredObjectID, 250)
+	baselineArray, err = mbDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(TENANT, upsert.MonitoredObjectID, 250)
 	assert.NotNil(t, err)
 	assert.Nil(t, baselineArray)
 
 	// Update an entire record
-	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, upsert.ID)
+	fetched, err = mbDB.GetMetricBaseline(TENANT, upsert.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, fetched)
-	assert.Equal(t, 2, len(fetched.Baselines))
+	assert.Equal(t, 3, len(fetched.Baselines))
 
 	fetched.Baselines = []*tenmod.MetricBaselineData{}
 	fetched.ID = ds.GetDataIDFromFullID(fetched.ID)
-	replaced, err := runner.tenantDB.UpdateMetricBaseline(fetched)
+	replaced, err := mbDB.UpdateMetricBaseline(fetched)
 	assert.Nil(t, err)
 	assert.NotNil(t, replaced)
 	assert.Equal(t, 0, len(replaced.Baselines))
@@ -146,16 +154,16 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Nil(t, err)
 	assert.NotNil(t, deletedMO)
 
-	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, MONOBJ1)
+	fetched, err = mbDB.GetMetricBaseline(TENANT, MONOBJ1)
 	assert.NotNil(t, err)
 	assert.Nil(t, fetched)
 
 	// Now delete a metric baseline successfully by ID
-	deleted, err := runner.tenantDB.DeleteMetricBaseline(TENANT, ds.GetDataIDFromFullID(created.ID))
+	deleted, err := mbDB.DeleteMetricBaseline(TENANT, ds.GetDataIDFromFullID(created.ID))
 	assert.Nil(t, err)
 	assert.NotNil(t, deleted)
 
-	fetched, err = runner.tenantDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
+	fetched, err = mbDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
 	assert.NotNil(t, err)
 	assert.Nil(t, fetched)
 }

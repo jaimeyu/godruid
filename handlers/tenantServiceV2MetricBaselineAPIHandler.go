@@ -22,7 +22,7 @@ import (
 )
 
 // HandleCreateMetricBaselineV2 - create a new MetricBaseline record
-func HandleCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) middleware.Responder {
+func HandleCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) middleware.Responder {
 
 		// Do the work
@@ -49,7 +49,7 @@ func HandleCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 }
 
 // HandleGetMetricBaselineV2 - retrieve a MetricBaseline record by the ID
-func HandleGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineV2Params) middleware.Responder {
+func HandleGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.GetMetricBaselineV2Params) middleware.Responder {
 
 		// Do the work
@@ -75,7 +75,7 @@ func HandleGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantS
 }
 
 // HandleUpdateMetricBaselineV2 - update a MetricBaseline record
-func HandleUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) middleware.Responder {
+func HandleUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) middleware.Responder {
 
 		// Do the work
@@ -104,7 +104,7 @@ func HandleUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 }
 
 // HandleDeleteMetricBaselineV2 - delete a MetricBaseline record by ID.
-func HandleDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) middleware.Responder {
+func HandleDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) middleware.Responder {
 
 		// Do the work
@@ -129,7 +129,7 @@ func HandleDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 	}
 }
 
-func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
+func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 
 		// Do the work
@@ -154,7 +154,7 @@ func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []st
 	}
 }
 
-func HandleUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) middleware.Responder {
+func HandleUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doUpdateMetricBaselineForHourOfWeekV2(allowedRoles, tenantDB, params)
@@ -178,7 +178,7 @@ func HandleUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB d
 }
 
 // HandleBulkUpdateMetricBaselinesV2 - update multiple MetricBaseline records for Multiple Monitored Objects
-func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, bulkUpdateManager *MetricBaselineBulkUpdateManager) func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
+func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, bulkUpdateManager *MetricBaselineBulkUpdateManager) func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
 
 		// Do the work
@@ -202,7 +202,7 @@ func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore
 	}
 }
 
-func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s for tenant %s", tenmod.TenantMetricBaselineStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
 
@@ -244,7 +244,7 @@ func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	return startTime, http.StatusCreated, &converted, nil
 }
 
-func doGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s %s for %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -273,7 +273,7 @@ func doGetMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServi
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.UpdateMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Updating %s %s for %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -325,7 +325,7 @@ func doUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Deleting %s %s for %s %s", tenmod.TenantMetricBaselineStr, params.MetricBaselineID, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -354,7 +354,7 @@ func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantSe
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineHourOfWeekResponse, error) {
+func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineHourOfWeekResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s for %s %s for %s %s and hourOfWeek %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, params.HourOfWeek), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -401,7 +401,7 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.UpdateMetricBaselineForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Updateing %s for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -442,7 +442,7 @@ func doUpdateMetricBaselineForHourOfWeekV2(allowedRoles []string, tenantDB datas
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params, bulkUpdateManager *MetricBaselineBulkUpdateManager) (time.Time, int, string, error) {
+func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params, bulkUpdateManager *MetricBaselineBulkUpdateManager) (time.Time, int, string, error) {
 	startTime := time.Now()
 
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
@@ -488,7 +488,7 @@ func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []*swag
 type MetricBaselineBulkUpdateManager struct {
 	jobs     chan bulkUpdateJob
 	results  chan bulkUpdateResult
-	tenantDB datastore.TenantServiceDatastore
+	tenantDB datastore.TenantMetricBaselineDatastore
 }
 
 type bulkUpdateJob struct {
@@ -504,7 +504,7 @@ type bulkUpdateResult struct {
 	err error
 }
 
-func CreateMetricBaselineBulkUpdateManager(db datastore.TenantServiceDatastore) *MetricBaselineBulkUpdateManager {
+func CreateMetricBaselineBulkUpdateManager(db datastore.TenantMetricBaselineDatastore) *MetricBaselineBulkUpdateManager {
 	cfg := gather.GetConfig()
 
 	numJobs := cfg.GetInt(gather.CK_args_metricbaselines_maxnumjobs.String())

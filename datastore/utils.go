@@ -40,10 +40,10 @@ func GenerateID(obj interface{}, dataType string) string {
 		return PrependToDataID(strings.TrimSpace(cast.MonitoredObjectID), dataType)
 	case *tenmod.MetricBaseline:
 		cast := obj.(*tenmod.MetricBaseline)
-		return PrependToDataID(strings.TrimSpace(cast.MonitoredObjectID), dataType)
+		return PrependToDataID(strings.TrimSpace(fmt.Sprintf("%s_%d", cast.MonitoredObjectID, cast.HourOfWeek)), dataType)
 	case tenmod.MetricBaseline:
 		cast := obj.(tenmod.MetricBaseline)
-		return PrependToDataID(strings.TrimSpace(cast.MonitoredObjectID), dataType)
+		return PrependToDataID(strings.TrimSpace(fmt.Sprintf("%s_%d", cast.MonitoredObjectID, cast.HourOfWeek)), dataType)
 	default:
 		uuid := uuid.NewV4()
 		return PrependToDataID(uuid.String(), dataType)

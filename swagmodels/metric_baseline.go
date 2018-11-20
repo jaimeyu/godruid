@@ -165,9 +165,18 @@ type MetricBaselineAttributes struct {
 	// Required: true
 	Datatype *string `json:"datatype"`
 
+	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
+	// Maximum: 167
+	// Minimum: 0
+	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
+
 	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
+
+	// Time since epoch at which this object was last reset to 0
+	// Required: true
+	LastResetTimestamp *int64 `json:"lastResetTimestamp"`
 
 	// Unique identifier of the Monitored Object for which these baselines are applicable
 	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
@@ -201,7 +210,15 @@ func (m *MetricBaselineAttributes) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateHourOfWeek(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateLastModifiedTimestamp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLastResetTimestamp(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -276,9 +293,35 @@ func (m *MetricBaselineAttributes) validateDatatype(formats strfmt.Registry) err
 	return nil
 }
 
+func (m *MetricBaselineAttributes) validateHourOfWeek(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.HourOfWeek) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("attributes"+"."+"hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *MetricBaselineAttributes) validateLastModifiedTimestamp(formats strfmt.Registry) error {
 
 	if err := validate.Required("attributes"+"."+"lastModifiedTimestamp", "body", m.LastModifiedTimestamp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineAttributes) validateLastResetTimestamp(formats strfmt.Registry) error {
+
+	if err := validate.Required("attributes"+"."+"lastResetTimestamp", "body", m.LastResetTimestamp); err != nil {
 		return err
 	}
 

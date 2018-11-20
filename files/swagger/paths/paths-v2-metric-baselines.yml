@@ -8,9 +8,9 @@
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Response body indicating the bulk update request has been received successfully and will be completed'
           schema:
-            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+            type: string
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -216,7 +216,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineResponse'
+            $ref: '#/definitions/MetricBaselineListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -236,6 +236,7 @@
           type: string
       tags:
         - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     patch:
       summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
       operationId: UpdateMetricBaselineForHourOfWeekV2
@@ -269,6 +270,11 @@
           schema:
             type: string
       parameters:
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
         - name: monitoredObjectId
           in: path
           required: true
@@ -280,7 +286,6 @@
             $ref: '#/definitions/MetricBaselineUpdateHourRequest'
       tags:
         - TenantProvisioningServiceV2
-  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     get:
       summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
       operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2

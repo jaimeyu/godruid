@@ -2,7 +2,10 @@ package restapi
 
 import (
 	"github.com/accedian/adh-gather/datastore"
+	pgdb "github.com/accedian/adh-gather/datastore/postgres"
+	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
+	"github.com/accedian/adh-gather/logger"
 	"github.com/accedian/adh-gather/restapi/operations"
 	"github.com/accedian/adh-gather/restapi/operations/admin_provisioning_service_v2"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service_v2"
@@ -104,7 +107,18 @@ func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.T
 	api.TenantProvisioningServiceV2UpdateMetadataConfigV2Handler = tenant_provisioning_service_v2.UpdateMetadataConfigV2HandlerFunc(handlers.HandleUpdateMetadataConfigV2(handlers.SkylightAndTenantAdminRoles, tenantDB))
 	api.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler = tenant_provisioning_service_v2.DeleteMetadataConfigV2HandlerFunc(handlers.HandleDeleteMetadataConfigV2(handlers.SkylightAdminRoleOnly, tenantDB))
 
+	// Determine what type of DAO to use for metric baseline provisioning
+	cfg := gather.GetConfig()
+	mbDBImpl := cfg.GetInt(gather.CK_args_metricbaselines_impl.String())
+
 	metricBaselineDatastore := tenantDB.(datastore.TenantMetricBaselineDatastore)
+	if mbDBImpl == int(gather.POSTGRES) {
+		var err error
+		metricBaselineDatastore, err = pgdb.CreateTenantMetricBaselinePostgresDAO()
+		if err != nil {
+			logger.Log.Fatalf("Unable to create Metric Baseline provisioning DAO: %s", err.Error())
+		}
+	}
 
 	api.TenantProvisioningServiceV2GetMetricBaselineV2Handler = tenant_provisioning_service_v2.GetMetricBaselineV2HandlerFunc(handlers.HandleGetMetricBaselineV2(handlers.AllRoles, metricBaselineDatastore))
 	api.TenantProvisioningServiceV2CreateMetricBaselineV2Handler = tenant_provisioning_service_v2.CreateMetricBaselineV2HandlerFunc(handlers.HandleCreateMetricBaselineV2(handlers.SkylightAdminRoleOnly, metricBaselineDatastore))

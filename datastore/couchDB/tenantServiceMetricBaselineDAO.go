@@ -1,6 +1,7 @@
 package couchDB
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	admmod "github.com/accedian/adh-gather/models/admin"
 	"github.com/accedian/adh-gather/models/common"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/accedian/adh-gather/swagmodels"
 	couchdb "github.com/leesper/couchdb-golang"
 )
 
@@ -322,7 +324,7 @@ func addMetricBaselineRecordToBulkFetchResponse(mbTypeString string, tenantID st
 	return true
 }
 
-func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error) {
+func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselinesFromList(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error) {
 	logger.Log.Debugf("Bulk updating %s", tenmod.TenantMetricBaselineStr)
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s", tenantID, metricBaselineDBSuffix))
@@ -386,6 +388,73 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID str
 
 	logger.Log.Debugf("Bulk update of %s complete\n", tenmod.TenantMetricBaselineStr)
 	return res, nil
+}
+
+func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID string, entries []*swagmodels.MetricBaselineBulkUpdateRequestDataAttributesItems0) ([]*common.BulkOperationResult, error) {
+	// Build up the request body to fetch existing records for all of the passed in MOs
+	moIDToHourOfWeekMap := map[string][]int32{}
+	for _, entry := range entries {
+		_, ok := moIDToHourOfWeekMap[entry.MonitoredObjectID]
+		if !ok {
+			moIDToHourOfWeekMap[entry.MonitoredObjectID] = []int32{*entry.HourOfWeek}
+			continue
+		}
+
+		moIDToHourOfWeekMap[entry.MonitoredObjectID] = append(moIDToHourOfWeekMap[entry.MonitoredObjectID], *entry.HourOfWeek)
+	}
+
+	existingMetricBaselineList, err := tsd.GetMetricBaselinesFor(tenantID, moIDToHourOfWeekMap, true)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to complete bulk update of %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	}
+
+	// Make a map for easy retrieval of baseline changes
+	mappedChanges := map[string][]*swagmodels.MetricBaselineData{}
+	for _, entry := range entries {
+		mapping := fmt.Sprintf("%s_%d", entry.MonitoredObjectID, *entry.HourOfWeek)
+		mappedChanges[mapping] = entry.Baselines
+	}
+
+	// Have the existing MOs, need to update each one
+	for _, existingBaseline := range existingMetricBaselineList {
+		key := fmt.Sprintf("%s_%d", existingBaseline.MonitoredObjectID, existingBaseline.HourOfWeek)
+		baselineUpdates, err := convertMetricBaselineDataCollectionFromSwagToDBModel(mappedChanges[key])
+		if err != nil {
+			return nil, fmt.Errorf(err.Error())
+		}
+
+		existingBaseline.MergeBaselines(baselineUpdates)
+	}
+
+	// Attempt the Bulk update request on the DB
+	result, err := tsd.BulkUpdateMetricBaselinesFromList(tenantID, existingMetricBaselineList)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to bulk update %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	}
+
+	// reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
+	logger.Log.Infof("Bulk Updated of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)
+	return result, nil
+}
+
+func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []*swagmodels.MetricBaselineData) ([]*tenmod.MetricBaselineData, error) {
+	result := []*tenmod.MetricBaselineData{}
+	for _, val := range swagCollection {
+		swagBytes, err := json.Marshal(val)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to marshal request baseline changes to bytes: %s", err.Error())
+		}
+
+		addItem := tenmod.MetricBaselineData{}
+		err = json.Unmarshal(swagBytes, &addItem)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to unmarshal request baseline change bytes to DB model: %s", err.Error())
+		}
+
+		result = append(result, &addItem)
+	}
+
+	return result, nil
 }
 
 func generateMetricBaselineID(monObjID string, hourOfWeek int32) string {

@@ -4,6 +4,7 @@ import (
 	"github.com/accedian/adh-gather/models/common"
 	metmod "github.com/accedian/adh-gather/models/metrics"
 	tenmod "github.com/accedian/adh-gather/models/tenant"
+	"github.com/accedian/adh-gather/swagmodels"
 )
 
 // TenantServiceDatastore - interface which provides the functionality
@@ -133,5 +134,6 @@ type TenantMetricBaselineDatastore interface {
 	// GetMetricBaselinesForMOsIn - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated
 	// in a subsequent bulk PUT call.
 	GetMetricBaselinesFor(tenantID string, moIDToHourOfWeekMap map[string][]int32, addNotFoundValuesInResponse bool) ([]*tenmod.MetricBaseline, error)
-	BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error)
+	BulkUpdateMetricBaselinesFromList(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error)
+	BulkUpdateMetricBaselines(tenantID string, entries []*swagmodels.MetricBaselineBulkUpdateRequestDataAttributesItems0) ([]*common.BulkOperationResult, error)
 }

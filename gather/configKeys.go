@@ -57,6 +57,13 @@ const (
 	CK_args_coltmef_checkpoint3               ConfigKey = "args.coltmef.checkpoint3"
 	CK_args_metricbaselines_numworkers        ConfigKey = "args.metricbaselines.numworkers"
 	CK_args_metricbaselines_maxnumjobs        ConfigKey = "args.metricbaselines.maxnumjobs"
+	CK_args_metricbaselines_impl              ConfigKey = "args.metricbaselines.impl"
+	CK_args_metricbaselines_ip                ConfigKey = "args.metricbaselines.ip"
+	CK_args_metricbaselines_port              ConfigKey = "args.metricbaselines.port"
+	CK_args_metricbaselines_user              ConfigKey = "args.metricbaselines.user"
+	CK_args_metricbaselines_password          ConfigKey = "args.metricbaselines.password"
+	CK_args_metricbaselines_dbname            ConfigKey = "args.metricbaselines.dbname"
+	CK_args_metricbaselines_schemadir         ConfigKey = "args.metricbaselines.schemadir"
 )
 
 func (key ConfigKey) String() string {

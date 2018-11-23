@@ -322,3 +322,7 @@ func EnsureThresholdProfileHasBothModels(profile *tenmod.ThresholdProfile) {
 		return
 	}
 }
+
+func GenerateMetricBaselineID(monObjID string, hourOfWeek int32) string {
+	return fmt.Sprintf("%s_2_%s_%d", string(tenmod.TenantMetricBaselineType), monObjID, hourOfWeek)
+}

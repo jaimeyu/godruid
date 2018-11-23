@@ -281,14 +281,16 @@ var (
 // TenantServiceDatastoreTestRunner - object used to run tests for any iplementation
 // of the TenantServiceDatastore interface
 type TenantServiceDatastoreTestRunner struct {
-	tenantDB ds.TenantServiceDatastore
-	adminDB  ds.AdminServiceDatastore
+	tenantDB   ds.TenantServiceDatastore
+	adminDB    ds.AdminServiceDatastore
+	baselineDB ds.TenantMetricBaselineDatastore
 }
 
-func InitTestRunner(tdb ds.TenantServiceDatastore, adb ds.AdminServiceDatastore) *TenantServiceDatastoreTestRunner {
+func InitTestRunner(tdb ds.TenantServiceDatastore, adb ds.AdminServiceDatastore, mbdb ds.TenantMetricBaselineDatastore) *TenantServiceDatastoreTestRunner {
 	return &TenantServiceDatastoreTestRunner{
-		tenantDB: tdb,
-		adminDB:  adb,
+		tenantDB:   tdb,
+		adminDB:    adb,
+		baselineDB: mbdb,
 	}
 }
 

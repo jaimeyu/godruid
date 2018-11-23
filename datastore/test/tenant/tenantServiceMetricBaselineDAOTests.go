@@ -13,7 +13,7 @@ import (
 )
 
 func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *testing.T) {
-	mbDB := runner.tenantDB.(ds.TenantMetricBaselineDatastore)
+	mbDB := runner.baselineDB
 	const COMPANY1 = "MetricBaselineCompany"
 	const SUBDOMAIN1 = "subdom1"
 	const MONOBJ1 = "MONOBJ1"
@@ -139,20 +139,6 @@ func (runner *TenantServiceDatastoreTestRunner) RunTenantMetricBaselineCRUD(t *t
 	assert.Nil(t, err)
 	assert.NotNil(t, replaced)
 	assert.Equal(t, 0, len(replaced.Baselines))
-
-	// Now create a monitored Object that is linked to a metric baseline so that it can be deleted and make sure the baseline is deleted as well
-	tenantMonObj := tenmod.MonitoredObject{
-		MonitoredObjectID: MONOBJ1,
-		ObjectName:        "Glummstein",
-		TenantID:          TENANT,
-	}
-	createdMO, err := runner.tenantDB.CreateMonitoredObject(&tenantMonObj)
-	assert.Nil(t, err)
-	assert.NotNil(t, createdMO)
-
-	deletedMO, err := runner.tenantDB.DeleteMonitoredObject(TENANT, ds.GetDataIDFromFullID(createdMO.ID))
-	assert.Nil(t, err)
-	assert.NotNil(t, deletedMO)
 
 	fetched, err = mbDB.GetMetricBaseline(TENANT, MONOBJ1)
 	assert.NotNil(t, err)

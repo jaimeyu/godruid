@@ -41,6 +41,13 @@ args:
   metricbaselines:
     numworkers: 10
     maxnumjobs: 100
+    impl: 2
+    ip: 127.0.0.1
+    port: 5432
+    user: postgres
+    password: mysecretpassword
+    dbname: datahub_prov
+    schemadir: "files/postgres/schema"
 
 kafka:
   broker: "localhost:9092"

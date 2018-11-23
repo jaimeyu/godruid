@@ -52,7 +52,7 @@ func TestCouchDBImplMain(t *testing.T) {
 func clearPostgres(dbImpl *TenantMetricBaselinePostgresDAO) {
 	_, err := dbImpl.DB.Exec("DELETE FROM metric_baselines")
 	if err != nil {
-		log.Fatalf("Could not delete DB data after test: %s", err.Error())
+		logger.Log.Errorf("Could not delete DB data after test: %s", err.Error())
 	}
 }
 

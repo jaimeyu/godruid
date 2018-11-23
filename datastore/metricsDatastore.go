@@ -143,3 +143,9 @@ type MetricsDatastore interface {
 
 	GetDataCleaningHistory(tenantID string, monitoredObjectID string, interval string) ([]*swagmodels.DataCleaningTransition, error)
 }
+
+type TenantMetricsDatastore interface {
+	GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error)
+	GetAllMonitoredObjectsIDs(tenantID string) ([]string, error)
+	GetTenantThresholdProfile(tenantID string, dataID string) (*tenmod.ThresholdProfile, error)
+}

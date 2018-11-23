@@ -26,7 +26,7 @@ import (
 )
 
 // HandleGetThresholdCrossingByMonitoredObjectTopNV2 - Retrieves threshold profile based Top N for distinct monitored objects
-func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
+func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles, metricsDB, tenantDB, params)
@@ -52,7 +52,7 @@ func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, me
 }
 
 // HandleGenerateSLAReportV2 - Retrieves SLA report for the specified tenant with the provided parameters
-func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
+func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGenerateSLAReportFromParamsV2(allowedRoles, metricsDB, tenantDB, params)
@@ -78,7 +78,7 @@ func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.Metric
 }
 
 // HandleGetRawMetricsV2 - Retrieves raw metrics for the specified tenant with the provided parameters
-func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
+func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetRawMetricsV2(allowedRoles, metricsDB, tenantDB, params)
@@ -100,8 +100,9 @@ func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDat
 }
 
 // HandleGetAggregateMetricsV2 - Retrieves metrics in aggregation for the specified tenant with the provided parameters
-func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
+func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
 	return func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
+
 		// Do the work
 		startTime, responseCode, response, err := doGetAggregateMetricsV2(allowedRoles, metricsDB, tenantDB, params)
 
@@ -126,7 +127,7 @@ func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.Metr
 }
 
 // HandleGetHistogramV2 - Retrieves a histogram for the specified tenant with the provided parameters
-func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
+func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetHistogramV2(allowedRoles, metricsDB, tenantDB, params)
@@ -152,7 +153,7 @@ func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsData
 }
 
 // HandleGetTopNForMetricV2 - Retrieves the top n for the specified tenant with the provided parameters
-func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
+func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetTopNForMetricV2(allowedRoles, metricsDB, tenantDB, params)
@@ -178,7 +179,7 @@ func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.Metrics
 }
 
 // HandleGetThresholdCrossingV2 - Retrieves the threshold crossings for the specified tenant with the provided parameters
-func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
+func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
 	return func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetThresholdCrossingV2(allowedRoles, metricsDB, tenantDB, params)
@@ -203,7 +204,7 @@ func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Met
 	}
 }
 
-func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetHistogramV2Params) (time.Time, int, *swagmodels.JSONAPIHistogramResponse, error) {
+func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetHistogramV2Params) (time.Time, int, *swagmodels.JSONAPIHistogramResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.HistogramStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -278,7 +279,7 @@ func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastor
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetTopNForMetricV2Params) (time.Time, int, *swagmodels.JSONAPITopNForMetricResponse, error) {
+func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetTopNForMetricV2Params) (time.Time, int, *swagmodels.JSONAPITopNForMetricResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.TopNForMetricStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -363,7 +364,7 @@ func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsData
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.QueryThresholdCrossingV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingResponse, error) {
+func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.QueryThresholdCrossingV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.ThresholdCrossingStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -650,7 +651,7 @@ func renderThresholdCrossingV2(config interface{}, report map[string]interface{}
 	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "thresholdCrossings")
 }
 
-func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.QueryAggregateMetricsV2Params) (time.Time, int, *swagmodels.JSONAPIAggregationResponse, error) {
+func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.QueryAggregateMetricsV2Params) (time.Time, int, *swagmodels.JSONAPIAggregationResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.AggMetricsStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -730,7 +731,7 @@ func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsD
 }
 
 // DEPRECATE - THIS IS ONLY KEPT IN ORDER TO NOT DISRUPT COLTS USE OF THE API. REMOVE AS SOON AS WE CAN GET THEM ONTO V2 AGGREGATE
-func doGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetFilteredRawMetricsV2Params) (time.Time, int, map[string]interface{}, error) {
+func doGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetFilteredRawMetricsV2Params) (time.Time, int, map[string]interface{}, error) {
 	startTime := time.Now()
 
 	// Unmarshal the request
@@ -867,7 +868,7 @@ func getSLATopNByBuckets(druidDB datastore.MetricsDatastore, request *metmod.SLA
 }
 
 // DoGenerateSLAReportV2 - Expose this API so the scheduler can use it.
-func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, daoRequest metmod.SLAReportRequest) (time.Time, int, map[string]interface{}, error) {
+func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, daoRequest metmod.SLAReportRequest) (time.Time, int, map[string]interface{}, error) {
 	tenantID := daoRequest.TenantID
 	startTime := time.Now()
 
@@ -1023,7 +1024,7 @@ func convertSLAMapToJSONAPI(input map[string]interface{}) (*swagmodels.JSONAPISL
 	return &converted, nil
 }
 
-func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GenerateSLAReportV2Params) (time.Time, int, *swagmodels.JSONAPISLAReportResponse, error) {
+func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GenerateSLAReportV2Params) (time.Time, int, *swagmodels.JSONAPISLAReportResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.SLAReportStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -1069,7 +1070,7 @@ func renderSLAReportV2(config interface{}, report interface{}) map[string]interf
 	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "slaReports")
 }
 
-func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingByMOTopNResponse, error) {
+func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingByMOTopNResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 

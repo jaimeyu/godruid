@@ -134,7 +134,7 @@ func configureTenantServiceV2API(api *operations.GatherAPI, tenantDB datastore.T
 	api.TenantProvisioningServiceV2DownloadRoadrunnerHandler = tenant_provisioning_service_v2.DownloadRoadrunnerHandlerFunc(handlers.HandleGetDownloadRoadrunner(handlers.SkylightAndTenantAdminRoles, tenantDB))
 }
 
-func configureMetricServiceV2API(api *operations.GatherAPI, tenantDB datastore.TenantServiceDatastore, metricsDB datastore.MetricsDatastore) {
+func configureMetricServiceV2API(api *operations.GatherAPI, tenantDB datastore.TenantMetricsDatastore, metricsDB datastore.MetricsDatastore) {
 	api.MetricsServiceV2GetHistogramV2Handler = metrics_service_v2.GetHistogramV2HandlerFunc(handlers.HandleGetHistogramV2(handlers.AllRoles, metricsDB, tenantDB))
 	api.MetricsServiceV2GetTopNForMetricV2Handler = metrics_service_v2.GetTopNForMetricV2HandlerFunc(handlers.HandleGetTopNForMetricV2(handlers.AllRoles, metricsDB, tenantDB))
 	api.MetricsServiceV2QueryThresholdCrossingV2Handler = metrics_service_v2.QueryThresholdCrossingV2HandlerFunc(handlers.HandleGetThresholdCrossingV2(handlers.AllRoles, metricsDB, tenantDB))

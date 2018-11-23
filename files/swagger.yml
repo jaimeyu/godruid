@@ -8979,6 +8979,9 @@ definitions:
           - min
           - max
           - avg
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         description: An array of identifiers that filter-in specifically identified metrics.
         type: array

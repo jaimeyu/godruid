@@ -645,7 +645,7 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 		monitoredObjectIds = request.MonitoredObjects
 	}
 
-	query, pp, queryKeySpec, err := AggMetricsQuery(request.TenantID, table, request.Interval, monitoredObjectIds, aggregateOnMeta, request.Aggregation, request.Metrics, timeout, request.Granularity)
+	query, pp, queryKeySpec, err := AggMetricsQuery(request.TenantID, table, request.Interval, monitoredObjectIds, aggregateOnMeta, request.Aggregation, request.Metrics, request.IgnoreCleaning, timeout, request.Granularity)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.QueryAggregatedMetricsStr)
 		return nil, nil, err

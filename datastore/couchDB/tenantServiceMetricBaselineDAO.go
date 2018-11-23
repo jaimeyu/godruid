@@ -29,7 +29,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMetricBaseline(metricBaselineReq
 	tenantID := ds.PrependToDataID(metricBaselineReq.TenantID, string(admmod.TenantType))
 
 	// Make sure there is no existing record for this id:
-	dataID := generateMetricBaselineID(metricBaselineReq.MonitoredObjectID, metricBaselineReq.HourOfWeek)
+	dataID := ds.GenerateMetricBaselineID(metricBaselineReq.MonitoredObjectID, metricBaselineReq.HourOfWeek)
 	existing, err := tsd.GetMetricBaseline(metricBaselineReq.TenantID, dataID)
 	if err != nil {
 		if !strings.Contains(err.Error(), ds.NotFoundStr) {
@@ -100,7 +100,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeek(tena
 		logger.Log.Debugf("Updating %s for %s %s for %s %s for hour of week %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 	}
 
-	dataID := ds.GetDataIDFromFullID(generateMetricBaselineID(monObjID, hourOfWeek))
+	dataID := ds.GetDataIDFromFullID(ds.GenerateMetricBaselineID(monObjID, hourOfWeek))
 	existing, err := tsd.GetMetricBaseline(tenantID, dataID)
 	if err != nil {
 		if !strings.Contains(err.Error(), ds.NotFoundStr) {
@@ -137,7 +137,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 		logger.Log.Debugf("Updating %s for %s %s for %s %s for hour of week %d with multiple values", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 	}
 
-	dataID := ds.GetDataIDFromFullID(generateMetricBaselineID(monObjID, hourOfWeek))
+	dataID := ds.GetDataIDFromFullID(ds.GenerateMetricBaselineID(monObjID, hourOfWeek))
 	existing, err := tsd.GetMetricBaseline(tenantID, dataID)
 	if err != nil {
 		if !strings.Contains(err.Error(), ds.NotFoundStr) {
@@ -171,7 +171,7 @@ func (tsd *TenantServiceDatastoreCouchDB) UpdateMetricBaselineForHourOfWeekWithC
 func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {
 	logger.Log.Debugf("Retrieving %ss for %s %s for %s %s for hour of week %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 
-	dataID := ds.GetDataIDFromFullID(generateMetricBaselineID(monObjID, hourOfWeek))
+	dataID := ds.GetDataIDFromFullID(ds.GenerateMetricBaselineID(monObjID, hourOfWeek))
 	existing, err := tsd.GetMetricBaseline(tenantID, dataID)
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselinesFor(tenantID string,
 	for moID, hourOfWeekList := range moIDToHourOfWeekMap {
 		for _, hour := range hourOfWeekList {
 			numEntries++
-			keyMap = append(keyMap, generateMetricBaselineID(moID, hour))
+			keyMap = append(keyMap, ds.GenerateMetricBaselineID(moID, hour))
 		}
 	}
 	if int64(numEntries) > tsd.batchSize {
@@ -455,8 +455,4 @@ func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []*swag
 	}
 
 	return result, nil
-}
-
-func generateMetricBaselineID(monObjID string, hourOfWeek int32) string {
-	return fmt.Sprintf("%s_2_%s_%d", string(tenmod.TenantMetricBaselineType), monObjID, hourOfWeek)
 }

@@ -16,6 +16,11 @@ jobs:
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
+      - image: circleci/postgres:9.6-alpine
+        environment:
+          POSTGRES_USER: testuser
+          POSTGRES_DB: testdb
+          POSTGRES_PASSWORD: testpassword
 
     working_directory: /root/go/src/github.com/accedian/adh-gather
 

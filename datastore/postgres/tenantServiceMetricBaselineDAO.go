@@ -305,78 +305,88 @@ func (mbdb *TenantMetricBaselinePostgresDAO) DeleteMetricBaseline(tenantID strin
 }
 
 func (mbdb *TenantMetricBaselinePostgresDAO) UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error) {
-	// if logger.IsDebugEnabled() {
-	// 	logger.Log.Debugf("Updating %s for %s %s for %s %s for hour of week %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
-	// }
+	methodStartTime := time.Now()
 
-	// dataID := ds.GetDataIDFromFullID(generateMetricBaselineID(monObjID, hourOfWeek))
-	// existing, err := tsd.GetMetricBaseline(tenantID, dataID)
-	// if err != nil {
-	// 	if !strings.Contains(err.Error(), ds.NotFoundStr) {
-	// 		// Error was something permanent, return it
-	// 		return nil, err
-	// 	}
+	logger.Log.Debugf("Updating %s for Tenant %s for %s %s for hour of week %d for a single entry", tenmod.TenantMetricBaselineStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 
-	// 	// Error was that the Baseline does not exist for this Monitored Object, let's create it
-	// 	createObj := tenmod.MetricBaseline{
-	// 		MonitoredObjectID: monObjID,
-	// 		TenantID:          tenantID,
-	// 		HourOfWeek:        hourOfWeek,
-	// 		Baselines:         []*tenmod.MetricBaselineData{baselineData},
-	// 	}
+	existing, err := mbdb.GetMetricBaseline(tenantID, datastore.GetDataIDFromFullID(datastore.GenerateMetricBaselineID(monObjID, hourOfWeek)))
+	if err != nil {
+		if !strings.Contains(err.Error(), datastore.NotFoundStr) {
+			// Error was something permanent, return it
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_single_val_update")
+			return nil, fmt.Errorf("Unable to update metric baseline single entry: %s", err.Error())
+		}
 
-	// 	return tsd.CreateMetricBaseline(&createObj)
-	// }
+		// Error was that the Baseline does not exist for this Monitored Object, let's create it
+		createObj := tenmod.MetricBaseline{
+			MonitoredObjectID: monObjID,
+			TenantID:          tenantID,
+			HourOfWeek:        hourOfWeek,
+			Baselines:         []*tenmod.MetricBaselineData{baselineData},
+		}
 
-	// existing.MergeBaseline(baselineData)
-	// existing.ID = ds.GetDataIDFromFullID(existing.ID)
+		return mbdb.CreateMetricBaseline(&createObj)
+	}
 
-	// updated, err := tsd.UpdateMetricBaseline(existing)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	existing.MergeBaseline(baselineData)
 
-	// logger.Log.Debugf("Updated %s for %s %s %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
-	// return updated, nil
-	return nil, fmt.Errorf("NOT IMPLEMENTED YET")
+	result, err := mbdb.UpdateMetricBaseline(existing)
+	if err != nil {
+		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_single_val_update")
+		return nil, err
+	}
+
+	// fill in the missing values of the response
+	result.ID = datastore.GetDataIDFromFullID(datastore.GenerateID(existing, metricBaselineType))
+	result.Datatype = metricBaselineType
+	result.REV = fmt.Sprintf("%d", existing.LastModifiedTimestamp)
+
+	logger.Log.Debugf("Completed baseline update for Tenant %s Monitored Object %s Hour Of Week %d for a single entry", result.TenantID, result.TenantID, result.HourOfWeek)
+	monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "200", "met_bsln_single_val_update")
+	return result, nil
 }
 
 // UpdateMetricBaselineForHourOfWeekWithCollection - couchDB implementation of UpdateMetricBaselineForHourOfWeekWithCollection
 func (mbdb *TenantMetricBaselinePostgresDAO) UpdateMetricBaselineForHourOfWeekWithCollection(tenantID string, monObjID string, hourOfWeek int32, baselineDataCollection []*tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error) {
-	// if logger.IsDebugEnabled() {
-	// 	logger.Log.Debugf("Updating %s for %s %s for %s %s for hour of week %d with multiple values", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
-	// }
+	methodStartTime := time.Now()
 
-	// dataID := ds.GetDataIDFromFullID(generateMetricBaselineID(monObjID, hourOfWeek))
-	// existing, err := tsd.GetMetricBaseline(tenantID, dataID)
-	// if err != nil {
-	// 	if !strings.Contains(err.Error(), ds.NotFoundStr) {
-	// 		// Error was something permanent, return it
-	// 		return nil, err
-	// 	}
+	logger.Log.Debugf("Updating %s for Tenant %s for %s %s for hour of week %d for multiple entries", tenmod.TenantMetricBaselineStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID, hourOfWeek)
 
-	// 	// Error was that the Baseline does not exist for this Monitored Object, let's create it
-	// 	createObj := tenmod.MetricBaseline{
-	// 		MonitoredObjectID: monObjID,
-	// 		TenantID:          tenantID,
-	// 		HourOfWeek:        hourOfWeek,
-	// 		Baselines:         baselineDataCollection,
-	// 	}
+	existing, err := mbdb.GetMetricBaseline(tenantID, datastore.GetDataIDFromFullID(datastore.GenerateMetricBaselineID(monObjID, hourOfWeek)))
+	if err != nil {
+		if !strings.Contains(err.Error(), datastore.NotFoundStr) {
+			// Error was something permanent, return it
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_multi_val_update")
+			return nil, fmt.Errorf("Unable to update metric baseline multiple entries: %s", err.Error())
+		}
 
-	// 	return tsd.CreateMetricBaseline(&createObj)
-	// }
+		// Error was that the Baseline does not exist for this Monitored Object, let's create it
+		createObj := tenmod.MetricBaseline{
+			MonitoredObjectID: monObjID,
+			TenantID:          tenantID,
+			HourOfWeek:        hourOfWeek,
+			Baselines:         baselineDataCollection,
+		}
 
-	// existing.MergeBaselines(baselineDataCollection)
-	// existing.ID = ds.GetDataIDFromFullID(existing.ID)
+		return mbdb.CreateMetricBaseline(&createObj)
+	}
 
-	// updated, err := tsd.UpdateMetricBaseline(existing)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	existing.MergeBaselines(baselineDataCollection)
 
-	// logger.Log.Debugf("Updated %s for %s %s %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, monObjID)
-	// return updated, nil
-	return nil, fmt.Errorf("NOT IMPLEMENTED YET")
+	result, err := mbdb.UpdateMetricBaseline(existing)
+	if err != nil {
+		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_multi_val_update")
+		return nil, err
+	}
+
+	// fill in the missing values of the response
+	result.ID = datastore.GetDataIDFromFullID(datastore.GenerateID(existing, metricBaselineType))
+	result.Datatype = metricBaselineType
+	result.REV = fmt.Sprintf("%d", existing.LastModifiedTimestamp)
+
+	logger.Log.Debugf("Completed baseline update for Tenant %s Monitored Object %s Hour Of Week %d for multiple entries", result.TenantID, result.TenantID, result.HourOfWeek)
+	monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "200", "met_bsln_multi_val_update")
+	return result, nil
 }
 
 func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error) {

@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.263.0 
+**Release Date:** Fri Nov 23 21:41:44 UTC 2018     
+## Previous Releases 
 ### 0.262.0 
 **Release Date:** Tue Nov 20 16:41:27 UTC 2018     
-## Previous Releases 
 * Fix - Add a toggle to add/remove data cleaning to aggregate request 
 ### 0.261.0 
 **Release Date:** Tue Nov 20 14:47:32 UTC 2018     

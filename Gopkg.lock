@@ -25,15 +25,6 @@
   revision = "53eb764f8034df33c8611265c94da919ed21d9e0"
 
 [[projects]]
-  name = "github.com/accedian/skylight-aaa"
-  packages = [
-    "config",
-    "logger"
-  ]
-  revision = "ed22ed46344842b6710caec32604a5d17e6fe00a"
-  version = "0.27.0"
-
-[[projects]]
   name = "github.com/adam-hanna/arrayOperations"
   packages = ["."]
   revision = "9b263904c31db75ed5ee915ecb256682433bf099"

@@ -432,6 +432,16 @@ func doDeleteMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 		NotifyMonitoredObjectDeleted(tenantID, result)
 	}
 
+	// Make a best effort to delete any Metric Baselines associated with this monitored object:
+	metricBaselineDatastore, ok := tenantDB.(datastore.TenantMetricBaselineDatastore)
+	if !ok {
+		logger.Log.Warningf("Unable to delete %ss for %s %s. Unable to issue call to delete the %ss", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonObjID, tenmod.TenantMetricBaselineStr)
+	} else {
+		if err = metricBaselineDatastore.DeleteMetricBaselineForMonitoredObject(tenantID, params.MonObjID, false); err != nil {
+			logger.Log.Warningf("Unable to delete %ss for %s %s: ", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonObjID, err.Error())
+		}
+	}
+
 	converted := swagmodels.MonitoredObjectResponse{}
 	err = convertToJsonapiObject(result, &converted)
 	if err != nil {

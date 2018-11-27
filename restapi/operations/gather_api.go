@@ -163,6 +163,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2DeleteMetadataConfigV2Handler: tenant_provisioning_service_v2.DeleteMetadataConfigV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetadataConfigV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetadataConfigV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2Handler: tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2DeleteMetricBaselineV2Handler: tenant_provisioning_service_v2.DeleteMetricBaselineV2HandlerFunc(func(params tenant_provisioning_service_v2.DeleteMetricBaselineV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2DeleteMetricBaselineV2 has not yet been implemented")
 		}),
@@ -551,7 +554,7 @@ type GatherAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/json" mime type
+	// JSONConsumer registers a consumer for a "application/vnd.api+json" mime type
 	JSONConsumer runtime.Consumer
 
 	// BinProducer registers a producer for a "application/octet-stream" mime type
@@ -639,6 +642,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2DeleteLocaleV2Handler tenant_provisioning_service_v2.DeleteLocaleV2Handler
 	// TenantProvisioningServiceV2DeleteMetadataConfigV2Handler sets the operation handler for the delete metadata config v2 operation
 	TenantProvisioningServiceV2DeleteMetadataConfigV2Handler tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler
+	// TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2Handler sets the operation handler for the delete metric baseline by monitored object Id v2 operation
+	TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2Handler tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Handler
 	// TenantProvisioningServiceV2DeleteMetricBaselineV2Handler sets the operation handler for the delete metric baseline v2 operation
 	TenantProvisioningServiceV2DeleteMetricBaselineV2Handler tenant_provisioning_service_v2.DeleteMetricBaselineV2Handler
 	// TenantProvisioningServiceV2DeleteMonitoredObjectV2Handler sets the operation handler for the delete monitored object v2 operation
@@ -1106,6 +1111,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteMetadataConfigV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2DeleteMetricBaselineV2Handler == nil {
@@ -1896,6 +1905,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v2/metadata-configs/{MetadataConfigId}"] = tenant_provisioning_service_v2.NewDeleteMetadataConfigV2(o.context, o.TenantProvisioningServiceV2DeleteMetadataConfigV2Handler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v2/metric-baselines/by-monitored-object/{monitoredObjectId}"] = tenant_provisioning_service_v2.NewDeleteMetricBaselineByMonitoredObjectIDV2(o.context, o.TenantProvisioningServiceV2DeleteMetricBaselineByMonitoredObjectIDV2Handler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)

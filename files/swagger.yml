@@ -4256,7 +4256,7 @@ paths:
         - TenantProvisioningServiceV2
   /v2/metric-baselines/by-monitored-object/{monitoredObjectId}:
     get:
-      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId.
+      summary: Retrieve all Tenant Metric Baselines for a single Monitored Object.
       operationId: GetMetricBaselineByMonitoredObjectIdV2
       produces:
         - application/vnd.api+json
@@ -4282,6 +4282,41 @@ paths:
           in: path
           required: true
           type: string
+      tags:
+        - TenantProvisioningServiceV2
+    delete:
+      summary: Deletes (or resets) all Metric Baselines for a Monitored Object
+      operationId: DeleteMetricBaselineByMonitoredObjectIdV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'A confirmation message of successful deletion or resetting'
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: reset
+          in: query
+          required: true
+          default: false
+          type: boolean
+          description: "If true, will only reset all Metric Baselines for the Monitored Object. If false, will delete all Metric Baseline records for the monitored object"
       tags:
         - TenantProvisioningServiceV2
   /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:

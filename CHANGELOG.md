@@ -1,3 +1,4 @@
+* Feature - Adding a flag to all the v2 APIs to control data cleaning
 ## Current Release 
 ### 0.265.0 
 **Release Date:** Tue Nov 27 11:05:39 UTC 2018     

@@ -28,6 +28,9 @@ type TopNForMetricConfig struct {
 	// An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
 	Dimensions DimensionFilter `json:"dimensions,omitempty"`
 
+	// A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+	IgnoreCleaning bool `json:"ignoreCleaning,omitempty"`
+
 	// Time boundary for the metrics under consideration using the ISO-8601 standard
 	// Required: true
 	Interval *string `json:"interval"`

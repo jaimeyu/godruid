@@ -32,7 +32,8 @@ type SLAReportRequest struct {
 
 	// v2 option, to specify a white list of metrics within the thresholdprofile to execute.
 	// This reduces potential druid processing time.
-	Metrics []string `json:"metrics,omitempty"`
+	Metrics        []string `json:"metrics,omitempty"`
+	IgnoreCleaning bool     `json:"ignoreCleaning,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling

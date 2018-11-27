@@ -22,6 +22,9 @@ type ThresholdCrossingConfig struct {
 	// the granularity for timeseries in ISO-8601 duration format, or ALL
 	Granularity string `json:"granularity,omitempty"`
 
+	// A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+	IgnoreCleaning bool `json:"ignoreCleaning,omitempty"`
+
 	// Time boundary for the metrics under consideration using the ISO-8601 standard
 	// Required: true
 	Interval *string `json:"interval"`

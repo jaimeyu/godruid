@@ -49,7 +49,8 @@ type Histogram struct {
 	Granularity          string                `json:"granularity,omitempty"`
 	MetricBucketRequests []MetricBucketRequest `json:"metrics,omitempty"`
 	// in Milliseconds
-	Timeout int32 `json:"timeout,omitempty"`
+	Timeout        int32 `json:"timeout,omitempty"`
+	IgnoreCleaning bool  `json:"ignoreCleaning,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -206,7 +207,8 @@ type ThresholdCrossingTopN struct {
 	Timeout            int32  `json:"timeout,omitempty"`
 	NumResults         int32  `json:"numResults,omitempty"`
 	// Indicates whether the results should be in ascending or descending order
-	Sorted string `json:"sorted,omitempty"`
+	Sorted         string `json:"sorted,omitempty"`
+	IgnoreCleaning bool   `json:"ignoreCleaning,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -272,7 +274,8 @@ type TopNForMetric struct {
 	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
 
 	// Indicates whether the results should be in ascending or descending order
-	Sorted string `json:"sorted,omitempty"`
+	Sorted         string `json:"sorted,omitempty"`
+	IgnoreCleaning bool   `json:"ignoreCleaning,omitempty"`
 }
 
 // DEPRECATED - Remove once V1 is removed
@@ -345,6 +348,7 @@ type ThresholdCrossing struct {
 	ThresholdProfileID string                   `json:"thresholdProfileId,omitempty"`
 	Metrics            []MetricIdentifierFilter `json:"metrics,omitempty"`
 	Timeout            int32                    `json:"timeout,omitempty"`
+	IgnoreCleaning     bool                     `json:"ignoreCleaning,omitempty"`
 }
 
 // GetID - required implementation for jsonapi marshalling

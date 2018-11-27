@@ -69,6 +69,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -187,6 +190,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       timezone: 
         description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
         type: string
@@ -508,6 +514,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       granularity:
         description: The granularity for timeseries in ISO-8601 duration format, or ALL
         type: string
@@ -643,6 +652,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -772,6 +784,9 @@
         type: integer
         description: query timeout in milliseconds
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         type: array
         description: limits the results to include only metrics in the whitelist

@@ -30,7 +30,7 @@ func setupPostgresDB() *TenantMetricBaselinePostgresDAO {
 	var err error
 	baselineDB, err = CreateTenantMetricBaselinePostgresDAO()
 	if err != nil {
-		log.Fatalf("Unabke to create metric baseline db: %s", err.Error())
+		log.Fatalf("Unable to create metric baseline db: %s", err.Error())
 	}
 
 	return baselineDB
@@ -180,4 +180,44 @@ func runTenantMetricBaselineCRUD(t *testing.T) {
 	// fetched, err = baselineDB.GetMetricBaseline(TENANT, created.MonitoredObjectID)
 	// assert.NotNil(t, err)
 	// assert.Nil(t, fetched)
+
+	// // Create a few records for 1 MO
+	// moID := fake.CharactersN(15)
+	// _, err = baselineDB.UpdateMetricBaselineForHourOfWeek(TENANT, moID, 20, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
+	// assert.Nil(t, err)
+	// assert.NotNil(t, updated)
+	// _, err = baselineDB.UpdateMetricBaselineForHourOfWeek(TENANT, moID, 21, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
+	// assert.Nil(t, err)
+	// assert.NotNil(t, updated)
+	// _, err = baselineDB.UpdateMetricBaselineForHourOfWeek(TENANT, moID, 22, &tenmod.MetricBaselineData{Metric: JITTER95, Direction: "1"})
+	// assert.Nil(t, err)
+	// assert.NotNil(t, updated)
+
+	// // Make sure we can bulk retrieve the baselines
+	// fetchByMOID, err := baselineDB.GetMetricBaselineForMonitoredObject(TENANT, moID)
+	// assert.Nil(t, err)
+	// assert.NotNil(t, fetchByMOID)
+	// assert.Equal(t, 3, len(fetchByMOID))
+	// for _, val := range fetchByMOID {
+	// 	assert.Equal(t, JITTER95, val.Baselines[0].Metric)
+	// }
+
+	// // Make sure Reset works
+	// err = baselineDB.DeleteMetricBaselineForMonitoredObject(TENANT, moID, true)
+	// assert.Nil(t, err)
+	// fetchByMOID, err = baselineDB.GetMetricBaselineForMonitoredObject(TENANT, moID)
+	// assert.Nil(t, err)
+	// assert.NotNil(t, fetchByMOID)
+	// assert.Equal(t, 3, len(fetchByMOID))
+	// for _, val := range fetchByMOID {
+	// 	assert.Equal(t, 0, len(val.Baselines))
+	// }
+
+	// // Make sure delete by MOID works:
+	// // Make sure Reset works
+	// err = baselineDB.DeleteMetricBaselineForMonitoredObject(TENANT, moID, false)
+	// assert.Nil(t, err)
+	// fetchByMOID, err = baselineDB.GetMetricBaselineForMonitoredObject(TENANT, moID)
+	// assert.NotNil(t, err)
+	// assert.Nil(t, fetchByMOID)
 }

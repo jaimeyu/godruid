@@ -202,6 +202,56 @@ func HandleBulkUpdateMetricBaselinesV2(allowedRoles []string, tenantDB datastore
 	}
 }
 
+func HandleGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+
+		// Do the work
+		startTime, responseCode, response, err := doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles, tenantDB, params)
+
+		// Success Response
+		if responseCode == http.StatusOK {
+			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2OK().WithPayload(response)
+		}
+
+		// Error Responses
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
+		switch responseCode {
+		case http.StatusForbidden:
+			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2Forbidden().WithPayload(errorMessage)
+		case http.StatusNotFound:
+			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2NotFound().WithPayload(errorMessage)
+		default:
+			return tenant_provisioning_service_v2.NewGetMetricBaselineByMonitoredObjectIDV2InternalServerError().WithPayload(errorMessage)
+		}
+
+	}
+}
+
+func HandleDeleteMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Params) middleware.Responder {
+
+		// Do the work
+		startTime, responseCode, response, err := doDeleteMetricBaselineByMonitoredObjectIDV2(allowedRoles, tenantDB, params)
+
+		// Success Response
+		if responseCode == http.StatusOK {
+			return tenant_provisioning_service_v2.NewDeleteMetricBaselineByMonitoredObjectIDV2OK().WithPayload(response)
+		}
+
+		// Error Responses
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
+		switch responseCode {
+		case http.StatusForbidden:
+			return tenant_provisioning_service_v2.NewDeleteMetricBaselineByMonitoredObjectIDV2Forbidden().WithPayload(errorMessage)
+		case http.StatusNotFound:
+			return tenant_provisioning_service_v2.NewDeleteMetricBaselineByMonitoredObjectIDV2NotFound().WithPayload(errorMessage)
+		default:
+			return tenant_provisioning_service_v2.NewDeleteMetricBaselineByMonitoredObjectIDV2InternalServerError().WithPayload(errorMessage)
+		}
+
+	}
+}
+
 func doCreateMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.CreateMetricBaselineV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s for tenant %s", tenmod.TenantMetricBaselineStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
@@ -463,6 +513,63 @@ func doBulkUpdateMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
 	return startTime, http.StatusOK, "Bulk update request accepted", nil
+}
+
+func doGetMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDV2Params) (time.Time, int, *swagmodels.MetricBaselineListResponse, error) {
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching all %ss for %s %s for %s %s", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+
+	if !isAuthorized {
+		return startTime, http.StatusForbidden, nil, fmt.Errorf("Fetch all %s operation not authorized for role: %s", tenmod.TenantMetricBaselineStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
+	}
+
+	// Issue request to DAO Layer
+	result, err := tenantDB.GetMetricBaselineForMonitoredObject(tenantID, params.MonitoredObjectID)
+	if err != nil {
+		if strings.Contains(err.Error(), datastore.NotFoundStr) {
+			return startTime, http.StatusNotFound, nil, err
+		}
+
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %ss for %s %s: %s", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, err.Error())
+	}
+
+	converted := swagmodels.MetricBaselineListResponse{}
+	err = convertToJsonapiObject(result, &converted)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
+	logger.Log.Infof("Retrieved %d %ss for %s %s", len(result), tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID)
+	return startTime, http.StatusOK, &converted, nil
+}
+
+func doDeleteMetricBaselineByMonitoredObjectIDV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.DeleteMetricBaselineByMonitoredObjectIDV2Params) (time.Time, int, string, error) {
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	operationType := "Delete"
+	if params.Reset {
+		operationType = "Reset"
+	}
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("%s all %ss for %s %s for %s %s", operationType, tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
+
+	if !isAuthorized {
+		return startTime, http.StatusForbidden, "", fmt.Errorf("%s all %s operation not authorized for role: %s", operationType, tenmod.TenantMetricBaselineStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
+	}
+
+	// Issue request to DAO Layer
+	err := tenantDB.DeleteMetricBaselineForMonitoredObject(tenantID, params.MonitoredObjectID, params.Reset)
+	if err != nil {
+		if strings.Contains(err.Error(), datastore.NotFoundStr) {
+			return startTime, http.StatusNotFound, "", err
+		}
+
+		return startTime, http.StatusInternalServerError, "", fmt.Errorf("Unable to %s %ss for %s %s: %s", strings.ToLower(operationType), tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, err.Error())
+	}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.DeleteMetricBaselineByMonitoredObjectIdStr, mon.APICompleted, mon.TenantAPICompleted)
+	successMsg := fmt.Sprintf("%s successful for %ss for %s %s", operationType, tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID)
+	logger.Log.Infof(successMsg)
+	return startTime, http.StatusOK, successMsg, nil
 }
 
 type MetricBaselineBulkUpdateManager struct {

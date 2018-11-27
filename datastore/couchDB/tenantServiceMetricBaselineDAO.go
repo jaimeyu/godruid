@@ -437,6 +437,16 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkUpdateMetricBaselines(tenantID str
 	return result, nil
 }
 
+// GetMetricBaselineForMonitoredObject - CouchDb implementation of GetMetricBaselineForMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) ([]*tenmod.MetricBaseline, error) {
+	return nil, fmt.Errorf("GetMetricBaselineForMonitoredObject not implemented for CouchDB implementation")
+}
+
+// DeleteMetricBaselineForMonitoredObject - CouchDb implementation of DeleteMetricBaselineForMonitoredObject
+func (tsd *TenantServiceDatastoreCouchDB) DeleteMetricBaselineForMonitoredObject(tenantID string, monObjID string, reset bool) error {
+	return fmt.Errorf("DeleteMetricBaselineForMonitoredObject not implemented for CouchDB implementation")
+}
+
 func convertMetricBaselineDataCollectionFromSwagToDBModel(swagCollection []*swagmodels.MetricBaselineData) ([]*tenmod.MetricBaselineData, error) {
 	result := []*tenmod.MetricBaselineData{}
 	for _, val := range swagCollection {

@@ -29,13 +29,17 @@ const (
 )
 
 var (
-	wherePrimaryKeySelectorSQL  = "WHERE tenant_id = $1 and monitored_object_id = $2 and hour_of_week = $3"
-	insertSQL                   = fmt.Sprintf("INSERT INTO %s (tenant_id, monitored_object_id, hour_of_week, baselines, created_timestamp, last_modified_timestamp) VALUES ($1, $2, $3, $4, $5, $6)", MetricBaselineTableName)
-	upsertSQL                   = fmt.Sprintf("INSERT INTO %s (tenant_id, monitored_object_id, hour_of_week, baselines, created_timestamp, last_modified_timestamp) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (tenant_id, monitored_object_id, hour_of_week) DO UPDATE SET baselines = EXCLUDED.baselines, last_modified_timestamp = EXCLUDED.last_modified_timestamp", MetricBaselineTableName)
-	getBaselinesByPrimaryKeySQL = fmt.Sprintf("SELECT baselines FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
-	getAllByPrimaryKeySQL       = fmt.Sprintf("SELECT * FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
-	updateSQL                   = fmt.Sprintf("UPDATE %s SET baselines = $1::jsonb, last_modified_timestamp = $2::bigint, last_reset_timestamp = $3::bigint WHERE tenant_id = $4 and monitored_object_id = $5 and hour_of_week = $6", MetricBaselineTableName)
-	deleteSQL                   = fmt.Sprintf("DELETE FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
+	wherePrimaryKeySelectorSQL                 = "WHERE tenant_id = $1 and monitored_object_id = $2 and hour_of_week = $3"
+	whereTeanntAndMonitoredObjectIDSelectorSQL = "WHERE tenant_id = $1 and monitored_object_id = $2"
+	insertSQL                                  = fmt.Sprintf("INSERT INTO %s (tenant_id, monitored_object_id, hour_of_week, baselines, created_timestamp, last_modified_timestamp) VALUES ($1, $2, $3, $4, $5, $6)", MetricBaselineTableName)
+	upsertSQL                                  = fmt.Sprintf("INSERT INTO %s (tenant_id, monitored_object_id, hour_of_week, baselines, created_timestamp, last_modified_timestamp) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (tenant_id, monitored_object_id, hour_of_week) DO UPDATE SET baselines = EXCLUDED.baselines, last_modified_timestamp = EXCLUDED.last_modified_timestamp", MetricBaselineTableName)
+	getBaselinesByPrimaryKeySQL                = fmt.Sprintf("SELECT baselines FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
+	getAllByPrimaryKeySQL                      = fmt.Sprintf("SELECT * FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
+	updateSQL                                  = fmt.Sprintf("UPDATE %s SET baselines = $1::jsonb, last_modified_timestamp = $2::bigint, last_reset_timestamp = $3::bigint WHERE tenant_id = $4 and monitored_object_id = $5 and hour_of_week = $6", MetricBaselineTableName)
+	deleteSQL                                  = fmt.Sprintf("DELETE FROM %s %s", MetricBaselineTableName, wherePrimaryKeySelectorSQL)
+	getBaselinesByMonitoredObjectSQL           = fmt.Sprintf("SELECT * FROM %s %s", MetricBaselineTableName, whereTeanntAndMonitoredObjectIDSelectorSQL)
+	deleteBaselinesByMonitoredObjectSQL        = fmt.Sprintf("DELETE FROM %s %s", MetricBaselineTableName, whereTeanntAndMonitoredObjectIDSelectorSQL)
+	resetBaselinesByMonitoredObjectSQL         = fmt.Sprintf("UPDATE %s SET baselines = $1::jsonb, last_modified_timestamp = $2::bigint, last_reset_timestamp = $3::bigint WHERE tenant_id = $4 and monitored_object_id = $5", MetricBaselineTableName)
 )
 
 type TenantMetricBaselinePostgresDAO struct {
@@ -131,7 +135,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) CreateMetricBaseline(metricBaseline
 	sqlStatement, err := mbdb.DB.Prepare(insertSQL)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_create")
-		return nil, fmt.Errorf("Unable to create insert metric baseline statement template: %s", err)
+		return nil, fmt.Errorf("Unable to create insert metric baseline statement template: %s", err.Error())
 	}
 	defer sqlStatement.Close()
 
@@ -143,7 +147,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) CreateMetricBaseline(metricBaseline
 			return nil, fmt.Errorf(datastore.ConflictErrorStr)
 		}
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_create")
-		return nil, fmt.Errorf("Unable to insert metric baseline: %s", err)
+		return nil, fmt.Errorf("Unable to insert metric baseline: %s", err.Error())
 	}
 
 	// fill in the missing values of the response
@@ -201,14 +205,14 @@ func (mbdb *TenantMetricBaselinePostgresDAO) UpdateMetricBaseline(metricBaseline
 	_, err = sqlStatement.Exec(models.AsJSONString(existing.Baselines), existing.LastModifiedTimestamp, existing.LastResetTimestamp, metricBaselineReq.TenantID, metricBaselineReq.MonitoredObjectID, metricBaselineReq.HourOfWeek)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_update")
-		return nil, fmt.Errorf("Unable to update metric baseline: %s", err)
+		return nil, fmt.Errorf("Unable to update metric baseline: %s", err.Error())
 	}
 
 	// Commit the transaction
 	err = txn.Commit()
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_update")
-		return nil, fmt.Errorf("Unable to commit bulk update transaction: %s", err)
+		return nil, fmt.Errorf("Unable to commit bulk update transaction: %s", err.Error())
 	}
 
 	// fill in the missing values of the response
@@ -230,7 +234,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaseline(tenantID string, 
 	sqlStatement, err := mbdb.DB.Prepare(getAllByPrimaryKeySQL)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_get")
-		return nil, fmt.Errorf("Unable to create fetch metric baseline statement template: %s", err)
+		return nil, fmt.Errorf("Unable to create fetch metric baseline statement template: %s", err.Error())
 	}
 	defer sqlStatement.Close()
 
@@ -256,14 +260,14 @@ func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaseline(tenantID string, 
 			return nil, fmt.Errorf(datastore.NotFoundStr)
 		}
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_get")
-		return nil, fmt.Errorf("Unable to read query result: %s", err)
+		return nil, fmt.Errorf("Unable to read query result: %s", err.Error())
 	}
 
 	// fill in the missing values of the response
 	err = json.Unmarshal(baselineResultContainer, &result.Baselines)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_get")
-		return nil, fmt.Errorf("Unable to convert query result: %s", err)
+		return nil, fmt.Errorf("Unable to convert query result: %s", err.Error())
 	}
 
 	result.ID = datastore.GetDataIDFromFullID(datastore.GenerateID(result, metricBaselineType))
@@ -289,14 +293,14 @@ func (mbdb *TenantMetricBaselinePostgresDAO) DeleteMetricBaseline(tenantID strin
 	sqlStatement, err := mbdb.DB.Prepare(deleteSQL)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_del")
-		return nil, fmt.Errorf("Unable to create delete metric baseline statement template: %s", err)
+		return nil, fmt.Errorf("Unable to create delete metric baseline statement template: %s", err.Error())
 	}
 	defer sqlStatement.Close()
 
 	_, err = sqlStatement.Exec(tenantID, existing.MonitoredObjectID, existing.HourOfWeek)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_del")
-		return nil, fmt.Errorf("Unable to convert query result: %s", err)
+		return nil, fmt.Errorf("Unable to convert query result: %s", err.Error())
 	}
 
 	logger.Log.Debugf("Retrieved Metric Baseline for Tenant %s Id %s", tenantID, dataID)
@@ -397,7 +401,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaselineForMonitoredObject
 	sqlStatement, err := mbdb.DB.Prepare(getBaselinesByPrimaryKeySQL)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_hrwk_getall")
-		return nil, fmt.Errorf("Unable to create get metric baseline statement template: %s", err)
+		return nil, fmt.Errorf("Unable to create get metric baseline statement template: %s", err.Error())
 	}
 	defer sqlStatement.Close()
 	row := sqlStatement.QueryRow(tenantID, monObjID, hourOfWeek)
@@ -410,14 +414,14 @@ func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaselineForMonitoredObject
 			return nil, fmt.Errorf(datastore.NotFoundStr)
 		}
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_hrwk_getall")
-		return nil, fmt.Errorf("Unable to read query result: %s", err)
+		return nil, fmt.Errorf("Unable to read query result: %s", err.Error())
 	}
 
 	result := []*tenmod.MetricBaselineData{}
 	err = json.Unmarshal(baselineBytes, &result)
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_hrwk_getall")
-		return nil, fmt.Errorf("Unable to convert query result: %s", err)
+		return nil, fmt.Errorf("Unable to convert query result: %s", err.Error())
 	}
 
 	logger.Log.Debugf("Completed baseline fetch for Tenant %s Monitored Object %s Hour Of Week %d", tenantID, monObjID, hourOfWeek)
@@ -456,7 +460,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) BulkUpdateMetricBaselines(tenantID 
 			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_bulk_update")
 			txn.Rollback()
 			sqlStatement.Close()
-			return nil, fmt.Errorf("Unable to create upsert statement template: %s", err)
+			return nil, fmt.Errorf("Unable to create upsert statement template: %s", err.Error())
 		}
 		_, err = sqlStatement.Exec(tenantID, val.MonitoredObjectID, val.HourOfWeek, models.AsJSONString(val.Baselines), currentTime, currentTime)
 		if err != nil {
@@ -472,7 +476,7 @@ func (mbdb *TenantMetricBaselinePostgresDAO) BulkUpdateMetricBaselines(tenantID 
 	err = txn.Commit()
 	if err != nil {
 		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_bulk_update")
-		return nil, fmt.Errorf("Unable to commit bulk update transaction: %s", err)
+		return nil, fmt.Errorf("Unable to commit bulk update transaction: %s", err.Error())
 	}
 
 	monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "200", "met_bsln_bulk_update")
@@ -494,6 +498,96 @@ func (mbdb *TenantMetricBaselinePostgresDAO) BulkUpdateMetricBaselinesFromList(t
 	return nil, fmt.Errorf("NOT IMPLEMENTED YET")
 }
 
-// func generateMetricBaselineID(monObjID string, hourOfWeek int32) string {
-// 	return fmt.Sprintf("%s_2_%s_%d", string(tenmod.TenantMetricBaselineType), monObjID, hourOfWeek)
-// }
+func (mbdb *TenantMetricBaselinePostgresDAO) GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) ([]*tenmod.MetricBaseline, error) {
+	methodStartTime := time.Now()
+
+	logger.Log.Debugf("Fetching all %s for Tenant %s for Monitored Object ID %s", tenmod.TenantMetricBaselineStr, tenantID, monObjID)
+
+	sqlStatement, err := mbdb.DB.Prepare(getBaselinesByMonitoredObjectSQL)
+	if err != nil {
+		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_get")
+		return nil, fmt.Errorf("Unable to create fetch metric baseline by monitored object statement template: %s", err.Error())
+	}
+	defer sqlStatement.Close()
+
+	rows, err := sqlStatement.Query(tenantID, monObjID)
+	if err != nil {
+		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_get")
+		return nil, fmt.Errorf("Unable to fetch metric baseline data for monitored object %s statement template: %s", monObjID, err.Error())
+	}
+	defer rows.Close()
+
+	resultList := []*tenmod.MetricBaseline{}
+
+	for rows.Next() {
+		var baselineResultContainer []byte
+		result := tenmod.MetricBaseline{}
+		err = rows.Scan(&result.TenantID, &result.MonitoredObjectID, &result.HourOfWeek, &baselineResultContainer, &result.CreatedTimestamp, &result.LastModifiedTimestamp, &result.LastResetTimestamp)
+		if err != nil {
+			if strings.Contains(err.Error(), "no rows in result set") {
+				monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "404", "met_bsln_by_monobj_get")
+				return nil, fmt.Errorf(datastore.NotFoundStr)
+			}
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_get")
+			return nil, fmt.Errorf("Unable to read query result: %s", err.Error())
+		}
+
+		// fill in the missing values of the response
+		err = json.Unmarshal(baselineResultContainer, &result.Baselines)
+		if err != nil {
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_get")
+			return nil, fmt.Errorf("Unable to convert query result: %s", err.Error())
+		}
+
+		result.ID = datastore.GetDataIDFromFullID(datastore.GenerateID(result, metricBaselineType))
+		result.Datatype = metricBaselineType
+		result.REV = fmt.Sprintf("%d", result.LastModifiedTimestamp)
+
+		resultList = append(resultList, &result)
+	}
+
+	if len(resultList) == 0 {
+		return nil, fmt.Errorf(datastore.NotFoundStr)
+	}
+
+	logger.Log.Debugf("Retrieved %d Metric Baselines for Tenant %s Monitored Object ID %s", len(resultList), tenantID, monObjID)
+	monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "200", "met_bsln_by_monobj_get")
+	return resultList, nil
+}
+
+func (mbdb *TenantMetricBaselinePostgresDAO) DeleteMetricBaselineForMonitoredObject(tenantID string, monObjID string, reset bool) error {
+	methodStartTime := time.Now()
+	sqlStatementStr := deleteBaselinesByMonitoredObjectSQL
+	operation := "Delete"
+	if reset {
+		operation = "Reset"
+		sqlStatementStr = resetBaselinesByMonitoredObjectSQL
+	}
+
+	logger.Log.Debugf("%s all %s for Tenant %s for Monitored Object ID %s", operation, tenmod.TenantMetricBaselineStr, tenantID, monObjID)
+	sqlStatement, err := mbdb.DB.Prepare(sqlStatementStr)
+	if err != nil {
+		monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_delete")
+		return fmt.Errorf("Unable to create %s metric baseline by monitored object statement template: %s", operation, err.Error())
+	}
+	defer sqlStatement.Close()
+
+	if reset {
+		updateTime := datastore.MakeTimestamp()
+		_, err := sqlStatement.Exec("[]", updateTime, updateTime, tenantID, monObjID)
+		if err != nil {
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_delete")
+			return fmt.Errorf("Unable to %s metric baseline data for monitored object %s statement template: %s", operation, monObjID, err.Error())
+		}
+	} else {
+		_, err := sqlStatement.Exec(tenantID, monObjID)
+		if err != nil {
+			monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "500", "met_bsln_by_monobj_delete")
+			return fmt.Errorf("Unable to %s metric baseline data for monitored object %s statement template: %s", operation, monObjID, err.Error())
+		}
+	}
+
+	logger.Log.Debugf("%s of all Metric Baselines for Tenant %s Monitored Object ID %s complete", operation, tenantID, monObjID)
+	monitoring.TrackPostgresTimeMetricInSeconds(monitoring.PostgresAPIMethodDurationType, methodStartTime, "200", "met_bsln_by_monobj_get")
+	return nil
+}

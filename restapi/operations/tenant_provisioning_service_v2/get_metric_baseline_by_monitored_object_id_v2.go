@@ -31,7 +31,7 @@ func NewGetMetricBaselineByMonitoredObjectIDV2(ctx *middleware.Context, handler 
 
 /*GetMetricBaselineByMonitoredObjectIDV2 swagger:route GET /v2/metric-baselines/by-monitored-object/{monitoredObjectId} TenantProvisioningServiceV2 getMetricBaselineByMonitoredObjectIdV2
 
-Retrieve a Tenant Metric Baselines by monitoredObjectId.
+Retrieve all Tenant Metric Baselines for a single Monitored Object.
 
 */
 type GetMetricBaselineByMonitoredObjectIDV2 struct {

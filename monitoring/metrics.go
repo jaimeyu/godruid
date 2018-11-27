@@ -243,6 +243,7 @@ const (
 	DeleteTenantMetricBaselineStr                        = MetricBaselineStr + metricNameDelimiter + OPDeleteStr
 	GetMetricBaselineByMonitoredObjectIdStr              = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
 	UpdateMetricBaselineForHourOfWeekV2Str               = MetricBaselineStr + metricNameDelimiter + "hourwk" + metricNameDelimiter + OPUpdateStr
+	DeleteMetricBaselineByMonitoredObjectIdStr           = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
 
 	GetDownloadRoadrunnerStr          = DownloadRoadrunnerStr + metricNameDelimiter + OPGetStr
 	BulkUpdateTenantMetricBaselineStr = MetricBaselineStr + metricNameDelimiter + OPBulkUpdate
@@ -460,7 +461,7 @@ func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 func TrackDruidTimeMetricInSeconds(summaryType DruidSummaryType, startTime time.Time, labels ...string) {
 	duration := time.Since(startTime).Seconds()
 
-	logger.Log.Infof("%v: %f", labels, duration)
+	logger.Log.Debugf("%v: %f", labels, duration)
 	switch summaryType {
 	case DruidQueryDurationType:
 		DruidQueryDuration.WithLabelValues(labels...).Observe(duration)
@@ -476,7 +477,7 @@ func TrackDruidTimeMetricInSeconds(summaryType DruidSummaryType, startTime time.
 func TrackPostgresTimeMetricInSeconds(summaryType PostgresSummaryType, startTime time.Time, labels ...string) {
 	duration := time.Since(startTime).Seconds()
 
-	logger.Log.Infof("%v: %f", labels, duration)
+	logger.Log.Debugf("%v: %f", labels, duration)
 	switch summaryType {
 	case PostgresQueryDurationType:
 		PostgresQueryDuration.WithLabelValues(labels...).Observe(duration)

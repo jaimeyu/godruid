@@ -1,8 +1,10 @@
-* Fix - Found bug in Connector's run.sh that did not include the host file override for the login function. 
 ## Current Release 
+### 0.265.0 
+**Release Date:** Tue Nov 27 11:05:39 UTC 2018     
+## Previous Releases 
+* Fix - Found bug in Connector's run.sh that did not include the host file override for the login function. 
 ### 0.264.0 
 **Release Date:** Tue Nov 27 02:46:02 UTC 2018     
-## Previous Releases 
 * Metric Baseline Postgres Impl
 ### 0.263.0 
 **Release Date:** Fri Nov 23 21:41:44 UTC 2018     

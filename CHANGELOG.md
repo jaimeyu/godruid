@@ -1,3 +1,4 @@
+* Fix - Found bug in Connector's run.sh that did not include the host file override for the login function. 
 ## Current Release 
 ### 0.264.0 
 **Release Date:** Tue Nov 27 02:46:02 UTC 2018     

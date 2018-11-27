@@ -330,7 +330,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineHourOfWeekResponse'
+            $ref: '#/definitions/MetricBaselineResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:

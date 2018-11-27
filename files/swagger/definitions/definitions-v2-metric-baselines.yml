@@ -166,37 +166,37 @@
       attributes:
         $ref: '#/definitions/MetricBaselineData'
 
-  MetricBaselineHourOfWeekResponse:
-    type: "object"
-    description: "Metric Baseline data response including one or more baselines tracked by a specific hour of the week"
-    required: ["data"]
-    properties:
-      data:
-        type: "object"
-        required: ["type", "id", "attributes"]
-        properties:
-          type: 
-            type: "string"
-            enum: [metricBaselineHourResponse]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            properties:
-              monitoredObjectId:
-                type: "string"
-                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
-              hourOfWeek:
-                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
-                type: "integer"
-                format: "int32"
-                minimum: 0
-                maximum: 167
-              baselines: 
-                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
-                type: "array"
-                items:
-                  $ref: '#/definitions/MetricBaselineData'
+  # MetricBaselineHourOfWeekResponse:
+  #   type: "object"
+  #   description: "Metric Baseline data response including one or more baselines tracked by a specific hour of the week"
+  #   required: ["data"]
+  #   properties:
+  #     data:
+  #       type: "object"
+  #       required: ["type", "id", "attributes"]
+  #       properties:
+  #         type: 
+  #           type: "string"
+  #           enum: [metricBaselineHourResponse]
+  #         id:
+  #           type: "string"
+  #         attributes:
+  #           type: "object"
+  #           properties:
+  #             monitoredObjectId:
+  #               type: "string"
+  #               description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+  #             hourOfWeek:
+  #               description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+  #               type: "integer"
+  #               format: "int32"
+  #               minimum: 0
+  #               maximum: 167
+  #             baselines: 
+  #               description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+  #               type: "array"
+  #               items:
+  #                 $ref: '#/definitions/MetricBaselineData'
 
   MetricBaselineUpdateHourRequest:
     type: "object"

@@ -404,7 +404,7 @@ func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMe
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineHourOfWeekResponse, error) {
+func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s for %s %s for %s %s and hourOfWeek %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, params.HourOfWeek), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -413,7 +413,8 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 	}
 
 	// Issue request to DAO Layer
-	result, err := tenantDB.GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID, params.MonitoredObjectID, params.HourOfWeek)
+	dataID := fmt.Sprintf("%s_%d", params.MonitoredObjectID, params.HourOfWeek)
+	result, err := tenantDB.GetMetricBaseline(tenantID, dataID)
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -422,28 +423,10 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
 
-	baselineContainer := []*swagmodels.MetricBaselineData{}
-	baselineBytes, err := json.Marshal(result)
+	converted := swagmodels.MetricBaselineResponse{}
+	err = convertToJsonapiObject(result, &converted)
 	if err != nil {
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to marshal response %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
-	}
-
-	err = json.Unmarshal(baselineBytes, &baselineContainer)
-	if err != nil {
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to marshal response %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
-	}
-
-	responseType := "metricBaselineHourResponse"
-	responseID := "-1"
-	converted := swagmodels.MetricBaselineHourOfWeekResponse{
-		Data: &swagmodels.MetricBaselineHourOfWeekResponseData{
-			Type: &responseType,
-			ID:   &responseID,
-			Attributes: &swagmodels.MetricBaselineHourOfWeekResponseDataAttributes{
-				MonitoredObjectID: params.MonitoredObjectID,
-				Baselines:         baselineContainer,
-			},
-		},
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetMetricBaselineByMonitoredObjectIdForHourOfWeekStr, mon.APICompleted, mon.TenantAPICompleted)

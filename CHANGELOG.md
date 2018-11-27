@@ -1,8 +1,10 @@
-* Feature - Adding a flag to all the v2 APIs to control data cleaning
 ## Current Release 
+### 0.266.0 
+**Release Date:** Tue Nov 27 14:39:19 UTC 2018     
+## Previous Releases 
+* Feature - Adding a flag to all the v2 APIs to control data cleaning
 ### 0.265.0 
 **Release Date:** Tue Nov 27 11:05:39 UTC 2018     
-## Previous Releases 
 * Fix - Found bug in Connector's run.sh that did not include the host file override for the login function. 
 ### 0.264.0 
 **Release Date:** Tue Nov 27 02:46:02 UTC 2018     

@@ -96,7 +96,7 @@ func RunAdminServiceDatastoreTests(t *testing.T) {
 
 func RunTenantServiceDatastoreTests(t *testing.T) {
 	// Issue the test to the TenantServiceDatastoreTestRunner
-	tester := dstestTenant.InitTestRunner(tenantDB, adminDB, tenantDB)
+	tester := dstestTenant.InitTestRunner(tenantDB, adminDB)
 	tester.RunTenantUserCRUD(t)
 	tester.RunTenantDomainCRUD(t)
 	tester.RunTenantMonitoredObjectCRUD(t)
@@ -116,5 +116,4 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunBrandingCRUD(t)
 	tester.RunLocaleCRUD(t)
 	tester.RunTenantMetadataConfigCRUD(t)
-	tester.RunTenantMetricBaselineCRUD(t)
 }

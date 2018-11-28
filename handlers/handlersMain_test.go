@@ -5,11 +5,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/logger"
 )
 
 var (
-	metricsIntegrationTests = flag.Bool("metrics", false, "Run metrics api integration tests")
+	metricsIntegrationTests        = flag.Bool("metrics", false, "Run metrics api integration tests")
+	stubbedMetricBaselineDatastore = &datastore.StubbedTenantMetricBaselineDatastore{}
 )
 
 func TestMain(m *testing.M) {

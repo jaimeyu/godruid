@@ -286,11 +286,10 @@ type TenantServiceDatastoreTestRunner struct {
 	baselineDB ds.TenantMetricBaselineDatastore
 }
 
-func InitTestRunner(tdb ds.TenantServiceDatastore, adb ds.AdminServiceDatastore, mbdb ds.TenantMetricBaselineDatastore) *TenantServiceDatastoreTestRunner {
+func InitTestRunner(tdb ds.TenantServiceDatastore, adb ds.AdminServiceDatastore) *TenantServiceDatastoreTestRunner {
 	return &TenantServiceDatastoreTestRunner{
-		tenantDB:   tdb,
-		adminDB:    adb,
-		baselineDB: mbdb,
+		tenantDB: tdb,
+		adminDB:  adb,
 	}
 }
 

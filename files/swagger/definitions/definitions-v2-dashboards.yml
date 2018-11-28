@@ -129,8 +129,10 @@
             $ref: '#/definitions/CardPositions'
           createdTimestamp:
             type: "integer"
+            format: "int64"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   CardPositions:

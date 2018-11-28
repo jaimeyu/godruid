@@ -30,7 +30,7 @@ func TestTeantCRUDV2(t *testing.T) {
 	castedResponse := existing.(*admin_provisioning_service_v2.GetAllTenantsV2NotFound)
 	assert.NotNil(t, castedResponse)
 
-	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreate := created.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
@@ -66,7 +66,7 @@ func TestTeantCRUDV2(t *testing.T) {
 	assert.Equal(t, castedCreate.Payload.Data.Attributes.URLSubdomain, castedUpdate.Payload.Data.Attributes.URLSubdomain)
 
 	// Delete the record
-	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
+	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
 	castedDelete := deleted.(*admin_provisioning_service_v2.DeleteTenantV2OK)
 	assert.NotNil(t, castedDelete)
 	assert.Equal(t, castedUpdate.Payload.Data, castedDelete.Payload.Data)
@@ -86,7 +86,7 @@ func TestTenantNotFoundV2(t *testing.T) {
 	assert.NotNil(t, castedFetch)
 
 	// Delete Tenant
-	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: notFoundID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
+	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: notFoundID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
 	castedDelete := deleted.(*admin_provisioning_service_v2.DeleteTenantV2NotFound)
 	assert.NotNil(t, castedDelete)
 
@@ -100,7 +100,7 @@ func TestTenantNotFoundV2(t *testing.T) {
 func TestTenantBadRequestV2(t *testing.T) {
 
 	// CreateTenant
-	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: nil, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: nil, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreate := created.(*admin_provisioning_service_v2.CreateTenantV2BadRequest)
 	assert.NotNil(t, castedCreate)
 
@@ -118,7 +118,7 @@ func TestTenantConflictV2(t *testing.T) {
 	assert.NotNil(t, castedResponse)
 
 	createReqBody := generateRandomTenantCreationRequest()
-	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreate := created.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
@@ -129,7 +129,7 @@ func TestTenantConflictV2(t *testing.T) {
 	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
 
 	// Try to create the record again
-	createdConflict := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	createdConflict := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreateConflict := createdConflict.(*admin_provisioning_service_v2.CreateTenantV2Conflict)
 	assert.NotNil(t, castedCreateConflict)
 
@@ -141,7 +141,7 @@ func TestTenantConflictV2(t *testing.T) {
 	assert.NotNil(t, castedUpdate)
 
 	// Delete the tenant
-	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
+	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "DELETE")})
 	castedDelete := deleted.(*admin_provisioning_service_v2.DeleteTenantV2OK)
 	assert.NotNil(t, castedDelete)
 	assert.NotNil(t, castedDelete.Payload.Data)
@@ -169,11 +169,11 @@ func TestAdminServiceAPIsProtectedByAuthV2(t *testing.T) {
 	assert.NotNil(t, castedFetch)
 
 	// Create Tenant - Skylight Admin Only
-	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantAdmin, tenantURL, "POST")})
+	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantAdmin, tenantURL, "POST")})
 	castedCreate := created.(*admin_provisioning_service_v2.CreateTenantV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
-	created = handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantUser, tenantURL, "POST")})
+	created = handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantUser, tenantURL, "POST")})
 	castedCreate = created.(*admin_provisioning_service_v2.CreateTenantV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
@@ -187,11 +187,11 @@ func TestAdminServiceAPIsProtectedByAuthV2(t *testing.T) {
 	assert.NotNil(t, castedUpdate)
 
 	// Delete record - Skylight Admin only
-	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: fakeID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantAdmin, tenantURL, "DELETE")})
+	deleted := handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: fakeID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantAdmin, tenantURL, "DELETE")})
 	castedDelete := deleted.(*admin_provisioning_service_v2.DeleteTenantV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
-	deleted = handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: fakeID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantUser, tenantURL, "DELETE")})
+	deleted = handlers.HandleDeleteTenantV2(handlers.SkylightAdminRoleOnly, adminDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.DeleteTenantV2Params{TenantID: fakeID, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleTenantUser, tenantURL, "DELETE")})
 	castedDelete = deleted.(*admin_provisioning_service_v2.DeleteTenantV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
@@ -229,7 +229,7 @@ func TestGetByAliasV2(t *testing.T) {
 	assert.NotNil(t, castedResponse)
 
 	createReqBody := generateRandomTenantCreationRequest()
-	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	created := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: createReqBody, HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreate := created.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreate)
 	assert.NotEmpty(t, castedCreate.Payload.Data.ID)

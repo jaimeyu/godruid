@@ -128,12 +128,15 @@
               $ref: '#/definitions/MetricBaselineData'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
           lastResetTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last reset to 0"
       
   MetricBaselineResponse:

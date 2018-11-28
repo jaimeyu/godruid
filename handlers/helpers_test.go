@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/accedian/adh-gather/datastore"
+	"github.com/accedian/adh-gather/datastore/postgres"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
 	admmod "github.com/accedian/adh-gather/models/admin"
@@ -28,8 +29,9 @@ const (
 )
 
 var (
-	adminDB  datastore.AdminServiceDatastore
-	tenantDB datastore.TenantServiceDatastore
+	adminDB          datastore.AdminServiceDatastore
+	tenantDB         datastore.TenantServiceDatastore
+	metricBaselineDB datastore.TenantMetricBaselineDatastore
 
 	objectTypes = []string{string(tenmod.TwampPE), string(tenmod.TwampSF), string(tenmod.TwampSL), string(tenmod.Flowmeter)}
 	deviceTypes = []string{string(tenmod.AccedianVNID), string(tenmod.AccedianNID)}
@@ -43,6 +45,7 @@ func setupTestDatastore() error {
 	cfg.Set("ingDict", "../files/defaultIngestionDictionary.json")
 	cfg.Set("changeNotifications", "false")
 	cfg.Set(gather.CK_args_authorizationAAA.String(), "true")
+	cfg.Set(gather.CK_args_metricbaselines_schemadir.String(), "../datastore/postgres/schema")
 
 	handlers.InitializeAuthHelper()
 
@@ -57,6 +60,11 @@ func setupTestDatastore() error {
 	tenantDB, err = handlers.GetTenantServiceDatastore()
 	if err != nil {
 		return fmt.Errorf("Unable to instantiate Tenant Service DAO: %s", err.Error())
+	}
+
+	metricBaselineDB, err = postgres.CreateTenantMetricBaselinePostgresDAO()
+	if err != nil {
+		return fmt.Errorf("Unable to instantiate Metric Baseline DAO: %s", err.Error())
 	}
 
 	adminDB.DeleteDatabase(adminDBName)

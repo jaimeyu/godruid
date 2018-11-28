@@ -146,13 +146,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
-	// Create a CouchDB database to isolate metric baselines for Monitored Objects for the tenant
-	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, metricBaselineDBSuffix))
-	if err != nil {
-		logger.Log.Debugf("Unable to create metric baseline database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
-		return nil, err
-	}
-
 	// Add in the views/indicies necessary for the db:
 	if err = asd.addTenantViewsToDB(tenantDescriptor.ID); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.ID, err.Error())

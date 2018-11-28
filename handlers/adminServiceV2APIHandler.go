@@ -21,11 +21,11 @@ import (
 )
 
 // HandleCreateTenantV2 - create a new tenant
-func HandleCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore) func(params admin_provisioning_service_v2.CreateTenantV2Params) middleware.Responder {
+func HandleCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore, metricBaselineDB datastore.TenantMetricBaselineDatastore) func(params admin_provisioning_service_v2.CreateTenantV2Params) middleware.Responder {
 	return func(params admin_provisioning_service_v2.CreateTenantV2Params) middleware.Responder {
 
 		// Do the work
-		startTime, responseCode, response, err := doCreateTenantV2(allowedRoles, adminDB, tenantDB, params)
+		startTime, responseCode, response, err := doCreateTenantV2(allowedRoles, adminDB, tenantDB, metricBaselineDB, params)
 
 		// Success Response
 		if responseCode == http.StatusCreated {
@@ -103,11 +103,11 @@ func HandlePatchTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDa
 }
 
 // HandleDeleteTenantV2 - delete a tenant by the tenant ID.
-func HandleDeleteTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore) func(params admin_provisioning_service_v2.DeleteTenantV2Params) middleware.Responder {
+func HandleDeleteTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, metricBaselineDB datastore.TenantMetricBaselineDatastore) func(params admin_provisioning_service_v2.DeleteTenantV2Params) middleware.Responder {
 	return func(params admin_provisioning_service_v2.DeleteTenantV2Params) middleware.Responder {
 
 		// Do the work
-		startTime, responseCode, response, err := doDeleteTenantV2(allowedRoles, adminDB, params)
+		startTime, responseCode, response, err := doDeleteTenantV2(allowedRoles, adminDB, metricBaselineDB, params)
 
 		// Success Response
 		if responseCode == http.StatusOK {
@@ -247,7 +247,7 @@ func HandleGetValidTypesV2(allowedRoles []string, adminDB datastore.AdminService
 	}
 }
 
-func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore, params admin_provisioning_service_v2.CreateTenantV2Params) (time.Time, int, *swagmodels.TenantResponse, error) {
+func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, tenantDB datastore.TenantServiceDatastore, metricBaselineDB datastore.TenantMetricBaselineDatastore, params admin_provisioning_service_v2.CreateTenantV2Params) (time.Time, int, *swagmodels.TenantResponse, error) {
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s: %s", admmod.TenantStr, models.AsJSONString(params.Body)), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
@@ -316,6 +316,12 @@ func doCreateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 	_, err = tenantDB.CreateTenantMeta(meta)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to create Tenant metadata %s", err.Error())
+	}
+
+	// Make a best effort to create the metric baseline DB
+	err = metricBaselineDB.CreateMetricBaselineDB(idForTenant)
+	if err != nil {
+		logger.Log.Errorf("Unable to create Metric Baseline DB for Tenant %s. Please create this DB manually to enable Metric Baseline tracking: %s", idForTenant, err.Error())
 	}
 
 	converted := swagmodels.TenantResponse{}
@@ -407,7 +413,7 @@ func doUpdateTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doDeleteTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, params admin_provisioning_service_v2.DeleteTenantV2Params) (time.Time, int, *swagmodels.TenantResponse, error) {
+func doDeleteTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatastore, metricBaselineDB datastore.TenantMetricBaselineDatastore, params admin_provisioning_service_v2.DeleteTenantV2Params) (time.Time, int, *swagmodels.TenantResponse, error) {
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Deleting %s: %s", admmod.TenantStr, params.TenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
 	if !isAuthorized {
@@ -422,6 +428,12 @@ func doDeleteTenantV2(allowedRoles []string, adminDB datastore.AdminServiceDatas
 		}
 
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to delete %s: %s", admmod.TenantStr, err.Error())
+	}
+
+	// Make a best effort to delete the metric baseline DB
+	err = metricBaselineDB.DeleteMetricBaselineDB(params.TenantID)
+	if err != nil {
+		logger.Log.Errorf("Unable to delete Metric Baseline DB for Tenant %s. Please remove this DB manually", params.TenantID)
 	}
 
 	converted := swagmodels.TenantResponse{}

@@ -111,9 +111,11 @@
             description: "The current state of the Tenant"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp at which this record was created in Datahub"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp of the last update to this record in Datahub"
 
   IngestionDictionaryListResponse:

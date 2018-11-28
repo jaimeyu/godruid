@@ -91,9 +91,11 @@
             $ref: '#/definitions/BrandingLogo'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   BrandingLogo:
@@ -210,7 +212,9 @@
             description: "Timezone used to coordinate timestamps for the specified region"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."

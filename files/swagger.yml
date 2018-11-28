@@ -6699,9 +6699,11 @@ definitions:
             description: "The current state of the Tenant"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp at which this record was created in Datahub"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp of the last update to this record in Datahub"
 
   IngestionDictionaryListResponse:
@@ -6962,9 +6964,11 @@ definitions:
             $ref: '#/definitions/BrandingLogo'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   BrandingLogo:
@@ -7081,9 +7085,11 @@ definitions:
             description: "Timezone used to coordinate timestamps for the specified region"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   MetricIdentifierFilter:
@@ -7314,9 +7320,11 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceCreateRequest:
@@ -7367,9 +7375,11 @@ definitions:
                 type: "string"
               createdTimestamp:
                 type: "integer"
+                format: "int64"
                 description: "Time since epoch at which this object was instantiated."
               lastModifiedTimestamp:
                 type: "integer"
+                format: "int64"
                 description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceResponse:
@@ -7414,9 +7424,11 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
   DashboardCreateRequest:
     type: "object"
@@ -7549,8 +7561,10 @@ definitions:
             $ref: '#/definitions/CardPositions'
           createdTimestamp:
             type: "integer"
+            format: "int64"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   CardPositions:
@@ -8152,9 +8166,11 @@ definitions:
             $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   IngestionProfileMetrics:
@@ -8320,9 +8336,11 @@ definitions:
               type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
   MetricBaselineCreateRequest:
     type: "object"
@@ -8454,12 +8472,15 @@ definitions:
               $ref: '#/definitions/MetricBaselineData'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
           lastResetTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last reset to 0"
       
   MetricBaselineResponse:
@@ -9539,9 +9560,11 @@ definitions:
               "wgs87_y": "-74.2130912"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   BulkOperationResponseV2:
@@ -9974,9 +9997,11 @@ definitions:
                 type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   ReportScheduleConfigRelationships:
@@ -10091,9 +10116,11 @@ definitions:
             description: "Identifying name of a Threshold Profile"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
           thresholds:
             description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"

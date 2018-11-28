@@ -117,7 +117,9 @@
               type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."

@@ -1739,12 +1739,8 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 	default:
 		// We need the SUM to do the average operation
 		aggregations = append(aggregations, godruid.AggDoubleSum(sumLbl, metric.Metric))
-		// Makes sure we don't pass in a 0 into a division operation (not necessary actually,
-		// testing shows druid doesn't segfault on a divide by zero operation and returns 0 as a result).
-		aggroFilter := godruid.FilterNot(godruid.FilterSelector(metric.Metric, 0))
 		aggroCount := godruid.AggCount(countLbl)
-		aggroFunc := godruid.AggFiltered(aggroFilter, &aggroCount)
-		aggregations = append(aggregations, aggroFunc)
+		aggregations = append(aggregations, aggroCount)
 		// Post Aggregation is where the Average operation is executed
 		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(sumLbl))
 		postAggregations.Fields = append(postAggregations.Fields, godruid.PostAggFieldAccessor(countLbl))

@@ -330,6 +330,21 @@ func fetchDesignDocumentResults(body map[string]interface{}, dbName string, inde
 	return parseData(data)
 }
 
+func (psd *PouchDBServiceDatastoreCouchDB) GetByDesignDocument(dbName string, indexName string) (map[string]interface{}, error) {
+	resource, err := couchdb.NewResource(createDBPathStr(psd.couchHost, dbName), nil)
+	if err != nil {
+		logger.Log.Debugf("Falied to create resource to DB %s: %s", dbName, err.Error())
+		return nil, err
+	}
+
+	_, data, err := resource.GetJSON(indexName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseData(data)
+}
+
 func performBulkUpdate(body map[string]interface{}, resource *couchdb.Resource) ([]map[string]interface{}, error) {
 	_, data, err := resource.PostJSON("_bulk_docs", nil, body, nil)
 	if err != nil {

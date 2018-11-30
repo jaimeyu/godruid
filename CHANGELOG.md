@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.270.0 
+**Release Date:** Fri Nov 30 03:19:14 UTC 2018     
+## Previous Releases 
 ### 0.269.0 
 **Release Date:** Wed Nov 28 22:37:52 UTC 2018     
-## Previous Releases 
 ### 0.268.0 
 **Release Date:** Tue Nov 27 19:53:39 UTC 2018     
 * Fix - Fixes issue where topn was not considering 0 valued metrics

@@ -1,3 +1,4 @@
+* Fix - Guards to ensure that badly formed threshold crossing top N requests do not affect gather
 ## Current Release 
 ### 0.270.0 
 **Release Date:** Fri Nov 30 03:19:14 UTC 2018     

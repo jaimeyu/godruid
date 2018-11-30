@@ -1146,7 +1146,34 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 	vendorMap := thresholdProfile.Thresholds.VendorMap
 	// NOTE: We make the assumption here, for now, that all of the object types that are passed in will be grouped in some way in the threshold profile and therefore will
 	// have the same event thresholds for each object type. This may not be the case in the future but for now it is.
-	events := vendorMap[metric.Vendor].MonitoredObjectTypeMap[metric.ObjectType[0]].MetricMap[metric.Metric].DirectionMap[metric.Direction[0]].EventMap
+
+	vMap := vendorMap[metric.Vendor]
+	if vMap == nil {
+		return nil, fmt.Errorf("No entry found in threshold profile for request metric identifier, vendor %s", metric.Vendor)
+	}
+
+	if len(metric.ObjectType) == 0 {
+		return nil, fmt.Errorf("No object type was provided in filter query")
+	}
+	oMap := vMap.MonitoredObjectTypeMap[metric.ObjectType[0]]
+	if oMap == nil {
+		return nil, fmt.Errorf("No entry found in theshold profile for request metric identifier, object type %s", metric.ObjectType[0])
+	}
+
+	mMap := oMap.MetricMap[metric.Metric]
+	if mMap == nil {
+		return nil, fmt.Errorf("No entry found in threshold profile for request metric identifier, metric %s", metric.Metric)
+	}
+
+	if len(metric.Direction) == 0 {
+		return nil, fmt.Errorf("No direction was provided in filter query")
+	}
+	dMap := mMap.DirectionMap[metric.Direction[0]]
+	if dMap == nil {
+		return nil, fmt.Errorf("No entry found in threshold profile for request metric identifier, direction %s", metric.Direction[0])
+	}
+
+	events := dMap.EventMap
 
 	sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(events).MapKeys())
 	for _, eventTypeKey := range sortedEventTypeMapKeys {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 
 	"io/ioutil"
 	"math/big"
@@ -151,6 +152,13 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Method:      "POST",
 			Pattern:     "/distribution/sign-csr",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight, UserRoleTenantAdmin}, result.SignCSR),
+		},
+
+		server.Route{
+			Name:        "DeleteDuplicateMonitoredObjectsByName",
+			Method:      "POST",
+			Pattern:     "/test-data/delete-duplicate-mo-by-name",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.DeleteDuplicateMonitoredObjectsByName),
 		},
 	}
 
@@ -1213,4 +1221,139 @@ func generateAndSendKafkaMsg(kafkaProducer *kafka.Writer, ts int64, tenantID str
 		return "", err
 	}
 	return "", nil
+}
+
+type MonitoredObjectIdAndTimestamp struct {
+	objectID         string
+	createdTimestamp int64
+	revision         string
+}
+
+// DeleteDuplicateMonitoredObjectsByName - used to correct the issue we have when a session is deleted then added again just to make changes.
+// Should only be used when we need to trim down DB before we fix the issue permanently by using Object name as the ID instead of the
+// session data as an id.
+func (tsh *TestDataServiceHandler) DeleteDuplicateMonitoredObjectsByName(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	dbSuffix := r.URL.Query().Get("dbSuffix")
+
+	dbName := "tenant_2_" + r.Header.Get("X-Forwarded-Tenant-Id") + dbSuffix
+	monObjDupDel := "mon_obj_dup_delete"
+
+	// First, fetch the listing of doc IDs and created timestamps as they are mapped to unique names from the db index:
+	indexResults, err := tsh.pouchDB.GetByDesignDocument(dbName, "_design/duplicates/_view/moNameToID")
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the deletion request for DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+		return
+	}
+
+	if len(indexResults) == 0 {
+		mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
+		fmt.Fprintf(w, "No records to delete for DB "+dbName)
+		return
+	}
+
+	// Iterate over the results to build up a map of names to lists of Monitored Object Ids
+	moNameToIdAndTimestampMap := map[string][]*MonitoredObjectIdAndTimestamp{}
+
+	rows, ok := indexResults["rows"].([]interface{})
+	if !ok {
+		msg := fmt.Sprintf("Unable to convert result array from index results to populate the deletion request for DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+		return
+	}
+
+	for _, resultVal := range rows {
+		row, ok := resultVal.(map[string]interface{})
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result from index results to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		// Retrieve the necessary values
+		objectName, ok := row["key"].(string)
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result key to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		value, ok := row["value"].([]interface{})
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result value to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		objectId, ok := value[0].(string)
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result object ID to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		objectCreatedTimestamp, ok := value[1].(float64)
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result object createdTimestamp to populate the deletion request for DB %s", dbName)
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		objectRevision, ok := value[2].(string)
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result object revision to populate the deletion request for DB %s", dbName)
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		// Update the mapping:
+		_, ok = moNameToIdAndTimestampMap[objectName]
+		if !ok {
+			moNameToIdAndTimestampMap[objectName] = []*MonitoredObjectIdAndTimestamp{}
+		}
+		moNameToIdAndTimestampMap[objectName] = append(moNameToIdAndTimestampMap[objectName], &MonitoredObjectIdAndTimestamp{objectID: objectId, createdTimestamp: int64(objectCreatedTimestamp), revision: objectRevision})
+	}
+
+	if len(moNameToIdAndTimestampMap) == 0 {
+		mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
+		fmt.Fprintf(w, "No records to delete after conversion to map for DB "+dbName)
+		return
+	}
+
+	docsToDelete := make([]map[string]interface{}, 0)
+
+	// Iterate over the created map to determine the entries that should be added to the bulk delete body
+	for _, objectDetailsList := range moNameToIdAndTimestampMap {
+		if len(objectDetailsList) == 1 {
+			continue
+		}
+
+		// Sort the object details list by the created timestamp so that the largest one is in he first position
+		sort.Slice(objectDetailsList, func(i, j int) bool {
+			return objectDetailsList[i].createdTimestamp > objectDetailsList[j].createdTimestamp
+		})
+
+		// Now that the list is sorted, do not use the first entry in the delete request
+		itemsToDelete := objectDetailsList[1:]
+
+		// Iterate over the remaiing items and add them to the delete request
+		for _, deleteItemDetails := range itemsToDelete {
+			docsToDelete = append(docsToDelete, map[string]interface{}{"_id": "monitoredObject_2_" + deleteItemDetails.objectID, "_rev": deleteItemDetails.revision, "_deleted": true})
+		}
+	}
+
+	deleteBody := map[string]interface{}{"docs": docsToDelete}
+
+	_, err = tsh.pouchDB.BulkDBUpdate(dbName, deleteBody)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to remove duplicate Monitored Objects from DB DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Purge complete, send back success details:
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
+	fmt.Fprintf(w, "Successfully deleted all duplicate Monitored Object records from DB "+dbName)
 }

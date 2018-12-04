@@ -35,7 +35,7 @@ type TopNForMetricConfig struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// An identifier that considers one specific metric based on the provided information

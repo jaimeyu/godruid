@@ -32,7 +32,7 @@ type HistogramConfig struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// A list of the requested metric identifiers and the histogram buckets associated with those identifiers

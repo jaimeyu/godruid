@@ -29,7 +29,7 @@ type ThresholdCrossingConfig struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// limits the results to include only metrics in the whitelist

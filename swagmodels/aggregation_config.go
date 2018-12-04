@@ -38,7 +38,7 @@ type AggregationConfig struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. This attribute cannot be used if the monitoredObjects attribute is also present in the request. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// An array of identifiers that filter-in specifically identified metrics.

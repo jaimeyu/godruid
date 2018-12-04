@@ -30,7 +30,7 @@ type ThresholdCrossingByMOTopNConfig struct {
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// The metric to be used for the top N query

@@ -1698,7 +1698,7 @@ func buildMetricAggregator(metricsView []metrics.MetricAggregation) []godruid.Ag
 }
 
 // GetTopNForMetricAvg - Provides TopN for certain metrics.
-func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout int32, ignoreCleaning bool, metaMOs []string) (*godruid.QueryTopN, error) {
+func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout int32, ignoreCleaning bool, metaMOs []string) (*godruid.QueryGroupBy, error) {
 
 	var aggregations []godruid.Aggregation
 	var postAggregations godruid.PostAggregation
@@ -1777,8 +1777,20 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		}
 
 	}
-	return &godruid.QueryTopN{
-		QueryType:        godruid.TOPN,
+
+	limitColumn := godruid.Column{
+		Dimension: "value",
+		Direction: "descending",
+		AsNumber:  true,
+	}
+	limit := &godruid.Limit{
+		Type:    "default",
+		Columns: []godruid.Column{limitColumn},
+		Limit:   int(request.NumResult),
+	}
+
+	return &godruid.QueryGroupBy{
+		QueryType:        godruid.GROUPBY,
 		DataSource:       dataSource,
 		Granularity:      godruid.GranAll,
 		Context:          map[string]interface{}{"timeout": timeout, "queryId": uuid.NewV4().String()},
@@ -1786,13 +1798,8 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		Filter:           filterOn,
 		PostAggregations: scoredPostAggregation,
 		Intervals:        []string{request.Interval},
-		// !! LOOK HERE. Metric is used to tell Druid which METRIC we want to sort by.
-		// Because the average operation is a POST AGGREGATION and not an existing column,
-		// the metric name here must match the POST AGGREGATION name for it to sort.
-		// Default is to sort in descending order (use `"type":"inverted"` to reverse the order)
-		Metric:    selectedMetric,
-		Threshold: int(request.NumResult),
-		Dimension: "monitoredObjectId",
+		Dimensions:       []godruid.DimSpec{"monitoredObjectId"},
+		LimitSpec:        limit,
 	}, nil
 }
 

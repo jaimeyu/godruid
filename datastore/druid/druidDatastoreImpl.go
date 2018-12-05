@@ -415,21 +415,17 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 	topNResults := make([]metrics.TopNEntryResponse, 0)
 
 	if len(topN) != 0 {
-		topNResponseHead, ok := topN[0]["result"] // There should be only a single entry with the granularity all
-		if !ok {
-			return topNResults, nil
-		}
-
-		topNResponse, ok := topNResponseHead.([]interface{}) // There should be only a single entry with the granularity all
-		if !ok {
-			logger.Log.Errorf("Could not cast topN response")
-			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
-			return nil, err
-		}
 		topNResults = make([]metrics.TopNEntryResponse, 0)
 
-		for _, r := range topNResponse {
-			rawMap := r.(map[string]interface{})
+		for _, r := range topN {
+			event, ok := r["event"]
+			if !ok {
+				logger.Log.Errorf("Could not cast topN response event: %s", models.AsJSONString(r))
+				mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
+				return nil, err
+			}
+
+			rawMap := event.(map[string]interface{})
 			if rawMap["monitoredObjectId"] != nil {
 				toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
 				delete(rawMap, "monitoredObjectId")

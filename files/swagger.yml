@@ -7738,6 +7738,21 @@ definitions:
         type: "string"
       component:
         type: "string"
+      queryParams:
+        type: "object"
+        properties:
+          limit:
+            description : "Restricts the number ofresults to the provided limit."
+            type: "integer"
+          sortDescending:
+            type: "boolean"
+            description: "Items will be displayed sorted in descending order when true, ascending order when false"
+            default: true
+          aggregator:
+            type: "string"
+            description: "The type of aggregation to use when displaying the values"
+            enum: ["min","max","avg"]
+            default: "avg"
       availability:
         type: "object"
         properties:

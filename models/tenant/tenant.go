@@ -897,10 +897,17 @@ type CardVisualization struct {
 	Component         string                         `json:"component"`
 	DefaultDimensions *Dimension                     `json:"defaultDimensions"`
 	Availability      *CardVisualizationAvailability `json:"availability"`
+	QueryParams       *CardVisualizationQueryParams  `json:"queryParams"`
 }
 
 type CardVisualizationAvailability struct {
 	Type []string `json:"type"`
+}
+
+type CardVisualizationQueryParams struct {
+	Aggregator     string `json:"aggregator"`
+	Limit          int64  `json:"limit"`
+	SortDescending bool   `json:"sortDescending"`
 }
 
 type MetadataFilter struct {

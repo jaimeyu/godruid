@@ -6,10 +6,13 @@ package swagmodels
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // CardVisualization card visualization
@@ -36,6 +39,9 @@ type CardVisualization struct {
 
 	// User provided identifier for a Visualization
 	Label string `json:"label,omitempty"`
+
+	// query params
+	QueryParams *CardVisualizationQueryParams `json:"queryParams,omitempty"`
 }
 
 // Validate validates this card visualization
@@ -47,6 +53,10 @@ func (m *CardVisualization) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDefaultDimensions(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateQueryParams(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -84,6 +94,24 @@ func (m *CardVisualization) validateDefaultDimensions(formats strfmt.Registry) e
 		if err := m.DefaultDimensions.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("defaultDimensions")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *CardVisualization) validateQueryParams(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.QueryParams) { // not required
+		return nil
+	}
+
+	if m.QueryParams != nil {
+		if err := m.QueryParams.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("queryParams")
 			}
 			return err
 		}
@@ -171,6 +199,99 @@ func (m *CardVisualizationDefaultDimensions) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *CardVisualizationDefaultDimensions) UnmarshalBinary(b []byte) error {
 	var res CardVisualizationDefaultDimensions
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// CardVisualizationQueryParams card visualization query params
+// swagger:model CardVisualizationQueryParams
+type CardVisualizationQueryParams struct {
+
+	// The type of aggregation to use when displaying the values
+	// Enum: [min max avg]
+	Aggregator *string `json:"aggregator,omitempty"`
+
+	// Restricts the number ofresults to the provided limit.
+	Limit int64 `json:"limit,omitempty"`
+
+	// Items will be displayed sorted in descending order when true, ascending order when false
+	SortDescending *bool `json:"sortDescending,omitempty"`
+}
+
+// Validate validates this card visualization query params
+func (m *CardVisualizationQueryParams) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAggregator(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var cardVisualizationQueryParamsTypeAggregatorPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["min","max","avg"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		cardVisualizationQueryParamsTypeAggregatorPropEnum = append(cardVisualizationQueryParamsTypeAggregatorPropEnum, v)
+	}
+}
+
+const (
+
+	// CardVisualizationQueryParamsAggregatorMin captures enum value "min"
+	CardVisualizationQueryParamsAggregatorMin string = "min"
+
+	// CardVisualizationQueryParamsAggregatorMax captures enum value "max"
+	CardVisualizationQueryParamsAggregatorMax string = "max"
+
+	// CardVisualizationQueryParamsAggregatorAvg captures enum value "avg"
+	CardVisualizationQueryParamsAggregatorAvg string = "avg"
+)
+
+// prop value enum
+func (m *CardVisualizationQueryParams) validateAggregatorEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, cardVisualizationQueryParamsTypeAggregatorPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CardVisualizationQueryParams) validateAggregator(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Aggregator) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateAggregatorEnum("queryParams"+"."+"aggregator", "body", *m.Aggregator); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *CardVisualizationQueryParams) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *CardVisualizationQueryParams) UnmarshalBinary(b []byte) error {
+	var res CardVisualizationQueryParams
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

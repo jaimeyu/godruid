@@ -1,3 +1,4 @@
+* Fix - Serializing SLA reports
 ## Current Release 
 ### 0.273.0 
 **Release Date:** Wed Dec  5 19:26:58 UTC 2018     

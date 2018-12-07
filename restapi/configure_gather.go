@@ -157,7 +157,7 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	websocket.Server(tenantDB)
 
 	// Start the scheduler for handling SLA report generation
-	slasched.Initialize(metricSH, nil, nil, 5)
+	slasched.Initialize(metricSH, nil, nil, 1)
 
 	// Make sure necessary Couch data is present
 	pouchSH := handlers.CreatePouchDBPluginServiceHandler()

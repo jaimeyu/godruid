@@ -206,10 +206,6 @@ func (ssc *ReportScheduleConfig) Validate(isUpdate bool) error {
 		ssc.Second = "0"
 	}
 
-	if ssc.Timeout < 5000 {
-		ssc.Timeout = 5000
-	}
-
 	if ssc.Minute == "*" {
 		// Avoid letting the scheduler run every 1 minute.
 		return errors.New("Minutes cannot be wildcard.")

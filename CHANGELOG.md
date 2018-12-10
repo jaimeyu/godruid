@@ -1,8 +1,10 @@
-* Fix - Removing hardcoded default timeout for SLA report
 ## Current Release 
+### 0.276.0 
+**Release Date:** Mon Dec 10 20:15:02 UTC 2018     
+## Previous Releases 
+* Fix - Removing hardcoded default timeout for SLA report
 ### 0.275.0 
 **Release Date:** Fri Dec  7 18:06:24 UTC 2018     
-## Previous Releases 
 * Fix - Serializing SLA reports
 ### 0.273.0 
 **Release Date:** Wed Dec  5 19:26:58 UTC 2018     

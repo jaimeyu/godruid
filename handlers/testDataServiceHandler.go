@@ -153,7 +153,12 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Pattern:     "/distribution/sign-csr",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight, UserRoleTenantAdmin}, result.SignCSR),
 		},
-
+		server.Route{
+			Name:        "RenewCerts",
+			Method:      "POST",
+			Pattern:     "/distribution/renew-certs",
+			HandlerFunc: result.SignCSR,
+		},
 		server.Route{
 			Name:        "DeleteDuplicateMonitoredObjectsByName",
 			Method:      "POST",

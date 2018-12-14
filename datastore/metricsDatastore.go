@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	"github.com/accedian/adh-gather/models/metrics"
@@ -41,6 +42,14 @@ const (
 )
 
 const QueryDelimeter = "|"
+
+func ConstructAggregationName(parts ...string) string {
+	return strings.Join(parts, QueryDelimeter)
+}
+
+func DeconstructAggregationName(name string) []string {
+	return strings.Split(name, QueryDelimeter)
+}
 
 type QueryKeySpec struct {
 	KeySpecMap map[string]map[string]interface{}
@@ -88,7 +97,7 @@ type MetricsDatastore interface {
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object
-	QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) (map[string]interface{}, error)
+	QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenmod.ThresholdProfile, metaMOs []string) ([]metrics.TimeseriesEntryResponse, *QueryKeySpec, error)
 
 	// Returns the the number of times a given metric crossed the
 	// minor,major,critical thresholds of a given threshold object

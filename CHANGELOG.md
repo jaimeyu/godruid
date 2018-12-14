@@ -1,3 +1,4 @@
+* Fix - Refactoring the threshold crossing query
 ## Current Release 
 ### 0.276.0 
 **Release Date:** Mon Dec 10 20:15:02 UTC 2018     

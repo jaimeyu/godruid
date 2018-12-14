@@ -59,11 +59,6 @@ type TopNThresholdCrossingByMonitoredObjectResponse struct {
 	Result    []map[string]interface{}
 }
 
-type BaseDruidResponse struct {
-	Timestamp string                 `json:"timestamp"`
-	Result    map[string]interface{} `json:"result"`
-}
-
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
@@ -257,7 +252,7 @@ func (dc *DruidDatastoreClient) GetHistogramV1(request *metrics.HistogramV1, met
 }
 
 // New version of threshold-crossing
-func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) ([]metrics.TimeseriesEntryResponse, *db.QueryKeySpec, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
@@ -269,11 +264,11 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossing.String()))
 	}
 
-	query, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.IgnoreCleaning, request.Metrics, thresholdProfile, timeout)
+	query, queryspec, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.IgnoreCleaning, request.Metrics, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
+		return nil, nil, err
 	}
 	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
@@ -281,12 +276,12 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 	}
 	druidResponse, err := dc.executeQuery(query)
 
-	response := make([]BaseDruidResponse, 0)
+	response := make([]metrics.TimeseriesEntryResponse, 0)
 	err = json.Unmarshal(druidResponse, &response)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetThrCrossStr)
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
+		return nil, nil, err
 	}
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetThrCrossStr)
 
@@ -294,22 +289,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(response))
 	}
 
-	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
-	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
-	}
-
-	rr := map[string]interface{}{
-		"results": reformatted,
-	}
-
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Processed response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(rr))
-	}
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetThrCrossStr)
 
-	return rr, nil
+	return response, queryspec, nil
 }
 
 // New version of threshold-crossing
@@ -337,7 +319,7 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossingV1(request *metrics.Thresh
 	}
 	druidResponse, err := dc.executeQuery(query)
 
-	response := make([]BaseDruidResponse, 0)
+	response := make([]metrics.TimeseriesEntryResponse, 0)
 	err = json.Unmarshal(druidResponse, &response)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetThrCrossStr)

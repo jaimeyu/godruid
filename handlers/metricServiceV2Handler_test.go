@@ -31,6 +31,101 @@ var (
 )
 
 // Threshold Crossing Tests
+func TestThresholdCrossingFiltersNone(t *testing.T) {
+
+	if !*metricsIntegrationTests {
+		return
+	}
+
+	testTenant := "testthresholdcrossingfilters"
+	metric := "delayMax"
+
+	testProfile := constructThresholdProfile([]*tenmod.ThresholdProfileThreshold{
+		&tenmod.ThresholdProfileThreshold{
+			Vendor:              defaultVendor,
+			MonitoredObjectType: "twamp-sf",
+			Direction:           "0",
+			Metric:              metric,
+			Events: []map[string]string{
+				map[string]string{
+					"eventName":  "critical",
+					"upperLimit": "101",
+					"lowerLimit": "99",
+				},
+				map[string]string{
+					"eventName":  "major",
+					"upperLimit": "52",
+					"lowerLimit": "49",
+				},
+			},
+		},
+		&tenmod.ThresholdProfileThreshold{
+			Vendor:              defaultVendor,
+			MonitoredObjectType: "twamp-sf",
+			Direction:           "1",
+			Metric:              metric,
+			Events: []map[string]string{
+				map[string]string{
+					"eventName":  "critical",
+					"upperLimit": "101",
+					"lowerLimit": "99",
+				},
+				map[string]string{
+					"eventName":  "major",
+					"upperLimit": "52",
+					"lowerLimit": "49",
+				},
+			},
+		},
+		&tenmod.ThresholdProfileThreshold{
+			Vendor:              defaultVendor,
+			MonitoredObjectType: "twamp-sl",
+			Direction:           "0",
+			Metric:              metric,
+			Events: []map[string]string{
+				map[string]string{
+					"eventName":  "critical",
+					"upperLimit": "101",
+					"lowerLimit": "99",
+				},
+				map[string]string{
+					"eventName":  "major",
+					"upperLimit": "52",
+					"lowerLimit": "49",
+				},
+			},
+		},
+	})
+
+	metricDatastoreClient := druid.NewDruidDatasctoreClient()
+	tenantDatastore := TenantServiceDatastoreStub{thresholdProfile: testProfile}
+
+	req := constructThresholdCrossingRequest(testTenant, defaultInterval, defaultGranularity, []metmod.MetricIdentifierFilter{
+		metmod.MetricIdentifierFilter{Vendor: defaultVendor, ObjectType: []string{"twamp-sf", "twamp-sl"}, Direction: []string{"0", "1"}, Metric: metric},
+	})
+
+	expected := swagmodels.ThresholdCrossingReportMetric{
+		Critical: []*swagmodels.ThresholdCrossingViolations{
+			&swagmodels.ThresholdCrossingViolations{
+				ViolationCount: iAddress(3),
+			},
+		},
+		Major: []*swagmodels.ThresholdCrossingViolations{
+			&swagmodels.ThresholdCrossingViolations{
+				ViolationCount: iAddress(1),
+			},
+		},
+	}
+
+	response := handlers.HandleGetThresholdCrossingV2(handlers.SkylightAdminRoleOnly, metricDatastoreClient, tenantDatastore)(req)
+	assert.IsType(t, &metrics_service_v2.QueryThresholdCrossingV2OK{}, response)
+	metricReport := response.(*metrics_service_v2.QueryThresholdCrossingV2OK)
+	assert.NotNil(t, metricReport)
+	metricResponses := metricReport.Payload.Data.Attributes.Result.Metric
+
+	valid, err := validateMetricThresholdCrossingEntries(expected, *metricResponses[0])
+	assert.Truef(t, valid, "Expected threshold crossing response issue: %v", err)
+}
 func TestThresholdCrossingRegularCrossing(t *testing.T) {
 
 	if !*metricsIntegrationTests {
@@ -40,8 +135,8 @@ func TestThresholdCrossingRegularCrossing(t *testing.T) {
 	testTenant := "testthresholdcrossing"
 	metric := "delayMax"
 
-	testProfile := constructThresholdProfile([]tenmod.ThresholdProfileThreshold{
-		tenmod.ThresholdProfileThreshold{
+	testProfile := constructThresholdProfile([]*tenmod.ThresholdProfileThreshold{
+		&tenmod.ThresholdProfileThreshold{
 			Vendor:              defaultVendor,
 			MonitoredObjectType: "twamp-sf",
 			Direction:           "0",
@@ -80,20 +175,17 @@ func TestThresholdCrossingRegularCrossing(t *testing.T) {
 	expected := swagmodels.ThresholdCrossingReportMetric{
 		Critical: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 		Major: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(2),
-				ViolationDuration: iAddress(100),
+				ViolationCount: iAddress(2),
 			},
 		},
 		Minor: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(2),
 			},
 		},
 	}
@@ -117,8 +209,8 @@ func TestThresholdCrossingBaselineStaticCrossing(t *testing.T) {
 	testTenant := "testthresholdcrossing"
 	metric := "delayMax"
 
-	testProfile := constructThresholdProfile([]tenmod.ThresholdProfileThreshold{
-		tenmod.ThresholdProfileThreshold{
+	testProfile := constructThresholdProfile([]*tenmod.ThresholdProfileThreshold{
+		&tenmod.ThresholdProfileThreshold{
 			Vendor:              defaultVendor,
 			MonitoredObjectType: "twamp-sf",
 			Direction:           "0",
@@ -161,20 +253,17 @@ func TestThresholdCrossingBaselineStaticCrossing(t *testing.T) {
 	expected := swagmodels.ThresholdCrossingReportMetric{
 		Critical: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 		Major: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 		Minor: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 	}
@@ -198,8 +287,8 @@ func TestThresholdCrossingBaselinePercentageCrossing(t *testing.T) {
 	testTenant := "testthresholdcrossing"
 	metric := "delayMax"
 
-	testProfile := constructThresholdProfile([]tenmod.ThresholdProfileThreshold{
-		tenmod.ThresholdProfileThreshold{
+	testProfile := constructThresholdProfile([]*tenmod.ThresholdProfileThreshold{
+		&tenmod.ThresholdProfileThreshold{
 			Vendor:              defaultVendor,
 			MonitoredObjectType: "twamp-sf",
 			Direction:           "0",
@@ -242,20 +331,17 @@ func TestThresholdCrossingBaselinePercentageCrossing(t *testing.T) {
 	expected := swagmodels.ThresholdCrossingReportMetric{
 		Critical: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 		Major: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 		Minor: []*swagmodels.ThresholdCrossingViolations{
 			&swagmodels.ThresholdCrossingViolations{
-				ViolationCount:    iAddress(1),
-				ViolationDuration: iAddress(50),
+				ViolationCount: iAddress(1),
 			},
 		},
 	}
@@ -300,57 +386,10 @@ func constructThresholdCrossingRequest(tenant string, interval string, granulari
 	return tcQuery
 }
 
-func constructThresholdProfile(thresholds []tenmod.ThresholdProfileThreshold) *tenmod.ThresholdProfile {
-	// TODO change this once we move to flattened threshold profile
-	tp := tenmod.ThresholdProfile{
-		Thresholds: &tenmod.ThrPrfVendorMap{
-			map[string]*tenmod.ThrPrfMetric{},
-		},
+func constructThresholdProfile(thresholds []*tenmod.ThresholdProfileThreshold) *tenmod.ThresholdProfile {
+	return &tenmod.ThresholdProfile{
+		ThresholdList: thresholds,
 	}
-
-	for _, threshold := range thresholds {
-		vMap := tp.Thresholds.VendorMap[threshold.Vendor]
-		if vMap == nil {
-			vMap = &tenmod.ThrPrfMetric{
-				MonitoredObjectTypeMap: map[string]*tenmod.ThrPrfMetricMap{},
-			}
-		}
-		oMap := vMap.MonitoredObjectTypeMap[threshold.MonitoredObjectType]
-		if oMap == nil {
-			oMap = &tenmod.ThrPrfMetricMap{
-				MetricMap: map[string]*tenmod.ThrPrfDirectionMap{},
-			}
-		}
-		mMap := oMap.MetricMap[threshold.Metric]
-		if mMap == nil {
-			mMap = &tenmod.ThrPrfDirectionMap{
-				DirectionMap: map[string]*tenmod.ThrPrfEventMap{},
-			}
-		}
-		dMap := mMap.DirectionMap[threshold.Direction]
-		if dMap == nil {
-			dMap = &tenmod.ThrPrfEventMap{
-				EventMap: map[string]*tenmod.ThrPrfEventAttrMap{},
-			}
-		}
-		for _, event := range threshold.Events {
-			eventName := event["eventName"]
-			eMap := dMap.EventMap[eventName]
-			if eMap == nil {
-				eMap = &tenmod.ThrPrfEventAttrMap{}
-			}
-			eMap.EventAttrMap = event
-
-			dMap.EventMap[eventName] = eMap
-		}
-
-		mMap.DirectionMap[threshold.Direction] = dMap
-		oMap.MetricMap[threshold.Metric] = mMap
-		vMap.MonitoredObjectTypeMap[threshold.MonitoredObjectType] = oMap
-		tp.Thresholds.VendorMap[threshold.Vendor] = vMap
-	}
-
-	return &tp
 }
 
 func validateMetricThresholdCrossingEntries(expected swagmodels.ThresholdCrossingReportMetric, actual swagmodels.ThresholdCrossingReportMetric) (bool, error) {
@@ -392,9 +431,6 @@ func validateThresholdCrossingViolationsEntry(expected []*swagmodels.ThresholdCr
 		}
 		if *expectedEntry.ViolationCount != *actualEntry.ViolationCount {
 			return false, fmt.Errorf("Expected violation count %v did not match up with actual violation count %v for timestamp %v", *expectedEntry.ViolationCount, *actualEntry.ViolationCount, *actualEntry.Timestamp)
-		}
-		if *expectedEntry.ViolationDuration != *actualEntry.ViolationDuration {
-			return false, fmt.Errorf("Expected violation duration %v did not match up with actual violation duration %v for timestamp %v", *expectedEntry.ViolationDuration, *actualEntry.ViolationDuration, *actualEntry.Timestamp)
 		}
 	}
 

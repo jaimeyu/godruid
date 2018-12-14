@@ -9375,14 +9375,11 @@ definitions:
     type: object
     required:
       - violationCount
-      - violationDuration
       - timestamp
     properties:
       timestamp:
         type: string
       violationCount:
-        type: integer
-      violationDuration:
         type: integer
 
   # COMMON METRIC ENTITIES

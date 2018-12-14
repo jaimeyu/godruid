@@ -200,7 +200,7 @@ func HistogramQuery(tenant string, metaMOs []string, dataSource string, interval
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, &querySpec, nil
@@ -249,7 +249,7 @@ func HistogramQueryV1(tenant string, metaMOs []string, dataSource string, interv
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(false),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 		),
 		Aggregations: aggregations,
 		Intervals:    []string{interval}}, nil
@@ -297,8 +297,8 @@ func IsBaselineType(thresholdType tenmod.ThresholdType) bool {
 //	 *godruid.Filter - a filter that represents the provisioned threshold
 //	 *godruid.VirtualColumn - a virtual column that represents the baseline calculation for the metric. This is only applicable if the threshold is baseline-based
 //	 error - if any issue is encountered during processing
-func BuildThresholdCrossingFilter(fieldNamePrefix string, metric string, eventMap *tenmod.ThrPrfEventAttrMap, baselineColumns *[]godruid.VirtualColumn) (*godruid.Filter, error) {
-	thresholdCrossingType := ThresholdCrossingType(eventMap.EventAttrMap)
+func BuildThresholdCrossingFilter(fieldNamePrefix string, metric string, eventMap map[string]string, baselineColumns *[]godruid.VirtualColumn) (*godruid.Filter, error) {
+	thresholdCrossingType := ThresholdCrossingType(eventMap)
 	filterDim := metric
 
 	var divByZeroFilter *godruid.Filter
@@ -325,7 +325,7 @@ func BuildThresholdCrossingFilter(fieldNamePrefix string, metric string, eventMa
 		}
 	}
 
-	boundedFilter, err := FilterHelper(filterDim, eventMap.EventAttrMap)
+	boundedFilter, err := FilterHelper(filterDim, eventMap)
 	if err != nil {
 		return nil, err
 	}
@@ -343,196 +343,154 @@ func BuildThresholdCrossingFilter(fieldNamePrefix string, metric string, eventMa
 	return thresholdFilter, nil
 }
 
-func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, ignoreCleaning bool, metricWhitelist []metrics.MetricIdentifierFilter, thresholdProfile *tenmod.ThresholdProfile, timeout int32) (*godruid.QueryTimeseries, error) {
+func metricIdentifiersFromThresholdProfiles(thresholdProfile *tenmod.ThresholdProfile) []metrics.MetricIdentifierFilter {
 
-	// columns used for baseline calculations
-	var baselineCalculationCols []godruid.VirtualColumn
-	// all of the aggregations
-	var aggregations []godruid.Aggregation
+	metricIdentifiers := make([]metrics.MetricIdentifierFilter, len(thresholdProfile.ThresholdList))
 
-	type objectTypeDirectionFilters struct {
-		BaseFilter              *godruid.Filter
-		ThresholdFiltersByEvent map[string][]*godruid.Filter
-		ThresholdFilterList     []*godruid.Filter
+	for i, threshold := range thresholdProfile.ThresholdList {
+		metricIdentifiers[i] = metrics.MetricIdentifierFilter{
+			Vendor:     threshold.Vendor,
+			ObjectType: []string{threshold.MonitoredObjectType},
+			Metric:     threshold.Metric,
+			Direction:  []string{threshold.Direction},
+		}
 	}
 
-	sortedVendorMapKeys := getSortedKeySlice(reflect.ValueOf(thresholdProfile.Thresholds.VendorMap).MapKeys())
-	for _, vk := range sortedVendorMapKeys {
-		v := thresholdProfile.Thresholds.VendorMap[vk]
+	return metricIdentifiers
+}
 
-		sortedMOTypeMapKeys := getSortedKeySlice(reflect.ValueOf(v.MonitoredObjectTypeMap).MapKeys())
-		for _, tk := range sortedMOTypeMapKeys {
-			t := v.MonitoredObjectTypeMap[tk]
-			// This is for de-duping violation duration for metrics that are violated at the same time for the same object.
-			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
+func findApplicableMetricIdentifiers(groupingFilters []metrics.MetricIdentifierFilter, vendor, objectType, metricName, direction string) []metrics.MetricIdentifierFilter {
 
-			sortedMetricTypeMapKeys := getSortedKeySlice(reflect.ValueOf(t.MetricMap).MapKeys())
-			for _, mk := range sortedMetricTypeMapKeys {
-				m := t.MetricMap[mk]
-				sortedDirectionTypeMapKeys := getSortedKeySlice(reflect.ValueOf(m.DirectionMap).MapKeys())
-				for _, dk := range sortedDirectionTypeMapKeys {
-					d := m.DirectionMap[dk]
+	applicableMetricIdentifiers := make([]metrics.MetricIdentifierFilter, 0)
 
-					// skip metrics that are not on the whitelist (if one was provided)
-					if !inWhitelist(metricWhitelist, vk, tk, mk, dk) {
-						continue
-					}
+	for _, mi := range groupingFilters {
+		if vendor == mi.Vendor && contains(mi.ObjectType, objectType) && metricName == mi.Metric && contains(mi.Direction, direction) {
+			applicableMetricIdentifiers = append(applicableMetricIdentifiers, mi)
+		}
+	}
+	return applicableMetricIdentifiers
+}
 
-					aggNamePrefix := buildMetricAggPrefix(vk, tk, mk, dk)
+func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string, granularity string, interval string, ignoreCleaning bool, metricGroupingFilter []metrics.MetricIdentifierFilter, thresholdProfile *tenmod.ThresholdProfile, timeout int32) (*godruid.QueryTimeseries, *db.QueryKeySpec, error) {
 
-					// create a base filter for this objectType and direction (druid doesn't store vendor)
-					objectTypeAndDirectionFilter := godruid.FilterAnd(
-						godruid.FilterSelector("objectType", tk),
-						godruid.FilterSelector("direction", dk),
-					)
+	type Severity string
+	type ObjectType string
+	type Direction string
+	type Metric string
 
-					// process the provisioned events (severities) and create aggregations
-					sortedEventTypeMapKeys := getSortedKeySlice(reflect.ValueOf(d.EventMap).MapKeys())
-					for _, ek := range sortedEventTypeMapKeys {
-						e := d.EventMap[ek]
+	// Columns used for baseline calculations
+	var baselineCalculationCols []godruid.VirtualColumn
+	// All of the aggregations
+	var aggregations []godruid.Aggregation
+	// Query specification that allows us to map complex identifiers to a simple hash
+	queryspec := db.QueryKeySpec{}
+	// Mapping that allows us to group all applicable filters based on threshold entries
+	groupFilterMapping := make(map[string]map[Severity]map[ObjectType]map[Direction]*godruid.Filter)
 
-						thresholdFilter, err := BuildThresholdCrossingFilter(aggNamePrefix, mk, e, &baselineCalculationCols)
-						if err != nil {
-							return nil, err
-						}
+	// If a grouping filter was not specified then we default to pulling out grouping filters from the threshold profile itself
+	if len(metricGroupingFilter) == 0 {
+		metricGroupingFilter = metricIdentifiersFromThresholdProfiles(thresholdProfile)
+	}
 
-						// store the threshold filter in a map - needed for de-duping later
-						dirFilters, ok := perDirectionFilters[vk+"."+tk+"."+dk]
-						if !ok {
-							perDirectionFilters[vk+"."+tk+"."+dk] = &objectTypeDirectionFilters{
-								BaseFilter:              objectTypeAndDirectionFilter,
-								ThresholdFilterList:     []*godruid.Filter{thresholdFilter},
-								ThresholdFiltersByEvent: map[string][]*godruid.Filter{ek: []*godruid.Filter{thresholdFilter}},
-							}
-						} else {
-							dirFilters.ThresholdFilterList = append(dirFilters.ThresholdFilterList, thresholdFilter)
-							filterList, ok := dirFilters.ThresholdFiltersByEvent[ek]
-							if !ok {
-								dirFilters.ThresholdFiltersByEvent[ek] = []*godruid.Filter{thresholdFilter}
-							} else {
-								dirFilters.ThresholdFiltersByEvent[ek] = append(filterList, thresholdFilter)
-							}
-						}
+	// Loop over all the entries in the threshold profile list. Internally we will only consider the thresholds that match our grouping filter
+	for _, threshold := range thresholdProfile.ThresholdList {
+		// If the threshold entry does not exist in the grouping filter list then we can safely ignore this record
+		applicableMetricIdentifiers := findApplicableMetricIdentifiers(metricGroupingFilter, threshold.Vendor, threshold.MonitoredObjectType, threshold.Metric, threshold.Direction)
+		if len(applicableMetricIdentifiers) == 0 {
+			continue
+		}
 
-						aggNameEventPrefix := aggNamePrefix + "." + ek
+		// Only consider the threshold entries that apply to one or more of the provided grouping filters
+		for _, filterGrouping := range applicableMetricIdentifiers {
+			querySpecID := queryspec.AddKeySpec(map[string]interface{}{"vendor": filterGrouping.Vendor, "objectType": filterGrouping.ObjectType, "direction": filterGrouping.Direction, "metric": filterGrouping.Metric})
 
-						// Count number of times the metric was violated
-						violationCountAggName := aggNameEventPrefix + ".violationCount"
-						aggregations = append(aggregations, godruid.AggFiltered(
-							godruid.FilterAnd(
-								thresholdFilter,
-								objectTypeAndDirectionFilter,
-							),
-							&godruid.Aggregation{
-								Type: "count",
-								Name: violationCountAggName,
-							},
-						))
-
-						// Sum the duration while this metric was in violation.
-						aggregations = append(aggregations, godruid.AggFiltered(
-							godruid.FilterAnd(
-								thresholdFilter,
-								objectTypeAndDirectionFilter,
-							),
-							&godruid.Aggregation{
-								Type:      "longSum",
-								FieldName: "duration",
-								Name:      aggNameEventPrefix + ".violationDuration",
-							},
-						))
-
-					}
-				}
+			// Retrieve the de-duplication map for a particular group filter
+			groupingFilter := groupFilterMapping[querySpecID]
+			if groupingFilter == nil {
+				groupingFilter = make(map[Severity]map[ObjectType]map[Direction]*godruid.Filter)
+				groupFilterMapping[querySpecID] = groupingFilter
 			}
 
-			// Duration de-dupping aggregations are created here.
-			if len(perDirectionFilters) > 0 {
-
-				for k, v := range perDirectionFilters {
-
-					if len(v.ThresholdFilterList) > 0 {
-						// Sum the violation duration per vendor/objecttype/direction
-						aggregations = append(aggregations, godruid.AggFiltered(
-							godruid.FilterAnd(
-								v.BaseFilter,
-								godruid.FilterOr(v.ThresholdFilterList...),
-							),
-							&godruid.Aggregation{
-								Type:      "longSum",
-								FieldName: "duration",
-								Name:      k + ".violationDuration",
-							},
-						))
-					}
-
-					if len(v.ThresholdFiltersByEvent) > 0 {
-						// Sum the violation duration per vendor/objecttype/direction/event
-
-						// This is done in the fixed order of knownEventNames for additional de-dup.
-						// It is possible to have 2 metrics in the same record that are both violated but
-						// for different events.  If 1 metric violates critical and the other violates
-						// minor we want the duration violation counted against critical only.
-						processed := []*godruid.Filter{}
-						for _, eventName := range knownEventNames {
-							tf, ok := v.ThresholdFiltersByEvent[eventName]
-							if !ok {
-								continue
-							}
-
-							// Here's where we build a filter containing the threshold conditions
-							// In order to de-dup (as describe above), we must exclude any filters
-							// we previous processed.
-							var filter *godruid.Filter
-							if len(processed) == 0 {
-								// i.e. here we'd be building the critical filter
-								filter = godruid.FilterAnd(
-									v.BaseFilter,
-									godruid.FilterOr(tf...),
-								)
-							} else {
-								// here we'd build, for example, the major filter and exclude critical filters
-								filter = godruid.FilterAnd(
-									v.BaseFilter,
-									godruid.FilterOr(tf...),
-									godruid.FilterNot(godruid.FilterOr(processed...)),
-								)
-							}
-							aggregations = append(aggregations, godruid.AggFiltered(
-								filter,
-								&godruid.Aggregation{
-									Type:      "longSum",
-									FieldName: "duration",
-									Name:      "__event." + eventName + "." + k + ".violationDuration",
-								},
-							))
-
-							// add the threshold filters to the processed list so we can exclude them for the next event
-							processed = append(processed, tf...)
-
-						}
-
-					}
-
+			for _, thresholdEvent := range threshold.Events {
+				severity := Severity(thresholdEvent["eventName"])
+				thresholdFilter, err := BuildThresholdCrossingFilter(querySpecID, filterGrouping.Metric, thresholdEvent, &baselineCalculationCols)
+				if err != nil {
+					return nil, nil, err
 				}
 
+				// Retrieve the de-duplication map for a particular severity
+				severityMap := groupingFilter[severity]
+				if severityMap == nil {
+					severityMap = make(map[ObjectType]map[Direction]*godruid.Filter)
+					groupingFilter[severity] = severityMap
+				}
+
+				// Retrieve the de-duplication map for a particular object type
+				objectTypeMap := severityMap[ObjectType(threshold.MonitoredObjectType)]
+				if objectTypeMap == nil {
+					objectTypeMap = make(map[Direction]*godruid.Filter)
+					severityMap[ObjectType(threshold.MonitoredObjectType)] = objectTypeMap
+				}
+
+				objectTypeMap[Direction(threshold.Direction)] = thresholdFilter
 			}
 		}
 	}
 
+	// Once all the de-duplicated filters have been built up, create the actual aggregations
+	// Sorting is necessary to ensure that the same query for the same parameters are executed in the same way
+	// so that we hit the cache
+	sortedFilterGroupKeys := getSortedKeySlice(reflect.ValueOf(groupFilterMapping).MapKeys())
+	for _, filterGroupingKey := range sortedFilterGroupKeys {
+		filterGrouping := groupFilterMapping[filterGroupingKey]
+		sortedSeverityKeys := getSortedKeySlice(reflect.ValueOf(filterGrouping).MapKeys())
+		for _, severityKey := range sortedSeverityKeys {
+			severityMap := filterGrouping[Severity(severityKey)]
+			aggNameEventPrefix := db.ConstructAggregationName(string(filterGroupingKey), string(severityKey))
+			objectTypeGroupedFilter := make([]*godruid.Filter, 0)
+			sortedObjectTypeKeys := getSortedKeySlice(reflect.ValueOf(severityMap).MapKeys())
+			for _, objectTypeKey := range sortedObjectTypeKeys {
+				objectTypeMap := severityMap[ObjectType(objectTypeKey)]
+				directionGroupedFilters := make([]*godruid.Filter, 0)
+				sortedDirectionKeys := getSortedKeySlice(reflect.ValueOf(objectTypeMap).MapKeys())
+				for _, directionKey := range sortedDirectionKeys {
+					thresholdFilter := objectTypeMap[Direction(directionKey)]
+					directionGroupedFilters = append(directionGroupedFilters, godruid.FilterAnd(
+						godruid.FilterSelector("direction", directionKey),
+						thresholdFilter,
+					))
+				}
+				objectTypeGroupedFilter = append(objectTypeGroupedFilter, godruid.FilterAnd(godruid.FilterSelector("objectType", objectTypeKey), godruid.FilterOr(directionGroupedFilters...)))
+			}
+			aggregations = append(aggregations,
+				godruid.AggFiltered(
+					godruid.FilterOr(
+						objectTypeGroupedFilter...,
+					),
+					&godruid.Aggregation{
+						Type: "count",
+						Name: db.ConstructAggregationName(aggNameEventPrefix, "violationCount"),
+					},
+				),
+			)
+		}
+	}
+
 	return &godruid.QueryTimeseries{
-		QueryType:   godruid.TIMESERIES,
-		DataSource:  dataSource,
-		Granularity: toGranularity(granularity),
-		Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
-		Filter: godruid.FilterAnd(
-			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
-			cleanFilter(ignoreCleaning),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
-		),
-		Aggregations:   aggregations,
-		VirtualColumns: baselineCalculationCols,
-		Intervals:      []string{interval}}, nil
+			QueryType:   godruid.TIMESERIES,
+			DataSource:  dataSource,
+			Granularity: toGranularity(granularity),
+			Context:     map[string]interface{}{"timeout": timeout, "skipEmptyBuckets": true},
+			Filter: godruid.FilterAnd(
+				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
+				cleanFilter(ignoreCleaning),
+				BuildMonitoredObjectFilter(metaMOs),
+			),
+			Aggregations:   aggregations,
+			VirtualColumns: baselineCalculationCols,
+			Intervals:      []string{interval}},
+		&queryspec,
+		nil
 }
 
 func ThresholdViolationsQueryV1(tenant string, dataSource string, metaMOs []string, granularity string, interval string, metricWhitelist []metrics.MetricIdentifierV1, thresholdProfile *pb.TenantThresholdProfileData, timeout int32) (*godruid.QueryTimeseries, error) {
@@ -812,7 +770,7 @@ func ThresholdViolationsQueryV1(tenant string, dataSource string, metaMOs []stri
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(false),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 		),
 		Aggregations:     aggregations,
 		PostAggregations: postAggregations,
@@ -873,7 +831,7 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 
 						aggNamePrefix := vk + "." + tk + "." + mk + "." + ek + "." + dk
 
-						thresholdFilter, err := BuildThresholdCrossingFilter(aggNamePrefix, mk, e, &baselineCalculationCols)
+						thresholdFilter, err := BuildThresholdCrossingFilter(aggNamePrefix, mk, e.EventAttrMap, &baselineCalculationCols)
 						if err != nil {
 							return nil, nil, err
 						}
@@ -1035,7 +993,7 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 			Filter: godruid.FilterAnd(
 				godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 				cleanFilter(ignoreCleaning),
-				BuildMonitoredObjectFilter(tenant, metaMOs),
+				BuildMonitoredObjectFilter(metaMOs),
 			),
 			VirtualColumns:   baselineCalculationCols,
 			Aggregations:     aggregations,
@@ -1086,7 +1044,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 		return nil, nil, fmt.Errorf("Invalid value for 'timeBucket' : %v", timeBucket)
 	}
 
-	thresholdFilter, err := BuildThresholdCrossingFilter(prefix, metric, eventAttr, &baselineCalculationCols)
+	thresholdFilter, err := BuildThresholdCrossingFilter(prefix, metric, eventAttr.EventAttrMap, &baselineCalculationCols)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1112,7 +1070,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 			thresholdFilter,
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
@@ -1181,7 +1139,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		e := events[ek]
 
 		name := ek
-		filter, err := BuildThresholdCrossingFilter(name, metric.Metric, e, &baselineCalculationCols)
+		filter, err := BuildThresholdCrossingFilter(name, metric.Metric, e.EventAttrMap, &baselineCalculationCols)
 		if err != nil {
 			return nil, err
 		}
@@ -1227,7 +1185,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 			buildInFilter("objectType", metric.ObjectType),
 			buildInFilter("direction", metric.Direction),
 		),
@@ -1303,7 +1261,7 @@ func ThresholdCrossingByMonitoredObjectTopNQueryV1(tenant string, dataSource str
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(false),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 			godruid.FilterSelector("objectType", objectType),
 			godruid.FilterSelector("direction", direction),
 		),
@@ -1481,7 +1439,7 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
-			BuildMonitoredObjectFilter(tenant, monitoredObjectIds),
+			BuildMonitoredObjectFilter(monitoredObjectIds),
 		),
 		Intervals:        []string{interval},
 		PostAggregations: postAggs,
@@ -1543,7 +1501,7 @@ func AggMetricsQueryV1(tenant string, dataSource string, interval string, metaMO
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(tenant)),
 			cleanFilter(false),
-			BuildMonitoredObjectFilter(tenant, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 		),
 		Intervals:        []string{interval},
 		PostAggregations: postAggs,
@@ -1593,7 +1551,7 @@ func buildMetricAggregationV1(aggType string, metric *metrics.MetricIdentifierV1
 }
 
 // BuildMonitoredObjectFilter - Builds a monitored object filter for druid
-func BuildMonitoredObjectFilter(tenantID string, mos []string) *godruid.Filter {
+func BuildMonitoredObjectFilter(mos []string) *godruid.Filter {
 	// It is important to draw a distinction between a nil set of monitored objects and an empty set of monitored objects. A nil
 	// set means that the query does not care which monitored object it belongs to. An empty set means that no monitored objects
 	// were found as a result of potential pre-filtering activities
@@ -1601,9 +1559,7 @@ func BuildMonitoredObjectFilter(tenantID string, mos []string) *godruid.Filter {
 		return nil
 	}
 
-	return godruid.FilterAnd(
-		godruid.FilterSelector("tenantId", strings.ToLower(tenantID)),
-		buildInFilter("monitoredObjectId", mos))
+	return buildInFilter("monitoredObjectId", mos)
 }
 
 func buildInFilter(dimension string, values []string) *godruid.Filter {
@@ -1738,7 +1694,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		cleanFilter(ignoreCleaning),
 		buildInFilter("objectType", metric.ObjectType),
 		buildInFilter("direction", request.Metric.Direction),
-		BuildMonitoredObjectFilter(request.TenantID, molist),
+		BuildMonitoredObjectFilter(molist),
 	)
 
 	// Create the aggregations
@@ -1846,10 +1802,10 @@ func GetTopNForMetricV1(dataSource string, request *metrics.TopNForMetricV1, met
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
 			cleanFilter(false),
 			godruid.FilterSelector("objectType", metric.ObjectType),
-			BuildMonitoredObjectFilter(request.TenantID, metaMOs),
+			BuildMonitoredObjectFilter(metaMOs),
 		)
 	} else {
-		monObjFilter := BuildMonitoredObjectFilter(request.TenantID, request.MonitoredObjects)
+		monObjFilter := BuildMonitoredObjectFilter(request.MonitoredObjects)
 		filterOn = godruid.FilterAnd(
 			godruid.FilterSelector("tenantId", strings.ToLower(request.TenantID)),
 			cleanFilter(false),

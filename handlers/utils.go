@@ -935,37 +935,6 @@ func getIdsFromRelationshipData(relationships *swagmodels.JSONAPIRelationship) [
 	return result
 }
 
-func addValToList(list []*metmod.MetricViolationSummaryType, entry map[string]interface{}, ts string) []*metmod.MetricViolationSummaryType {
-
-	if entry == nil {
-		entry = make(map[string]interface{})
-	}
-
-	if entry["violationDuration"] != nil || entry["violationCount"] != nil {
-
-		// var check float64
-		_, ok := entry["violationDuration"].(float64)
-		if !ok {
-			return list
-		}
-
-		_, ok = entry["violationDuration"].(float64)
-		if !ok {
-			return list
-		}
-
-		tmp := metmod.MetricViolationSummaryType{
-			"violationCount":    entry["violationCount"],
-			"violationDuration": entry["violationDuration"],
-			"timestamp":         ts,
-		}
-
-		list = append(list, &tmp)
-	}
-
-	return list
-}
-
 func buildHash(args ...string) string {
 	str := ""
 	for _, w := range args {

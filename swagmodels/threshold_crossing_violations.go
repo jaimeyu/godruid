@@ -24,10 +24,6 @@ type ThresholdCrossingViolations struct {
 	// violation count
 	// Required: true
 	ViolationCount *int64 `json:"violationCount"`
-
-	// violation duration
-	// Required: true
-	ViolationDuration *int64 `json:"violationDuration"`
 }
 
 // Validate validates this threshold crossing violations
@@ -39,10 +35,6 @@ func (m *ThresholdCrossingViolations) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateViolationCount(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateViolationDuration(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -64,15 +56,6 @@ func (m *ThresholdCrossingViolations) validateTimestamp(formats strfmt.Registry)
 func (m *ThresholdCrossingViolations) validateViolationCount(formats strfmt.Registry) error {
 
 	if err := validate.Required("violationCount", "body", m.ViolationCount); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ThresholdCrossingViolations) validateViolationDuration(formats strfmt.Registry) error {
-
-	if err := validate.Required("violationDuration", "body", m.ViolationDuration); err != nil {
 		return err
 	}
 

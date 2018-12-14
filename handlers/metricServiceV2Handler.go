@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -405,7 +404,8 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	}
 
 	// Issue request to DAO Layer
-	queryReport, err := metricsDB.QueryThresholdCrossing(&daoRequest, thresholdProfile, metaMOs)
+	queryReport, queryKeySpec, err := metricsDB.QueryThresholdCrossing(&daoRequest, thresholdProfile, metaMOs)
+
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -414,9 +414,7 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.ThresholdCrossingStr, err.Error())
 	}
 
-	// TODO REMOVE THE RE-RENDER ONCE THE QUERY PROPERLY RETURNS THE VIOLATIONS AGAINS THE V2 VERSION OF METRIC IDENTIFIER
-	rendered := rerenderThresholdCrossingV2(daoRequest.Metrics, renderThresholdCrossingV2(params.Body.Data.Attributes, queryReport))
-
+	rendered := renderThresholdCrossingV2(params.Body.Data.Attributes, queryKeySpec, queryReport)
 	rr, err := json.Marshal(rendered)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingStr, err.Error())
@@ -438,215 +436,81 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	return startTime, http.StatusOK, &converted, nil
 }
 
-// This is a temporary method that is only used to re-group the violations under the v2 version of the metric identifier.
-// We are essentially doing a post aggregation that we should be doing in druid. Once the underlying druid query is modified to
-// properly build the query by the v2 version of the metric identifier this should go away
-func rerenderThresholdCrossingV2(metricFilters []metmod.MetricIdentifierFilter, report map[string]interface{}) map[string]interface{} {
-	results := report["data"].(map[string]interface{})["attributes"].(map[string]interface{})["result"].(map[string]interface{})
+func renderThresholdCrossingV2(config interface{}, queryKeySpec *datastore.QueryKeySpec, reportEntries []metmod.TimeseriesEntryResponse) map[string]interface{} {
 
-	if len(results) == 0 {
-		return report
-	}
+	type severity string
 
-	retrievedMetrics := results["metric"].([]*metmod.MetricViolationsTimeSeries)
+	metricIdentifierMap := make(map[string]map[severity][]map[string]interface{})
 
-	metricMapCache := make(map[string]*metmod.MetricViolationsTimeSeries)
+	if reportEntries != nil {
+		for _, rEntry := range reportEntries {
 
-	for _, m := range retrievedMetrics {
-		metricIdentifierName := fmt.Sprintf("%s.%s.%s.%s", m.Vendor, m.ObjectType, m.Direction, m.Metric)
-		metricMapCache[metricIdentifierName] = m
-	}
+			rTimestamp := rEntry.Timestamp
+			for compositeKey, v := range rEntry.Result {
+				hasData := false
+				compositeKeyParts := datastore.DeconstructAggregationName(compositeKey)
+				accessorKey := compositeKeyParts[0]
+				severityKey := compositeKeyParts[1]
 
-	txfEntries := make([]map[string]interface{}, 0)
-
-	for _, m := range metricFilters {
-		eventMap := make(map[string][]metmod.MetricViolationSummaryType)
-
-		for _, o := range m.ObjectType {
-			for _, d := range m.Direction {
-				metricIdentifierName := fmt.Sprintf("%s.%s.%s.%s", m.Vendor, o, d, m.Metric)
-
-				if cachedMetricData, ok := metricMapCache[metricIdentifierName]; ok {
-					if len(cachedMetricData.Critical) != 0 {
-						event, ok := eventMap["critical"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Critical)
-						eventMap["critical"] = event
-					}
-					if len(cachedMetricData.Major) != 0 {
-						event, ok := eventMap["major"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Major)
-						eventMap["major"] = event
-					}
-					if len(cachedMetricData.Minor) != 0 {
-						event, ok := eventMap["minor"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Minor)
-						eventMap["minor"] = event
-					}
-					if len(cachedMetricData.Warning) != 0 {
-						event, ok := eventMap["warning"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Warning)
-						eventMap["warning"] = event
-					}
-					if len(cachedMetricData.SLA) != 0 {
-						event, ok := eventMap["sla"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.SLA)
-						eventMap["sla"] = event
-					}
+				// Initialize an empty map if one does not exist for the current metric identifier
+				if _, ok := metricIdentifierMap[accessorKey]; !ok {
+					metricIdentifierMap[accessorKey] = make(map[severity][]map[string]interface{}, 0)
 				}
 
-			}
-		}
-
-		finishedMetricFilter := make(map[string]interface{})
-		finishedMetricFilter["vendor"] = m.Vendor
-		finishedMetricFilter["objectType"] = m.ObjectType
-		finishedMetricFilter["direction"] = m.Direction
-		finishedMetricFilter["metric"] = m.Metric
-
-		for k, v := range eventMap {
-			finishedMetricFilter[k] = v
-		}
-
-		txfEntries = append(txfEntries, finishedMetricFilter)
-	}
-
-	delete(results, "metric")
-	results["metric"] = txfEntries
-
-	return report
-}
-
-func mergeCategory(mergee []metmod.MetricViolationSummaryType, merger []*metmod.MetricViolationSummaryType) []metmod.MetricViolationSummaryType {
-
-	addedEntry := false
-
-	for _, from := range merger {
-		found := false
-		for _, to := range mergee {
-			if to["timestamp"] == (*from)["timestamp"] {
-				mergeTimeseriesEntry(to, (*from))
-				found = true
-			}
-		}
-		if !found {
-			mergee = append(mergee, (*from))
-			addedEntry = true // Optimization so we only sort everything if we know that we added a new entry to the tail of the event order
-		}
-	}
-
-	if addedEntry {
-		sortEntries(mergee)
-	}
-
-	return mergee
-}
-
-func sortEntries(mergee []metmod.MetricViolationSummaryType) {
-	sort.Slice(mergee, func(i, j int) bool {
-		t1, err := time.Parse(time.RFC3339, mergee[i]["timestamp"].(string))
-		if err != nil {
-			return false
-		}
-		t2, err := time.Parse(time.RFC3339, mergee[j]["timestamp"].(string))
-		if err != nil {
-			return false
-		}
-		return t1.Before(t2)
-	})
-}
-
-func mergeTimeseriesEntry(mergee map[string]interface{}, merger map[string]interface{}) {
-
-	if mergee["timestamp"] != merger["timestamp"] {
-		return
-	}
-
-	for k, v := range merger {
-		if k == "timestamp" {
-			continue
-		}
-
-		if val, ok := mergee[k]; ok {
-			mergee[k] = val.(float64) + v.(float64)
-		}
-	}
-}
-
-func renderThresholdCrossingV2(config interface{}, report map[string]interface{}) map[string]interface{} {
-
-	topLevelResult := report["results"]
-
-	metrics := topLevelResult.([]metmod.ThresholdCrossingTimeSeriesEntry)
-
-	listThresholdCrossings := make(map[string]*metmod.MetricViolationsTimeSeries)
-
-	for _, tsEntry := range metrics {
-		ts := tsEntry.Timestamp
-		results := tsEntry.Result
-
-		for _, metric := range results.ByMetric {
-
-			logger.Log.Debugf("metric: %s", models.AsJSONString(metric))
-			hash := buildHash("metric", metric.Metric, metric.ObjectType, metric.Vendor, metric.Direction)
-			c := listThresholdCrossings[hash]
-			if c == nil {
-				c = &metmod.MetricViolationsTimeSeries{
-					Direction:  metric.Direction,
-					Metric:     metric.Metric,
-					Vendor:     metric.Vendor,
-					ObjectType: metric.ObjectType,
+				var value float64
+				switch v.(type) {
+				case float32:
+					hasData = true
+					value = float64(v.(float32))
+				case float64:
+					hasData = true
+					value = v.(float64)
+				case int:
+					hasData = true
+					value = float64(v.(int))
+				case string:
+					hasData = false
+				default:
+					hasData = true
 				}
+				if hasData {
+					metricIdentifierSeverityMap := metricIdentifierMap[accessorKey]
 
-			}
+					severityTimeseries := metricIdentifierSeverityMap[severity(severityKey)]
+					if severityTimeseries == nil {
+						severityTimeseries = make([]map[string]interface{}, 0)
+					}
 
-			// Need a null check for BySeverity[xxxxx]
-			if metric.BySeverity["sla"] != nil {
-				c.SLA = addValToList(c.SLA, metric.BySeverity["sla"], ts)
+					severityTimeseries = append(severityTimeseries, map[string]interface{}{"timestamp": rTimestamp, "violationCount": value})
+					metricIdentifierSeverityMap[severity(severityKey)] = severityTimeseries
+				}
 			}
-
-			if metric.BySeverity["major"] != nil {
-				c.Major = addValToList(c.Major, metric.BySeverity["major"], ts)
-			}
-			if metric.BySeverity["minor"] != nil {
-				c.Minor = addValToList(c.Minor, metric.BySeverity["minor"], ts)
-			}
-			if metric.BySeverity["warning"] != nil {
-				c.Warning = addValToList(c.Warning, metric.BySeverity["warning"], ts)
-			}
-			if metric.BySeverity["critical"] != nil {
-				c.Critical = addValToList(c.Critical, metric.BySeverity["critical"], ts)
-			}
-
-			listThresholdCrossings[hash] = c
 		}
 	}
 
-	reportResponse := make(map[string]interface{})
+	reportResponse := make([]map[string]interface{}, len(metricIdentifierMap))
 
-	reportMetrics := make([]*metmod.MetricViolationsTimeSeries, 0)
-	for _, metric := range listThresholdCrossings {
-		reportMetrics = append(reportMetrics, metric)
+	i := 0
+	for accessor, severityMap := range metricIdentifierMap {
+
+		keyMap := queryKeySpec.KeySpecMap[accessor]
+
+		metricMap := make(map[string]interface{})
+		for qk, qv := range keyMap {
+			metricMap[qk] = qv
+		}
+
+		for severityKey, sevReport := range severityMap {
+			metricMap[string(severityKey)] = sevReport
+		}
+
+		reportResponse[i] = metricMap
+		i++
 	}
-	reportResponse["metric"] = reportMetrics
 
 	rawResponse := make(map[string]interface{})
 	rawResponse["config"] = config
-	rawResponse["result"] = reportResponse
+	rawResponse["result"] = map[string]interface{}{"metric": reportResponse}
 
 	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "thresholdCrossings")
 }

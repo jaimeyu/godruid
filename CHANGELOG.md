@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.278.0 
+**Release Date:** Fri Dec 14 15:21:20 UTC 2018     
+## Previous Releases 
 ### 0.277.0 
 **Release Date:** Fri Dec 14 14:20:16 UTC 2018     
-## Previous Releases 
 * Fix - Refactoring the threshold crossing query
 ### 0.276.0 
 **Release Date:** Mon Dec 10 20:15:02 UTC 2018     

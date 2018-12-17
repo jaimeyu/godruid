@@ -18,6 +18,7 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service_v2"
 	"github.com/accedian/adh-gather/swagmodels"
+	"github.com/accedian/adh-gather/transform"
 	"github.com/getlantern/deepcopy"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/manyminds/api2go/jsonapi"
@@ -925,15 +926,6 @@ func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.Me
 	return startTime, http.StatusOK, response, nil
 }
 
-func renderSLAReportV2(config interface{}, report interface{}) map[string]interface{} {
-
-	rawResponse := make(map[string]interface{})
-	rawResponse["config"] = config
-	rawResponse["result"] = report
-
-	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "slaReports")
-}
-
 func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingByMOTopNResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
@@ -1097,7 +1089,7 @@ func renderHistogramTimeseriesMetrics(reportType string, reportID string, config
 			rTimestamp := rEntry.Timestamp
 			for k, v := range rEntry.Result {
 				// Expecting a key structure with the query spec ID with the order suffixed to it
-				parts := strings.Split(k, datastore.QueryDelimeter)
+				parts := datastore.DeconstructAggregationName(k)
 
 				// The index should not be part of the key as the index is only used to preserve the order of the histogram response
 				accessorKey := parts[0]
@@ -1179,11 +1171,11 @@ func renderTopNMetrics(config interface{}, metricIdentifier metmod.MetricIdentif
 			reportEntryIndex = (len(report) - 1) - i
 		}
 		renderedReport[reportEntryIndex] = map[string]interface{}{"monitoredObjectIds": []string{r.MonitoredObjectId},
-			"vendor":     metricIdentifier.Vendor,
-			"objectType": metricIdentifier.ObjectType,
-			"metric":     metricIdentifier.Metric,
-			"direction":  metricIdentifier.Direction,
-			"result":     r.Result}
+			transform.Vendor:              metricIdentifier.Vendor,
+			transform.MonitoredObjectType: metricIdentifier.ObjectType,
+			transform.Metric:              metricIdentifier.Metric,
+			transform.Direction:           metricIdentifier.Direction,
+			"result":                      r.Result}
 	}
 
 	return renderV2Report(config, renderedReport, ID, reportType)

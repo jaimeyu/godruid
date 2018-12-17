@@ -114,12 +114,14 @@ var bothEvent = &tenmod.ThrPrfEventAttrMap{
 	},
 }
 
+var aggTotalCount = godruid.AggCount("total")
+
 var testThresholdCrossing1 = &godruid.QueryTimeseries{
 	DataSource:  "druidTableName",
 	Granularity: godruid.GranPeriod("PT1H", druid.TimeZoneUTC, ""),
 	Context:     map[string]interface{}{"timeout": 60000},
 	Aggregations: []godruid.Aggregation{
-		godruid.AggCount("total"),
+		*aggTotalCount,
 		godruid.AggFiltered(
 			godruid.FilterAnd(
 				godruid.FilterUpperBound(metric1, "numeric", 30000, false),

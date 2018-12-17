@@ -1,3 +1,4 @@
+* Fix - Refactoring metric query code
 ## Current Release 
 ### 0.278.0 
 **Release Date:** Fri Dec 14 15:21:20 UTC 2018     

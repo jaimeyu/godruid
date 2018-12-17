@@ -1,8 +1,10 @@
-* Fix - Refactoring metric query code
 ## Current Release 
+### 0.279.0 
+**Release Date:** Mon Dec 17 18:14:24 UTC 2018     
+## Previous Releases 
+* Fix - Refactoring metric query code
 ### 0.278.0 
 **Release Date:** Fri Dec 14 15:21:20 UTC 2018     
-## Previous Releases 
 ### 0.277.0 
 **Release Date:** Fri Dec 14 14:20:16 UTC 2018     
 * Fix - Refactoring the threshold crossing query

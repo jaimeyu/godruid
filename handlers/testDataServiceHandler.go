@@ -1381,7 +1381,7 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 
 	// BYT has it located in this database name
 	dbName := "tenant_2_" + tenantID + dbSuffix
-	monObjDupDel := "mon_obj_dup_delete"
+	monObjDupDel := "mon_obj_id2session_migration"
 
 	/*
 		indexResults will hacve the format:
@@ -1396,16 +1396,11 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 		value []string
 	}
 
-	// // First, fetch the listing of doc IDs and created timestamps as they are mapped to unique names from the db index:
-	// indexResults, err := tsh.pouchDB.GetByDesignDocument(dbName, "_design/sessions/_view/sessions2IDs?group=true")
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the deletion request for DB %s: %s", dbName, err.Error())
-	// 	reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
-	// 	return
-	// }
+	// Grab the view with all the ID mapped to sessions.
+	// This function differs from the delete because I used a map-reduce to remove duplicates
 	index, err := tsh.tenantDB.GetDdocView(tenantID, "sessions", "sessions2IDs", true)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the deletion request for DB %s: %s", dbName, err.Error())
+		msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the migration request for DB %s: %s", dbName, err.Error())
 		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
 		return
 	}
@@ -1421,6 +1416,7 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 	// Iterate over the results to build up a map of names to lists of Monitored Object Ids
 
 	mobs := []*tenmod.MonitoredObject{}
+	fmt.Fprintf(w, "#%d of IDs to convert\n", len(rows))
 	for _, row := range rows {
 		// Retrieve the necessary values
 		objectName := row.Key
@@ -1428,27 +1424,32 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 		// This view returns an array of IDs for the values.
 		value, ok := row.Value.([]interface{})
 		if !ok {
-			msg := fmt.Sprintf("Unable to parse result value to populate the deletion request for DB %s: %s", dbName, err.Error())
+			msg := fmt.Sprintf("Unable to parse result value to populate the migration request for DB %s: %s", dbName, err.Error())
 			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, "#%d of IDs to session %s", len(value), objectName)
 
 		// Just get the first Object ID for now, we don't really care about tracking the history
 		objectID, ok := value[0].(string)
 		if !ok {
-			msg := fmt.Sprintf("Unable to parse result object ID to populate the deletion request for DB %s: %s", dbName, err.Error())
+			msg := fmt.Sprintf("Unable to parse result object ID to populate the migration request for DB %s: %s", dbName, err.Error())
 			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
 			return
 		}
 
+		fmt.Fprintf(w, "Converting ID: %s   to %s:", objectID, objectName)
+
 		mo, err := tsh.tenantDB.GetMonitoredObject(tenantID, objectID)
 		if err != nil {
+
+			fmt.Fprintf(w, " failed\n")
 			msg := fmt.Sprintf("%s'sMob:%s does not load, :%s", tenantID, objectID, err.Error())
 			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
 			return
 		}
+		fmt.Fprintf(w, " success\n")
 
+		// !! Transform the ID to use the object name
 		mo.ID = mo.ObjectName
 		mo.MonitoredObjectID = mo.ObjectName
 		mo.REV = "" // remove it!
@@ -1468,5 +1469,5 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 
 	// Purge complete, send back success details:
 	mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
-	fmt.Fprintf(w, "Successfully deleted all duplicate Monitored Object records from DB "+dbName)
+	fmt.Fprintf(w, "Successfully migrated Monitored Object records from DB "+dbName)
 }

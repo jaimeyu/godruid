@@ -1010,7 +1010,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 	return rows, nil
 }
 
-// GetDdocView - Gets all the known metadata keys from the couchdb view
+// GetDdocView - Gets all the rows from the couchdb view with ability to specify group by toggle
 func (tsd *TenantServiceDatastoreCouchDB) GetDdocView(tenantId string, ddoc string, view string, group bool) (*tenmod.ViewResultsGeneric, error) {
 
 	dbName := GenerateMonitoredObjectURL(tenantId, tsd.server)
@@ -1274,7 +1274,7 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	return res, nil
 }
 
-// BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
+// BulkCreateMonitoredObjects - Creates monitored objects and places them in database with a different suffix. We can merge with BulkInsertMonitoredObjects eventually
 func (tsd *TenantServiceDatastoreCouchDB) BulkCreateMonitoredObjects(dbNamesuffix string, tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
 	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
 	origTenantID := tenantID

@@ -1,3 +1,5 @@
+* Feature - Added logic to create metadata views in other tables
+* Feature - Utility to migrate legacy monitored object ID to object names
 ## Current Release 
 ### 0.279.0 
 **Release Date:** Mon Dec 17 18:14:24 UTC 2018     

@@ -979,6 +979,45 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 	return rows, nil
 }
 
+// GetDdocView - Gets all the known metadata keys from the couchdb view
+func (tsd *TenantServiceDatastoreCouchDB) GetDdocView(tenantId string, ddoc string, view string, group bool) (*tenmod.ViewResultsGeneric, error) {
+
+	dbName := GenerateMonitoredObjectURL(tenantId, tsd.server)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, err
+	}
+	v := url.Values{}
+
+	// Some views are map-reduces so we want to set the group to true to collate on the key
+	if group {
+		v.Set("group", "true")
+	}
+	url := "_design/" + ddoc + "/_view/" + view
+
+	// Now get the view
+	doc, err := db.Get(url, v)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Getting items from %s -> %s", dbName+url, models.AsJSONString(doc))
+	}
+
+	var resp tenmod.ViewResultsGeneric
+	raw, err := json.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("Could not marshal (%s) %s, %s", dbName+url, models.AsJSONString(doc), err.Error())
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("Could not unmarshal (%s) %s into CouchdbViewResults, %s", dbName+url, string(raw), err.Error())
+	}
+
+	return &resp, nil
+}
+
 // CheckMetaDdocExist - Gets all the known metadata keys from the couchdb view
 func (tsd *TenantServiceDatastoreCouchDB) CheckMetaDdocExist(tenantID string, docname string) error {
 
@@ -1201,6 +1240,84 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	}
 
 	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(res))
+	return res, nil
+}
+
+// BulkInsertMonitoredObjects - CouchDB implementation of BulkInsertMonitoredObjects
+func (tsd *TenantServiceDatastoreCouchDB) BulkCreateMonitoredObjects(dbNamesuffix string, tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
+	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
+	origTenantID := tenantID
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s%s", tenantID, monitoredObjectDBSuffix, dbNamesuffix))
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	metas := make(map[string]string)
+	// Iterate over the collection and populate necessary fields
+	data := make([]map[string]interface{}, 0)
+	for _, mo := range value {
+		genericMO, err := convertDataToCouchDbSupportedModel(mo)
+		if err != nil {
+			return nil, err
+		}
+
+		dataType := string(tenmod.TenantMonitoredObjectType)
+		genericMO["_id"] = mo.ID
+
+		dataProp := genericMO["data"].(map[string]interface{})
+		dataProp["datatype"] = dataType
+		dataProp["createdTimestamp"] = ds.MakeTimestamp()
+		dataProp["lastModifiedTimestamp"] = dataProp["createdTimestamp"]
+
+		data = append(data, genericMO)
+
+		// We want to generate a list of metakeys for processing later
+		for key := range mo.Meta {
+			metas[key] = key
+		}
+
+	}
+	body := map[string]interface{}{
+		"docs": data}
+
+	fetchedData, err := performBulkUpdate(body, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// Now that we've done the bulk update, refresh the views
+	err = tsd.UpdateMonitoredObjectMetadataViews(origTenantID, metas)
+	if err != nil {
+		logger.Log.Errorf("Couldn't update metadata. Views may be out of sync, continuing with bulk update. %s", err.Error)
+	}
+
+	// Populate the response
+	res := make([]*common.BulkOperationResult, 0)
+	for _, fetched := range fetchedData {
+		newObj := common.BulkOperationResult{}
+		if fetched["id"] != nil {
+			newObj.ID = fetched["id"].(string)
+		}
+		if fetched["rev"] != nil {
+			newObj.REV = fetched["rev"].(string)
+		}
+		if fetched["reason"] != nil {
+			newObj.REASON = fetched["reason"].(string)
+		}
+		if fetched["error"] != nil {
+			newObj.ERROR = fetched["error"].(string)
+		}
+		if fetched["ok"] != nil {
+			newObj.OK = fetched["ok"].(bool)
+		}
+
+		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
+		res = append(res, &newObj)
+	}
+
+	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
 	return res, nil
 }
 

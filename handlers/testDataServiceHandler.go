@@ -165,6 +165,12 @@ func CreateTestDataServiceHandler() *TestDataServiceHandler {
 			Pattern:     "/test-data/delete-duplicate-mo-by-name",
 			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.DeleteDuplicateMonitoredObjectsByName),
 		},
+		server.Route{
+			Name:        "MigrateMonitoredObjectsByName",
+			Method:      "POST",
+			Pattern:     "/test-data/migrate-mo-by-name",
+			HandlerFunc: BuildRouteHandlerWithRAC([]string{UserRoleSkylight}, result.ConvertLegacyObjectIDtoName),
+		},
 	}
 
 	// Wire up the datastore impls
@@ -1356,6 +1362,110 @@ func (tsh *TestDataServiceHandler) DeleteDuplicateMonitoredObjectsByName(w http.
 		msg := fmt.Sprintf("Unable to remove duplicate Monitored Objects from DB DB %s: %s", dbName, err.Error())
 		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
 		return
+	}
+
+	// Purge complete, send back success details:
+	mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
+	fmt.Fprintf(w, "Successfully deleted all duplicate Monitored Object records from DB "+dbName)
+}
+
+// ConvertLegacyObjectIDtoName - used to convert all rhe
+func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
+	dbSuffix := r.URL.Query().Get("dbSuffix")
+	tenantID := r.Header.Get("X-Forwarded-Tenant-Id")
+
+	// We're going to store the migrated data here
+	migratedDB := "-migrated"
+
+	// BYT has it located in this database name
+	dbName := "tenant_2_" + tenantID + dbSuffix
+	monObjDupDel := "mon_obj_dup_delete"
+
+	/*
+		indexResults will hacve the format:
+		{"key":"E00002_MED_E_ENB_MON_ZIPEC_AF22_admin_03-08-18","value":["36371-39B32AFF-6F18-4F5F-8478-C9B70F778636","24169-39B32AFF-6F18-4F5F-8478-C9B70F778636"]},
+		{"key":"E00002_MED_E_ENB_MON_ZIPEC_CS6_voix_02-08-18","value":["18217-A819EA64-78BA-4440-8A4D-19732D4E35B5"]},
+		{"key":"E00003_MED_E_ENB_MON_ZIPEC_AF22_admin_11-10-20}
+
+	*/
+
+	type MonitoredObjectNameToIDMapping struct {
+		key   string
+		value []string
+	}
+
+	// // First, fetch the listing of doc IDs and created timestamps as they are mapped to unique names from the db index:
+	// indexResults, err := tsh.pouchDB.GetByDesignDocument(dbName, "_design/sessions/_view/sessions2IDs?group=true")
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the deletion request for DB %s: %s", dbName, err.Error())
+	// 	reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+	// 	return
+	// }
+	index, err := tsh.tenantDB.GetDdocView(tenantID, "sessions", "sessions2IDs", true)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to retrieve Monitored Object details from index to populate the deletion request for DB %s: %s", dbName, err.Error())
+		reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+		return
+	}
+
+	rows := index.Rows
+
+	if len(rows) == 0 {
+		mon.TrackAPITimeMetricInSeconds(startTime, "200", monObjDupDel)
+		fmt.Fprintf(w, "No records to delete for DB "+dbName)
+		return
+	}
+
+	// Iterate over the results to build up a map of names to lists of Monitored Object Ids
+
+	mobs := []*tenmod.MonitoredObject{}
+
+	for _, row := range rows {
+		// Retrieve the necessary values
+		objectName := row.Key
+
+		// This view returns an array of IDs for the values.
+		value, ok := row.Value.([]interface{})
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result value to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, "#%d of IDs to session %s", len(value), objectName)
+
+		// Just get the first Object ID for now, we don't really care about tracking the history
+		objectID, ok := value[0].(string)
+		if !ok {
+			msg := fmt.Sprintf("Unable to parse result object ID to populate the deletion request for DB %s: %s", dbName, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		mo, err := tsh.tenantDB.GetMonitoredObject(tenantID, objectID)
+		if err != nil {
+			msg := fmt.Sprintf("%s'sMob:%s does not load, :%s", tenantID, objectID, err.Error())
+			reportError(w, startTime, "500", monObjDupDel, msg, http.StatusInternalServerError)
+			return
+		}
+
+		mo.ID = mo.ObjectName
+		mo.MonitoredObjectID = mo.ObjectName
+		mo.REV = "" // remove it!
+		mobs = append(mobs, mo)
+
+	}
+
+	// Issue request to DAO Layer
+	_, err = tsh.tenantDB.BulkCreateMonitoredObjects(migratedDB, tenantID, mobs)
+	if err != nil {
+		// return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+		return
+	}
+
+	if changeNotificationEnabled {
+		NotifyMonitoredObjectCreated(tenantID, mobs...)
 	}
 
 	// Purge complete, send back success details:

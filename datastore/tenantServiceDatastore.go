@@ -79,7 +79,8 @@ type TenantServiceDatastore interface {
 	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
 
 	// For Monitored Objects Meta fields
-	CheckAndAddMetadataView(tenantID string, metas map[string]string) error
+	CheckAndAddMetadataView(tenantID string, metas map[string]string, dbsuffix string) error
+	UpdateMonitoredObjectMetadataViewsForDB(tenantID string, dbsuffix string, metas map[string]string) error
 	UpdateMonitoredObjectMetadataViews(tenantID string, metas map[string]string) error
 	GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error)
 	GetMetadataKeys(tenantId string) (map[string]int, error)

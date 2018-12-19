@@ -1421,7 +1421,6 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 	// Iterate over the results to build up a map of names to lists of Monitored Object Ids
 
 	mobs := []*tenmod.MonitoredObject{}
-
 	for _, row := range rows {
 		// Retrieve the necessary values
 		objectName := row.Key
@@ -1454,7 +1453,6 @@ func (tsh *TestDataServiceHandler) ConvertLegacyObjectIDtoName(w http.ResponseWr
 		mo.MonitoredObjectID = mo.ObjectName
 		mo.REV = "" // remove it!
 		mobs = append(mobs, mo)
-
 	}
 
 	// Issue request to DAO Layer

@@ -645,7 +645,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 	dataContainer := &tenmod.MonitoredObject{}
 
 	// Add missing metadata
-	err := tsd.CheckAndAddMetadataView(monitoredObjectReq.TenantID, monitoredObjectReq.Meta)
+	err := tsd.CheckAndAddMetadataView(monitoredObjectReq.TenantID, monitoredObjectReq.Meta, "")
 	if err != nil {
 		return nil, err
 	}
@@ -889,10 +889,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 }
 
 // CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata and then create it
-func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string) error {
+func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string, dbsuffix string) error {
 
 	// Create the couchDB views
-	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
+	dbNameKeys := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s%s/", tenantID, "_monitored-objects", dbsuffix))
+
 	for key := range meta {
 		// Create an index based on metadata keys
 		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
@@ -914,11 +915,41 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 
 // UpdateMonitoredObjectMetadataViews - Updates the Tenant's Metadata's Monitored Object Meta key list
 func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(tenantID string, meta map[string]string) error {
+	// TODO: Merge this with UpdateMonitoredObjectMetadataViewsForDB but we need to make sure there are tests for it.
 
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	if meta != nil {
-		tsd.CheckAndAddMetadataView(tenantID, meta)
+		tsd.CheckAndAddMetadataView(tenantID, meta, "")
+
+		// Now force the indexer to crunch!
+		// Do not wait for this to finish, it will certainly take tens of minutes
+		// Create/update the couchDB views
+		for key := range meta {
+			go TriggerBuildCouchView(dbNameKeys, key, key, false)
+		}
+	}
+
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
+	go TriggerBuildCouchView(dbNameKeys, objectNameDelimitedDdoc, objectNameDelimitedByKeyView, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
+	// Indexes
+	go TriggerBuildCouchIndex(dbNameKeys, moIndexDdoc, moIndexView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountByNameView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountView, true)
+
+	return nil
+}
+
+// UpdateMonitoredObjectMetadataViewsForDB - Updates the Tenant's Metadata's Monitored Object Meta key list
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViewsForDB(tenantID string, dbsuffix string, meta map[string]string) error {
+
+	// Create the couchDB views
+	dbNameKeys := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s%s/", tenantID, "_monitored-objects", dbsuffix))
+
+	if meta != nil {
+		tsd.CheckAndAddMetadataView(tenantID, meta, dbsuffix)
 
 		// Now force the indexer to crunch!
 		// Do not wait for this to finish, it will certainly take tens of minutes
@@ -1288,7 +1319,7 @@ func (tsd *TenantServiceDatastoreCouchDB) BulkCreateMonitoredObjects(dbNamesuffi
 	}
 
 	// Now that we've done the bulk update, refresh the views
-	err = tsd.UpdateMonitoredObjectMetadataViews(origTenantID, metas)
+	err = tsd.UpdateMonitoredObjectMetadataViewsForDB(origTenantID, dbNamesuffix, metas)
 	if err != nil {
 		logger.Log.Errorf("Couldn't update metadata. Views may be out of sync, continuing with bulk update. %s", err.Error)
 	}

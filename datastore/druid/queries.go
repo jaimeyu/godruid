@@ -814,9 +814,9 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 			tk := typeKey
 			t := v.MonitoredObjectTypeMap[tk]
 			// @TODO: HEY! We need to remove this!
-			if tk != "twamp-sf" {
-				continue
-			}
+			// if tk != "twamp-sf" {
+			// 	continue
+			// }
 
 			perDirectionFilters := make(map[string]*objectTypeDirectionFilters)
 

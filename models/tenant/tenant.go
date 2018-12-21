@@ -1183,3 +1183,15 @@ func (mb *MetricBaseline) MergeBaselines(baselineDataCollection []*MetricBaselin
 		mb.MergeBaseline(baselineFromCollection)
 	}
 }
+
+// ViewResultItemGeneric - Model for Extracting Couchdb data from Views
+type ViewResultItemGeneric struct {
+	ID    string      `json:"id"`
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
+}
+
+// ViewResultsGeneric - View results
+type ViewResultsGeneric struct {
+	Rows []ViewResultItemGeneric `json:"rows"`
+}

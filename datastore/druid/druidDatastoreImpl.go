@@ -1234,9 +1234,11 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 
 	for vk, v := range thresholdProfile.Thresholds.VendorMap {
 		for tk, t := range v.MonitoredObjectTypeMap {
-			if tk != "twamp-sf" {
-				continue
-			}
+
+			// Removing this filter
+			// if tk != "twamp-sf" {
+			// 	continue
+			// }
 
 			for mk, m := range t.MetricMap {
 				for dk, d := range m.DirectionMap {

@@ -1,8 +1,10 @@
-* Fix - Removing the TWAMP-SF filter so all object types are used in SLA Reports
 ## Current Release 
+### 0.281.0 
+**Release Date:** Fri Dec 21 20:14:47 UTC 2018     
+## Previous Releases 
+* Fix - Removing the TWAMP-SF filter so all object types are used in SLA Reports
 ### 0.280.0 
 **Release Date:** Fri Dec 21 14:56:41 UTC 2018     
-## Previous Releases 
 * Feature - Added logic to create metadata views in other tables
 * Feature - Utility to migrate legacy monitored object ID to object names
 ### 0.279.0 

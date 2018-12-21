@@ -1,5 +1,176 @@
 {
   "metrics": {
+    "cisco-telemetry": {
+      "metricMap": {
+        "bandwidth": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "bandwidth",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "input-data-rate": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "input-data-rate",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "output-data-rate": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "output-data-rate",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "peak-input-data-rate": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "peak-input-data-rate",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "peak-output-data-rate": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "peak-output-data-rate",
+              "units": [
+                "bps"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "input-errors": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "input-errors",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "input-drops": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "input-drops",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "bytes-received": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "bytes-received",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "bytes-sent": {
+          "ui": {
+            "group": "unknown",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-telemetry",
+              "rawMetricId": "bytes-sent",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+          "unknown"
+        ]
+      }
+    },
     "accedian-twamp": {
       "metricMap": {
         "delayMin": {

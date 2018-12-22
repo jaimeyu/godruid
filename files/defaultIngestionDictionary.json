@@ -20,7 +20,7 @@
             }
           ]
         },
-        "input-data-rate": {
+        "inputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -28,7 +28,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "input-data-rate",
+              "rawMetricId": "inputDataRate",
               "units": [
                 "bps"
               ],
@@ -38,7 +38,7 @@
             }
           ]
         },
-        "output-data-rate": {
+        "outputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -46,7 +46,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "output-data-rate",
+              "rawMetricId": "outputDataRate",
               "units": [
                 "bps"
               ],
@@ -56,7 +56,7 @@
             }
           ]
         },
-        "peak-input-data-rate": {
+        "peakInputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -64,7 +64,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "peak-input-data-rate",
+              "rawMetricId": "peakInputDataRate",
               "units": [
                 "bps"
               ],
@@ -74,7 +74,7 @@
             }
           ]
         },
-        "peak-output-data-rate": {
+        "peakOutputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -82,7 +82,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "peak-output-data-rate",
+              "rawMetricId": "peakOutputDataRate",
               "units": [
                 "bps"
               ],
@@ -92,7 +92,7 @@
             }
           ]
         },
-        "input-errors": {
+        "inputErrors": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -100,7 +100,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "input-errors",
+              "rawMetricId": "inputErrors",
               "units": [
                 "value"
               ],
@@ -110,7 +110,7 @@
             }
           ]
         },
-        "input-drops": {
+        "inputDrops": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -118,7 +118,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "input-drops",
+              "rawMetricId": "inputDrops",
               "units": [
                 "value"
               ],
@@ -128,7 +128,7 @@
             }
           ]
         },
-        "bytes-received": {
+        "bytesReceived": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -136,7 +136,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "bytes-received",
+              "rawMetricId": "bytesReceived",
               "units": [
                 "value"
               ],
@@ -146,7 +146,7 @@
             }
           ]
         },
-        "bytes-sent": {
+        "bytesSent": {
           "ui": {
             "group": "unknown",
             "position": "2"
@@ -154,7 +154,7 @@
           "monitoredObjectTypes": [
             {
               "key": "cisco-telemetry",
-              "rawMetricId": "bytes-sent",
+              "rawMetricId": "bytesSent",
               "units": [
                 "value"
               ],

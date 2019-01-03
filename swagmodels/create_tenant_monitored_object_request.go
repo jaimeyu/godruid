@@ -45,7 +45,7 @@ type CreateTenantMonitoredObjectRequest struct {
 	ObjectName string `json:"objectName,omitempty"`
 
 	// object type
-	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-telemetry]
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
 	ObjectType string `json:"objectType,omitempty"`
 
 	// reflector name
@@ -131,7 +131,7 @@ var createTenantMonitoredObjectRequestTypeObjectTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-telemetry"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-interface", "cisco-node-summary"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

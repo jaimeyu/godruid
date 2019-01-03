@@ -244,7 +244,7 @@ var monitoredObjectCreateAttributesTypeObjectTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl", "cisco-telemetry"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl", "cisco-interface", "cisco-node-summary"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

@@ -5610,7 +5610,7 @@ definitions:
         type: "string"
       objectType: 
         type: "string"
-        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary]
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx]
       meta:
         type: "object"
         additionalProperties:
@@ -5655,7 +5655,7 @@ definitions:
         type: "string"
       objectType: 
         type: "string"
-        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary]
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx]
       meta:
         type: "object"
         additionalProperties:
@@ -9459,7 +9459,7 @@ definitions:
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx]
           meta:
             type: "object"
             description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"

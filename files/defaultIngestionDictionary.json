@@ -407,6 +407,179 @@
         ]
       }
     },
+    "accedian-pvx": {
+      "metricMap": {
+        "clientDTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "clientDTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverDTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverDTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "clientRTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "clientRTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverRTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverRTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverResponseTime": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverResponseTime",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "numberOfTransactions": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "numberOfTransactions",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "percentClientRetransmission": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "percentClientRetransmission",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "percentServerRetransmission": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "percentServerRetransmission",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "endUserResponseTime": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "endUserResponseTime",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+            "unknown",
+            "cpu",
+            "memory"
+        ]
+      }
+    },
     "accedian-twamp": {
       "metricMap": {
         "delayMin": {

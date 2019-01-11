@@ -92,6 +92,11 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 		if err != nil {
 			logger.Log.Errorf("Lost connection to Connector with ID: %v. Error: %v", connectorID, err)
 
+			if wsServer.ConnectionMeta[connectorID] == nil {
+				logger.Log.Debugf("Connection to Connector: %s has already been deleted", connectorID)
+				break
+			}
+
 			tenantID := wsServer.ConnectionMeta[connectorID].TenantID
 			connectorConfigs, _ := wsServer.TenantDB.GetAllTenantConnectorConfigsByInstanceID(tenantID, connectorID)
 
@@ -130,6 +135,7 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 				wsServer.Lock.Lock()
 				wsServer.ConnectionMeta[connectorID].TenantID = tenantID
+				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
 				wsServer.Lock.Unlock()
 
 				// Check if ConnectorInstances has an entry for connectorID
@@ -230,15 +236,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					break
 				}
 			}
-		case "Heartbeat":
-			{
-				logger.Log.Debugf("Received Heartbeat from Connector with ID: %s", connectorID)
-				wsServer.Lock.Lock()
-				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
-				wsServer.Lock.Unlock()
-
-			}
-
 		case "SessionUpdate":
 			{
 				setBatchSize()
@@ -440,10 +437,13 @@ func Server(tenantDB datastore.TenantServiceDatastore) *ServerStruct {
 		for range heartbeatTicker.C {
 			now := time.Now().Unix()
 			for cID, meta := range wsServer.ConnectionMeta {
+				// No hearbeat has been received for this connector, so we need to clean out its connection,
+				// and clear out the connectorInstance, as well as the connectorInstanceID from the connector config.
 				if now-meta.LastHeartbeat > maxSecondsWithoutHeartbeat {
 					logger.Log.Errorf("No Heartbeat messages have been received from Connector with ID: %v for %v seconds. Terminating connection.", cID, maxSecondsWithoutHeartbeat)
 					wsServer.Lock.Lock()
 					wsServer.ConnectionMeta[cID].Connection.Close()
+					delete(wsServer.ConnectionMeta, cID)
 					wsServer.Lock.Unlock()
 				}
 			}

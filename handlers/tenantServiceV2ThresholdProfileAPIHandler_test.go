@@ -22,7 +22,7 @@ var (
 
 func TestThresholdProfileCRUDV2(t *testing.T) {
 
-	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreateTeant := createdTenant.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreateTeant)
 	assert.NotEmpty(t, castedCreateTeant.Payload.Data.ID)
@@ -126,7 +126,7 @@ func TestThresholdProfileBadRequestV2(t *testing.T) {
 
 func TestThresholdProfileConflictV2(t *testing.T) {
 
-	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreateTeant := createdTenant.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreateTeant)
 	assert.NotEmpty(t, castedCreateTeant.Payload.Data.ID)

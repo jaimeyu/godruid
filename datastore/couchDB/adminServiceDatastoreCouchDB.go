@@ -146,13 +146,6 @@ func (asd *AdminServiceDatastoreCouchDB) CreateTenant(tenantDescriptor *admmod.T
 		return nil, err
 	}
 
-	// Create a CouchDB database to isolate metric baselines for Monitored Objects for the tenant
-	_, err = asd.CreateDatabase(fmt.Sprintf("%s%s", tenantDescriptor.ID, metricBaselineDBSuffix))
-	if err != nil {
-		logger.Log.Debugf("Unable to create metric baseline database for Tenant %s: %s", tenantDescriptor.ID, err.Error())
-		return nil, err
-	}
-
 	// Add in the views/indicies necessary for the db:
 	if err = asd.addTenantViewsToDB(tenantDescriptor.ID); err != nil {
 		logger.Log.Debugf("Unable to add Views to DB for Tenant %s: %s", tenantDescriptor.ID, err.Error())
@@ -277,6 +270,11 @@ func (asd *AdminServiceDatastoreCouchDB) CreateDatabase(dbName string) (ds.Datab
 		return nil, err
 	}
 
+	err = db.SetRevsLimit(1)
+	if err != nil {
+		return nil, err
+	}
+
 	logger.Log.Debugf("Created DB %s\n", dbName)
 
 	return db, nil
@@ -305,18 +303,18 @@ func (asd *AdminServiceDatastoreCouchDB) addTenantViewsToDB(dbName string) error
 		}
 	}
 
-	mbDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, metricBaselineDBSuffix)))
-	if err != nil {
-		return err
-	}
+	// mbDB, err := getDatabase(createDBPathStr(asd.couchHost, fmt.Sprintf("%s%s", dbName, metricBaselineDBSuffix)))
+	// if err != nil {
+	// 	return err
+	// }
 
-	// Store the views related to Monitored Objects
-	for _, viewPayload := range getMetricBaselineViews() {
-		_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", mbDB, nil)
-		if err != nil {
-			return err
-		}
-	}
+	// // Store the views related to Monitored Objects
+	// for _, viewPayload := range getMetricBaselineViews() {
+	// 	_, _, err = storeDataInCouchDBWithQueryParams(viewPayload, "TenantView", mbDB, nil)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	logger.Log.Debugf("Added views to DB %s\n", dbName)
 	return nil

@@ -56,6 +56,7 @@ type TenantServiceDatastore interface {
 	GetAllMonitoredObjects(tenantID string) ([]*tenmod.MonitoredObject, error)
 	GetMonitoredObjectToDomainMap(moByDomReq *tenmod.MonitoredObjectCountByDomainRequest) (*tenmod.MonitoredObjectCountByDomainResponse, error)
 	BulkInsertMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
+	BulkCreateMonitoredObjects(dbname string, tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	BulkUpdateMonitoredObjects(tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error)
 	GetAllMonitoredObjectsInIDList(tenantID string, idList []string) ([]*tenmod.MonitoredObject, error)
 	GetMonitoredObjectsByObjectName(name string, tenantID string) ([]*tenmod.MonitoredObject, error)
@@ -78,10 +79,12 @@ type TenantServiceDatastore interface {
 	GetAllSLAReports(tenantID string) ([]*metmod.SLAReport, error)
 
 	// For Monitored Objects Meta fields
-	CheckAndAddMetadataView(tenantID string, metas map[string]string) error
+	CheckAndAddMetadataView(tenantID string, metas map[string]string, dbsuffix string) error
+	UpdateMonitoredObjectMetadataViewsForDB(tenantID string, dbsuffix string, metas map[string]string) error
 	UpdateMonitoredObjectMetadataViews(tenantID string, metas map[string]string) error
 	GetFilteredMonitoredObjectList(tenantId string, meta map[string][]string) ([]string, error)
 	GetMetadataKeys(tenantId string) (map[string]int, error)
+	GetDdocView(tenantId string, ddoc string, view string, group bool) (*tenmod.ViewResultsGeneric, error)
 
 	CreateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
 	UpdateDashboard(dashboard *tenmod.Dashboard) (*tenmod.Dashboard, error)
@@ -119,17 +122,4 @@ type TenantServiceDatastore interface {
 	GetTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
 	DeleteTenantMetadataConfig(tenantID string, dataID string) (*tenmod.MetadataConfig, error)
 	GetActiveTenantMetadataConfig(tenantID string) (*tenmod.MetadataConfig, error)
-
-	CreateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
-	UpdateMetricBaseline(baseline *tenmod.MetricBaseline) (*tenmod.MetricBaseline, error)
-	UpdateMetricBaselineForHourOfWeek(tenantID string, monObjID string, baselineData *tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
-	UpdateMetricBaselineForHourOfWeekWithCollection(tenantID string, monObjID string, baselineDataCollection []*tenmod.MetricBaselineData) (*tenmod.MetricBaseline, error)
-	GetMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
-	GetMetricBaselineForMonitoredObject(tenantID string, monObjID string) (*tenmod.MetricBaseline, error)
-	GetMetricBaselineForMonitoredObjectForHourOfWeek(tenantID string, monObjID string, hourOfWeek int32) ([]*tenmod.MetricBaselineData, error)
-	DeleteMetricBaseline(tenantID string, dataID string) (*tenmod.MetricBaseline, error)
-	// GetMetricBaselinesForMOsIn - note that this function will return results that are not stored in the DB as new "empty" items so that they can be populated
-	// in a subsequent bulk PUT call.
-	GetMetricBaselinesForMOsIn(tenantID string, moIDList []string, addNotFoundValuesInResponse bool) ([]*tenmod.MetricBaseline, error)
-	BulkUpdateMetricBaselines(tenantID string, baselineUpdateList []*tenmod.MetricBaseline) ([]*common.BulkOperationResult, error)
 }

@@ -1,8 +1,81 @@
-* Fix - Making the dowloaded Roadrunner tar.gz archive and actual gz archive
 ## Current Release 
+### 0.281.0 
+**Release Date:** Fri Dec 21 20:14:47 UTC 2018     
+## Previous Releases 
+* Fix - Removing the TWAMP-SF filter so all object types are used in SLA Reports
+### 0.280.0 
+**Release Date:** Fri Dec 21 14:56:41 UTC 2018     
+* Feature - Added logic to create metadata views in other tables
+* Feature - Utility to migrate legacy monitored object ID to object names
+### 0.279.0 
+**Release Date:** Mon Dec 17 18:14:24 UTC 2018     
+* Fix - Refactoring metric query code
+### 0.278.0 
+**Release Date:** Fri Dec 14 15:21:20 UTC 2018     
+### 0.277.0 
+**Release Date:** Fri Dec 14 14:20:16 UTC 2018     
+* Fix - Refactoring the threshold crossing query
+### 0.276.0 
+**Release Date:** Mon Dec 10 20:15:02 UTC 2018     
+* Fix - Removing hardcoded default timeout for SLA report
+### 0.275.0 
+**Release Date:** Fri Dec  7 18:06:24 UTC 2018     
+* Fix - Serializing SLA reports
+### 0.273.0 
+**Release Date:** Wed Dec  5 19:26:58 UTC 2018     
+### 0.272.0 
+**Release Date:** Tue Dec  4 18:44:19 UTC 2018     
+### 0.271.0 
+**Release Date:** Fri Nov 30 17:21:15 UTC 2018     
+* Fix - Guards to ensure that badly formed threshold crossing top N requests do not affect gather
+### 0.270.0 
+**Release Date:** Fri Nov 30 03:19:14 UTC 2018     
+### 0.269.0 
+**Release Date:** Wed Nov 28 22:37:52 UTC 2018     
+### 0.268.0 
+**Release Date:** Tue Nov 27 19:53:39 UTC 2018     
+* Fix - Fixes issue where topn was not considering 0 valued metrics
+### 0.267.0 
+**Release Date:** Tue Nov 27 17:21:33 UTC 2018     
+### 0.266.0 
+**Release Date:** Tue Nov 27 14:39:19 UTC 2018     
+* Feature - Adding a flag to all the v2 APIs to control data cleaning
+### 0.265.0 
+**Release Date:** Tue Nov 27 11:05:39 UTC 2018     
+* Fix - Found bug in Connector's run.sh that did not include the host file override for the login function. 
+### 0.264.0 
+**Release Date:** Tue Nov 27 02:46:02 UTC 2018     
+* Metric Baseline Postgres Impl
+### 0.263.0 
+**Release Date:** Fri Nov 23 21:41:44 UTC 2018     
+### 0.262.0 
+**Release Date:** Tue Nov 20 16:41:27 UTC 2018     
+* Fix - Add a toggle to add/remove data cleaning to aggregate request 
+### 0.261.0 
+**Release Date:** Tue Nov 20 14:47:32 UTC 2018     
+* Feature - Initial checkin of metric query integration tests
+### 0.260.0 
+**Release Date:** Tue Nov 20 02:58:26 UTC 2018     
+### 0.259.0 
+**Release Date:** Mon Nov 19 14:28:33 UTC 2018     
+* Feature - Adding V2 API for  bulk meta
+### 0.258.0 
+**Release Date:** Fri Nov 16 16:08:32 UTC 2018     
+* Fix - Alpine image is now pointing to alpine latest instead of edge
+### 0.257.0 
+**Release Date:** Thu Nov 15 19:50:03 UTC 2018     
+* Fix - Removed excessive logging from doGetDownloadRoadrunner and doGetIngestionDictionaryV2
+### 0.256.0 
+**Release Date:** Thu Nov 15 17:56:17 UTC 2018     
+* Fix - Remove unnecessary debug log
+### 0.255.0 
+**Release Date:** Wed Nov 14 15:14:03 UTC 2018     
+* Fix - Updated run.sh to remove the old running aod_connector container before starting a new one.
+### 0.254.0 
+**Release Date:** Tue Nov 13 22:44:24 UTC 2018     
+* Fix - Making the dowloaded Roadrunner tar.gz archive and actual gz archive
 ### 0.253.0 
 **Release Date:** Tue Nov 13 19:35:01 UTC 2018     
-## Previous Releases 
 * Feature - Multitenancy support for RoadRunner configuration. 
 ### 0.252.0 
 **Release Date:** Tue Nov 13 16:04:51 UTC 2018     

@@ -58,9 +58,7 @@
         type: string
         example: 2018-04-08T14:00:00/2018-04-09T15:00:00
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       thresholdProfileId:
         description: ID of the threshold profile that is used to select metrics and events
         type: string
@@ -69,6 +67,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -172,9 +173,7 @@
         type: string
         example: 2018-04-08T14:00:00/2018-04-09T15:00:00
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       thresholdProfileId:
         description: ID of the threshold profile that is used to select metrics and events
         type: string
@@ -187,6 +186,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       timezone: 
         description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
         type: string
@@ -323,9 +325,7 @@
         description: The tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -409,9 +409,7 @@
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. This attribute cannot be used if the monitoredObjects attribute is also present in the request. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -432,6 +430,9 @@
           - min
           - max
           - avg
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         description: An array of identifiers that filter-in specifically identified metrics.
         type: array
@@ -494,9 +495,7 @@
     required: [interval, metrics]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -505,6 +504,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       granularity:
         description: The granularity for timeseries in ISO-8601 duration format, or ALL
         type: string
@@ -620,9 +622,7 @@
     required: [interval, aggregator, metric]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       monitoredObjects:
         description: An optional array of monitored objects that we want to retrieve specific topn against. This attribute cannot be used if the meta attribute is also present in the request.
         x-omitempty: true
@@ -640,6 +640,9 @@
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -750,9 +753,7 @@
     required: [interval, metrics]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -769,6 +770,9 @@
         type: integer
         description: query timeout in milliseconds
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         type: array
         description: limits the results to include only metrics in the whitelist
@@ -812,14 +816,11 @@
     type: object
     required:
       - violationCount
-      - violationDuration
       - timestamp
     properties:
       timestamp:
         type: string
       violationCount:
-        type: integer
-      violationDuration:
         type: integer
 
   # COMMON METRIC ENTITIES

@@ -645,7 +645,7 @@ func (tsd *TenantServiceDatastoreCouchDB) CreateMonitoredObject(monitoredObjectR
 	dataContainer := &tenmod.MonitoredObject{}
 
 	// Add missing metadata
-	err := tsd.CheckAndAddMetadataView(monitoredObjectReq.TenantID, monitoredObjectReq.Meta)
+	err := tsd.CheckAndAddMetadataView(monitoredObjectReq.TenantID, monitoredObjectReq.Meta, "")
 	if err != nil {
 		return nil, err
 	}
@@ -696,8 +696,6 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObject(tenantID string, da
 // DeleteMonitoredObject - CouchDB implementation of DeleteMonitoredObject
 func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string, dataID string) (*tenmod.MonitoredObject, error) {
 	logger.Log.Debugf("Deleting %s: %s\n", tenmod.TenantMonitoredObjectStr, dataID)
-	originalTenantID := tenantID
-	originalDataID := dataID
 	dataID = ds.PrependToDataID(dataID, string(tenmod.TenantMonitoredObjectType))
 	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
 
@@ -705,19 +703,6 @@ func (tsd *TenantServiceDatastoreCouchDB) DeleteMonitoredObject(tenantID string,
 	dataContainer := tenmod.MonitoredObject{}
 	if err := deleteDataFromCouch(dbName, dataID, &dataContainer, tenmod.TenantMonitoredObjectStr); err != nil {
 		return nil, err
-	}
-
-	// Try and remove any metric baselines for this monitored object:
-	associatedMetricBaseline, err := tsd.GetMetricBaselineForMonitoredObject(originalTenantID, originalDataID)
-	if err != nil {
-		logger.Log.Warningf("Successful deletion of %s %s and there is no associated %s  for %s %s: %s", tenmod.TenantMonitoredObjectStr, originalDataID, tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, originalDataID)
-	}
-	if associatedMetricBaseline != nil {
-		metricBaslineID := ds.GetDataIDFromFullID(associatedMetricBaseline.ID)
-		_, err = tsd.DeleteMetricBaseline(originalTenantID, metricBaslineID)
-		if err != nil {
-			logger.Log.Warningf("Successful deletion of %s %s but unable to delete associated %s %s: %s", tenmod.TenantMonitoredObjectStr, originalDataID, tenmod.TenantMetricBaselineStr, metricBaslineID)
-		}
 	}
 
 	logger.Log.Debugf("Deleted %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(dataContainer))
@@ -904,10 +889,11 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMonitoredObjectToDomainMap(moByDomR
 }
 
 // CheckAndAddMetadataView - Check if we're missing a couchdb view for this new metadata and then create it
-func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string) error {
+func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID string, meta map[string]string, dbsuffix string) error {
 
 	// Create the couchDB views
-	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
+	dbNameKeys := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s%s/", tenantID, "_monitored-objects", dbsuffix))
+
 	for key := range meta {
 		// Create an index based on metadata keys
 		err := createNewTenantMetadataViews(dbNameKeys, strings.ToLower(key))
@@ -929,11 +915,41 @@ func (tsd *TenantServiceDatastoreCouchDB) CheckAndAddMetadataView(tenantID strin
 
 // UpdateMonitoredObjectMetadataViews - Updates the Tenant's Metadata's Monitored Object Meta key list
 func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViews(tenantID string, meta map[string]string) error {
+	// TODO: Merge this with UpdateMonitoredObjectMetadataViewsForDB but we need to make sure there are tests for it.
 
 	// Create the couchDB views
 	dbNameKeys := GenerateMonitoredObjectURL(tenantID, tsd.server)
 	if meta != nil {
-		tsd.CheckAndAddMetadataView(tenantID, meta)
+		tsd.CheckAndAddMetadataView(tenantID, meta, "")
+
+		// Now force the indexer to crunch!
+		// Do not wait for this to finish, it will certainly take tens of minutes
+		// Create/update the couchDB views
+		for key := range meta {
+			go TriggerBuildCouchView(dbNameKeys, key, key, false)
+		}
+	}
+
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewAllValuesPerKey, true)
+	go TriggerBuildCouchView(dbNameKeys, objectNameDelimitedDdoc, objectNameDelimitedByKeyView, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewUniqueKeys, true)
+	go TriggerBuildCouchView(dbNameKeys, metakeysViewDdocName, metaViewLookupWords, true)
+	// Indexes
+	go TriggerBuildCouchIndex(dbNameKeys, moIndexDdoc, moIndexView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountByNameView, true)
+	go TriggerBuildCouchIndex(dbNameKeys, objectCountDdoc, objectCountView, true)
+
+	return nil
+}
+
+// UpdateMonitoredObjectMetadataViewsForDB - Updates the Tenant's Metadata's Monitored Object Meta key list
+func (tsd *TenantServiceDatastoreCouchDB) UpdateMonitoredObjectMetadataViewsForDB(tenantID string, dbsuffix string, meta map[string]string) error {
+
+	// Create the couchDB views
+	dbNameKeys := createDBPathStr(tsd.server, fmt.Sprintf("tenant_2_%s%s%s/", tenantID, "_monitored-objects", dbsuffix))
+
+	if meta != nil {
+		tsd.CheckAndAddMetadataView(tenantID, meta, dbsuffix)
 
 		// Now force the indexer to crunch!
 		// Do not wait for this to finish, it will certainly take tens of minutes
@@ -992,6 +1008,45 @@ func (tsd *TenantServiceDatastoreCouchDB) GetMetadataKeys(tenantId string) (map[
 	}
 
 	return rows, nil
+}
+
+// GetDdocView - Gets all the rows from the couchdb view with ability to specify group by toggle
+func (tsd *TenantServiceDatastoreCouchDB) GetDdocView(tenantId string, ddoc string, view string, group bool) (*tenmod.ViewResultsGeneric, error) {
+
+	dbName := GenerateMonitoredObjectURL(tenantId, tsd.server)
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return nil, err
+	}
+	v := url.Values{}
+
+	// Some views are map-reduces so we want to set the group to true to collate on the key
+	if group {
+		v.Set("group", "true")
+	}
+	url := "_design/" + ddoc + "/_view/" + view
+
+	// Now get the view
+	doc, err := db.Get(url, v)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get view %s, %s", dbName+url, err.Error())
+	}
+
+	if logger.IsDebugEnabled() {
+		logger.Log.Debugf("Getting items from %s -> %s", dbName+url, models.AsJSONString(doc))
+	}
+
+	var resp tenmod.ViewResultsGeneric
+	raw, err := json.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("Could not marshal (%s) %s, %s", dbName+url, models.AsJSONString(doc), err.Error())
+	}
+	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("Could not unmarshal (%s) %s into CouchdbViewResults, %s", dbName+url, string(raw), err.Error())
+	}
+
+	return &resp, nil
 }
 
 // CheckMetaDdocExist - Gets all the known metadata keys from the couchdb view
@@ -1216,6 +1271,84 @@ func (tsd *TenantServiceDatastoreCouchDB) GetAllTenantThresholdProfile(tenantID 
 	}
 
 	logger.Log.Debugf("Retrieved %d %s\n", tenmod.TenantThresholdProfileStr, models.AsJSONString(res))
+	return res, nil
+}
+
+// BulkCreateMonitoredObjects - Creates monitored objects and places them in database with a different suffix. We can merge with BulkInsertMonitoredObjects eventually
+func (tsd *TenantServiceDatastoreCouchDB) BulkCreateMonitoredObjects(dbNamesuffix string, tenantID string, value []*tenmod.MonitoredObject) ([]*common.BulkOperationResult, error) {
+	logger.Log.Debugf("Bulk creating %s: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(value))
+	origTenantID := tenantID
+	tenantID = ds.PrependToDataID(tenantID, string(admmod.TenantType))
+	dbName := createDBPathStr(tsd.server, fmt.Sprintf("%s%s%s", tenantID, monitoredObjectDBSuffix, dbNamesuffix))
+	resource, err := couchdb.NewResource(dbName, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	metas := make(map[string]string)
+	// Iterate over the collection and populate necessary fields
+	data := make([]map[string]interface{}, 0)
+	for _, mo := range value {
+		genericMO, err := convertDataToCouchDbSupportedModel(mo)
+		if err != nil {
+			return nil, err
+		}
+
+		dataType := string(tenmod.TenantMonitoredObjectType)
+		genericMO["_id"] = mo.ID
+
+		dataProp := genericMO["data"].(map[string]interface{})
+		dataProp["datatype"] = dataType
+		dataProp["createdTimestamp"] = ds.MakeTimestamp()
+		dataProp["lastModifiedTimestamp"] = dataProp["createdTimestamp"]
+
+		data = append(data, genericMO)
+
+		// We want to generate a list of metakeys for processing later
+		for key := range mo.Meta {
+			metas[key] = key
+		}
+
+	}
+	body := map[string]interface{}{
+		"docs": data}
+
+	fetchedData, err := performBulkUpdate(body, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// Now that we've done the bulk update, refresh the views
+	err = tsd.UpdateMonitoredObjectMetadataViewsForDB(origTenantID, dbNamesuffix, metas)
+	if err != nil {
+		logger.Log.Errorf("Couldn't update metadata. Views may be out of sync, continuing with bulk update. %s", err.Error)
+	}
+
+	// Populate the response
+	res := make([]*common.BulkOperationResult, 0)
+	for _, fetched := range fetchedData {
+		newObj := common.BulkOperationResult{}
+		if fetched["id"] != nil {
+			newObj.ID = fetched["id"].(string)
+		}
+		if fetched["rev"] != nil {
+			newObj.REV = fetched["rev"].(string)
+		}
+		if fetched["reason"] != nil {
+			newObj.REASON = fetched["reason"].(string)
+		}
+		if fetched["error"] != nil {
+			newObj.ERROR = fetched["error"].(string)
+		}
+		if fetched["ok"] != nil {
+			newObj.OK = fetched["ok"].(bool)
+		}
+
+		newObj.ID = ds.GetDataIDFromFullID(newObj.ID)
+		res = append(res, &newObj)
+	}
+
+	logger.Log.Debugf("Bulk create of %s result: %v\n", tenmod.TenantMonitoredObjectStr, models.AsJSONString(res))
 	return res, nil
 }
 

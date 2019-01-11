@@ -12,6 +12,7 @@ import (
 
 	"github.com/accedian/adh-gather/datastore"
 	"github.com/accedian/adh-gather/datastore/druid"
+	pgdb "github.com/accedian/adh-gather/datastore/postgres"
 	"github.com/accedian/adh-gather/gather"
 	"github.com/accedian/adh-gather/handlers"
 	"github.com/accedian/adh-gather/logger"
@@ -29,12 +30,13 @@ const (
 )
 
 var (
-	metricSH      *handlers.MetricServiceHandler
-	testSH        *handlers.TestDataServiceHandler
-	nonSwaggerMUX *mux.Router
-	adminDB       datastore.AdminServiceDatastore
-	tenantDB      datastore.TenantServiceDatastore
-	metricsDB     datastore.MetricsDatastore
+	metricSH                *handlers.MetricServiceHandler
+	testSH                  *handlers.TestDataServiceHandler
+	nonSwaggerMUX           *mux.Router
+	adminDB                 datastore.AdminServiceDatastore
+	tenantDB                datastore.TenantServiceDatastore
+	metricsDB               datastore.MetricsDatastore
+	metricBaselineDatastore datastore.TenantMetricBaselineDatastore
 
 	// DEPRECATED - REMOVE ONCE V1 IS REMOVED
 	metricServiceV1APIRouteRoots = []string{
@@ -82,6 +84,11 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 
 	metricsDB := druid.NewDruidDatasctoreClient()
 
+	metricBaselineDatastore, err = pgdb.CreateTenantMetricBaselinePostgresDAO()
+	if err != nil {
+		logger.Log.Fatalf("Unable to create Metric Baseline provisioning DAO: %s", err.Error())
+	}
+
 	// Register the V1 APIs
 	configureAdminServiceV1API(api, adminDB, tenantDB)
 	configureTenantServiceV1API(api, tenantDB)
@@ -89,9 +96,10 @@ func configureAPI(api *operations.GatherAPI) http.Handler {
 	configurev1APIThatWeMayRemove(api, tenantDB)
 
 	// Register the V2 APIs
-	configureAdminServiceV2API(api, adminDB, tenantDB)
+	configureAdminServiceV2API(api, adminDB, tenantDB, metricBaselineDatastore)
 	configureMetricServiceV2API(api, tenantDB, metricsDB)
 	configureTenantServiceV2API(api, tenantDB, metricsDB)
+	configureTenantMetricBaselineServiceV2API(api, metricBaselineDatastore)
 
 	api.ServerShutdown = func() {}
 
@@ -149,7 +157,7 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	websocket.Server(tenantDB)
 
 	// Start the scheduler for handling SLA report generation
-	slasched.Initialize(metricSH, nil, nil, 5)
+	slasched.Initialize(metricSH, nil, nil, 1)
 
 	// Make sure necessary Couch data is present
 	pouchSH := handlers.CreatePouchDBPluginServiceHandler()

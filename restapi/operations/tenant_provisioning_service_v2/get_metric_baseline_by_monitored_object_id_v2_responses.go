@@ -25,7 +25,7 @@ type GetMetricBaselineByMonitoredObjectIDV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.MetricBaselineResponse `json:"body,omitempty"`
+	Payload *swagmodels.MetricBaselineListResponse `json:"body,omitempty"`
 }
 
 // NewGetMetricBaselineByMonitoredObjectIDV2OK creates GetMetricBaselineByMonitoredObjectIDV2OK with default headers values
@@ -35,13 +35,13 @@ func NewGetMetricBaselineByMonitoredObjectIDV2OK() *GetMetricBaselineByMonitored
 }
 
 // WithPayload adds the payload to the get metric baseline by monitored object Id v2 o k response
-func (o *GetMetricBaselineByMonitoredObjectIDV2OK) WithPayload(payload *swagmodels.MetricBaselineResponse) *GetMetricBaselineByMonitoredObjectIDV2OK {
+func (o *GetMetricBaselineByMonitoredObjectIDV2OK) WithPayload(payload *swagmodels.MetricBaselineListResponse) *GetMetricBaselineByMonitoredObjectIDV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get metric baseline by monitored object Id v2 o k response
-func (o *GetMetricBaselineByMonitoredObjectIDV2OK) SetPayload(payload *swagmodels.MetricBaselineResponse) {
+func (o *GetMetricBaselineByMonitoredObjectIDV2OK) SetPayload(payload *swagmodels.MetricBaselineListResponse) {
 	o.Payload = payload
 }
 

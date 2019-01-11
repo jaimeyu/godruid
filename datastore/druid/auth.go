@@ -33,7 +33,10 @@ func GetAuthCode(cfg config.Provider) string {
 
 		req.Header.Add("Accept", "application/vnd.api+json")
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-		res, _ := http.DefaultClient.Do(req)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			panic(err)
+		}
 
 		// Make sure to close the body/clean up
 		defer res.Body.Close()

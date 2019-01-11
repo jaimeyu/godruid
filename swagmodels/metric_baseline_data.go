@@ -8,9 +8,7 @@ package swagmodels
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // MetricBaselineData metric baseline data
@@ -26,11 +24,6 @@ type MetricBaselineData struct {
 	// The direction of the metric baseline
 	Direction string `json:"direction,omitempty"`
 
-	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
-	// Maximum: 167
-	// Minimum: 0
-	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
-
 	// The name of the metric represented by this baseline
 	Metric string `json:"metric,omitempty"`
 
@@ -40,32 +33,6 @@ type MetricBaselineData struct {
 
 // Validate validates this metric baseline data
 func (m *MetricBaselineData) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateHourOfWeek(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *MetricBaselineData) validateHourOfWeek(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.HourOfWeek) { // not required
-		return nil
-	}
-
-	if err := validate.MinimumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MaximumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
-		return err
-	}
-
 	return nil
 }
 

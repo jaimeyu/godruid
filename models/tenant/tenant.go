@@ -897,10 +897,17 @@ type CardVisualization struct {
 	Component         string                         `json:"component"`
 	DefaultDimensions *Dimension                     `json:"defaultDimensions"`
 	Availability      *CardVisualizationAvailability `json:"availability"`
+	QueryParams       *CardVisualizationQueryParams  `json:"queryParams"`
 }
 
 type CardVisualizationAvailability struct {
 	Type []string `json:"type"`
+}
+
+type CardVisualizationQueryParams struct {
+	Aggregator     string `json:"aggregator"`
+	Limit          int64  `json:"limit"`
+	SortDescending bool   `json:"sortDescending"`
 }
 
 type MetadataFilter struct {
@@ -966,6 +973,31 @@ func (meta *MonitoredObjectBulkMetadata) Validate(isUpdate bool) error {
 		return errors.New("Monitored Object List cannot be empty")
 	}
 	return nil
+}
+
+type BulkMetadataEntries struct {
+	ID              string              `json:"_id"`
+	MetadataEntries []BulkMetadataEntry `json:"metadata-entries"`
+}
+
+type BulkMetadataEntry struct {
+	Metadata   map[string]string `json:"metadata"`
+	ObjectName string            `json:"objectName"`
+}
+
+// GetID - required implementation for jsonapi marshalling
+func (bme *BulkMetadataEntries) GetID() string {
+	return bme.ID
+}
+
+// SetID - required implementation for jsonapi unmarshalling
+func (bme *BulkMetadataEntries) SetID(s string) error {
+	bme.ID = s
+	return nil
+}
+
+func (bme *BulkMetadataEntries) GetName() string {
+	return "monitoredObjectsMeta"
 }
 
 // Error models
@@ -1100,10 +1132,12 @@ type MetricBaseline struct {
 	REV                   string                `json:"_rev"`
 	Datatype              string                `json:"datatype"`
 	TenantID              string                `json:"tenantId"`
+	HourOfWeek            int32                 `json:"hourOfWeek"`
 	Baselines             []*MetricBaselineData `json:"baselines"`
 	MonitoredObjectID     string                `json:"monitoredObjectId"`
 	CreatedTimestamp      int64                 `json:"createdTimestamp"`
 	LastModifiedTimestamp int64                 `json:"lastModifiedTimestamp"`
+	LastResetTimestamp    int64                 `json:"lastResetTimestamp"`
 }
 
 // GetID - required implementation for jsonapi marshalling
@@ -1118,19 +1152,18 @@ func (mb *MetricBaseline) SetID(s string) error {
 }
 
 type MetricBaselineData struct {
-	Average    float64 `json:"avg"`
-	Count      int64   `json:"count"`
-	Direction  string  `json:"direction"`
-	HourOfWeek int32   `json:"hourOfWeek"`
-	Metric     string  `json:"metric"`
-	Sum        float64 `json:"sum"`
+	Average   float64 `json:"avg"`
+	Count     int64   `json:"count"`
+	Direction string  `json:"direction"`
+	Metric    string  `json:"metric"`
+	Sum       float64 `json:"sum"`
 }
 
 // MergeBaseline - will add the baseline data provided to this Metric Baseline object
 func (mb *MetricBaseline) MergeBaseline(baselineData *MetricBaselineData) {
 	didUpdateBaseline := false
 	for index, baseline := range mb.Baselines {
-		if baseline.HourOfWeek == baselineData.HourOfWeek && baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
+		if baseline.Metric == baselineData.Metric && baseline.Direction == baselineData.Direction {
 			// The baseline is already being tracked, update it
 			mb.Baselines[index] = baselineData
 			didUpdateBaseline = true
@@ -1149,4 +1182,16 @@ func (mb *MetricBaseline) MergeBaselines(baselineDataCollection []*MetricBaselin
 	for _, baselineFromCollection := range baselineDataCollection {
 		mb.MergeBaseline(baselineFromCollection)
 	}
+}
+
+// ViewResultItemGeneric - Model for Extracting Couchdb data from Views
+type ViewResultItemGeneric struct {
+	ID    string      `json:"id"`
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
+}
+
+// ViewResultsGeneric - View results
+type ViewResultsGeneric struct {
+	Rows []ViewResultItemGeneric `json:"rows"`
 }

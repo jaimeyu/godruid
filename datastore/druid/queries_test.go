@@ -54,19 +54,18 @@ func TestFilterHelper(t *testing.T) {
 }
 
 func TestBuildMonitoredObjectFilterNoEntries(t *testing.T) {
-	if druid.BuildMonitoredObjectFilter("1234", nil) != nil {
+	if druid.BuildMonitoredObjectFilter(nil) != nil {
 		t.Errorf("Expecting nil filter to be returned")
 	}
 }
 
 func TestBuildMonitoredObjectFilterOk(t *testing.T) {
 	testMOs := []string{"mon1", "mon2"}
-	tenantId := "1234"
 
-	rFilter := druid.BuildMonitoredObjectFilter(tenantId, testMOs)
+	rFilter := druid.BuildMonitoredObjectFilter(testMOs)
 
-	if len(rFilter.Fields) != 2 {
-		t.Errorf("Expecting only the tenant filter and monitored object filter to be return but got %d", len(rFilter.Fields))
+	if rFilter == nil || len(rFilter.Fields) != 0 {
+		t.Errorf("Expecting only the monitored object filter to be returned but got %d", len(rFilter.Fields))
 	}
 }
 
@@ -115,12 +114,14 @@ var bothEvent = &tenmod.ThrPrfEventAttrMap{
 	},
 }
 
+var aggTotalCount = godruid.AggCount("total")
+
 var testThresholdCrossing1 = &godruid.QueryTimeseries{
 	DataSource:  "druidTableName",
 	Granularity: godruid.GranPeriod("PT1H", druid.TimeZoneUTC, ""),
 	Context:     map[string]interface{}{"timeout": 60000},
 	Aggregations: []godruid.Aggregation{
-		godruid.AggCount("total"),
+		*aggTotalCount,
 		godruid.AggFiltered(
 			godruid.FilterAnd(
 				godruid.FilterUpperBound(metric1, "numeric", 30000, false),

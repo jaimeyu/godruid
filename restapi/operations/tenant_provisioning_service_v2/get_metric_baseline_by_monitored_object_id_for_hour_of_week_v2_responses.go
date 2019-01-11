@@ -25,7 +25,7 @@ type GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.MetricBaselineHourOfWeekResponse `json:"body,omitempty"`
+	Payload *swagmodels.MetricBaselineResponse `json:"body,omitempty"`
 }
 
 // NewGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK creates GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK with default headers values
@@ -35,13 +35,13 @@ func NewGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK() *GetMetricBaseli
 }
 
 // WithPayload adds the payload to the get metric baseline by monitored object Id for hour of week v2 o k response
-func (o *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK) WithPayload(payload *swagmodels.MetricBaselineHourOfWeekResponse) *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK {
+func (o *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK) WithPayload(payload *swagmodels.MetricBaselineResponse) *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get metric baseline by monitored object Id for hour of week v2 o k response
-func (o *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK) SetPayload(payload *swagmodels.MetricBaselineHourOfWeekResponse) {
+func (o *GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK) SetPayload(payload *swagmodels.MetricBaselineResponse) {
 	o.Payload = payload
 }
 

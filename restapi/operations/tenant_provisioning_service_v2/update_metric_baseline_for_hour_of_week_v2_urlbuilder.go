@@ -10,10 +10,13 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
+
+	"github.com/go-openapi/swag"
 )
 
 // UpdateMetricBaselineForHourOfWeekV2URL generates an URL for the update metric baseline for hour of week v2 operation
 type UpdateMetricBaselineForHourOfWeekV2URL struct {
+	HourOfWeek        int32
 	MonitoredObjectID string
 
 	_basePath string
@@ -40,7 +43,14 @@ func (o *UpdateMetricBaselineForHourOfWeekV2URL) SetBasePath(bp string) {
 func (o *UpdateMetricBaselineForHourOfWeekV2URL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/v2/metric-baselines/by-monitored-object/{monitoredObjectId}"
+	var _path = "/v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}"
+
+	hourOfWeek := swag.FormatInt32(o.HourOfWeek)
+	if hourOfWeek != "" {
+		_path = strings.Replace(_path, "{hourOfWeek}", hourOfWeek, -1)
+	} else {
+		return nil, errors.New("HourOfWeek is required on UpdateMetricBaselineForHourOfWeekV2URL")
+	}
 
 	monitoredObjectID := o.MonitoredObjectID
 	if monitoredObjectID != "" {

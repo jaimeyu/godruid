@@ -16,6 +16,7 @@ type DBImpl int
 const (
 	MEM DBImpl = iota
 	COUCH
+	POSTGRES
 )
 
 // Config represents the global adh-gather configuration parameters, as loaded from the config file
@@ -58,6 +59,13 @@ type Config struct {
 		metricbaselines struct {
 			numWorkers int
 			maxNumJobs int
+			impl       DBImpl
+			ip         string
+			port       int
+			user       string
+			password   string
+			dbname     string
+			schemadir  string
 		}
 		maxConcurrentPouchAPICalls  uint64
 		maxConcurrentProvAPICalls   uint64
@@ -149,4 +157,11 @@ func LoadDefaults(v *viper.Viper) {
 	v.SetDefault(CK_args_coltmef_checkpoint3.String(), (15 * time.Minute).Seconds())
 	v.SetDefault(CK_args_metricbaselines_maxnumjobs.String(), 100)
 	v.SetDefault(CK_args_metricbaselines_numworkers.String(), 10)
+	v.SetDefault(CK_args_metricbaselines_impl.String(), 2)
+	v.SetDefault(CK_args_metricbaselines_ip.String(), "127.0.0.1")
+	v.SetDefault(CK_args_metricbaselines_port.String(), 5432)
+	v.SetDefault(CK_args_metricbaselines_user.String(), "datahub")
+	v.SetDefault(CK_args_metricbaselines_password.String(), "secret")
+	v.SetDefault(CK_args_metricbaselines_dbname.String(), "datahub_prov")
+	v.SetDefault(CK_args_metricbaselines_schemadir.String(), "/files/postgres/schema")
 }

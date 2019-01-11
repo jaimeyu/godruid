@@ -9,14 +9,12 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-
-	swagmodels "github.com/accedian/adh-gather/swagmodels"
 )
 
 // BulkUpdateMetricBaselinesV2OKCode is the HTTP code returned for type BulkUpdateMetricBaselinesV2OK
 const BulkUpdateMetricBaselinesV2OKCode int = 200
 
-/*BulkUpdateMetricBaselinesV2OK bulk update metric baselines v2 o k
+/*BulkUpdateMetricBaselinesV2OK Response body indicating the bulk update request has been received successfully and will be completed
 
 swagger:response bulkUpdateMetricBaselinesV2OK
 */
@@ -25,7 +23,7 @@ type BulkUpdateMetricBaselinesV2OK struct {
 	/*
 	  In: Body
 	*/
-	Payload *swagmodels.MetricBaselineBulkUpdateResponse `json:"body,omitempty"`
+	Payload string `json:"body,omitempty"`
 }
 
 // NewBulkUpdateMetricBaselinesV2OK creates BulkUpdateMetricBaselinesV2OK with default headers values
@@ -35,13 +33,13 @@ func NewBulkUpdateMetricBaselinesV2OK() *BulkUpdateMetricBaselinesV2OK {
 }
 
 // WithPayload adds the payload to the bulk update metric baselines v2 o k response
-func (o *BulkUpdateMetricBaselinesV2OK) WithPayload(payload *swagmodels.MetricBaselineBulkUpdateResponse) *BulkUpdateMetricBaselinesV2OK {
+func (o *BulkUpdateMetricBaselinesV2OK) WithPayload(payload string) *BulkUpdateMetricBaselinesV2OK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the bulk update metric baselines v2 o k response
-func (o *BulkUpdateMetricBaselinesV2OK) SetPayload(payload *swagmodels.MetricBaselineBulkUpdateResponse) {
+func (o *BulkUpdateMetricBaselinesV2OK) SetPayload(payload string) {
 	o.Payload = payload
 }
 
@@ -49,12 +47,11 @@ func (o *BulkUpdateMetricBaselinesV2OK) SetPayload(payload *swagmodels.MetricBas
 func (o *BulkUpdateMetricBaselinesV2OK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
 	}
+
 }
 
 // BulkUpdateMetricBaselinesV2BadRequestCode is the HTTP code returned for type BulkUpdateMetricBaselinesV2BadRequest

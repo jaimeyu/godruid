@@ -1,0 +1,9 @@
+{"timestamp":1542134832000,"tenantId":"testthresholdcrossing","monitoredObjectId":"1473880047000-2036","direction":0,"objectType":"twamp-sf","delayMax":120,"avg_delayMax":100.0}
+{"timestamp":1542134832000,"tenantId":"testthresholdcrossing","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":250,"avg_delayMax":100.0}
+{"timestamp":1542134832001,"tenantId":"testthresholdcrossing","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":150,"avg_delayMax":100.0}
+{"timestamp":1542134832002,"tenantId":"testthresholdcrossing","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":50,"avg_delayMax":100.0}
+{"timestamp":1542134832003,"tenantId":"testthresholdcrossing","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":25,"avg_delayMax":100.0}
+{"timestamp":1542134832000,"tenantId":"testthresholdcrossingfilters","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":50}
+{"timestamp":1542134832001,"tenantId":"testthresholdcrossingfilters","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sf","delayMax":100}
+{"timestamp":1542134832000,"tenantId":"testthresholdcrossingfilters","monitoredObjectId":"1473880047000-2040","direction":1,"objectType":"twamp-sf","delayMax":100}
+{"timestamp":1542134832000,"tenantId":"testthresholdcrossingfilters","monitoredObjectId":"1473880047000-2040","direction":0,"objectType":"twamp-sl","delayMax":100}

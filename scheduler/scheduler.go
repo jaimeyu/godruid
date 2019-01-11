@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/accedian/adh-gather/gather"
 	metrics "github.com/accedian/adh-gather/models/metrics"
 	"github.com/getlantern/deepcopy"
 	"github.com/robfig/cron"
@@ -155,7 +156,9 @@ func pendWork(request metrics.SLAReportRequest) error {
 			result <- nil
 			return
 		}
-		logger.Log.Debugf("REPORT: %+v", report)
+		if logger.IsDebugEnabled() {
+			logger.Log.Debugf("REPORT: %+v", report)
+		}
 
 		result <- report
 	}
@@ -165,8 +168,8 @@ func pendWork(request metrics.SLAReportRequest) error {
 	}
 
 	schedulecfg.druidRequestsQ <- work
-	if request.Timeout < 5000 {
-		request.Timeout = 5000
+	if request.Timeout <= 5000 {
+		request.Timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 	t := time.Duration(request.Timeout)
 
@@ -179,10 +182,15 @@ func pendWork(request metrics.SLAReportRequest) error {
 			logger.Log.Errorf(msg)
 			break
 		} else {
-			logger.Log.Debugf("Report received! ", models.AsJSONString(r))
+			if logger.IsDebugEnabled() {
+				logger.Log.Debugf("Report received for configuration ID%s: %s ", request.SLAScheduleConfig, models.AsJSONString(r))
+			} else {
+				logger.Log.Infof("Report received for configuration ID %s ", request.SLAScheduleConfig)
+			}
+
 			_, err := schedulecfg.db.CreateSLAReport(r)
 			if err != nil {
-				logger.Log.Errorf("Not store SLA Report: %s", err)
+				logger.Log.Errorf("Unable to store SLA Report: %s", err)
 			}
 
 			break
@@ -209,7 +217,7 @@ func createWork(origSchedConfig *metrics.ReportScheduleConfig) (func(), error) {
 	logger.Log.Debugf("Creating work for %s", s.Name)
 
 	functor := func() {
-		logger.Log.Debugf("Job %s's Work is exec'ing", s.Name)
+		logger.Log.Infof("Executing scheduler job with ID %s", s.ID)
 		request, err := convertScheduleConfigToRequest(s)
 		if err != nil {
 			msg := fmt.Sprintf("Unable to convert Scheduled SLA Report Configuration: %s. Error: %s", models.AsJSONString(s), err.Error())

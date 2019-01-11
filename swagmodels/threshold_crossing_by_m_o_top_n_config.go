@@ -23,11 +23,14 @@ type ThresholdCrossingByMOTopNConfig struct {
 	// Enum: [min max avg]
 	Aggregator string `json:"aggregator,omitempty"`
 
+	// A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+	IgnoreCleaning bool `json:"ignoreCleaning,omitempty"`
+
 	// Time boundary for the metrics under consideration using the ISO-8601 standard
 	// Required: true
 	Interval *string `json:"interval"`
 
-	// An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
+	// meta
 	Meta MetaFilter `json:"meta,omitempty"`
 
 	// The metric to be used for the top N query

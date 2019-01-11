@@ -243,6 +243,7 @@ const (
 	DeleteTenantMetricBaselineStr                        = MetricBaselineStr + metricNameDelimiter + OPDeleteStr
 	GetMetricBaselineByMonitoredObjectIdStr              = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
 	UpdateMetricBaselineForHourOfWeekV2Str               = MetricBaselineStr + metricNameDelimiter + "hourwk" + metricNameDelimiter + OPUpdateStr
+	DeleteMetricBaselineByMonitoredObjectIdStr           = MetricBaselineStr + metricNameDelimiter + "monobj" + metricNameDelimiter + OPGetStr
 
 	GetDownloadRoadrunnerStr          = DownloadRoadrunnerStr + metricNameDelimiter + OPGetStr
 	BulkUpdateTenantMetricBaselineStr = MetricBaselineStr + metricNameDelimiter + OPBulkUpdate
@@ -270,6 +271,13 @@ type DruidSummaryType string
 const (
 	DruidQueryDurationType     DruidSummaryType = "DruidQueryDuration"
 	DruidAPIMethodDurationType DruidSummaryType = "DruidAPIMethodDuration"
+)
+
+type PostgresSummaryType string
+
+const (
+	PostgresQueryDurationType     PostgresSummaryType = "PostgresQueryDuration"
+	PostgresAPIMethodDurationType PostgresSummaryType = "PostgresAPIMethodDuration"
 )
 
 var (
@@ -318,6 +326,12 @@ var (
 	// DruidAPIMethodDuration - Time it takes to complete a Druid API method (includes query time, encoding time, etc.)
 	DruidAPIMethodDuration prometheus.SummaryVec
 
+	// PostgresQueryDuration - Time it takes to complete a query to postgres.
+	PostgresQueryDuration prometheus.SummaryVec
+
+	// PostgresAPIMethodDuration - Time it takes to complete a Postgres API method (includes query time, encoding time, etc.)
+	PostgresAPIMethodDuration prometheus.SummaryVec
+
 	// MonitoredObjectCounter - the number of monitored objects during a pollChange call
 	MonitoredObjectCounter prometheus.Counter
 
@@ -342,6 +356,18 @@ func InitMetrics() {
 	DruidAPIMethodDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Name:       "gather_druid_method_call_duration",
 		Help:       "Time taken to execute a Driud calling method. Includes query time, encoding time, etc.",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	}, []string{"code", "name"})
+
+	PostgresQueryDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name:       "gather_postgres_query_call_duration",
+		Help:       "Time taken to execute a query to Postgres",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	}, []string{"code", "name"})
+
+	PostgresAPIMethodDuration = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Name:       "gather_postgres_method_call_duration",
+		Help:       "Time taken to execute a Postgres calling method. Includes query time, encoding time, etc.",
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	}, []string{"code", "name"})
 
@@ -418,6 +444,9 @@ func InitMetrics() {
 	prometheus.MustRegister(DruidQueryDuration)
 	prometheus.MustRegister(MonitoredObjectCounter)
 	prometheus.MustRegister(MetadataKeysCounter)
+	prometheus.MustRegister(PostgresAPIMethodDuration)
+	prometheus.MustRegister(PostgresQueryDuration)
+
 }
 
 // TrackAPITimeMetricInSeconds - helper function to track metrics related to API call duration.
@@ -432,7 +461,7 @@ func TrackAPITimeMetricInSeconds(startTime time.Time, labels ...string) {
 func TrackDruidTimeMetricInSeconds(summaryType DruidSummaryType, startTime time.Time, labels ...string) {
 	duration := time.Since(startTime).Seconds()
 
-	logger.Log.Infof("%v: %f", labels, duration)
+	logger.Log.Debugf("%v: %f", labels, duration)
 	switch summaryType {
 	case DruidQueryDurationType:
 		DruidQueryDuration.WithLabelValues(labels...).Observe(duration)
@@ -440,6 +469,22 @@ func TrackDruidTimeMetricInSeconds(summaryType DruidSummaryType, startTime time.
 		DruidAPIMethodDuration.WithLabelValues(labels...).Observe(duration)
 	default:
 		logger.Log.Debugf("Unable to update Druid Time Metric %v", summaryType)
+	}
+
+}
+
+// TrackPostgresTimeMetricInSeconds - helper function to track metrics related to Postgres call duration.
+func TrackPostgresTimeMetricInSeconds(summaryType PostgresSummaryType, startTime time.Time, labels ...string) {
+	duration := time.Since(startTime).Seconds()
+
+	logger.Log.Debugf("%v: %f", labels, duration)
+	switch summaryType {
+	case PostgresQueryDurationType:
+		PostgresQueryDuration.WithLabelValues(labels...).Observe(duration)
+	case PostgresAPIMethodDurationType:
+		PostgresAPIMethodDuration.WithLabelValues(labels...).Observe(duration)
+	default:
+		logger.Log.Debugf("Unable to update Postgres Time Metric %v", summaryType)
 	}
 
 }

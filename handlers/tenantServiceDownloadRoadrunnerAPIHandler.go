@@ -164,9 +164,6 @@ func doGetDownloadRoadrunner(allowedRoles []string, tenantDB datastore.TenantSer
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	// We need to know the tenant's hostname in order to point to the correct login portal for road runner
 	tenantHost := params.HTTPRequest.Header.Get("X-Forwarded-Server")
-	logger.Log.Errorf("header: tenantHost:%s", tenantHost)
-
-	logger.Log.Errorf("header: %+v", params.HTTPRequest.Header)
 
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s %s for %s %s", tenmod.TenantDownloadRoadrunnerStr, params.Zone, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 

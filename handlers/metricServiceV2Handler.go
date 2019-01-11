@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +18,7 @@ import (
 	mon "github.com/accedian/adh-gather/monitoring"
 	"github.com/accedian/adh-gather/restapi/operations/metrics_service_v2"
 	"github.com/accedian/adh-gather/swagmodels"
+	"github.com/accedian/adh-gather/transform"
 	"github.com/getlantern/deepcopy"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/manyminds/api2go/jsonapi"
@@ -26,7 +26,7 @@ import (
 )
 
 // HandleGetThresholdCrossingByMonitoredObjectTopNV2 - Retrieves threshold profile based Top N for distinct monitored objects
-func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
+func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles, metricsDB, tenantDB, params)
@@ -52,7 +52,7 @@ func HandleGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, me
 }
 
 // HandleGenerateSLAReportV2 - Retrieves SLA report for the specified tenant with the provided parameters
-func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
+func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GenerateSLAReportV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGenerateSLAReportFromParamsV2(allowedRoles, metricsDB, tenantDB, params)
@@ -78,7 +78,7 @@ func HandleGenerateSLAReportV2(allowedRoles []string, metricsDB datastore.Metric
 }
 
 // HandleGetRawMetricsV2 - Retrieves raw metrics for the specified tenant with the provided parameters
-func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
+func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetFilteredRawMetricsV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetRawMetricsV2(allowedRoles, metricsDB, tenantDB, params)
@@ -100,8 +100,9 @@ func HandleGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDat
 }
 
 // HandleGetAggregateMetricsV2 - Retrieves metrics in aggregation for the specified tenant with the provided parameters
-func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
+func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
 	return func(params metrics_service_v2.QueryAggregateMetricsV2Params) middleware.Responder {
+
 		// Do the work
 		startTime, responseCode, response, err := doGetAggregateMetricsV2(allowedRoles, metricsDB, tenantDB, params)
 
@@ -126,7 +127,7 @@ func HandleGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.Metr
 }
 
 // HandleGetHistogramV2 - Retrieves a histogram for the specified tenant with the provided parameters
-func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
+func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetHistogramV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetHistogramV2(allowedRoles, metricsDB, tenantDB, params)
@@ -152,7 +153,7 @@ func HandleGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsData
 }
 
 // HandleGetTopNForMetricV2 - Retrieves the top n for the specified tenant with the provided parameters
-func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
+func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
 	return func(params metrics_service_v2.GetTopNForMetricV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetTopNForMetricV2(allowedRoles, metricsDB, tenantDB, params)
@@ -178,7 +179,7 @@ func HandleGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.Metrics
 }
 
 // HandleGetThresholdCrossingV2 - Retrieves the threshold crossings for the specified tenant with the provided parameters
-func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore) func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
+func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore) func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
 	return func(params metrics_service_v2.QueryThresholdCrossingV2Params) middleware.Responder {
 		// Do the work
 		startTime, responseCode, response, err := doGetThresholdCrossingV2(allowedRoles, metricsDB, tenantDB, params)
@@ -203,7 +204,7 @@ func HandleGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Met
 	}
 }
 
-func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetHistogramV2Params) (time.Time, int, *swagmodels.JSONAPIHistogramResponse, error) {
+func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetHistogramV2Params) (time.Time, int, *swagmodels.JSONAPIHistogramResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.HistogramStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -278,7 +279,7 @@ func doGetHistogramV2(allowedRoles []string, metricsDB datastore.MetricsDatastor
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetTopNForMetricV2Params) (time.Time, int, *swagmodels.JSONAPITopNForMetricResponse, error) {
+func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetTopNForMetricV2Params) (time.Time, int, *swagmodels.JSONAPITopNForMetricResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.TopNForMetricStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -363,7 +364,7 @@ func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsData
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.QueryThresholdCrossingV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingResponse, error) {
+func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.QueryThresholdCrossingV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.ThresholdCrossingStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -404,7 +405,8 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	}
 
 	// Issue request to DAO Layer
-	queryReport, err := metricsDB.QueryThresholdCrossing(&daoRequest, thresholdProfile, metaMOs)
+	queryReport, queryKeySpec, err := metricsDB.QueryThresholdCrossing(&daoRequest, thresholdProfile, metaMOs)
+
 	if err != nil {
 		if strings.Contains(err.Error(), datastore.NotFoundStr) {
 			return startTime, http.StatusNotFound, nil, err
@@ -413,9 +415,7 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", datastore.ThresholdCrossingStr, err.Error())
 	}
 
-	// TODO REMOVE THE RE-RENDER ONCE THE QUERY PROPERLY RETURNS THE VIOLATIONS AGAINS THE V2 VERSION OF METRIC IDENTIFIER
-	rendered := rerenderThresholdCrossingV2(daoRequest.Metrics, renderThresholdCrossingV2(params.Body.Data.Attributes, queryReport))
-
+	rendered := renderThresholdCrossingV2(params.Body.Data.Attributes, queryKeySpec, queryReport)
 	rr, err := json.Marshal(rendered)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", datastore.ThresholdCrossingStr, err.Error())
@@ -437,221 +437,86 @@ func doGetThresholdCrossingV2(allowedRoles []string, metricsDB datastore.Metrics
 	return startTime, http.StatusOK, &converted, nil
 }
 
-// This is a temporary method that is only used to re-group the violations under the v2 version of the metric identifier.
-// We are essentially doing a post aggregation that we should be doing in druid. Once the underlying druid query is modified to
-// properly build the query by the v2 version of the metric identifier this should go away
-func rerenderThresholdCrossingV2(metricFilters []metmod.MetricIdentifierFilter, report map[string]interface{}) map[string]interface{} {
-	results := report["data"].(map[string]interface{})["attributes"].(map[string]interface{})["result"].(map[string]interface{})
+func renderThresholdCrossingV2(config interface{}, queryKeySpec *datastore.QueryKeySpec, reportEntries []metmod.TimeseriesEntryResponse) map[string]interface{} {
 
-	if len(results) == 0 {
-		return report
-	}
+	type severity string
 
-	retrievedMetrics := results["metric"].([]*metmod.MetricViolationsTimeSeries)
+	metricIdentifierMap := make(map[string]map[severity][]map[string]interface{})
 
-	metricMapCache := make(map[string]*metmod.MetricViolationsTimeSeries)
+	if reportEntries != nil {
+		for _, rEntry := range reportEntries {
 
-	for _, m := range retrievedMetrics {
-		metricIdentifierName := fmt.Sprintf("%s.%s.%s.%s", m.Vendor, m.ObjectType, m.Direction, m.Metric)
-		metricMapCache[metricIdentifierName] = m
-	}
+			rTimestamp := rEntry.Timestamp
+			for compositeKey, v := range rEntry.Result {
+				hasData := false
+				compositeKeyParts := datastore.DeconstructAggregationName(compositeKey)
+				accessorKey := compositeKeyParts[0]
+				severityKey := compositeKeyParts[1]
 
-	txfEntries := make([]map[string]interface{}, 0)
-
-	for _, m := range metricFilters {
-		eventMap := make(map[string][]metmod.MetricViolationSummaryType)
-
-		for _, o := range m.ObjectType {
-			for _, d := range m.Direction {
-				metricIdentifierName := fmt.Sprintf("%s.%s.%s.%s", m.Vendor, o, d, m.Metric)
-
-				if cachedMetricData, ok := metricMapCache[metricIdentifierName]; ok {
-					if len(cachedMetricData.Critical) != 0 {
-						event, ok := eventMap["critical"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Critical)
-						eventMap["critical"] = event
-					}
-					if len(cachedMetricData.Major) != 0 {
-						event, ok := eventMap["major"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Major)
-						eventMap["major"] = event
-					}
-					if len(cachedMetricData.Minor) != 0 {
-						event, ok := eventMap["minor"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Minor)
-						eventMap["minor"] = event
-					}
-					if len(cachedMetricData.Warning) != 0 {
-						event, ok := eventMap["warning"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.Warning)
-						eventMap["warning"] = event
-					}
-					if len(cachedMetricData.SLA) != 0 {
-						event, ok := eventMap["sla"]
-						if !ok {
-							event = make([]metmod.MetricViolationSummaryType, 0)
-						}
-						event = mergeCategory(event, cachedMetricData.SLA)
-						eventMap["sla"] = event
-					}
+				// Initialize an empty map if one does not exist for the current metric identifier
+				if _, ok := metricIdentifierMap[accessorKey]; !ok {
+					metricIdentifierMap[accessorKey] = make(map[severity][]map[string]interface{}, 0)
 				}
 
-			}
-		}
-
-		finishedMetricFilter := make(map[string]interface{})
-		finishedMetricFilter["vendor"] = m.Vendor
-		finishedMetricFilter["objectType"] = m.ObjectType
-		finishedMetricFilter["direction"] = m.Direction
-		finishedMetricFilter["metric"] = m.Metric
-
-		for k, v := range eventMap {
-			finishedMetricFilter[k] = v
-		}
-
-		txfEntries = append(txfEntries, finishedMetricFilter)
-	}
-
-	delete(results, "metric")
-	results["metric"] = txfEntries
-	fmt.Printf("%v", report)
-
-	return report
-}
-
-func mergeCategory(mergee []metmod.MetricViolationSummaryType, merger []*metmod.MetricViolationSummaryType) []metmod.MetricViolationSummaryType {
-
-	addedEntry := false
-
-	for _, from := range merger {
-		found := false
-		for _, to := range mergee {
-			if to["timestamp"] == (*from)["timestamp"] {
-				mergeTimeseriesEntry(to, (*from))
-				found = true
-			}
-		}
-		if !found {
-			mergee = append(mergee, (*from))
-			addedEntry = true // Optimization so we only sort everything if we know that we added a new entry to the tail of the event order
-		}
-	}
-
-	if addedEntry {
-		sortEntries(mergee)
-	}
-
-	return mergee
-}
-
-func sortEntries(mergee []metmod.MetricViolationSummaryType) {
-	sort.Slice(mergee, func(i, j int) bool {
-		t1, err := time.Parse(time.RFC3339, mergee[i]["timestamp"].(string))
-		if err != nil {
-			return false
-		}
-		t2, err := time.Parse(time.RFC3339, mergee[j]["timestamp"].(string))
-		if err != nil {
-			return false
-		}
-		return t1.Before(t2)
-	})
-}
-
-func mergeTimeseriesEntry(mergee map[string]interface{}, merger map[string]interface{}) {
-
-	if mergee["timestamp"] != merger["timestamp"] {
-		return
-	}
-
-	for k, v := range merger {
-		if k == "timestamp" {
-			continue
-		}
-
-		if val, ok := mergee[k]; ok {
-			mergee[k] = val.(float64) + v.(float64)
-		}
-	}
-}
-
-func renderThresholdCrossingV2(config interface{}, report map[string]interface{}) map[string]interface{} {
-
-	topLevelResult := report["results"]
-
-	metrics := topLevelResult.([]metmod.ThresholdCrossingTimeSeriesEntry)
-
-	listThresholdCrossings := make(map[string]*metmod.MetricViolationsTimeSeries)
-
-	for _, tsEntry := range metrics {
-		ts := tsEntry.Timestamp
-		results := tsEntry.Result
-
-		for _, metric := range results.ByMetric {
-
-			logger.Log.Debugf("metric: %s", models.AsJSONString(metric))
-			hash := buildHash("metric", metric.Metric, metric.ObjectType, metric.Vendor, metric.Direction)
-			c := listThresholdCrossings[hash]
-			if c == nil {
-				c = &metmod.MetricViolationsTimeSeries{
-					Direction:  metric.Direction,
-					Metric:     metric.Metric,
-					Vendor:     metric.Vendor,
-					ObjectType: metric.ObjectType,
+				var value float64
+				switch v.(type) {
+				case float32:
+					hasData = true
+					value = float64(v.(float32))
+				case float64:
+					hasData = true
+					value = v.(float64)
+				case int:
+					hasData = true
+					value = float64(v.(int))
+				case string:
+					hasData = false
+				default:
+					hasData = true
 				}
+				if hasData {
+					metricIdentifierSeverityMap := metricIdentifierMap[accessorKey]
 
-			}
+					severityTimeseries := metricIdentifierSeverityMap[severity(severityKey)]
+					if severityTimeseries == nil {
+						severityTimeseries = make([]map[string]interface{}, 0)
+					}
 
-			// Need a null check for BySeverity[xxxxx]
-			if metric.BySeverity["sla"] != nil {
-				c.SLA = addValToList(c.SLA, metric.BySeverity["sla"], ts)
+					severityTimeseries = append(severityTimeseries, map[string]interface{}{"timestamp": rTimestamp, "violationCount": value})
+					metricIdentifierSeverityMap[severity(severityKey)] = severityTimeseries
+				}
 			}
-
-			if metric.BySeverity["major"] != nil {
-				c.Major = addValToList(c.Major, metric.BySeverity["major"], ts)
-			}
-			if metric.BySeverity["minor"] != nil {
-				c.Minor = addValToList(c.Minor, metric.BySeverity["minor"], ts)
-			}
-			if metric.BySeverity["warning"] != nil {
-				c.Warning = addValToList(c.Warning, metric.BySeverity["warning"], ts)
-			}
-			if metric.BySeverity["critical"] != nil {
-				c.Critical = addValToList(c.Critical, metric.BySeverity["critical"], ts)
-			}
-
-			listThresholdCrossings[hash] = c
 		}
 	}
 
-	reportResponse := make(map[string]interface{})
+	reportResponse := make([]map[string]interface{}, len(metricIdentifierMap))
 
-	reportMetrics := make([]*metmod.MetricViolationsTimeSeries, 0)
-	for _, metric := range listThresholdCrossings {
-		reportMetrics = append(reportMetrics, metric)
+	i := 0
+	for accessor, severityMap := range metricIdentifierMap {
+
+		keyMap := queryKeySpec.KeySpecMap[accessor]
+
+		metricMap := make(map[string]interface{})
+		for qk, qv := range keyMap {
+			metricMap[qk] = qv
+		}
+
+		for severityKey, sevReport := range severityMap {
+			metricMap[string(severityKey)] = sevReport
+		}
+
+		reportResponse[i] = metricMap
+		i++
 	}
-	reportResponse["metric"] = reportMetrics
 
 	rawResponse := make(map[string]interface{})
 	rawResponse["config"] = config
-	rawResponse["result"] = reportResponse
+	rawResponse["result"] = map[string]interface{}{"metric": reportResponse}
 
 	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "thresholdCrossings")
 }
 
-func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.QueryAggregateMetricsV2Params) (time.Time, int, *swagmodels.JSONAPIAggregationResponse, error) {
+func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.QueryAggregateMetricsV2Params) (time.Time, int, *swagmodels.JSONAPIAggregationResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.AggMetricsStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -731,7 +596,7 @@ func doGetAggregateMetricsV2(allowedRoles []string, metricsDB datastore.MetricsD
 }
 
 // DEPRECATE - THIS IS ONLY KEPT IN ORDER TO NOT DISRUPT COLTS USE OF THE API. REMOVE AS SOON AS WE CAN GET THEM ONTO V2 AGGREGATE
-func doGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetFilteredRawMetricsV2Params) (time.Time, int, map[string]interface{}, error) {
+func doGetRawMetricsV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetFilteredRawMetricsV2Params) (time.Time, int, map[string]interface{}, error) {
 	startTime := time.Now()
 
 	// Unmarshal the request
@@ -868,7 +733,7 @@ func getSLATopNByBuckets(druidDB datastore.MetricsDatastore, request *metmod.SLA
 }
 
 // DoGenerateSLAReportV2 - Expose this API so the scheduler can use it.
-func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, daoRequest metmod.SLAReportRequest) (time.Time, int, map[string]interface{}, error) {
+func DoGenerateSLAReportV2(druidDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, daoRequest metmod.SLAReportRequest) (time.Time, int, map[string]interface{}, error) {
 	tenantID := daoRequest.TenantID
 	startTime := time.Now()
 
@@ -1024,7 +889,7 @@ func convertSLAMapToJSONAPI(input map[string]interface{}) (*swagmodels.JSONAPISL
 	return &converted, nil
 }
 
-func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GenerateSLAReportV2Params) (time.Time, int, *swagmodels.JSONAPISLAReportResponse, error) {
+func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GenerateSLAReportV2Params) (time.Time, int, *swagmodels.JSONAPISLAReportResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.SLAReportStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -1061,16 +926,7 @@ func doGenerateSLAReportFromParamsV2(allowedRoles []string, druidDB datastore.Me
 	return startTime, http.StatusOK, response, nil
 }
 
-func renderSLAReportV2(config interface{}, report interface{}) map[string]interface{} {
-
-	rawResponse := make(map[string]interface{})
-	rawResponse["config"] = config
-	rawResponse["result"] = report
-
-	return wrapJsonAPIObject(rawResponse, uuid.NewV4().String(), "slaReports")
-}
-
-func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantServiceDatastore, params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingByMOTopNResponse, error) {
+func doGetThresholdCrossingByMonitoredObjectTopNV2(allowedRoles []string, metricsDB datastore.MetricsDatastore, tenantDB datastore.TenantMetricsDatastore, params metrics_service_v2.GetThresholdCrossingByMonitoredObjectTopNV2Params) (time.Time, int, *swagmodels.JSONAPIThresholdCrossingByMOTopNResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Retrieving %s for %s %s", datastore.TopNThresholdCrossingByMonitoredObjectStr, admmod.TenantStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.MetricAPIRecieved)
 
@@ -1233,7 +1089,7 @@ func renderHistogramTimeseriesMetrics(reportType string, reportID string, config
 			rTimestamp := rEntry.Timestamp
 			for k, v := range rEntry.Result {
 				// Expecting a key structure with the query spec ID with the order suffixed to it
-				parts := strings.Split(k, datastore.QueryDelimeter)
+				parts := datastore.DeconstructAggregationName(k)
 
 				// The index should not be part of the key as the index is only used to preserve the order of the histogram response
 				accessorKey := parts[0]
@@ -1315,11 +1171,11 @@ func renderTopNMetrics(config interface{}, metricIdentifier metmod.MetricIdentif
 			reportEntryIndex = (len(report) - 1) - i
 		}
 		renderedReport[reportEntryIndex] = map[string]interface{}{"monitoredObjectIds": []string{r.MonitoredObjectId},
-			"vendor":     metricIdentifier.Vendor,
-			"objectType": metricIdentifier.ObjectType,
-			"metric":     metricIdentifier.Metric,
-			"direction":  metricIdentifier.Direction,
-			"result":     r.Result}
+			transform.Vendor:              metricIdentifier.Vendor,
+			transform.MonitoredObjectType: metricIdentifier.ObjectType,
+			transform.Metric:              metricIdentifier.Metric,
+			transform.Direction:           metricIdentifier.Direction,
+			"result":                      r.Result}
 	}
 
 	return renderV2Report(config, renderedReport, ID, reportType)

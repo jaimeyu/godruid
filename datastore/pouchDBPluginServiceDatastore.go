@@ -49,4 +49,6 @@ type PouchDBPluginServiceDatastore interface {
 
 	// Have to pass headers into this call as it changes the response type of the call.
 	GetDoc(dbname string, docID string, queryParams *url.Values, headers *http.Header) (map[string]interface{}, error)
+
+	GetByDesignDocument(dbName string, indexName string) (map[string]interface{}, error)
 }

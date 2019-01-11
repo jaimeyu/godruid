@@ -116,5 +116,4 @@ func RunTenantServiceDatastoreTests(t *testing.T) {
 	tester.RunBrandingCRUD(t)
 	tester.RunLocaleCRUD(t)
 	tester.RunTenantMetadataConfigCRUD(t)
-	tester.RunTenantMetricBaselineCRUD(t)
 }

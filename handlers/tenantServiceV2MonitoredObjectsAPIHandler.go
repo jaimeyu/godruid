@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -228,6 +229,30 @@ func HandleBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastor
 	}
 }
 
+func HandleBulkInsertMonitoredObjectsMetaV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Params) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Params) middleware.Responder {
+		// Do the work
+		startTime, responseCode, response, err := doBulkInsertMonitoredObjectsMetaV2(allowedRoles, tenantDB, params)
+
+		// Success Response
+		if responseCode == http.StatusOK {
+			return tenant_provisioning_service_v2.NewBulkUpdateMonitoredObjectsV2OK().WithPayload(response)
+		}
+
+		// Error Responses
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		switch responseCode {
+		case http.StatusForbidden:
+			return tenant_provisioning_service_v2.NewBulkUpdateMonitoredObjectsV2Forbidden().WithPayload(errorMessage)
+		case http.StatusBadRequest:
+			return tenant_provisioning_service_v2.NewBulkUpdateMonitoredObjectsV2BadRequest().WithPayload(errorMessage)
+		default:
+			return tenant_provisioning_service_v2.NewBulkUpdateMonitoredObjectsV2InternalServerError().WithPayload(errorMessage)
+
+		}
+	}
+}
+
 func doCreateMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.CreateMonitoredObjectV2Params) (time.Time, int, *swagmodels.MonitoredObjectResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Creating %s for tenant %s", tenmod.TenantMonitoredObjectStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
@@ -405,6 +430,16 @@ func doDeleteMonitoredObjectV2(allowedRoles []string, tenantDB datastore.TenantS
 
 	if changeNotificationEnabled {
 		NotifyMonitoredObjectDeleted(tenantID, result)
+	}
+
+	// Make a best effort to delete any Metric Baselines associated with this monitored object:
+	metricBaselineDatastore, ok := tenantDB.(datastore.TenantMetricBaselineDatastore)
+	if !ok {
+		logger.Log.Warningf("Unable to delete %ss for %s %s. Unable to issue call to delete the %ss", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonObjID, tenmod.TenantMetricBaselineStr)
+	} else {
+		if err = metricBaselineDatastore.DeleteMetricBaselineForMonitoredObject(tenantID, params.MonObjID, false); err != nil {
+			logger.Log.Warningf("Unable to delete %ss for %s %s: ", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonObjID, err.Error())
+		}
 	}
 
 	converted := swagmodels.MonitoredObjectResponse{}
@@ -622,7 +657,7 @@ func doBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 	}
 
 	if len(data) == 0 {
-		return startTime, http.StatusBadRequest, nil, fmt.Errorf("No Monitored Objects in provided in the request")
+		return startTime, http.StatusBadRequest, nil, fmt.Errorf("No Monitored Objects provided in the request")
 	}
 
 	// Issue request to DAO Layer
@@ -649,6 +684,123 @@ func doBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
+	return startTime, http.StatusOK, &converted, nil
+}
+
+func doBulkInsertMonitoredObjectsMetaV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Params) (time.Time, int, *swagmodels.BulkOperationResponseV2, error) {
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Attempting Bulk Insert of %s metadata for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
+
+	if !isAuthorized {
+		err := fmt.Errorf("Bulk Insert %s metadata operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
+		return startTime, http.StatusForbidden, nil, err
+	}
+
+	incrementAPICounters(mon.APIRecieved, mon.TenantAPIRecieved)
+	logger.Log.Infof("Inserting %s metadata in bulk for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID)
+
+	requestBytes, err := json.Marshal(params.Body)
+	if err != nil {
+		return startTime, http.StatusBadRequest, nil, err
+	}
+
+	// Unmarshal the request
+	data := tenmod.BulkMetadataEntries{}
+	err = jsonapi.Unmarshal(requestBytes, &data)
+	if err != nil {
+		return startTime, http.StatusBadRequest, nil, err
+	}
+
+	response := make([]*common.BulkOperationResult, len(data.MetadataEntries))
+
+	// Internal function responsible for managing error scenarios for individual result items
+	itemError := func(position int, itemResponse *common.BulkOperationResult, reason int, itemErr string) {
+		itemResponse.OK = false
+		itemResponse.REASON = strconv.Itoa(reason)
+		itemResponse.ERROR = itemErr
+
+		logger.Log.Errorf(generateErrorMessage(reason, itemErr))
+
+		response[position] = itemResponse
+	}
+
+	metaKeys := make(map[string]string)
+	const idSep = "_"
+
+	for i, item := range data.MetadataEntries {
+		itemResponse := common.BulkOperationResult{
+			ID: item.ObjectName,
+		}
+		// Issue request to DAO Layer
+		existingMonitoredObjects, err := tenantDB.GetMonitoredObjectsByObjectName(item.ObjectName, tenantID)
+		if err != nil {
+			itemError(i, &itemResponse, http.StatusNotFound, fmt.Sprintf("Unable to retrieve %s %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+			continue
+		}
+
+		revlist := "" // Create a comma separated list of revisions since multiple monitored objects could be associated with this key
+		var moErr error
+
+		for i, existingMO := range existingMonitoredObjects {
+			logger.Log.Infof("Patching metadata for %s with name %s and id %s", tenmod.TenantMonitoredObjectStr, existingMO.ObjectName, existingMO.ID)
+
+			existingMO.Meta = item.Metadata
+
+			splitID := datastore.GetDataIDFromFullID(existingMO.ID)
+
+			existingMO.ID = splitID
+
+			moErr = existingMO.Validate(true)
+			if moErr != nil {
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				break
+			}
+			// Issue request to DAO Layer
+			updatedMonitoredObject, moErr := tenantDB.UpdateMonitoredObject(existingMO)
+			if moErr != nil {
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				break
+			}
+
+			if i > 0 {
+				revlist += ","
+			}
+			revlist += updatedMonitoredObject.REV
+
+			// Track all distinct metadata items to be index processed after all are items are worked through
+			for k := range item.Metadata {
+				metaKeys[k] = ""
+			}
+
+			logger.Log.Debugf("Sending notification of update to monitored object %s", existingMO.ObjectName)
+			NotifyMonitoredObjectUpdated(existingMO.TenantID, existingMO)
+		}
+
+		// If there was an error against a monitored object for a set of monitored objects that share the same object ID then continue through the loop.
+		// The inner loop will have already reported the proble
+		if moErr != nil {
+			continue
+		}
+
+		itemResponse.OK = true
+		itemResponse.REV = revlist
+		response[i] = &itemResponse
+	}
+
+	// Build up the monitored object indices
+	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, err
+	}
+
+	converted, err := convertToBulkMOResponse(response)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, err
+	}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpsertMonObjMetaStr, mon.APICompleted, mon.TenantAPICompleted)
+	logger.Log.Infof("Bulk insertion of %ss meta data complete", tenmod.TenantMonitoredObjectStr)
+
 	return startTime, http.StatusOK, &converted, nil
 }
 

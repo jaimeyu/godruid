@@ -79,9 +79,9 @@ func (m *MetricBaselineBulkUpdateRequest) UnmarshalBinary(b []byte) error {
 // swagger:model MetricBaselineBulkUpdateRequestData
 type MetricBaselineBulkUpdateRequestData struct {
 
-	// A map of Monitored Object ID to an array of Metric Baseline values to be updated for the Monitored Object
+	// attributes
 	// Required: true
-	Attributes map[string][]MetricBaselineData `json:"attributes"`
+	Attributes []*MetricBaselineBulkUpdateRequestDataAttributesItems0 `json:"attributes"`
 
 	// id
 	ID string `json:"id,omitempty"`
@@ -112,21 +112,22 @@ func (m *MetricBaselineBulkUpdateRequestData) Validate(formats strfmt.Registry) 
 
 func (m *MetricBaselineBulkUpdateRequestData) validateAttributes(formats strfmt.Registry) error {
 
-	for k := range m.Attributes {
+	if err := validate.Required("data"+"."+"attributes", "body", m.Attributes); err != nil {
+		return err
+	}
 
-		if err := validate.Required("data"+"."+"attributes"+"."+k, "body", m.Attributes[k]); err != nil {
-			return err
+	for i := 0; i < len(m.Attributes); i++ {
+		if swag.IsZero(m.Attributes[i]) { // not required
+			continue
 		}
 
-		for i := 0; i < len(m.Attributes[k]); i++ {
-
-			if err := m.Attributes[k][i].Validate(formats); err != nil {
+		if m.Attributes[i] != nil {
+			if err := m.Attributes[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("data" + "." + "attributes" + "." + k + "." + strconv.Itoa(i))
+					return ve.ValidateName("data" + "." + "attributes" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
-
 		}
 
 	}
@@ -185,6 +186,100 @@ func (m *MetricBaselineBulkUpdateRequestData) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *MetricBaselineBulkUpdateRequestData) UnmarshalBinary(b []byte) error {
 	var res MetricBaselineBulkUpdateRequestData
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// MetricBaselineBulkUpdateRequestDataAttributesItems0 metric baseline bulk update request data attributes items0
+// swagger:model MetricBaselineBulkUpdateRequestDataAttributesItems0
+type MetricBaselineBulkUpdateRequestDataAttributesItems0 struct {
+
+	// Contains the dynamically calculated baseline values for the metrics collected by Datahub
+	Baselines []*MetricBaselineData `json:"baselines"`
+
+	// Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week
+	// Maximum: 167
+	// Minimum: 0
+	HourOfWeek *int32 `json:"hourOfWeek,omitempty"`
+
+	// Unique identifier of the Monitored Object for which these baselines are applicable
+	MonitoredObjectID string `json:"monitoredObjectId,omitempty"`
+}
+
+// Validate validates this metric baseline bulk update request data attributes items0
+func (m *MetricBaselineBulkUpdateRequestDataAttributesItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateBaselines(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateHourOfWeek(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *MetricBaselineBulkUpdateRequestDataAttributesItems0) validateBaselines(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Baselines) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Baselines); i++ {
+		if swag.IsZero(m.Baselines[i]) { // not required
+			continue
+		}
+
+		if m.Baselines[i] != nil {
+			if err := m.Baselines[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("baselines" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *MetricBaselineBulkUpdateRequestDataAttributesItems0) validateHourOfWeek(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.HourOfWeek) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("hourOfWeek", "body", int64(*m.HourOfWeek), 167, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *MetricBaselineBulkUpdateRequestDataAttributesItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *MetricBaselineBulkUpdateRequestDataAttributesItems0) UnmarshalBinary(b []byte) error {
+	var res MetricBaselineBulkUpdateRequestDataAttributesItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

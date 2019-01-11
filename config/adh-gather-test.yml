@@ -40,15 +40,18 @@ args:
   metricbaselines:
     numworkers: 10
     maxnumjobs: 100
+    impl: 2
+    ip: 127.0.0.1
+    port: 5432
+    user: postgres
+    password: mysecretpassword
+    dbname: testdb
+    schemadir: "datastore/postgres/test"
 
 kafka:
   broker: "localhost:9092"
 
 druid:
   broker:
-    server: "https://broker.skoa.npav.accedian.net"
-    table: "NPAVKPI2"
-    auth: "https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1%2FNRaUrQyX5tI-YkvBurNrO9P8tNvludiXQbWJt7cQlKw&grant_type=refresh_token&audience=627634877761-fuiuhml29ce7985ua5rcjm2s3adk797v.apps.googleusercontent.com"
-
-
-    #"https://www.googleapis.com/oauth2/v4/token?client_id=627634877761-jsgt56b08875ahddn72dmipfrp848ou4.apps.googleusercontent.com&client_secret=ArWEZCMyZ0SrsJzSiqGU10aE&refresh_token=1%2FDfvhAZKYRY2MM90DbK66VfIvbsx7Phh1fLnVSxqRbYc&grant_type=refresh_token&audience=627634877761-fuiuhml29ce7985ua5rcjm2s3adk797v.apps.googleusercontent.com"
+    server: "http://localhost:8082"
+    table: "npav-ts-metrics"

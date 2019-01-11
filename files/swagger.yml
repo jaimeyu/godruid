@@ -366,33 +366,6 @@ paths:
           type: string
       tags:
         - MetricsService
-  /v2/raw-metrics:
-    post:
-      summary: Returns raw metrics from druid
-      operationId: GetFilteredRawMetrics
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/FilteredRawMetricsRequestObject'
-      tags:
-        - MetricsService
   /v1/threshold-crossing:
     post:
       summary: Retrieve threshold crossings
@@ -4056,9 +4029,9 @@ paths:
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Response body indicating the bulk update request has been received successfully and will be completed'
           schema:
-            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+            type: string
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -4256,7 +4229,7 @@ paths:
         - TenantProvisioningServiceV2
   /v2/metric-baselines/by-monitored-object/{monitoredObjectId}:
     get:
-      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId.
+      summary: Retrieve all Tenant Metric Baselines for a single Monitored Object.
       operationId: GetMetricBaselineByMonitoredObjectIdV2
       produces:
         - application/vnd.api+json
@@ -4264,7 +4237,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineResponse'
+            $ref: '#/definitions/MetricBaselineListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -4284,6 +4257,42 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+    delete:
+      summary: Deletes (or resets) all Metric Baselines for a Monitored Object
+      operationId: DeleteMetricBaselineByMonitoredObjectIdV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'A confirmation message of successful deletion or resetting'
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: reset
+          in: query
+          required: true
+          default: false
+          type: boolean
+          description: "If true, will only reset all Metric Baselines for the Monitored Object. If false, will delete all Metric Baseline records for the monitored object"
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     patch:
       summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
       operationId: UpdateMetricBaselineForHourOfWeekV2
@@ -4317,6 +4326,11 @@ paths:
           schema:
             type: string
       parameters:
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
         - name: monitoredObjectId
           in: path
           required: true
@@ -4328,7 +4342,6 @@ paths:
             $ref: '#/definitions/MetricBaselineUpdateHourRequest'
       tags:
         - TenantProvisioningServiceV2
-  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     get:
       summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
       operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2
@@ -4338,7 +4351,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineHourOfWeekResponse'
+            $ref: '#/definitions/MetricBaselineResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -4886,6 +4899,38 @@ paths:
           required: true
           schema:
               $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
+      tags:
+        - TenantProvisioningServiceV2
+        
+  /v2/bulk/insert/monitored-objects/meta:
+    post:
+      summary: Update the metadata of one or more Monitored Objects in a single API request.
+      operationId: BulkInsertMonitoredObjectsMetaV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectMetaCreateRequest'
       tags:
         - TenantProvisioningServiceV2
   /v2/reports/{reportID}:
@@ -6627,9 +6672,11 @@ definitions:
             description: "The current state of the Tenant"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp at which this record was created in Datahub"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "The timestamp of the last update to this record in Datahub"
 
   IngestionDictionaryListResponse:
@@ -6890,9 +6937,11 @@ definitions:
             $ref: '#/definitions/BrandingLogo'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   BrandingLogo:
@@ -7009,9 +7058,11 @@ definitions:
             description: "Timezone used to coordinate timestamps for the specified region"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   MetricIdentifierFilter:
@@ -7242,9 +7293,11 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceCreateRequest:
@@ -7295,9 +7348,11 @@ definitions:
                 type: "string"
               createdTimestamp:
                 type: "integer"
+                format: "int64"
                 description: "Time since epoch at which this object was instantiated."
               lastModifiedTimestamp:
                 type: "integer"
+                format: "int64"
                 description: "Time since epoch at which this object was last altered."
 
   ConnectorInstanceResponse:
@@ -7342,9 +7397,11 @@ definitions:
             type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
   DashboardCreateRequest:
     type: "object"
@@ -7477,8 +7534,10 @@ definitions:
             $ref: '#/definitions/CardPositions'
           createdTimestamp:
             type: "integer"
+            format: "int64"
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   CardPositions:
@@ -7679,6 +7738,21 @@ definitions:
         type: "string"
       component:
         type: "string"
+      queryParams:
+        type: "object"
+        properties:
+          limit:
+            description : "Restricts the number ofresults to the provided limit."
+            type: "integer"
+          sortDescending:
+            type: "boolean"
+            description: "Items will be displayed sorted in descending order when true, ascending order when false"
+            default: true
+          aggregator:
+            type: "string"
+            description: "The type of aggregation to use when displaying the values"
+            enum: ["min","max","avg"]
+            default: "avg"
       availability:
         type: "object"
         properties:
@@ -8080,9 +8154,11 @@ definitions:
             $ref: '#/definitions/IngestionProfileMetricList'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   IngestionProfileMetrics:
@@ -8248,9 +8324,11 @@ definitions:
               type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
   MetricBaselineCreateRequest:
     type: "object"
@@ -8272,6 +8350,12 @@ definitions:
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              hourOfWeek:
+                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                type: "integer"
+                format: "int32"
+                minimum: 0
+                maximum: 167
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -8302,6 +8386,12 @@ definitions:
               monitoredObjectId:
                 type: "string"
                 description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+              hourOfWeek:
+                description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                type: "integer"
+                format: "int32"
+                minimum: 0
+                maximum: 167
               baselines:
                 description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
                 type: "array"
@@ -8314,12 +8404,6 @@ definitions:
       metric:
         description: "The name of the metric represented by this baseline"
         type: "string"
-      hourOfWeek:
-        description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
-        type: "integer"
-        format: "int32"
-        minimum: 0
-        maximum: 167
       direction:
         description: "The direction of the metric baseline"
         type: "string"
@@ -8347,7 +8431,7 @@ definitions:
         type: "string"
       attributes:
         type: "object"
-        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp"]
+        required: ["tenantId", "_id", "_rev", "datatype", "baselines", "createdTimestamp", "lastModifiedTimestamp", "lastResetTimestamp"]
         properties:
           tenantId:
             type: "string"
@@ -8363,6 +8447,12 @@ definitions:
           monitoredObjectId:
             type: "string"
             description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+          hourOfWeek:
+            description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+            type: "integer"
+            format: "int32"
+            minimum: 0
+            maximum: 167
           baselines:
             description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
             type: "array"
@@ -8370,10 +8460,16 @@ definitions:
               $ref: '#/definitions/MetricBaselineData'
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
+          lastResetTimestamp:
+            type: "integer"
+            format: "int64"
+            description: "Time since epoch at which this object was last reset to 0"
       
   MetricBaselineResponse:
     type: "object"
@@ -8405,32 +8501,6 @@ definitions:
       attributes:
         $ref: '#/definitions/MetricBaselineData'
 
-  MetricBaselineHourOfWeekResponse:
-    type: "object"
-    description: "Metric Baseline data response including one or more baselines tracked by a specific hour of the week"
-    required: ["data"]
-    properties:
-      data:
-        type: "object"
-        required: ["type", "id", "attributes"]
-        properties:
-          type: 
-            type: "string"
-            enum: [metricBaselineHourResponse]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            properties:
-              monitoredObjectId:
-                type: "string"
-                description: "Unique identifier of the Monitored Object for which these baselines are applicable"
-              baselines: 
-                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
-                type: "array"
-                items:
-                  $ref: '#/definitions/MetricBaselineData'
-
   MetricBaselineUpdateHourRequest:
     type: "object"
     required: ["data"]
@@ -8446,7 +8516,13 @@ definitions:
           id:
             type: "string"
           attributes:
-              $ref: '#/definitions/MetricBaselineData'
+            type: "object"
+            properties:
+              baselines:
+                description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                type: "array"
+                items:
+                  $ref: '#/definitions/MetricBaselineData'
 
   MetricBaselineBulkUpdateRequest:
     type: "object"
@@ -8463,42 +8539,24 @@ definitions:
           id:
             type: "string"
           attributes:
-            type: "object"
-            description: "A map of Monitored Object ID to an array of Metric Baseline values to be updated for the Monitored Object"
-            additionalProperties:
-              type: "array"
-              items:
-                $ref: '#/definitions/MetricBaselineData'
-
-  MetricBaselineBulkUpdateResponse:
-    type: "object"
-    required: ["data"]
-    properties:
-      data:
-        type: "object"
-        required: ["type", "id", "attributes"]
-        properties:
-          type: 
-            type: "string"
-            enum: [metricBaselineBulkUpdateResponse]
-          id:
-            type: "string"
-          attributes:
-            type: "object"
-            description: "A map of monitored object ID to the response data for each Monitored Object's update request"
-            additionalProperties:
+            type: "array"
+            items:
               type: "object"
               properties:
-                ok:
-                  type: "boolean"
-                id:
+                monitoredObjectId:
                   type: "string"
-                rev:
-                  type: "string"
-                error:
-                  type: "string"
-                reason:
-                  type: "string"
+                  description: "Unique identifier of the Monitored Object for which these baselines are applicable"
+                hourOfWeek:
+                  description: "Integer value of the day of the week and hour of day for which this baseline is calculated. Values are 0-167 which corresponds to each our of each day in one week"
+                  type: "integer"
+                  format: "int32"
+                  minimum: 0
+                  maximum: 167
+                baselines: 
+                  description: "Contains the dynamically calculated baseline values for the metrics collected by Datahub"
+                  type: "array"
+                  items:
+                    $ref: '#/definitions/MetricBaselineData'
    
   # THRESHOLD CROSSING BY MONITORED OBJECT TOPN REPORT DEFINITIONS
   ## REQUEST DEFINITION 
@@ -8559,9 +8617,7 @@ definitions:
         type: string
         example: 2018-04-08T14:00:00/2018-04-09T15:00:00
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       thresholdProfileId:
         description: ID of the threshold profile that is used to select metrics and events
         type: string
@@ -8570,6 +8626,9 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -8673,9 +8732,7 @@ definitions:
         type: string
         example: 2018-04-08T14:00:00/2018-04-09T15:00:00
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       thresholdProfileId:
         description: ID of the threshold profile that is used to select metrics and events
         type: string
@@ -8688,6 +8745,9 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       timezone: 
         description: timezone used for time-based buckets (e.g. hour of day buckets) see http://joda-time.sourceforge.net/timezones.html
         type: string
@@ -8824,9 +8884,7 @@ definitions:
         description: The tenant identifier
         example: 8501f157-b7f5-41c3-aaba-c75e0566c54c
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -8910,9 +8968,7 @@ definitions:
           - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
           - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. This attribute cannot be used if the monitoredObjects attribute is also present in the request. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -8933,6 +8989,9 @@ definitions:
           - min
           - max
           - avg
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         description: An array of identifiers that filter-in specifically identified metrics.
         type: array
@@ -8995,9 +9054,7 @@ definitions:
     required: [interval, metrics]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -9006,6 +9063,9 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       granularity:
         description: The granularity for timeseries in ISO-8601 duration format, or ALL
         type: string
@@ -9121,9 +9181,7 @@ definitions:
     required: [interval, aggregator, metric]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       monitoredObjects:
         description: An optional array of monitored objects that we want to retrieve specific topn against. This attribute cannot be used if the meta attribute is also present in the request.
         x-omitempty: true
@@ -9141,6 +9199,9 @@ definitions:
         description: Query timeout in milliseconds
         type: integer
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       sorted:
         type: string
         description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
@@ -9251,9 +9312,7 @@ definitions:
     required: [interval, metrics]
     properties:
       meta:
-        description: An object that allows filtering on arbitrary metadata criteria and their values. Refer to the MetaFilter object for additional details
         $ref: '#/definitions/MetaFilter'
-        example: {"region":["montreal","ottawa"], "group":["radio"]}
       interval:
         description: Time boundary for the metrics under consideration using the ISO-8601 standard
         type: string
@@ -9270,6 +9329,9 @@ definitions:
         type: integer
         description: query timeout in milliseconds
         example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
       metrics:
         type: array
         description: limits the results to include only metrics in the whitelist
@@ -9313,14 +9375,11 @@ definitions:
     type: object
     required:
       - violationCount
-      - violationDuration
       - timestamp
     properties:
       timestamp:
         type: string
       violationCount:
-        type: integer
-      violationDuration:
         type: integer
 
   # COMMON METRIC ENTITIES
@@ -9472,9 +9531,11 @@ definitions:
               "wgs87_y": "-74.2130912"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   BulkOperationResponseV2:
@@ -9563,6 +9624,41 @@ definitions:
               "region": "paris"
               "wgs87_x": "-45.7123912"
               "wgs87_y": "-74.2130912"
+
+  BulkMonitoredObjectMetaCreateRequest: 
+    type: "object"
+    required: ["data"]
+    description: "Object used to update the meta information for one or more Monitored Objects in Datahub"
+    properties:
+      data:
+        type: "object"
+        required: ["type", "attributes"]
+        properties:
+          type: 
+            type: "string"
+            enum: [monitoredObjectsMeta]
+          attributes:
+            type: "object"
+            properties:
+              metadata-entries:
+                type: "array"
+                items:
+                  type: "object"
+                  required: ["objectName", "metadata"]
+                  properties:
+                    objectName:
+                      type: "string"
+                      description: "Name of the monitored object in the datastore"
+                    metadata:
+                      type: "object"
+                      description: "Attributes added to a Monitored Object that help identify the Monitored Object as well as provide filtering/grouping properties"
+                      additionalProperties:
+                        type: "string"
+                      example:
+                        "region": "paris"
+                        "wgs87_x": "-45.7123912"
+                        "wgs87_y": "-74.2130912"
+  
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
@@ -9872,9 +9968,11 @@ definitions:
                 type: "string"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
 
   ReportScheduleConfigRelationships:
@@ -9989,9 +10087,11 @@ definitions:
             description: "Identifying name of a Threshold Profile"
           createdTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was instantiated."
           lastModifiedTimestamp:
             type: "integer"
+            format: "int64"
             description: "Time since epoch at which this object was last altered."
           thresholds:
             description: "Thresholds will be deprecated in the next API version. Please use the 'thresholdList' property instead"

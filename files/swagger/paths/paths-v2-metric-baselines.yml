@@ -8,9 +8,9 @@
         - application/vnd.api+json
       responses:
         '200':
-          description: ''
+          description: 'Response body indicating the bulk update request has been received successfully and will be completed'
           schema:
-            $ref: '#/definitions/MetricBaselineBulkUpdateResponse'
+            type: string
         '400':
           description: "Request data does not pass validation"
           schema:
@@ -208,7 +208,7 @@
         - TenantProvisioningServiceV2
   /v2/metric-baselines/by-monitored-object/{monitoredObjectId}:
     get:
-      summary: Retrieve a Tenant Metric Baselines by monitoredObjectId.
+      summary: Retrieve all Tenant Metric Baselines for a single Monitored Object.
       operationId: GetMetricBaselineByMonitoredObjectIdV2
       produces:
         - application/vnd.api+json
@@ -216,7 +216,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineResponse'
+            $ref: '#/definitions/MetricBaselineListResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:
@@ -236,6 +236,42 @@
           type: string
       tags:
         - TenantProvisioningServiceV2
+    delete:
+      summary: Deletes (or resets) all Metric Baselines for a Monitored Object
+      operationId: DeleteMetricBaselineByMonitoredObjectIdV2
+      produces:
+        - application/vnd.api+json
+      responses:
+        '200':
+          description: 'A confirmation message of successful deletion or resetting'
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '404':
+          description: "The specified Metric Baseline is not provisioned"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: monitoredObjectId
+          in: path
+          required: true
+          type: string
+        - name: reset
+          in: query
+          required: true
+          default: false
+          type: boolean
+          description: "If true, will only reset all Metric Baselines for the Monitored Object. If false, will delete all Metric Baseline records for the monitored object"
+      tags:
+        - TenantProvisioningServiceV2
+  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     patch:
       summary: Update a Tenant Metric Baseline for a specific Metric for a specific hour of the week
       operationId: UpdateMetricBaselineForHourOfWeekV2
@@ -269,6 +305,11 @@
           schema:
             type: string
       parameters:
+        - name: hourOfWeek
+          in: path
+          required: true
+          type: integer
+          format: int32
         - name: monitoredObjectId
           in: path
           required: true
@@ -280,7 +321,6 @@
             $ref: '#/definitions/MetricBaselineUpdateHourRequest'
       tags:
         - TenantProvisioningServiceV2
-  /v2/metric-baselines/by-monitored-object/{monitoredObjectId}/hour-of-week/{hourOfWeek}:
     get:
       summary: Retrieve a Tenant Metric Baselines by monitoredObjectId for a specific hour of the week.
       operationId: GetMetricBaselineByMonitoredObjectIdForHourOfWeekV2
@@ -290,7 +330,7 @@
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/MetricBaselineHourOfWeekResponse'
+            $ref: '#/definitions/MetricBaselineResponse'
         '403':
           description: "Requestor does not have authorization to perform this action"
           schema:

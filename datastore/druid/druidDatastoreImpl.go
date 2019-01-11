@@ -59,11 +59,6 @@ type TopNThresholdCrossingByMonitoredObjectResponse struct {
 	Result    []map[string]interface{}
 }
 
-type BaseDruidResponse struct {
-	Timestamp string                 `json:"timestamp"`
-	Result    map[string]interface{} `json:"result"`
-}
-
 func makeHttpClient() *http.Client {
 	// By default, use 60 second timeout unless specified otherwise
 	// by the caller
@@ -152,7 +147,7 @@ func (dc *DruidDatastoreClient) GetHistogram(request *metrics.Histogram, metaMOs
 	}
 
 	// Build out the actual druid query to send
-	query, querySpec, err := HistogramQuery(request.TenantID, metaMOs, table, request.Interval, request.Granularity, timeout, request.MetricBucketRequests)
+	query, querySpec, err := HistogramQuery(request.TenantID, metaMOs, table, request.Interval, request.Granularity, timeout, request.IgnoreCleaning, request.MetricBucketRequests)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetHistogramObjStr)
@@ -257,7 +252,7 @@ func (dc *DruidDatastoreClient) GetHistogramV1(request *metrics.HistogramV1, met
 }
 
 // New version of threshold-crossing
-func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) (map[string]interface{}, error) {
+func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.ThresholdCrossing, thresholdProfile *tenant.ThresholdProfile, metaMOs []string) ([]metrics.TimeseriesEntryResponse, *db.QueryKeySpec, error) {
 	methodStartTime := time.Now()
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Calling QueryThresholdCrossing for request: %v", models.AsJSONString(request))
@@ -269,11 +264,11 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossing.String()))
 	}
 
-	query, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.Metrics, thresholdProfile, timeout)
+	query, queryspec, err := ThresholdViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.IgnoreCleaning, request.Metrics, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
+		return nil, nil, err
 	}
 	queryStartTime := time.Now()
 	if logger.IsDebugEnabled() {
@@ -281,12 +276,12 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 	}
 	druidResponse, err := dc.executeQuery(query)
 
-	response := make([]BaseDruidResponse, 0)
+	response := make([]metrics.TimeseriesEntryResponse, 0)
 	err = json.Unmarshal(druidResponse, &response)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetThrCrossStr)
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
+		return nil, nil, err
 	}
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetThrCrossStr)
 
@@ -294,22 +289,9 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossing(request *metrics.Threshol
 		logger.Log.Debugf("Response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(response))
 	}
 
-	reformatted, err := reformatThresholdCrossingTimeSeries(druidResponse)
-	if err != nil {
-		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossStr)
-		return nil, err
-	}
-
-	rr := map[string]interface{}{
-		"results": reformatted,
-	}
-
-	if logger.IsDebugEnabled() {
-		logger.Log.Debugf("Processed response from druid for %s: %v", db.ThresholdCrossingStr, models.AsJSONString(rr))
-	}
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetThrCrossStr)
 
-	return rr, nil
+	return response, queryspec, nil
 }
 
 // New version of threshold-crossing
@@ -337,7 +319,7 @@ func (dc *DruidDatastoreClient) QueryThresholdCrossingV1(request *metrics.Thresh
 	}
 	druidResponse, err := dc.executeQuery(query)
 
-	response := make([]BaseDruidResponse, 0)
+	response := make([]metrics.TimeseriesEntryResponse, 0)
 	err = json.Unmarshal(druidResponse, &response)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, errorCode, mon.GetThrCrossStr)
@@ -382,7 +364,7 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_topn.String()))
 	}
 
-	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request, timeout, metaMOs)
+	query, err := GetTopNForMetric(dc.cfg.GetString(gather.CK_druid_broker_table.String()), request, timeout, request.IgnoreCleaning, metaMOs)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
 		return nil, fmt.Errorf("Failed to generate a druid query while processing request: %s: '%s'", models.AsJSONString(request), err.Error())
@@ -415,21 +397,17 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 	topNResults := make([]metrics.TopNEntryResponse, 0)
 
 	if len(topN) != 0 {
-		topNResponseHead, ok := topN[0]["result"] // There should be only a single entry with the granularity all
-		if !ok {
-			return topNResults, nil
-		}
-
-		topNResponse, ok := topNResponseHead.([]interface{}) // There should be only a single entry with the granularity all
-		if !ok {
-			logger.Log.Errorf("Could not cast topN response")
-			mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
-			return nil, err
-		}
 		topNResults = make([]metrics.TopNEntryResponse, 0)
 
-		for _, r := range topNResponse {
-			rawMap := r.(map[string]interface{})
+		for _, r := range topN {
+			event, ok := r["event"]
+			if !ok {
+				logger.Log.Errorf("Could not cast topN response event: %s", models.AsJSONString(r))
+				mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetTopNReqStr)
+				return nil, err
+			}
+
+			rawMap := event.(map[string]interface{})
 			if rawMap["monitoredObjectId"] != nil {
 				toAdd := metrics.TopNEntryResponse{MonitoredObjectId: rawMap["monitoredObjectId"].(string)}
 				delete(rawMap, "monitoredObjectId")
@@ -501,7 +479,7 @@ func (dc *DruidDatastoreClient) GetThresholdCrossingByMonitoredObjectTopN(reques
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_thresholdcrossingtopn.String()))
 	}
 
-	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, metaMOs, request.Metric, request.Granularity, request.Interval, thresholdProfile, timeout, request.NumResults)
+	query, err := ThresholdCrossingByMonitoredObjectTopNQuery(request.TenantID, table, metaMOs, request.Metric, request.Granularity, request.Interval, request.IgnoreCleaning, thresholdProfile, timeout, request.NumResults)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetThrCrossByMonObjTopNStr)
@@ -645,7 +623,7 @@ func (dc *DruidDatastoreClient) GetAggregatedMetrics(request *metrics.AggregateM
 		monitoredObjectIds = request.MonitoredObjects
 	}
 
-	query, pp, queryKeySpec, err := AggMetricsQuery(request.TenantID, table, request.Interval, monitoredObjectIds, aggregateOnMeta, request.Aggregation, request.Metrics, timeout, request.Granularity)
+	query, pp, queryKeySpec, err := AggMetricsQuery(request.TenantID, table, request.Interval, monitoredObjectIds, aggregateOnMeta, request.Aggregation, request.Metrics, request.IgnoreCleaning, timeout, request.Granularity)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.QueryAggregatedMetricsStr)
 		return nil, nil, err
@@ -758,7 +736,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
+	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, false, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -786,7 +764,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 	}
 
-	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
+	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, false, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetSLAReportStr)
 		return nil, err
@@ -825,7 +803,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 						if ek != "sla" {
 							continue
 						}
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, err
@@ -849,7 +827,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV1(request *metrics.SLAReportRequest
 							return nil, err
 						}
 
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, err
@@ -921,7 +899,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryAllGranularity(request *met
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, respSchema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
+	query, respSchema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, false, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -960,7 +938,7 @@ func (dc *DruidDatastoreClient) GetSLAViolationsQueryWithGranularity(request *me
 	if timeout == 0 {
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
-	query, schema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
+	query, schema, err := SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.IgnoreCleaning, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, methodStartTime, successCode, mon.GetSLAReportStr)
 		return nil, nil, err
@@ -992,7 +970,7 @@ func (dc *DruidDatastoreClient) GetTopNTimeByBuckets(request *metrics.SLAReportR
 	if timeout == 0 {
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
-	query, schema, err := SLATimeBucketQuery(request.TenantID, table, metaMOs /*DayOfWeek*/, extractFn, request.Timezone, vendor, objType, metric, direction /*event*/, "sla", eventAttr, GranularityAll, request.Interval, timeout)
+	query, schema, err := SLATimeBucketQuery(request.TenantID, table, metaMOs /*DayOfWeek*/, extractFn, false, request.Timezone, vendor, objType, metric, direction /*event*/, "sla", eventAttr, GranularityAll, request.Interval, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 		return nil, nil, err
@@ -1042,7 +1020,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportReque
 						}
 
 						// split into its own function
-						query, schema, err := SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, schema, err := SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, nil, err
@@ -1066,7 +1044,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeries(request *metrics.SLAReportReque
 							return nil, nil, err
 						}
 
-						query, schema, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, schema, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, nil, err
@@ -1126,7 +1104,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportReq
 						}
 
 						// split into its own function
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, nil, err
@@ -1153,7 +1131,7 @@ func (dc *DruidDatastoreClient) GetSLATimeSeriesV1(request *metrics.SLAReportReq
 							return nil, nil, err
 						}
 
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, false, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, nil, err
@@ -1199,7 +1177,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 		timeout = int32(gather.GetConfig().GetInt(gather.CK_druid_timeoutsms_slareports.String()))
 	}
 
-	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, thresholdProfile, timeout)
+	query, _, err := SLAViolationsQuery(request.TenantID, table, metaMOs, GranularityAll, request.Interval, request.IgnoreCleaning, thresholdProfile, timeout)
 
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
@@ -1227,7 +1205,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 		logger.Log.Debugf("Result: %v", db.SLAReportStr, models.AsJSONString(reportSummary))
 	}
 
-	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, thresholdProfile, timeout)
+	query, _, err = SLAViolationsQuery(request.TenantID, table, metaMOs, request.Granularity, request.Interval, request.IgnoreCleaning, thresholdProfile, timeout)
 	if err != nil {
 		mon.TrackDruidTimeMetricInSeconds(mon.DruidQueryDurationType, queryStartTime, successCode, mon.GetSLAReportStr)
 		return nil, err
@@ -1256,9 +1234,11 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 
 	for vk, v := range thresholdProfile.Thresholds.VendorMap {
 		for tk, t := range v.MonitoredObjectTypeMap {
-			if tk != "twamp-sf" {
-				continue
-			}
+
+			// Removing this filter
+			// if tk != "twamp-sf" {
+			// 	continue
+			// }
 
 			for mk, m := range t.MetricMap {
 				for dk, d := range m.DirectionMap {
@@ -1266,7 +1246,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 						if ek != "sla" {
 							continue
 						}
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, DayOfWeek, request.IgnoreCleaning, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, err
@@ -1290,7 +1270,7 @@ func (dc *DruidDatastoreClient) GetSLAReportV2(request *metrics.SLAReportRequest
 							return nil, err
 						}
 
-						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
+						query, _, err = SLATimeBucketQuery(request.TenantID, table, metaMOs, HourOfDay, request.IgnoreCleaning, request.Timezone, vk, tk, mk, dk, "sla", e, GranularityAll, request.Interval, timeout)
 						if err != nil {
 							mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, errorCode, mon.GetSLAReportStr)
 							return nil, err

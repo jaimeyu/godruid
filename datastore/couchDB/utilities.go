@@ -99,6 +99,12 @@ func storeDataInCouchDB(dataToStore map[string]interface{}, dataTypeStrForLoggin
 	return storeDataInCouchDBWithQueryParams(dataToStore, dataTypeStrForLogging, db, nil)
 }
 
+func storeDataInCouchDBInBatchMode(dataToStore map[string]interface{}, dataTypeStrForLogging string, db *couchdb.Database) (string, string, error) {
+	params := url.Values{}
+	params.Add("batch", "ok")
+	return storeDataInCouchDBWithQueryParams(dataToStore, dataTypeStrForLogging, db, &params)
+}
+
 // StoreDataInCouchDB - takes data that is already in a format ready to store in CouchDB
 // and attempts to store it. Parameters are:
 // dataToStore(the CouchDB ready data to be stored),
@@ -501,6 +507,41 @@ func updateData(dbName string, data interface{}, dataType string, dataTypeLogStr
 	return nil
 }
 
+func updateDataInBatchMode(dbName string, data interface{}, dataType string, dataTypeLogStr string, dataContainer interface{}) error {
+	db, err := getDatabase(dbName)
+	if err != nil {
+		return err
+	}
+
+	// Convert to generic object
+	storeFormat, err := convertDataToCouchDbSupportedModel(data)
+	if err != nil {
+		return err
+	}
+
+	// Give the data a known type, and timestamps:
+	objectData := storeFormat["data"].(map[string]interface{})
+	objectData["datatype"] = dataType
+	objectData["lastModifiedTimestamp"] = ds.MakeTimestamp()
+
+	// Store the object in CouchDB
+	_, _, err = storeDataInCouchDBInBatchMode(storeFormat, dataTypeLogStr, db)
+	if err != nil {
+		return err
+	}
+
+	stripPrefixFromID(storeFormat)
+
+	// Populate the response
+	if err = convertGenericCouchDataToObject(storeFormat, &dataContainer, dataTypeLogStr); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", dataTypeLogStr, models.AsJSONString(dataContainer))
+	return nil
+}
+
 // ConvertGenericCouchDataToObject - takes an empty object of a known type and populates
 // that object with the generic data.
 func convertCouchDesignDocumentToObject(genericData map[string]interface{}, dataContainer interface{}, dataTypeStr string) error {
@@ -633,6 +674,18 @@ func updateDataInCouch(dbName string, dataToStore interface{}, dataContainer int
 	logger.Log.Debugf("Updating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
 
 	if err := updateData(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
+		return err
+	}
+
+	// Return the provisioned object.
+	logger.Log.Debugf("Updated %s: %v\n", loggingStr, models.AsJSONString(dataContainer))
+	return nil
+}
+
+func updateDataInCouchInBatchMode(dbName string, dataToStore interface{}, dataContainer interface{}, dataType string, loggingStr string) error {
+	logger.Log.Debugf("Updating %s: %v\n", loggingStr, models.AsJSONString(dataToStore))
+
+	if err := updateDataInBatchMode(dbName, dataToStore, dataType, loggingStr, &dataContainer); err != nil {
 		return err
 	}
 

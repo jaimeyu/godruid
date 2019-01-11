@@ -85,33 +85,6 @@
           type: string
       tags:
         - MetricsService
-  /v2/raw-metrics:
-    post:
-      summary: Returns raw metrics from druid
-      operationId: GetFilteredRawMetrics
-      produces:
-        - application/vnd.api+json
-      responses:
-        '200':
-          description: ''
-          schema:
-            $ref: '#/definitions/gathergrpcJSONAPIObject'
-        '403':
-          description: "Requestor does not have authorization to perform this action"
-          schema:
-            type: string
-        '500':
-          description: "Unexpected error processing request"
-          schema:
-            type: string
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/FilteredRawMetricsRequestObject'
-      tags:
-        - MetricsService
   /v1/threshold-crossing:
     post:
       summary: Retrieve threshold crossings

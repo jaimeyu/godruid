@@ -9,7 +9,7 @@
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
+              "key": "cisco-interface",
               "rawMetricId": "bandwidth",
               "units": [
                 "bps"
@@ -20,15 +20,15 @@
             }
           ]
         },
-        "input-data-rate": {
+        "inputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "input-data-rate",
+              "key": "cisco-interface",
+              "rawMetricId": "inputDataRate",
               "units": [
                 "bps"
               ],
@@ -38,15 +38,15 @@
             }
           ]
         },
-        "output-data-rate": {
+        "outputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "output-data-rate",
+              "key": "cisco-interface",
+              "rawMetricId": "outputDataRate",
               "units": [
                 "bps"
               ],
@@ -56,15 +56,15 @@
             }
           ]
         },
-        "peak-input-data-rate": {
+        "peakInputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "peak-input-data-rate",
+              "key": "cisco-interface",
+              "rawMetricId": "peakInputDataRate",
               "units": [
                 "bps"
               ],
@@ -74,15 +74,15 @@
             }
           ]
         },
-        "peak-output-data-rate": {
+        "peakOutputDataRate": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "peak-output-data-rate",
+              "key": "cisco-interface",
+              "rawMetricId": "peakOutputDataRate",
               "units": [
                 "bps"
               ],
@@ -92,15 +92,15 @@
             }
           ]
         },
-        "input-errors": {
+        "inputErrors": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "input-errors",
+              "key": "cisco-interface",
+              "rawMetricId": "inputErrors",
               "units": [
                 "value"
               ],
@@ -110,15 +110,15 @@
             }
           ]
         },
-        "input-drops": {
+        "inputDrops": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "input-drops",
+              "key": "cisco-interface",
+              "rawMetricId": "inputDrops",
               "units": [
                 "value"
               ],
@@ -128,15 +128,15 @@
             }
           ]
         },
-        "bytes-received": {
+        "bytesReceived": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "bytes-received",
+              "key": "cisco-interface",
+              "rawMetricId": "bytesReceived",
               "units": [
                 "value"
               ],
@@ -146,15 +146,422 @@
             }
           ]
         },
-        "bytes-sent": {
+        "bytesSent": {
           "ui": {
             "group": "unknown",
             "position": "2"
           },
           "monitoredObjectTypes": [
             {
-              "key": "cisco-telemetry",
-              "rawMetricId": "bytes-sent",
+              "key": "cisco-interface",
+              "rawMetricId": "bytesSent",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "totalCPUFifteenMinute": {
+          "ui": {
+            "group": "cpu",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "totalCPUFifteenMinute",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "totalCPUFiveMinute": {
+          "ui": {
+            "group": "cpu",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "totalCPUFiveMinute",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "totalCPUOneMinute": {
+          "ui": {
+            "group": "cpu",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "totalCPUOneMinute",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "bootRamSize": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "bootRamSize",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "flashSystem": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "flashSystem",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "freeApplicationMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "freeApplicationMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "freePhysicalMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "freePhysicalMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "imageMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "imageMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "ioMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "ioMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "pageSize": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "pageSize",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "ramMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "ramMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "reservedMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "reservedMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "systemRamMemory": {
+          "ui": {
+            "group": "memory",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "cisco-node-summary",
+              "rawMetricId": "systemRamMemory",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        }        
+      },
+      "ui": {
+        "metricGroups": [
+            "unknown",
+            "cpu",
+            "memory"
+        ]
+      }
+    },
+    "accedian-pvx": {
+      "metricMap": {
+        "clientDTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "clientDTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverDTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverDTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "clientRTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "clientRTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverRTT": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverRTT",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "serverResponseTime": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "serverResponseTime",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "numberOfTransactions": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "numberOfTransactions",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "percentClientRetransmission": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "percentClientRetransmission",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "percentServerRetransmission": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "percentServerRetransmission",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "endUserResponseTime": {
+          "ui": {
+            "group": "unknown",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "pvx",
+              "rawMetricId": "endUserResponseTime",
               "units": [
                 "value"
               ],
@@ -167,7 +574,9 @@
       },
       "ui": {
         "metricGroups": [
-          "unknown"
+            "unknown",
+            "cpu",
+            "memory"
         ]
       }
     },

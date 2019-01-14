@@ -133,11 +133,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 
 				logger.Log.Infof("Received config request from Connector with ID: %s", connectorID)
 
-				wsServer.Lock.Lock()
-				wsServer.ConnectionMeta[connectorID].TenantID = tenantID
-				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
-				wsServer.Lock.Unlock()
-
 				// Check if ConnectorInstances has an entry for connectorID
 				connectorInstance, err := wsServer.TenantDB.GetTenantConnectorInstance(tenantID, connectorID)
 				if err != nil {
@@ -174,23 +169,6 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 						// get all available configs
 						configs, err = wsServer.TenantDB.GetAllAvailableTenantConnectorConfigs(tenantID, zone)
 					}
-
-					// if there are no available configs, make sure that the used configs are being used by a valid connector
-					// and not by any stale connectors (Could happen if gather crashes)
-
-					if len(configs) == 0 {
-						allConfigs, err := wsServer.TenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
-						if err != nil {
-							logger.Log.Errorf("Unable to find connectors for tenant: %v and zone: %v", tenantID, zone)
-							break
-						}
-						for _, c := range allConfigs {
-							if wsServer.ConnectionMeta[c.ConnectorInstanceID] == nil {
-								c.ConnectorInstanceID = ""
-								configs = append(configs, c)
-							}
-						}
-					}
 				}
 
 				if err != nil {
@@ -198,25 +176,41 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 					break
 				}
 
-				// take the first available config, and assign a connector instance ID to it
+				// if there are no available configs, make sure that the used configs are being used by a valid connector
+				// and not by any stale connectors (Could happen if gather crashes)
 				if len(configs) == 0 {
-					errMsg := fmt.Sprintf("No available configurations for Connector with ID: %v", connectorID)
-					logger.Log.Error(errMsg)
-
-					returnMsg := &ConnectorMessage{
-						MsgType:  "Config",
-						ErrorMsg: errMsg,
-					}
-
-					msgJSON, _ := json.Marshal(returnMsg)
-
-					err = wsServer.ConnectionMeta[connectorID].Connection.WriteMessage(websocket.BinaryMessage, msgJSON)
-
+					allConfigs, err := wsServer.TenantDB.GetAllTenantConnectorConfigs(tenantID, zone)
 					if err != nil {
-						logger.Log.Errorf("Error sending configuration to Connector with ID: %v", connectorID)
+						logger.Log.Errorf("Unable to find connectors for tenant: %v and zone: %v", tenantID, zone)
 						break
 					}
-					break
+					for _, c := range allConfigs {
+						if wsServer.ConnectionMeta[c.ConnectorInstanceID] == nil {
+							c.ConnectorInstanceID = ""
+							configs = append(configs, c)
+						}
+					}
+
+					if len(configs) == 0 {
+						errMsg := fmt.Sprintf("No available configurations for Connector with ID: %v", connectorID)
+						logger.Log.Error(errMsg)
+
+						returnMsg := &ConnectorMessage{
+							MsgType:  "Config",
+							ErrorMsg: errMsg,
+						}
+
+						msgJSON, _ := json.Marshal(returnMsg)
+
+						err = wsServer.ConnectionMeta[connectorID].Connection.WriteMessage(websocket.BinaryMessage, msgJSON)
+
+						if err != nil {
+							logger.Log.Errorf("Error sending configuration to Connector with ID: %v", connectorID)
+							break
+						}
+						break
+					}
+
 				}
 
 				// pick the first available connector
@@ -228,6 +222,11 @@ func (wsServer *ServerStruct) Reader(ws *websocket.Conn, connectorID string) {
 				// remove the couchDB type prefix from the ID
 				selectedConfig.ID = datastore.GetDataIDFromFullID(selectedConfig.ID)
 				selectedConfig.ConnectorInstanceID = connectorID
+
+				wsServer.Lock.Lock()
+				wsServer.ConnectionMeta[connectorID].TenantID = tenantID
+				wsServer.ConnectionMeta[connectorID].LastHeartbeat = time.Now().Unix()
+				wsServer.Lock.Unlock()
 
 				// After successfully sending config to connector, update ConnectorConfig with the instance iD
 				_, err = wsServer.TenantDB.UpdateTenantConnectorConfig(selectedConfig)

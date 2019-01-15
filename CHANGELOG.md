@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.282.0 
+**Release Date:** Tue Jan 15 16:14:14 UTC 2019     
+## Previous Releases 
 ### 0.281.0 
 **Release Date:** Fri Dec 21 20:14:47 UTC 2018     
-## Previous Releases 
 * Fix - Removing the TWAMP-SF filter so all object types are used in SLA Reports
 ### 0.280.0 
 **Release Date:** Fri Dec 21 14:56:41 UTC 2018     

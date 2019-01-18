@@ -1,3 +1,4 @@
+* Fix - Removing additional count aggregation for min/max queries and adding UUID for all metrics requests
 ## Current Release 
 ### 0.282.0 
 **Release Date:** Tue Jan 15 16:14:14 UTC 2019     

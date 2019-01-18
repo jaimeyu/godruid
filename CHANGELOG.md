@@ -1,8 +1,10 @@
-* Fix - Removing additional count aggregation for min/max queries and adding UUID for all metrics requests
 ## Current Release 
+### 0.283.0 
+**Release Date:** Fri Jan 18 16:17:26 UTC 2019     
+## Previous Releases 
+* Fix - Removing additional count aggregation for min/max queries and adding UUID for all metrics requests
 ### 0.282.0 
 **Release Date:** Tue Jan 15 16:14:14 UTC 2019     
-## Previous Releases 
 ### 0.281.0 
 **Release Date:** Fri Dec 21 20:14:47 UTC 2018     
 * Fix - Removing the TWAMP-SF filter so all object types are used in SLA Reports

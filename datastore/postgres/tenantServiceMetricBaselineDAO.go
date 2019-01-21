@@ -71,7 +71,7 @@ func CreateTenantMetricBaselinePostgresDAO() (*TenantMetricBaselinePostgresDAO, 
 	result.batchSize = int64(cfg.GetInt(gather.CK_server_datastore_batchsize.String()))
 
 	postgresConnInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+		"password=%s dbname=%s sslmode=disable connect_timeout=5",
 		host, port, user, password, dbname)
 
 	var err error

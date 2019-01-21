@@ -185,6 +185,10 @@ func TestConnectorInstanceAPIsProtectedByAuthV2(t *testing.T) {
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateConnectorInstanceV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
+	created = handlers.HandleCreateConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateConnectorInstanceV2Params{Body: generateRandomTenantConnectorInstanceCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, connectorInstanceUrl, "POST")})
+	castedCreate = created.(*tenant_provisioning_service_v2.CreateConnectorInstanceV2Forbidden)
+	assert.NotNil(t, castedCreate)
+
 	// Update - SkylightAdmin and TenantAdmin Only
 	updated := handlers.HandleUpdateConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateConnectorInstanceV2Params{ConnectorInstanceID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, connectorInstanceUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateConnectorInstanceV2Forbidden)
@@ -194,12 +198,20 @@ func TestConnectorInstanceAPIsProtectedByAuthV2(t *testing.T) {
 	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateConnectorInstanceV2Forbidden)
 	assert.NotNil(t, castedUpdate)
 
+	updated = handlers.HandleUpdateConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateConnectorInstanceV2Params{ConnectorInstanceID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, connectorInstanceUrl, "PATCH")})
+	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateConnectorInstanceV2Forbidden)
+	assert.NotNil(t, castedUpdate)
+
 	// Delete - SkylightAdmin and TenantAdmin Only
 	deleted := handlers.HandleDeleteConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteConnectorInstanceV2Params{ConnectorInstanceID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, connectorInstanceUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteConnectorInstanceV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
 	deleted = handlers.HandleDeleteConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteConnectorInstanceV2Params{ConnectorInstanceID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, connectorInstanceUrl, "DELETE")})
+	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteConnectorInstanceV2Forbidden)
+	assert.NotNil(t, castedDelete)
+
+	deleted = handlers.HandleDeleteConnectorInstanceV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteConnectorInstanceV2Params{ConnectorInstanceID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, connectorInstanceUrl, "DELETE")})
 	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteConnectorInstanceV2Forbidden)
 	assert.NotNil(t, castedDelete)
 }

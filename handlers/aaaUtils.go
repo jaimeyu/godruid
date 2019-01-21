@@ -12,6 +12,7 @@ var (
 
 	SkylightAdminRoleOnly       = []string{UserRoleSystem, UserRoleSkylight}
 	SkylightAndTenantAdminRoles = []string{UserRoleSystem, UserRoleSkylight, UserRoleTenantAdmin}
+	AdminAndContributorRoles    = []string{UserRoleSystem, UserRoleSkylight, UserRoleTenantAdmin, UserRoleTenantContributor}
 	AllRoles                    = []string{UserRoleSystem, UserRoleSkylight, UserRoleTenantAdmin, UserRoleTenantUser}
 )
 

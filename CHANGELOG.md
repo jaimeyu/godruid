@@ -1,8 +1,10 @@
-* Fix - changing Postgres connection for heavily called get metric baseline API. Also changing config for how long gather will wait for a postgres worker from the connection pool
 ## Current Release 
+### 0.284.0 
+**Release Date:** Mon Jan 21 17:37:48 UTC 2019     
+## Previous Releases 
+* Fix - changing Postgres connection for heavily called get metric baseline API. Also changing config for how long gather will wait for a postgres worker from the connection pool
 ### 0.283.0 
 **Release Date:** Fri Jan 18 16:17:26 UTC 2019     
-## Previous Releases 
 * Fix - Removing additional count aggregation for min/max queries and adding UUID for all metrics requests
 ### 0.282.0 
 **Release Date:** Tue Jan 15 16:14:14 UTC 2019     

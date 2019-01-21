@@ -129,11 +129,11 @@ func HandleDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.Tena
 	}
 }
 
-func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
+func HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, fetchLimiter *MetricBaselineFetchLimiter) func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) middleware.Responder {
 
 		// Do the work
-		startTime, responseCode, response, err := doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles, tenantDB, params)
+		startTime, responseCode, response, err := doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles, tenantDB, params, fetchLimiter)
 
 		// Success Response
 		if responseCode == http.StatusOK {
@@ -404,7 +404,7 @@ func doDeleteMetricBaselineV2(allowedRoles []string, tenantDB datastore.TenantMe
 	return startTime, http.StatusOK, &converted, nil
 }
 
-func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
+func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string, tenantDB datastore.TenantMetricBaselineDatastore, params tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params, fetchLimiter *MetricBaselineFetchLimiter) (time.Time, int, *swagmodels.MetricBaselineResponse, error) {
 	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
 	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Fetching %s for %s %s for %s %s and hourOfWeek %d", tenmod.TenantMetricBaselineStr, admmod.TenantStr, tenantID, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, params.HourOfWeek), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.AdminAPIRecieved)
 
@@ -414,17 +414,32 @@ func doGetMetricBaselineByMonitoredObjectIDForHourOfWeekV2(allowedRoles []string
 
 	// Issue request to DAO Layer
 	dataID := fmt.Sprintf("%s_%d", params.MonitoredObjectID, params.HourOfWeek)
-	result, err := tenantDB.GetMetricBaseline(tenantID, dataID)
-	if err != nil {
-		if strings.Contains(err.Error(), datastore.NotFoundStr) {
-			return startTime, http.StatusNotFound, nil, err
-		}
+	// result, err := tenantDB.GetMetricBaseline(tenantID, dataID)
+	// if err != nil {
+	// 	if strings.Contains(err.Error(), datastore.NotFoundStr) {
+	// 		return startTime, http.StatusNotFound, nil, err
+	// 	}
 
-		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	// 	return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantMetricBaselineStr, err.Error())
+	// }
+	daoResult := make(chan limitedFetchResult, 1)
+	job := limitedFetchJob{
+		dataID:    dataID,
+		startTime: startTime,
+		tenantID:  tenantID,
+		result:    daoResult,
+	}
+	fetchLimiter.jobs <- job
+
+	jobResp := <-daoResult
+	if jobResp.err != nil {
+		return startTime, jobResp.resultCode, nil, fmt.Errorf("Unable to fetch %s for %s %s and hourOfWeek %d: %s", tenmod.TenantMetricBaselineStr, tenmod.TenantMonitoredObjectStr, params.MonitoredObjectID, params.HourOfWeek, jobResp.err.Error())
 	}
 
+	close(daoResult)
+
 	converted := swagmodels.MetricBaselineResponse{}
-	err = convertToJsonapiObject(result, &converted)
+	err := convertToJsonapiObject(jobResp.result, &converted)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", tenmod.TenantMetricBaselineStr, err.Error())
 	}
@@ -616,6 +631,87 @@ func (manager *MetricBaselineBulkUpdateManager) performBulkUpdate(startTime time
 	}
 
 	// reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateTenantMetricBaselineStr, mon.APICompleted, mon.TenantAPICompleted)
-	logger.Log.Infof("Bulk Updated of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)
+	logger.Log.Infof("Bulk Update of %ss for Tenant %s complete", tenmod.TenantMetricBaselineStr, tenantID)
 	return startTime, http.StatusOK, nil
+}
+
+type MetricBaselineFetchLimiter struct {
+	jobs     chan limitedFetchJob
+	tenantDB datastore.TenantMetricBaselineDatastore
+}
+
+type limitedFetchJob struct {
+	startTime time.Time
+	tenantID  string
+	dataID    string
+	result    chan limitedFetchResult
+}
+
+type limitedFetchResult struct {
+	startTime  time.Time
+	resultCode int
+	result     *tenmod.MetricBaseline
+	err        error
+}
+
+func CreateLimitedFetchManager(db datastore.TenantMetricBaselineDatastore) *MetricBaselineFetchLimiter {
+	cfg := gather.GetConfig()
+
+	numJobs := cfg.GetInt(gather.CK_args_metricbaselines_maxnumjobs.String())
+	numWorkers := cfg.GetInt(gather.CK_args_metricbaselines_numworkers.String())
+
+	result := MetricBaselineFetchLimiter{
+		jobs:     make(chan limitedFetchJob, numJobs),
+		tenantDB: db,
+	}
+
+	for w := 1; w <= numWorkers; w++ {
+		go result.limitedFetchWorker(w, result.jobs)
+	}
+
+	return &result
+}
+
+func (manager *MetricBaselineFetchLimiter) limitedFetchWorker(id int, jobs <-chan limitedFetchJob) {
+	for j := range jobs {
+		// // startTime, resultCode, result, err := manager.performBulkUpdate(j.startTime, j.tenantID, j.params)
+		// fetchRes, code, err := manager.performLimitedFetch(j.startTime, j.tenantID, j.dataID)
+		// if err != nil {
+		// 	logger.Log.Error(err.Error())
+		// }
+
+		fetchRes, err := manager.tenantDB.GetMetricBaseline(j.tenantID, j.dataID)
+		if err != nil {
+			if strings.Contains(err.Error(), datastore.NotFoundStr) {
+				res := limitedFetchResult{
+					startTime:  j.startTime,
+					resultCode: http.StatusNotFound,
+					result:     nil,
+					err:        err,
+				}
+
+				j.result <- res
+				continue
+			}
+
+			res := limitedFetchResult{
+				startTime:  j.startTime,
+				resultCode: http.StatusInternalServerError,
+				result:     nil,
+				err:        fmt.Errorf("Unable to retrieve %s: %s", tenmod.TenantMetricBaselineStr, err.Error()),
+			}
+
+			j.result <- res
+			continue
+		}
+
+		res := limitedFetchResult{
+			startTime:  j.startTime,
+			resultCode: http.StatusOK,
+			result:     fetchRes,
+			err:        err,
+		}
+
+		j.result <- res
+	}
 }

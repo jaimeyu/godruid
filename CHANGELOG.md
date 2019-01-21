@@ -1,3 +1,4 @@
+* Fix - changing Postgres connection for heavily called get metric baseline API. Also changing config for how long gather will wait for a postgres worker from the connection pool
 ## Current Release 
 ### 0.283.0 
 **Release Date:** Fri Jan 18 16:17:26 UTC 2019     

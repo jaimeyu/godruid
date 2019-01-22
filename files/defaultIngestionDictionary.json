@@ -1,5 +1,71 @@
 {
   "metrics": {
+    "accedian-rfc8321": {
+      "metricMap":{
+        "totalCount": {
+          "ui": {
+            "group": "packet",
+            "position": "0"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "rfc8321",
+              "rawMetricId": "totalCount",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                  "0",
+                  "1"
+              ]
+            }
+          ]
+        },
+        "lostCount": {
+          "ui": {
+            "group": "packets",
+            "position": "1"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "rfc8321",
+              "rawMetricId": "lostCount",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1"
+              ]
+            }
+          ]
+        },
+        "packetsLostPct": {
+          "ui": {
+            "group": "packets",
+            "position": "2"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "rfc8321",
+              "rawMetricId": "packetsLostPct",
+              "units": [
+                "pct"
+              ],
+              "directions": [
+                  "0",
+                  "1"
+              ]
+            }
+          ]
+        }
+      },
+      "ui": {
+        "metricGroups": [
+            "packets"
+        ]
+      }
+    },
     "cisco-telemetry": {
       "metricMap": {
         "bandwidth": {

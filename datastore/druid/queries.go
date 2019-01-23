@@ -14,7 +14,7 @@ import (
 	tenmod "github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/adh-gather/transform"
 	"github.com/accedian/godruid"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type TimeBucket int
@@ -208,7 +208,7 @@ func HistogramQuery(tenant string, metaMOs []string, dataSource string, interval
 	return &godruid.QueryTimeseries{
 		DataSource:  dataSource,
 		Granularity: toGranularity(granularity),
-		Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.SKIPEMPTYBUCKETS: true},
+		Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String(), godruid.SKIPEMPTYBUCKETS: true},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
@@ -492,7 +492,7 @@ func ThresholdViolationsQuery(tenant string, dataSource string, metaMOs []string
 			QueryType:   godruid.TIMESERIES,
 			DataSource:  dataSource,
 			Granularity: toGranularity(granularity),
-			Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.SKIPEMPTYBUCKETS: true},
+			Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String(), godruid.SKIPEMPTYBUCKETS: true},
 			Filter: godruid.FilterAnd(
 				godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
 				cleanFilter(ignoreCleaning),
@@ -982,7 +982,7 @@ func SLAViolationsQuery(tenant string, dataSource string, metaMOs []string, gran
 			QueryType:   godruid.TIMESERIES,
 			DataSource:  dataSource,
 			Granularity: toGranularity(granularity),
-			Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.SKIPEMPTYBUCKETS: true},
+			Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String(), godruid.SKIPEMPTYBUCKETS: true},
 			Filter: godruid.FilterAnd(
 				godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
 				cleanFilter(ignoreCleaning),
@@ -1056,7 +1056,7 @@ func SLATimeBucketQuery(tenant string, dataSource string, metaMOs []string, time
 	return &godruid.QueryTopN{
 		DataSource:  dataSource,
 		Granularity: toGranularity(granularity),
-		Context:     map[string]interface{}{godruid.TIMEOUT: timeout},
+		Context:     map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String()},
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
 			cleanFilter(ignoreCleaning),
@@ -1167,7 +1167,7 @@ func ThresholdCrossingByMonitoredObjectTopNQuery(tenant string, dataSource strin
 	return &godruid.QueryTopN{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
-		Context:      map[string]interface{}{godruid.TIMEOUT: timeout},
+		Context:      map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String()},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
@@ -1297,7 +1297,7 @@ func RawMetricsQuery(tenant string, dataSource string, metrics []string, interva
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
-		Context:      map[string]interface{}{godruid.TIMEOUT: timeout, godruid.SKIPEMPTYBUCKETS: true},
+		Context:      map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String(), godruid.SKIPEMPTYBUCKETS: true},
 		Aggregations: aggregations,
 		Filter:       queryFilter,
 		Intervals:    []string{interval},
@@ -1392,10 +1392,7 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 					transform.Direction:           metric.Direction,
 					transform.Metric:              metric.Metric})
 			}
-			countName := db.ConstructAggregationName(querySpecID, "count")
-			keyToDrop = append(keyToDrop, countName)
-			countKeys[countName] = []string{querySpecID}
-			aggregations = append(aggregations, buildMetricAggregation("count", mo, &metric, countName))
+
 			if aggregationFunc == "max" {
 				aggregations = append(aggregations, buildMetricAggregation("doubleMax", mo, &metric, querySpecID))
 
@@ -1404,7 +1401,11 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 
 			} else if aggregationFunc == "avg" {
 
-				aggregations = append(aggregations, buildMetricAggregation("doubleSum", mo, &metric, querySpecID+db.QueryDelimeter+"sum"))
+				countName := db.ConstructAggregationName(querySpecID, "count")
+				keyToDrop = append(keyToDrop, countName)
+				countKeys[countName] = []string{querySpecID}
+				aggregations = append(aggregations, buildMetricAggregation("count", mo, &metric, countName),
+					buildMetricAggregation("doubleSum", mo, &metric, querySpecID+db.QueryDelimeter+"sum"))
 
 				keyToDrop = append(keyToDrop, querySpecID+db.QueryDelimeter+"sum")
 
@@ -1430,7 +1431,7 @@ func AggMetricsQuery(tenant string, dataSource string, interval string, monitore
 	return &godruid.QueryTimeseries{
 		DataSource:   dataSource,
 		Granularity:  toGranularity(granularity),
-		Context:      map[string]interface{}{godruid.TIMEOUT: timeout, godruid.SKIPEMPTYBUCKETS: true},
+		Context:      map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String(), godruid.SKIPEMPTYBUCKETS: true},
 		Aggregations: aggregations,
 		Filter: godruid.FilterAnd(
 			godruid.FilterSelector(schemaTenantID, strings.ToLower(tenant)),
@@ -1745,7 +1746,7 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		QueryType:        godruid.GROUPBY,
 		DataSource:       dataSource,
 		Granularity:      godruid.GranAll,
-		Context:          map[string]interface{}{godruid.TIMEOUT: timeout, "queryId": uuid.NewV4().String()},
+		Context:          map[string]interface{}{godruid.TIMEOUT: timeout, godruid.QUERYID: uuid.NewV4().String()},
 		Aggregations:     aggregations,
 		Filter:           filterOn,
 		PostAggregations: scoredPostAggregation,

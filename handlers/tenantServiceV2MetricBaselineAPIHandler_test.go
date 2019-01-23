@@ -22,6 +22,8 @@ var (
 
 func TestMetricBaselineCRUDV2(t *testing.T) {
 
+	fetchLimiter := handlers.CreateLimitedFetchManager(metricBaselineDB)
+
 	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, metricBaselineDB)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
 	castedCreateTeant := createdTenant.(*admin_provisioning_service_v2.CreateTenantV2Created)
 	assert.NotNil(t, castedCreateTeant)
@@ -49,7 +51,7 @@ func TestMetricBaselineCRUDV2(t *testing.T) {
 	assert.Equal(t, castedCreate.Payload.Data, castedFetch.Payload.Data)
 
 	// Get metric baselines for an hour of the week for a MO
-	fetchByMOForHour := handlers.HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(handlers.AllRoles, metricBaselineDB)(tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params{MonitoredObjectID: castedCreate.Payload.Data.Attributes.MonitoredObjectID, HourOfWeek: *castedCreate.Payload.Data.Attributes.HourOfWeek,
+	fetchByMOForHour := handlers.HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(handlers.AllRoles, metricBaselineDB, fetchLimiter)(tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params{MonitoredObjectID: castedCreate.Payload.Data.Attributes.MonitoredObjectID, HourOfWeek: *castedCreate.Payload.Data.Attributes.HourOfWeek,
 		HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, MetricBaselineUrl, "GET")})
 	castedFetchByMOForHour := fetchByMOForHour.(*tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2OK)
 	assert.NotNil(t, castedFetchByMOForHour)
@@ -110,8 +112,10 @@ func TestMetricBaselineNotFoundV2(t *testing.T) {
 	castedFetch := fetched.(*tenant_provisioning_service_v2.GetMetricBaselineV2NotFound)
 	assert.NotNil(t, castedFetch)
 
+	fetchLimiter := handlers.CreateLimitedFetchManager(metricBaselineDB)
+
 	// By MO for Hour
-	fetchByMOForHour := handlers.HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(handlers.AllRoles, metricBaselineDB)(tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params{MonitoredObjectID: notFoundID, HourOfWeek: int32(4),
+	fetchByMOForHour := handlers.HandleGetMetricBaselineByMonitoredObjectIdForHourOfWeekV2(handlers.AllRoles, metricBaselineDB, fetchLimiter)(tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2Params{MonitoredObjectID: notFoundID, HourOfWeek: int32(4),
 		HTTPRequest: createHttpRequestWithParams(tenantID, handlers.UserRoleSkylight, MetricBaselineUrl, "GET")})
 	castedFetchByMOForHour := fetchByMOForHour.(*tenant_provisioning_service_v2.GetMetricBaselineByMonitoredObjectIDForHourOfWeekV2NotFound)
 	assert.NotNil(t, castedFetchByMOForHour)

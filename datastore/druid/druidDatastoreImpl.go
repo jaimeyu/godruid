@@ -17,12 +17,11 @@ import (
 	"github.com/accedian/adh-gather/models/tenant"
 	"github.com/accedian/adh-gather/swagmodels"
 	"github.com/accedian/godruid"
+	uuid "github.com/satori/go.uuid"
 
 	db "github.com/accedian/adh-gather/datastore"
 	pb "github.com/accedian/adh-gather/gathergrpc"
 	mon "github.com/accedian/adh-gather/monitoring"
-
-	"github.com/satori/go.uuid"
 )
 
 const (

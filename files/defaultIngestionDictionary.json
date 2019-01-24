@@ -4,7 +4,7 @@
       "metricMap":{
         "packetsSent": {
           "ui": {
-            "group": "packet",
+            "group": "packets",
             "position": "0"
           },
           "monitoredObjectTypes": [

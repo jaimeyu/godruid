@@ -2,7 +2,7 @@
   "metrics": {
     "accedian-rfc8321": {
       "metricMap":{
-        "totalCount": {
+        "packetsSent": {
           "ui": {
             "group": "packet",
             "position": "0"
@@ -10,7 +10,7 @@
           "monitoredObjectTypes": [
             {
               "key": "rfc8321",
-              "rawMetricId": "totalCount",
+              "rawMetricId": "packetsSent",
               "units": [
                 "value"
               ],
@@ -21,7 +21,7 @@
             }
           ]
         },
-        "lostCount": {
+        "packetsLost": {
           "ui": {
             "group": "packets",
             "position": "1"
@@ -29,7 +29,7 @@
           "monitoredObjectTypes": [
             {
               "key": "rfc8321",
-              "rawMetricId": "lostCount",
+              "rawMetricId": "packetsLost",
               "units": [
                 "value"
               ],

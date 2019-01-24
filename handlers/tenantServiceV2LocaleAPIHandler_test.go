@@ -187,6 +187,10 @@ func TestLocaleAPIsProtectedByAuthV2(t *testing.T) {
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateLocaleV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
+	created = handlers.HandleCreateLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateLocaleV2Params{Body: generateRandomTenantLocaleCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, LocaleUrl, "POST")})
+	castedCreate = created.(*tenant_provisioning_service_v2.CreateLocaleV2Forbidden)
+	assert.NotNil(t, castedCreate)
+
 	// Update - SkylightAdmin and TenantAdmin Only
 	updated := handlers.HandleUpdateLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateLocaleV2Params{LocaleID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, LocaleUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateLocaleV2Forbidden)
@@ -196,12 +200,20 @@ func TestLocaleAPIsProtectedByAuthV2(t *testing.T) {
 	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateLocaleV2Forbidden)
 	assert.NotNil(t, castedUpdate)
 
+	updated = handlers.HandleUpdateLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateLocaleV2Params{LocaleID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, LocaleUrl, "PATCH")})
+	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateLocaleV2Forbidden)
+	assert.NotNil(t, castedUpdate)
+
 	// Delete - SkylightAdmin and TenantAdmin Only
 	deleted := handlers.HandleDeleteLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteLocaleV2Params{LocaleID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, LocaleUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteLocaleV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
 	deleted = handlers.HandleDeleteLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteLocaleV2Params{LocaleID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, LocaleUrl, "DELETE")})
+	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteLocaleV2Forbidden)
+	assert.NotNil(t, castedDelete)
+
+	deleted = handlers.HandleDeleteLocaleV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteLocaleV2Params{LocaleID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, LocaleUrl, "DELETE")})
 	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteLocaleV2Forbidden)
 	assert.NotNil(t, castedDelete)
 }

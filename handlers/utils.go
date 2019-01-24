@@ -655,15 +655,17 @@ func generateErrorMessage(errCode int, errMsg string) string {
 User roles as defined by Skylight AAA
     SkylightAdmin UserRole = "skylight-admin"
     TenantAdmin   UserRole = "tenant-admin"
-    TenantUser    UserRole = "tenant-user"
+	TenantUser    UserRole = "tenant-user"
+	TenantContributor    UserRole = "tenant-contributor"
     UnknownRole   UserRole = "unknown"
 */
 const (
-	UserRoleSkylight    = "skylight-admin"
-	UserRoleTenantAdmin = "tenant-admin"
-	UserRoleTenantUser  = "tenant-user"
-	UserRoleSystem      = "system"
-	UserRoleUnknown     = "unknown"
+	UserRoleSkylight          = "skylight-admin"
+	UserRoleTenantAdmin       = "tenant-admin"
+	UserRoleTenantUser        = "tenant-user"
+	UserRoleTenantContributor = "tenant-contributor"
+	UserRoleSystem            = "system"
+	UserRoleUnknown           = "unknown"
 )
 
 // X-Forward strings that will come from skylight AAA

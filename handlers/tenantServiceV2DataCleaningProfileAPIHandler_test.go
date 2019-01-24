@@ -175,6 +175,14 @@ func TestCreateDataCleaningProfile(t *testing.T) {
 	castedCreateFrbdn := createdFrbdn.(*tenant_provisioning_service_v2.CreateDataCleaningProfileForbidden)
 	assert.NotNil(t, castedCreateFrbdn)
 
+	createdFrbdn = handlers.HandleCreateDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateDataCleaningProfileParams{
+		Body: &swagmodels.DataCleaningProfileCreateRequest{
+			Data: createRandomDataCleaningProfileCreateRequest(),
+		},
+		HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleTenantContributor)})
+	castedCreateFrbdn = createdFrbdn.(*tenant_provisioning_service_v2.CreateDataCleaningProfileForbidden)
+	assert.NotNil(t, castedCreateFrbdn)
+
 	// Try the create with bad data:
 	createdBad := handlers.HandleCreateDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateDataCleaningProfileParams{
 		Body: &swagmodels.DataCleaningProfileCreateRequest{
@@ -261,6 +269,12 @@ func TestDeleteDataCleaningProfile(t *testing.T) {
 		ProfileID:   *castedCreate.Payload.Data.ID,
 		HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleTenantUser)})
 	castedDeleteFrbdn := deleteFrbdn.(*tenant_provisioning_service_v2.DeleteDataCleaningProfileForbidden)
+	assert.NotNil(t, castedDeleteFrbdn)
+
+	deleteFrbdn = handlers.HandleDeleteDataCleaningProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteDataCleaningProfileParams{
+		ProfileID:   *castedCreate.Payload.Data.ID,
+		HTTPRequest: createHttpRequest(createdTenant.ID, handlers.UserRoleTenantContributor)})
+	castedDeleteFrbdn = deleteFrbdn.(*tenant_provisioning_service_v2.DeleteDataCleaningProfileForbidden)
 	assert.NotNil(t, castedDeleteFrbdn)
 
 	// Delete successfully

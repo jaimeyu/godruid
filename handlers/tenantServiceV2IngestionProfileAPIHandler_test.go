@@ -169,6 +169,10 @@ func TestIngestionProfileAPIsProtectedByAuthV2(t *testing.T) {
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateIngestionProfileV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
+	created = handlers.HandleCreateIngestionProfileV2(handlers.SkylightAdminRoleOnly, tenantDB)(tenant_provisioning_service_v2.CreateIngestionProfileV2Params{Body: generateTenantIngestionProfileCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, IngestionProfileUrl, "POST")})
+	castedCreate = created.(*tenant_provisioning_service_v2.CreateIngestionProfileV2Forbidden)
+	assert.NotNil(t, castedCreate)
+
 	// Update - SkylightAdmin and TenantAdmin Only
 	updated := handlers.HandleUpdateIngestionProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateIngestionProfileV2Params{IngestionProfileID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, IngestionProfileUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateIngestionProfileV2Forbidden)
@@ -178,12 +182,20 @@ func TestIngestionProfileAPIsProtectedByAuthV2(t *testing.T) {
 	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateIngestionProfileV2Forbidden)
 	assert.NotNil(t, castedUpdate)
 
+	updated = handlers.HandleUpdateIngestionProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateIngestionProfileV2Params{IngestionProfileID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, IngestionProfileUrl, "PATCH")})
+	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateIngestionProfileV2Forbidden)
+	assert.NotNil(t, castedUpdate)
+
 	// Delete - SkylightAdmin and TenantAdmin Only
 	deleted := handlers.HandleDeleteIngestionProfileV2(handlers.SkylightAdminRoleOnly, tenantDB)(tenant_provisioning_service_v2.DeleteIngestionProfileV2Params{IngestionProfileID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantAdmin, IngestionProfileUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteIngestionProfileV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
 	deleted = handlers.HandleDeleteIngestionProfileV2(handlers.SkylightAdminRoleOnly, tenantDB)(tenant_provisioning_service_v2.DeleteIngestionProfileV2Params{IngestionProfileID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, IngestionProfileUrl, "DELETE")})
+	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteIngestionProfileV2Forbidden)
+	assert.NotNil(t, castedDelete)
+
+	deleted = handlers.HandleDeleteIngestionProfileV2(handlers.SkylightAdminRoleOnly, tenantDB)(tenant_provisioning_service_v2.DeleteIngestionProfileV2Params{IngestionProfileID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, IngestionProfileUrl, "DELETE")})
 	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteIngestionProfileV2Forbidden)
 	assert.NotNil(t, castedDelete)
 }

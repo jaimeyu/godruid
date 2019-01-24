@@ -1,3 +1,4 @@
+* Fix - Updated the viewOfDelimitedKeys couchdb view so it breaks monitored object names by _ and -
 ## Current Release 
 ### 0.284.0 
 **Release Date:** Mon Jan 21 17:37:48 UTC 2019     

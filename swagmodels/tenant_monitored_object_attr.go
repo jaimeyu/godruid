@@ -51,7 +51,7 @@ type TenantMonitoredObjectAttr struct {
 	ObjectName string `json:"objectName,omitempty"`
 
 	// object type
-	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-interface cisco-node-summary pvx paa regulator]
 	ObjectType string `json:"objectType,omitempty"`
 
 	// reflector name
@@ -137,7 +137,7 @@ var tenantMonitoredObjectAttrTypeObjectTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-interface","cisco-node-summary","pvx","paa","regulator"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -161,6 +161,21 @@ const (
 
 	// TenantMonitoredObjectAttrObjectTypeTwampSl captures enum value "twamp-sl"
 	TenantMonitoredObjectAttrObjectTypeTwampSl string = "twamp-sl"
+
+	// TenantMonitoredObjectAttrObjectTypeCiscoInterface captures enum value "cisco-interface"
+	TenantMonitoredObjectAttrObjectTypeCiscoInterface string = "cisco-interface"
+
+	// TenantMonitoredObjectAttrObjectTypeCiscoNodeSummary captures enum value "cisco-node-summary"
+	TenantMonitoredObjectAttrObjectTypeCiscoNodeSummary string = "cisco-node-summary"
+
+	// TenantMonitoredObjectAttrObjectTypePvx captures enum value "pvx"
+	TenantMonitoredObjectAttrObjectTypePvx string = "pvx"
+
+	// TenantMonitoredObjectAttrObjectTypePaa captures enum value "paa"
+	TenantMonitoredObjectAttrObjectTypePaa string = "paa"
+
+	// TenantMonitoredObjectAttrObjectTypeRegulator captures enum value "regulator"
+	TenantMonitoredObjectAttrObjectTypeRegulator string = "regulator"
 )
 
 // prop value enum

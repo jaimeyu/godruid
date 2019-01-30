@@ -27,6 +27,8 @@
                 type: "array"
                 items:
                   type: "string"
+              geo:
+                $ref: '#/definitions/MetadataConfigGeo'
                     
   MetadataConfigUpdateRequest:
     type: "object"
@@ -60,6 +62,8 @@
                 type: "array"
                 items:
                   type: "string"
+              geo:
+                $ref: '#/definitions/MetadataConfigGeo'
             
              
   MetadataConfigListResponse:
@@ -115,6 +119,8 @@
             type: "array"
             items:
               type: "string"
+          geo:
+            $ref: '#/definitions/MetadataConfigGeo'
           createdTimestamp:
             type: "integer"
             format: "int64"
@@ -123,3 +129,22 @@
             type: "integer"
             format: "int64"
             description: "Time since epoch at which this object was last altered."
+
+  MetadataConfigGeo: 
+    description: "The geographical location information for nodes on the logical map"
+    type: "object"
+    properties:
+      startPoint:
+        description: "The geographical location details for the first point of a Logical Map"
+        $ref: '#/definitions/GeoDetails'
+      endPoint:
+        description: "The geographical location details for the first point of a Logical Map"
+        $ref: '#/definitions/GeoDetails'
+  GeoDetails:
+    type: "object"
+    required: ["latitude", "longitude"]
+    properties:
+      latitude:
+        type: "string"
+      longitude:
+        type: "string"

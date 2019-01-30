@@ -227,6 +227,94 @@ func TestThresholdProfileAPIsProtectedByAuthV2(t *testing.T) {
 	assert.NotNil(t, castedDelete)
 }
 
+func TestThresholdProfileDeleteIntegrityCheckV2(t *testing.T) {
+
+	createdTenant := handlers.HandleCreateTenantV2(handlers.SkylightAdminRoleOnly, adminDB, tenantDB, stubbedMetricBaselineDatastore)(admin_provisioning_service_v2.CreateTenantV2Params{Body: generateRandomTenantCreationRequest(), HTTPRequest: createHttpRequestWithParams("", handlers.UserRoleSkylight, tenantURL, "POST")})
+	castedCreateTeant := createdTenant.(*admin_provisioning_service_v2.CreateTenantV2Created)
+	assert.NotNil(t, castedCreateTeant)
+	assert.NotEmpty(t, castedCreateTeant.Payload.Data.ID)
+	assert.NotEmpty(t, castedCreateTeant.Payload.Data.Attributes.Name)
+	assert.NotEmpty(t, castedCreateTeant.Payload.Data.Attributes.URLSubdomain)
+	assert.Equal(t, string(common.UserActive), *castedCreateTeant.Payload.Data.Attributes.State)
+	assert.True(t, *castedCreateTeant.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreateTeant.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+
+	// Make sure a record is created when the tenant is created
+	existing := handlers.HandleGetAllThresholdProfilesV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllThresholdProfilesV2Params{HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "GET")})
+	castedResponse := existing.(*tenant_provisioning_service_v2.GetAllThresholdProfilesV2OK)
+	assert.NotNil(t, castedResponse)
+	assert.Equal(t, 1, len(castedResponse.Payload.Data))
+	assert.Equal(t, "Default", *castedResponse.Payload.Data[0].Attributes.Name)
+
+	created := handlers.HandleCreateThresholdProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateThresholdProfileV2Params{Body: generateRandomTenantThresholdProfileCreationRequest(), HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "POST")})
+	castedCreate := created.(*tenant_provisioning_service_v2.CreateThresholdProfileV2Created)
+	assert.NotNil(t, castedCreate)
+	assert.NotEmpty(t, castedCreate.Payload.Data.ID)
+	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Name)
+	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Thresholds)
+	assert.NotEmpty(t, castedCreate.Payload.Data.Attributes.Datatype)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreate.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+
+	// Create a Dashboard that uses the Profile
+	dashReq := generateRandomTenantDashboardCreationRequest()
+	dashReq.Data.Relationships.ThresholdProfile.Data.ID = *castedCreate.Payload.Data.ID
+	createdDash := handlers.HandleCreateDashboardV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateDashboardV2Params{Body: dashReq, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, DashboardUrl, "POST")})
+	castedCreateDash := createdDash.(*tenant_provisioning_service_v2.CreateDashboardV2Created)
+	assert.NotNil(t, castedCreateDash)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.ID)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.Attributes.Name)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.Relationships.ThresholdProfile)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.Attributes.Category)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.Relationships.Cards.Data)
+	assert.NotEmpty(t, castedCreateDash.Payload.Data.Attributes.Datatype)
+	assert.True(t, *castedCreateDash.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreateDash.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+
+	// Create a SLA Report Configuration that uses the profile
+	createdSLA := handlers.HandleCreateReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.CreateReportScheduleConfigV2Params{Body: generateRandomTenantReportScheduleConfigCreationRequest(*castedCreate.Payload.Data.ID), HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "POST")})
+	castedCreateSLA := createdSLA.(*tenant_provisioning_service_v2.CreateReportScheduleConfigV2Created)
+	assert.NotNil(t, castedCreateSLA)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.ID)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.Name)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Relationships)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.Hour)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.Minute)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.DayMonth)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.DayWeek)
+	assert.NotEmpty(t, castedCreateSLA.Payload.Data.Attributes.Datatype)
+	assert.True(t, *castedCreateSLA.Payload.Data.Attributes.CreatedTimestamp > 0)
+	assert.True(t, *castedCreateSLA.Payload.Data.Attributes.LastModifiedTimestamp > 0)
+
+	// Delete - fails due to integrity check
+	deleted := handlers.HandleDeleteThresholdProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "DELETE")})
+	castedDeleteError := deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2InternalServerError)
+	assert.NotNil(t, castedDeleteError)
+
+	// Delete the Dashboard
+	deletedDash := handlers.HandleDeleteDashboardV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteDashboardV2Params{DashboardID: *castedCreateDash.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, DashboardUrl, "DELETE")})
+	castedDeleteDash := deletedDash.(*tenant_provisioning_service_v2.DeleteDashboardV2OK)
+	assert.NotNil(t, castedDeleteDash)
+	assert.Equal(t, castedCreateDash.Payload.Data, castedDeleteDash.Payload.Data)
+
+	// Delete - still fails due to SLA Report Configuration
+	deleted = handlers.HandleDeleteThresholdProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "DELETE")})
+	castedDeleteError = deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2InternalServerError)
+	assert.NotNil(t, castedDeleteError)
+
+	// Delete the SLA Report Configuration
+	deletedSLA := handlers.HandleDeleteReportScheduleConfigV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteReportScheduleConfigV2Params{ConfigID: *castedCreateSLA.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ReportScheduleConfigUrl, "DELETE")})
+	castedDeleteSLA := deletedSLA.(*tenant_provisioning_service_v2.DeleteReportScheduleConfigV2OK)
+	assert.NotNil(t, castedDeleteSLA)
+	assert.Equal(t, castedCreateSLA.Payload.Data, castedDeleteSLA.Payload.Data)
+
+	// Delete - success
+	deleted = handlers.HandleDeleteThresholdProfileV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: *castedCreate.Payload.Data.ID, HTTPRequest: createHttpRequestWithParams(*castedCreateTeant.Payload.Data.ID, handlers.UserRoleSkylight, ThresholdProfileUrl, "DELETE")})
+	castedDeleteOK := deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2OK)
+	assert.NotNil(t, castedDeleteOK)
+	assert.Equal(t, castedCreate.Payload.Data, castedDeleteOK.Payload.Data)
+}
+
 func generateRandomTenantThresholdProfileCreationRequest() *swagmodels.ThresholdProfileCreateRequest {
 	name := fake.CharactersN(12)
 	thresholds := generateThresholdsObject()

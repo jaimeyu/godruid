@@ -285,6 +285,12 @@ func doDeleteThresholdProfileV2(allowedRoles []string, tenantDB datastore.Tenant
 		return startTime, http.StatusForbidden, nil, fmt.Errorf("Delete %s operation not authorized for role: %s", tenmod.TenantThresholdProfileStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
 	}
 
+	// Inegrity check to ensure other objects are not dependent on the threshold profile before we delete it
+	err := canThresholdProfileBeDeleted(tenantID, params.ThrPrfID, tenantDB)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to delete %s due to failed integrity check: %s", tenmod.TenantThresholdProfileStr, err.Error())
+	}
+
 	// Issue request to DAO Layer
 	result, err := tenantDB.DeleteTenantThresholdProfile(tenantID, params.ThrPrfID)
 	if err != nil {
@@ -337,4 +343,42 @@ func doGetAllThresholdProfilesV2(allowedRoles []string, tenantDB datastore.Tenan
 	reportAPICompletionState(startTime, http.StatusOK, mon.GetAllThrPrfStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Retrieved %d %ss", len(result), tenmod.TenantThresholdProfileStr)
 	return startTime, http.StatusOK, &converted, nil
+}
+
+func canThresholdProfileBeDeleted(tenantID string, thrPrfId string, tenantDB datastore.TenantServiceDatastore) error {
+	// Check the Dashboards
+	allDashboards, err := tenantDB.GetAllDashboards(tenantID)
+	if err != nil {
+		if !strings.Contains(err.Error(), datastore.NotFoundStr) {
+			return fmt.Errorf("Unable to retrieve Dashboard data for integrity check: %s", err.Error())
+		}
+	}
+
+	dashboardsUsingPrf := []string{}
+	for _, dash := range allDashboards {
+		if dash.ThresholdProfile == thrPrfId {
+			dashboardsUsingPrf = append(dashboardsUsingPrf, dash.ID)
+		}
+	}
+
+	// Check the SLA Report configs
+	allReportConfigs, err := tenantDB.GetAllReportScheduleConfigs(tenantID)
+	if err != nil {
+		if !strings.Contains(err.Error(), datastore.NotFoundStr) {
+			return fmt.Errorf("Unable to retrieve SLA Report Configuration data for integrity check: %s", err.Error())
+		}
+	}
+
+	reportsUsingPrf := []string{}
+	for _, config := range allReportConfigs {
+		if config.ThresholdProfile == thrPrfId {
+			reportsUsingPrf = append(reportsUsingPrf, config.ID)
+		}
+	}
+
+	if len(dashboardsUsingPrf) != 0 || len(reportsUsingPrf) != 0 {
+		return fmt.Errorf("Integrity check failed. Threshold Profile %s is still used by the following: Dashboards %s - SLA Report Configurations %s", thrPrfId, models.AsJSONString(dashboardsUsingPrf), models.AsJSONString(reportsUsingPrf))
+	}
+
+	return nil
 }

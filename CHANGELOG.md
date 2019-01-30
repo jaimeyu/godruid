@@ -1,8 +1,10 @@
-* Fix - Updated the viewOfDelimitedKeys couchdb view so it breaks monitored object names by _ and -
 ## Current Release 
+### 0.288.0 
+**Release Date:** Wed Jan 30 15:51:38 UTC 2019     
+## Previous Releases 
+* Fix - Updated the viewOfDelimitedKeys couchdb view so it breaks monitored object names by _ and -
 ### 0.287.0 
 **Release Date:** Wed Jan 30 15:42:39 UTC 2019     
-## Previous Releases 
 * Feature - adding integrity check to Threshold Profile deletion
 ### 0.286.0 
 **Release Date:** Wed Jan 30 14:46:51 UTC 2019     

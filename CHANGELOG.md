@@ -1,3 +1,4 @@
+* Feature - adding geo properties to the mdtatdata config object
 ## Current Release 
 ### 0.285.0 
 **Release Date:** Thu Jan 24 14:22:06 UTC 2019     

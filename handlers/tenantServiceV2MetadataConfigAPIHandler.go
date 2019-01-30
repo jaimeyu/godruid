@@ -249,6 +249,8 @@ func doUpdateMetadataConfigV2(allowedRoles []string, tenantDB datastore.TenantSe
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to fetch %s: %s", tenmod.TenantMetadataConfigStr, err.Error())
 	}
 
+	logger.Log.Errorf("RECEIVED: %s", string(patchRequestBytes))
+
 	// Merge the attributes passed in with the patch request to the record fetched from the datastore
 	patched := &tenmod.MetadataConfig{}
 	if err := models.MergeObjWithMap(patched, fetched, patchRequestBytes); err != nil {

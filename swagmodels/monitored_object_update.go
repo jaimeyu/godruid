@@ -174,7 +174,7 @@ type MonitoredObjectUpdateAttributes struct {
 
 	// Type of the Monitored Object
 	// Required: true
-	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-interface cisco-node-summary pvx paa regulator]
 	ObjectType *string `json:"objectType"`
 
 	// Name of the target of the Monitored Object
@@ -328,7 +328,7 @@ var monitoredObjectUpdateAttributesTypeObjectTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl", "cisco-interface", "cisco-node-summary", "pvx", "paa", "regulator"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-interface","cisco-node-summary","pvx","paa","regulator"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -352,6 +352,21 @@ const (
 
 	// MonitoredObjectUpdateAttributesObjectTypeTwampSl captures enum value "twamp-sl"
 	MonitoredObjectUpdateAttributesObjectTypeTwampSl string = "twamp-sl"
+
+	// MonitoredObjectUpdateAttributesObjectTypeCiscoInterface captures enum value "cisco-interface"
+	MonitoredObjectUpdateAttributesObjectTypeCiscoInterface string = "cisco-interface"
+
+	// MonitoredObjectUpdateAttributesObjectTypeCiscoNodeSummary captures enum value "cisco-node-summary"
+	MonitoredObjectUpdateAttributesObjectTypeCiscoNodeSummary string = "cisco-node-summary"
+
+	// MonitoredObjectUpdateAttributesObjectTypePvx captures enum value "pvx"
+	MonitoredObjectUpdateAttributesObjectTypePvx string = "pvx"
+
+	// MonitoredObjectUpdateAttributesObjectTypePaa captures enum value "paa"
+	MonitoredObjectUpdateAttributesObjectTypePaa string = "paa"
+
+	// MonitoredObjectUpdateAttributesObjectTypeRegulator captures enum value "regulator"
+	MonitoredObjectUpdateAttributesObjectTypeRegulator string = "regulator"
 )
 
 // prop value enum

@@ -1,7 +1,11 @@
 * Feature - adding integrity check to Threshold Profile deletion
 ## Current Release 
+### 0.286.0 
+**Release Date:** Wed Jan 30 14:46:51 UTC 2019     
+## Previous Releases 
+* Feature - adding geo properties to the mdtatdata config object
 ### 0.285.0 
-**Release Date:** Thu Jan 24 14:22:06 UTC 2019     
+**Release Date:** Thu Jan 24 14:22:06 UTC 2019
 * Feature - adding geo properties to the metatdata config object
 ## Previous Releases 
 ### 0.284.0 

@@ -163,6 +163,9 @@ type MetadataConfigAttributes struct {
 	// Required: true
 	EndPoint *string `json:"endPoint"`
 
+	// geo
+	Geo *MetadataConfigGeo `json:"geo,omitempty"`
+
 	// Time since epoch at which this object was last altered.
 	// Required: true
 	LastModifiedTimestamp *int64 `json:"lastModifiedTimestamp"`
@@ -197,6 +200,10 @@ func (m *MetadataConfigAttributes) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateEndPoint(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGeo(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -253,6 +260,24 @@ func (m *MetadataConfigAttributes) validateEndPoint(formats strfmt.Registry) err
 
 	if err := validate.Required("attributes"+"."+"endPoint", "body", m.EndPoint); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *MetadataConfigAttributes) validateGeo(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Geo) { // not required
+		return nil
+	}
+
+	if m.Geo != nil {
+		if err := m.Geo.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("attributes" + "." + "geo")
+			}
+			return err
+		}
 	}
 
 	return nil

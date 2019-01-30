@@ -206,6 +206,10 @@ func TestMetricBaselineAPIsProtectedByAuthV2(t *testing.T) {
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateMetricBaselineV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
+	created = handlers.HandleCreateMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.CreateMetricBaselineV2Params{Body: generateRandomTenantMetricBaselineCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, MetricBaselineUrl, "POST")})
+	castedCreate = created.(*tenant_provisioning_service_v2.CreateMetricBaselineV2Forbidden)
+	assert.NotNil(t, castedCreate)
+
 	// Update - SkylightAdmin and TenantAdmin Only
 	updated := handlers.HandleUpdateMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.UpdateMetricBaselineV2Params{MetricBaselineID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, MetricBaselineUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateMetricBaselineV2Forbidden)
@@ -215,12 +219,20 @@ func TestMetricBaselineAPIsProtectedByAuthV2(t *testing.T) {
 	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateMetricBaselineV2Forbidden)
 	assert.NotNil(t, castedUpdate)
 
+	updated = handlers.HandleUpdateMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.UpdateMetricBaselineV2Params{MetricBaselineID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, MetricBaselineUrl, "PATCH")})
+	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateMetricBaselineV2Forbidden)
+	assert.NotNil(t, castedUpdate)
+
 	// Delete - SkylightAdmin and TenantAdmin Only
 	deleted := handlers.HandleDeleteMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.DeleteMetricBaselineV2Params{MetricBaselineID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, MetricBaselineUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteMetricBaselineV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
 	deleted = handlers.HandleDeleteMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.DeleteMetricBaselineV2Params{MetricBaselineID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, MetricBaselineUrl, "DELETE")})
+	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteMetricBaselineV2Forbidden)
+	assert.NotNil(t, castedDelete)
+
+	deleted = handlers.HandleDeleteMetricBaselineV2(handlers.SkylightAndTenantAdminRoles, metricBaselineDB)(tenant_provisioning_service_v2.DeleteMetricBaselineV2Params{MetricBaselineID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, MetricBaselineUrl, "DELETE")})
 	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteMetricBaselineV2Forbidden)
 	assert.NotNil(t, castedDelete)
 }

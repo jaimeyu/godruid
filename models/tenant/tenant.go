@@ -1105,15 +1105,26 @@ func (l *Locale) SetID(s string) error {
 
 // MetadataConfig - defines a Tenant MetadataConfig.
 type MetadataConfig struct {
-	ID                    string   `json:"_id"`
-	REV                   string   `json:"_rev"`
-	Datatype              string   `json:"datatype"`
-	TenantID              string   `json:"tenantId"`
-	EndPoint              string   `json:"endPoint"`
-	MidPoints             []string `json:"midPoints"`
-	StartPoint            string   `json:"startPoint"`
-	CreatedTimestamp      int64    `json:"createdTimestamp"`
-	LastModifiedTimestamp int64    `json:"lastModifiedTimestamp"`
+	ID                    string             `json:"_id"`
+	REV                   string             `json:"_rev"`
+	Datatype              string             `json:"datatype"`
+	TenantID              string             `json:"tenantId"`
+	EndPoint              string             `json:"endPoint"`
+	MidPoints             []string           `json:"midPoints"`
+	StartPoint            string             `json:"startPoint"`
+	Geo                   *MetadataConfigGeo `json:"geo"`
+	CreatedTimestamp      int64              `json:"createdTimestamp"`
+	LastModifiedTimestamp int64              `json:"lastModifiedTimestamp"`
+}
+
+type MetadataConfigGeo struct {
+	EndPoint   *GeoDetails `json:"endPoint,"`
+	StartPoint *GeoDetails `json:"startPoint,"`
+}
+
+type GeoDetails struct {
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
 // GetID - required implementation for jsonapi marshalling

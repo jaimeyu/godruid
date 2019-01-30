@@ -196,6 +196,10 @@ func TestThresholdProfileAPIsProtectedByAuthV2(t *testing.T) {
 	castedCreate = created.(*tenant_provisioning_service_v2.CreateThresholdProfileV2Forbidden)
 	assert.NotNil(t, castedCreate)
 
+	created = handlers.HandleCreateThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.CreateThresholdProfileV2Params{Body: generateRandomTenantThresholdProfileCreationRequest(), HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, ThresholdProfileUrl, "POST")})
+	castedCreate = created.(*tenant_provisioning_service_v2.CreateThresholdProfileV2Forbidden)
+	assert.NotNil(t, castedCreate)
+
 	// Update - SkylightAdmin and TenantAdmin Only
 	updated := handlers.HandleUpdateThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateThresholdProfileV2Params{ThrPrfID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, ThresholdProfileUrl, "PATCH")})
 	castedUpdate := updated.(*tenant_provisioning_service_v2.UpdateThresholdProfileV2Forbidden)
@@ -205,12 +209,20 @@ func TestThresholdProfileAPIsProtectedByAuthV2(t *testing.T) {
 	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateThresholdProfileV2Forbidden)
 	assert.NotNil(t, castedUpdate)
 
+	updated = handlers.HandleUpdateThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.UpdateThresholdProfileV2Params{ThrPrfID: fakeID, Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, ThresholdProfileUrl, "PATCH")})
+	castedUpdate = updated.(*tenant_provisioning_service_v2.UpdateThresholdProfileV2Forbidden)
+	assert.NotNil(t, castedUpdate)
+
 	// Delete - SkylightAdmin and TenantAdmin Only
 	deleted := handlers.HandleDeleteThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleUnknown, ThresholdProfileUrl, "DELETE")})
 	castedDelete := deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2Forbidden)
 	assert.NotNil(t, castedDelete)
 
 	deleted = handlers.HandleDeleteThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, ThresholdProfileUrl, "DELETE")})
+	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2Forbidden)
+	assert.NotNil(t, castedDelete)
+
+	deleted = handlers.HandleDeleteThresholdProfileV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.DeleteThresholdProfileV2Params{ThrPrfID: fakeID, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantContributor, ThresholdProfileUrl, "DELETE")})
 	castedDelete = deleted.(*tenant_provisioning_service_v2.DeleteThresholdProfileV2Forbidden)
 	assert.NotNil(t, castedDelete)
 }

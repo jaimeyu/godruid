@@ -8234,6 +8234,8 @@ definitions:
                 type: "array"
                 items:
                   type: "string"
+              geo:
+                $ref: '#/definitions/MetadataConfigGeo'
                     
   MetadataConfigUpdateRequest:
     type: "object"
@@ -8267,6 +8269,8 @@ definitions:
                 type: "array"
                 items:
                   type: "string"
+              geo:
+                $ref: '#/definitions/MetadataConfigGeo'
             
              
   MetadataConfigListResponse:
@@ -8322,6 +8326,8 @@ definitions:
             type: "array"
             items:
               type: "string"
+          geo:
+            $ref: '#/definitions/MetadataConfigGeo'
           createdTimestamp:
             type: "integer"
             format: "int64"
@@ -8330,6 +8336,25 @@ definitions:
             type: "integer"
             format: "int64"
             description: "Time since epoch at which this object was last altered."
+
+  MetadataConfigGeo: 
+    description: "The geographical location information for nodes on the logical map"
+    type: "object"
+    properties:
+      startPoint:
+        description: "The geographical location details for the first point of a Logical Map"
+        $ref: '#/definitions/GeoDetails'
+      endPoint:
+        description: "The geographical location details for the first point of a Logical Map"
+        $ref: '#/definitions/GeoDetails'
+  GeoDetails:
+    type: "object"
+    required: ["latitude", "longitude"]
+    properties:
+      latitude:
+        type: "string"
+      longitude:
+        type: "string"
   MetricBaselineCreateRequest:
     type: "object"
     required: ["data"]
@@ -9614,7 +9639,7 @@ definitions:
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator]
           meta:
             type: "object"
             description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
@@ -9738,7 +9763,7 @@ definitions:
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator]
           createdTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was instantiated."

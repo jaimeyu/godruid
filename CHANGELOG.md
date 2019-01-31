@@ -1,7 +1,19 @@
 ## Current Release 
+### 0.288.0 
+**Release Date:** Wed Jan 30 15:51:38 UTC 2019     
+## Previous Releases 
+* Fix - Updated the viewOfDelimitedKeys couchdb view so it breaks monitored object names by _ and -
+### 0.287.0 
+**Release Date:** Wed Jan 30 15:42:39 UTC 2019     
+* Feature - adding integrity check to Threshold Profile deletion
+### 0.286.0 
+**Release Date:** Wed Jan 30 14:46:51 UTC 2019     
+* Feature - adding geo properties to the mdtatdata config object
+### 0.285.0 
+**Release Date:** Thu Jan 24 14:22:06 UTC 2019
+* Feature - adding geo properties to the metatdata config object
 ### 0.284.0 
 **Release Date:** Mon Jan 21 17:37:48 UTC 2019     
-## Previous Releases 
 * Fix - changing Postgres connection for heavily called get metric baseline API. Also changing config for how long gather will wait for a postgres worker from the connection pool
 ### 0.283.0 
 **Release Date:** Fri Jan 18 16:17:26 UTC 2019     

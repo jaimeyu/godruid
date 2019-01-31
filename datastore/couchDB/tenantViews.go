@@ -195,14 +195,15 @@ const (
 	}`
 
 	ddocObjectNameDelimiterSplit = `{
-		"_id": "_design/viewOfDelimitedKeys",
-		"views": {
-			"byKey": {
-				"map": "function (doc) {\n    var dict = {};\n    if(doc.data.objectName) {\n      var words = doc.data.objectName.split(\"_\");\n      //words = words.slice(1);\n      for (var i in words) {\n        // emit(words[i], doc.data.objectId);\n        //if (word[i] == null) continue; \n        dict[words[i]] = doc.data.objectName\n      }\n    }\n    for (var key in dict)\n    emit(key, dict[key]);\n\n}\n"
-			}
-		},
-		"language": "javascript"
-	}`
+  "_id": "_design/viewOfDelimitedKeys",
+  "language": "javascript",
+  "views": {
+    "byKey": {
+      "map": "function (doc) {\n    // This version will split the sentences up by - and _\n\n    // Create a dictionary\n    var dict = {};\n    if (doc.data.objectName) {\n        // First attempt to split by _\n        var words = doc.data.objectName.split(\"_\");\n\n        // Now check if any of the words has -\n        for (var i in words) {\n            var aword = words[i]\n\n            // string.includes() does not work in couchdb, took me a while to figure this out and do a side by side with jsfiddle\n            var hasDashes = aword.split(\"-\")\n\n\n            // Check if we need to do a split on -\n            if (hasDashes.length > 1) {\n                var dashWords = aword.split(\"-\")\n                for (var dw in dashWords) {\n                    dict[dashWords[dw]] = doc.data.objectName\n                }\n            }\n            else {\n                // If not, then we ship it\n                dict[words[i]] = doc.data.objectName\n            }\n        }\n    }\n\n    // Take the dictionary and emit it to a view\n    for (var key in dict) {\n        emit(key, dict[key]);\n\n    }\n\n}\n\n"
+    }
+  }
+}
+		`
 
 	// metricBaselineByMO = `{
 	// 	"_id": "_design/metricBaseline",

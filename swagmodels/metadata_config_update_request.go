@@ -210,6 +210,9 @@ type MetadataConfigUpdateRequestDataAttributes struct {
 	// The last point of a Logical Map
 	EndPoint string `json:"endPoint,omitempty"`
 
+	// geo
+	Geo *MetadataConfigGeo `json:"geo,omitempty"`
+
 	// The points between the startPoint and endPoint of a logical map
 	MidPoints []string `json:"midPoints"`
 
@@ -225,6 +228,10 @@ func (m *MetadataConfigUpdateRequestDataAttributes) Validate(formats strfmt.Regi
 		res = append(res, err)
 	}
 
+	if err := m.validateGeo(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -235,6 +242,24 @@ func (m *MetadataConfigUpdateRequestDataAttributes) validateRev(formats strfmt.R
 
 	if err := validate.Required("data"+"."+"attributes"+"."+"_rev", "body", m.Rev); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *MetadataConfigUpdateRequestDataAttributes) validateGeo(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Geo) { // not required
+		return nil
+	}
+
+	if m.Geo != nil {
+		if err := m.Geo.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("data" + "." + "attributes" + "." + "geo")
+			}
+			return err
+		}
 	}
 
 	return nil

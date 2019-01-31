@@ -175,7 +175,7 @@ type MonitoredObjectAttributes struct {
 	ObjectName string `json:"objectName,omitempty"`
 
 	// Type of the Monitored Object
-	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl]
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-interface cisco-node-summary pvx paa regulator]
 	ObjectType string `json:"objectType,omitempty"`
 
 	// Name of the target of the Monitored Object
@@ -311,6 +311,21 @@ const (
 
 	// MonitoredObjectAttributesObjectTypeTwampSl captures enum value "twamp-sl"
 	MonitoredObjectAttributesObjectTypeTwampSl string = "twamp-sl"
+
+	// MonitoredObjectAttributesObjectTypeCiscoInterface captures enum value "cisco-interface"
+	MonitoredObjectAttributesObjectTypeCiscoInterface string = "cisco-interface"
+
+	// MonitoredObjectAttributesObjectTypeCiscoNodeSummary captures enum value "cisco-node-summary"
+	MonitoredObjectAttributesObjectTypeCiscoNodeSummary string = "cisco-node-summary"
+
+	// MonitoredObjectAttributesObjectTypePvx captures enum value "pvx"
+	MonitoredObjectAttributesObjectTypePvx string = "pvx"
+
+	// MonitoredObjectAttributesObjectTypePaa captures enum value "paa"
+	MonitoredObjectAttributesObjectTypePaa string = "paa"
+
+	// MonitoredObjectAttributesObjectTypeRegulator captures enum value "regulator"
+	MonitoredObjectAttributesObjectTypeRegulator string = "regulator"
 )
 
 // prop value enum

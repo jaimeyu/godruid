@@ -1,8 +1,10 @@
-* Fix - Resolved runtime error during bulk-meta operation
 ## Current Release 
+### 0.289.0 
+**Release Date:** Fri Feb  1 01:54:19 UTC 2019     
+## Previous Releases 
+* Fix - Resolved runtime error during bulk-meta operation
 ### 0.288.0 
 **Release Date:** Wed Jan 30 15:51:38 UTC 2019     
-## Previous Releases 
 * Fix - Updated the viewOfDelimitedKeys couchdb view so it breaks monitored object names by _ and -
 ### 0.287.0 
 **Release Date:** Wed Jan 30 15:42:39 UTC 2019     

@@ -14,7 +14,7 @@ import (
 type TenantDataType string
 
 const illegalWords = "!,@#$%^&*?/"
-const legalCharacters = "qwertyuiopasdfghjklzxcvbnm_"
+const legalCharacters = "qwertyuiopasdfghjklzxcvbnm_0123456789"
 
 const (
 	// TenantUserType - datatype string used to identify a Tenant User in the datastore record

@@ -1,3 +1,4 @@
+* Fix - Resolved runtime error during bulk-meta operation
 ## Current Release 
 ### 0.288.0 
 **Release Date:** Wed Jan 30 15:51:38 UTC 2019     

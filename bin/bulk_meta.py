@@ -42,6 +42,10 @@ def envoy_func(conn, auth, host, processfile):
         payload = '{"data":{"type":"monitoredObjectsMeta","attributes":{"metadata-entries":[%s]}}}' % ",".join(batchlist)
         conn.request("POST","/api/v2/bulk/insert/monitored-objects/meta", payload, {"Content-Type":"application/json","Authorization":auth})
         bulk_response = conn.getresponse()
+
+        if bulk_response.status != 200:
+            logging.error("Could not successfully send request to host %s. Received error code %d: %s", host, bulk_response.status, bulk_response.reason)
+            return
         
         # Convert the response to json and process each individual response entry to track in the process file
         response = json.loads(bulk_response.read().decode("utf-8"))

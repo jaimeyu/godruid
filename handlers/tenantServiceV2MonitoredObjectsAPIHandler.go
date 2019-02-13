@@ -752,13 +752,13 @@ func doBulkInsertMonitoredObjectsMetaV2(allowedRoles []string, tenantDB datastor
 
 			moErr = existingMO.Validate(true)
 			if moErr != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Data did not validate %s: %s", tenmod.TenantMonitoredObjectStr, moErr.Error()))
 				break
 			}
 			// Issue request to DAO Layer
 			updatedMonitoredObject, moErr := tenantDB.UpdateMonitoredObject(existingMO)
 			if moErr != nil {
-				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error()))
+				itemError(i, &itemResponse, http.StatusInternalServerError, fmt.Sprintf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, moErr.Error()))
 				break
 			}
 

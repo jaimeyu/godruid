@@ -2020,54 +2020,10 @@
             }
           ]
         },
-        "periodsLost": {
-          "ui": {
-            "group": "unknown",
-            "position": "1"
-          },
-          "monitoredObjectTypes": [
-            {
-              "key": "twamp-pe",
-              "rawMetricId": "",
-              "units": [
-                "value"
-              ],
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ]
-            },
-            {
-              "key": "twamp-sl",
-              "rawMetricId": "lostperiods",
-              "units": [
-                "value"
-              ],
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ]
-            },
-            {
-              "key": "twamp-sf",
-              "rawMetricId": "lostperiods",
-              "units": [
-                "value"
-              ],
-              "directions": [
-                "0",
-                "1",
-                "2"
-              ]
-            }
-          ]
-        },
         "lostBurstMin": {
           "ui": {
-            "group": "unknown",
-            "position": "2"
+            "group": "packets",
+            "position": "6"
           },
           "monitoredObjectTypes": [
             {
@@ -2110,8 +2066,8 @@
         },
         "lostBurstMax": {
           "ui": {
-            "group": "unknown",
-            "position": "3"
+            "group": "packets",
+            "position": "7"
           },
           "monitoredObjectTypes": [
             {
@@ -2141,6 +2097,50 @@
             {
               "key": "twamp-sf",
               "rawMetricId": "lostburstmax",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          ]
+        },
+        "periodsLost": {
+          "ui": {
+            "group": "packets",
+            "position": "8"
+          },
+          "monitoredObjectTypes": [
+            {
+              "key": "twamp-pe",
+              "rawMetricId": "",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sl",
+              "rawMetricId": "lostperiods",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "0",
+                "1",
+                "2"
+              ]
+            },
+            {
+              "key": "twamp-sf",
+              "rawMetricId": "lostperiods",
               "units": [
                 "value"
               ],
@@ -3153,6 +3153,60 @@
     
             ]
         },
+        "lostBurstMin": {
+            "ui": {
+            "group": "packets",
+              "position": "7"
+          },
+          "monitoredObjectTypes": [
+              {
+                  "key": "eth-dm",
+                  "rawMetricId": "lostburstmin",
+                "units": [
+                  "value"
+                ],
+                "directions": [
+                  "2"
+                ]
+              }
+            ]
+        },
+        "lostBurstMax": {
+          "ui": {
+              "group": "packets",
+              "position": "8"
+          },
+          "monitoredObjectTypes": [
+              {
+                  "key": "eth-dm",
+                  "rawMetricId": "lostburstmax",
+                "units": [
+                  "value"
+                ],
+                "directions": [
+                  "2"
+                ]
+              }
+            ]
+        },
+        "periodsLost": {
+          "ui": {
+            "group": "packets",
+            "position": "9"
+          },
+          "monitoredObjectTypes": [
+            {
+                "key": "eth-dm",
+                "rawMetricId": "lostperiods",
+              "units": [
+                "value"
+              ],
+              "directions": [
+                "2"
+              ]
+            }
+          ]
+        },
         "bytesReceived": {
               "ui": {
                 "group": "unknown",
@@ -3162,60 +3216,6 @@
                 {
                   "key": "eth-dm",
                   "rawMetricId": "rxbytes",
-                  "units": [
-                    "value"
-                  ],
-                  "directions": [
-                    "2"
-                  ]
-                }
-              ]
-        },
-        "periodsLost": {
-            "ui": {
-                "group": "unknown",
-                "position": "2"
-            },
-            "monitoredObjectTypes": [
-                {
-                    "key": "eth-dm",
-                    "rawMetricId": "lostperiods",
-                  "units": [
-                    "value"
-                  ],
-                  "directions": [
-                    "2"
-                  ]
-                }
-              ]
-        },
-        "lostBurstMin": {
-            "ui": {
-                "group": "unknown",
-                "position": "3"
-            },
-            "monitoredObjectTypes": [
-                {
-                    "key": "eth-dm",
-                    "rawMetricId": "lostburstmin",
-                  "units": [
-                    "value"
-                  ],
-                  "directions": [
-                    "2"
-                  ]
-                }
-              ]
-        },
-        "lostBurstMax": {
-            "ui": {
-                "group": "unknown",
-                "position": "4"
-            },
-            "monitoredObjectTypes": [
-                {
-                    "key": "eth-dm",
-                    "rawMetricId": "lostburstmax",
                   "units": [
                     "value"
                   ],

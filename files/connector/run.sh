@@ -1,5 +1,4 @@
 #!/bin/bash
-
 CURRENT_DIR=`pwd`
 
 main() {
@@ -17,22 +16,23 @@ main() {
     fi
 
     echo "Getting client certs from datahub"
-    docker run -it -v "${CURRENT_DIR}/":"/tmp/config" \
+    docker run -it -v "${CURRENT_DIR}/":"/tmp/config":z \
            ${proxy_option} \
            --add-host "${DEPLOYMENT_HOSTNAME}:${DEPLOYMENT_IP}" \
            --add-host "${TENANT_HOSTNAME}:${TENANT_IP}" \
-           -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner" gcr.io/npav-172917/adh-roadrunner:"${VERSION}" login --config=/tmp/config/adh-roadrunner.yml
+           -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner":z gcr.io/npav-172917/adh-roadrunner:"${VERSION}" login --config=/tmp/config/adh-roadrunner.yml
 
     echo "Stopping old connector"
     docker rm -f aod-connector-for-${TENANT_HOSTNAME}
 
     echo "Starting connector"
-    docker run -d -v "${CURRENT_DIR}/":"/tmp/config" -v "${FILE_DIR}":"/tmp/files" -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner" \
+    docker run -d -v "${CURRENT_DIR}/":"/tmp/config":z -v "${FILE_DIR}":"/tmp/files":z -v "${CURRENT_DIR}/.rr_ssh":"/go/bin/.ssh/roadrunner":z \
            --restart always \
            --name aod-connector-for-${TENANT_HOSTNAME} \
            ${proxy_option} \
            --add-host "${DEPLOYMENT_HOSTNAME}:${DEPLOYMENT_IP}" \
            --add-host "${TENANT_HOSTNAME}:${TENANT_IP}" \
+           --env-file "$CURRENT_DIR/.env" \
            gcr.io/npav-172917/adh-roadrunner:"${VERSION}" data --config=/tmp/config/adh-roadrunner.yml
 }
 

@@ -262,9 +262,9 @@ func doUpdateConnectorConfigV2(allowedRoles []string, tenantDB datastore.TenantS
 	}
 	patched.TenantID = tenantID
 
-	// if config with zone already exists for this tenant, return error
+	// if incoming update contains a change in the zone, check to see if that zone is being used by another config.
 	configs, _ := tenantDB.GetAllTenantConnectorConfigs(tenantID, patched.Zone)
-	if len(configs) != 0 {
+	if fetched.Zone != params.Body.Data.Attributes.Zone && len(configs) != 0 {
 		return startTime, http.StatusConflict, nil, fmt.Errorf("connector Config with zone: %s already exists, please use a different zone", patched.Zone)
 	}
 

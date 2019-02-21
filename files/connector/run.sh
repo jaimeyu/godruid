@@ -32,7 +32,7 @@ main() {
            -v /var:/varhost:z \
            -v /sys:/syshost:z \
            --restart always \
-           --name aod-connector2-for-${TENANT_HOSTNAME} \
+           --name aod-connector-for-${TENANT_HOSTNAME} \
            ${proxy_option} \
            --add-host "${DEPLOYMENT_HOSTNAME}:${DEPLOYMENT_IP}" \
            --add-host "${TENANT_HOSTNAME}:${TENANT_IP}" \

@@ -337,7 +337,7 @@
         type: "string"
       objectType: 
         type: "string"
-        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm]
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm]
       meta:
         type: "object"
         additionalProperties:
@@ -382,7 +382,7 @@
         type: "string"
       objectType: 
         type: "string"
-        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm]
+        enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm]
       meta:
         type: "object"
         additionalProperties:

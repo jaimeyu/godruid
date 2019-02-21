@@ -4002,6 +4002,88 @@
           "unknown"
         ]
       }
+    },
+    "accedian-slm": {
+      "metricMap":{
+        "packetsLost": {
+            "ui": {
+                "group": "packets",
+                "position": "1"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Packets lost",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "packetsLostPct": {
+            "ui": {
+                "group": "packets",
+                "position": "2"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "packet loss ratio (%)",
+                    "units": [
+                        "pct"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "lostBurstMax": {
+            "ui": {
+                "group": "packets",
+                "position": "3"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Largest gap",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "periodsLost": {
+            "ui": {
+                "group": "packets",
+                "position": "4"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Number of gaps",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        }
+    },
+      "ui": {
+        "metricGroups": [
+          "packets",
+          "unknown"
+        ]
+      }
     }
   }
 }

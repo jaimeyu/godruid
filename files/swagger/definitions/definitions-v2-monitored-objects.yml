@@ -86,7 +86,7 @@
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm, eth-dm]
           meta:
             type: "object"
             description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
@@ -182,7 +182,7 @@
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm, eth-dm]
           meta:
             type: "object"
             description: "Attributes added to a Monitored Object that help identify the Mlnitored Object as well as provide flitering/grouping properties"
@@ -306,7 +306,7 @@
           objectType: 
             type: "string"
             description: "Type of the Monitored Object"
-            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm]
+            enum: [unknown, flowmeter, twamp-pe, twamp-sf, twamp-sl, cisco-interface, cisco-node-summary, pvx, paa, regulator, rfc8321, dmm, slm, eth-dm]
           createdTimestamp:
             type: "integer"
             description: "Time since epoch at which this object was instantiated."

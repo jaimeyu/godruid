@@ -77,7 +77,7 @@ func writeConnectorConfigs(archiveDir string, tenantID string, tenantHost string
 		return fmt.Errorf("Unable to resolve host: %s : %v", tenantHost, err)
 	}
 
-	envTemplate := "export FILE_DIR=%s\nexport VERSION=%s\nexport DEPLOYMENT_HOSTNAME=%s\nexport DEPLOYMENT_IP=%s\nexport TENANT_HOSTNAME=%s\nexport TENANT_IP=%s\n  \n"
+	envTemplate := "FILE_DIR=%s\nVERSION=%s\nDEPLOYMENT_HOSTNAME=%s\nDEPLOYMENT_IP=%s\nTENANT_HOSTNAME=%s\nTENANT_IP=%s\n  \n"
 	env := fmt.Sprintf(envTemplate, config.URL, cfg.GetString(gather.CK_connector_dockerVersion.String()), host, addrs[0], tenantHost, tenantHostaddrs[0])
 	err = ioutil.WriteFile(archiveDir+"/.env", []byte(env), os.ModePerm)
 	if err != nil {

@@ -1,6 +1,7 @@
 bufferSize: 1000000
 removeFile: true
 fileWatcherTicker: 100
+hoursToExpiry: 240 # how many hours before the cert is due to expire do we renew it
 hosts:
 -
   dhHost: "%s"

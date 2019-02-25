@@ -3349,6 +3349,17 @@
                     "0",
                     "1"
                   ]
+                },
+                {
+                  "key": "dmm",
+                  "rawMetricId": "Delay min value",
+                  "units": [
+                    "\u03bcs"
+                  ],
+                  "directions": [
+                    "1",
+                    "2"
+                  ]
                 }
               ]
             },
@@ -3368,7 +3379,18 @@
                     "0",
                     "1"
                   ]
-                }            
+                },
+                {
+                  "key": "dmm",
+                  "rawMetricId": "Delay max value",
+                  "units": [
+                    "\u03bcs"
+                  ],
+                  "directions": [
+                    "1",
+                    "2"
+                  ]
+                }
               ]
             },
             "delayAvg": {
@@ -3386,6 +3408,17 @@
                   "directions": [
                     "0",
                     "1"
+                  ]
+                },
+                {
+                  "key": "dmm",
+                  "rawMetricId": "Delay avg value",
+                  "units": [
+                    "\u03bcs"
+                  ],
+                  "directions": [
+                    "1",
+                    "2"
                   ]
                 }
               ]
@@ -3558,6 +3591,17 @@
                     "0",
                     "1"
                   ]
+                },
+                {
+                  "key": "dmm",
+                  "rawMetricId": "DV min value",
+                  "units": [
+                    "\u03bcs"
+                  ],
+                  "directions": [
+                    "1",
+                    "2"
+                  ]
                 }
               ]
             },
@@ -3579,14 +3623,14 @@
                   ]
                 },
                 {
-                  "key": "eth-dm",
-                  "rawMetricId": "dvmax",
+                  "key": "dmm",
+                  "rawMetricId": "DV max value",
                   "units": [
                     "\u03bcs"
                   ],
                   "directions": [
-                    "0",
-                    "1"
+                    "1",
+                    "2"
                   ]
                 }
               ]
@@ -3606,6 +3650,17 @@
                   "directions": [
                     "0",
                     "1"
+                  ]
+                },
+                {
+                  "key": "dmm",
+                  "rawMetricId": "DV avg value",
+                  "units": [
+                    "\u03bcs"
+                  ],
+                  "directions": [
+                    "1",
+                    "2"
                   ]
                 }
               ]
@@ -3998,6 +4053,88 @@
           "delay",
           "delayVar",
           "jitter",
+          "packets",
+          "unknown"
+        ]
+      }
+    },
+    "accedian-slm": {
+      "metricMap":{
+        "packetsLost": {
+            "ui": {
+                "group": "packets",
+                "position": "1"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Packets lost",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "packetsLostPct": {
+            "ui": {
+                "group": "packets",
+                "position": "2"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "packet loss ratio (%)",
+                    "units": [
+                        "pct"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "lostBurstMax": {
+            "ui": {
+                "group": "packets",
+                "position": "3"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Largest gap",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        },
+        "periodsLost": {
+            "ui": {
+                "group": "packets",
+                "position": "4"
+            },
+            "monitoredObjectTypes": [
+                {
+                    "key": "slm",
+                    "rawMetricId": "Number of gaps",
+                    "units": [
+                        "value"
+                    ],
+                    "directions": [
+                        "3"
+                    ]
+                }
+            ]
+        }
+    },
+      "ui": {
+        "metricGroups": [
           "packets",
           "unknown"
         ]

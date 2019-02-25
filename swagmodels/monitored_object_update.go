@@ -174,7 +174,7 @@ type MonitoredObjectUpdateAttributes struct {
 
 	// Type of the Monitored Object
 	// Required: true
-	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-interface cisco-node-summary pvx paa regulator]
+	// Enum: [unknown flowmeter twamp-pe twamp-sf twamp-sl cisco-interface cisco-node-summary pvx paa regulator rfc8321 dmm slm eth-dm]
 	ObjectType *string `json:"objectType"`
 
 	// Name of the target of the Monitored Object
@@ -328,7 +328,7 @@ var monitoredObjectUpdateAttributesTypeObjectTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-interface","cisco-node-summary","pvx","paa","regulator","rfc8321"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["unknown","flowmeter","twamp-pe","twamp-sf","twamp-sl","cisco-interface","cisco-node-summary","pvx","paa","regulator","rfc8321","dmm","slm","eth-dm"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -367,6 +367,18 @@ const (
 
 	// MonitoredObjectUpdateAttributesObjectTypeRegulator captures enum value "regulator"
 	MonitoredObjectUpdateAttributesObjectTypeRegulator string = "regulator"
+
+	// MonitoredObjectUpdateAttributesObjectTypeRfc8321 captures enum value "rfc8321"
+	MonitoredObjectUpdateAttributesObjectTypeRfc8321 string = "rfc8321"
+
+	// MonitoredObjectUpdateAttributesObjectTypeDmm captures enum value "dmm"
+	MonitoredObjectUpdateAttributesObjectTypeDmm string = "dmm"
+
+	// MonitoredObjectUpdateAttributesObjectTypeSlm captures enum value "slm"
+	MonitoredObjectUpdateAttributesObjectTypeSlm string = "slm"
+
+	// MonitoredObjectUpdateAttributesObjectTypeEthDm captures enum value "eth-dm"
+	MonitoredObjectUpdateAttributesObjectTypeEthDm string = "eth-dm"
 )
 
 // prop value enum

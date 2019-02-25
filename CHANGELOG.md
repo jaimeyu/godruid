@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.295.0 
+**Release Date:** Mon Feb 25 20:17:28 UTC 2019     
+## Previous Releases 
 ### 0.294.0 
 **Release Date:** Fri Feb 22 14:15:40 UTC 2019     
-## Previous Releases 
 * Feature - added SELinux labels run.sh
 * Feature - fixed updateing connector config
 ### 0.293.0 

@@ -55,6 +55,9 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2 has not yet been implemented")
 		}),
+		TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2Handler: tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params) middleware.Responder {
+			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2 has not yet been implemented")
+		}),
 		TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler: tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2HandlerFunc(func(params tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Params) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2 has not yet been implemented")
 		}),
@@ -570,6 +573,8 @@ type GatherAPI struct {
 	TenantProvisioningServiceV2BulkInsertMonitoredObjectsMetaV2Handler tenant_provisioning_service_v2.BulkInsertMonitoredObjectsMetaV2Handler
 	// TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler sets the operation handler for the bulk insert monitored objects v2 operation
 	TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Handler
+	// TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2Handler sets the operation handler for the bulk patch monitored objects v2 operation
+	TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2Handler tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Handler
 	// TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler sets the operation handler for the bulk update metric baselines v2 operation
 	TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler tenant_provisioning_service_v2.BulkUpdateMetricBaselinesV2Handler
 	// TenantProvisioningServiceBulkUpdateMonitoredObjectHandler sets the operation handler for the bulk update monitored object operation
@@ -967,6 +972,10 @@ func (o *GatherAPI) Validate() error {
 
 	if o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler == nil {
 		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkInsertMonitoredObjectsV2Handler")
+	}
+
+	if o.TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2Handler == nil {
+		unregistered = append(unregistered, "tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Handler")
 	}
 
 	if o.TenantProvisioningServiceV2BulkUpdateMetricBaselinesV2Handler == nil {
@@ -1725,6 +1734,11 @@ func (o *GatherAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/v2/bulk/insert/monitored-objects"] = tenant_provisioning_service_v2.NewBulkInsertMonitoredObjectsV2(o.context, o.TenantProvisioningServiceV2BulkInsertMonitoredObjectsV2Handler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/v2/bulk/patch/monitored-objects"] = tenant_provisioning_service_v2.NewBulkPatchMonitoredObjectsV2(o.context, o.TenantProvisioningServiceV2BulkPatchMonitoredObjectsV2Handler)
 
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)

@@ -62,6 +62,7 @@ const (
 	OPAddStr       = "add"
 	OPBulkInsert   = "bulk_insert"
 	OPBulkUpdate   = "bulk_update"
+	OPBulkPatch    = "bulk_patch"
 	OPBulkUpsert   = "bulk_upsert"
 
 	// TimeStr - metric constant for a time metric
@@ -180,6 +181,7 @@ const (
 
 	BulkInsertMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkInsert
 	BulkUpdateMonObjStr     = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
+	BulkPatchMonObjStr      = MonitoredObjectStr + metricNameDelimiter + OPBulkPatch
 	BulkUpsertMonObjMetaStr = MonitoredObjectStr + metricNameDelimiter + OPBulkUpdate
 
 	SLATimeBucketQueryStr = SLAReportStr + metricNameDelimiter + "time_bucket" + metricNameDelimiter + OPGetStr

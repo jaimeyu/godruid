@@ -4840,6 +4840,38 @@ paths:
           type: string
       tags:
         - TenantProvisioningServiceV2
+
+  /v2/bulk/patch/monitored-objects:
+    patch:
+      summary: Patches one or more Monitored Objects's object name or reflector name
+      operationId: BulkPatchMonitoredObjectsV2
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BulkOperationResponseV2'
+        '400':
+          description: "Request data does not pass validation"
+          schema:
+            type: string
+        '403':
+          description: "Requestor does not have authorization to perform this action"
+          schema:
+            type: string
+        '500':
+          description: "Unexpected error processing request"
+          schema:
+            type: string
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+              $ref: '#/definitions/BulkMonitoredObjectPatchRequest'
+      tags:
+        - TenantProvisioningServiceV2
   /v2/bulk/insert/monitored-objects:
     post:
       summary: Create one or more Monitored Objects in a single API request.
@@ -4901,6 +4933,7 @@ paths:
               $ref: '#/definitions/BulkMonitoredObjectUpdateRequest'
       tags:
         - TenantProvisioningServiceV2
+
         
   /v2/bulk/insert/monitored-objects/meta:
     post:
@@ -9471,7 +9504,6 @@ definitions:
       data:
         $ref: '#/definitions/MonitoredObjectUpdate'
 
-
   MonitoredObjectListResponse:
     type: "object"
     description: "Monitoerd Object response including one or more values"
@@ -9684,6 +9716,16 @@ definitions:
                         "wgs87_x": "-45.7123912"
                         "wgs87_y": "-74.2130912"
   
+  BulkMonitoredObjectPatchRequest:
+    type: "object"
+    description: "Patch the names for Monitored Objects in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectPatch'
+
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
@@ -9723,6 +9765,32 @@ definitions:
               type: "array"
               items:
                 type: "string"
+
+  MonitoredObjectPatch:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["objectId"]
+        properties:
+          objectId:
+            type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
+          actuatorName: 
+            type: "string"
+            description: "Name of the origin of the Monitored Object"
+          reflectorName: 
+            type: "string"
+            description: "Name of the target of the Monitored Object"
+          objectName: 
+            type: "string"
+            description: "Name of the Monitored Object"
 
   MonitoredObjectUpdate:
     type: "object"

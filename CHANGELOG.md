@@ -1,3 +1,4 @@
+* Feature - Adding support for bulk patch of monitored object names
 ## Current Release 
 ### 0.295.0 
 **Release Date:** Mon Feb 25 20:17:28 UTC 2019     

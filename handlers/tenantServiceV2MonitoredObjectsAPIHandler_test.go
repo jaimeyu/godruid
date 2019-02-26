@@ -257,6 +257,11 @@ func TestMonitoredObjectAPIsProtectedByAuthV2(t *testing.T) {
 	bulkUpdate = handlers.HandleBulkUpdateMonitoredObjectsV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Params{Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, monitoredObjectBulkUrl, "PUT")})
 	castedBulkUpdate = bulkUpdate.(*tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Forbidden)
 	assert.NotNil(t, castedBulkUpdate)
+	// Bulk Patch
+	bulkPatch := handlers.HandleBulkPatchMonitoredObjectsV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params{Body: nil, HTTPRequest: createHttpRequestWithParams(fakeTenantID, handlers.UserRoleTenantUser, monitoredObjectBulkUrl, "PUT")})
+	castedBulkPatch := bulkPatch.(*tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Forbidden)
+	assert.NotNil(t, castedBulkPatch)
+
 }
 func TestGetAllMonitoredObjectsV2(t *testing.T) {
 
@@ -404,6 +409,43 @@ func TestBulkInsertAndUpdateMonitoredObjectsV2(t *testing.T) {
 	}
 
 	assert.Equal(t, moCount, knownName1Count+knownName2Count)
+	// Get all the existing MOs
+	fetchList = handlers.HandleGetAllMonitoredObjectsV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params{HTTPRequest: createHttpRequestWithParams(createdTenant.ID, handlers.UserRoleSkylight, monitoredObjectUrl, "GET")})
+	castedFetchList = fetchList.(*tenant_provisioning_service_v2.GetAllMonitoredObjectsV2OK)
+	assert.NotNil(t, castedFetchList)
+	assert.Equal(t, moCount, len(castedFetchList.Payload.Data))
+
+	// Patch Some names to be known values
+	knownName1 = "Patched1"
+	knownName2 = "Patchey2"
+	bulkPatchBody := generateBulkPatchRequest(castedFetchList.Payload.Data, knownName1, knownName2)
+	updated = handlers.HandleBulkPatchMonitoredObjectsV2(handlers.SkylightAndTenantAdminRoles, tenantDB)(tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params{Body: bulkPatchBody, HTTPRequest: createHttpRequestWithParams(createdTenant.ID, handlers.UserRoleTenantAdmin, monitoredObjectBulkUrl, "POST")})
+	castedPatched := updated.(*tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2OK)
+	assert.NotNil(t, castedPatched)
+	assert.Equal(t, moCount, len(castedUpdate.Payload.Data))
+	for _, res := range castedUpdate.Payload.Data {
+		assert.NotEmpty(t, res.Attributes.ID)
+		assert.True(t, res.Attributes.Ok)
+	}
+
+	// Retrieve the records again and make sure that the updates were handled properly
+	fetchList2 = handlers.HandleGetAllMonitoredObjectsV2(handlers.AllRoles, tenantDB)(tenant_provisioning_service_v2.GetAllMonitoredObjectsV2Params{HTTPRequest: createHttpRequestWithParams(createdTenant.ID, handlers.UserRoleSkylight, monitoredObjectUrl, "GET")})
+	castedFetchList2 = fetchList2.(*tenant_provisioning_service_v2.GetAllMonitoredObjectsV2OK)
+	assert.NotNil(t, castedFetchList2)
+	assert.Equal(t, moCount, len(castedFetchList2.Payload.Data))
+
+	knownName1Count = 0
+	knownName2Count = 0
+	for _, res := range castedFetchList2.Payload.Data {
+		if res.Attributes.ActuatorName == knownName1 {
+			knownName1Count++
+		}
+		if res.Attributes.ReflectorName == knownName2 {
+			knownName2Count++
+		}
+	}
+
+	assert.Equal(t, moCount, knownName1Count+knownName2Count)
 }
 
 func generateRandomTenantMonitoredObjectCreationRequest() *swagmodels.MonitoredObjectCreateRequest {
@@ -513,6 +555,28 @@ func generateRandomBulkInsertMORequest(numObjects int) *swagmodels.BulkMonitored
 	}
 
 	return &swagmodels.BulkMonitoredObjectCreateRequest{
+		Data: data,
+	}
+}
+
+func generateBulkPatchRequest(objectsToUpdate []*swagmodels.MonitoredObject, knownName1 string, knownName2 string) *swagmodels.BulkMonitoredObjectPatchRequest {
+	data := []*swagmodels.MonitoredObjectPatch{}
+
+	for i, obj := range objectsToUpdate {
+		dataBytes, _ := json.Marshal(obj)
+		addObject := swagmodels.MonitoredObjectPatch{}
+		json.Unmarshal(dataBytes, &addObject)
+
+		if i%2 == 0 {
+			addObject.Attributes.ActuatorName = knownName1
+		} else {
+			addObject.Attributes.ReflectorName = knownName2
+		}
+
+		data = append(data, &addObject)
+	}
+
+	return &swagmodels.BulkMonitoredObjectPatchRequest{
 		Data: data,
 	}
 }

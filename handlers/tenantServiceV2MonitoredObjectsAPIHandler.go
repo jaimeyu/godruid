@@ -204,6 +204,31 @@ func HandleBulkCreateMonitoredObjectsV2(allowedRoles []string, tenantDB datastor
 	}
 }
 
+// HandleBulkPatchMonitoredObjectsV2 - update more than 1 Monitored Object in a single request
+func HandleBulkPatchMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params) middleware.Responder {
+	return func(params tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params) middleware.Responder {
+		// Do the work
+		startTime, responseCode, response, err := doBulkPatchMonitoredObjectsV2(allowedRoles, tenantDB, params)
+
+		// Success Response
+		if responseCode == http.StatusOK {
+			return tenant_provisioning_service_v2.NewBulkPatchMonitoredObjectsV2OK().WithPayload(response)
+		}
+
+		// Error Responses
+		errorMessage := reportAPIError(err.Error(), startTime, responseCode, mon.BulkPatchMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+		switch responseCode {
+		case http.StatusForbidden:
+			return tenant_provisioning_service_v2.NewBulkPatchMonitoredObjectsV2Forbidden().WithPayload(errorMessage)
+		case http.StatusBadRequest:
+			return tenant_provisioning_service_v2.NewBulkPatchMonitoredObjectsV2BadRequest().WithPayload(errorMessage)
+		default:
+			return tenant_provisioning_service_v2.NewBulkPatchMonitoredObjectsV2InternalServerError().WithPayload(errorMessage)
+
+		}
+	}
+}
+
 // HandleBulkUpdateMonitoredObjectsV2 - update more than 1 Monitored Object in a single request
 func HandleBulkUpdateMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore) func(params tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Params) middleware.Responder {
 	return func(params tenant_provisioning_service_v2.BulkUpdateMonitoredObjectsV2Params) middleware.Responder {
@@ -620,6 +645,96 @@ func doBulkInsertMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.Te
 	}
 
 	reportAPICompletionState(startTime, http.StatusOK, mon.BulkInsertMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
+	logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
+	return startTime, http.StatusOK, &converted, nil
+}
+
+// doBulkPatchMonitoredObjectsV2 - Only allows for patch of monitored object and reflector names
+func doBulkPatchMonitoredObjectsV2(allowedRoles []string, tenantDB datastore.TenantServiceDatastore, params tenant_provisioning_service_v2.BulkPatchMonitoredObjectsV2Params) (time.Time, int, *swagmodels.BulkOperationResponseV2, error) {
+	tenantID := params.HTTPRequest.Header.Get(XFwdTenantId)
+	isAuthorized, startTime := authorizeRequest(fmt.Sprintf("Attempting Bulk Patch of %s for Tenant %s", tenmod.TenantMonitoredObjectStr, tenantID), params.HTTPRequest, allowedRoles, mon.APIRecieved, mon.TenantAPIRecieved)
+
+	if !isAuthorized {
+		err := fmt.Errorf("Bulk Patch %s operation not authorized for role: %s", tenmod.TenantMonitoredObjectStr, params.HTTPRequest.Header.Get(XFwdUserRoles))
+		return startTime, http.StatusForbidden, nil, err
+	}
+
+	metaKeys := make(map[string]string)
+
+	reqObjectIds := make([]string, 0)
+	// Unmarshal the request
+	data := []*tenmod.MonitoredObject{}
+	for _, val := range params.Body.Data {
+		addItem, err := convertMOBulkItemToDBMonitoredObject(val.Attributes, tenantID)
+		if err != nil {
+			return startTime, http.StatusBadRequest, nil, err
+		}
+
+		// Verify that at least 1 of the following names is populated
+		if addItem.ActuatorName != "" || addItem.ReflectorName != "" || addItem.ObjectName != "" {
+			data = append(data, addItem)
+			reqObjectIds = append(reqObjectIds, addItem.GetID())
+		} else {
+			logger.Log.Warningf("Skipping MO %s/%s because it has no valid names", tenantID, addItem.ID)
+			continue
+		}
+	}
+
+	// Now get the old monitored objects for the patching process
+	origObjects, err := tenantDB.GetAllMonitoredObjectsInIDList(tenantID, reqObjectIds)
+	if err != nil {
+		return startTime, http.StatusBadRequest, nil, fmt.Errorf("Patch's Get failure of %s because: %s", models.AsJSONString(reqObjectIds), err.Error())
+	}
+
+	// Convert to trie
+	trie := make(map[string]*tenmod.MonitoredObject)
+
+	for _, val := range origObjects {
+		trie[val.GetID()] = val
+	}
+
+	patchedObjs := make([]*tenmod.MonitoredObject, 0)
+	for _, v := range data {
+		convertedOriginal := trie[v.GetID()]
+		logger.Log.Debugf("Patching %s/%s's %s/%s/%s to %s/%s/%s",
+			tenantID, convertedOriginal.ID, convertedOriginal.ObjectName, v.ObjectName,
+			convertedOriginal.ReflectorName, v.ReflectorName,
+			convertedOriginal.ActuatorName, v.ActuatorName)
+		convertedOriginal.ObjectName = v.ObjectName
+		convertedOriginal.ReflectorName = v.ReflectorName
+		convertedOriginal.ActuatorName = v.ActuatorName
+		convertedOriginal.Validate(false)
+		patchedObjs = append(patchedObjs, convertedOriginal)
+	}
+
+	if len(data) == 0 {
+		return startTime, http.StatusBadRequest, nil, fmt.Errorf("No Monitored Objects provided in the request")
+	}
+
+	logger.Log.Debugf("Patched objs:%+v", patchedObjs)
+	// Issue request to DAO Layer
+	result, err := tenantDB.BulkUpdateMonitoredObjects(tenantID, patchedObjs)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to store %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	if changeNotificationEnabled {
+		NotifyMonitoredObjectUpdated(tenantID, data...)
+	}
+
+	// Build up the monitored object indices
+	err = tenantDB.UpdateMonitoredObjectMetadataViews(tenantID, metaKeys)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to update metadata views %s %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	converted, err := convertToBulkMOResponse(result)
+	// err = json.Unmarshal(res, &converted)
+	if err != nil {
+		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to format bulk update %s: %s", tenmod.TenantMonitoredObjectStr, err.Error())
+	}
+
+	reportAPICompletionState(startTime, http.StatusOK, mon.BulkUpdateMonObjStr, mon.APICompleted, mon.TenantAPICompleted)
 	logger.Log.Infof("Bulk insertion of %ss complete", tenmod.TenantMonitoredObjectStr)
 	return startTime, http.StatusOK, &converted, nil
 }

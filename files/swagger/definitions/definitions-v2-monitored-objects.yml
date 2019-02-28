@@ -14,7 +14,6 @@
       data:
         $ref: '#/definitions/MonitoredObjectUpdate'
 
-
   MonitoredObjectListResponse:
     type: "object"
     description: "Monitoerd Object response including one or more values"
@@ -227,6 +226,16 @@
                         "wgs87_x": "-45.7123912"
                         "wgs87_y": "-74.2130912"
   
+  BulkMonitoredObjectPatchRequest:
+    type: "object"
+    description: "Patch the names for Monitored Objects in Datahub"
+    required: ["data"]
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/MonitoredObjectPatch'
+
 
   BulkMonitoredObjectUpdateRequest:
     type: "object"
@@ -266,6 +275,32 @@
               type: "array"
               items:
                 type: "string"
+
+  MonitoredObjectPatch:
+    type: "object"
+    required: ["type", "id", "attributes"]
+    properties:
+      type: 
+        type: "string"
+        enum: [monitoredObjects]
+      id:
+        type: "string"
+      attributes:
+        type: "object"
+        required: ["objectId"]
+        properties:
+          objectId:
+            type: "string"
+            description: "Unique identifier of the Monitored Object in Datahub"
+          actuatorName: 
+            type: "string"
+            description: "Name of the origin of the Monitored Object"
+          reflectorName: 
+            type: "string"
+            description: "Name of the target of the Monitored Object"
+          objectName: 
+            type: "string"
+            description: "Name of the Monitored Object"
 
   MonitoredObjectUpdate:
     type: "object"

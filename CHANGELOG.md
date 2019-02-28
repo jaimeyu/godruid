@@ -1,8 +1,10 @@
-* Feature - Adding support for bulk patch of monitored object names
 ## Current Release 
+### 0.296.0 
+**Release Date:** Thu Feb 28 20:18:19 UTC 2019     
+## Previous Releases 
+* Feature - Adding support for bulk patch of monitored object names
 ### 0.295.0 
 **Release Date:** Mon Feb 25 20:17:28 UTC 2019     
-## Previous Releases 
 ### 0.294.0 
 **Release Date:** Fri Feb 22 14:15:40 UTC 2019     
 * Feature - added SELinux labels run.sh

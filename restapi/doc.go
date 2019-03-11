@@ -16,8 +16,8 @@ Gather API Documentation
     - application/json
 
     Produces:
-    - application/json
     - application/octet-stream
+    - application/vnd.api+json
     - text/plain
 
 swagger:meta

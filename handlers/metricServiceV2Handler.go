@@ -343,6 +343,8 @@ func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsData
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to render %s report: %s", datastore.TopNForMetricStr, err.Error())
 	}
 
+	logger.Log.Debugf("rednered:%+v", rendered)
+
 	rr, err := json.Marshal(rendered)
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", datastore.TopNForMetricStr, err.Error())
@@ -353,6 +355,7 @@ func doGetTopNForMetricV2(allowedRoles []string, metricsDB datastore.MetricsData
 	if err != nil {
 		return startTime, http.StatusInternalServerError, nil, fmt.Errorf("Unable to convert %s data to jsonapi return format: %s", datastore.TopNForMetricStr, err.Error())
 	}
+	logger.Log.Debugf("converted:%+v", converted.Data.Attributes.Result)
 
 	if logger.IsDebugEnabled() {
 		logger.Log.Debugf("Retrieved %s %s", datastore.TopNForMetricStr, models.AsJSONString(converted))
@@ -1163,6 +1166,7 @@ func renderHistogramTimeseriesMetrics(reportType string, reportID string, config
 
 func renderTopNMetrics(config interface{}, metricIdentifier metmod.MetricIdentifierFilter, report []metmod.TopNEntryResponse, ID string, reportType string, descendingOrder bool) (map[string]interface{}, error) {
 
+	logger.Log.Debugf("len(report):%+d", len(report))
 	renderedReport := make([]map[string]interface{}, len(report))
 
 	for i, r := range report {
@@ -1187,6 +1191,8 @@ func renderV2Report(config interface{}, report interface{}, ID string, reportTyp
 		return nil, err
 	}
 	rawResponse["result"] = report
+
+	logger.Log.Debugf("rawResponse:%+v", rawResponse)
 
 	return wrapJsonAPIObject(rawResponse, ID, reportType), nil
 }

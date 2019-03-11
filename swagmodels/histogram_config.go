@@ -158,7 +158,8 @@ func (m *HistogramConfig) UnmarshalBinary(b []byte) error {
 type HistogramConfigMetricsItems0 struct {
 	MetricIdentifierFilter
 
-	BucketFilter
+	// An ordered set of histogram buckets that should be filled with the appropriate metric data
+	Buckets []*HistogramConfigMetricsItems0BucketsItems0 `json:"buckets"`
 }
 
 // UnmarshalJSON unmarshals this object from a JSON structure
@@ -171,11 +172,14 @@ func (m *HistogramConfigMetricsItems0) UnmarshalJSON(raw []byte) error {
 	m.MetricIdentifierFilter = aO0
 
 	// AO1
-	var aO1 BucketFilter
-	if err := swag.ReadJSON(raw, &aO1); err != nil {
+	var dataAO1 struct {
+		Buckets []*HistogramConfigMetricsItems0BucketsItems0 `json:"buckets,omitempty"`
+	}
+	if err := swag.ReadJSON(raw, &dataAO1); err != nil {
 		return err
 	}
-	m.BucketFilter = aO1
+
+	m.Buckets = dataAO1.Buckets
 
 	return nil
 }
@@ -190,11 +194,17 @@ func (m HistogramConfigMetricsItems0) MarshalJSON() ([]byte, error) {
 	}
 	_parts = append(_parts, aO0)
 
-	aO1, err := swag.WriteJSON(m.BucketFilter)
-	if err != nil {
-		return nil, err
+	var dataAO1 struct {
+		Buckets []*HistogramConfigMetricsItems0BucketsItems0 `json:"buckets,omitempty"`
 	}
-	_parts = append(_parts, aO1)
+
+	dataAO1.Buckets = m.Buckets
+
+	jsonDataAO1, errAO1 := swag.WriteJSON(dataAO1)
+	if errAO1 != nil {
+		return nil, errAO1
+	}
+	_parts = append(_parts, jsonDataAO1)
 
 	return swag.ConcatJSON(_parts...), nil
 }
@@ -207,14 +217,39 @@ func (m *HistogramConfigMetricsItems0) Validate(formats strfmt.Registry) error {
 	if err := m.MetricIdentifierFilter.Validate(formats); err != nil {
 		res = append(res, err)
 	}
-	// validation for a type composition with BucketFilter
-	if err := m.BucketFilter.Validate(formats); err != nil {
+
+	if err := m.validateBuckets(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *HistogramConfigMetricsItems0) validateBuckets(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Buckets) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Buckets); i++ {
+		if swag.IsZero(m.Buckets[i]) { // not required
+			continue
+		}
+
+		if m.Buckets[i] != nil {
+			if err := m.Buckets[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("buckets" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -229,6 +264,195 @@ func (m *HistogramConfigMetricsItems0) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *HistogramConfigMetricsItems0) UnmarshalBinary(b []byte) error {
 	var res HistogramConfigMetricsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// HistogramConfigMetricsItems0BucketsItems0 histogram config metrics items0 buckets items0
+// swagger:model HistogramConfigMetricsItems0BucketsItems0
+type HistogramConfigMetricsItems0BucketsItems0 struct {
+
+	// lower
+	Lower *HistogramConfigMetricsItems0BucketsItems0Lower `json:"lower,omitempty"`
+
+	// upper
+	Upper *HistogramConfigMetricsItems0BucketsItems0Upper `json:"upper,omitempty"`
+}
+
+// Validate validates this histogram config metrics items0 buckets items0
+func (m *HistogramConfigMetricsItems0BucketsItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateLower(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUpper(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *HistogramConfigMetricsItems0BucketsItems0) validateLower(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Lower) { // not required
+		return nil
+	}
+
+	if m.Lower != nil {
+		if err := m.Lower.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("lower")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *HistogramConfigMetricsItems0BucketsItems0) validateUpper(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Upper) { // not required
+		return nil
+	}
+
+	if m.Upper != nil {
+		if err := m.Upper.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("upper")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0) UnmarshalBinary(b []byte) error {
+	var res HistogramConfigMetricsItems0BucketsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// HistogramConfigMetricsItems0BucketsItems0Lower The specification for the lower boundary of the bucket
+// swagger:model HistogramConfigMetricsItems0BucketsItems0Lower
+type HistogramConfigMetricsItems0BucketsItems0Lower struct {
+
+	// If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
+	Strict bool `json:"strict,omitempty"`
+
+	// The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
+	// Required: true
+	Value *float32 `json:"value"`
+}
+
+// Validate validates this histogram config metrics items0 buckets items0 lower
+func (m *HistogramConfigMetricsItems0BucketsItems0Lower) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateValue(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *HistogramConfigMetricsItems0BucketsItems0Lower) validateValue(formats strfmt.Registry) error {
+
+	if err := validate.Required("lower"+"."+"value", "body", m.Value); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0Lower) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0Lower) UnmarshalBinary(b []byte) error {
+	var res HistogramConfigMetricsItems0BucketsItems0Lower
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// HistogramConfigMetricsItems0BucketsItems0Upper The specification for the upper boundary of the bucket
+// swagger:model HistogramConfigMetricsItems0BucketsItems0Upper
+type HistogramConfigMetricsItems0BucketsItems0Upper struct {
+
+	// If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
+	Strict bool `json:"strict,omitempty"`
+
+	// The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
+	// Required: true
+	Value *float32 `json:"value"`
+}
+
+// Validate validates this histogram config metrics items0 buckets items0 upper
+func (m *HistogramConfigMetricsItems0BucketsItems0Upper) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateValue(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *HistogramConfigMetricsItems0BucketsItems0Upper) validateValue(formats strfmt.Registry) error {
+
+	if err := validate.Required("upper"+"."+"value", "body", m.Value); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0Upper) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *HistogramConfigMetricsItems0BucketsItems0Upper) UnmarshalBinary(b []byte) error {
+	var res HistogramConfigMetricsItems0BucketsItems0Upper
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

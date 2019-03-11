@@ -274,8 +274,9 @@ type TopNForMetric struct {
 	MetricsView []MetricAggregation `json:"metricsView,omitempty"`
 
 	// Indicates whether the results should be in ascending or descending order
-	Sorted         string `json:"sorted,omitempty"`
-	IgnoreCleaning bool   `json:"ignoreCleaning,omitempty"`
+	Sorted         string         `json:"sorted,omitempty"`
+	IgnoreCleaning bool           `json:"ignoreCleaning,omitempty"`
+	Buckets        []MetricBucket `json:"buckets,omitempty"`
 }
 
 // DEPRECATED - Remove once V1 is removed

@@ -1686,12 +1686,20 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		molist = request.MonitoredObjects
 	}
 
-	filterOn := godruid.FilterAnd(
+	bins := make([]*godruid.Filter, 0)
+	for _, bucket := range request.Buckets {
+		filter := BoundarySpecFilterLimitSelectorHelper(request.Metric.Metric, bucket.Lower, bucket.Upper)
+		bins = append(bins, filter)
+	}
+	bins = append(bins,
 		godruid.FilterSelector(schemaTenantID, strings.ToLower(request.TenantID)),
 		cleanFilter(ignoreCleaning),
 		buildInFilter(schemaMonitoredObjectType, metric.ObjectType),
 		buildInFilter(schemaDirection, request.Metric.Direction),
-		BuildMonitoredObjectFilter(molist),
+		BuildMonitoredObjectFilter(molist))
+
+	filterOn := godruid.FilterAnd(
+		bins...,
 	)
 
 	// Create the aggregations

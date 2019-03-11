@@ -9134,47 +9134,42 @@ definitions:
         items:
           allOf:
             - $ref: '#/definitions/MetricIdentifierFilter'
-            - $ref: '#/definitions/BucketFilter'
+            - properties:
+                buckets:
+                  description: An ordered set of histogram buckets that should be filled with the appropriate metric data
+                  example: > 
+                    "buckets":[{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      lower:
+                        description: The specification for the lower boundary of the bucket
+                        type: object
+                        required: [value]
+                        properties:
+                          value:
+                            description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
+                            type: number
+                            format: float
+                          strict:
+                            description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
+                            type: boolean
+                      upper:
+                        description: The specification for the upper boundary of the bucket
+                        type: object
+                        required: [value]
+                        properties:
+                          value:
+                            description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
+                            type: number
+                            format: float
+                          strict:
+                            description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
+                            type: boolean
       dimensions:
         description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
         $ref: '#/definitions/DimensionFilter'
-        
-  BucketFilter:
-    description: Filter object that identifies a specific metric within a monitored object by its key attributes
-    type: object
-    properties:
-      buckets:
-        description: An ordered set of histogram buckets that should be filled with the appropriate metric data
-        example: > 
-          [{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
-        type: array
-        items:
-          type: object
-          properties:
-            lower:
-              description: The specification for the lower boundary of the bucket
-              type: object
-              required: [value]
-              properties:
-                value:
-                  description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
-                  type: number
-                  format: float
-                strict:
-                  description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
-                  type: boolean
-            upper:
-              description: The specification for the upper boundary of the bucket
-              type: object
-              required: [value]
-              properties:
-                value:
-                  description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
-                  type: number
-                  format: float
-                strict:
-                  description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
-                  type: boolean
 
   HistogramReport:
     description: The rendered response structure from the metric query
@@ -9241,61 +9236,91 @@ definitions:
   TopNForMetricConfig:
     description: The necessary request parameters for the metric api call
     type: object
-    allOf:
-      - $ref: '#/definitions/BucketFilter'
-      - type: object
-        required: [interval, aggregator, metric]
-      - properties:
-          meta:
-            $ref: '#/definitions/MetaFilter'
-          monitoredObjects:
-            description: An optional array of monitored objects that we want to retrieve specific topn against. This attribute cannot be used if the meta attribute is also present in the request.
-            x-omitempty: true
-            type: array
-            items:
-              type: string
-            example: 
-              - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
-              - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
-          interval:
-            description: Time boundary for the metrics under consideration using the ISO-8601 standard
-            type: string
-            example: 2018-04-08T14:00:00/2018-04-09T15:00:00
-          timeout:
-            description: Query timeout in milliseconds
-            type: integer
-            example: 30000
-          ignoreCleaning:
-            description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
-            type: boolean
-          sorted:
-            type: string
-            description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
-            enum: [asc, desc]
-            example:
-              - asc
-              - desc
-          aggregator:
-            type: string
-            description: The type of aggregation (avg/min/max)
-            enum: [min, max, avg]
-            example:
-              - min
-              - max
-              - avg
-          numResults:
-            description: Number of results to return
-            type: integer
-          metric:
-            $ref: '#/definitions/MetricIdentifierFilter'
-          dimensions:
-            $ref: '#/definitions/DimensionFilter'
-          metricsView:
-            x-omitempty: true
-            type: array
-            items:
-              $ref: '#/definitions/MetricView'
-
+    required: [interval, aggregator, metric]
+    properties:
+      meta:
+        $ref: '#/definitions/MetaFilter'
+      monitoredObjects:
+        description: An optional array of monitored objects that we want to retrieve specific topn against. This attribute cannot be used if the meta attribute is also present in the request.
+        x-omitempty: true
+        type: array
+        items:
+          type: string
+        example: 
+          - 7c3d3280-628c-c778-92ec-4e9b83fcbb4d
+          - 41f1b537-b7f5-41c3-a1b2-a75e1536c54e
+      interval:
+        description: Time boundary for the metrics under consideration using the ISO-8601 standard
+        type: string
+        example: 2018-04-08T14:00:00/2018-04-09T15:00:00
+      timeout:
+        description: Query timeout in milliseconds
+        type: integer
+        example: 30000
+      ignoreCleaning:
+        description: A value of true will have the aggregation request execute on all data regardless of whether it has been cleaned or not
+        type: boolean
+      sorted:
+        type: string
+        description: Indicates whether the response should return the topn in ascending or descending order. The default value is descending
+        enum: [asc, desc]
+        example:
+          - asc
+          - desc
+      aggregator:
+        type: string
+        description: The type of aggregation (avg/min/max)
+        enum: [min, max, avg]
+        example:
+          - min
+          - max
+          - avg
+      numResults:
+        description: Number of results to return
+        type: integer
+      metric:
+        description: An identifier that considers one specific metric based on the provided information
+        $ref: '#/definitions/MetricIdentifierFilter'
+      dimensions:
+        description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
+        $ref: '#/definitions/DimensionFilter'
+      metricsView:
+        x-omitempty: true
+        type: array
+        items:
+          $ref: '#/definitions/MetricView'
+      buckets:
+        description: An ordered set of histogram buckets that should be filled with the appropriate metric data
+        example: > 
+          "buckets":[{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
+        type: array
+        items:
+          type: object
+          properties:
+            lower:
+              description: The specification for the lower boundary of the bucket
+              type: object
+              required: [value]
+              properties:
+                value:
+                  description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
+                  type: number
+                  format: float
+                strict:
+                  description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
+                  type: boolean
+            upper:
+              description: The specification for the upper boundary of the bucket
+              type: object
+              required: [value]
+              properties:
+                value:
+                  description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
+                  type: number
+                  format: float
+                strict:
+                  description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
+                  type: boolean
 
   MetricView:
     type: object

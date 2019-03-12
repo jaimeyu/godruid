@@ -395,7 +395,6 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 
 	topNResults := make([]metrics.TopNEntryResponse, 0)
 
-	logger.Log.Debugf("Length of topN Response:%d", len(topN))
 	if len(topN) != 0 {
 		topNResults = make([]metrics.TopNEntryResponse, 0)
 
@@ -417,7 +416,6 @@ func (dc *DruidDatastoreClient) GetTopNForMetric(request *metrics.TopNForMetric,
 		}
 
 	}
-	logger.Log.Debugf("topNResults:%+v", topNResults)
 
 	mon.TrackDruidTimeMetricInSeconds(mon.DruidAPIMethodDurationType, methodStartTime, successCode, mon.GetTopNReqStr)
 	return topNResults, nil

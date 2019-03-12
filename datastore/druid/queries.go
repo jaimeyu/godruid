@@ -1686,20 +1686,31 @@ func GetTopNForMetric(dataSource string, request *metrics.TopNForMetric, timeout
 		molist = request.MonitoredObjects
 	}
 
+	// Adding support to filter by bins for TopN
+	// This is reusing the structure from the Histogram API for buckets
+
 	bins := make([]*godruid.Filter, 0)
 	for _, bucket := range request.Buckets {
 		filter := BoundarySpecFilterLimitSelectorHelper(request.Metric.Metric, bucket.Lower, bucket.Upper)
 		bins = append(bins, filter)
 	}
-	bins = append(bins,
+
+	filterbins := godruid.FilterOr(
+		bins...,
+	)
+
+	filters := make([]*godruid.Filter, 0)
+	filters = append(filters,
 		godruid.FilterSelector(schemaTenantID, strings.ToLower(request.TenantID)),
 		cleanFilter(ignoreCleaning),
 		buildInFilter(schemaMonitoredObjectType, metric.ObjectType),
 		buildInFilter(schemaDirection, request.Metric.Direction),
-		BuildMonitoredObjectFilter(molist))
+		BuildMonitoredObjectFilter(molist),
+		filterbins,
+	)
 
 	filterOn := godruid.FilterAnd(
-		bins...,
+		filters...,
 	)
 
 	// Create the aggregations

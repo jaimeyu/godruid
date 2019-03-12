@@ -519,37 +519,7 @@
             - $ref: '#/definitions/MetricIdentifierFilter'
             - properties:
                 buckets:
-                  description: An ordered set of histogram buckets that should be filled with the appropriate metric data
-                  example: > 
-                    "buckets":[{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      lower:
-                        description: The specification for the lower boundary of the bucket
-                        type: object
-                        required: [value]
-                        properties:
-                          value:
-                            description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
-                            type: number
-                            format: float
-                          strict:
-                            description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
-                            type: boolean
-                      upper:
-                        description: The specification for the upper boundary of the bucket
-                        type: object
-                        required: [value]
-                        properties:
-                          value:
-                            description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
-                            type: number
-                            format: float
-                          strict:
-                            description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
-                            type: boolean
+                  $ref: '#/definitions/MetricBucketFilter'
       dimensions:
         description: An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
         $ref: '#/definitions/DimensionFilter'
@@ -673,37 +643,8 @@
         items:
           $ref: '#/definitions/MetricView'
       buckets:
-        description: An ordered set of histogram buckets that should be filled with the appropriate metric data
-        example: > 
-          "buckets":[{"lower":{"value":0},"upper":{"value":200}},{"lower":{"value":200},"upper":{"value":400}},{"lower":{"value":400},"upper":{"value":600}},{"lower":{"value":600}}]
-        type: array
-        items:
-          type: object
-          properties:
-            lower:
-              description: The specification for the lower boundary of the bucket
-              type: object
-              required: [value]
-              properties:
-                value:
-                  description: The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
-                  type: number
-                  format: float
-                strict:
-                  description: If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
-                  type: boolean
-            upper:
-              description: The specification for the upper boundary of the bucket
-              type: object
-              required: [value]
-              properties:
-                value:
-                  description: The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
-                  type: number
-                  format: float
-                strict:
-                  description: If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
-                  type: boolean
+        $ref: '#/definitions/MetricBucketFilter'
+      
 
   MetricView:
     type: object

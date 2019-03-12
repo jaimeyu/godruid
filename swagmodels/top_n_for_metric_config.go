@@ -25,8 +25,8 @@ type TopNForMetricConfig struct {
 	// Enum: [min max avg]
 	Aggregator *string `json:"aggregator"`
 
-	// An ordered set of histogram buckets that should be filled with the appropriate metric data
-	Buckets []*TopNForMetricConfigBucketsItems0 `json:"buckets"`
+	// buckets
+	Buckets MetricBucketFilter `json:"buckets"`
 
 	// An array of metric dimensions that filter-in metrics that adhere to those dimensions. Refer to the DimensionFilter object for further information
 	Dimensions DimensionFilter `json:"dimensions,omitempty"`
@@ -156,20 +156,11 @@ func (m *TopNForMetricConfig) validateBuckets(formats strfmt.Registry) error {
 		return nil
 	}
 
-	for i := 0; i < len(m.Buckets); i++ {
-		if swag.IsZero(m.Buckets[i]) { // not required
-			continue
+	if err := m.Buckets.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("buckets")
 		}
-
-		if m.Buckets[i] != nil {
-			if err := m.Buckets[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("buckets" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
+		return err
 	}
 
 	return nil
@@ -313,195 +304,6 @@ func (m *TopNForMetricConfig) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *TopNForMetricConfig) UnmarshalBinary(b []byte) error {
 	var res TopNForMetricConfig
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// TopNForMetricConfigBucketsItems0 top n for metric config buckets items0
-// swagger:model TopNForMetricConfigBucketsItems0
-type TopNForMetricConfigBucketsItems0 struct {
-
-	// lower
-	Lower *TopNForMetricConfigBucketsItems0Lower `json:"lower,omitempty"`
-
-	// upper
-	Upper *TopNForMetricConfigBucketsItems0Upper `json:"upper,omitempty"`
-}
-
-// Validate validates this top n for metric config buckets items0
-func (m *TopNForMetricConfigBucketsItems0) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateLower(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateUpper(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *TopNForMetricConfigBucketsItems0) validateLower(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Lower) { // not required
-		return nil
-	}
-
-	if m.Lower != nil {
-		if err := m.Lower.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("lower")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *TopNForMetricConfigBucketsItems0) validateUpper(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Upper) { // not required
-		return nil
-	}
-
-	if m.Upper != nil {
-		if err := m.Upper.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("upper")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0) UnmarshalBinary(b []byte) error {
-	var res TopNForMetricConfigBucketsItems0
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// TopNForMetricConfigBucketsItems0Lower The specification for the lower boundary of the bucket
-// swagger:model TopNForMetricConfigBucketsItems0Lower
-type TopNForMetricConfigBucketsItems0Lower struct {
-
-	// If set to true, then the lower value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the lower value is to be taken inclusively
-	Strict bool `json:"strict,omitempty"`
-
-	// The lower, positive number to be used to describe the lowest value of the bucket. Omitting this value assumes that this bucket includes anything lower than the defined "upper" value
-	// Required: true
-	Value *float32 `json:"value"`
-}
-
-// Validate validates this top n for metric config buckets items0 lower
-func (m *TopNForMetricConfigBucketsItems0Lower) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateValue(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *TopNForMetricConfigBucketsItems0Lower) validateValue(formats strfmt.Registry) error {
-
-	if err := validate.Required("lower"+"."+"value", "body", m.Value); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0Lower) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0Lower) UnmarshalBinary(b []byte) error {
-	var res TopNForMetricConfigBucketsItems0Lower
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*m = res
-	return nil
-}
-
-// TopNForMetricConfigBucketsItems0Upper The specification for the upper boundary of the bucket
-// swagger:model TopNForMetricConfigBucketsItems0Upper
-type TopNForMetricConfigBucketsItems0Upper struct {
-
-	// If set to true, then the upper value is assumed to be exclusive. Otherwise a value of false or the absence of this value assumes that the upper value is to be taken inclusively
-	Strict bool `json:"strict,omitempty"`
-
-	// The upper, positive number to be used to describe the highest value of the bucket. Omitting this value assumes that this bucket includes anything higher than the defined "lower" value
-	// Required: true
-	Value *float32 `json:"value"`
-}
-
-// Validate validates this top n for metric config buckets items0 upper
-func (m *TopNForMetricConfigBucketsItems0Upper) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateValue(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *TopNForMetricConfigBucketsItems0Upper) validateValue(formats strfmt.Registry) error {
-
-	if err := validate.Required("upper"+"."+"value", "body", m.Value); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0Upper) MarshalBinary() ([]byte, error) {
-	if m == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(m)
-}
-
-// UnmarshalBinary interface implementation
-func (m *TopNForMetricConfigBucketsItems0Upper) UnmarshalBinary(b []byte) error {
-	var res TopNForMetricConfigBucketsItems0Upper
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

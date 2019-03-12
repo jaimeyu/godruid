@@ -43,8 +43,8 @@ func NewGatherAPI(spec *loads.Document) *GatherAPI {
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
-		BinProducer:         runtime.ByteStreamProducer(),
 		JSONProducer:        runtime.JSONProducer(),
+		BinProducer:         runtime.ByteStreamProducer(),
 		TxtProducer:         runtime.TextProducer(),
 		TenantProvisioningServiceBulkInsertMonitoredObjectHandler: tenant_provisioning_service.BulkInsertMonitoredObjectHandlerFunc(func(params tenant_provisioning_service.BulkInsertMonitoredObjectParams) middleware.Responder {
 			return middleware.NotImplemented("operation TenantProvisioningServiceBulkInsertMonitoredObject has not yet been implemented")
@@ -560,10 +560,10 @@ type GatherAPI struct {
 	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
+	// JSONProducer registers a producer for a "application/json" mime type
+	JSONProducer runtime.Producer
 	// BinProducer registers a producer for a "application/octet-stream" mime type
 	BinProducer runtime.Producer
-	// JSONProducer registers a producer for a "application/vnd.api+json" mime type
-	JSONProducer runtime.Producer
 	// TxtProducer registers a producer for a "text/plain" mime type
 	TxtProducer runtime.Producer
 
@@ -950,12 +950,12 @@ func (o *GatherAPI) Validate() error {
 		unregistered = append(unregistered, "JSONConsumer")
 	}
 
-	if o.BinProducer == nil {
-		unregistered = append(unregistered, "BinProducer")
-	}
-
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
+	}
+
+	if o.BinProducer == nil {
+		unregistered = append(unregistered, "BinProducer")
 	}
 
 	if o.TxtProducer == nil {
@@ -1666,14 +1666,14 @@ func (o *GatherAPI) ProducersFor(mediaTypes []string) map[string]runtime.Produce
 	for _, mt := range mediaTypes {
 		switch mt {
 
-		case "application/octet-stream":
-			result["application/octet-stream"] = o.BinProducer
-
 		case "application/json":
 			result["application/json"] = o.JSONProducer
 
 		case "application/vnd.api+json":
 			result["application/vnd.api+json"] = o.JSONProducer
+
+		case "application/octet-stream":
+			result["application/octet-stream"] = o.BinProducer
 
 		case "text/plain":
 			result["text/plain"] = o.TxtProducer
